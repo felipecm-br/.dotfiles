@@ -1,7 +1,9 @@
 
-popup ou atalho para referenciar sessoes/janelas/panes a ideas
-criar agente dotfiles UX/ergonomia/performance
+xiuuuuuuuuuuuuu
 
+
+
+ook
 para abrir uma nova aba, usar ctrl t ou ctrl n?
 
 tmux
