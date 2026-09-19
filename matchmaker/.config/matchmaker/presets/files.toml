@@ -1,7 +1,8 @@
-# Matchmaker Files Peek Preset (`mm -o files`)
+# Matchmaker Files Picker Preset (`mm -o files`)
 # Optimized for quick inspection of workspace files and AI-generated content.
-# Supports 60% Golden Ratio split and 95% Full-Modal preview toggle via Ctrl+P.
+# Supports 60% Golden Ratio split and 100% Full-Modal preview toggle via Ctrl+P / Enter.
 # Supports Ctrl+V to insert the file path directly into the origin pane/AI prompt.
+# Tab / Shift+Tab cycles data sources (Local files -> Frecency -> Bookmarks).
 
 [ui.nav]
 active = true
@@ -19,6 +20,22 @@ max = 9999
 prompt = " > "
 prompt_style.fg = "Cyan"
 status_inline = true
+
+# Data source mode prompts and styling (aligning with jump.toml)
+[query.local]
+prompt = "> "
+prompt_style.fg = "cyan"
+underline_style.fg = "cyan"
+
+[query.frecency]
+prompt = "󱅤 "
+prompt_style.fg = "#8999f1"
+underline_style.fg = "#8999f1"
+
+[query.bookmarks]
+prompt = " "
+prompt_style.fg = "#f9e2af"
+underline_style.fg = "#f9e2af"
 
 [matcher]
 depth_penalty = 15
@@ -51,6 +68,17 @@ modifier = "BOLD"
 
 [results.current_nav_bar_style]
 fg = "white"
+
+[results.bookmark]
+folder_icon = "󰮟"
+file_icon = "󱀻"
+icon_style.fg = "#f9e2af"
+
+[results.frecency]
+folder_icon = "󰪻"
+folder_icon_style.fg = "#8999f1"
+icon = "󱋢"
+icon_style.fg = "#8999f1"
 
 [previewer]
 debounce_ms = 40
@@ -92,14 +120,40 @@ color = "Gray"
 title_fg = "Cyan"
 
 [footer]
-content = " {cyan,bold:󰍍 [enter]} {darkgray:full} {cyan,bold:󰄧 [s]} {darkgray:diagram} {cyan,bold:󰍉 [+]} {darkgray:in} {cyan,bold:󰍋 [-]} {darkgray:out} {cyan,bold:󰑐 [0]} {darkgray:1:1} {cyan,bold:󰆤 [J/K]} {darkgray:scroll} {cyan,bold:󱞪 [C-v]} {darkgray:insert} {cyan,bold:󰏫 [C-e]} {darkgray:edit} {cyan,bold:󰆏 [C-y]} {darkgray:copy}"
+content = " {cyan,bold:󰍍 [enter]} {darkgray:full} {cyan,bold:󰑐 [tab]} {darkgray:cycle} {cyan,bold:󰄧 [s]} {darkgray:diagram} {cyan,bold:󰍉 [+]} {darkgray:in} {cyan,bold:󰍋 [-]} {darkgray:out} {cyan,bold:󰑐 [0]} {darkgray:1:1} {cyan,bold:󰆤 [J/K]} {darkgray:scroll} {cyan,bold:󱞪 [C-v]} {darkgray:insert} {cyan,bold:󰏫 [C-e]} {darkgray:edit} {cyan,bold:󰆏 [C-y]} {darkgray:copy}"
 match_indent = false
 row_connection = "Full"
 
 [exit]
 abort_empty = true
 
+[start]
+
+[start.command]
+command = ""
+# Fontes de dados cicláveis via @reloadnext (Tab / Shift+Tab):
+# Índice 0: "" -> Usa AsyncWalker nativo para pasta/arquivos locais.
+# Índice 1: Lista global por frecência via mm list.
+# Índice 2: Lista exclusiva de favoritos via mm list --bookmarks.
+additional = [
+    "",
+    "mm list 2>/dev/null",
+    "mm list --bookmarks 2>/dev/null"
+]
+
 [binds]
+# Data source cycling (aligning with jump.toml)
+tab = "@reloadnext"
+shift-backtab = "@reloadprev"
+backtab = "@reloadprev"
+shift-tab = "@reloadprev"
+"@dirs" = "ReloadNext(1)"
+"@bookmarks" = "ReloadNext(2)"
+"@local" = "ReloadNext(0)"
+ctrl-f = "@dirs"
+ctrl-b = "@bookmarks"
+"*" = "@bookmark"
+
 enter = "CyclePreview"
 esc = "ToggleFocus"
 ctrl-c = "Quit"
@@ -117,15 +171,24 @@ ctrl-s = "ToggleDiagram"
 "ctrl-+" = "DiagramZoomIn"
 "ctrl--" = "DiagramZoomOut"
 "ctrl-0" = "DiagramResetZoom"
-tab = "ToggleFocus"
-ctrl-i = "ToggleFocus"
 ctrl-v = 'ExecuteSilent(test -n "$MM_ORIGIN_PANE" && tmux send-keys -t "$MM_ORIGIN_PANE" -l -- {})'
 ctrl-e = 'Execute(~/.config/tmux/scrollback-open.sh {} "$MM_ORIGIN_CWD")'
 ctrl-l = ["ChDir({=})", "Cancel", "Reload", "Pos(0)"]
 ctrl-h = ["ChDir(..)", "Cancel", "Reload"]
 
 [ui.nav.binds]
+# Data source cycling (aligning with jump.toml)
+tab = "@reloadnext"
+shift-backtab = "@reloadprev"
+backtab = "@reloadprev"
+shift-tab = "@reloadprev"
+f = "@dirs"
+b = "@bookmarks"
+"*" = "@bookmark"
+
 enter = "CyclePreview"
+y = "Accept"
+ctrl-y = "Accept"
 esc = "Quit"
 q = "Quit"
 "/" = "FocusFilter"
@@ -162,8 +225,6 @@ ctrl-s = "ToggleDiagram"
 "-" = "DiagramZoomOut"
 "0" = "DiagramResetZoom"
 " " = "Toggle"
-tab = "ToggleFocus"
-ctrl-i = "ToggleFocus"
 e = 'Execute(~/.config/tmux/scrollback-open.sh {} "$MM_ORIGIN_CWD")'
 l = ["ChDir({=})", "Cancel", "Reload", "Pos(0)"]
 h = ["ChDir(..)", "Cancel", "Reload"]

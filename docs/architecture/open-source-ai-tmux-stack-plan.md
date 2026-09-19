@@ -140,7 +140,7 @@ The README and value proposition must lead with the concrete problem solved for 
       2. [`tmux/.config/tmux/sesh-picker.sh:21`](file:///home/fecavmi/.dotfiles/main/tmux/.config/tmux/sesh-picker.sh#L21)
       3. [`tmux/.config/tmux/window-picker.sh:24`](file:///home/fecavmi/.dotfiles/main/tmux/.config/tmux/window-picker.sh#L24)
       4. [`tmux/.config/tmux/scrollback-extract.sh:40`](file:///home/fecavmi/.dotfiles/main/tmux/.config/tmux/scrollback-extract.sh#L40)
-      5. [`tmux/.config/tmux/dir-peek.sh:48`](file:///home/fecavmi/.dotfiles/main/tmux/.config/tmux/dir-peek.sh#L48)
+      5. [`tmux/.config/tmux/files-picker.sh:48`](file:///home/fecavmi/.dotfiles/main/tmux/.config/tmux/files-picker.sh#L48)
     - *Bugs caused:* Concurrent popups in different panes or sessions clobber each other's backdrop. On multi-user systems, terminal scrollbacks containing sensitive code/credentials are exposed to other users in `/tmp`.
     - *Remediation:* Create a unified helper script `tmux-popup-isolate.sh` that scopes the backdrop to:
       `/tmp/tmux-backdrop-${UID}-${CURRENT_PANE#%}.ansi` with strict `0600` permissions and automated cleanup traps (`rm -f`).
@@ -663,7 +663,7 @@ To satisfy both the requirement for standalone open-source modularity and the us
   - Remove `/run/user/1001/` and `/home/fecavmi` from `opencode/.config/opencode/plugins/hooker.ts:8-15`.
 - [ ] **tmux (Backdrop Isolation & Theming):**
   - Deploy complete `tmux-popup-isolate.sh` with `resize-pane -Z`, conditional idle bypass, CLI flags, and 0600 UID-pane isolation.
-  - Refactor `lazygitrs-popup.sh`, `window-picker.sh`, `sesh-picker.sh`, `scrollback-extract.sh`, and `dir-peek.sh` to use `tmux-popup-isolate.sh`.
+  - Refactor `lazygitrs-popup.sh`, `window-picker.sh`, `sesh-picker.sh`, `scrollback-extract.sh`, and `files-picker.sh` to use `tmux-popup-isolate.sh`.
   - Provide fallback theme variables for non-Omarchy environments.
 
 ### Phase 2: Two-Tier CI/CD & Multi-Arch Build Automation

@@ -18,10 +18,12 @@ bad() { echo "FALHOU: $1"; fail=1; }
 python3 - "$PRESET" <<'EOF' || exit 1
 import sys, tomllib
 p = tomllib.load(open(sys.argv[1], "rb"))
-assert p["ui"]["nav_mode"] is True, "nav_mode"
-assert str(p["ui"]["nav_focus_on_start"]).lower() == "filter", "focus filter"
+nav_active = p["ui"].get("nav_mode", p["ui"].get("nav", {}).get("active", False))
+assert nav_active is True, "nav_mode"
+focus = p["ui"].get("nav_focus_on_start", p["ui"].get("nav", {}).get("focus_on_start", ""))
+assert str(focus).lower() == "filter", "focus filter"
 b = p["binds"]
-nb = p["ui"]["nav_binds"]
+nb = p["ui"].get("nav_binds") or p["ui"].get("nav", {}).get("binds", {})
 assert b["enter"] == "Accept" and nb["enter"] == "Accept", "enter"
 assert b["esc"] == "ToggleFocus", "esc cascade"
 assert nb["esc"] == "Quit" and nb["q"] == "Quit", "esc quit"
@@ -33,8 +35,10 @@ assert b["sha^^tab"][3] == "SetMode(all)", "sha->all state"
 assert b["sha^^shift-backtab"][3] == "SetMode(path)", "reverse state"
 assert nb[" "] == "Toggle", "space multi"
 assert p["query"]["prompt"] == "> ", "prompt minimal"
-assert len(p["start"]["additional_commands"]) == 4, "4 filters"
-assert p["start"]["command"] == "cat /tmp/scrollback-extract-all.txt", "items via command (stdin stays on tty)"
+add_cmds = p["start"].get("additional_commands") or p["start"].get("command", {}).get("additional", [])
+assert len(add_cmds) == 4, "4 filters"
+start_cmd = p["start"].get("command") if isinstance(p["start"].get("command"), str) else p["start"].get("command", {}).get("command")
+assert start_cmd == "cat /tmp/scrollback-extract-all.txt", "items via command (stdin stays on tty)"
 assert "send-keys" in b["ctrl-v"], "insert action"
 assert p["preview"]["show"] is True, "preview on"
 assert "scrollback-extract-src" in p["preview"]["layout"][0]["command"], "preview context"
@@ -73,11 +77,11 @@ OSCRIPT="$ROOT/tmux/.config/tmux/scrollback-open.sh"
 [ "$("$OSCRIPT" --check 'src/api.ts:42:13')" = "src/api.ts|42|13|0" ] && ok "open parser file:line:col" || bad "open parser file:line:col"
 [ "$("$OSCRIPT" --check '/tmp/x')" = "/tmp/x|1|1|0" ] && ok "open parser plain" || bad "open parser plain"
 [ "$("$OSCRIPT" --check 'https://a.b/c')" = "https://a.b/c|1|1|0" ] && ok "open parser url-safe" || bad "open parser url-safe"
-PSCRIPT="$ROOT/tmux/.config/tmux/dir-peek.sh"
-[ -x "$PSCRIPT" ] && sh -n "$PSCRIPT" && ok "peek script syntax" || bad "peek script syntax"
-grep -q 'dir-peek.sh' "$CONF" && grep -q '@ai_agent_state_raw' "$PSCRIPT" && ok "peek bind+backdrop" || bad "peek bind+backdrop"
+PSCRIPT="$ROOT/tmux/.config/tmux/files-picker.sh"
+[ -x "$PSCRIPT" ] && sh -n "$PSCRIPT" && ok "files-picker script syntax" || bad "files-picker script syntax"
+grep -q 'files-picker.sh' "$CONF" && grep -q '@ai_agent_state_raw' "$PSCRIPT" && ok "files-picker bind+backdrop" || bad "files-picker bind+backdrop"
 grep -q "bind-key \"y\" run-shell \".*scrollback-extract.sh '#{pane_id}'" "$CONF" && ok "bind prefix+y extract" || bad "bind prefix+y extract"
-grep -q "bind-key \"e\" run-shell \".*dir-peek.sh '#{pane_id}'" "$CONF" && grep -q "bind-key C-e run-shell \".*dir-peek.sh '#{pane_id}'" "$CONF" && ok "bind prefix+e/C-e dir-peek" || bad "bind prefix+e/C-e dir-peek"
+grep -q "bind-key \"e\" run-shell \".*files-picker.sh '#{pane_id}'" "$CONF" && grep -q "bind-key C-e run-shell \".*files-picker.sh '#{pane_id}'" "$CONF" && ok "bind prefix+e/C-e files-picker" || bad "bind prefix+e/C-e files-picker"
 ! grep -q 'bind-key "v"' "$CONF" && ! grep -q 'bind-key C-v' "$CONF" && ! grep -q 'bind-key "V"' "$CONF" && ok "prefix+v/C-v/V unbound" || bad "prefix+v/C-v/V still bound"
 mm --dump-config -o files >/dev/null 2>&1 && ok "mm loads files preset" || bad "mm loads files preset"
 grep -q "sainnhe/tmux-fzf\|fcsonline/tmux-thumbs" "$CONF" && bad "orphan plugin lines" || ok "no orphan plugin lines"

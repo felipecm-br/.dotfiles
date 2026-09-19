@@ -54,7 +54,8 @@ This document provides a comprehensive audit and definitive reference of all key
 | **`Prefix + Tab`** | **Last Active Window (MRU Toggle)** | Instant toggle between the two most recent windows. |
 | **`Prefix + y`** | **Token Extract / Yank (`75% × 60%`)** | `y` = **Y**ank tokens, URLs, hashes, paths via Matchmaker. Inward chord ($H=0$). Dynamic 60%/95% preview toggle (`Ctrl+P`). |
 | **`Prefix + E`** | **Full Scrollback in Neovim** | Captures complete ANSI scrollback history into read-only Neovim buffer. |
-| **`Prefix + e`** / **`C-e`** | **Workspace Files Peek (`75% × 60%`)** | `e` = **E**xplore workspace files via Matchmaker popup (` 󰈞 󰄧 󰋩 `). Dynamic 60%/100% full preview modal (`Enter`), native Markdown, Mermaid & Photos rendering with Kitty graphics passthrough, diagram zoom (`+`/`-`/`0`), inspector (`s`), AI prompt insert (`Ctrl+V`). |
+| **`Prefix + e`** / **`C-e`** | **Workspace Files Picker (`75% × 60%`)** | `e` = **E**xplore workspace files via Matchmaker popup (` 󰈞 󰄧 󰋩 `). Data sources cycle via `Tab`/`Shift+Tab` (Local -> Frecency -> Bookmarks), dynamic 60%/100% full preview modal (`Enter`), native Markdown, Mermaid & Photos rendering with Kitty graphics passthrough, diagram zoom (`+`/`-`/`0`), inspector (`s`), AI prompt insert (`Ctrl+V`). |
+| **`Prefix + /`** | **Workspace Full-Text Ripgrep (`85% × 75%`)** | `/` = Universal search mnemonic. Matchmaker live search modal (` 󰍉 `) with 45/55 foveal layout, debounced query reload, line-synced `bat` syntax preview, `Enter` opens in Neovim (`+{line} {file}`), `Ctrl+V` inserts `{file}:{line}` into origin pane. |
 ### 🐚 Layer 2: Smart Shell (`zsh`) & Object-First Navigation Widgets
 
 | Keybinding | Widget / Function | Behavior & Context Awareness |

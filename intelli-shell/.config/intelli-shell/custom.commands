@@ -76,6 +76,12 @@ awtc {{repo_url}}
 # Open interactive Tmux window picker with live pane preview and agent status
 ~/.config/tmux/window-picker.sh
 
+# Open interactive workspace file picker in Tmux popup (Prefix + e)
+~/.config/tmux/files-picker.sh
+
+# Open live full-text ripgrep picker in Tmux popup (Prefix + /)
+~/.config/tmux/grep-picker.sh
+
 # Paste files or clipboard into last visited Matchmaker target directory
 ptl {{files}}
 

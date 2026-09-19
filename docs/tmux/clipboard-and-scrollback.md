@@ -87,7 +87,7 @@ Browse workspace files and AI-generated code in a popup via `mm -o files` — in
 Bind ([`tmux.conf`](../../tmux/.config/tmux/tmux.conf)):
 - `Prefix + e` / `Prefix + C-e`: Opens Golden Ratio popup (`75% × 60%`) via inward roll (`e` = Explorer).
 
-Architecture ([`dir-peek.sh`](../../tmux/.config/tmux/dir-peek.sh) and preset [`files.toml`](../../matchmaker/.config/matchmaker/presets/files.toml)):
+Architecture ([`files-picker.sh`](../../tmux/.config/tmux/files-picker.sh) and preset [`files.toml`](../../matchmaker/.config/matchmaker/presets/files.toml)):
 1. **Themed Popup & Pure Icon Badge**: Uses theme blue/cyan border with pure icon badge ` 󰈞 󰄧 󰋩 ` (Explorer, Mermaid diagrams, and Photos), with frozen backdrop protection when an agent streams.
 2. **Native Markdown, Mermaid & Photos Rendering**: Automatically routes `.md`, `.markdown`, `.mmd`, `.png`, `.jpg`, `.webp` through native media and diagram pipelines with Kitty Graphics Protocol passthrough.
 3. **Diagram & Photo Zoom Controls & HUD Icons**:
@@ -106,3 +106,20 @@ Architecture ([`dir-peek.sh`](../../tmux/.config/tmux/dir-peek.sh) and preset [`
    - `Ctrl+V`: Injects the path directly into the origin pane (`MM_ORIGIN_PANE`) — instant referencing into the active AI prompt.
    - `Ctrl+E` / `e`: Opens the selected file in `$EDITOR` (Neovim).
    - `l` / `h`: Drills down or navigates up directory levels seamlessly.
+   - `Tab` / `Shift+Tab`: Cycles data sources (Local files -> Frecency -> Bookmarks).
+
+---
+
+## 🔍 Live Ripgrep Full-Text Search (`grep-picker.sh`)
+
+Instant full-text workspace search using Matchmaker and ripgrep, featuring debounced query reloads, line-synced `bat` preview, and 1-touch navigation into Neovim.
+
+Bind ([`tmux.conf`](../../tmux/.config/tmux/tmux.conf)):
+- `Prefix + /`: Opens centered modal (`85% × 75%`) via universal `/` search mnemonic.
+
+Architecture ([`grep-picker.sh`](../../tmux/.config/tmux/grep-picker.sh) and preset [`rg.toml`](../../matchmaker/.config/matchmaker/presets/rg.toml)):
+1. **Live Query Reload**: Search updates in real-time as you type, aborting previous processes automatically on input changes.
+2. **45/55 Foveal Layout**: 45% candidate match column on the left and 55% syntax-highlighted code preview on the right.
+3. **Line-Synced `bat` Preview**: Automatically centers and highlights the matched line number using `bat --highlight-line`.
+4. **Direct Navigation (`Enter`)**: Opens Neovim directly at the matched line (`nvim +{line} {file}`).
+5. **AI Prompt Injection (`Ctrl+V`)**: Injects `{file}:{line}` directly into the active terminal pane (`MM_ORIGIN_PANE`).
