@@ -231,6 +231,13 @@ if [ -n "${TMUX:-}" ] && command -v tmux >/dev/null 2>&1; then
   fi
 fi
 
+# Live headless mode test (ensure mm -f filters stdin streams directly)
+if printf "alpha\nbeta\ngamma\n" | mm -f "bet" 2>/dev/null | grep -q "beta"; then
+  ok "mm --filter headless matching streams matches directly"
+else
+  bad "mm --filter headless matching failed"
+fi
+
 
 # ── 3. Script Executability & Syntax ──
 echo -e "\n[3/6] Validating Popup Scripts & Symlinks..."

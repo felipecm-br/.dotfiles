@@ -18,3 +18,15 @@ Matchmaker (`mm`) uses TOML configuration presets located in `~/.config/matchmak
 | **borders** | `mm -o borders` / `hypr-border` | Interactive live Hyprland border gradient switcher with real-time preview and multi-theme template persistence. | `j` / `k`: Live-render gradient on active window<br>`Enter`: Persist style across all themes |
 | **animations** | `mm -o animations` / `hypr-anim` | Interactive live Hyprland window animation switcher with instant visual preview. | `j` / `k`: Live-apply animation curve<br>`Enter`: Persist animation style |
 
+## Headless Filter Mode (`mm -f <query>` / `mm --filter <query>`)
+
+Matchmaker can run headlessly without initializing a terminal UI. It filters stdin streams or the current directory tree using its native Nucleo fuzzy matcher and ranked frecency scoring, printing matching results directly to stdout:
+
+```bash
+# Filter standard input stream
+echo -e "apple\nbanana\ncherry" | mm -f "ban"
+
+# Headless directory filtering
+mm -f "src"
+```
+

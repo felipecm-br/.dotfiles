@@ -234,6 +234,22 @@ j() {
         fi
     fi
 
+    # Fast-path: headless resolution in current directory tree via mm -f (<10ms)
+    local match
+    match="$(mm -f "$*" 2>/dev/null | head -n 1)"
+    if [[ -n "$match" ]]; then
+        match="${match%%$'\n'*}"
+        match="${match/#\~/$HOME}"
+        match="$(realpath "$match" 2>/dev/null || echo "$match")"
+        if [[ -f "$match" ]]; then
+            match="${match:h}"
+        fi
+        if [[ -d "$match" ]]; then
+            cd "$match" || return 1
+            return 0
+        fi
+    fi
+
     # Fallback: interactive jump with initial query
     target="$(mm -o jump query.initial="$*" 2>/dev/null)"
     if [[ -n "$target" ]]; then

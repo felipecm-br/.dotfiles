@@ -109,6 +109,9 @@ ji
 # Interactive Matchmaker Jump widget (frecency & tree navigation)
 mm -o jump
 
+# Headless fuzzy filter matching query without launching TUI
+mm -f {{query}}
+
 # List frecency directories ranked by usage
 mm list --dirs
 
