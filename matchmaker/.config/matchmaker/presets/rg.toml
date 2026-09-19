@@ -22,7 +22,7 @@ percentage = 100
 max = 9999
 
 [query]
-prompt = " rg> "
+prompt = " > "
 prompt_style.fg = "Cyan"
 status_inline = true
 
@@ -93,7 +93,7 @@ title = " Preview "
 title_fg = "Cyan"
 
 [footer]
-content = " {cyan,bold:󰍍 [enter]} {darkgray:nvim} {cyan,bold:󱞪 [C-v]} {darkgray:insert} {cyan,bold:󰆏 [y]} {darkgray:copy} {cyan,bold:󰆤 [J/K]} {darkgray:scroll} {cyan,bold:󰍉 [C-/]} {darkgray:layout} {yellow,bold:[C-s]} {darkgray:case} {cyan,bold:[C-w]} {darkgray:word} {cyan,bold:󰅙 [esc]} {darkgray:quit}"
+content = " {cyan,bold:[Enter]} {darkgray:Nvim}  •  {green,bold:[C-v]} {darkgray:Insert}  •  {magenta,bold:[y]} {darkgray:Copy}  •  {blue,bold:[J/K]} {darkgray:Scroll}  •  {cyan,bold:[C-/]} {darkgray:Layout}  •  {yellow,bold:[C-s]} {darkgray:Case}  •  {green,bold:[C-w]} {darkgray:Word}  •  {red,bold:[Esc]} {darkgray:Quit}"
 match_indent = false
 row_connection = "Full"
 
