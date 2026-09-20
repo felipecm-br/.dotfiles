@@ -1,0 +1,16 @@
+[Unit]
+Description=Bluetooth Authentication Agent (Auto-Confirm Pairing)
+Documentation=man:bt-agent(1)
+After=bluetooth.target
+Wants=bluetooth.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/bt-agent -c NoInputNoOutput
+Restart=always
+RestartSec=3s
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=default.target
