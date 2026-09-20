@@ -29,7 +29,7 @@ scripts in `.shell/install/packages/` and plugin scripts in `.shell/install/plug
 ## Stow packages
 
 `atuin`, `bat`, `battery`, `bluetui`, `cargo`, `claude`, `duf`, `eza`, `fed`, `figlet`, `fonts`,
-`fuzzel`, `fzf`, `gh`, `ghostty`, `git`, `herdr`, `hypr`, `kanshi`, `kitty`, `lazycommit`,
+`fuzzel`, `gh`, `ghostty`, `git`, `herdr`, `hypr`, `kanshi`, `kitty`, `lazycommit`,
 `lazygit`, `lazygitrs`, `lolcat`, `matchmaker`, `mise`, `nvim`, `omarchy`, `opencode`,
 `procs`, `sesh`, `starship`, `tmux`, `tuikit`, `utils`, `yazi`, `zsh`,
 `zsh-plugins`.

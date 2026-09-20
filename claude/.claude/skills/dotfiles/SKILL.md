@@ -35,7 +35,7 @@ Each top-level directory (except `.git`, `.github`, `.shell`, `scripts`) is a st
 Running `stow.sh` creates symlinks from `~/<path>` → `~/.dotfiles/<package>/<path>`.
 
 Current stow packages:
-`atuin`, `bat`, `duf`, `eza`, `fed`, `figlet`, `fonts`, `fzf`, `gh`, `ghostty`,
+`atuin`, `bat`, `duf`, `eza`, `fed`, `figlet`, `fonts`, `gh`, `ghostty`,
 `git`, `hypr`, `kanshi`, `lolcat`, `mako`, `mise`, `nvim`, `omarchy`, `performance-battery-plan.md`,
 `procs`, `sesh`, `starship`, `tmux`, `utils`, `vimium`, `walker`, `waybar`, `workflow.md`,
 `xkb`, `yazi`, `zsh`, `zsh-plugins`
