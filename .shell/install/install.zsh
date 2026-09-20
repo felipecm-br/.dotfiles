@@ -61,7 +61,9 @@ install_packages \
     mermaid-cli \
     bitwarden-bin \
     hibiki \
-    aws-cli-v2
+    aws-cli-v2 \
+    uv \
+    posting
 
 install_plugins \
     zsh-plugins \

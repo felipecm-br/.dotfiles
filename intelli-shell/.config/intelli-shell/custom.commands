@@ -175,6 +175,12 @@ hibiki --no-ui
 # Reopen last closed Tmux window/tab with file, command, path, and session (Ctrl+Shift+T)
 ~/.config/tmux/reopen-window.sh
 
+# Open Posting TUI HTTP client
+posting
+
+# Open Posting TUI HTTP client with specific collection directory
+posting --collection {{collection_dir}}
+
 
 
 $ (awt) branch: git branch --format='%(refname:short)' 2>/dev/null
