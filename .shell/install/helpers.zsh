@@ -55,6 +55,7 @@ pkg_is_installed() {
     visual-studio-code-bin) command -v code &>/dev/null && return 0 ;;
     pacsea-bin) command -v pacsea &>/dev/null && return 0 ;;
     bitwarden-bin) command -v bitwarden &>/dev/null && return 0 ;;
+    aws-cli-v2) command -v aws &>/dev/null && return 0 ;;
   esac
 
   # Fallback to package database check

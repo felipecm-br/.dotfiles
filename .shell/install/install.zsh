@@ -60,7 +60,8 @@ install_packages \
     intelli-shell \
     mermaid-cli \
     bitwarden-bin \
-    hibiki
+    hibiki \
+    aws-cli-v2
 
 install_plugins \
     zsh-plugins \
