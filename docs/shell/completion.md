@@ -145,12 +145,11 @@ Eliminates the friction of having to manually type a trailing space before reque
 
 ---
 
-## 3. Dual Picker Backends (`Ctrl+N` vs `Ctrl+F`)
+## 3. Matchmaker Completion Backend (`Ctrl+N` / `<Tab>`)
 
 | Keybinding | Backend | Engine | Architecture & Purpose |
 | :--- | :--- | :--- | :--- |
 | **`Ctrl+N`** / **`<Tab>`** | **Matchmaker** | [`mm-ftb`](../../matchmaker/.local/bin/mm-ftb) | **Zero-Fork & Zero-Disk I/O**: Direct in-memory streaming with preset [`ftb.toml`](../../matchmaker/.config/matchmaker/presets/ftb.toml) (<2ms latency) |
-| **`Ctrl+F`** | **FZF** | `fzf` | Classic fzf fallback picker |
 
 ---
 

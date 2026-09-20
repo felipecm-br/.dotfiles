@@ -2,16 +2,8 @@
 if [ -f "${HOME}/.zsh-plugins/fzf-tab/fzf-tab.plugin.zsh" ]; then
     source "${HOME}/.zsh-plugins/fzf-tab/fzf-tab.plugin.zsh"
 
-    # Show file previews in completions (directories with eza, files with bat)
-    # eza --all ensures hidden files/dirs are visible in the tree preview
-    zstyle ':fzf-tab:complete:*' fzf-preview \
-        '[[ -d $realpath ]] && eza --tree --level=2 --icons --color=always --all "$realpath" || bat --style=numbers --color=always --line-range=:200 "$realpath" 2>/dev/null'
-
-    # Use the same fzf flags as the rest of the setup
-    zstyle ':fzf-tab:*' fzf-flags --height=50% --layout=reverse --border
-
-    # Bindings inside fzf-tab popup for buttery navigation
-    zstyle ':fzf-tab:*' fzf-bindings 'ctrl-n:down,ctrl-p:up,ctrl-j:down,ctrl-k:up,down:down,up:up'
+    # Use Matchmaker (mm-ftb) as the exclusive completion UI engine
+    zstyle ':fzf-tab:*' fzf-command mm-ftb
 
     # Switch between tab groups with < and >
     zstyle ':fzf-tab:*' switch-group '<' '>'

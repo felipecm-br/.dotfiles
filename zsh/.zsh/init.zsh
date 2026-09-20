@@ -22,7 +22,6 @@ source_packages \
 	mise \
 	starship \
 	mm \
-	fzf \
 	atuin \
 	yazi \
 	duf \
