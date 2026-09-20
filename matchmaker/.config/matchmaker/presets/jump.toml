@@ -53,6 +53,7 @@ style.modifier = "DIM"        # "DIM", "BOLD", "ITALIC", "UNDERLINED", "REVERSED
 match_indent = false          # true / false
 
 [matcher]
+engine = "frizbee"                # "nucleo" ou "frizbee" (motor de fuzzy matching)
 depth_penalty = 15            # Penalidade por profundidade de pasta
 typo_tolerance = true         # true / false (tolerância a erros de digitação)
 dir_first = true              # true / false (prioriza pastas no topo da lista)
