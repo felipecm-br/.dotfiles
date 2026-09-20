@@ -59,6 +59,7 @@ install_packages \
     mcat \
     intelli-shell \
     mermaid-cli \
+    bitwarden-bin \
     hibiki
 
 install_plugins \

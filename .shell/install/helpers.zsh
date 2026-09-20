@@ -54,6 +54,7 @@ pkg_is_installed() {
     crush-bin) command -v crush &>/dev/null && return 0 ;;
     visual-studio-code-bin) command -v code &>/dev/null && return 0 ;;
     pacsea-bin) command -v pacsea &>/dev/null && return 0 ;;
+    bitwarden-bin) command -v bitwarden &>/dev/null && return 0 ;;
   esac
 
   # Fallback to package database check
