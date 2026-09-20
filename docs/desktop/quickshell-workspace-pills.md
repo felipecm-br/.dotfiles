@@ -83,6 +83,7 @@ For desktop applications, Tier 2 checks the compositor class identifiers:
 | **Media & Audio** | `spotify`, `steam`, `vlc`, `mpv` | `` / `` / `󰕼` / `` |
 | **File Managers** | `nautilus`, `dolphin`, `thunar`, `yazi` | `` |
 | **Omarchy TUIs** | `impala`, `bluetui`, `wiremix`, `btop`, `lazydocker`, `lazygit` | `󰤨` / `󰂰` / `󰕾` / `󰍛` / `󰡨` / `󰊢` |
+| **Password Managers** | `bitwarden`, `com.bitwarden.desktop` (Theme-Aware Papirus SVG / `app:`) | `app:com.bitwarden.desktop` |
 
 #### Tier 3: Title Heuristics Fallback
 If the application class is wrapped or unavailable, Tier 3 searches the title string for common application signatures (e.g. `"chrome"`, `"bash"`, `"spotify"`).

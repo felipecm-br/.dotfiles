@@ -83,7 +83,8 @@ BarWidget {
     "chatgpt": "󰚩",
     "grok": "󰚩",
     "google messages": "󰭹",
-    "linkedin": "󰌻"
+    "linkedin": "󰌻",
+    "bitwarden": "󰯄"
   })
 
   function getGlyphOrFallback(data) {
@@ -125,6 +126,9 @@ BarWidget {
       }
       if (appName === "antigravity" || appName === "antigravity-ide") {
         return "/usr/share/icons/Papirus/32x32/apps/antigravity.svg"
+      }
+      if (appName === "bitwarden" || appName === "com.bitwarden.desktop") {
+        return "/usr/share/icons/Papirus/32x32/apps/com.bitwarden.desktop.svg"
       }
 
       return ""
@@ -192,7 +196,10 @@ BarWidget {
     { patterns: ["wiremix"],                                icon: "󰕾" },
     { patterns: ["btop"],                                   icon: "󰍛" },
     { patterns: ["lazydocker"],                             icon: "󰡨" },
-    { patterns: ["lazygit"],                                icon: "󰊢" }
+    { patterns: ["lazygit"],                                icon: "󰊢" },
+
+    // Password Managers & Vaults
+    { patterns: ["bitwarden", "com.bitwarden.desktop"],     icon: "app:com.bitwarden.desktop" }
   ]
 
   readonly property var titleFallbackRules: [
@@ -203,7 +210,8 @@ BarWidget {
     { patterns: ["antigravity"],                            icon: "app:antigravity", brightness: 0.80, contrast: 1.0 },
     { patterns: ["code"],                                   icon: "" },
     { patterns: ["spotify"],                                icon: "" },
-    { patterns: ["discord"],                                icon: "" }
+    { patterns: ["discord"],                                icon: "" },
+    { patterns: ["bitwarden"],                              icon: "app:com.bitwarden.desktop" }
   ]
 
   function matchRule(rules, target) {
