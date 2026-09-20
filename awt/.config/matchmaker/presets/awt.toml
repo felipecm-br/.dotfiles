@@ -9,8 +9,11 @@ restore_fullscreen = false
 
 [ui.nav]
 active = true
+focus_on_start = "filter"
 bar = "Plain"
 color = "white"
+hints = true
+hints_columns = 4
 
 [ui.parent_peek]
 enabled = false
@@ -217,7 +220,6 @@ done
 
 [start]
 ansi = true
-mode = "nav"
 output_template = "{=session}\t{=path}"
 
 [binds]
@@ -242,7 +244,7 @@ output_template = "{=session}\t{=path}"
     "Reload",
 ]
 
-# Standard & fallback keys
+# Standard & fallback keys (active in filter mode)
 "ctrl-j" = "Down"
 "ctrl-k" = "Up"
 "ctrl-shift-j" = "PreviewDown(5)"
@@ -250,32 +252,63 @@ output_template = "{=session}\t{=path}"
 "ctrl-shift-J" = "PreviewDown(5)"
 "ctrl-shift-K" = "PreviewUp(5)"
 "ctrl-p" = "SwitchPreview"
+"ctrl-c" = "@new_worktree"
 "ctrl-n" = "@new_worktree"
 "ctrl-d" = "@delete_worktree"
+"ctrl-m" = "@merge_worktree"
+"ctrl-s" = "@ship_worktree"
+"ctrl-shift-s" = "@ship_worktree"
+"ctrl-shift-S" = "@ship_worktree"
 "ctrl-r" = "@rename_worktree"
+"ctrl-shift-r" = "@rebase_worktree"
+"ctrl-shift-R" = "@rebase_worktree"
+"ctrl-shift-p" = "@pr_worktree"
+"ctrl-shift-P" = "@pr_worktree"
 "ctrl-u" = "@fetch_remotes"
 "esc" = "FocusNav"
 
-# Nav Mode Binds (active when mode = "nav")
-"nav^^/" = "FocusFilter"
-"nav^^i" = "FocusFilter"
-"nav^^j" = "Down"
-"nav^^k" = "Up"
-"nav^^J" = "PreviewDown(5)"
-"nav^^K" = "PreviewUp(5)"
-"nav^^down" = "Down"
-"nav^^up" = "Up"
-"nav^^enter" = "Accept"
-"nav^^q" = "Quit"
-"nav^^esc" = "Quit"
-"nav^^p" = "SwitchPreview"
-"nav^^g" = "Pos(0)"
-"nav^^G" = "Pos(-1)"
-"nav^^c" = "@new_worktree"
-"nav^^m" = "@merge_worktree"
-"nav^^S" = "@ship_worktree"
-"nav^^R" = "@rebase_worktree"
-"nav^^r" = "@rename_worktree"
-"nav^^P" = "@pr_worktree"
-"nav^^d" = "@delete_worktree"
-"nav^^u" = "@fetch_remotes"
+# Nav Mode Binds (active when Results / Nav Mode is focused)
+[ui.nav.binds]
+"/" = "FocusFilter"
+"i" = "FocusFilter"
+"esc" = "Quit"
+"q" = "Quit"
+"enter" = "Accept"
+"j" = "Down"
+"k" = "Up"
+"down" = "Down"
+"up" = "Up"
+"J" = "PreviewDown(5)"
+"K" = "PreviewUp(5)"
+"shift-j" = "PreviewDown(5)"
+"shift-k" = "PreviewUp(5)"
+"ctrl-shift-j" = "PreviewDown(5)"
+"ctrl-shift-k" = "PreviewUp(5)"
+"g" = "Pos(0)"
+"G" = "Pos(-1)"
+"p" = "SwitchPreview"
+"ctrl-p" = "SwitchPreview"
+"c" = "@new_worktree"
+"ctrl-c" = "@new_worktree"
+"ctrl-n" = "@new_worktree"
+"m" = "@merge_worktree"
+"ctrl-m" = "@merge_worktree"
+"S" = "@ship_worktree"
+"shift-s" = "@ship_worktree"
+"ctrl-s" = "@ship_worktree"
+"ctrl-shift-s" = "@ship_worktree"
+"ctrl-shift-S" = "@ship_worktree"
+"R" = "@rebase_worktree"
+"shift-r" = "@rebase_worktree"
+"ctrl-shift-r" = "@rebase_worktree"
+"ctrl-shift-R" = "@rebase_worktree"
+"r" = "@rename_worktree"
+"ctrl-r" = "@rename_worktree"
+"P" = "@pr_worktree"
+"shift-p" = "@pr_worktree"
+"ctrl-shift-p" = "@pr_worktree"
+"ctrl-shift-P" = "@pr_worktree"
+"d" = "@delete_worktree"
+"ctrl-d" = "@delete_worktree"
+"u" = "@fetch_remotes"
+"ctrl-u" = "@fetch_remotes"
