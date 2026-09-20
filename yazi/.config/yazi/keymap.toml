@@ -17,7 +17,7 @@ prepend_keymap = [
   # Archive helpers
   { on = "<A-z>", run = '''shell '
 # Prompt user for compression format (xz preferred, listed first)
-fmt=$(printf "tar.xz\nzip\n7z" | fzf --prompt="Compression format: " --height=6 --reverse)
+fmt=$(gum choose "tar.xz" "zip" "7z" --header="Compression format:")
 [ -z "$fmt" ] && exit 0
 
 compress() {
