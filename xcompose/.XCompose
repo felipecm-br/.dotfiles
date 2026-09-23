@@ -1,0 +1,35 @@
+# Run omarchy-restart-xcompose to apply changes
+
+# Include fast emoji access and locale compose
+include "/usr/share/omarchy/default/xcompose"
+
+# Cedilla support for US-Intl (' + c -> ç, ' + C -> Ç)
+<dead_acute> <c> : "ç" U00E7
+<dead_acute> <C> : "Ç" U00C7
+<dead_acute> <space> : "'" apostrophe
+
+# Dead grave and tilde compositions
+<dead_grave> <a> : "à" agrave
+<dead_grave> <A> : "À" Agrave
+<dead_grave> <e> : "è" egrave
+<dead_grave> <E> : "È" Egrave
+<dead_grave> <i> : "ì" igrave
+<dead_grave> <I> : "Ì" Igrave
+<dead_grave> <o> : "ò" ograve
+<dead_grave> <O> : "Ò" Ograve
+<dead_grave> <u> : "ù" ugrave
+<dead_grave> <U> : "Ù" Ugrave
+<dead_tilde> <a> : "ã" atilde
+<dead_tilde> <A> : "Ã" Atilde
+<dead_tilde> <o> : "õ" otilde
+<dead_tilde> <O> : "Õ" Otilde
+<dead_tilde> <n> : "ñ" ntilde
+<dead_tilde> <N> : "Ñ" Ntilde
+<dead_tilde> <space> : "~" asciitilde
+<dead_grave> <space> : "`" grave
+<dead_tilde> <dead_tilde> : "~" asciitilde
+<dead_grave> <dead_grave> : "`" grave
+
+# Identification
+<Multi_key> <space> <n> : ""
+<Multi_key> <space> <e> : ""
