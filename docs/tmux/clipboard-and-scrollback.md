@@ -65,18 +65,18 @@ alias scrollback='tmux capture-pane -epS - > /tmp/tmux_scrollback.ansi && nvim -
 
 ---
 
-## 3. Token Extract to Clipboard (`Prefix + y`)
+## 3. Token & Command Extract to Clipboard (`Prefix + y` / `Prefix + C-y`)
 
-Fuzzy copy/insert of structured tokens (URLs, paths, git hashes, IPs) from the full scrollback via `mm`, extrakto-style — no editor round-trip.
+Fuzzy copy/insert of structured tokens and commands (Linux CLI commands, paths, URLs, git hashes, IPs) from the full scrollback via `wm`, extrakto-style — no editor round-trip.
 
-Bind ([`tmux.conf`](../../tmux/.config/tmux/tmux.conf)): `Prefix` then `y` (yank / extract) runs [`scrollback-extract.sh`](../../tmux/.config/tmux/scrollback-extract.sh) with the origin pane id. The script opens a themed popup itself (rounded border in theme green, pure icon badge ` 󰅍 `, golden `75% x 60%`). When an agent is streaming (`@ai_agent_state_raw` = busy/working), it opens over a frozen snapshot backdrop instead, per Issue B in `popup-isolation-and-debounce.md`:
+Bind ([`tmux.conf`](../../tmux/.config/tmux/tmux.conf)): `Prefix` then `y` or `C-y` (yank / extract) runs [`scrollback-extract.sh`](../../tmux/.config/tmux/scrollback-extract.sh) with the origin pane id. The script opens a themed popup itself (rounded border in theme green, pure icon badge ` 󰅍 `, golden `75% x 60%`). When an agent is streaming (`@ai_agent_state_raw` = busy/working), it opens over a frozen snapshot backdrop instead, per Issue B in `popup-isolation-and-debounce.md`:
 
-1. `tmux capture-pane -pJS - -t <origin>` exports the origin pane explicitly (never the popup), joining wrapped lines (`-J`) so split URLs survive; full text kept in `/tmp/scrollback-extract-src.txt`.
-2. One token file per filter precomputed (`-all/-url/-path/-sha.txt`), deduped and recent-first.
-3. `mm -o scrollback` ([preset](../../matchmaker/.config/matchmaker/presets/scrollback.toml): nav mode starting in filter, jump-style keymap) with items from `[start] command`. Keys: `Enter` copies, `Ctrl+V` inserts the current token directly into the origin pane (`MM_ORIGIN_PANE`), `Ctrl+E` (filter) / `e` (nav) opens a `path[:line[:col]]` token in `$EDITOR` via [`scrollback-open.sh`](../../tmux/.config/tmux/scrollback-open.sh), `Tab`/`Shift-Tab` cycle explicit filter modes (all→url→path→sha→all), `Space` multi-selects, `Esc` cascades filter→nav→quit, `Ctrl+P` / `P` cycles between 60% and 95% full-modal preview.
+1. `tmux capture-pane -pJS - -t <origin>` exports the origin pane explicitly (never the popup), joining wrapped lines (`-J`) so split commands and URLs survive; full text kept in `/tmp/scrollback-extract-src.txt`.
+2. Token files per filter precomputed (`-all/-cmd/-path/-url/-sha.txt`), deduped and recent-first. Commands are extracted from prompt-prefixed lines (`❯`, `$`, `#`, `>`), AI tool execution logs (`● Bash(...)`), and common Linux CLI verbs (`pacman`, `yay`, `rm`, `mv`, `git`, `cargo`, `just`, `systemctl`, etc.).
+3. `wm -o scrollback` ([preset](../../matchmaker/.config/matchmaker/presets/scrollback.toml): nav mode starting in filter, jump-style keymap) with items from `[start] command`. Keys: `Enter` copies, `Ctrl+V` inserts the current token/command directly into the origin pane (`MM_ORIGIN_PANE`), `Ctrl+E` (filter) / `e` (nav) opens a `path[:line[:col]]` token in `$EDITOR` via [`scrollback-open.sh`](../../tmux/.config/tmux/scrollback-open.sh), `Tab`/`Shift-Tab` cycle explicit filter modes (all→cmd→path→url→sha→all), `Space` multi-selects, `Esc` cascades filter→nav→quit, `Ctrl+P` / `P` cycles between 60% and 95% full-modal preview.
 4. Copy tail runs detached (`trap '' HUP`, `&`) to `wl-copy` (fallback `xclip`, then tmux buffer) with a `tmux display-message` confirm, so the popup closes the instant `Enter` is pressed; stages are timestamped in `/tmp/scrollback-mm.log`. Covered by `tests/scrollback_extract.test.sh`.
 
-Rule of thumb: `Prefix + E` = **read** (long-form inspection in Neovim), `Prefix + e` / `Prefix + C-e` = **explore** (workspace files popup), `Prefix + y` = **yank/extract** (one token to clipboard in ~3 keystrokes).
+Rule of thumb: `Prefix + E` = **read** (long-form inspection in Neovim), `Prefix + e` / `Prefix + C-e` = **explore** (workspace files popup), `Prefix + y` / `Prefix + C-y` = **yank/extract** (tokens & shell commands to clipboard or prompt in ~3 keystrokes).
 
 ---
 

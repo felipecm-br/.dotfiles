@@ -9,8 +9,9 @@ set -u
 
 SRC=/tmp/scrollback-extract-src.txt
 TOK_ALL=/tmp/scrollback-extract-all.txt
-TOK_URL=/tmp/scrollback-extract-url.txt
+TOK_CMD=/tmp/scrollback-extract-cmd.txt
 TOK_PATH=/tmp/scrollback-extract-path.txt
+TOK_URL=/tmp/scrollback-extract-url.txt
 TOK_SHA=/tmp/scrollback-extract-sha.txt
 LOG=/tmp/scrollback-mm.log
 
@@ -70,19 +71,38 @@ MM_BIN="$HOME/.local/bin/wm"
 P_URL='https?://[^[:space:]"'"'"'<>]+|git@[^[:space:]"'"'"'<>]+'
 P_PATH='(~?/[A-Za-z0-9._~:/?#@!$&()*+,;=%-]+|\./[A-Za-z0-9._~:/?#@!$&()*+,;=%-]+)'
 P_SHA='\b[0-9a-f]{7,40}\b|\b[0-9]{1,3}(\.[0-9]{1,3}){3}(:[0-9]+)?\b'
+CMD_VERBS='sudo|doas|pacman|yay|paru|apt|apt-get|dnf|yum|brew|flatpak|snap|rm|mv|cp|mkdir|rmdir|touch|ln|chmod|chown|git|gh|cargo|rustc|just|make|systemctl|journalctl|docker|podman|kubectl|curl|wget|ssh|scp|rsync|tar|unzip|gzip|nvim|vim|bat|cat|rg|grep|find|fd|wm|mm|awt|sesh|tmux|kill|pkill|python|python3|node|npm|pnpm|bun|uv|zig|go'
+
 dedup_rev() { awk '!seen[$0]++ && length($0)>2 { lines[n++]=$0 } END { for (i=n-1;i>=0;i--) print lines[i] }'; }
+
+extract_commands() {
+  {
+    sed -nE 's/^[[:space:]]*[$#%❯➜→>][[:space:]]+//p' "$SRC"
+    sed -nE 's/^[[:space:]]*●[[:space:]]*Bash\((.*)\)[[:space:]]*(\(ctrl\+o to expand\))?[[:space:]]*$/\1/p' "$SRC"
+    grep -E "^[[:space:]]*($CMD_VERBS)\b" "$SRC" | sed -E 's/^[[:space:]]+//'
+  } | sed -E 's/\)[[:space:]]*\(ctrl\+o to expand\)[[:space:]]*$//' | \
+    awk '!seen[$0]++ && length($0)>=3 && !/^[0-9]+$/ { lines[n++]=$0 } END { for (i=n-1;i>=0;i--) print lines[i] }'
+}
 
 if ! tmux capture-pane -pJS - -t "$ORIGIN" 2>/dev/null | sed '/^$/d' > "$SRC"; then
   tmux display-message "scrollback: capture-pane falhou ($ORIGIN)"
   exit 1
 fi
-grep -oE "$P_URL|$P_PATH|$P_SHA" "$SRC" | dedup_rev > "$TOK_ALL"
-grep -oE "$P_URL" "$SRC" | dedup_rev > "$TOK_URL"
+
+extract_commands > "$TOK_CMD"
 grep -oE "$P_PATH" "$SRC" | dedup_rev > "$TOK_PATH"
+grep -oE "$P_URL" "$SRC" | dedup_rev > "$TOK_URL"
 grep -oE "$P_SHA" "$SRC" | dedup_rev > "$TOK_SHA"
 
+{
+  cat "$TOK_CMD" 2>/dev/null || true
+  cat "$TOK_PATH" 2>/dev/null || true
+  cat "$TOK_URL" 2>/dev/null || true
+  cat "$TOK_SHA" 2>/dev/null || true
+} | awk '!seen[$0]++ { print }' > "$TOK_ALL"
+
 if [ ! -s "$TOK_ALL" ]; then
-  tmux display-message "scrollback: nada extraível (URL/path/hash/IP)"
+  tmux display-message "scrollback: nada extraível (cmd/path/URL/hash)"
   exit 0
 fi
 
