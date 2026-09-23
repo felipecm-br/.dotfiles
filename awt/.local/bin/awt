@@ -181,9 +181,8 @@ if [[ $# -eq 0 ]]; then
         exit 1
     fi
 
-    local wm_bin=$(command -v wm 2>/dev/null || command -v mm 2>/dev/null || true)
-    if [[ -n "$wm_bin" ]]; then
-        output=$($wm_bin -o awt)
+    if command -v wm >/dev/null 2>&1; then
+        output=$(wm -o awt)
         [[ -z "$output" ]] && exit 0
 
         IFS=$'\t' read -r session target <<< "$output"

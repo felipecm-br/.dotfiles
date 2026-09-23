@@ -173,32 +173,26 @@ chpwd() {
 }
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Waymaker / Matchmaker Smart Frecency Tracking & Jump (Zero-Friction 2.0)
+# Waymaker Smart Frecency Tracking & Jump (Zero-Friction 2.0)
 # ─────────────────────────────────────────────────────────────────────────────
 
 # Smart Sanitized chpwd hook: records directory visits in Waymaker frecency.
 # Ephemeral, system, build, and noise directories are ignored to prevent database pollution.
 wm_smart_chpwd() {
-    local wm_bin="${commands[wm]:+wm}"
-    wm_bin="${wm_bin:-${commands[mm]:+mm}}"
-    [[ -n "$wm_bin" ]] || return 0
+    (( $+commands[wm] )) || return 0
 
     case "$PWD" in
         /tmp*|/proc*|/sys*|*/.git*|*/node_modules*|*/target/debug*|*/target/release*|*/.direnv*)
             return 0
             ;;
         *)
-            $wm_bin add "$PWD" >/dev/null 2>&1 &!
+            wm add "$PWD" >/dev/null 2>&1 &!
             ;;
     esac
 }
-mm_smart_chpwd() { wm_smart_chpwd "$@"; }
 
 autoload -Uz add-zsh-hook
-# Disarm un-sanitized hook if previously registered by external scripts
-add-zsh-hook -d chpwd mm_chpwd 2>/dev/null
 add-zsh-hook -d chpwd wm_chpwd 2>/dev/null
-add-zsh-hook -d chpwd mm_smart_chpwd 2>/dev/null
 add-zsh-hook chpwd wm_smart_chpwd
 
 # j - Rapid directory jump with Zero-Friction Frecency 2.0
@@ -219,15 +213,13 @@ j() {
         fi
     fi
 
-    local wm_bin="${commands[wm]:+wm}"
-    wm_bin="${wm_bin:-${commands[mm]:+mm}}"
-    [[ -n "$wm_bin" ]] || {
+    (( $+commands[wm] )) || {
         echo "j: 'wm' (Waymaker) não encontrado no PATH."
         return 1
     }
 
     local target
-    target="$($wm_bin list --dirs "$@" 2>/dev/null | head -n 1)"
+    target="$(wm list --dirs "$@" 2>/dev/null | head -n 1)"
     if [[ -n "$target" ]]; then
         target="${target%%$'\n'*}"
         target="${target/#\~/$HOME}"
@@ -243,7 +235,7 @@ j() {
 
     # Fast-path: headless resolution in current directory tree via wm -f (<10ms)
     local match
-    match="$($wm_bin -f "$*" 2>/dev/null | head -n 1)"
+    match="$(wm -f "$*" 2>/dev/null | head -n 1)"
     if [[ -n "$match" ]]; then
         match="${match%%$'\n'*}"
         match="${match/#\~/$HOME}"
@@ -258,7 +250,7 @@ j() {
     fi
 
     # Fallback: interactive jump with initial query
-    target="$($wm_bin -o jump query.initial="$*" 2>/dev/null)"
+    target="$(wm -o jump query.initial="$*" 2>/dev/null)"
     if [[ -n "$target" ]]; then
         target="${target%%$'\n'*}"
         target="${target/#\~/$HOME}"
@@ -278,9 +270,7 @@ j() {
 # ji - Interactive directory jump using Waymaker Jump Mode
 # Usage: ji [query]
 ji() {
-    local wm_bin="${commands[wm]:+wm}"
-    wm_bin="${wm_bin:-${commands[mm]:+mm}}"
-    [[ -n "$wm_bin" ]] || {
+    (( $+commands[wm] )) || {
         echo "ji: 'wm' (Waymaker) não encontrado no PATH."
         return 1
     }
@@ -290,7 +280,7 @@ ji() {
         wm_args+=(query.initial="$*")
     fi
     local target
-    target="$($wm_bin "${wm_args[@]}" 2>/dev/null)"
+    target="$(wm "${wm_args[@]}" 2>/dev/null)"
     if [[ -n "$target" ]]; then
         target="${target%%$'\n'*}"
         target="${target/#\~/$HOME}"
@@ -391,13 +381,11 @@ ai-fix() {
     fi
 }
 
-# wtj - Interactively select and jump (cd) into a Git Worktree via Waymaker / Matchmaker
+# wtj - Interactively select and jump (cd) into a Git Worktree via Waymaker
 # Usage: wtj
 wtj() {
-    local wm_bin="${commands[wm]:+wm}"
-    wm_bin="${wm_bin:-${commands[mm]:+mm}}"
     local target
-    target=$(${wm_bin:-wm} -o wt)
+    target=$(wm -o wt)
     if [[ -n "$target" && -d "$target" ]]; then
         cd "$target"
     fi
@@ -503,12 +491,9 @@ pasteto() {
     done
 
     # 1. Visual selection if no arguments passed
-    local wm_bin="${commands[wm]:+wm}"
-    wm_bin="${wm_bin:-${commands[mm]:+mm}}"
-
     if (( ${#sources} == 0 )); then
         local raw_items
-        raw_items=$($wm_bin --no-read 2>/dev/null)
+        raw_items=$(wm --no-read 2>/dev/null)
         [[ -z "$raw_items" ]] && return 0
         local -a lines=("${(@f)raw_items}")
         for l in "${lines[@]}"; do
@@ -539,7 +524,7 @@ pasteto() {
         fi
         target_dir="$_MM_LAST_TARGET"
     else
-        target_dir=$($wm_bin list --dirs 2>/dev/null | $wm_bin -o jump header.content="PASTE TO (Escolha o Destino)")
+        target_dir=$(wm list --dirs 2>/dev/null | wm -o jump header.content="PASTE TO (Escolha o Destino)")
         [[ -z "$target_dir" ]] && return 0
     fi
 
@@ -564,7 +549,7 @@ pasteto() {
     _MM_LAST_TARGET="$target_dir"
 
     # 5. Automatically boost destination in frecency
-    $wm_bin add "$target_dir" >/dev/null 2>&1 &!
+    wm add "$target_dir" >/dev/null 2>&1 &!
 
     # 6. Navigate if -g / --go requested
     if (( go )); then
@@ -616,12 +601,9 @@ moveto() {
     done
 
     # 1. Visual selection if no arguments passed
-    local wm_bin="${commands[wm]:+wm}"
-    wm_bin="${wm_bin:-${commands[mm]:+mm}}"
-
     if (( ${#sources} == 0 )); then
         local raw_items
-        raw_items=$($wm_bin --no-read 2>/dev/null)
+        raw_items=$(wm --no-read 2>/dev/null)
         [[ -z "$raw_items" ]] && return 0
         local -a lines=("${(@f)raw_items}")
         for l in "${lines[@]}"; do
@@ -652,7 +634,7 @@ moveto() {
         fi
         target_dir="$_MM_LAST_TARGET"
     else
-        target_dir=$($wm_bin list --dirs 2>/dev/null | $wm_bin -o jump header.content="MOVE TO (Escolha o Destino)")
+        target_dir=$(wm list --dirs 2>/dev/null | wm -o jump header.content="MOVE TO (Escolha o Destino)")
         [[ -z "$target_dir" ]] && return 0
     fi
 
@@ -677,7 +659,7 @@ moveto() {
     _MM_LAST_TARGET="$target_dir"
 
     # 5. Automatically boost destination in frecency
-    $wm_bin add "$target_dir" >/dev/null 2>&1 &!
+    wm add "$target_dir" >/dev/null 2>&1 &!
 
     # 6. Navigate if -g / --go requested
     if (( go )); then
@@ -691,9 +673,6 @@ alias ptl='pasteto -l' 2>/dev/null
 alias mt='moveto' 2>/dev/null
 alias mtg='moveto -g' 2>/dev/null
 alias mtl='moveto -l' 2>/dev/null
-
-# Waymaker / Matchmaker seamless CLI alias
-alias mm='wm' 2>/dev/null
 
 
 # ─────────────────────────────────────────────────────────────────────────────

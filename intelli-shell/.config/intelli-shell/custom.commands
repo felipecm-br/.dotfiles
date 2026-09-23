@@ -124,12 +124,6 @@ wm add {{dir}}
 # Live-reload Markdown preview with inline Kitty Unicode diagrams
 wm md -w {{file}}
 
-# Legacy Matchmaker Jump widget (frecency & tree navigation)
-mm -o jump
-
-# Legacy headless fuzzy filter matching query without launching TUI
-mm -f {{query}}
-
 # Connect to or create a session with Sesh
 sesh connect {{session}}
 
@@ -197,5 +191,4 @@ $ (stow.sh) package: find . -maxdepth 1 -mindepth 1 -type d ! -name '.*' ! -name
 $ (./stow.sh) package: find . -maxdepth 1 -mindepth 1 -type d ! -name '.*' ! -name 'scripts' ! -name 'docs' -printf '%f\n' 2>/dev/null
 $ (sesh) session: sesh list 2>/dev/null
 $ (wm) file: find . -maxdepth 3 -type f \( -name '*.md' -o -name '*.markdown' -o -name '*.mmd' \) 2>/dev/null
-$ (mm) file: find . -maxdepth 3 -type f \( -name '*.md' -o -name '*.markdown' -o -name '*.mmd' \) 2>/dev/null
 $ (mmdc) mmd_file: find . -maxdepth 4 -type f \( -name '*.mmd' -o -name '*.mermaid' \) 2>/dev/null

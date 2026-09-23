@@ -24,7 +24,7 @@ selected_base="$(echo "${1:-}" | sed -E 's/^[^a-zA-Z0-9._/-]+[[:space:]]*//')"
 connect_tmux=1
 ai_continue_mode="auto"
 custom_ai_cmd=""
-WM_BIN=$(command -v wm 2>/dev/null || command -v mm 2>/dev/null || echo wm)
+WM_BIN="wm"
 
 shift 2>/dev/null || true
 while [[ $# -gt 0 ]]; do
