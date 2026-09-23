@@ -31,6 +31,7 @@ underline_style.fg = "#f9e2af"
 
 [ui.nav]
 active = true               # true (modo navegação habilitado) / false
+profile = "fm"              # Perfil de File Manager completo (atalhos de criação/edição/remoção de arquivos e traversal h/l)
 focus_on_start = "picker" # Inicia na lista de resultados (NavBar) para navegação VIM instantânea na Home Row
 bar = "Plain"             # Estilo da barra na lista: "Plain" (│), "Thick" (█), "Double" (║), "Rounded" (│), "QuadrantOutside" (▌), "QuadrantInside" (▐)
 color = "Darkgray"        # Cor da barra: nomes ("black", "gray", "cyan", "lightblue", etc.) ou hex ("#000000", "#1e1e2e")

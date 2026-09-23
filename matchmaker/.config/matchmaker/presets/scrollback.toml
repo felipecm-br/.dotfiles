@@ -10,11 +10,11 @@
 
 [ui.nav]
 active = true
+profile = "list"
 focus_on_start = "filter"
 bar = "Plain"
 color = "Darkgray"
-hints = true
-hints_columns = 3
+hints = false
 
 [tui]
 percentage = 100
