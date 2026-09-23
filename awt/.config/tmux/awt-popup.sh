@@ -65,8 +65,8 @@ if [ -z "${TMUX_POPUP:-}" ]; then
 fi
 
 # Inside the popup modal:
-MM_BIN="$HOME/.local/bin/mm"
-[ -x "$MM_BIN" ] || MM_BIN="$(command -v mm 2>/dev/null || echo "mm")"
+MM_BIN="$HOME/.local/bin/wm"
+[ -x "$MM_BIN" ] || MM_BIN="$(command -v wm 2>/dev/null || command -v mm 2>/dev/null || echo "wm")"
 
 output=$("$MM_BIN" -o awt tui.percentage=100 tui.max=9999)
 [ -z "$output" ] && exit 0

@@ -64,9 +64,8 @@ fi
 export MM_ORIGIN_PANE="$ORIGIN"
 export MM_ORIGIN_CWD="${2:-}"
 
-MM_BIN="$HOME/.local/bin/mm"
-[ -x "$MM_BIN" ] || MM_BIN="$HOME/.cargo/bin/mm"
-[ -x "$MM_BIN" ] || MM_BIN="$(command -v mm 2>/dev/null || echo mm)"
+MM_BIN="$HOME/.local/bin/wm"
+[ -x "$MM_BIN" ] || MM_BIN="$(command -v wm 2>/dev/null || command -v mm 2>/dev/null || echo mm)"
 
 P_URL='https?://[^[:space:]"'"'"'<>]+|git@[^[:space:]"'"'"'<>]+'
 P_PATH='(~?/[A-Za-z0-9._~:/?#@!$&()*+,;=%-]+|\./[A-Za-z0-9._~:/?#@!$&()*+,;=%-]+)'

@@ -91,5 +91,5 @@ separator_style.fg = "Cyan"   # Cor do separador
 command = ""
 additional = [
     "",
-    "mm list --dirs 2>/dev/null"
+    "wm list --dirs 2>/dev/null"
 ]

@@ -256,12 +256,12 @@ separator_style.fg = "Cyan"   # Cor do separador
 command = ""
 # Fontes de dados cicláveis via @reloadnext (ctrl-f / f / b):
 # Índice 0: "" -> Usa AsyncWalker nativo para pasta/arquivos locais.
-# Índice 1: Lista global de pastas por frecência via mm list --dirs.
-# Índice 2: Lista exclusiva de pastas favoritadas via mm list --bookmarks.
+# Índice 1: Lista global de pastas por frecência via wm list --dirs.
+# Índice 2: Lista exclusiva de pastas favoritadas via wm list --bookmarks.
 additional = [
     "",
-    "mm list --dirs 2>/dev/null",
-    "mm list --bookmarks 2>/dev/null"
+    "wm list --dirs 2>/dev/null",
+    "wm list --bookmarks 2>/dev/null"
 ]
 
 # Regras automáticas de ordenação por pasta (avaliadas em ordem top-to-bottom)

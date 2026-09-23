@@ -5,11 +5,11 @@ ANIM_DIR="$HOME/.config/hypr/animations"
 CONFIG_DEST="$HOME/.config/hypr/animations.lua"
 PRESET_FILE="$HOME/.config/matchmaker/presets/animations.toml"
 
-# Ensure matchmaker binary is accessible
-MM_BIN=$(command -v mm || echo "$HOME/.local/bin/mm")
+# Ensure waymaker binary is accessible
+MM_BIN=$(command -v wm || command -v mm || echo "$HOME/.local/bin/wm")
 
 if [ ! -x "$MM_BIN" ]; then
-    echo "Error: matchmaker (mm) binary not found!" >&2
+    echo "Error: waymaker (wm) binary not found!" >&2
     exit 1
 fi
 

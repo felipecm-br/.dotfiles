@@ -75,9 +75,8 @@ ORIG_WIN="${TMUX_ORIGIN_WINDOW:-$(tmux display-message -p '#I')}"
 ITEMS=$("$ITEMS_SCRIPT" "$ORIG_SESS" "$ORIG_WIN")
 START_IDX=$(printf '%s\n' "$ITEMS" | awk '!/^#/ {n++} /•/ {print n-1; exit}')
 [ -z "$START_IDX" ] && START_IDX=0
-MM_BIN="$HOME/.local/bin/mm"
-[ -x "$MM_BIN" ] || MM_BIN="$HOME/.cargo/bin/mm"
-[ -x "$MM_BIN" ] || MM_BIN="$(command -v mm 2>/dev/null || echo "mm")"
+MM_BIN="$HOME/.local/bin/wm"
+[ -x "$MM_BIN" ] || MM_BIN="$(command -v wm 2>/dev/null || command -v mm 2>/dev/null || echo "wm")"
 
 chosen=$(printf '%s\n' "$ITEMS" | "$MM_BIN" \
   -o "$SCRIPT_DIR/window-picker.toml" \

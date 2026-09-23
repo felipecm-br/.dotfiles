@@ -3,10 +3,10 @@
 set -eo pipefail
 
 PRESET_FILE="$HOME/.config/matchmaker/presets/sounds.toml"
-MM_BIN=$(command -v mm || echo "$HOME/.local/bin/mm")
+MM_BIN=$(command -v wm || command -v mm || echo "$HOME/.local/bin/wm")
 
 if [[ ! -x "$MM_BIN" ]]; then
-  echo "Error: matchmaker (mm) binary not found!" >&2
+  echo "Error: waymaker (wm) binary not found!" >&2
   exit 1
 fi
 

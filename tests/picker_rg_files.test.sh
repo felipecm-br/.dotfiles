@@ -38,8 +38,8 @@ start_cmd = cfg["start"]["command"]
 add_cmds = start_cmd.get("additional") or cfg["start"].get("additional_commands", [])
 assert len(add_cmds) >= 3, f"Expected at least 3 data sources, got {len(add_cmds)}"
 assert add_cmds[0] == "", "Source 0 must be local empty string"
-assert "mm list" in add_cmds[1], "Source 1 must be frecency mm list"
-assert "mm list --bookmarks" in add_cmds[2], "Source 2 must be bookmarks mm list"
+assert ("wm list" in add_cmds[1] or "mm list" in add_cmds[1]), "Source 1 must be frecency wm/mm list"
+assert ("wm list --bookmarks" in add_cmds[2] or "mm list --bookmarks" in add_cmds[2]), "Source 2 must be bookmarks wm/mm list"
 
 # Binds contract
 binds = cfg["binds"]
@@ -61,10 +61,11 @@ print("files.toml python validation ok")
 EOF
 if [ $? -eq 0 ]; then ok "files.toml schema & bindings contract"; else bad "files.toml schema & bindings contract"; fi
 
-if mm --dump-config -o files >/dev/null 2>&1; then
-  ok "mm loads files preset without errors"
+TEST_BIN="$(command -v wm 2>/dev/null || command -v mm 2>/dev/null || echo wm)"
+if "$TEST_BIN" --dump-config -o files >/dev/null 2>&1; then
+  ok "wm/mm loads files preset without errors"
 else
-  bad "mm rejected files preset"
+  bad "wm/mm rejected files preset"
 fi
 
 # ── 2. Validate rg.toml Contract ──
@@ -185,16 +186,16 @@ print("rg.toml python validation ok")
 EOF
 if [ $? -eq 0 ]; then ok "rg.toml schema & bindings contract"; else bad "rg.toml schema & bindings contract"; fi
 
-if mm --dump-config -o rg >/dev/null 2>&1; then
-  ok "mm loads rg preset without errors"
+if "$TEST_BIN" --dump-config -o rg >/dev/null 2>&1; then
+  ok "wm/mm loads rg preset without errors"
 else
-  bad "mm rejected rg preset"
+  bad "wm/mm rejected rg preset"
 fi
 
-# Live functional test: test mm -o rg inside tmux with query reload and item rendering
+# Live functional test: test wm -o rg inside tmux with query reload and item rendering
 if [ -n "${TMUX:-}" ] && command -v tmux >/dev/null 2>&1; then
   WIN="test-rg-live-$$"
-  if tmux new-window -n "$WIN" "mm --no-read -o rg" 2>/dev/null; then
+  if tmux new-window -n "$WIN" "$TEST_BIN --no-read -o rg" 2>/dev/null; then
     sleep 1.0
     for c in f i l e s - p i c k e r; do
       tmux send-keys -t "$WIN" -l "$c" 2>/dev/null || true
@@ -204,14 +205,14 @@ if [ -n "${TMUX:-}" ] && command -v tmux >/dev/null 2>&1; then
     CAPTURED=$(tmux capture-pane -t "$WIN" -p 2>/dev/null || true)
     tmux kill-window -t "$WIN" 2>/dev/null || true
     if echo "$CAPTURED" | grep -q "files-picker"; then
-      ok "live mm -o rg streams ripgrep matches and splits columns"
+      ok "live wm/mm -o rg streams ripgrep matches and splits columns"
     else
-      bad "live mm -o rg failed to display ripgrep matches"
+      bad "live wm/mm -o rg failed to display ripgrep matches"
     fi
 
     # Uppercase query test (ensure Filtering(false) prevents nucleo from filtering out case-insensitive rg results)
     WIN_UPPER="test-rg-upper-$$"
-    if tmux new-window -n "$WIN_UPPER" "mm --no-read -o rg" 2>/dev/null; then
+    if tmux new-window -n "$WIN_UPPER" "$TEST_BIN --no-read -o rg" 2>/dev/null; then
       sleep 1.0
       for c in F Z F; do
         tmux send-keys -t "$WIN_UPPER" -l "$c" 2>/dev/null || true
@@ -221,21 +222,21 @@ if [ -n "${TMUX:-}" ] && command -v tmux >/dev/null 2>&1; then
       CAPTURED_UPPER=$(tmux capture-pane -t "$WIN_UPPER" -p 2>/dev/null || true)
       tmux kill-window -t "$WIN_UPPER" 2>/dev/null || true
       if echo "$CAPTURED_UPPER" | grep -q "fzf"; then
-        ok "live mm -o rg uppercase query works (FZF matches fzf)"
+        ok "live wm/mm -o rg uppercase query works (FZF matches fzf)"
       else
-        bad "live mm -o rg uppercase query failed to display matches"
+        bad "live wm/mm -o rg uppercase query failed to display matches"
       fi
     fi
   else
-    ok "live mm -o rg test skipped (could not create tmux test window)"
+    ok "live wm/mm -o rg test skipped (could not create tmux test window)"
   fi
 fi
 
-# Live headless mode test (ensure mm -f filters stdin streams directly)
-if printf "alpha\nbeta\ngamma\n" | mm -f "bet" 2>/dev/null | grep -q "beta"; then
-  ok "mm --filter headless matching streams matches directly"
+# Live headless mode test (ensure wm -f filters stdin streams directly)
+if printf "alpha\nbeta\ngamma\n" | "$TEST_BIN" -f "bet" 2>/dev/null | grep -q "beta"; then
+  ok "wm/mm --filter headless matching streams matches directly"
 else
-  bad "mm --filter headless matching failed"
+  bad "wm/mm --filter headless matching failed"
 fi
 
 

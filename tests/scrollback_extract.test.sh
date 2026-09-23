@@ -49,8 +49,9 @@ print("ok: preset parses with nav/filter/accept contract")
 EOF
 [ $? -eq 0 ] || bad "preset toml"
 
-# 2. preset loads in the real mm binary (catches unknown keys)
-if mm --dump-config -o scrollback >/dev/null 2>&1; then ok "mm loads preset"; else bad "mm rejects preset"; fi
+# 2. preset loads in the real wm/mm binary (catches unknown keys)
+TEST_BIN="$(command -v wm 2>/dev/null || command -v mm 2>/dev/null || echo wm)"
+if "$TEST_BIN" --dump-config -o scrollback >/dev/null 2>&1; then ok "wm/mm loads preset"; else bad "wm/mm rejects preset"; fi
 
 # 3. extraction pipeline: dedupe + recent-first on fixture
 got="$(grep -oE 'https?://[^[:space:]"'"'"'<>]+|(~?/[A-Za-z0-9._~:/?#@!$&()*+,;=%-]+|\./[A-Za-z0-9._~:/?#@!$&()*+,;=%-]+)|\b[0-9a-f]{7,40}\b|\b[0-9]{1,3}(\.[0-9]{1,3}){3}(:[0-9]+)?\b' "$FIX" | awk '!seen[$0]++ && length($0)>2 { lines[n++]=$0 } END { for (i=n-1;i>=0;i--) print lines[i] }')"
@@ -83,7 +84,7 @@ grep -q 'files-picker.sh' "$CONF" && grep -q '@ai_agent_state_raw' "$PSCRIPT" &&
 grep -q "bind-key \"y\" run-shell \".*scrollback-extract.sh '#{pane_id}'" "$CONF" && ok "bind prefix+y extract" || bad "bind prefix+y extract"
 grep -q "bind-key \"e\" run-shell \".*files-picker.sh '#{pane_id}'" "$CONF" && grep -q "bind-key C-e run-shell \".*files-picker.sh '#{pane_id}'" "$CONF" && ok "bind prefix+e/C-e files-picker" || bad "bind prefix+e/C-e files-picker"
 ! grep -q 'bind-key "v"' "$CONF" && ! grep -q 'bind-key C-v' "$CONF" && ! grep -q 'bind-key "V"' "$CONF" && ok "prefix+v/C-v/V unbound" || bad "prefix+v/C-v/V still bound"
-mm --dump-config -o files >/dev/null 2>&1 && ok "mm loads files preset" || bad "mm loads files preset"
+"$TEST_BIN" --dump-config -o files >/dev/null 2>&1 && ok "wm/mm loads files preset" || bad "wm/mm loads files preset"
 grep -q "sainnhe/tmux-fzf\|fcsonline/tmux-thumbs" "$CONF" && bad "orphan plugin lines" || ok "no orphan plugin lines"
 
 exit $fail

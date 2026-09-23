@@ -59,9 +59,8 @@ _tmux_style="$HOME/.local/state/omarchy/current/theme/tmux-style.sh"
 . "$_tmux_style" 2>/dev/null || true
 unset _tmux_style
 
-MM_BIN="$HOME/.local/bin/mm"
-[ -x "$MM_BIN" ] || MM_BIN="$HOME/.cargo/bin/mm"
-[ -x "$MM_BIN" ] || MM_BIN="$(command -v mm 2>/dev/null || echo "mm")"
+MM_BIN="$HOME/.local/bin/wm"
+[ -x "$MM_BIN" ] || MM_BIN="$(command -v wm 2>/dev/null || command -v mm 2>/dev/null || echo "wm")"
 
 sesh list --icons | grep -Ev '(_lazygitrs|_popups|[[:space:]]+\.)' | "$MM_BIN" \
   -o "$SCRIPT_DIR/sesh-picker.toml" \

@@ -82,7 +82,7 @@ ansi = false
 [start.command]
 additional = [
     "",
-    "mm list 2>/dev/null"
+    "wm list 2>/dev/null"
 ]
 
 [binds]

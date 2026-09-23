@@ -147,11 +147,12 @@ layout_slots() {
 }
 
 run_matchmaker_picker() {
-  local mm_bin="$HOME/.cargo/bin/mm"
+  local mm_bin="$HOME/.local/bin/wm"
+  [[ -x $mm_bin ]] || mm_bin="$(command -v wm 2>/dev/null || command -v mm 2>/dev/null || echo "wm")"
   local config_file="$HOME/.config/matchmaker/presets/backgrounds.toml"
 
   if [[ ! -x $mm_bin ]]; then
-    notify-send "Background selector" "matchmaker binary not found or not executable at $mm_bin"
+    notify-send "Background selector" "waymaker binary not found or not executable at $mm_bin"
     exit 1
   fi
 

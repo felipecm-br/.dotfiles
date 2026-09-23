@@ -75,9 +75,8 @@ CWD="${2:-$HOME}"
 export MM_ORIGIN_PANE="$ORIGIN"
 export MM_ORIGIN_CWD="$CWD"
 
-MM_BIN="$HOME/.local/bin/mm"
-[ -x "$MM_BIN" ] || MM_BIN="$HOME/.cargo/bin/mm"
-[ -x "$MM_BIN" ] || MM_BIN="$(command -v mm 2>/dev/null || echo mm)"
+MM_BIN="$HOME/.local/bin/wm"
+[ -x "$MM_BIN" ] || MM_BIN="$(command -v wm 2>/dev/null || command -v mm 2>/dev/null || echo wm)"
 
 tmux set -p allow-passthrough all 2>/dev/null || true
 tmux set -g allow-passthrough all 2>/dev/null || true
