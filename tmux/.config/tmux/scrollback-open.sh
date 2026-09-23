@@ -81,8 +81,8 @@ EOF
     fi
     tmux select-pane -t "$nvim_pane" 2>/dev/null || true
   else
-    # Neovim not running: open split on the left (65% Neovim / 35% origin AI pane on right)
-    new_pane="$(tmux split-window -d -h -b -l 65% -P -F '#{pane_id}' -t "$origin_pane" -c "$cwd" "${EDITOR:-nvim} +\"call cursor($line,$col)\" $(printf '%q' "$file")" 2>/dev/null || true)"
+    # Neovim not running: open split on the left (Golden Ratio 62% Neovim / 38% origin AI pane on right)
+    new_pane="$(tmux split-window -d -h -b -l 62% -P -F '#{pane_id}' -t "$origin_pane" -c "$cwd" "${EDITOR:-nvim} +\"call cursor($line,$col)\" $(printf '%q' "$file")" 2>/dev/null || true)"
     if [ -n "$new_pane" ]; then
       tmux select-pane -t "$new_pane" 2>/dev/null || true
     fi

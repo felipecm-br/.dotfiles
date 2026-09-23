@@ -104,7 +104,7 @@ Architecture ([`files-picker.sh`](../../tmux/.config/tmux/files-picker.sh) and p
    - `y` / `Ctrl+Y`: Copies path(s) to system clipboard and closes modal.
    - `Enter`: Expands to exclusive 100% fullscreen preview modal.
    - `Ctrl+V`: Injects the path directly into the origin pane (`MM_ORIGIN_PANE`) — instant referencing into the active AI prompt.
-   - `Ctrl+E` / `e` / `o`: Opens the selected file in `$EDITOR` (Neovim) in a split pane beside the origin pane (or loads into an existing Neovim pane), closing the popup immediately to preserve visual concurrency with the AI session.
+   - `Ctrl+E` / `e` / `o`: Opens the selected file in `$EDITOR` (Neovim) in a Golden Ratio left split pane (`62% × 38%`, `split-window -h -b -l 62%`) beside the origin pane (or loads into an existing Neovim pane), closing the popup immediately to preserve visual concurrency with the AI session.
    - `l` / `h`: Drills down or navigates up directory levels seamlessly.
    - `Tab` / `Shift+Tab`: Cycles data sources (Local files -> Frecency -> Bookmarks).
 
