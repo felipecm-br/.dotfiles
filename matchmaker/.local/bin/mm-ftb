@@ -17,8 +17,9 @@ fi
 # Streamed directly to stdout so null bytes \0 are preserved
 printf "\n\n"
 
-# Run Matchmaker with ftb preset, feeding candidates from RAM and TUI via /dev/tty
-mm -o ftb cmd "cat '$tmp_candidates'" < /dev/tty 2> /dev/tty || true
+# Run Waymaker / Matchmaker with ftb preset, feeding candidates from RAM and TUI via /dev/tty
+WM_BIN=$(command -v wm 2>/dev/null || echo mm)
+$WM_BIN -o ftb cmd "cat '$tmp_candidates'" < /dev/tty 2> /dev/tty || true
 
 rm -f "$tmp_candidates"
 

@@ -18,11 +18,13 @@ bindkey '^[[1;3C' forward-word   # Alt+Right Arrow
 bindkey '^[f'     forward-word
 
 
-# Matchmaker Jump Widget: context-aware navigation & Object-First buffer ergonomics
+# Waymaker / Matchmaker Jump Widget: context-aware navigation & Object-First buffer ergonomics
 _jump_widget() {
     local initial_buf="$BUFFER"
     local raw_result
-    raw_result=$(mm --no-read -o jump)
+    local wm_bin="${commands[wm]:+wm}"
+    wm_bin="${wm_bin:-${commands[mm]:+mm}}"
+    raw_result=$($wm_bin --no-read -o jump)
     [[ -z "$raw_result" ]] && { zle reset-prompt; return 0; }
 
     local -a lines=("${(@f)raw_result}")

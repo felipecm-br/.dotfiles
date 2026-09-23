@@ -173,35 +173,40 @@ chpwd() {
 }
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Matchmaker Smart Frecency Tracking & Jump (Zero-Friction 2.0)
+# Waymaker / Matchmaker Smart Frecency Tracking & Jump (Zero-Friction 2.0)
 # ─────────────────────────────────────────────────────────────────────────────
 
-# Smart Sanitized chpwd hook: records directory visits in Matchmaker frecency.
+# Smart Sanitized chpwd hook: records directory visits in Waymaker frecency.
 # Ephemeral, system, build, and noise directories are ignored to prevent database pollution.
-mm_smart_chpwd() {
-    (( $+commands[mm] )) || return 0
+wm_smart_chpwd() {
+    local wm_bin="${commands[wm]:+wm}"
+    wm_bin="${wm_bin:-${commands[mm]:+mm}}"
+    [[ -n "$wm_bin" ]] || return 0
 
     case "$PWD" in
         /tmp*|/proc*|/sys*|*/.git*|*/node_modules*|*/target/debug*|*/target/release*|*/.direnv*)
             return 0
             ;;
         *)
-            mm add "$PWD" >/dev/null 2>&1 &!
+            $wm_bin add "$PWD" >/dev/null 2>&1 &!
             ;;
     esac
 }
+mm_smart_chpwd() { wm_smart_chpwd "$@"; }
 
 autoload -Uz add-zsh-hook
 # Disarm un-sanitized hook if previously registered by external scripts
 add-zsh-hook -d chpwd mm_chpwd 2>/dev/null
-add-zsh-hook chpwd mm_smart_chpwd
+add-zsh-hook -d chpwd wm_chpwd 2>/dev/null
+add-zsh-hook -d chpwd mm_smart_chpwd 2>/dev/null
+add-zsh-hook chpwd wm_smart_chpwd
 
 # j - Rapid directory jump with Zero-Friction Frecency 2.0
 # Usage:
 #   j           -> Jump to $HOME (rapid muscle memory)
 #   j <dir>     -> Jump to literal directory if exists (or '-' for previous dir)
 #   j <query>   -> Jump to highest-ranked frecency directory matching query
-#   Fallback    -> Launch Matchmaker interactive Jump Mode with query
+#   Fallback    -> Launch Waymaker interactive Jump Mode with query
 j() {
     if (( $# == 0 )); then
         cd ~ || return 1
@@ -214,13 +219,15 @@ j() {
         fi
     fi
 
-    (( $+commands[mm] )) || {
-        echo "j: 'mm' (Matchmaker) não encontrado no PATH."
+    local wm_bin="${commands[wm]:+wm}"
+    wm_bin="${wm_bin:-${commands[mm]:+mm}}"
+    [[ -n "$wm_bin" ]] || {
+        echo "j: 'wm' (Waymaker) não encontrado no PATH."
         return 1
     }
 
     local target
-    target="$(mm list --dirs "$@" 2>/dev/null | head -n 1)"
+    target="$($wm_bin list --dirs "$@" 2>/dev/null | head -n 1)"
     if [[ -n "$target" ]]; then
         target="${target%%$'\n'*}"
         target="${target/#\~/$HOME}"
@@ -234,9 +241,9 @@ j() {
         fi
     fi
 
-    # Fast-path: headless resolution in current directory tree via mm -f (<10ms)
+    # Fast-path: headless resolution in current directory tree via wm -f (<10ms)
     local match
-    match="$(mm -f "$*" 2>/dev/null | head -n 1)"
+    match="$($wm_bin -f "$*" 2>/dev/null | head -n 1)"
     if [[ -n "$match" ]]; then
         match="${match%%$'\n'*}"
         match="${match/#\~/$HOME}"
@@ -251,7 +258,7 @@ j() {
     fi
 
     # Fallback: interactive jump with initial query
-    target="$(mm -o jump query.initial="$*" 2>/dev/null)"
+    target="$($wm_bin -o jump query.initial="$*" 2>/dev/null)"
     if [[ -n "$target" ]]; then
         target="${target%%$'\n'*}"
         target="${target/#\~/$HOME}"
@@ -268,20 +275,22 @@ j() {
     return 1
 }
 
-# ji - Interactive directory jump using Matchmaker Jump Mode
+# ji - Interactive directory jump using Waymaker Jump Mode
 # Usage: ji [query]
 ji() {
-    (( $+commands[mm] )) || {
-        echo "ji: 'mm' (Matchmaker) não encontrado no PATH."
+    local wm_bin="${commands[wm]:+wm}"
+    wm_bin="${wm_bin:-${commands[mm]:+mm}}"
+    [[ -n "$wm_bin" ]] || {
+        echo "ji: 'wm' (Waymaker) não encontrado no PATH."
         return 1
     }
 
-    local -a mm_args=(-o jump)
+    local -a wm_args=(-o jump)
     if (( $# > 0 )); then
-        mm_args+=(query.initial="$*")
+        wm_args+=(query.initial="$*")
     fi
     local target
-    target="$(mm "${mm_args[@]}" 2>/dev/null)"
+    target="$($wm_bin "${wm_args[@]}" 2>/dev/null)"
     if [[ -n "$target" ]]; then
         target="${target%%$'\n'*}"
         target="${target/#\~/$HOME}"
@@ -382,11 +391,13 @@ ai-fix() {
     fi
 }
 
-# wtj - Interactively select and jump (cd) into a Git Worktree via Matchmaker
+# wtj - Interactively select and jump (cd) into a Git Worktree via Waymaker / Matchmaker
 # Usage: wtj
 wtj() {
+    local wm_bin="${commands[wm]:+wm}"
+    wm_bin="${wm_bin:-${commands[mm]:+mm}}"
     local target
-    target=$(mm -o wt)
+    target=$(${wm_bin:-wm} -o wt)
     if [[ -n "$target" && -d "$target" ]]; then
         cd "$target"
     fi
@@ -492,9 +503,12 @@ pasteto() {
     done
 
     # 1. Visual selection if no arguments passed
+    local wm_bin="${commands[wm]:+wm}"
+    wm_bin="${wm_bin:-${commands[mm]:+mm}}"
+
     if (( ${#sources} == 0 )); then
         local raw_items
-        raw_items=$(mm --no-read 2>/dev/null)
+        raw_items=$($wm_bin --no-read 2>/dev/null)
         [[ -z "$raw_items" ]] && return 0
         local -a lines=("${(@f)raw_items}")
         for l in "${lines[@]}"; do
@@ -525,7 +539,7 @@ pasteto() {
         fi
         target_dir="$_MM_LAST_TARGET"
     else
-        target_dir=$(mm list --dirs 2>/dev/null | mm -o jump header.content="PASTE TO (Escolha o Destino)")
+        target_dir=$($wm_bin list --dirs 2>/dev/null | $wm_bin -o jump header.content="PASTE TO (Escolha o Destino)")
         [[ -z "$target_dir" ]] && return 0
     fi
 
@@ -550,7 +564,7 @@ pasteto() {
     _MM_LAST_TARGET="$target_dir"
 
     # 5. Automatically boost destination in frecency
-    mm add "$target_dir" >/dev/null 2>&1 &!
+    $wm_bin add "$target_dir" >/dev/null 2>&1 &!
 
     # 6. Navigate if -g / --go requested
     if (( go )); then
@@ -563,7 +577,7 @@ pasteto() {
 # Options:
 #   -g, --go    Navigate directly to destination directory after moving
 #   -l, --last  Move directly into last target (_MM_LAST_TARGET) without opening picker
-# If no files are passed, opens Matchmaker to visually select files in current directory.
+# If no files are passed, opens Waymaker to visually select files in current directory.
 moveto() {
     local go=0
     local use_last=0
@@ -602,9 +616,12 @@ moveto() {
     done
 
     # 1. Visual selection if no arguments passed
+    local wm_bin="${commands[wm]:+wm}"
+    wm_bin="${wm_bin:-${commands[mm]:+mm}}"
+
     if (( ${#sources} == 0 )); then
         local raw_items
-        raw_items=$(mm --no-read 2>/dev/null)
+        raw_items=$($wm_bin --no-read 2>/dev/null)
         [[ -z "$raw_items" ]] && return 0
         local -a lines=("${(@f)raw_items}")
         for l in "${lines[@]}"; do
@@ -635,7 +652,7 @@ moveto() {
         fi
         target_dir="$_MM_LAST_TARGET"
     else
-        target_dir=$(mm list --dirs 2>/dev/null | mm -o jump header.content="MOVE TO (Escolha o Destino)")
+        target_dir=$($wm_bin list --dirs 2>/dev/null | $wm_bin -o jump header.content="MOVE TO (Escolha o Destino)")
         [[ -z "$target_dir" ]] && return 0
     fi
 
@@ -660,7 +677,7 @@ moveto() {
     _MM_LAST_TARGET="$target_dir"
 
     # 5. Automatically boost destination in frecency
-    mm add "$target_dir" >/dev/null 2>&1 &!
+    $wm_bin add "$target_dir" >/dev/null 2>&1 &!
 
     # 6. Navigate if -g / --go requested
     if (( go )); then
@@ -674,6 +691,9 @@ alias ptl='pasteto -l' 2>/dev/null
 alias mt='moveto' 2>/dev/null
 alias mtg='moveto -g' 2>/dev/null
 alias mtl='moveto -l' 2>/dev/null
+
+# Waymaker / Matchmaker seamless CLI alias
+alias mm='wm' 2>/dev/null
 
 
 # ─────────────────────────────────────────────────────────────────────────────

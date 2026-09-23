@@ -24,6 +24,7 @@ selected_base="$(echo "${1:-}" | sed -E 's/^[^a-zA-Z0-9._/-]+[[:space:]]*//')"
 connect_tmux=1
 ai_continue_mode="auto"
 custom_ai_cmd=""
+WM_BIN=$(command -v wm 2>/dev/null || command -v mm 2>/dev/null || echo wm)
 
 shift 2>/dev/null || true
 while [[ $# -gt 0 ]]; do
@@ -54,8 +55,8 @@ done
 while true; do
     case "$step" in
         1)
-            # ── Step 1: Conventional Type Selection via Matchmaker Preset (`mm -o awt-type`) ──
-            type_output=$(mm -o awt-type "${MM_TUI_ARGS[@]}")
+            # ── Step 1: Conventional Type Selection via Waymaker / Matchmaker Preset (`wm -o awt-type`) ──
+            type_output=$($WM_BIN -o awt-type "${MM_TUI_ARGS[@]}")
 
             # If Esc / canceled in Step 1 -> exit completely back to main awt list
             if [[ -z "$type_output" ]]; then
@@ -67,11 +68,11 @@ while true; do
             ;;
 
         2)
-            # ── Step 2: Worktree Branch Name via Matchmaker Prompt Box (`mm -o awt-prompt`) ──
+            # ── Step 2: Worktree Branch Name via Waymaker / Matchmaker Prompt Box (`wm -o awt-prompt`) ──
             initial_val="${prefix}${slug}"
             prompt_str="${icon}"
 
-            branch_input=$(mm -o awt-prompt prompt="$prompt_str" initial="$initial_val" "${MM_TUI_ARGS[@]}")
+            branch_input=$($WM_BIN -o awt-prompt prompt="$prompt_str" initial="$initial_val" "${MM_TUI_ARGS[@]}")
 
             # If user pressed Esc or cancelled -> go back to Step 1
             if [[ -z "$branch_input" ]]; then
@@ -85,8 +86,8 @@ while true; do
             ;;
 
         3)
-            # ── Step 3: Base Branch Selection via Matchmaker Preset (`mm -o awt-base`) ──
-            bbase=$(mm -o awt-base "${MM_TUI_ARGS[@]}" -- "$selected_base")
+            # ── Step 3: Base Branch Selection via Waymaker / Matchmaker Preset (`wm -o awt-base`) ──
+            bbase=$($WM_BIN -o awt-base "${MM_TUI_ARGS[@]}" -- "$selected_base")
 
             # If Esc was pressed in Step 3 -> step back to Step 2 with previous slug preserved!
             if [[ -z "$bbase" ]]; then
@@ -121,8 +122,8 @@ while true; do
             ;;
 
         4)
-            # ── Step 4: AI Conversation Selection via Matchmaker Preset (`mm -o awt-ai`) ──
-            ai_output=$(mm -o awt-ai "${MM_TUI_ARGS[@]}")
+            # ── Step 4: AI Conversation Selection via Waymaker / Matchmaker Preset (`wm -o awt-ai`) ──
+            ai_output=$($WM_BIN -o awt-ai "${MM_TUI_ARGS[@]}")
 
             # If Esc was pressed in Step 4 -> step back to Step 3 (base selection)
             if [[ -z "$ai_output" ]]; then

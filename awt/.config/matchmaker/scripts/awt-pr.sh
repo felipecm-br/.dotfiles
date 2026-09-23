@@ -27,18 +27,19 @@ if [[ $# -gt 0 && -n "$1" ]]; then
         exit 1
     fi
 else
-    # Interactive Matchmaker PR selector
-    if command -v mm >/dev/null 2>&1; then
+    # Interactive Waymaker / Matchmaker PR selector
+    local wm_bin=$(command -v wm 2>/dev/null || command -v mm 2>/dev/null || true)
+    if [[ -n "$wm_bin" ]]; then
         MM_TUI_ARGS=()
         if [ "$TMUX_POPUP" = "1" ]; then
             MM_TUI_ARGS=("tui.percentage=100" "tui.max=9999")
         fi
-        output=$(mm -o awt-pr "${MM_TUI_ARGS[@]}")
+        output=$($wm_bin -o awt-pr "${MM_TUI_ARGS[@]}")
         [[ -z "$output" ]] && exit 0
         IFS=$'\t' read -r pr_raw head_branch <<< "$output"
         pr_num="${pr_raw#\#}"
     else
-        echo "awt-pr: Matchmaker (mm) not found. Specify PR number directly: awt pr <number>"
+        echo "awt-pr: Waymaker (wm) or Matchmaker (mm) not found. Specify PR number directly: awt pr <number>"
         exit 1
     fi
 fi
