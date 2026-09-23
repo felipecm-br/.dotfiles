@@ -264,11 +264,11 @@ GREP_SCRIPT="$ROOT/tmux/.config/tmux/grep-picker.sh"
 [ -L "$ROOT/matchmaker/.config/matchmaker/presets/files-picker.toml" ] && [ "$(readlink "$ROOT/matchmaker/.config/matchmaker/presets/files-picker.toml")" = "files.toml" ] \
   && ok "files-picker.toml -> files.toml symlink" || bad "files-picker.toml symlink"
 
-# Backdrop isolation in scripts (Issue B)
-grep -q '@ai_agent_state_raw' "$FILES_SCRIPT" && grep -q 'tmux-backdrop.ansi' "$FILES_SCRIPT" \
+# Backdrop isolation in scripts (delegates to tmux-popup-isolate.sh or inline)
+(grep -q 'tmux-popup-isolate' "$FILES_SCRIPT" || (grep -q '@ai_agent_state_raw' "$FILES_SCRIPT" && grep -q 'tmux-backdrop' "$FILES_SCRIPT")) \
   && ok "files-picker.sh AI backdrop protection" || bad "files-picker.sh AI backdrop"
 
-grep -q '@ai_agent_state_raw' "$GREP_SCRIPT" && grep -q 'tmux-backdrop.ansi' "$GREP_SCRIPT" \
+(grep -q 'tmux-popup-isolate' "$GREP_SCRIPT" || (grep -q '@ai_agent_state_raw' "$GREP_SCRIPT" && grep -q 'tmux-backdrop' "$GREP_SCRIPT")) \
   && ok "grep-picker.sh AI backdrop protection" || bad "grep-picker.sh AI backdrop"
 
 # ── 4. Validate tmux.conf Keybindings ──

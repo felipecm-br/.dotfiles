@@ -13,42 +13,18 @@ elif [ -z "${TMUX_POPUP:-}" ]; then
   SESH_POPUP_COLOR=$(grep -E '^\s*cyan\s*=' "$HOME/.local/state/omarchy/current/theme/colors.toml" 2>/dev/null | sed -E 's/.*=\s*"([^"]+)".*/\1/')
   [ -z "$SESH_POPUP_COLOR" ] && SESH_POPUP_COLOR="${TMUX_POPUP_BORDER_COLOR:-#89dceb}"
 
-  AI_STATE=$(tmux display-message -p '#{@ai_agent_state_raw}')
-  if [ "$AI_STATE" = "busy" ] || [ "$AI_STATE" = "working" ]; then
-    CURRENT_PANE=$(tmux display-message -p '#{pane_id}')
-    ORIG_SESS=$(tmux display-message -p '#{session_name}')
+  SCRIPT_DIR=$(dirname "$REAL_SCRIPT")
+  ISOLATOR="$SCRIPT_DIR/tmux-popup-isolate.sh"
+  [ -x "$ISOLATOR" ] || ISOLATOR="$(command -v tmux-popup-isolate.sh 2>/dev/null || echo "$HOME/.config/tmux/tmux-popup-isolate.sh")"
 
-    tmux capture-pane -ep -t "$CURRENT_PANE" > /tmp/tmux-backdrop.ansi 2>/dev/null || true
-    tmux set-option -w -t "$CURRENT_PANE" automatic-rename off 2>/dev/null || true
-
-    BACKDROP_PANE=$(tmux split-window -d -P -F '#{pane_id}' -t "$CURRENT_PANE" "cat /tmp/tmux-backdrop.ansi; tail -f /dev/null")
-    tmux select-pane -t "$BACKDROP_PANE" 2>/dev/null || true
-    tmux resize-pane -Z 2>/dev/null || true
-
-    tmux display-popup \
-      -S "fg=$SESH_POPUP_COLOR" \
-      -s "fg=${TMUX_POPUP_TEXT_COLOR:-default}" \
-      -b rounded \
-      -T " ⚡ " \
-      -w 75% -h 60% \
-      -E "TMUX_POPUP=1 $REAL_SCRIPT"
-
-    tmux kill-pane -t "$BACKDROP_PANE" 2>/dev/null || true
-    tmux set-option -w -t "$CURRENT_PANE" automatic-rename on 2>/dev/null || true
-    CURRENT_SESS=$(tmux display-message -p '#{session_name}')
-    if [ "$CURRENT_SESS" = "$ORIG_SESS" ]; then
-      tmux select-pane -t "$CURRENT_PANE" 2>/dev/null || true
-    fi
-    exit 0
-  else
-    exec tmux display-popup \
-      -S "fg=$SESH_POPUP_COLOR" \
-      -s "fg=${TMUX_POPUP_TEXT_COLOR:-default}" \
-      -b rounded \
-      -T " ⚡ " \
-      -w 75% -h 60% \
-      -E "TMUX_POPUP=1 $REAL_SCRIPT"
-  fi
+  exec "$ISOLATOR" \
+    -S "fg=$SESH_POPUP_COLOR" \
+    -s "fg=${TMUX_POPUP_TEXT_COLOR:-default}" \
+    -b rounded \
+    -T " ⚡ " \
+    -w 75% -h 60% \
+    -E \
+    -- "TMUX_POPUP=1 '$REAL_SCRIPT'"
 fi
 
 SCRIPT_DIR=$(dirname "$REAL_SCRIPT")

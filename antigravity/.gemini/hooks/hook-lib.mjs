@@ -89,13 +89,13 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 export function getAcpdToken() {
-  const uid = process.getuid?.() || 1001;
+  const uid = typeof process.getuid === 'function' ? process.getuid() : (process.env.UID || '1000');
+  const homeDir = process.env.HOME || (process.env.USER ? `/home/${process.env.USER}` : tmpdir());
   const xdgRuntime = process.env.XDG_RUNTIME_DIR || `/run/user/${uid}`;
   const candidates = [
     join(xdgRuntime, 'acpd', 'token'),
     join(tmpdir(), `acpd-${uid}`, 'token'),
-    join(process.env.HOME || '/home/fecavmi', '.cache', 'acpd', 'token'),
-    `/run/user/1001/acpd/token`,
+    join(homeDir, '.cache', 'acpd', 'token'),
   ];
   for (const tokenPath of candidates) {
     try {

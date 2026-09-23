@@ -1,87 +1,89 @@
-# Open-Source Strategy: Agent Client Protocol (ACP) Ecosystem
+# Open-Source Strategy: Terminal AI Cockpit Stack
 
-## 1. Executive Summary
-The goal is to transition the highly-coupled, personal dotfiles AI terminal state orchestration into a modular, plug-and-play open-source ecosystem. By decoupling the background daemon, the UI components, and the client hook SDKs, we create a standard for "Terminal AI State Management" that anyone can install via Cargo, TPM (Tmux Plugin Manager), and NPM.
+> **Canonical Blueprint:** See [docs/architecture/open-source-ai-tmux-stack-plan.md](docs/architecture/open-source-ai-tmux-stack-plan.md) for the complete production-grade architectural specification, technical audit, and multi-arch CI/CD pipeline based on Fabio Akita's open-source release principles.
 
-## 2. Core Philosophy
-- **Separation of Concerns:** The daemon (`acpd`) only knows about state and sinks (Output Adapters). It does not know about user dotfiles or specific shell environments.
-- **Protocol First:** The HTTP REST (`/api/status`) and JSON-RPC (`/rpc`) APIs serve as the universal contract.
-- **Zero-Config Defaults, Infinite Customization:** Sensible default colors and spinners out of the box, configurable via a centralized `TOML` file.
+---
 
-## 3. Architecture Overview
+## 1. Executive Summary & Value Proposition
 
-```mermaid
-graph TD
-    subgraph Clients ["Agent Hooks (The Publishers)"]
-        A[OpenCode] -->|HTTP POST| D
-        B[Antigravity] -->|HTTP POST| D
-        C[Copilot CLI] -->|HTTP POST| D
-    end
+The goal is to transition our battle-tested terminal AI state orchestration into a modular, zero-compilation open-source distribution: **The Terminal AI Cockpit Stack**.
 
-    subgraph Core ["ACP Daemon (The Broker)"]
-        D((acpd :4040))
-        D -->|TmuxAdapter| E
-        D -->|WaybarAdapter| F
-    end
+### The Core Problem Solved (Akita's Golden Rule)
+1. **Zero Terminal Redraw Flicker:** Active AI token streaming breaks popup borders and search inputs during background ANSI redraws.
+2. **Event-Driven Status Bar:** `status-interval 0` with 0% idle CPU drain and sub-300ms debounce.
+3. **Frozen Snapshot Backdrop Popups:** Seamless floating overlays (`display-popup`) backed by per-pane UID-isolated ANSI snapshot buffers.
+4. **1-Key Inline Diff Review to AI:** Review git diffs directly in TUI (`lazygitrs`), annotate lines, and bracket-paste them instantly into active agent panes (`antigravity`, `opencode`).
+5. **Zero-Compile 1-Command Install:** Pre-built static `musl` Linux and Apple Silicon `Darwin` binaries bundled into a single repository (`terminal-ai-cockpit`), installed via `curl -fsSL ... | bash` in under 30 seconds.
 
-    subgraph Sinks ["Terminal UI (The Subscribers)"]
-        E[tmux-acp TPM Plugin]
-        F[Waybar Custom Module]
-        G[Matchmaker Window Picker]
-        E <-.-> G
-    end
+---
+
+## 2. Two-Tier Umbrella Architecture
+
+Rather than forcing users to assemble disparate repositories or compile 13 C tree-sitter grammars from source, the project employs a **Two-Tier Distribution Model**:
+
+```
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│                        TIER 1: UPSTREAM SUB-REPO ENGINES                               │
+├──────────────────────────┬───────────────────────────┬─────────────────────────────────┤
+│ fcmiranda/acpd           │ fcmiranda/lazygitrs       │ fcmiranda/matchmaker (waymaker) │
+│ (Axum 0.8, Tokio 1.52)   │ (branch: fecavmi)         │ (binary: wm / waymaker)         │
+│ Native Rust Toolchain    │ cross-rs / cargo-zigbuild │ Native Rust Toolchain           │
+│ (musl + Darwin static)   │ (13 C parsers + musl)     │ (musl + Darwin static)          │
+└────────────┬─────────────┴─────────────┬─────────────┴────────────────┬────────────────┘
+             ▼                           ▼                              ▼
+     acpd-<target>.tar.gz       lazygitrs-<target>.tar.gz        wm-<target>.tar.gz
+             │                           │                              │
+             └───────────────────────────┼──────────────────────────────┘
+                                         ▼
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│          TIER 2: terminal-ai-cockpit UMBRELLA DISTRIBUTION (ZERO COMPILATION)          │
+├────────────────────────────────────────────────────────────────────────────────────────┤
+│ • install.sh               -> 1-line zero-compile curl installer (< 30s execution)     │
+│ • cockpit-manifest.json    -> Pinned upstream release tags of acpd, lazygitrs, wm      │
+│ • pre-built release assets -> Unified tarballs: terminal-ai-cockpit-v*.*.*-<target>    │
+│ • cockpit.tmux             -> Event-driven status pills & popup bindings               │
+│ • scripts/                 -> tmux-popup-isolate.sh, lazygit-tmux-injector.sh          │
+│ • hooks/                   -> Zero-config AI agent hooks (antigravity, opencode)       │
+│ • systemd/                 -> acpd.service user unit                                   │
+└────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-## 4. Repository Breakdown
+---
 
-To successfully open-source the ecosystem, the code must be split into independent repositories.
+## 3. Subsystem Breakdown
 
-### A. `fcmiranda/acpd` (The Broker)
-The central Rust daemon.
-- **Role:** Receives HTTP payloads, manages the state machine, renders active spinners into generic outputs.
-- **Action Items:**
-  - Remove all hardcoded paths (e.g., `~/.config/omarchy`). Use `$XDG_CONFIG_HOME/acpd/config.toml` as the primary configuration lookup.
-  - Document the REST payload schema in a pristine `README.md`.
-  - Setup GitHub Actions to publish pre-compiled binaries for Linux and macOS.
+### A. `fcmiranda/acpd` (The Broker Daemon)
+- **Role:** High-throughput async broker managing per-pane agent state transitions, dynamic spinner rendering, and status sinks (Tmux, Waybar).
+- **Status:** Release CI configured, dynamic token generation verified, pushed to `origin/main`. Actively running via `systemd --user`.
+- **Next:** Centralize debouncing in `api.rs` (300ms), fix 4 `collapsible_if` clippy warnings.
 
-### B. `fcmiranda/tmux-acp` (The Visual Layer)
-A standard Tmux Plugin Manager (TPM) repository.
-- **Role:** Injects the AI states into the Tmux UI gracefully (status bar filled rounded pills and background tab icons).
-- **Structure:**
-  - `tmux-acp.tmux`: The entrypoint. It reads 3 orthogonal Tmux variables: `@ai_agent_state` (pure icon/spinner), `@ai_agent_state_color` (hex color), and `@ai_agent_state_raw` (raw state string), exposing standard formatter variables like `#{acp_status}`, `#{acp_color}`, and `#{acp_spinner}`.
-  - `scripts/bell-popup.sh`: The decoupled version of `ai-agent-bell-popup.sh`.
-- **User Config:**
-  ```tmux
-  set -g @plugin 'fcmiranda/tmux-acp'
-  set -g @acp-bell-key 'i'
-  set -g status-right "#{acp_status} %H:%M"
-  ```
+### B. `fcmiranda/lazygitrs` (The Review Engine)
+- **Role:** Blazing fast Git TUI with `--commits`, worktree port discovery, and headless inline diff review note injection (`S` bracket-pasted to active AI pane).
+- **Status:** Branch `fecavmi` pushed to `origin/fecavmi` (commit `27bce0347`). Bare worktree architecture active.
+- **Next:** Remediate clippy warnings, configure `cross-rs` for the 13 C tree-sitter parsers, relocate `.lines.json` to `.git/info/` to eliminate repository working tree pollution.
 
-### C. `fcmiranda/matchmaker-acp` (The TUI Extension)
-A showcase of how to integrate ACP into modern TUI workflows.
-- **Role:** Provides the `window-picker.sh` and `window-picker-items.sh` logic.
-- **Structure:**
-  - Ships with `window-picker.toml`.
-  - The script dynamically reads the global tmux variables exposed by `tmux-acp` instead of hardcoded config parsing.
+### C. `fcmiranda/matchmaker` / `waymaker` (The Nav & Selector Layer)
+- **Role:** Sub-millisecond fuzzy finder with live-reload inotify watch (`-w`), Kitty graphics caching, and Mermaid diagram rendering.
+- **Status:** Evolved and rebranded to **Waymaker** (`wm`) on branch `waymaker`, pushed to origin. Canonical binary `~/.local/bin/wm` active throughout dotfiles.
+- **Next:** Scope `rustfmt --check` in CI to changed files, gate dead code in `fm.rs`.
 
-### D. `@acpd/client` (The SDKs)
-Thin wrapper libraries for agent creators.
-- **Role:** Allows any Node.js/Python CLI tool to report its state with zero boilerplate.
-- **Structure (NPM):**
-  ```typescript
-  import { AgentStatus } from '@acpd/client';
-  
-  await AgentStatus.working({ paneId: process.env.TMUX_PANE });
-  ```
+### D. `tmux` Backdrop Isolation Layer
+- **Role:** Guarantees popup stability during active token streaming via frozen ANSI backdrops.
+- **Status:** Core isolator script [`tmux/.config/tmux/tmux-popup-isolate.sh`](tmux/.config/tmux/tmux-popup-isolate.sh) implemented with full CLI parsing, conditional idle bypass, and `0600` UID-pane isolation. All popup callers (`grep-picker.sh`, `lazygitrs-popup.sh`, `files-picker.sh`, `sesh-picker.sh`, `window-picker.sh`, `scrollback-extract.sh`, `awt-popup.sh`) migrated.
+- **Next:** Optional decoupled border theming fallbacks for generic non-Omarchy systems.
 
-## 5. Refactoring & Decoupling Checklist
+---
 
-- [ ] **Daemon Configuration:** Ensure `src/daemon.rs` creates default config directories (`~/.config/acpd`) if they don't exist.
-- [ ] **Tmux Fallbacks:** In `TmuxAdapter`, ensure that if `tmux` commands fail (e.g., user is running detached), the daemon does not panic, but gracefully degrades.
-- [ ] **Plugin Abstraction:** Port `ai-agent-bell-popup.sh` into `tmux-acp`, replacing hardcoded Omarchy colors with standard tmux styles (`#[fg=cyan]`) or variables provided by the plugin (`@acp_popup_border`).
-- [ ] **Documentation:** Write a "Quick Start" guide showing how to wire a mock bash script to `acpd`.
+## 4. Immediate Roadmap & Action Items
 
-## 6. Launch & Community Strategy
-1. **The Core Release:** Publish `acpd` to crates.io and GitHub Releases.
-2. **The Visual Demo:** Publish a high-quality GIF of the Tmux spinner, the Matchmaker integration, and the Waybar sync. Visuals drive TUI adoption.
-3. **The "Why":** Write an engineering blog post or a GitHub Discussion about the fragmentation of AI tool statuses (Cursor vs Copilot vs Custom CLI) and how `acpd` unifies them into a single, beautiful terminal layer.
+- [x] **Audit & Synchronization:** Align dotfiles and documentation with the Two-Tier Cockpit strategy and Waymaker rebrand.
+- [x] **Git Remote Tracking:** Ensure all engine branches (`acpd:main`, `lazygitrs:fecavmi`, `waymaker:waymaker`) are pushed to remote origins.
+- [x] **Backdrop Isolator:** Author and deploy `tmux-popup-isolate.sh`.
+- [x] **Caller Migration:** Route dotfiles tmux popup scripts through `tmux-popup-isolate.sh`.
+- [x] **Lints & Build Sanitization:** Fixed `acpd` clippy warnings and sanitized hardcoded `/home/fecavmi` fallbacks in agent hooks.
+- [ ] **Umbrella Meta-Repo:** Initialize `fcmiranda/terminal-ai-cockpit` with `cockpit-manifest.json` and Tier 2 GitHub Actions packaging.
+- [ ] **Universal Installer:** Ship POSIX `install.sh` for one-command installation.
+
+---
+
+*For detailed technical specifications, benchmark comparisons, and CI configuration templates, consult [docs/architecture/open-source-ai-tmux-stack-plan.md](docs/architecture/open-source-ai-tmux-stack-plan.md).*

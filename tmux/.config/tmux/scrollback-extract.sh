@@ -15,46 +15,24 @@ TOK_URL=/tmp/scrollback-extract-url.txt
 TOK_SHA=/tmp/scrollback-extract-sha.txt
 LOG=/tmp/scrollback-mm.log
 
-popup_cmd() {
-  # $1 = border color; origin pane travels via ORIGIN_ARG.
-  tmux display-popup \
-    -S "fg=$1" \
-    -s "fg=default" \
-    -b rounded \
-    -T " 󰅍 " \
-    -w 75% -h 60% \
-    -E "TMUX_POPUP=1 $0 '$ORIGIN_ARG' '$CWD_ARG'"
-}
-
 if [ -z "${TMUX_POPUP:-}" ]; then
   ORIGIN_ARG="${1:-}"
   CWD_ARG="${2:-}"
   GREEN=$(grep -E '^\s*green\s*=' "$HOME/.local/state/omarchy/current/theme/colors.toml" 2>/dev/null | sed -E 's/.*=\s*"([^"]+)".*/\1/')
   [ -n "$GREEN" ] || GREEN="#a6e3a1"
-  # Issue B (docs/tmux/popup-isolation-and-debounce.md): a streaming background
-  # pane redraws over the popup's top border. When an agent is busy, open over
-  # a frozen snapshot backdrop instead (window-picker.sh pattern).
-  AI_STATE=$(tmux display-message -p '#{@ai_agent_state_raw}' 2>/dev/null || true)
-  if [ "$AI_STATE" = "busy" ] || [ "$AI_STATE" = "working" ]; then
-    CURRENT_PANE=$(tmux display-message -p '#{pane_id}')
-    ORIG_SESS=$(tmux display-message -p '#{session_name}')
-    tmux capture-pane -ep -t "$CURRENT_PANE" > /tmp/tmux-backdrop.ansi 2>/dev/null || true
-    tmux set-option -w -t "$CURRENT_PANE" automatic-rename off 2>/dev/null || true
-    BACKDROP_PANE=$(tmux split-window -d -P -F '#{pane_id}' -t "$CURRENT_PANE" "cat /tmp/tmux-backdrop.ansi; tail -f /dev/null")
-    tmux select-pane -t "$BACKDROP_PANE" 2>/dev/null || true
-    tmux resize-pane -Z 2>/dev/null || true
-    popup_cmd "$GREEN"
-    tmux kill-pane -t "$BACKDROP_PANE" 2>/dev/null || true
-    tmux set-option -w -t "$CURRENT_PANE" automatic-rename on 2>/dev/null || true
-    CURRENT_SESS=$(tmux display-message -p '#{session_name}')
-    if [ "$CURRENT_SESS" = "$ORIG_SESS" ]; then
-      tmux select-pane -t "$CURRENT_PANE" 2>/dev/null || true
-    fi
-    exit 0
-  else
-    popup_cmd "$GREEN"
-    exit 0
-  fi
+
+  SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  ISOLATOR="$SCRIPT_DIR/tmux-popup-isolate.sh"
+  [ -x "$ISOLATOR" ] || ISOLATOR="$(command -v tmux-popup-isolate.sh 2>/dev/null || echo "$HOME/.config/tmux/tmux-popup-isolate.sh")"
+
+  exec "$ISOLATOR" \
+    -S "fg=$GREEN" \
+    -s "fg=default" \
+    -b rounded \
+    -T " 󰅍 " \
+    -w 75% -h 60% \
+    -E \
+    -- "TMUX_POPUP=1 '$0' '$ORIGIN_ARG' '$CWD_ARG'"
 fi
 
 [ -n "${TMUX:-}" ] || { echo "scrollback-extract: fora do tmux" >&2; exit 1; }

@@ -32,37 +32,18 @@ if [ -z "${TMUX_POPUP:-}" ]; then
     HEIGHT="92%"
   fi
 
-  popup_cmd() {
-    tmux display-popup \
-      -S "fg=$BLUE" \
-      -s "fg=default" \
-      -b rounded \
-      -T " 󰈞 " \
-      -w "$WIDTH" -h "$HEIGHT" \
-      -E "TMUX_POPUP=1 $0 '$ORIGIN_ARG' '$CWD_ARG' '$FULLSCREEN_ARG'"
-  }
+  SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  ISOLATOR="$SCRIPT_DIR/tmux-popup-isolate.sh"
+  [ -x "$ISOLATOR" ] || ISOLATOR="$(command -v tmux-popup-isolate.sh 2>/dev/null || echo "$HOME/.config/tmux/tmux-popup-isolate.sh")"
 
-  AI_STATE=$(tmux display-message -p '#{@ai_agent_state_raw}' 2>/dev/null || true)
-  if [ "$AI_STATE" = "busy" ] || [ "$AI_STATE" = "working" ]; then
-    CURRENT_PANE=$(tmux display-message -p '#{pane_id}')
-    ORIG_SESS=$(tmux display-message -p '#{session_name}')
-    tmux capture-pane -ep -t "$CURRENT_PANE" > /tmp/tmux-backdrop.ansi 2>/dev/null || true
-    tmux set-option -w -t "$CURRENT_PANE" automatic-rename off 2>/dev/null || true
-    BACKDROP_PANE=$(tmux split-window -d -P -F '#{pane_id}' -t "$CURRENT_PANE" "cat /tmp/tmux-backdrop.ansi; tail -f /dev/null")
-    tmux select-pane -t "$BACKDROP_PANE" 2>/dev/null || true
-    tmux resize-pane -Z 2>/dev/null || true
-    popup_cmd
-    tmux kill-pane -t "$BACKDROP_PANE" 2>/dev/null || true
-    tmux set-option -w -t "$CURRENT_PANE" automatic-rename on 2>/dev/null || true
-    CURRENT_SESS=$(tmux display-message -p '#{session_name}')
-    if [ "$CURRENT_SESS" = "$ORIG_SESS" ]; then
-      tmux select-pane -t "$CURRENT_PANE" 2>/dev/null || true
-    fi
-    exit 0
-  else
-    popup_cmd
-    exit 0
-  fi
+  exec "$ISOLATOR" \
+    -S "fg=$BLUE" \
+    -s "fg=default" \
+    -b rounded \
+    -T " 󰈞 " \
+    -w "$WIDTH" -h "$HEIGHT" \
+    -E \
+    -- "TMUX_POPUP=1 '$0' '$ORIGIN_ARG' '$CWD_ARG' '$FULLSCREEN_ARG'"
 fi
 
 [ -n "${TMUX:-}" ] || { echo "files-picker: not inside tmux" >&2; exit 1; }

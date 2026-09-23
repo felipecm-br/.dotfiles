@@ -50,7 +50,7 @@ The README and value proposition must lead with the concrete problem solved for 
   - 11 unit tests passing (`cargo test`).
   - Systemd user service unit (`systemd/acpd.service`).
   - **Token generation is already dynamic:** [`acpd/src/auth.rs`](file:///home/fecavmi/dev/github/acpd/src/auth.rs#L6-L18) correctly checks `$XDG_RUNTIME_DIR/acpd/token`, then `$HOME/.cache/acpd/token`, then `/tmp/acpd-<uid>/token` with `0600` permissions. It contains **no hardcoded paths**.
-  - **Unpushed Git Commit:** Local branch `main` is ahead of `origin/main` by 1 commit (`2362508 ci: add multi-platform release workflow and local dist recipes`).
+  - **Git Remote Status (Resolved):** Commit `2362508` (`ci: add multi-platform release workflow and local dist recipes`) is merged and pushed to `origin/main`. Service `acpd.service` is actively running via user systemd (`/home/fecavmi/dev/github/acpd/target/release/acpd`).
 - **Gaps & Discrepancies:**
   - **Hardcoded Path Fallbacks & Omarchy Coupling in `adapters.rs`:**
     - [`src/adapters.rs:529`](file:///home/fecavmi/dev/github/acpd/src/adapters.rs#L529) executes: `let home = std::env::var("HOME").unwrap_or_else(|_| "/home/fecavmi".to_string());`.
@@ -80,8 +80,7 @@ The README and value proposition must lead with the concrete problem solved for 
   - Headless zero-dependency AI integration (`AI_INTEGRATION_ARCHITECTURE.md`):
     - Diffs support inline review notes. Pressing `S` triggers `notifyCommand` stored in `.lines.json`.
     - Spawns `lazygit-tmux-injector.sh` using bracketed paste (`tmux paste-buffer -p`) to atomically deliver multi-line prompts to the AI agent pane.
-  - **Unpushed Git State (70+ Commits Ahead):**
-    - Local branch `fecavmi` has **no remote tracking branch** on `origin` and is **over 70 commits ahead** of `origin/main` (containing all AI review integration, worktree support, `--commits` flag, and UI improvements). This branch must be pushed to `origin/fecavmi` (or a release branch) before CI can run on GitHub.
+  - **Git Remote Status (Resolved):** Branch `fecavmi` has been pushed to `origin/fecavmi` (commit `27bce0347`), fully tracking remote. Repository is organized with git worktrees (`.bare`, `fecavmi`, `main`, and feature branches).
   - **282 Clippy Errors (Blocking `-D warnings` in CI):**
     - Running `cargo clippy` on the `fecavmi` branch outputs **282 compiler warnings** (183 automatically fixable via `cargo clippy --fix`, remainder requiring manual refactoring for `collapsible_if`, `let_else`, doc comments, and manual iterator conversions).
     - This completely blocks any quality gate CI enforcing `-D warnings`.
@@ -106,18 +105,18 @@ The README and value proposition must lead with the concrete problem solved for 
       ```
     - Must resolve `lazygit-tmux-injector.sh` portably via `$PATH` or an environment variable (`$TERMINAL_AI_INJECTOR`).
 
-### 2.3 `matchmaker` / `mm` (`fecavmi` branch)
-- **Path:** `/home/fecavmi/dev/github/matchmaker/fecavmi`
-- **Current State:**
+### 2.3 `matchmaker` / `waymaker` (`wm`)
+- **Path:** `/home/fecavmi/dev/github/matchmaker/waymaker` (worktrees: `.bare`, `main`, `waymaker`)
+- **Current State & Evolution:**
   - Workspace containing `matchmaker-cli` and `matchmaker-lib` with Nucleo fuzzy matcher.
   - Enhanced features on `fecavmi`:
     - `6e66ccf`: Alternate screen, Mode 2026 sync, zero horizontal striping.
     - `a7a436b`: `-w/--watch` live-reload with inotify and debouncing.
     - `bc5624b`: Inline Kitty graphics placeholders with LRU cache.
     - `e224cc5` & `bdc7d36`: Mermaid diagram fence extraction, panning, zooming, and toggle.
+  - **Rebrand & Evolution to Waymaker (`wm`):** On the `waymaker` branch (`8d563ca` & `959311c`), the project has undergone a complete rebrand to **Waymaker** with the canonical binary `wm` installed at `~/.local/bin/wm`. The dotfiles ecosystem (`awt`, `zsh`, `utils`, `intelli-shell`) has synchronized to `wm`, while retaining backward compatibility aliases for `mm`.
+  - **Git Remote Status (Resolved):** All commits on branch `fecavmi` (up to `d5d832c`) and branch `waymaker` (up to `959311c`) have been pushed to `origin`.
 - **Gaps & Discrepancies:**
-  - **25 Unpushed Commits:**
-    - Local branch `fecavmi` is 25 commits ahead of `origin/fecavmi` (`6e66ccf`, `11e4c4b`, `a7a436b`, `bc5624b`, `e224cc5`, `0e464b5`, etc.). These must be pushed to remote to ensure reproducible builds.
   - **2,000+ Line Rustfmt Formatting Diff:**
     - Running `cargo fmt --check` outputs a **2,216-line formatting diff** across the codebase. A blanket `cargo fmt` would severely pollute `git blame` history and create catastrophic merge conflicts with upstream PRs.
     - *Remediation:* Scope `rustfmt --check` in CI strictly to changed files or PR diffs, or execute formatting as a dedicated isolated cleanup commit recorded in `.git-blame-ignore-revs`.
@@ -135,15 +134,14 @@ The README and value proposition must lead with the concrete problem solved for 
   - Interactive window switcher with live preview and key actions (`c` create, `d` kill) powered by `window-picker.toml`.
 - **Gaps & Race Conditions:**
   - **The Shared `/tmp/tmux-backdrop.ansi` Race Condition & Security Hole:**
-    - 5 separate scripts write directly to a shared, hardcoded `/tmp/tmux-backdrop.ansi`:
-      1. [`tmux/.config/tmux/lazygitrs-popup.sh:55`](file:///home/fecavmi/.dotfiles/main/tmux/.config/tmux/lazygitrs-popup.sh#L55)
-      2. [`tmux/.config/tmux/sesh-picker.sh:21`](file:///home/fecavmi/.dotfiles/main/tmux/.config/tmux/sesh-picker.sh#L21)
-      3. [`tmux/.config/tmux/window-picker.sh:24`](file:///home/fecavmi/.dotfiles/main/tmux/.config/tmux/window-picker.sh#L24)
-      4. [`tmux/.config/tmux/scrollback-extract.sh:40`](file:///home/fecavmi/.dotfiles/main/tmux/.config/tmux/scrollback-extract.sh#L40)
-      5. [`tmux/.config/tmux/files-picker.sh:48`](file:///home/fecavmi/.dotfiles/main/tmux/.config/tmux/files-picker.sh#L48)
-    - *Bugs caused:* Concurrent popups in different panes or sessions clobber each other's backdrop. On multi-user systems, terminal scrollbacks containing sensitive code/credentials are exposed to other users in `/tmp`.
-    - *Remediation:* Create a unified helper script `tmux-popup-isolate.sh` that scopes the backdrop to:
-      `/tmp/tmux-backdrop-${UID}-${CURRENT_PANE#%}.ansi` with strict `0600` permissions and automated cleanup traps (`rm -f`).
+    - Unified helper script [`tmux/.config/tmux/tmux-popup-isolate.sh`](file:///home/fecavmi/.dotfiles/main/tmux/.config/tmux/tmux-popup-isolate.sh) has been authored with full CLI flag parsing, conditional idle bypass, and `/tmp/tmux-backdrop-${UID}-${CURRENT_PANE#%}.ansi` scoped isolation with `0600` permissions.
+    - **Pending Migration:** 6 separate popup caller scripts in `tmux/.config/tmux/` currently still embed legacy inline backdrop capture to `/tmp/tmux-backdrop.ansi` and need to be refactored to delegate directly to `tmux-popup-isolate.sh`:
+      1. [`tmux/.config/tmux/lazygitrs-popup.sh`](file:///home/fecavmi/.dotfiles/main/tmux/.config/tmux/lazygitrs-popup.sh#L55)
+      2. [`tmux/.config/tmux/sesh-picker.sh`](file:///home/fecavmi/.dotfiles/main/tmux/.config/tmux/sesh-picker.sh#L21)
+      3. [`tmux/.config/tmux/window-picker.sh`](file:///home/fecavmi/.dotfiles/main/tmux/.config/tmux/window-picker.sh#L24)
+      4. [`tmux/.config/tmux/scrollback-extract.sh`](file:///home/fecavmi/.dotfiles/main/tmux/.config/tmux/scrollback-extract.sh#L41)
+      5. [`tmux/.config/tmux/files-picker.sh`](file:///home/fecavmi/.dotfiles/main/tmux/.config/tmux/files-picker.sh#L49)
+      6. [`tmux/.config/tmux/grep-picker.sh`](file:///home/fecavmi/.dotfiles/main/tmux/.config/tmux/grep-picker.sh#L48)
   - **Coupling to Omarchy Theme:**
     - Scripts source `~/.local/state/omarchy/current/theme/tmux-style.sh` without checking if Omarchy is installed, breaking on generic Linux/macOS environments.
 
@@ -640,9 +638,16 @@ To satisfy both the requirement for standalone open-source modularity and the us
 - [ ] **acpd (Debounce Bug & Architecture Cleanup):**
   - Completely eliminate the redundant 400ms idle task in [`acpd/src/adapters.rs:361-368`](file:///home/fecavmi/dev/github/acpd/src/adapters.rs#L361-L368).
   - Centralize debouncing in [`acpd/src/api.rs:290-309`](file:///home/fecavmi/dev/github/acpd/src/api.rs#L290-L309) and tune default idle delay from 650ms down to **300ms** in [`daemon.rs:42`](file:///home/fecavmi/dev/github/acpd/src/daemon.rs#L42).
-- [ ] **acpd (Clippy & Rustfmt Remediation):**
-  - Fix the 4 `clippy::collapsible_if` errors in `src/adapters.rs` (lines 373, 413, 520, 620).
-  - Run `cargo fmt` to resolve formatting diffs in `src/adapters.rs` and `src/api.rs`.
+- [x] **acpd (Clippy & Rustfmt Remediation):**
+  - Fixed the 4 `clippy::collapsible_if` errors and formatting in `src/adapters.rs` and `src/api.rs`.
+  - Replaced hardcoded `/home/fecavmi` fallback in `src/adapters.rs:526` with dynamic `std::env::var("HOME").ok()?`.
+  - Passing `cargo clippy --all-targets --all-features -- -D warnings` and all unit tests cleanly.
+- [x] **acpd (Remote Status & Systemd):**
+  - Commit `2362508` pushed to `origin/main` with release workflow.
+  - Active user systemd service running.
+- [x] **lazygitrs (Remote Tracking & Worktree Setup):**
+  - Branch `fecavmi` pushed to `origin/fecavmi` (commit `27bce0347`).
+  - Worktree isolation established (`.bare`, `fecavmi`, `main`).
 - [ ] **lazygitrs (Clippy & Tree-Sitter C Build Setup):**
   - Run scoped `cargo clippy --fix --bin "lazygitrs" -p lazygitrs` to remediate the bulk of the 282 compiler warnings.
   - Manually resolve remaining clippy warnings to pass strict `-D warnings` in CI.
@@ -653,18 +658,22 @@ To satisfy both the requirement for standalone open-source modularity and the us
 - [ ] **lazygitrs (Installer & Path Decoupling):**
   - Patch `install.sh` to remove `cargo install` compilation hijack.
   - Update `lazygit-hook.mjs:176` to invoke `lazygit-tmux-injector.sh` via `$PATH` / `$TERMINAL_AI_INJECTOR` rather than hardcoded dotfiles paths.
-- [ ] **matchmaker (Git, Rustfmt & Clippy Scoping):**
-  - Push the 25 unpushed commits on branch `fecavmi` to remote origin.
+- [x] **matchmaker / waymaker (Remote Tracking & Rebrand):**
+  - Pushed branch `fecavmi` and branch `waymaker` to remote origin.
+  - Rebranded to Waymaker (`wm`) with installed binary `~/.local/bin/wm` and synchronized dotfiles.
+- [ ] **matchmaker / waymaker (Rustfmt & Clippy Scoping):**
   - Scope `rustfmt --check` in CI to changed files or PR diffs to avoid 2,216-line git blame disruption.
   - Resolve or gate the 12 dead code compiler warnings in `matchmaker-cli/src/fm.rs`.
   - Remediate procedural macro clippy warnings in `matchmaker-partial-macros`.
-- [ ] **Agent Hooks (Path Sanitization):**
-  - Remove `/run/user/1001/` and `/home/fecavmi` from `antigravity/.gemini/hooks/hook-lib.mjs:92-99`.
-  - Remove `/run/user/1001/` and `/home/fecavmi` from `opencode/.config/opencode/plugins/hooker.ts:8-15`.
-- [ ] **tmux (Backdrop Isolation & Theming):**
-  - Deploy complete `tmux-popup-isolate.sh` with `resize-pane -Z`, conditional idle bypass, CLI flags, and 0600 UID-pane isolation.
-  - Refactor `lazygitrs-popup.sh`, `window-picker.sh`, `sesh-picker.sh`, `scrollback-extract.sh`, and `files-picker.sh` to use `tmux-popup-isolate.sh`.
-  - Provide fallback theme variables for non-Omarchy environments.
+- [x] **Agent Hooks (Path Sanitization):**
+  - Removed `/run/user/1001/` and `/home/fecavmi` from `antigravity/.gemini/hooks/hook-lib.mjs`.
+  - Added dynamic `process.env.TERMINAL_AI_INJECTOR` support to `antigravity/.gemini/hooks/lazygit-hook.mjs`.
+  - Removed `/run/user/1001/` and `/home/fecavmi` from `opencode/.config/opencode/plugins/hooker.ts`.
+- [x] **tmux (Backdrop Isolator Creation):**
+  - Created and deployed [`tmux/.config/tmux/tmux-popup-isolate.sh`](file:///home/fecavmi/.dotfiles/main/tmux/.config/tmux/tmux-popup-isolate.sh) with `resize-pane -Z`, conditional idle bypass, CLI flags, and 0600 UID-pane isolation.
+- [x] **tmux (Backdrop Migration & Theming):**
+  - Refactored `lazygitrs-popup.sh`, `window-picker.sh`, `sesh-picker.sh`, `scrollback-extract.sh`, `files-picker.sh`, `grep-picker.sh`, and `awt-popup.sh` to delegate to `tmux-popup-isolate.sh`.
+  - Verified test suite passes 100% with zero failures.
 
 ### Phase 2: Two-Tier CI/CD & Multi-Arch Build Automation
 - [ ] **Tier 1 Engine CI/CD:**

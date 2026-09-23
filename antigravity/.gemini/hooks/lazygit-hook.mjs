@@ -178,8 +178,8 @@ async function registerLazygitrs(conversationId, tmuxPane, initialPort, workspac
   // Phase 3: Register the conversation with the found/started instance.
   try {
     if (!isAlreadyRegistered) {
-      log(LOG_FILE, `Registering session on port ${port}...`);
-      const homeDir = process.env.HOME || '/home/fecavmi';
+      const homeDir = process.env.HOME || (process.env.USER ? `/home/${process.env.USER}` : '');
+      const injectorCmd = process.env.TERMINAL_AI_INJECTOR || `${homeDir}/.gemini/hooks/lazygit-tmux-injector.sh`;
       const res = await fetch(API_BASE_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -188,7 +188,7 @@ async function registerLazygitrs(conversationId, tmuxPane, initialPort, workspac
           sessionId: conversationId,
           cli: 'antigravity',
           force: true,
-          notifyCommand: `${homeDir}/.gemini/hooks/lazygit-tmux-injector.sh {{workspace_path}} {{prompt}}`
+          notifyCommand: `${injectorCmd} {{workspace_path}} {{prompt}}`
         }),
       });
 

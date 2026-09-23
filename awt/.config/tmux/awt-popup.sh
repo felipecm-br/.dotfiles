@@ -21,46 +21,19 @@ if [ -z "${TMUX_POPUP:-}" ]; then
     AWT_POPUP_COLOR=$(grep -E '^\s*orange\s*=' "$HOME/.local/state/omarchy/current/theme/colors.toml" 2>/dev/null | sed -E 's/.*=\s*"([^"]+)".*/\1/')
     [ -z "$AWT_POPUP_COLOR" ] && AWT_POPUP_COLOR="#e84d31"
 
-    AI_STATE=$(tmux display-message -p '#{@ai_agent_state_raw}')
-    if [ "$AI_STATE" = "busy" ] || [ "$AI_STATE" = "working" ]; then
-        CURRENT_PANE=$(tmux display-message -p '#{pane_id}')
-        ORIG_SESS=$(tmux display-message -p '#{session_name}')
+    CURRENT_PANE=$(tmux display-message -p '#{pane_id}')
+    ISOLATOR="$HOME/.config/tmux/tmux-popup-isolate.sh"
+    [ -x "$ISOLATOR" ] || ISOLATOR="$(command -v tmux-popup-isolate.sh 2>/dev/null || echo "$ISOLATOR")"
 
-        tmux capture-pane -ep -t "$CURRENT_PANE" > /tmp/tmux-backdrop.ansi 2>/dev/null || true
-        tmux set-option -w -t "$CURRENT_PANE" automatic-rename off 2>/dev/null || true
-
-        BACKDROP_PANE=$(tmux split-window -d -P -F '#{pane_id}' -t "$CURRENT_PANE" "cat /tmp/tmux-backdrop.ansi; tail -f /dev/null")
-        tmux select-pane -t "$BACKDROP_PANE" 2>/dev/null || true
-        tmux resize-pane -Z 2>/dev/null || true
-
-        tmux display-popup \
-          -S "fg=$AWT_POPUP_COLOR" \
-          -s "fg=${TMUX_POPUP_TEXT_COLOR:-default}" \
-          -b rounded \
-          -T "  " \
-          -d "$PROJECT_DIR" \
-          -E \
-          -w 85% -h 75% \
-          "TMUX_POPUP=1 AWT_ORIGIN_PANE='$CURRENT_PANE' '$REAL_SCRIPT' '$PROJECT_DIR' || true" || true
-
-        tmux kill-pane -t "$BACKDROP_PANE" 2>/dev/null || true
-        tmux set-option -w -t "$CURRENT_PANE" automatic-rename on 2>/dev/null || true
-        CURRENT_SESS=$(tmux display-message -p '#{session_name}')
-        if [ "$CURRENT_SESS" = "$ORIG_SESS" ]; then
-            tmux select-pane -t "$CURRENT_PANE" 2>/dev/null || true
-        fi
-    else
-        CURRENT_PANE=$(tmux display-message -p '#{pane_id}')
-        exec tmux display-popup \
-          -S "fg=$AWT_POPUP_COLOR" \
-          -s "fg=${TMUX_POPUP_TEXT_COLOR:-default}" \
-          -b rounded \
-          -T "  " \
-          -d "$PROJECT_DIR" \
-          -E \
-          -w 85% -h 75% \
-          "TMUX_POPUP=1 AWT_ORIGIN_PANE='$CURRENT_PANE' '$REAL_SCRIPT' '$PROJECT_DIR' || true" || true
-    fi
+    exec "$ISOLATOR" \
+      -S "fg=$AWT_POPUP_COLOR" \
+      -s "fg=${TMUX_POPUP_TEXT_COLOR:-default}" \
+      -b rounded \
+      -T "  " \
+      -d "$PROJECT_DIR" \
+      -E \
+      -w 85% -h 75% \
+      -- "TMUX_POPUP=1 AWT_ORIGIN_PANE='$CURRENT_PANE' '$REAL_SCRIPT' '$PROJECT_DIR' || true"
     exit 0
 fi
 
