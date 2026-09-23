@@ -107,6 +107,7 @@ When switching themes via `omarchy theme set <theme>`, **100% of popups instantl
 
 * **Foveal Ergonomics (`75% × 60%`):** Human central visual acuity is confined to a 2°–5° foveal cone. The 75% × 60% viewport occupies the visual center without hiding the parent terminal backdrop.
 * **Column Partitioning (`40% / 60%`):** Divides space according to $\frac{1}{\phi^2} \approx 38.2\%$ (list) and $\frac{1}{\phi} \approx 61.8\%$ (preview), preventing label truncation.
+* **Concurrent Split Editor Architecture (`62% / 38%` LTR):** When opening files from ephemeral pickers, the modal is immediately dismissed (`display-popup -C`) to prevent nested modal trapping. The editor (Neovim) is positioned on the left (`split-window -h -b -l 62%`) at $\frac{1}{\phi} \approx 61.8\%$ (62%), preserving the active terminal or AI session on the right at $\frac{1}{\phi^2} \approx 38.2\%$ (38%). This aligns with western Left-to-Right reading hierarchy and modern IDE sidebar architecture (primary workspace left, AI copilot right).
 * **High-Density Workspaces (`90% × 88%`):** Lazygitrs expands to 90% × 88% to satisfy Miller's Chunking Law ($7 \pm 2$) across 5 control panels and wide diff viewports.
 
 ---
