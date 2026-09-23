@@ -14,7 +14,8 @@ profile = "list"
 focus_on_start = "filter"
 bar = "Plain"
 color = "Darkgray"
-hints = false
+hints = true
+hints_columns = 4
 
 [tui]
 percentage = 100
@@ -39,6 +40,7 @@ threshold = false
 
 [query]
 prompt = "> "
+prompt_style.fg = "Cyan"
 status_inline = true
 
 [results]
@@ -77,8 +79,9 @@ debounce_ms = 200
 delay_clear = true
 
 [footer]
-content = " {cyan,bold:[enter]} {darkgray:yank} {cyan,bold:[C-v]} {darkgray:insert} {cyan,bold:[C-e]} {darkgray:open} {cyan,bold:[tab]} {darkgray:filter} {cyan,bold:[spc]} {darkgray:multi}"
+content = " {cyan,bold:[Enter]} {darkgray:Yank}  •  {magenta,bold:[Tab]} {darkgray:Filter}  •  {green,bold:[C-v]} {darkgray:Insert}  •  {yellow,bold:[C-e]} {darkgray:Open}  •  {magenta,bold:[C-y]} {darkgray:Copy}  •  {blue,bold:[J/K]} {darkgray:Scroll}  •  {cyan,bold:[Space]} {darkgray:Multi}"
 match_indent = false
+row_connection = "Full"
 
 [exit]
 abort_empty = true
