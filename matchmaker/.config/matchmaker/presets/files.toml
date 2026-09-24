@@ -120,7 +120,7 @@ color = "Gray"
 title_fg = "Cyan"
 
 [footer]
-content = " {cyan,bold:[Enter]} {darkgray:Full}  •  {magenta,bold:[Tab]} {darkgray:Cycle}  •  {yellow,bold:[C-h/l]} {darkgray:Dir}  •  {cyan,bold:[C-j/k]} {darkgray:Move}  •  {blue,bold:[C-d/u]} {darkgray:Scroll}  •  {green,bold:[C-v]} {darkgray:Insert}  •  {yellow,bold:[C-e]} {darkgray:Edit}  •  {magenta,bold:[C-y]} {darkgray:Copy}  •  {red,bold:[Esc]} {darkgray:Nav}"
+# content = " {cyan,bold:[Enter]} {darkgray:Full}  •  {magenta,bold:[Tab]} {darkgray:Cycle}  •  {yellow,bold:[C-h/l]} {darkgray:Dir}  •  {cyan,bold:[C-j/k]} {darkgray:Move}  •  {blue,bold:[C-d/u]} {darkgray:Scroll}  •  {green,bold:[C-v]} {darkgray:Insert}  •  {yellow,bold:[C-e]} {darkgray:Edit}  •  {magenta,bold:[C-y]} {darkgray:Copy}  •  {red,bold:[Esc]} {darkgray:Nav}"
 match_indent = false
 row_connection = "Full"
 
@@ -164,8 +164,8 @@ ctrl-shift-k = "PreviewUp(5)"
 ctrl-J = "PreviewDown(5)"
 ctrl-K = "PreviewUp(5)"
 ctrl-y = "Accept"
-ctrl-d = "PreviewHalfPageDown"
-ctrl-u = "PreviewHalfPageUp"
+ctrl-d = "@delete"
+ctrl-u = ["Reload(curr=\"$(pwd)\"; while [ \"$curr\" != \"/\" ] && [ -n \"$curr\" ]; do curr=\"$(dirname \"$curr\")\"; echo \"$curr\"; done)", "Cancel", "Pos(0)"]
 ctrl-s = "ToggleDiagram"
 "ctrl-=" = "DiagramZoomIn"
 "ctrl-+" = "DiagramZoomIn"
@@ -174,8 +174,8 @@ ctrl-s = "ToggleDiagram"
 ctrl-v = 'ExecuteSilent(test -n "$MM_ORIGIN_PANE" && tmux send-keys -t "$MM_ORIGIN_PANE" -l -- {})'
 ctrl-e = 'ExecuteSilent(~/.config/tmux/scrollback-open.sh {} "$MM_ORIGIN_CWD")'
 ctrl-o = 'ExecuteSilent(~/.config/tmux/scrollback-open.sh {} "$MM_ORIGIN_CWD")'
-ctrl-l = ["ChDir({=})", "Cancel", "Reload", "Pos(0)"]
-ctrl-h = ["ChDir(..)", "Cancel", "Reload"]
+ctrl-l = ["ChDir({=})", "Cancel", "Reload", "Pos(0)", "FocusNav"]
+ctrl-h = ["ChDir(..)", "Cancel", "Reload", "FocusNav"]
 
 [ui.nav.binds]
 # Data source cycling (aligning with jump.toml)
