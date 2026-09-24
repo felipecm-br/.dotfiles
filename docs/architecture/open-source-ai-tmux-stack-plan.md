@@ -170,14 +170,14 @@ The README and value proposition must lead with the concrete problem solved for 
         join(process.env.HOME || "/home/fecavmi", ".cache", "acpd", "token"),
         `/run/user/1001/acpd/token`,
       ];
-### 2.6 Workspace & Session Layer (`sesh`)
+### 2.6 Workspace & Session Layer (`sesh` / `wm session`)
 - **Role:** Session management, project directory discovery, and workspace context switching.
-- **Where Sesh is Used in the Cockpit Stack:**
-  1. **`sesh-picker.sh` (`Prefix + t`):** Invokes `sesh list --icons` and pipes into Waymaker (`wm -o sesh-picker.toml`), connecting to chosen workspaces via `sesh connect "$chosen"`.
-  2. **`lazygitrs` Worktree Controller:** In [`src/gui/controller/worktrees.rs:40`](file:///home/fecavmi/dev/github/lazygitrs/fecavmi/src/gui/controller/worktrees.rs#L40), pressing Enter on a worktree branch natively triggers `std::process::Command::new("sesh").arg("connect").arg(&target_path)`. If `sesh` is installed, it switches directly into an isolated project session; otherwise, it cleanly falls back to native `tmux new-session / switch-client`.
-  3. **`awt` (Agent Worktree Orchestrator):** Provisions isolated git worktrees mapped to 1 tmux session each via `sesh connect "$target_dir"`, with redirection on deletion via `sesh last`.
+- **Where Sesh / Waymaker is Used in the Cockpit Stack:**
+  1. **`sesh-picker.sh` (`Prefix + t`):** Invokes `sesh list --icons` (or `wm session list --icons`) and pipes into Waymaker (`wm -o sesh-picker.toml`), connecting to chosen workspaces via `sesh connect "$chosen"`.
+  2. **`lazygitrs` Worktree Controller:** In [`src/gui/controller/worktrees.rs:40`](file:///home/fecavmi/dev/github/lazygitrs/fecavmi/src/gui/controller/worktrees.rs#L40), pressing Enter on a worktree branch natively triggers `std::process::Command::new("sesh").arg("connect").arg(&target_path)`. If `sesh` (or Waymaker's drop-in `sesh` wrapper) is installed, it switches directly into an isolated project session; otherwise, it cleanly falls back to native `tmux new-session / switch-client`.
+  3. **`awt` (Agent Worktree Orchestrator):** Provisions isolated git worktrees mapped to 1 tmux session each via `sesh connect "$target_dir"`, with redirection on deletion via `sesh last` (or `wm last`).
   4. **`gh dash`:** Binds key `s` to `sesh connect {{.RepoPath}}`.
-- **Ecosystem Contract:** `sesh` is a **Host Platform Prerequisite** for workspace management, with graceful degradation to native `tmux` session commands in `lazygitrs`.
+- **Ecosystem Contract:** Session management is **Bundled natively in Waymaker (`wm session` / `wm connect` / `wm last`)**. The standalone `sesh` Go binary and `zoxide` are no longer required; a zero-overhead `sesh` drop-in wrapper is provided by the stack, backed by Waymaker's embedded high-performance `redb` frecency store.
 
 ### 2.7 Complete Ecosystem Dependency Matrix
 
@@ -187,9 +187,9 @@ The Cockpit ecosystem classifies all runtime tools into 3 distinct tiers:
 | :--- | :--- | :--- | :--- |
 | **`acpd`** | Async state machine & status broker | **Bundled (Tier 1 Engine)** | Pre-compiled static binary in release bundle |
 | **`lazygitrs`** | Git TUI, worktrees & AI review notes | **Bundled (Tier 1 Engine)** | Pre-compiled static binary in release bundle |
-| **`waymaker` (`wm`)** | Fuzzy navigation, live watch & popups | **Bundled (Tier 1 Engine)** | Pre-compiled static binary in release bundle |
+| **`waymaker` (`wm`)** | Fuzzy nav, popups & native session manager | **Bundled (Tier 1 Engine)** | Pre-compiled static binary in release bundle (includes native `sesh` drop-in) |
 | **`tmux` (>= 3.2)** | Multiplexer, popups & state display | **Host Platform Prerequisite** | Hard requirement (the cockpit runs inside Tmux) |
-| **`sesh`** | Workspace & worktree session switcher | **Host Platform Prerequisite** | Degrades to native `tmux new-session` in `lazygitrs` |
+| **`sesh`** | Drop-in session CLI alias | **Bundled (Provided by `wm`)** | Implemented natively in `waymaker-cli`, wrapper bundled in `utils/` |
 | **`git`** | Version control engine | **Host Platform Prerequisite** | Hard requirement |
 | **`ripgrep` (`rg`)** | Full-text code search (`Prefix + /`) | **Recommended Accelerator** | Required for `grep-picker.sh` (modal search) |
 | **`bat`** | Syntax highlighting & line highlight | **Recommended Accelerator** | Graceful fallback to plain `cat` in picker previews |
@@ -244,13 +244,14 @@ curl -fsSL https://raw.githubusercontent.com/fcmiranda/terminal-ai-cockpit/main/
 2. **Arch & OS Detection:** Detects `linux` / `macos` and `x86_64` / `aarch64`.
 3. **Bundle Download:** Fetches the unified archive containing pre-built `acpd`, `lazygitrs`, and `wm` (Waymaker).
 4. **Integrity Check:** Validates `sha256sum` before extraction to `~/.local/bin/` (or `--prefix`).
-5. **Prerequisites Verification:** Verifies presence of `tmux`, `git`, and `sesh` (prompting user or suggesting package install if absent).
-6. **Backdrop Isolation Helper:** Installs `tmux-popup-isolate.sh` to `~/.local/bin/`.
-7. **Tmux Plugin Registration:**
+5. **Prerequisites Verification:** Verifies presence of `tmux` and `git` (prompting user or suggesting package install if absent).
+6. **Binary & Wrapper Installation:** Extracts `acpd`, `lazygitrs`, `wm`, and the drop-in `sesh` executable wrapper to `~/.local/bin/`.
+7. **Backdrop Isolation Helper:** Installs `tmux-popup-isolate.sh` to `~/.local/bin/`.
+8. **Tmux Plugin Registration:**
    - Appends `run-shell "~/.tmux/plugins/terminal-ai-cockpit/cockpit.tmux"` to `~/.tmux.conf` or TPM config.
-8. **Systemd User Service:**
+9. **Systemd User Service:**
    - Enables `acpd.service` via `systemctl --user enable --now acpd`.
-9. **Agent Hook Linking:**
+10. **Agent Hook Linking:**
    - Detects installed AI agents (`antigravity`, `opencode`, `claude`) and links portable hooks.
 
 ---

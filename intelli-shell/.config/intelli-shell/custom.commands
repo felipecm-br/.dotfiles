@@ -124,7 +124,16 @@ wm add {{dir}}
 # Live-reload Markdown preview with inline Kitty Unicode diagrams
 wm md -w {{file}}
 
-# Connect to or create a session with Sesh
+# Interactive workspace & session picker (Waymaker native)
+wm session
+
+# Connect to or create a session with Waymaker
+wm connect {{session}}
+
+# Switch to previous Tmux session
+wm last
+
+# Connect to or create a session with Sesh (Waymaker drop-in)
 sesh connect {{session}}
 
 # List active sessions and configured paths
@@ -190,5 +199,6 @@ $ (awtc) repo_url: gh repo list --limit 20 --json nameWithOwner -q '.[].nameWith
 $ (stow.sh) package: find . -maxdepth 1 -mindepth 1 -type d ! -name '.*' ! -name 'scripts' ! -name 'docs' -printf '%f\n' 2>/dev/null
 $ (./stow.sh) package: find . -maxdepth 1 -mindepth 1 -type d ! -name '.*' ! -name 'scripts' ! -name 'docs' -printf '%f\n' 2>/dev/null
 $ (sesh) session: sesh list 2>/dev/null
+$ (wm) session: wm session list 2>/dev/null
 $ (wm) file: find . -maxdepth 3 -type f \( -name '*.md' -o -name '*.markdown' -o -name '*.mmd' \) 2>/dev/null
 $ (mmdc) mmd_file: find . -maxdepth 4 -type f \( -name '*.mmd' -o -name '*.mermaid' \) 2>/dev/null

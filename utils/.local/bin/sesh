@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# Drop-in sesh wrapper powered natively by Waymaker (wm)
+exec -a sesh wm "$@"
