@@ -25,3 +25,6 @@ if command -v wt >/dev/null 2>&1; then eval "$(command wt config shell init zsh)
 
 # Added by Antigravity CLI installer
 export PATH="/home/fecavmi/.local/bin:$PATH"
+
+# Disable Omarchy's legacy zoxide wrapper for cd in favor of native cd and Waymaker frecency
+unalias cd 2>/dev/null
