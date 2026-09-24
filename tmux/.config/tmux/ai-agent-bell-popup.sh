@@ -68,14 +68,35 @@ win_name=$(tmux display-message -t "$pane" -p '#W' 2>/dev/null)
 
 TITLE=" $sess › $win_name ($((curr_idx + 1))/$total)  │  prefix+i cycle "
 
-# If current client is already on the same session, jump directly to the window and show HUD.
-current_sess=$(tmux display-message -p '#S' 2>/dev/null)
-if [ "$current_sess" = "$sess" ]; then
-  tmux select-window -t "$sess:$win_idx" 2>/dev/null || true
+# If target pane is in the exact same window (a split pane beside you in the current view),
+# simply move focus without opening an unnecessary popup overlay.
+current_pane=$(tmux display-message -p '#{pane_id}' 2>/dev/null || echo "")
+current_sess=$(tmux display-message -p '#S' 2>/dev/null || echo "")
+current_win=$(tmux display-message -p '#I' 2>/dev/null || echo "")
+
+# If already focused on this exact target pane:
+if [ "$current_pane" = "$pane" ]; then
+  if [ "$total" -gt 1 ]; then
+    # Cycle directly to the next alerting candidate in ring buffer
+    curr_idx=$next_idx
+    pane="${notifying_panes[$curr_idx]}"
+    next_idx=$(( (curr_idx + 1) % total ))
+    tmux set-option -g @ai_agent_bell_ring_idx "$next_idx" 2>/dev/null
+    sess=$(tmux display-message -t "$pane" -p '#S' 2>/dev/null)
+    win_idx=$(tmux display-message -t "$pane" -p '#I' 2>/dev/null)
+    win_name=$(tmux display-message -t "$pane" -p '#W' 2>/dev/null)
+  else
+    tmux display-message -d 1500 " 󰮯 Already focused on active agent ($sess › $win_name)"
+    exit 0
+  fi
+fi
+
+if [ "$current_sess" = "$sess" ] && [ "$current_win" = "$win_idx" ]; then
   tmux select-pane -t "$pane" 2>/dev/null || true
-  tmux display-message -d 1500 " 󰮯 AI Agent: $sess › $win_name ($((curr_idx + 1))/$total)"
+  tmux display-message -d 1500 " 󰮯 AI Agent: focused split pane ($sess › $win_name)"
   exit 0
 fi
+
 
 POPUP_SESS="_popups"
 if ! tmux has-session -t "$POPUP_SESS" 2>/dev/null; then

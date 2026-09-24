@@ -87,9 +87,41 @@ if [ "${#notifying_panes[@]}" -eq 0 ]; then
   done < <(tmux list-panes -a -F '#{pane_id} #{pane_current_command} #{pane_title}' 2>/dev/null | awk '$2 ~ /^(agy|antigravity|opencode)$/ || $3 ~ /^(agy|antigravity|opencode)$/ {print $1}')
 fi
 
+current_pane=$(tmux display-message -p '#{pane_id}' 2>/dev/null || echo "")
+current_sess=$(tmux display-message -p '#S' 2>/dev/null || echo "")
+current_win=$(tmux display-message -p '#I' 2>/dev/null || echo "")
+
+origin_pane=$(tmux show-option -gv @ai_agent_triage_origin_pane 2>/dev/null || echo "")
+origin_sess=$(tmux show-option -gv @ai_agent_triage_origin_sess 2>/dev/null || echo "")
+origin_win=$(tmux show-option -gv @ai_agent_triage_origin_win 2>/dev/null || echo "")
+
 if [ "${#notifying_panes[@]}" -eq 0 ]; then
-  tmux display-message -d 1500 " 󰮯 No active AI Agent sessions found."
+  if [ -n "$origin_pane" ] && tmux display-message -t "$origin_pane" -p '#{pane_id}' >/dev/null 2>&1; then
+    # Clear trampoline stack
+    tmux set-option -gu @ai_agent_triage_origin_pane 2>/dev/null || true
+    tmux set-option -gu @ai_agent_triage_origin_sess 2>/dev/null || true
+    tmux set-option -gu @ai_agent_triage_origin_win 2>/dev/null || true
+
+    if [ "$current_sess" != "$origin_sess" ]; then
+      tmux switch-client -t "$origin_sess" 2>/dev/null || true
+    fi
+    tmux select-window -t "$origin_sess:$origin_win" 2>/dev/null || true
+    tmux select-pane -t "$origin_pane" 2>/dev/null || true
+
+    tmux display-message -d 1500 " 󰌑 AI Triage: Returned to $origin_sess:$origin_win"
+    exit 0
+  fi
+
+  tmux display-message -d 1500 " 󰮯 No active AI Agent alerts or return origin."
   exit 0
+fi
+
+# Save origin coordinates if not already saved and current pane is not an AI agent
+current_is_agent=$(tmux show-option -p -t "$current_pane" -v @ai_agent_state_raw 2>/dev/null || echo "")
+if [ -z "$origin_pane" ] && [ -z "$current_is_agent" ]; then
+  tmux set-option -g @ai_agent_triage_origin_pane "$current_pane" 2>/dev/null
+  tmux set-option -g @ai_agent_triage_origin_sess "$current_sess" 2>/dev/null
+  tmux set-option -g @ai_agent_triage_origin_win "$current_win" 2>/dev/null
 fi
 
 total=${#notifying_panes[@]}
@@ -110,8 +142,6 @@ target_win_name=$(tmux display-message -t "$target_pane" -p '#W' 2>/dev/null)
 target_state=$(tmux show-option -p -t "$target_pane" -v @ai_agent_state_raw 2>/dev/null || echo "active")
 
 # Direct focus switch without intermediate popups
-current_sess=$(tmux display-message -p '#S' 2>/dev/null || echo "")
-
 if [ "$current_sess" != "$target_sess" ]; then
   tmux switch-client -t "$target_sess" 2>/dev/null || true
 fi
@@ -136,4 +166,5 @@ if [ -n "$sound_file" ] && [ -f "$sound_file" ]; then
 fi
 
 # HUD feedback
-tmux display-message -d 2000 " 󰮯 AI Triage: $target_sess › $target_win_name ($((curr_idx + 1))/$total) [${target_state}]"
+tmux display-message -d 2000 " 󰮯 AI Triage: $target_sess › $target_win_name ($((curr_idx + 1))/$total) [${target_state}] • [Prefix+I to return]"
+
