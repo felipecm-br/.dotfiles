@@ -107,8 +107,39 @@ When switching themes via `omarchy theme set <theme>`, **100% of popups instantl
 
 * **Foveal Ergonomics (`75% × 60%`):** Human central visual acuity is confined to a 2°–5° foveal cone. The 75% × 60% viewport occupies the visual center without hiding the parent terminal backdrop.
 * **Column Partitioning (`40% / 60%`):** Divides space according to $\frac{1}{\phi^2} \approx 38.2\%$ (list) and $\frac{1}{\phi} \approx 61.8\%$ (preview), preventing label truncation.
-* **Concurrent Split Editor Architecture (`62% / 38%` LTR):** When opening files from ephemeral pickers, the modal is immediately dismissed (`display-popup -C`) to prevent nested modal trapping. The editor (Neovim) is positioned on the left (`split-window -h -b -l 62%`) at $\frac{1}{\phi} \approx 61.8\%$ (62%), preserving the active terminal or AI session on the right at $\frac{1}{\phi^2} \approx 38.2\%$ (38%). This aligns with western Left-to-Right reading hierarchy and modern IDE sidebar architecture (primary workspace left, AI copilot right).
+* **Concurrent Split Editor Architecture (`62% / 38%` LTR):** When opening files from ephemeral pickers (e.g. `wm -o files` / [`files-picker.sh`](../../tmux/.config/tmux/files-picker.sh) with `Ctrl+E` or `e`), the modal is immediately dismissed (`display-popup -C`) via [`scrollback-open.sh`](../../tmux/.config/tmux/scrollback-open.sh) to prevent nested modal trapping. The editor (Neovim) is positioned on the left (`split-window -h -b -l 62%`) at $\frac{1}{\phi} \approx 61.8\%$ (62%), preserving the active terminal or AI session on the right at $\frac{1}{\phi^2} \approx 38.2\%$ (38%). This aligns with western Left-to-Right reading hierarchy and modern IDE sidebar architecture (primary workspace left, AI copilot right).
 * **High-Density Workspaces (`90% × 88%`):** Lazygitrs expands to 90% × 88% to satisfy Miller's Chunking Law ($7 \pm 2$) across 5 control panels and wide diff viewports.
+
+### 3.1 The Z-Axis vs. X-Axis Law: Ephemeral Overlays vs. Persistent Sidebars
+
+A fundamental architectural design question in terminal multiplexing and AI cockpit engineering is: **Should workspace management (sessions, worktrees, file trees) live in a persistent lateral split (Sidebar / Chrome Split) or in an ephemeral floating overlay (Z-Axis Modal)?**
+
+While tools like `workmux` or traditional GUI IDEs (VSCode, JetBrains) adopt permanent lateral sidebars, our Cockpit architecture enforces the **Z-Axis Navigation Law**:
+
+> **The Z-Axis Navigation Law:**  
+> *Navigation, context switching, and metadata discovery must strictly occur in the **Z-Axis** (ephemeral floating overlays that self-destruct upon selection).*  
+> *Horizontal screen real estate (**X-Axis**) must be exclusively reserved for **Active Content Splits** (high-density code buffers, side-by-side vertical diffs, and live terminal interaction).*
+
+#### 1. The Mathematics of Screen Real Estate Starvation
+On standard laptop displays (14"–16" MacBook Pro, or 1080p/4K scaled monitors), a terminal emulator typically spans **160 to 200 character columns**. Modern software development requires simultaneous vertical splits (e.g. source buffer + test suite, or side-by-side Git diff):
+$$\text{Ideal Line Length (80–100 cols)} \times 2 + \text{gutters/LSP diagnostics} \approx 176\text{–}190\text{ columns}$$
+
+| Architecture Model | Viewport Budget (180 cols) | Editor Buffer (Left Split) | AI Agent / Terminal (Right Split) | In-Editor Vertical Split (`:vsplit`) | Visual & Ergonomic State |
+| :--- | :---: | :---: | :---: | :---: | :--- |
+| **A. Static Sidebar (`workmux` style)** | 180 cols - 32 cols sidebar = **148 cols** | 62% of 148 = **91 cols** | 38% of 148 = **57 cols** (severe text truncation) | $91 \div 2 = \mathbf{45\text{ cols}}$ per buffer | **Complete Collapse:** Code lines wrap prematurely; LSP diagnostics overlap; AI markdown output breaks across words. |
+| **B. Cockpit Golden Ratio (`awt` / `wm`)** | **180 cols full width** (0 cols wasted) | 62% of 180 = **111 cols** (spacious buffer) | 38% of 180 = **69 cols** (optimal markdown reading) | $111 \div 2 = \mathbf{55\text{–}56\text{ cols}}$ comfortably readable | **Pure Ergonomics:** Full side-by-side concurrency without horizontal scrolling or line folding. |
+
+#### 2. Content Splits vs. Chrome Splits (Tufte's Data-Ink Principle)
+1. **Dynamic Content Splits (`scrollback-open.sh` via `wm -o files` $\to$ `Ctrl+e`):**
+   * **High Data-Ink Density:** Both panes actively emit, inspect, and edit code or commands.
+   * **Transient Lifecycle:** Exists only while actively editing; closing the buffer (`:q`) instantly restores the primary terminal to 100% viewport width.
+2. **Static Chrome Splits (Persistent Sidebars):**
+   * **Extremely Low Data-Ink Density:** 32 columns dedicated permanently to static branch names and window labels. 95% of the working time, these pixels remain static and unread.
+   * **Attentional Taxation:** Positioned in the peripheral field ($30^\circ\text{–}60^\circ$), every agent stream, background spinner, or port update triggers the involuntary **orienting reflex** via the *superior colliculus*, breaking deep focus.
+
+#### 3. Architectural Scope: 1 Worktree = 1 Isolated Session vs. 1 Worktree = 1 Window
+* **The `workmux` Window Bottleneck:** `workmux` equates 1 worktree to 1 single Tmux window inside a shared session. This forces a persistent sidebar to manage the flat list of windows, yet completely breaks down when a worktree requires multiple internal windows (e.g., Neovim, test runner, server daemon, and log monitor).
+* **The Cockpit Session Advantage:** `awt` provisions an **entire, hermetically isolated Tmux session per worktree**. Worktrees can scale to multiple windows and internal splits without polluting other workspaces. The floating modal (`Ctrl+Shift+G` / `awp`) and ACPD sonic telemetry (`Prefix + Space` / `ai-agent-triage-jump.sh`) provide instantaneous cross-session switching without sacrificing a single column of horizontal workspace.
 
 ---
 

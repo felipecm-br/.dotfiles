@@ -123,6 +123,7 @@ The **Golden Ratio** ($\phi = \frac{1 + \sqrt{5}}{2} \approx 1.618$) provides th
 * **Major Panel ($A$ - Inspection / Preview):** $\frac{1}{\phi} \approx 61.8\%$ (rounded to **$60\%$**).
 * **Foveal Window (75% × 60%):** Constrains primary information inside the eye's central 2° to 5° foveal field without occluding peripheral backdrop orientation.
 * **Concurrent Split Editor Integration (`62% / 38%` LTR):** When opening files from ephemeral pickers (`files`, `rg`, `scrollback`), the modal popup is closed immediately (`tmux display-popup -C`) to prevent nested modal trapping. The editor (Neovim) opens in a Golden Ratio left split (`tmux split-window -d -h -b -l 62%`) beside the origin pane, keeping the AI agent session visible on the right (38%), or reusing an existing Neovim pane via RPC socket (`/run/user/$UID/nvim.<pid>.0`) to eliminate duplicate split proliferation.
+* **The Z-Axis Navigation vs X-Axis Work Law:** Ephemeral popups operate strictly along the Z-Axis (depth), consuming zero permanent horizontal columns. This preserves the full 180+ column budget required for high-density side-by-side content splits (Neovim 62% + AI 38%), proving why static lateral sidebars (Chrome Splits) degrade terminal workflows. See detailed comparative analysis in [Terminal Ergonomics & UX Manifesto](../architecture/terminal-ergonomics-and-ux-manifesto.md#31-the-z-axis-vs-x-axis-law-ephemeral-overlays-vs-persistent-sidebars).
 
 ---
 
