@@ -120,7 +120,7 @@ color = "Gray"
 title_fg = "Cyan"
 
 [footer]
-content = " {cyan,bold:[Enter]} {darkgray:Full}  •  {magenta,bold:[Tab]} {darkgray:Cycle}  •  {yellow,bold:[s]} {darkgray:Diagram}  •  {green,bold:[+]} {darkgray:In}  •  {red,bold:[-]} {darkgray:Out}  •  {blue,bold:[0]} {darkgray:1:1}  •  {cyan,bold:[J/K]} {darkgray:Scroll}  •  {green,bold:[C-v]} {darkgray:Insert}  •  {yellow,bold:[C-e]} {darkgray:Edit}  •  {magenta,bold:[C-y]} {darkgray:Copy}"
+content = " {cyan,bold:[Enter]} {darkgray:Full}  •  {magenta,bold:[Tab]} {darkgray:Cycle}  •  {yellow,bold:[C-h/l]} {darkgray:Dir}  •  {cyan,bold:[C-j/k]} {darkgray:Move}  •  {blue,bold:[C-d/u]} {darkgray:Scroll}  •  {green,bold:[C-v]} {darkgray:Insert}  •  {yellow,bold:[C-e]} {darkgray:Edit}  •  {magenta,bold:[C-y]} {darkgray:Copy}  •  {red,bold:[Esc]} {darkgray:Nav}"
 match_indent = false
 row_connection = "Full"
 
