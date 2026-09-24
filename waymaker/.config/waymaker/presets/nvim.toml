@@ -59,7 +59,7 @@ protocol = "kitty"
 
 [preview.border]
 sides = "LEFT"
-color = "Gray"
+color = "Darkgray"
 
 [[preview.layout]]
 side = "right"

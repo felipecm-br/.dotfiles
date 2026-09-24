@@ -116,7 +116,7 @@ max = 0
 
 [preview.border]
 sides = "LEFT"
-color = "Gray"
+color = "Darkgray"
 title_fg = "Cyan"
 
 [footer]

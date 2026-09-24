@@ -88,7 +88,7 @@ max = 0
 
 [preview.border]
 sides = "LEFT"
-color = "Gray"
+color = "Darkgray"
 title = " Preview "
 title_fg = "Cyan"
 

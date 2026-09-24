@@ -72,7 +72,7 @@ max = 0
 
 [preview.border]
 sides = "LEFT"
-color = "Gray"
+color = "Darkgray"
 
 [previewer]
 debounce_ms = 200
