@@ -68,7 +68,13 @@ fi
 # If worktree already exists, connect directly
 if [[ -d "$target_dir" ]]; then
     printf "\n\033[1;36m󰄬 Worktree already exists at %s, connecting...\033[0m\n" "$target_dir"
-    if command -v sesh >/dev/null 2>&1; then
+    if command -v wm >/dev/null 2>&1; then
+        if tmux has-session -t "$session_name" 2>/dev/null; then
+            exec wm connect "$session_name"
+        else
+            exec wm connect "$target_dir"
+        fi
+    elif command -v sesh >/dev/null 2>&1; then
         if tmux has-session -t "$session_name" 2>/dev/null; then
             exec sesh connect "$session_name"
         else
@@ -111,8 +117,14 @@ if [ -n "$TMUX" ]; then
     tmux display-popup -C 2>/dev/null || true
 fi
 
-# Connect via Sesh / Tmux
-if command -v sesh >/dev/null 2>&1; then
+# Connect via Waymaker / Sesh / Tmux
+if command -v wm >/dev/null 2>&1; then
+    if tmux has-session -t "$session_name" 2>/dev/null; then
+        exec wm connect "$session_name"
+    else
+        exec wm connect "$target_dir"
+    fi
+elif command -v sesh >/dev/null 2>&1; then
     if tmux has-session -t "$session_name" 2>/dev/null; then
         exec sesh connect "$session_name"
     else

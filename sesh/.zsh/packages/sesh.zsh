@@ -5,11 +5,11 @@ function sesh-sessions() {
     local wm_bin="$HOME/.local/bin/wm"
     [ -x "$wm_bin" ] || wm_bin="$(command -v wm 2>/dev/null || command -v mm 2>/dev/null || echo "wm")"
     local chosen
-    chosen=$(sesh list --icons | grep -Ev '(_lazygitrs|_popups|[[:space:]]+\.)' | "$wm_bin" -o "$HOME/.config/tmux/sesh-picker.toml")
+    chosen=$("$wm_bin" session list --icons | grep -Ev '(_lazygitrs|_popups|[[:space:]]+\.)' | "$wm_bin" -o "$HOME/.config/tmux/sesh-picker.toml")
     zle reset-prompt > /dev/null 2>&1 || true
     chosen=$(echo "$chosen" | sed -E 's/\x1B\[[0-9;]*[a-zA-Z]//g' | sed -E 's/^[^a-zA-Z0-9/~._-]+//' | tr -d '\r' | xargs)
     [[ -z "$chosen" ]] && return
-    sesh connect "$chosen"
+    "$wm_bin" connect "$chosen"
   }
 }
 

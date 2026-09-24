@@ -8,7 +8,7 @@ target="$1"
 target=$(echo "$target" | sed -E 's/^[[:space:]]*[^[:alnum:]/~._-]+[[:space:]]+//')
 
 if [ -n "${TMUX:-}" ]; then
-  exec sesh connect --switch -- "$target"
+  exec wm connect --switch -- "$target"
 else
-  exec uwsm-app -- xdg-terminal-exec -e sesh connect -- "$target"
+  exec uwsm-app -- xdg-terminal-exec -e wm connect -- "$target"
 fi

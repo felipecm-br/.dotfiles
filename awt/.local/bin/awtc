@@ -34,7 +34,9 @@ base_dir="${base_dir/#\~/$HOME}"
 
 if [[ -d "$base_dir" ]]; then
     echo "awtc: Directory $base_dir already exists."
-    if command -v sesh >/dev/null 2>&1 && [[ -d "$base_dir/main" ]]; then
+    if command -v wm >/dev/null 2>&1 && [[ -d "$base_dir/main" ]]; then
+        exec wm connect "$base_dir/main"
+    elif command -v sesh >/dev/null 2>&1 && [[ -d "$base_dir/main" ]]; then
         exec sesh connect "$base_dir/main"
     fi
     exit 1
@@ -70,8 +72,10 @@ echo "gitdir: ./.bare" > "$base_dir/.git"
 
 echo "✓ Successfully provisioned container layout in: $base_dir"
 
-# 8. Connect to the primary worktree using Sesh if available
-if command -v sesh >/dev/null 2>&1; then
+# 8. Connect to the primary worktree using Waymaker or Sesh if available
+if command -v wm >/dev/null 2>&1; then
+    exec wm connect "$base_dir/$default_branch"
+elif command -v sesh >/dev/null 2>&1; then
     exec sesh connect "$base_dir/$default_branch"
 else
     cd "$base_dir/$default_branch"

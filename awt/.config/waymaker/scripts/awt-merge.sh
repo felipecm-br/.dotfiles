@@ -184,7 +184,13 @@ if [[ $merge_success -eq 1 ]]; then
 
     # Switch Tmux session to target unless --no-tmux was specified
     if [[ $no_tmux -eq 0 ]]; then
-        if command -v sesh >/dev/null 2>&1; then
+        if command -v wm >/dev/null 2>&1; then
+            if tmux has-session -t "$target_session" >/dev/null 2>&1; then
+                wm connect "$target_session" >/dev/null 2>&1
+            elif [[ -d "$target_wt" ]]; then
+                wm connect "$target_wt" >/dev/null 2>&1
+            fi
+        elif command -v sesh >/dev/null 2>&1; then
             if tmux has-session -t "$target_session" >/dev/null 2>&1; then
                 sesh connect "$target_session" >/dev/null 2>&1
             elif [[ -d "$target_wt" ]]; then

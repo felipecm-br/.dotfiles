@@ -76,7 +76,9 @@ fi
 if [[ $no_tmux -eq 0 ]]; then
     if [[ $is_current_session -eq 1 ]]; then
         # Switch to previous session before killing current session
-        if command -v sesh >/dev/null 2>&1; then
+        if command -v wm >/dev/null 2>&1; then
+            wm last >/dev/null 2>&1 || tmux switch-client -l >/dev/null 2>&1 || tmux switch-client -n >/dev/null 2>&1
+        elif command -v sesh >/dev/null 2>&1; then
             sesh last >/dev/null 2>&1 || tmux switch-client -l >/dev/null 2>&1 || tmux switch-client -n >/dev/null 2>&1
         else
             tmux switch-client -l >/dev/null 2>&1 || tmux switch-client -n >/dev/null 2>&1

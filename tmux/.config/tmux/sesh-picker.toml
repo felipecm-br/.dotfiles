@@ -10,7 +10,7 @@ sort = false
 ansi = true
 
 [start.command]
-command = "sesh list --icons"
+command = "wm session list --icons"
 
 [tui]
 percentage = 100
@@ -53,20 +53,20 @@ sides = "LEFT"
 color = "Gray"
 
 [[preview.layout]]
-command = 'sesh preview {=}'
+command = 'wm session preview {=}'
 side = "right"
 percentage = 55
 
 [binds]
-"ctrl-a" = [ "SetPrompt(⚡  )", "Reload(sesh list --icons)" ]
-"ctrl-t" = [ "SetPrompt(🪟  )", "Reload(sesh list -t --icons)" ]
-"ctrl-g" = [ "SetPrompt(⚙️  )", "Reload(sesh list -c --icons)" ]
+"ctrl-a" = [ "SetPrompt(⚡  )", "Reload(wm session list --icons)" ]
+"ctrl-t" = [ "SetPrompt(🪟  )", "Reload(wm session list -t --icons)" ]
+"ctrl-g" = [ "SetPrompt(⚙️  )", "Reload(wm session list -c --icons)" ]
 "ctrl-x" = [ "SetPrompt(📁  )", "Reload(wm list --dirs)" ]
 "ctrl-f" = [ "SetPrompt(🔎  )", "Reload(fd -H -d 2 -t d -E .Trash . ~)" ]
-"ctrl-d" = [ 'ExecuteAsync(sess="{=}"; sess="${sess#* }"; tmux kill-session -t "$sess")', "SetPrompt(⚡  )", "SetQuery()", "Reload(sesh list --icons)" ]
-"nav^^a" = [ "SetPrompt(⚡  )", "Reload(sesh list --icons)" ]
-"nav^^t" = [ "SetPrompt(🪟  )", "Reload(sesh list -t --icons)" ]
-"nav^^g" = [ "SetPrompt(⚙️  )", "Reload(sesh list -c --icons)" ]
+"ctrl-d" = [ 'ExecuteAsync(sess="{=}"; sess="${sess#* }"; tmux kill-session -t "$sess")', "SetPrompt(⚡  )", "SetQuery()", "Reload(wm session list --icons)" ]
+"nav^^a" = [ "SetPrompt(⚡  )", "Reload(wm session list --icons)" ]
+"nav^^t" = [ "SetPrompt(🪟  )", "Reload(wm session list -t --icons)" ]
+"nav^^g" = [ "SetPrompt(⚙️  )", "Reload(wm session list -c --icons)" ]
 "nav^^x" = [ "SetPrompt(📁  )", "Reload(wm list --dirs)" ]
 "nav^^f" = [ "SetPrompt(🔎  )", "Reload(fd -H -d 2 -t d -E .Trash . ~)" ]
-"nav^^d" = [ 'ExecuteAsync(sess="{=}"; sess="${sess#* }"; tmux kill-session -t "$sess")', "SetPrompt(⚡  )", "SetQuery()", "Reload(sesh list --icons)" ]
+"nav^^d" = [ 'ExecuteAsync(sess="{=}"; sess="${sess#* }"; tmux kill-session -t "$sess")', "SetPrompt(⚡  )", "SetQuery()", "Reload(wm session list --icons)" ]

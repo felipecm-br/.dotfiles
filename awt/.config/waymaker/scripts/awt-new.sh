@@ -173,13 +173,17 @@ while true; do
                         tmux new-session -d -s "$session_name" -c "$target_dir"
                         tmux send-keys -t "$session_name:0.0" "$ai_cmd" C-m
                     fi
-                    if command -v sesh >/dev/null 2>&1; then
+                    if command -v wm >/dev/null 2>&1; then
+                        wm connect "$session_name" 2>/dev/null || tmux switch-client -t "$session_name" 2>/dev/null || true
+                    elif command -v sesh >/dev/null 2>&1; then
                         sesh connect "$session_name" 2>/dev/null || tmux switch-client -t "$session_name" 2>/dev/null || true
                     else
                         tmux switch-client -t "$session_name" 2>/dev/null || true
                     fi
                 else
-                    if command -v sesh >/dev/null 2>&1; then
+                    if command -v wm >/dev/null 2>&1; then
+                        wm connect "$target_dir"
+                    elif command -v sesh >/dev/null 2>&1; then
                         sesh connect "$target_dir"
                     fi
                 fi

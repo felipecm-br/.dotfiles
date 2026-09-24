@@ -54,7 +54,13 @@ IFS=$'\t' read -r session target <<< "$output"
 cur_session=$(tmux display-message -p '#{session_name}' 2>/dev/null || echo "")
 
 if [ -n "$session" ] && [ "$cur_session" != "$session" ]; then
-    if command -v sesh >/dev/null 2>&1; then
+    if command -v wm >/dev/null 2>&1; then
+        if tmux has-session -t "$session" 2>/dev/null; then
+            exec wm connect "$session"
+        else
+            exec wm connect "$target"
+        fi
+    elif command -v sesh >/dev/null 2>&1; then
         if tmux has-session -t "$session" 2>/dev/null; then
             exec sesh connect "$session"
         else

@@ -192,7 +192,13 @@ if [[ $# -eq 0 ]]; then
         [[ -n "$cur_session" && "$cur_session" == "$session" ]] && exit 0
 
         # If session exists in Tmux, switch by name; otherwise connect to path
-        if command -v sesh >/dev/null 2>&1; then
+        if command -v wm >/dev/null 2>&1; then
+            if tmux has-session -t "$session" 2>/dev/null; then
+                exec wm connect "$session"
+            else
+                exec wm connect "$target"
+            fi
+        elif command -v sesh >/dev/null 2>&1; then
             if tmux has-session -t "$session" 2>/dev/null; then
                 exec sesh connect "$session"
             else
@@ -317,7 +323,13 @@ if [[ -d "$target_dir" ]]; then
     fi
 
     if [[ $no_connect -eq 0 ]]; then
-        if command -v sesh >/dev/null 2>&1; then
+        if command -v wm >/dev/null 2>&1; then
+            if tmux has-session -t "$sess" 2>/dev/null; then
+                exec wm connect "$sess"
+            else
+                exec wm connect "$target_dir"
+            fi
+        elif command -v sesh >/dev/null 2>&1; then
             if tmux has-session -t "$sess" 2>/dev/null; then
                 exec sesh connect "$sess"
             else
@@ -379,7 +391,9 @@ if [[ $no_connect -eq 0 ]]; then
             tmux new-session -d -s "$sess" -c "$target_dir"
             tmux send-keys -t "$sess:0.0" "$ai_cmd" C-m
         fi
-        if command -v sesh >/dev/null 2>&1; then
+        if command -v wm >/dev/null 2>&1; then
+            exec wm connect "$sess"
+        elif command -v sesh >/dev/null 2>&1; then
             exec sesh connect "$sess"
         elif [ -n "$TMUX" ]; then
             tmux switch-client -t "$sess" 2>/dev/null || cd "$target_dir"
@@ -387,7 +401,9 @@ if [[ $no_connect -eq 0 ]]; then
             cd "$target_dir"
         fi
     else
-        if command -v sesh >/dev/null 2>&1; then
+        if command -v wm >/dev/null 2>&1; then
+            exec wm connect "$target_dir"
+        elif command -v sesh >/dev/null 2>&1; then
             exec sesh connect "$target_dir"
         elif [ -n "$TMUX" ]; then
             tmux switch-client -t "$sess" 2>/dev/null || cd "$target_dir"

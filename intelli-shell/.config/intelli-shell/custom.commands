@@ -133,11 +133,8 @@ wm connect {{session}}
 # Switch to previous Tmux session
 wm last
 
-# Connect to or create a session with Sesh (Waymaker drop-in)
-sesh connect {{session}}
-
 # List active sessions and configured paths
-sesh list
+wm session list
 
 # Dry-run GNU Stow symlink validation
 ./stow.sh -n
@@ -198,7 +195,6 @@ $ (awt) pr_number: gh pr list --limit 30 --json number,title --template '{{range
 $ (awtc) repo_url: gh repo list --limit 20 --json nameWithOwner -q '.[].nameWithOwner' 2>/dev/null
 $ (stow.sh) package: find . -maxdepth 1 -mindepth 1 -type d ! -name '.*' ! -name 'scripts' ! -name 'docs' -printf '%f\n' 2>/dev/null
 $ (./stow.sh) package: find . -maxdepth 1 -mindepth 1 -type d ! -name '.*' ! -name 'scripts' ! -name 'docs' -printf '%f\n' 2>/dev/null
-$ (sesh) session: sesh list 2>/dev/null
 $ (wm) session: wm session list 2>/dev/null
 $ (wm) file: find . -maxdepth 3 -type f \( -name '*.md' -o -name '*.markdown' -o -name '*.mmd' \) 2>/dev/null
 $ (mmdc) mmd_file: find . -maxdepth 4 -type f \( -name '*.mmd' -o -name '*.mermaid' \) 2>/dev/null

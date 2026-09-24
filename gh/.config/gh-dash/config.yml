@@ -82,8 +82,8 @@ keybindings:
           name: lazygitrs
           command: cd {{.RepoPath}} && lazygitrs
         - key: s
-          name: sesh
-          command: sesh connect {{.RepoPath}}
+          name: waymaker
+          command: wm connect {{.RepoPath}}
     issues:
         - key: g
           name: lazygitrs
