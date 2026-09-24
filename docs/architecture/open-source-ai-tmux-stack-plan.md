@@ -170,8 +170,35 @@ The README and value proposition must lead with the concrete problem solved for 
         join(process.env.HOME || "/home/fecavmi", ".cache", "acpd", "token"),
         `/run/user/1001/acpd/token`,
       ];
-      ```
-  - *Remediation:* Strip hardcoded `1001` and `/home/fecavmi` fallbacks. Use standard `$HOME`, `$XDG_RUNTIME_DIR`, and `os.userInfo().uid`.
+### 2.6 Workspace & Session Layer (`sesh`)
+- **Role:** Session management, project directory discovery, and workspace context switching.
+- **Where Sesh is Used in the Cockpit Stack:**
+  1. **`sesh-picker.sh` (`Prefix + t`):** Invokes `sesh list --icons` and pipes into Waymaker (`wm -o sesh-picker.toml`), connecting to chosen workspaces via `sesh connect "$chosen"`.
+  2. **`lazygitrs` Worktree Controller:** In [`src/gui/controller/worktrees.rs:40`](file:///home/fecavmi/dev/github/lazygitrs/fecavmi/src/gui/controller/worktrees.rs#L40), pressing Enter on a worktree branch natively triggers `std::process::Command::new("sesh").arg("connect").arg(&target_path)`. If `sesh` is installed, it switches directly into an isolated project session; otherwise, it cleanly falls back to native `tmux new-session / switch-client`.
+  3. **`awt` (Agent Worktree Orchestrator):** Provisions isolated git worktrees mapped to 1 tmux session each via `sesh connect "$target_dir"`, with redirection on deletion via `sesh last`.
+  4. **`gh dash`:** Binds key `s` to `sesh connect {{.RepoPath}}`.
+- **Ecosystem Contract:** `sesh` is a **Host Platform Prerequisite** for workspace management, with graceful degradation to native `tmux` session commands in `lazygitrs`.
+
+### 2.7 Complete Ecosystem Dependency Matrix
+
+The Cockpit ecosystem classifies all runtime tools into 3 distinct tiers:
+
+| Component / Tool | Role in Cockpit | Classification | Fallback Behavior if Absent |
+| :--- | :--- | :--- | :--- |
+| **`acpd`** | Async state machine & status broker | **Bundled (Tier 1 Engine)** | Pre-compiled static binary in release bundle |
+| **`lazygitrs`** | Git TUI, worktrees & AI review notes | **Bundled (Tier 1 Engine)** | Pre-compiled static binary in release bundle |
+| **`waymaker` (`wm`)** | Fuzzy navigation, live watch & popups | **Bundled (Tier 1 Engine)** | Pre-compiled static binary in release bundle |
+| **`tmux` (>= 3.2)** | Multiplexer, popups & state display | **Host Platform Prerequisite** | Hard requirement (the cockpit runs inside Tmux) |
+| **`sesh`** | Workspace & worktree session switcher | **Host Platform Prerequisite** | Degrades to native `tmux new-session` in `lazygitrs` |
+| **`git`** | Version control engine | **Host Platform Prerequisite** | Hard requirement |
+| **`ripgrep` (`rg`)** | Full-text code search (`Prefix + /`) | **Recommended Accelerator** | Required for `grep-picker.sh` (modal search) |
+| **`bat`** | Syntax highlighting & line highlight | **Recommended Accelerator** | Graceful fallback to plain `cat` in picker previews |
+| **`fd`** | High-performance filesystem walker | **Recommended Accelerator** | Graceful fallback to `waymaker` native AsyncWalker |
+| **`zoxide`** | Frecency directory database (`j`, `ji`) | **Recommended Accelerator** | `wm -o jump` defaults to standard directory traversal |
+| **`wl-copy` / `xclip`** | OS System Clipboard bridge | **System Integration** | Fallback to Tmux internal paste buffer & OSC 52 |
+| **`pw-play` / `paplay`** | Sound telemetry on AI state changes | **Optional Audio Integration** | Silent execution if sound adapter or player absent |
+| **`nvim` / `$EDITOR`** | In-situ code inspection from search | **User Editor** | Fallback to `$EDITOR` or `vim` |
+| **Nerd Fonts** | Icon badges, spinners & status pills | **Visual Requirement** | Pure Unicode/ASCII fallbacks in standard terminals |
 
 ---
 
@@ -213,14 +240,15 @@ curl -fsSL https://raw.githubusercontent.com/fcmiranda/terminal-ai-cockpit/main/
 **Installer Logic (Strict Zero-Compile Guarantee):**
 1. **Never compile:** Never invoke `cargo install` or `cargo build`.
 2. **Arch & OS Detection:** Detects `linux` / `macos` and `x86_64` / `aarch64`.
-3. **Bundle Download:** Fetches the unified archive containing pre-built `acpd`, `lazygitrs`, and `mm`.
+3. **Bundle Download:** Fetches the unified archive containing pre-built `acpd`, `lazygitrs`, and `wm` (Waymaker).
 4. **Integrity Check:** Validates `sha256sum` before extraction to `~/.local/bin/` (or `--prefix`).
-5. **Backdrop Isolation Helper:** Installs `tmux-popup-isolate.sh` to `~/.local/bin/`.
-6. **Tmux Plugin Registration:**
+5. **Prerequisites Verification:** Verifies presence of `tmux`, `git`, and `sesh` (prompting user or suggesting package install if absent).
+6. **Backdrop Isolation Helper:** Installs `tmux-popup-isolate.sh` to `~/.local/bin/`.
+7. **Tmux Plugin Registration:**
    - Appends `run-shell "~/.tmux/plugins/terminal-ai-cockpit/cockpit.tmux"` to `~/.tmux.conf` or TPM config.
-7. **Systemd User Service:**
+8. **Systemd User Service:**
    - Enables `acpd.service` via `systemctl --user enable --now acpd`.
-8. **Agent Hook Linking:**
+9. **Agent Hook Linking:**
    - Detects installed AI agents (`antigravity`, `opencode`, `claude`) and links portable hooks.
 
 ---
