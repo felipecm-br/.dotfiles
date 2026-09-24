@@ -123,6 +123,7 @@ title_fg = "Cyan"
 # content = " {cyan,bold:[Enter]} {darkgray:Full}  •  {magenta,bold:[Tab]} {darkgray:Cycle}  •  {yellow,bold:[C-h/l]} {darkgray:Dir}  •  {cyan,bold:[C-j/k]} {darkgray:Move}  •  {blue,bold:[C-d/u]} {darkgray:Scroll}  •  {green,bold:[C-v]} {darkgray:Insert}  •  {yellow,bold:[C-e]} {darkgray:Edit}  •  {magenta,bold:[C-y]} {darkgray:Copy}  •  {red,bold:[Esc]} {darkgray:Nav}"
 match_indent = false
 row_connection = "Full"
+separator = "light"
 
 [exit]
 abort_empty = true
