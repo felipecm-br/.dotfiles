@@ -29,6 +29,8 @@ prompt_style.fg = "Gray"
 [header]
 
 [footer]
+separator = "light"
+
 # --- Preview ---
 [preview]
 show = true

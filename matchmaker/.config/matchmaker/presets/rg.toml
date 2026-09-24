@@ -96,6 +96,7 @@ title_fg = "Cyan"
 content = " {cyan,bold:[Enter]} {darkgray:Nvim}  •  {green,bold:[C-v]} {darkgray:Insert}  •  {magenta,bold:[y]} {darkgray:Copy}  •  {blue,bold:[J/K]} {darkgray:Scroll}  •  {cyan,bold:[C-/]} {darkgray:Layout}  •  {yellow,bold:[C-s]} {darkgray:Case}  •  {green,bold:[C-w]} {darkgray:Word}  •  {red,bold:[Esc]} {darkgray:Quit}"
 match_indent = false
 row_connection = "Full"
+separator = "light"
 
 [exit]
 abort_empty = false

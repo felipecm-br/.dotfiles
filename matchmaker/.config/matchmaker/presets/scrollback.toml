@@ -82,6 +82,7 @@ delay_clear = true
 content = " {cyan,bold:[Enter]} {darkgray:Yank}  •  {magenta,bold:[Tab]} {darkgray:Filter}  •  {green,bold:[C-v]} {darkgray:Insert}  •  {yellow,bold:[C-e]} {darkgray:Open}  •  {magenta,bold:[C-y]} {darkgray:Copy}  •  {blue,bold:[J/K]} {darkgray:Scroll}  •  {cyan,bold:[Space]} {darkgray:Multi}"
 match_indent = false
 row_connection = "Full"
+separator = "light"
 
 [exit]
 abort_empty = true

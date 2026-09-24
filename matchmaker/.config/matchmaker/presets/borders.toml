@@ -12,6 +12,7 @@ max = 85
 content = " {magenta,bold:[Enter]} {darkgray:Salvar}  •  {cyan,bold:[j/k | ↓/↑]} {darkgray:Estilo}  •  {yellow,bold:[h/l | ←/→]} {darkgray:Velocidade}  •  {blue,bold:[r]} {darkgray:Girar Ângulo}  •  {darkgray,bold:[Esc / q]} {darkgray:Cancelar}"
 row_connection = "Full"
 match_indent = false
+separator = "light"
 
 [preview]
 show = true

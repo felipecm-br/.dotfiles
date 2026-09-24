@@ -101,6 +101,7 @@ status_inline = true
 content = " {cyan,bold:[Enter]} {darkgray:Set Sound}  •  {yellow,bold:[p / Space]} {darkgray:Replay}  •  {blue,bold:[Esc / q]} {darkgray:Quit}"
 row_connection = "Full"
 match_indent = false
+separator = "light"
 
 [start]
 mode = "nav"

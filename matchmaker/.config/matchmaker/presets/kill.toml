@@ -15,6 +15,7 @@ prompt_style.modifier = "BOLD"
 content = "  Enter: SIGTERM (15)  •  Ctrl+X: SIGKILL (-9)  •  Ctrl+P: Toggle Preview"
 style.fg = "DarkGray"
 style.modifier = "DIM"
+separator = "light"
 
 [columns]
 split = "\t"

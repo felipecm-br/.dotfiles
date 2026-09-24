@@ -48,6 +48,7 @@ enabled = false               # true (mostra painel com pasta pai à esquerda) /
 show = false                  # true / false (borda do painel pai)
 
 [footer]
+separator = "light"
 # content = "  h/l: Nav  •  Ctrl+F: Cycle Mode  •  Ctrl+P: Toggle Preview  •  Ctrl+U: Ancestors  •  Enter: Select"
 style.fg = "gray"             # Cor do texto do rodapé ("gray", "cyan", "#RRGGBB", etc.)
 style.modifier = "DIM"        # "DIM", "BOLD", "ITALIC", "UNDERLINED", "REVERSED"
