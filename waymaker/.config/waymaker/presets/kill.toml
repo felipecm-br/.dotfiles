@@ -29,6 +29,10 @@ names = [
 [preview]
 show = true
 
+[preview.border]
+sides = "LEFT"
+color = "Darkgray"
+
 [[preview.layout]]
 command = '''
 pid="{=pid}"

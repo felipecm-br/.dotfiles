@@ -44,6 +44,7 @@ show = true
 content = " {cyan,bold:[Enter]} {darkgray:Switch Window}  •  {green,bold:[c]} {darkgray:New Window}  •  {red,bold:[d]} {darkgray:Kill Window}  •  {blue,bold:[Esc]} {darkgray:Cancel}  •  {magenta,bold:[?]} {darkgray:Toggle Footer}"
 row_connection = "Full"
 match_indent = false
+separator = "light"
 
 [ui.nav]
 active = true
@@ -70,7 +71,7 @@ wrap = false
 
 [preview.border]
 sides = "LEFT"
-color = "Gray"
+color = "Darkgray"
 
 [[preview.layout]]
 command = 'sess="{=session}"; tmux capture-pane -ep -t "${sess}:{=idx}" 2>/dev/null || printf "  \033[38;2;146;131;116m(no preview)\033[0m\n"'

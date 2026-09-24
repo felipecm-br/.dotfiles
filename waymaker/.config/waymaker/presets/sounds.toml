@@ -16,9 +16,9 @@ show = true
 wrap = true
 
 [preview.border]
+sides = "LEFT"
+color = "Darkgray"
 title_fg = "Cyan"
-color = "Blue"
-type = "Rounded"
 
 [previewer]
 debounce_ms = 15

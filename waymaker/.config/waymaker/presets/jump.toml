@@ -133,6 +133,10 @@ active = true
 fit = "fit"
 size = 0             # Resolução máxima do downscaling em pixels (ex: 512, 800, 1280, 1920; 0 = original/sem downscale)
 
+[preview.border]
+sides = "LEFT"
+color = "Darkgray"
+
 [[preview.layout]]
 side = "right"                # Posição do preview: "right", "left", "top", "bottom"
 percentage = 60               # Tamanho balanceado do painel em % (Proporção Áurea 60/40)
