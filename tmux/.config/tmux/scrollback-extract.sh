@@ -86,7 +86,12 @@ fi
 
 # Items come from [start] command (file), never from a pipe: mm reads keyboard
 # from stdin via crossterm, so stdin must stay on the tty or no key works.
-chosen="$("$MM_BIN" -o scrollback)" || exit 0
+if "$MM_BIN" --dump-config -o yank >/dev/null 2>&1; then
+  PRESET="yank"
+else
+  PRESET="scrollback"
+fi
+chosen="$("$MM_BIN" -o "$PRESET")" || exit 0
 [ -n "$chosen" ] || exit 0
 
 # Clipboard + confirm run detached from the popup: the popup must close the

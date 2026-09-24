@@ -107,7 +107,7 @@ When switching themes via `omarchy theme set <theme>`, **100% of popups instantl
 
 * **Foveal Ergonomics (`75% × 60%`):** Human central visual acuity is confined to a 2°–5° foveal cone. The 75% × 60% viewport occupies the visual center without hiding the parent terminal backdrop.
 * **Column Partitioning (`40% / 60%`):** Divides space according to $\frac{1}{\phi^2} \approx 38.2\%$ (list) and $\frac{1}{\phi} \approx 61.8\%$ (preview), preventing label truncation.
-* **Concurrent Split Editor Architecture (`62% / 38%` LTR):** When opening files from ephemeral pickers (e.g. `wm -o files` / [`files-picker.sh`](../../tmux/.config/tmux/files-picker.sh) with `Ctrl+E` or `e`), the modal is immediately dismissed (`display-popup -C`) via [`scrollback-open.sh`](../../tmux/.config/tmux/scrollback-open.sh) to prevent nested modal trapping. The editor (Neovim) is positioned on the left (`split-window -h -b -l 62%`) at $\frac{1}{\phi} \approx 61.8\%$ (62%), preserving the active terminal or AI session on the right at $\frac{1}{\phi^2} \approx 38.2\%$ (38%). This aligns with western Left-to-Right reading hierarchy and modern IDE sidebar architecture (primary workspace left, AI copilot right).
+* **Concurrent Split Editor Architecture (`62% / 38%` LTR):** When opening files from ephemeral pickers (e.g. `wm -o workspace` / `wm -o files` / [`files-picker.sh`](../../tmux/.config/tmux/files-picker.sh) with `Ctrl+E` or `e`), the modal is immediately dismissed (`display-popup -C`) via [`scrollback-open.sh`](../../tmux/.config/tmux/scrollback-open.sh) to prevent nested modal trapping. The editor (Neovim) is positioned on the left (`split-window -h -b -l 62%`) at $\frac{1}{\phi} \approx 61.8\%$ (62%), preserving the active terminal or AI session on the right at $\frac{1}{\phi^2} \approx 38.2\%$ (38%). This aligns with western Left-to-Right reading hierarchy and modern IDE sidebar architecture (primary workspace left, AI copilot right).
 * **High-Density Workspaces (`90% × 88%`):** Lazygitrs expands to 90% × 88% to satisfy Miller's Chunking Law ($7 \pm 2$) across 5 control panels and wide diff viewports.
 
 ### 3.1 The Z-Axis vs. X-Axis Law: Ephemeral Overlays vs. Persistent Sidebars
@@ -130,7 +130,7 @@ $$\text{Ideal Line Length (80–100 cols)} \times 2 + \text{gutters/LSP diagnost
 | **B. Cockpit Golden Ratio (`awt` / `wm`)** | **180 cols full width** (0 cols wasted) | 62% of 180 = **111 cols** (spacious buffer) | 38% of 180 = **69 cols** (optimal markdown reading) | $111 \div 2 = \mathbf{55\text{–}56\text{ cols}}$ comfortably readable | **Pure Ergonomics:** Full side-by-side concurrency without horizontal scrolling or line folding. |
 
 #### 2. Content Splits vs. Chrome Splits (Tufte's Data-Ink Principle)
-1. **Dynamic Content Splits (`scrollback-open.sh` via `wm -o files` $\to$ `Ctrl+e`):**
+1. **Dynamic Content Splits (`scrollback-open.sh` via `wm -o workspace` $\to$ `Ctrl+e`):**
    * **High Data-Ink Density:** Both panes actively emit, inspect, and edit code or commands.
    * **Transient Lifecycle:** Exists only while actively editing; closing the buffer (`:q`) instantly restores the primary terminal to 100% viewport width.
 2. **Static Chrome Splits (Persistent Sidebars):**

@@ -64,10 +64,21 @@ EOF
 if [ $? -eq 0 ]; then ok "files.toml schema & bindings contract"; else bad "files.toml schema & bindings contract"; fi
 
 TEST_BIN="$(command -v wm 2>/dev/null || command -v mm 2>/dev/null || echo wm)"
-if "$TEST_BIN" --dump-config -o files >/dev/null 2>&1; then
+WORKSPACE_PRESET="$ROOT/waymaker/.config/waymaker/presets/workspace.toml"
+[[ -f "$WORKSPACE_PRESET" ]] || WORKSPACE_PRESET="$ROOT/matchmaker/.config/matchmaker/presets/workspace.toml"
+FILES_PRESET_CHECK="$ROOT/waymaker/.config/waymaker/presets/files.toml"
+[[ -f "$FILES_PRESET_CHECK" ]] || FILES_PRESET_CHECK="$ROOT/matchmaker/.config/matchmaker/presets/files.toml"
+
+if "$TEST_BIN" --dump-config -o files >/dev/null 2>&1 || "$TEST_BIN" --dump-config -o "$FILES_PRESET_CHECK" >/dev/null 2>&1; then
   ok "wm/mm loads files preset without errors"
 else
   bad "wm/mm rejected files preset"
+fi
+
+if "$TEST_BIN" --dump-config -o workspace >/dev/null 2>&1 || "$TEST_BIN" --dump-config -o "$WORKSPACE_PRESET" >/dev/null 2>&1; then
+  ok "wm/mm loads workspace preset without errors"
+else
+  bad "wm/mm rejected workspace preset"
 fi
 
 # ── 2. Validate rg.toml Contract ──
@@ -270,8 +281,11 @@ PRESETS_DIR="$ROOT/waymaker/.config/waymaker/presets"
 [ -L "$PRESETS_DIR/grep-picker.toml" ] && [ "$(readlink "$PRESETS_DIR/grep-picker.toml")" = "rg.toml" ] \
   && ok "grep-picker.toml -> rg.toml symlink" || bad "grep-picker.toml symlink"
 
-[ -L "$PRESETS_DIR/files-picker.toml" ] && [ "$(readlink "$PRESETS_DIR/files-picker.toml")" = "files.toml" ] \
-  && ok "files-picker.toml -> files.toml symlink" || bad "files-picker.toml symlink"
+[ -L "$PRESETS_DIR/files-picker.toml" ] && { [ "$(readlink "$PRESETS_DIR/files-picker.toml")" = "workspace.toml" ] || [ "$(readlink "$PRESETS_DIR/files-picker.toml")" = "files.toml" ]; } \
+  && ok "files-picker.toml -> workspace.toml symlink" || bad "files-picker.toml symlink"
+
+[ -L "$PRESETS_DIR/files.toml" ] && [ "$(readlink "$PRESETS_DIR/files.toml")" = "workspace.toml" ] \
+  && ok "files.toml -> workspace.toml compatibility symlink" || bad "files.toml compatibility symlink"
 
 # Backdrop isolation in scripts (delegates to tmux-popup-isolate.sh or inline)
 (grep -q 'tmux-popup-isolate' "$FILES_SCRIPT" || (grep -q '@ai_agent_state_raw' "$FILES_SCRIPT" && grep -q 'tmux-backdrop' "$FILES_SCRIPT")) \
@@ -316,9 +330,12 @@ fi
 
 STOW_PKG="waymaker"
 [ -d "$ROOT/waymaker" ] || STOW_PKG="matchmaker"
-if "$ROOT/stow.sh" -n "$STOW_PKG" tmux >/dev/null 2>&1; then
+MOCK_TARGET="$(mktemp -d)"
+if STOW_TARGET="$MOCK_TARGET" "$ROOT/stow.sh" -n "$STOW_PKG" tmux >/dev/null 2>&1; then
+  rm -rf "$MOCK_TARGET"
   ok "stow.sh -n $STOW_PKG tmux passed"
 else
+  rm -rf "$MOCK_TARGET"
   bad "stow.sh -n $STOW_PKG tmux failed"
 fi
 

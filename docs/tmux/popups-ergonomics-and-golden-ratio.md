@@ -83,8 +83,8 @@ Whenever the system theme switches (`omarchy theme set <name>`), 100% of termina
 | :--- | :--- | :--- | :--- | :---: | :---: | :--- |
 | **1. Ephemeral** | [`window-picker.sh`](../../tmux/.config/tmux/window-picker.sh) | `magenta` / `accent` | `#cba6f7` | ` 󱂬 ` | `75% × 60%` | `Esc` (1 tap) |
 | **1. Ephemeral** | [`sesh-picker.sh`](../../tmux/.config/tmux/sesh-picker.sh) | `cyan` / `blue` | `#89dceb` | ` ⚡ ` | `75% × 60%` | `Esc` (1 tap) |
-| **1. Ephemeral** | [`scrollback-extract.sh`](../../tmux/.config/tmux/scrollback-extract.sh) | `green` | `#a6e3a1` | ` 󰅍 ` | `75% × 60%` | `Esc` (1 tap) |
-| **1. Ephemeral** | [`files-picker.sh`](../../tmux/.config/tmux/files-picker.sh) | `blue` / `cyan` | `#89b4fa` | ` 󰈞 󰄧 󰋩 ` | `75% × 60%` / `95% × 90%` | `Esc` (1 tap) |
+| **1. Ephemeral** | [`scrollback-extract.sh`](../../tmux/.config/tmux/scrollback-extract.sh) (`yank.toml`) | `green` | `#a6e3a1` | ` 󰅍 ` | `75% × 60%` | `Esc` (1 tap) |
+| **1. Ephemeral** | [`files-picker.sh`](../../tmux/.config/tmux/files-picker.sh) (`workspace.toml`) | `blue` / `cyan` | `#89b4fa` | ` 󰈞 󰄧 󰋩 ` | `75% × 60%` / `95% × 90%` | `Esc` (1 tap) |
 | **1. Ephemeral** | [`grep-picker.sh`](../../tmux/.config/tmux/grep-picker.sh) | `teal` / `cyan` | `#94e2d5` | ` 󰍉 ` | `85% × 75%` / `96% × 92%` | `Esc` (1 tap) |
 | **1. Ephemeral** | [`awt-popup.sh`](../../awt/.config/tmux/awt-popup.sh) | `orange` / `peach` | `#e84d31` | `  ` | `85% × 75%` | `Esc` / `q` |
 | **2. Persistent** | [`lazygitrs-popup.sh`](../../tmux/.config/tmux/lazygitrs-popup.sh)| `orange` / `peach` | `#e84d31` | ` 󰊢 ` | `90% × 88%` | `Esc` (Files) / `q` |

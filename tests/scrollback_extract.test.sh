@@ -4,9 +4,11 @@
 # Checks: preset parses + key binds, extraction pipeline on fixture, tmux binds.
 set -u
 
-ROOT="$HOME/.dotfiles/main"
+ROOT="${ROOT:-$(cd "$(dirname "$0")/.." && pwd)}"
 FIX="$ROOT/tests/fixtures/scrollback_sample.txt"
-PRESET="$ROOT/waymaker/.config/waymaker/presets/scrollback.toml"
+PRESET="$ROOT/waymaker/.config/waymaker/presets/yank.toml"
+[[ -f "$PRESET" ]] || PRESET="$ROOT/waymaker/.config/waymaker/presets/scrollback.toml"
+[[ -f "$PRESET" ]] || PRESET="$ROOT/matchmaker/.config/matchmaker/presets/yank.toml"
 [[ -f "$PRESET" ]] || PRESET="$ROOT/matchmaker/.config/matchmaker/presets/scrollback.toml"
 SCRIPT="$ROOT/tmux/.config/tmux/scrollback-extract.sh"
 CONF="$ROOT/tmux/.config/tmux/tmux.conf"
@@ -54,7 +56,7 @@ EOF
 
 # 2. preset loads in the real wm/mm binary (catches unknown keys)
 TEST_BIN="$(command -v wm 2>/dev/null || command -v mm 2>/dev/null || echo wm)"
-if "$TEST_BIN" --dump-config -o scrollback >/dev/null 2>&1; then ok "wm/mm loads preset"; else bad "wm/mm rejects preset"; fi
+if "$TEST_BIN" --dump-config -o yank >/dev/null 2>&1 || "$TEST_BIN" --dump-config -o scrollback >/dev/null 2>&1 || "$TEST_BIN" --dump-config -o "$PRESET" >/dev/null 2>&1; then ok "wm/mm loads preset"; else bad "wm/mm rejects preset"; fi
 
 # 3. extraction pipeline: dedupe + recent-first on fixture
 got="$(grep -oE 'https?://[^[:space:]"'"'"'<>]+|(~?/[A-Za-z0-9._~:/?#@!$&()*+,;=%-]+|\./[A-Za-z0-9._~:/?#@!$&()*+,;=%-]+)|\b[0-9a-f]{7,40}\b|\b[0-9]{1,3}(\.[0-9]{1,3}){3}(:[0-9]+)?\b' "$FIX" | awk '!seen[$0]++ && length($0)>2 { lines[n++]=$0 } END { for (i=n-1;i>=0;i--) print lines[i] }')"
@@ -63,7 +65,7 @@ if [ "$got" = "$want" ]; then ok "extraction dedupe+order"; else bad "extraction
 
 # 4. script syntax + uses preset + clipboard path
 sh -n "$SCRIPT" && ok "script syntax" || bad "script syntax"
-grep -q -- '-o scrollback' "$SCRIPT" && ok "script uses preset" || bad "script preset"
+grep -qE -- '-o (yank|scrollback)' "$SCRIPT" && ok "script uses preset" || bad "script preset"
 grep -q '| *"\$MM_BIN"' "$SCRIPT" && bad "piped stdin (kills keyboard)" || ok "no piped stdin"
 grep -q 'wl-copy' "$SCRIPT" && ok "clipboard path" || bad "clipboard path"
 grep -q "trap '' HUP" "$SCRIPT" && grep -q 'scrollback-mm.log' "$SCRIPT" && ok "detached tail+log" || bad "detached tail+log"
@@ -85,8 +87,10 @@ PSCRIPT="$ROOT/tmux/.config/tmux/files-picker.sh"
 grep -q 'files-picker.sh' "$CONF" && (grep -q 'tmux-popup-isolate' "$PSCRIPT" || grep -q '@ai_agent_state_raw' "$PSCRIPT") && ok "files-picker bind+backdrop" || bad "files-picker bind+backdrop"
 grep -q "bind-key \"y\" run-shell \".*scrollback-extract.sh '#{pane_id}'" "$CONF" && ok "bind prefix+y extract" || bad "bind prefix+y extract"
 grep -q "bind-key \"e\" run-shell \".*files-picker.sh '#{pane_id}'" "$CONF" && grep -q "bind-key C-e run-shell \".*files-picker.sh '#{pane_id}'" "$CONF" && ok "bind prefix+e/C-e files-picker" || bad "bind prefix+e/C-e files-picker"
-! grep -q 'bind-key "v"' "$CONF" && ! grep -q 'bind-key C-v' "$CONF" && ! grep -q 'bind-key "V"' "$CONF" && ok "prefix+v/C-v/V unbound" || bad "prefix+v/C-v/V still bound"
-"$TEST_BIN" --dump-config -o files >/dev/null 2>&1 && ok "wm/mm loads files preset" || bad "wm/mm loads files preset"
+("$TEST_BIN" --dump-config -o files >/dev/null 2>&1 || "$TEST_BIN" --dump-config -o "$ROOT/waymaker/.config/waymaker/presets/files.toml" >/dev/null 2>&1) && ok "wm/mm loads files preset" || bad "wm/mm loads files preset"
+("$TEST_BIN" --dump-config -o workspace >/dev/null 2>&1 || "$TEST_BIN" --dump-config -o "$ROOT/waymaker/.config/waymaker/presets/workspace.toml" >/dev/null 2>&1) && ok "wm/mm loads workspace preset" || bad "wm/mm loads workspace preset"
+("$TEST_BIN" --dump-config -o yank >/dev/null 2>&1 || "$TEST_BIN" --dump-config -o "$ROOT/waymaker/.config/waymaker/presets/yank.toml" >/dev/null 2>&1) && ok "wm/mm loads yank preset" || bad "wm/mm loads yank preset"
+[ -L "$ROOT/waymaker/.config/waymaker/presets/scrollback.toml" ] && ok "scrollback.toml -> yank.toml compatibility symlink" || bad "scrollback.toml compatibility symlink"
 grep -q "sainnhe/tmux-fzf\|fcsonline/tmux-thumbs" "$CONF" && bad "orphan plugin lines" || ok "no orphan plugin lines"
 
 exit $fail

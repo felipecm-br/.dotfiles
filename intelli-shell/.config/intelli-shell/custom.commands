@@ -91,6 +91,12 @@ awtc {{repo_url}}
 # Open interactive workspace file picker in Tmux popup (Prefix + e)
 ~/.config/tmux/files-picker.sh
 
+# Open interactive workspace context inspector in Tmux popup (Prefix + e)
+~/.config/tmux/workspace-picker.sh
+
+# Open interactive yank token extractor from terminal scrollback in Tmux popup (Prefix + y)
+~/.config/tmux/scrollback-extract.sh
+
 # Open live full-text ripgrep picker in Tmux popup (Prefix + /)
 ~/.config/tmux/grep-picker.sh
 

@@ -60,8 +60,10 @@ export MM_ORIGIN_CWD="$CWD"
 MM_BIN="$HOME/.local/bin/wm"
 [ -x "$MM_BIN" ] || MM_BIN="$(command -v wm 2>/dev/null || command -v mm 2>/dev/null || echo wm)"
 
-# Prefer dedicated files preset (with 60%/100% layouts and ctrl-v insert), fallback to jump
-if "$MM_BIN" --dump-config -o files >/dev/null 2>&1; then
+# Prefer dedicated workspace preset (with 60%/100% layouts and ctrl-v insert), fallback to files, then jump
+if "$MM_BIN" --dump-config -o workspace >/dev/null 2>&1; then
+  PRESET="workspace"
+elif "$MM_BIN" --dump-config -o files >/dev/null 2>&1; then
   PRESET="files"
 else
   PRESET="jump"
