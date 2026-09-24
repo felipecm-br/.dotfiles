@@ -30,7 +30,6 @@ install_packages \
     zen-browser-bin \
     opencode-bin \
     gum \
-    sesh-bin \
     crush-bin \
     hugo \
     cava \

@@ -48,7 +48,6 @@ pkg_is_installed() {
     upscayl-bin) command -v upscayl &>/dev/null && return 0 ;;
     apm-unix) command -v apm &>/dev/null && return 0 ;;
     battery) [[ -f /etc/battery-charge-threshold.conf ]] && return 0 ;;
-    sesh-bin) command -v sesh &>/dev/null && return 0 ;;
     opencode-bin) command -v opencode &>/dev/null && return 0 ;;
     zen-browser-bin) command -v zen-browser &>/dev/null && return 0 ;;
     crush-bin) command -v crush &>/dev/null && return 0 ;;
