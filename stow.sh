@@ -387,8 +387,14 @@ process_packages() {
                 failed=$((failed + 1))
             fi
         else
-            log_warning "Package not found: $package"
-            failed=$((failed + 1))
+            if [[ "$action" == "delete" ]]; then
+                remove_from_lock "$package"
+                log_success "removed orphan from lock: $package"
+                success=$((success + 1))
+            else
+                log_warning "Package not found: $package"
+                failed=$((failed + 1))
+            fi
         fi
     done
 
