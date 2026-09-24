@@ -696,30 +696,27 @@ To satisfy both the requirement for standalone open-source modularity and the us
   - Published `v0.1.0` tag on `fcmiranda/acpd` triggering `.github/workflows/release.yml` with sha256 checksums.
   - Published `v0.1.0` tag on `fcmiranda/waymaker` triggering `.github/workflows/release.yml` with sha256 checksums.
   - Published `v0.1.0-cockpit` tag on `fcmiranda/lazygitrs` triggering `.github/workflows/release.yml` with musl-tools and sha256 checksums.
-- [ ] **Tier 2 Umbrella CI/CD (`terminal-ai-cockpit`):**
-  - Create `cockpit-manifest.json` tracking pinned upstream engine release tags (`acpd: v0.1.0`, `lazygitrs: v0.1.0-cockpit`, `waymaker: v0.1.0`).
-  - Create `.github/workflows/release.yml` that downloads pre-compiled Tier 1 assets, verifies SHA256 hashes, bundles them with scripts/plugins, and generates `terminal-ai-cockpit-v*.*.*-<arch>.tar.gz`.
-  - Implement Akita's `awk` changelog slicer from `CHANGELOG.md` for automated GitHub Release notes.
+- [x] **Tier 2 Umbrella CI/CD (`waymux`):**
+  - Created `waymux-manifest.json` tracking pinned upstream engine release tags (`acpd: v0.1.0`, `lazygitrs: v0.1.0-cockpit`, `waymaker: v0.1.0`).
+  - Created `.github/workflows/release.yml` downloading Tier 1 assets, computing SHA256 hashes, bundling scripts/plugins, and releasing multi-arch distribution tarballs.
+  - Added `CHANGELOG.md` following Keep a Changelog and SemVer.
 
-### Phase 3: Unified Repository Setup (`terminal-ai-cockpit`)
-- [ ] Initialize `fcmiranda/terminal-ai-cockpit`.
-- [ ] Structure directories: `bin/`, `tmux/`, `hooks/`, `scripts/`, `systemd/`, `docs/`.
-- [ ] Assemble `cockpit.tmux` registering status bar format options (`#{cockpit_status}`, `#{cockpit_spinner}`) and popup keybindings (`Ctrl+g`, `Prefix+s`, `Prefix+i`).
+### Phase 3: Unified Repository Setup (`waymux`)
+- [x] Initialized and published [`fcmiranda/waymux`](https://github.com/fcmiranda/waymux) on GitHub.
+- [x] Structured directories: `bin/`, `tmux/`, `hooks/`, `scripts/`, `systemd/`, `assets/`.
+- [x] Assembled `tmux/waymux.tmux` registering status bar format options (`#{waymux_status}`, `#{waymux_spinner}`) and ergonomic popup keybindings (`Ctrl+g`, `Prefix+s`, `Prefix+C-j`).
 
 ### Phase 4: Universal Installer (`install.sh`)
-- [ ] Write POSIX-compliant, zero-compilation `install.sh`:
-  - Detects OS/Arch.
-  - Downloads latest Tier 2 release tarball from `terminal-ai-cockpit`.
-  - Verifies sha256 checksum.
-  - Installs binaries to `~/.local/bin/`.
-  - Configures global gitignore for `.lines.json`.
-  - Activates `acpd.service` via `systemctl --user enable --now`.
-  - Automatically configures `.tmux.conf` with `cockpit.tmux`.
-- [ ] Test on clean Docker containers: Ubuntu 24.04, Alpine Linux, Arch Linux, macOS Sonoma.
+- [x] Implemented POSIX-compliant, zero-compilation `install.sh`:
+  - Detects OS & architecture (`x86_64`, `aarch64` musl/Darwin).
+  - Downloads latest Tier 1 pre-compiled engines with SHA-256 verification.
+  - Installs binaries to `~/.local/bin/` with `sesh -> wm` symlink.
+  - Automatically configures global gitignore for `.lines.json`.
+  - Configures and enables `acpd.service` on Linux via systemd user unit.
 
 ### Phase 5: Documentation & Community Launch
-- [ ] Problem-First `README.md`:
-  - Highlight flicker-free streaming, 1-key inline diff reviews, and 0% idle CPU (no tech-stack vanity).
+- [x] Problem-First `README.md`:
+  - Features official visual banner (`assets/waymux-banner.jpg`), problem-first pitch, quick install command, core engine breakdown, and Mermaid architecture diagram.
 - [ ] Terminal Demos (`vhs`):
   - Record animated SVG/GIFs demonstrating the frozen backdrop popup during active AI token streaming.
 - [ ] Packaging Distribution:

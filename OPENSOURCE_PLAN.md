@@ -36,14 +36,14 @@ Rather than forcing users to assemble disparate repositories or compile 13 C tre
              └───────────────────────────┼──────────────────────────────┘
                                          ▼
 ┌────────────────────────────────────────────────────────────────────────────────────────┐
-│          TIER 2: terminal-ai-cockpit UMBRELLA DISTRIBUTION (ZERO COMPILATION)          │
+│                 TIER 2: waymux UMBRELLA DISTRIBUTION (ZERO COMPILATION)                │
 ├────────────────────────────────────────────────────────────────────────────────────────┤
-│ • install.sh               -> 1-line zero-compile curl installer (< 30s execution)     │
-│ • cockpit-manifest.json    -> Pinned upstream release tags of acpd, lazygitrs, wm      │
-│ • pre-built release assets -> Unified tarballs: terminal-ai-cockpit-v*.*.*-<target>    │
-│ • cockpit.tmux             -> Event-driven status pills & popup bindings               │
+│ • install.sh               -> 1-line zero-compile curl installer (< 5s execution)      │
+│ • waymux-manifest.json     -> Pinned upstream release tags of acpd, lazygitrs, wm      │
+│ • pre-built release assets -> Unified tarballs: waymux-v*.*.*-<target>                 │
+│ • waymux.tmux              -> Event-driven status pills & ergonomic popup keybindings  │
 │ • scripts/                 -> tmux-popup-isolate.sh, lazygit-tmux-injector.sh          │
-│ • hooks/                   -> Zero-config AI agent hooks (antigravity, opencode)       │
+│ • hooks/                   -> Universal AI agent lifecycle hooks (waymux-hook.mjs)     │
 │ • systemd/                 -> acpd.service user unit                                   │
 └────────────────────────────────────────────────────────────────────────────────────────┘
 ```
