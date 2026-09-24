@@ -54,35 +54,37 @@ Rather than forcing users to assemble disparate repositories or compile 13 C tre
 
 ### A. `fcmiranda/acpd` (The Broker Daemon)
 - **Role:** High-throughput async broker managing per-pane agent state transitions, dynamic spinner rendering, and status sinks (Tmux, Waybar).
-- **Status:** Release CI configured, dynamic token generation verified, pushed to `origin/main`. Actively running via `systemd --user`.
-- **Next:** Centralize debouncing in `api.rs` (300ms), fix 4 `collapsible_if` clippy warnings.
+- **Status:** Release CI configured, dynamic token generation verified, clippy and formatting 100% compliant with 0 warnings, pushed to `origin/main`. Actively running via `systemd --user`.
+- **Next:** Tag `v0.1.0` release to trigger multi-arch static binary builds on GitHub Actions.
 
 ### B. `fcmiranda/lazygitrs` (The Review Engine)
 - **Role:** Blazing fast Git TUI with `--commits`, worktree port discovery, and headless inline diff review note injection (`S` bracket-pasted to active AI pane).
-- **Status:** Branch `fecavmi` pushed to `origin/fecavmi` (commit `27bce0347`). Bare worktree architecture active.
-- **Next:** Remediate clippy warnings, configure `cross-rs` for the 13 C tree-sitter parsers, relocate `.lines.json` to `.git/info/` to eliminate repository working tree pollution.
+- **Status:** Branch `fecavmi` pushed to `origin/fecavmi` (commit `27bce0347`). Bare worktree architecture active. Compiles cleanly.
+- **Next:** Remediate 69 unused/dead code warnings to pass `-D warnings` in CI, relocate `.lines.json` to `$XDG_STATE_HOME` or `.git/info/lines.json` to eliminate repository working tree pollution, and tag `v0.1.0-cockpit`.
 
-### C. `fcmiranda/matchmaker` / `waymaker` (The Nav & Selector Layer)
-- **Role:** Sub-millisecond fuzzy finder with live-reload inotify watch (`-w`), Kitty graphics caching, and Mermaid diagram rendering.
-- **Status:** Evolved and rebranded to **Waymaker** (`wm`) on branch `waymaker`, pushed to origin. Canonical binary `~/.local/bin/wm` active throughout dotfiles.
-- **Next:** Scope `rustfmt --check` in CI to changed files, gate dead code in `fm.rs`.
+### C. `fcmiranda/matchmaker` / `waymaker` (The Nav, Frecency & Session Layer)
+- **Role:** Sub-millisecond fuzzy finder with live-reload inotify watch (`-w`), Kitty graphics caching, Mermaid diagram rendering, ACID `redb` frecency store, and **native workspace & session engine** (`wm session`, `wm connect`, `wm last`, `wm preview`).
+- **Status:** Sesh and frecency completely incorporated into Waymaker (`session.rs`). External `sesh-bin` (Go) and `zoxide` dependencies **100% eliminated**. Over 220 tests passing with 0 failures (`cargo test`). Canonical binary `~/.local/bin/wm` active throughout dotfiles with drop-in `sesh` wrapper in `utils/.local/bin/sesh`.
+- **Next:** Tag `v0.1.0` release on branch `waymaker` to trigger multi-arch binary packaging.
 
 ### D. `tmux` Backdrop Isolation Layer
 - **Role:** Guarantees popup stability during active token streaming via frozen ANSI backdrops.
-- **Status:** Core isolator script [`tmux/.config/tmux/tmux-popup-isolate.sh`](tmux/.config/tmux/tmux-popup-isolate.sh) implemented with full CLI parsing, conditional idle bypass, and `0600` UID-pane isolation. All popup callers (`grep-picker.sh`, `lazygitrs-popup.sh`, `files-picker.sh`, `sesh-picker.sh`, `window-picker.sh`, `scrollback-extract.sh`, `awt-popup.sh`) migrated.
-- **Next:** Optional decoupled border theming fallbacks for generic non-Omarchy systems.
+- **Status:** Core isolator script [`tmux/.config/tmux/tmux-popup-isolate.sh`](tmux/.config/tmux/tmux-popup-isolate.sh) implemented with full CLI parsing, conditional idle bypass, and `0600` UID-pane isolation. All 7 popup callers (`grep-picker.sh`, `lazygitrs-popup.sh`, `files-picker.sh`, `sesh-picker.sh`, `window-picker.sh`, `scrollback-extract.sh`, `awt-popup.sh`) 100% migrated and verified.
+- **Next:** Package inside umbrella repo `terminal-ai-cockpit/scripts/`.
 
 ---
 
-## 4. Immediate Roadmap & Action Items
+## 4. Immediate Roadmap & Action Items (What is Missing for Launch)
 
 - [x] **Audit & Synchronization:** Align dotfiles and documentation with the Two-Tier Cockpit strategy and Waymaker rebrand.
 - [x] **Git Remote Tracking:** Ensure all engine branches (`acpd:main`, `lazygitrs:fecavmi`, `waymaker:waymaker`) are pushed to remote origins.
-- [x] **Backdrop Isolator:** Author and deploy `tmux-popup-isolate.sh`.
-- [x] **Caller Migration:** Route dotfiles tmux popup scripts through `tmux-popup-isolate.sh`.
-- [x] **Lints & Build Sanitization:** Fixed `acpd` clippy warnings and sanitized hardcoded `/home/fecavmi` fallbacks in agent hooks.
-- [ ] **Umbrella Meta-Repo:** Initialize `fcmiranda/terminal-ai-cockpit` with `cockpit-manifest.json` and Tier 2 GitHub Actions packaging.
-- [ ] **Universal Installer:** Ship POSIX `install.sh` for one-command installation.
+- [x] **Backdrop Isolator:** Author and deploy `tmux-popup-isolate.sh` with migration of all 7 callers.
+- [x] **Lints & Build Sanitization:** Fixed `acpd` clippy warnings, eliminated double-debounce, sanitized hardcoded `/home/fecavmi` fallbacks in agent hooks.
+- [x] **Native Sesh & Frecency Integration:** Fully incorporated `sesh` workspace management into `waymaker` (`session.rs`), eliminating external `sesh-bin` and `zoxide` dependencies with drop-in wrapper.
+- [ ] **Tier 1 Engine Tagged Releases:** Publish `v0.1.0` releases for `acpd` and `waymaker`, and `v0.1.0-cockpit` for `lazygitrs` to populate GitHub Release assets.
+- [ ] **Umbrella Meta-Repo:** Initialize `fcmiranda/terminal-ai-cockpit` with `cockpit-manifest.json`, `cockpit.tmux`, `scripts/`, `hooks/`, and `systemd/`.
+- [ ] **Universal Installer:** Ship POSIX `install.sh` for one-command, zero-compilation curl installation (< 30s execution).
+- [ ] **Problem-First README & VHS Demos:** Record animated SVGs showing flicker-free streaming popups and 1-key inline diff reviews.
 
 ---
 
