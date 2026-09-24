@@ -194,11 +194,13 @@ The Cockpit ecosystem classifies all runtime tools into 3 distinct tiers:
 | **`ripgrep` (`rg`)** | Full-text code search (`Prefix + /`) | **Recommended Accelerator** | Required for `grep-picker.sh` (modal search) |
 | **`bat`** | Syntax highlighting & line highlight | **Recommended Accelerator** | Graceful fallback to plain `cat` in picker previews |
 | **`fd`** | High-performance filesystem walker | **Recommended Accelerator** | Graceful fallback to `waymaker` native AsyncWalker |
-| **`zoxide`** | Frecency directory database (`j`, `ji`) | **Recommended Accelerator** | `wm -o jump` defaults to standard directory traversal |
 | **`wl-copy` / `xclip`** | OS System Clipboard bridge | **System Integration** | Fallback to Tmux internal paste buffer & OSC 52 |
 | **`pw-play` / `paplay`** | Sound telemetry on AI state changes | **Optional Audio Integration** | Silent execution if sound adapter or player absent |
 | **`nvim` / `$EDITOR`** | In-situ code inspection from search | **User Editor** | Fallback to `$EDITOR` or `vim` |
 | **Nerd Fonts** | Icon badges, spinners & status pills | **Visual Requirement** | Pure Unicode/ASCII fallbacks in standard terminals |
+
+> [!NOTE]
+> **Native Frecency Architecture:** Frecency directory scoring, bookmarks, and recency tracking are 100% native to Waymaker via its embedded ACID `redb` database (`~/.local/state/waymaker/frecency.redb`) with continuous exponential half-life decay. External utilities like `zoxide` or `fre` are not required and are completely excluded from the Cockpit architecture.
 
 ---
 
