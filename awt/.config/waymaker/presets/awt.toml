@@ -223,17 +223,17 @@ ansi = true
 output_template = "{=session}\t{=path}"
 
 [binds]
-"@delete_worktree" = '''Confirm({red,bold:󱓌} Delete worktree {=branch}? (Enter/Esc) | ~/.config/matchmaker/scripts/awt-delete.sh "{=session}" "{=path}" "{=raw}")'''
+"@delete_worktree" = '''Confirm({red,bold:󱓌} Delete worktree {=branch}? (Enter/Esc) | ~/.config/waymaker/scripts/awt-delete.sh "{=session}" "{=path}" "{=raw}")'''
 "@new_worktree" = [
-    '''Execute(~/.config/matchmaker/scripts/awt-new.sh "{=raw}")''',
+    '''Execute(~/.config/waymaker/scripts/awt-new.sh "{=raw}")''',
     "Reload",
 ]
-"@merge_worktree" = '''Confirm({magenta,bold:} Merge into {=branch}? (Enter/Esc) | ~/.config/matchmaker/scripts/awt-merge.sh "{=raw}" "{=path}" "{=session}" "{=base}")'''
-"@ship_worktree" = '''Confirm({magenta,bold:󱓍} Ship (Merge & Push) into {=branch}? (Enter/Esc) | ~/.config/matchmaker/scripts/awt-merge.sh "{=raw}" "{=path}" "{=session}" "{=base}" --push)'''
-"@rebase_worktree" = '''Confirm({yellow,bold:󱓎} Rebase {=branch} onto {=base}? (Enter/Esc) | ~/.config/matchmaker/scripts/awt-rebase.sh "{=raw}" "{=path}" "{=base}")'''
-"@rename_worktree" = '''Prompt({cyan,bold:} Rename branch to: | ~/.config/matchmaker/scripts/awt-rename.sh "{=raw}" "{=path}" "{input}" | {=raw})'''
+"@merge_worktree" = '''Confirm({magenta,bold:} Merge into {=branch}? (Enter/Esc) | ~/.config/waymaker/scripts/awt-merge.sh "{=raw}" "{=path}" "{=session}" "{=base}")'''
+"@ship_worktree" = '''Confirm({magenta,bold:󱓍} Ship (Merge & Push) into {=branch}? (Enter/Esc) | ~/.config/waymaker/scripts/awt-merge.sh "{=raw}" "{=path}" "{=session}" "{=base}" --push)'''
+"@rebase_worktree" = '''Confirm({yellow,bold:󱓎} Rebase {=branch} onto {=base}? (Enter/Esc) | ~/.config/waymaker/scripts/awt-rebase.sh "{=raw}" "{=path}" "{=base}")'''
+"@rename_worktree" = '''Prompt({cyan,bold:} Rename branch to: | ~/.config/waymaker/scripts/awt-rename.sh "{=raw}" "{=path}" "{input}" | {=raw})'''
 "@pr_worktree" = [
-    '''Execute(~/.config/matchmaker/scripts/awt-pr.sh)''',
+    '''Execute(~/.config/waymaker/scripts/awt-pr.sh)''',
     "Reload",
 ]
 "@fetch_remotes" = [

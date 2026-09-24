@@ -16,7 +16,7 @@ show = true
 side = "right"
 percentage = 70
 
-[start]
+[start.command]
 command = '''
 find "$PWD" "$HOME/.dotfiles/main" \
     -maxdepth 4 \

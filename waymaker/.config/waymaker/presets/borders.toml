@@ -60,9 +60,6 @@ status_inline = true
 [start]
 mode = "nav"
 
-[start.command]
-additional = []
-
 [binds]
 # Standard / query mode navigation & actions
 "ctrl-j" = "Down"

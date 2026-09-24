@@ -151,7 +151,9 @@ while true; do
             git -C "$target_dir" config "branch.${branch_name}.base" "$bbase" 2>/dev/null || true
 
             # Run post-create hook if present
-            if [[ -x "$HOME/.config/matchmaker/hooks/post-create.sh" ]]; then
+            if [[ -x "$HOME/.config/waymaker/hooks/post-create.sh" ]]; then
+                "$HOME/.config/waymaker/hooks/post-create.sh" "$target_dir" "$branch_name" "$bbase" 2>/dev/null || true
+            elif [[ -x "$HOME/.config/matchmaker/hooks/post-create.sh" ]]; then
                 "$HOME/.config/matchmaker/hooks/post-create.sh" "$target_dir" "$branch_name" "$bbase" 2>/dev/null || true
             fi
 

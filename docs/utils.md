@@ -37,7 +37,7 @@ Defined in [`zsh/.zsh/utils/functions.zsh`](../zsh/.zsh/utils/functions.zsh):
 
 ## Matchmaker Presets (`mm -o <preset>`)
 
-Specialized TUI pickers configured in [`matchmaker/.config/matchmaker/presets/`](../matchmaker/.config/matchmaker/presets/):
+Specialized TUI pickers configured in [`waymaker/.config/waymaker/presets/`](../waymaker/.config/waymaker/presets/):
 * `mm -o wt` — Git Worktree Switcher with live `git status` and commit log preview.
 * `mm -o kill` — Interactive TCP listening port & process terminator (`Enter` for SIGTERM, `Ctrl+X` for SIGKILL).
 * `mm -o memory` — AI memory, `AGENTS.md`, and project rules explorer.

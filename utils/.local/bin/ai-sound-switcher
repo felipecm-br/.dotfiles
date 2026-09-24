@@ -2,7 +2,8 @@
 # ai-sound-switcher — Interactive AI Response Sound Switcher using Matchmaker (mm)
 set -eo pipefail
 
-PRESET_FILE="$HOME/.config/matchmaker/presets/sounds.toml"
+PRESET_FILE="$HOME/.config/waymaker/presets/sounds.toml"
+[[ -f "$PRESET_FILE" ]] || PRESET_FILE="$HOME/.config/matchmaker/presets/sounds.toml"
 MM_BIN=$(command -v wm || command -v mm || echo "$HOME/.local/bin/wm")
 
 if [[ ! -x "$MM_BIN" ]]; then

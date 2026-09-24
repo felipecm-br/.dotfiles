@@ -15,7 +15,7 @@ Welcome to the central documentation index for this Arch Linux + Omarchy dotfile
 - [**Open-Source AI Cockpit Stack Blueprint**](architecture/open-source-ai-tmux-stack-plan.md): Architecture and distribution strategy for the open-source `acpd` + `lazygitrs` + `mm` + `tmux` terminal AI cockpit stack.
 
 ### 🐚 1. Shell & Navigation (`docs/shell/`)
-- [**Smart Tab Completion & Matchmaker**](shell/completion.md): Context-aware `<Tab>`, auto-spacing on aliases (`gco<Tab>`), dual backends (`Ctrl+N` vs `Ctrl+F`), and the [`ftb.toml`](../matchmaker/.config/matchmaker/presets/ftb.toml) preset with on-demand preview (`Ctrl+P`).
+- [**Smart Tab Completion & Matchmaker**](shell/completion.md): Context-aware `<Tab>`, auto-spacing on aliases (`gco<Tab>`), dual backends (`Ctrl+N` vs `Ctrl+F`), and the [`ftb.toml`](../waymaker/.config/waymaker/presets/ftb.toml) preset with on-demand preview (`Ctrl+P`).
 - [**Zsh Vi Mode & Custom Surrounds**](shell/vi-mode.md): `zsh-vi-mode` integration, dynamic Starship prompt sync (`ZVM_MODE`), and unified surround text objects (`ib`, `ab`, `iq`, `aq`).
 - [**Matchmaker Presets Reference**](shell/matchmaker-presets.md): Presets configuration guide for fuzzy finder layouts, preview commands, and navigation modes.
 

@@ -160,11 +160,11 @@ separator = "\n"
 
 # Toggle Match Case (Ctrl+S = S for Sensitive)
 # Flips: ic <-> cs  and  ww <-> cs+ww
-"ctrl-s" = "Transform(sh ~/.config/matchmaker/scripts/rg-toggle-case.sh)"
+"ctrl-s" = "Transform(sh ~/.config/waymaker/scripts/rg-toggle-case.sh)"
 
 # Toggle Whole Word (Ctrl+W = W for Word)
 # Flips: ic <-> ww  and  cs <-> cs+ww
-"ctrl-w" = "Transform(sh ~/.config/matchmaker/scripts/rg-toggle-word.sh)"
+"ctrl-w" = "Transform(sh ~/.config/waymaker/scripts/rg-toggle-word.sh)"
 
 [ui.nav.binds]
 "enter" = "Become(nvim +{2} {1})"

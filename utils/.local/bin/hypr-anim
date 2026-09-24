@@ -3,7 +3,8 @@
 
 ANIM_DIR="$HOME/.config/hypr/animations"
 CONFIG_DEST="$HOME/.config/hypr/animations.lua"
-PRESET_FILE="$HOME/.config/matchmaker/presets/animations.toml"
+PRESET_FILE="$HOME/.config/waymaker/presets/animations.toml"
+[[ -f "$PRESET_FILE" ]] || PRESET_FILE="$HOME/.config/matchmaker/presets/animations.toml"
 
 # Ensure waymaker binary is accessible
 MM_BIN=$(command -v wm || command -v mm || echo "$HOME/.local/bin/wm")

@@ -10,6 +10,8 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+AWT_WM_DIR="$ROOT/awt/.config/waymaker"
+[ -d "$AWT_WM_DIR" ] || AWT_WM_DIR="$ROOT/awt/.config/matchmaker"
 FAILURES=0
 
 pass() { echo -e "\033[1;32m✔ PASS:\033[0m $1"; }
@@ -20,24 +22,28 @@ echo "=== Running AWT Improvements Verification Suite ==="
 # ── 1. Validate TOML Presets Contract ──
 echo -e "\n[1/6] Validating TOML Presets (awt.toml & awt-pr.toml)..."
 python3 - <<EOF
-import tomllib
+import os, tomllib
+
+presets_dir = "$AWT_WM_DIR/presets"
 
 # 1.1 awt.toml
-with open("$ROOT/awt/.config/matchmaker/presets/awt.toml", "rb") as f:
+with open(os.path.join(presets_dir, "awt.toml"), "rb") as f:
     awt = tomllib.load(f)
 
 assert "@ship_worktree" in awt["binds"], "awt.toml missing @ship_worktree"
 assert "@pr_worktree" in awt["binds"], "awt.toml missing @pr_worktree"
-assert awt["binds"]["nav^^S"] == "@ship_worktree", "awt.toml missing nav^^S bind"
-assert awt["binds"]["nav^^P"] == "@pr_worktree", "awt.toml missing nav^^P bind"
+nav_binds = awt.get("ui", {}).get("nav", {}).get("binds", {})
+assert awt["binds"].get("nav^^S") == "@ship_worktree" or nav_binds.get("S") == "@ship_worktree", "awt.toml missing nav S bind"
+assert awt["binds"].get("nav^^P") == "@pr_worktree" or nav_binds.get("P") == "@pr_worktree", "awt.toml missing nav P bind"
 assert "[S]" in awt["footer"]["content"], "awt.toml footer missing [S] Ship indicator"
 assert "[P]" in awt["footer"]["content"], "awt.toml footer missing [P] PR indicator"
 
 # 1.2 awt-pr.toml
-with open("$ROOT/awt/.config/matchmaker/presets/awt-pr.toml", "rb") as f:
+with open(os.path.join(presets_dir, "awt-pr.toml"), "rb") as f:
     pr = tomllib.load(f)
 
-assert pr["ui"]["nav_mode"] is True, "awt-pr.toml nav_mode should be True"
+nav_active = pr["ui"].get("nav_mode", pr["ui"].get("nav", {}).get("active", False))
+assert nav_active is True, "awt-pr.toml nav_mode should be True"
 assert "number" in [col["name"] for col in pr["columns"]["names"]], "missing number column in awt-pr.toml"
 assert "title" in [col["name"] for col in pr["columns"]["names"]], "missing title column in awt-pr.toml"
 EOF
@@ -112,7 +118,7 @@ mkdir -p "$TEST_TMP/container/feat-sandbox"
 )
 
 # Run post-create hook pointing to feat-sandbox
-"$ROOT/awt/.config/matchmaker/hooks/post-create.sh" "$TEST_TMP/container/feat-sandbox" "feat-sandbox" "main"
+"$AWT_WM_DIR/hooks/post-create.sh" "$TEST_TMP/container/feat-sandbox" "feat-sandbox" "main"
 
 # Check: .env must be copied
 if [ -f "$TEST_TMP/container/feat-sandbox/.env" ] && grep -q "primary_secret" "$TEST_TMP/container/feat-sandbox/.env"; then
@@ -165,7 +171,7 @@ mkdir -p "$MERGE_TMP/repo"
 # Merge feature into main with --no-tmux, --no-remove, --push
 (
     cd "$MERGE_TMP/repo/feat-branch"
-    "$ROOT/awt/.config/matchmaker/scripts/awt-merge.sh" "main" "$MERGE_TMP/repo/main" "test-session" "main" --no-tmux --no-remove --push
+    "$AWT_WM_DIR/scripts/awt-merge.sh" "main" "$MERGE_TMP/repo/main" "test-session" "main" --no-tmux --no-remove --push
 )
 
 # Verify main has feature commit and origin was updated
@@ -199,7 +205,7 @@ fi
     git add linear.txt && git commit -qm "linear commit"
 
     # Merge with --rebase
-    "$ROOT/awt/.config/matchmaker/scripts/awt-merge.sh" "main" "$MERGE_TMP/repo/main" "linear-session" "main" --no-tmux --no-remove --rebase
+    "$AWT_WM_DIR/scripts/awt-merge.sh" "main" "$MERGE_TMP/repo/main" "linear-session" "main" --no-tmux --no-remove --rebase
 )
 
 if [ -f "$MERGE_TMP/repo/main/linear.txt" ]; then
@@ -222,7 +228,7 @@ fi
 
     # Attempt to ship (push will fail)
     set +e
-    "$ROOT/awt/.config/matchmaker/scripts/awt-merge.sh" "main" "$MERGE_TMP/repo/main" "rollback-sess" "main" --no-tmux --no-remove --push >/dev/null 2>&1
+    "$AWT_WM_DIR/scripts/awt-merge.sh" "main" "$MERGE_TMP/repo/main" "rollback-sess" "main" --no-tmux --no-remove --push >/dev/null 2>&1
     set -e
     rm -f "$MERGE_TMP/origin.git/hooks/pre-receive"
 )
@@ -235,7 +241,7 @@ fi
 
 # ── 5. Validate GitHub PR Handler (awt-pr.sh) ──
 echo -e "\n[5/6] Validating awt-pr.sh parsing..."
-PR_SCRIPT="$ROOT/awt/.config/matchmaker/scripts/awt-pr.sh"
+PR_SCRIPT="$AWT_WM_DIR/scripts/awt-pr.sh"
 bash -n "$PR_SCRIPT" || fail "awt-pr.sh syntax error"
 
 # Check PR URL and raw number parsing logic

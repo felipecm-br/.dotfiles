@@ -75,15 +75,13 @@ else
     find . -type f
 fi
 '''
-
-[start]
-ansi = false
-
-[start.command]
 additional = [
     "",
     "wm list 2>/dev/null"
 ]
+
+[start]
+ansi = false
 
 [binds]
 "ctrl-c" = "Quit"

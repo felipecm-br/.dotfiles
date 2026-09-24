@@ -19,7 +19,9 @@ echo "=== Running Picker Harmonization & Ripgrep Live Search Test Suite ==="
 
 # ── 1. Validate files.toml Contract ──
 echo -e "\n[1/6] Validating files.toml Preset & Data Source Cycling..."
-python3 - "$ROOT/matchmaker/.config/matchmaker/presets/files.toml" <<'EOF'
+FILES_PRESET="$ROOT/waymaker/.config/waymaker/presets/files.toml"
+[[ -f "$FILES_PRESET" ]] || FILES_PRESET="$ROOT/matchmaker/.config/matchmaker/presets/files.toml"
+python3 - "$FILES_PRESET" <<'EOF'
 import sys, tomllib
 
 with open(sys.argv[1], "rb") as f:
@@ -70,7 +72,9 @@ fi
 
 # ── 2. Validate rg.toml Contract ──
 echo -e "\n[2/6] Validating rg.toml Preset (Live Ripgrep)..."
-python3 - "$ROOT/matchmaker/.config/matchmaker/presets/rg.toml" <<'EOF'
+RG_PRESET="$ROOT/waymaker/.config/waymaker/presets/rg.toml"
+[[ -f "$RG_PRESET" ]] || RG_PRESET="$ROOT/matchmaker/.config/matchmaker/presets/rg.toml"
+python3 - "$RG_PRESET" <<'EOF'
 import sys, re, subprocess, tomllib
 
 with open(sys.argv[1], "rb") as f:
@@ -88,7 +92,7 @@ assert m is not None, f"Regex {pattern} failed to match"
 assert m.groups() == ("path/to a space/app.rs", "42", "fn main() {"), f"Unexpected groups: {m.groups()}"
 
 # Test regex split against real stripped ripgrep output
-repo_root = sys.argv[1].split("/matchmaker/")[0]
+repo_root = sys.argv[1].split("/waymaker/")[0] if "/waymaker/" in sys.argv[1] else sys.argv[1].split("/matchmaker/")[0]
 rg_raw = subprocess.check_output(
     ["rg", "--hidden", "--glob", "!.git", "--line-number", "--no-heading", "--color=always", "--ignore-case", "--", "files-picker"],
     cwd=repo_root,
@@ -165,7 +169,9 @@ assert "Transform(" in binds.get("ctrl-s", ""), "ctrl-s must use Transform to up
 assert "Transform(" in binds.get("ctrl-w", ""), "ctrl-w must use Transform to update state"
 # Transform delegate scripts must emit Store, SetStyledPrompt, Reload
 import os
-scripts_dir = os.path.join(os.path.expanduser("~"), ".config", "matchmaker", "scripts")
+scripts_dir = os.path.join(os.path.expanduser("~"), ".config", "waymaker", "scripts")
+if not os.path.isdir(scripts_dir):
+    scripts_dir = os.path.join(os.path.expanduser("~"), ".config", "matchmaker", "scripts")
 for fname, label in [("rg-toggle-case.sh", "match-case"), ("rg-toggle-word.sh", "whole-word")]:
     script_path = os.path.join(scripts_dir, fname)
     assert os.path.isfile(script_path), f"Toggle script {fname} must exist at {script_path}"
@@ -258,10 +264,13 @@ GREP_SCRIPT="$ROOT/tmux/.config/tmux/grep-picker.sh"
 [ -L "$ROOT/tmux/.config/tmux/rg-picker.sh" ] && [ "$(readlink "$ROOT/tmux/.config/tmux/rg-picker.sh")" = "grep-picker.sh" ] \
   && ok "rg-picker.sh -> grep-picker.sh symlink" || bad "rg-picker.sh symlink"
 
-[ -L "$ROOT/matchmaker/.config/matchmaker/presets/grep-picker.toml" ] && [ "$(readlink "$ROOT/matchmaker/.config/matchmaker/presets/grep-picker.toml")" = "rg.toml" ] \
+PRESETS_DIR="$ROOT/waymaker/.config/waymaker/presets"
+[ -d "$PRESETS_DIR" ] || PRESETS_DIR="$ROOT/matchmaker/.config/matchmaker/presets"
+
+[ -L "$PRESETS_DIR/grep-picker.toml" ] && [ "$(readlink "$PRESETS_DIR/grep-picker.toml")" = "rg.toml" ] \
   && ok "grep-picker.toml -> rg.toml symlink" || bad "grep-picker.toml symlink"
 
-[ -L "$ROOT/matchmaker/.config/matchmaker/presets/files-picker.toml" ] && [ "$(readlink "$ROOT/matchmaker/.config/matchmaker/presets/files-picker.toml")" = "files.toml" ] \
+[ -L "$PRESETS_DIR/files-picker.toml" ] && [ "$(readlink "$PRESETS_DIR/files-picker.toml")" = "files.toml" ] \
   && ok "files-picker.toml -> files.toml symlink" || bad "files-picker.toml symlink"
 
 # Backdrop isolation in scripts (delegates to tmux-popup-isolate.sh or inline)
@@ -305,10 +314,12 @@ else
   bad "docs-lint.sh failed"
 fi
 
-if "$ROOT/stow.sh" -n matchmaker tmux >/dev/null 2>&1; then
-  ok "stow.sh -n matchmaker tmux passed"
+STOW_PKG="waymaker"
+[ -d "$ROOT/waymaker" ] || STOW_PKG="matchmaker"
+if "$ROOT/stow.sh" -n "$STOW_PKG" tmux >/dev/null 2>&1; then
+  ok "stow.sh -n $STOW_PKG tmux passed"
 else
-  bad "stow.sh -n matchmaker tmux failed"
+  bad "stow.sh -n $STOW_PKG tmux failed"
 fi
 
 echo -e "\n=== Summary: $FAILURES failure(s) ==="

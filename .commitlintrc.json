@@ -39,6 +39,7 @@
         "fonts",
         "stow",
         "matchmaker",
+        "waymaker",
         "shell",
         "deps"
       ]

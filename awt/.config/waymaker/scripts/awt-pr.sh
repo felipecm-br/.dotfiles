@@ -99,7 +99,8 @@ fi
 git -C "$target_dir" config "branch.${branch_name}.base" "main" 2>/dev/null || true
 
 # Run post-create hook
-hook_script="$HOME/.config/matchmaker/hooks/post-create.sh"
+hook_script="$HOME/.config/waymaker/hooks/post-create.sh"
+[ -x "$hook_script" ] || hook_script="$HOME/.config/matchmaker/hooks/post-create.sh"
 [ -x "$hook_script" ] || hook_script="$(dirname "$0")/../hooks/post-create.sh"
 if [[ -x "$hook_script" ]]; then
     "$hook_script" "$target_dir" "$branch_name" "main" 2>/dev/null || true

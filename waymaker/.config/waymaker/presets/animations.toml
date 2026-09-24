@@ -53,9 +53,6 @@ prompt = " Hyprland Animations > "
 [start]
 mode = "nav"
 
-[start.command]
-additional = []
-
 [binds]
 "ctrl-j" = "Down"
 "ctrl-k" = "Up"

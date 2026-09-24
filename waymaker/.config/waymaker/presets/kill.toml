@@ -42,7 +42,7 @@ lsof -i :"$port" 2>/dev/null
 side = "right"
 percentage = 60
 
-[start]
+[start.command]
 command = '''
 lsof -iTCP -sTCP:LISTEN -n -P 2>/dev/null | awk 'NR>1 {
     split($9, a, ":");

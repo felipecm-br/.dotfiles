@@ -6,7 +6,8 @@ set -u
 
 ROOT="$HOME/.dotfiles/main"
 FIX="$ROOT/tests/fixtures/scrollback_sample.txt"
-PRESET="$ROOT/matchmaker/.config/matchmaker/presets/scrollback.toml"
+PRESET="$ROOT/waymaker/.config/waymaker/presets/scrollback.toml"
+[[ -f "$PRESET" ]] || PRESET="$ROOT/matchmaker/.config/matchmaker/presets/scrollback.toml"
 SCRIPT="$ROOT/tmux/.config/tmux/scrollback-extract.sh"
 CONF="$ROOT/tmux/.config/tmux/tmux.conf"
 fail=0

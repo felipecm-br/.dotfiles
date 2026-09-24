@@ -67,7 +67,7 @@ show = false
 
 [start.command]
 command = '''
-"$HOME/.config/matchmaker/scripts/awt-ai-list.sh"
+"$HOME/.config/waymaker/scripts/awt-ai-list.sh"
 '''
 
 [start]

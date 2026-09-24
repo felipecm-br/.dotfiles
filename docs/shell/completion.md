@@ -149,11 +149,11 @@ Eliminates the friction of having to manually type a trailing space before reque
 
 | Keybinding | Backend | Engine | Architecture & Purpose |
 | :--- | :--- | :--- | :--- |
-| **`Ctrl+N`** / **`<Tab>`** | **Matchmaker** | [`mm-ftb`](../../matchmaker/.local/bin/mm-ftb) | **Zero-Fork & Zero-Disk I/O**: Direct in-memory streaming with preset [`ftb.toml`](../../matchmaker/.config/matchmaker/presets/ftb.toml) (<2ms latency) |
+| **`Ctrl+N`** / **`<Tab>`** | **Matchmaker** | [`mm-ftb`](../../waymaker/.local/bin/mm-ftb) | **Zero-Fork & Zero-Disk I/O**: Direct in-memory streaming with preset [`ftb.toml`](../../waymaker/.config/waymaker/presets/ftb.toml) (<2ms latency) |
 
 ---
 
-## 4. Matchmaker FZF-Tab Preset Highlights ([`ftb.toml`](../../matchmaker/.config/matchmaker/presets/ftb.toml))
+## 4. Matchmaker FZF-Tab Preset Highlights ([`ftb.toml`](../../waymaker/.config/waymaker/presets/ftb.toml))
 
 The dedicated completion preset includes key UX optimizations:
 
@@ -169,7 +169,7 @@ The dedicated completion preset includes key UX optimizations:
 
 ---
 
-## 5. Matchmaker Jump Mode ([`jump.toml`](../../matchmaker/.config/matchmaker/presets/jump.toml))
+## 5. Matchmaker Jump Mode ([`jump.toml`](../../waymaker/.config/waymaker/presets/jump.toml))
 
 Triggered directly with `Ctrl+F`. Optimized for directory traversal, frecency ranking, and subfolder navigation:
 

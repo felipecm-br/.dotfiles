@@ -73,7 +73,7 @@ Bind ([`tmux.conf`](../../tmux/.config/tmux/tmux.conf)): `Prefix` then `y` or `C
 
 1. `tmux capture-pane -pJS - -t <origin>` exports the origin pane explicitly (never the popup), joining wrapped lines (`-J`) so split commands and URLs survive; full text kept in `/tmp/scrollback-extract-src.txt`.
 2. Token files per filter precomputed (`-all/-cmd/-path/-url/-sha.txt`), deduped and recent-first. Commands are extracted from prompt-prefixed lines (`❯`, `$`, `#`, `>`), AI tool execution logs (`● Bash(...)`), and common Linux CLI verbs (`pacman`, `yay`, `rm`, `mv`, `git`, `cargo`, `just`, `systemctl`, etc.).
-3. `wm -o scrollback` ([preset](../../matchmaker/.config/matchmaker/presets/scrollback.toml): nav mode starting in filter, jump-style keymap) with items from `[start] command`. Keys: `Enter` copies, `Ctrl+V` inserts the current token/command directly into the origin pane (`MM_ORIGIN_PANE`), `Ctrl+E` (filter) / `e` (nav) opens a `path[:line[:col]]` token in `$EDITOR` via [`scrollback-open.sh`](../../tmux/.config/tmux/scrollback-open.sh), `Tab`/`Shift-Tab` cycle explicit filter modes (all→cmd→path→url→sha→all), `Space` multi-selects, `Esc` cascades filter→nav→quit, `Ctrl+P` / `P` cycles between 60% and 95% full-modal preview.
+3. `wm -o scrollback` ([preset](../../waymaker/.config/waymaker/presets/scrollback.toml): nav mode starting in filter, jump-style keymap) with items from `[start] command`. Keys: `Enter` copies, `Ctrl+V` inserts the current token/command directly into the origin pane (`MM_ORIGIN_PANE`), `Ctrl+E` (filter) / `e` (nav) opens a `path[:line[:col]]` token in `$EDITOR` via [`scrollback-open.sh`](../../tmux/.config/tmux/scrollback-open.sh), `Tab`/`Shift-Tab` cycle explicit filter modes (all→cmd→path→url→sha→all), `Space` multi-selects, `Esc` cascades filter→nav→quit, `Ctrl+P` / `P` cycles between 60% and 95% full-modal preview.
 4. Copy tail runs detached (`trap '' HUP`, `&`) to `wl-copy` (fallback `xclip`, then tmux buffer) with a `tmux display-message` confirm, so the popup closes the instant `Enter` is pressed; stages are timestamped in `/tmp/scrollback-mm.log`. Covered by `tests/scrollback_extract.test.sh`.
 
 Rule of thumb: `Prefix + E` = **read** (long-form inspection in Neovim), `Prefix + e` / `Prefix + C-e` = **explore** (workspace files popup), `Prefix + y` / `Prefix + C-y` = **yank/extract** (tokens & shell commands to clipboard or prompt in ~3 keystrokes).
@@ -87,7 +87,7 @@ Browse workspace files and AI-generated code in a popup via `mm -o files` — in
 Bind ([`tmux.conf`](../../tmux/.config/tmux/tmux.conf)):
 - `Prefix + e` / `Prefix + C-e`: Opens Golden Ratio popup (`75% × 60%`) via inward roll (`e` = Explorer).
 
-Architecture ([`files-picker.sh`](../../tmux/.config/tmux/files-picker.sh) and preset [`files.toml`](../../matchmaker/.config/matchmaker/presets/files.toml)):
+Architecture ([`files-picker.sh`](../../tmux/.config/tmux/files-picker.sh) and preset [`files.toml`](../../waymaker/.config/waymaker/presets/files.toml)):
 1. **Themed Popup & Pure Icon Badge**: Uses theme blue/cyan border with pure icon badge ` 󰈞 󰄧 󰋩 ` (Explorer, Mermaid diagrams, and Photos), with frozen backdrop protection when an agent streams.
 2. **Native Markdown, Mermaid & Photos Rendering**: Automatically routes `.md`, `.markdown`, `.mmd`, `.png`, `.jpg`, `.webp` through native media and diagram pipelines with Kitty Graphics Protocol passthrough.
 3. **Diagram & Photo Zoom Controls & HUD Icons**:
@@ -117,7 +117,7 @@ Instant full-text workspace search using Matchmaker and ripgrep, featuring debou
 Bind ([`tmux.conf`](../../tmux/.config/tmux/tmux.conf)):
 - `Prefix + /`: Opens centered modal (`85% × 75%`) via universal `/` search mnemonic.
 
-Architecture ([`grep-picker.sh`](../../tmux/.config/tmux/grep-picker.sh) and preset [`rg.toml`](../../matchmaker/.config/matchmaker/presets/rg.toml)):
+Architecture ([`grep-picker.sh`](../../tmux/.config/tmux/grep-picker.sh) and preset [`rg.toml`](../../waymaker/.config/waymaker/presets/rg.toml)):
 1. **Live Query Reload**: Search updates in real-time as you type, aborting previous processes automatically on input changes.
 2. **45/55 Foveal Layout**: 45% candidate match column on the left and 55% syntax-highlighted code preview on the right.
 3. **Line-Synced `bat` Preview**: Automatically centers and highlights the matched line number using `bat --highlight-line`.

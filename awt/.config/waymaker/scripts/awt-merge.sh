@@ -168,7 +168,9 @@ if [[ $merge_success -eq 1 ]]; then
     fi
 
     # Trigger post-merge lifecycle hook
-    if [[ -x "$HOME/.config/matchmaker/hooks/post-merge.sh" && -d "$target_wt" ]]; then
+    if [[ -x "$HOME/.config/waymaker/hooks/post-merge.sh" && -d "$target_wt" ]]; then
+        "$HOME/.config/waymaker/hooks/post-merge.sh" "$target_wt" "$target_branch" "$source_branch" 2>/dev/null || true
+    elif [[ -x "$HOME/.config/matchmaker/hooks/post-merge.sh" && -d "$target_wt" ]]; then
         "$HOME/.config/matchmaker/hooks/post-merge.sh" "$target_wt" "$target_branch" "$source_branch" 2>/dev/null || true
     fi
 

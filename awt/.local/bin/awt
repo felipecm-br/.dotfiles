@@ -276,8 +276,9 @@ done
 
 # 4. Interactive Matchmaker wizard when called as `awt -c` or `awt new` without branch name
 if [[ "$create" -eq 1 && -z "$branch" ]]; then
-    new_script="$HOME/.config/matchmaker/scripts/awt-new.sh"
-    [ -x "$new_script" ] || new_script="$(dirname "$0")/../../.config/matchmaker/scripts/awt-new.sh"
+    new_script="$HOME/.config/waymaker/scripts/awt-new.sh"
+    [ -x "$new_script" ] || new_script="$HOME/.config/matchmaker/scripts/awt-new.sh"
+    [ -x "$new_script" ] || new_script="$(dirname "$0")/../../.config/waymaker/scripts/awt-new.sh"
     cur_branch="$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo '')"
     if [[ -x "$new_script" ]]; then
         exec "$new_script" "$cur_branch" "${extra_flags[@]}"
@@ -344,7 +345,9 @@ if [[ ! -d "$target_dir" ]]; then
 fi
 
 # Run lifecycle post-create hook
-if [[ -x "$HOME/.config/matchmaker/hooks/post-create.sh" ]]; then
+if [[ -x "$HOME/.config/waymaker/hooks/post-create.sh" ]]; then
+    "$HOME/.config/waymaker/hooks/post-create.sh" "$target_dir" "$branch" "$base" 2>/dev/null || true
+elif [[ -x "$HOME/.config/matchmaker/hooks/post-create.sh" ]]; then
     "$HOME/.config/matchmaker/hooks/post-create.sh" "$target_dir" "$branch" "$base" 2>/dev/null || true
 fi
 
@@ -356,8 +359,9 @@ if [[ $no_connect -eq 0 ]]; then
     if [[ "$ai_continue_mode" == "custom" ]]; then
         ai_cmd="$custom_ai_cmd"
     elif [[ "$ai_continue_mode" == "yes" || "$ai_continue_mode" == "auto" ]]; then
-        detect_script="$HOME/.config/matchmaker/scripts/awt-ai-detect.sh"
-        [ -f "$detect_script" ] || detect_script="$(dirname "$0")/../../.config/matchmaker/scripts/awt-ai-detect.sh"
+        detect_script="$HOME/.config/waymaker/scripts/awt-ai-detect.sh"
+        [ -f "$detect_script" ] || detect_script="$HOME/.config/matchmaker/scripts/awt-ai-detect.sh"
+        [ -f "$detect_script" ] || detect_script="$(dirname "$0")/../../.config/waymaker/scripts/awt-ai-detect.sh"
         if [ -f "$detect_script" ]; then
             # shellcheck source=/dev/null
             . "$detect_script" 2>/dev/null || true

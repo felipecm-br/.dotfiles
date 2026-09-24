@@ -3,7 +3,7 @@
 # Reads MM_STORE (ic / cs / ww / cs+ww), flips case-sensitivity,
 # then emits Store / SetStyledPrompt / Reload actions to mm Transform.
 #
-# Called by: ctrl-s bind in rg.toml  (`Transform(sh ~/.config/matchmaker/scripts/rg-toggle-case.sh)`)
+# Called by: ctrl-s bind in rg.toml  (`Transform(sh ~/.config/waymaker/scripts/rg-toggle-case.sh)`)
 
 MODE="${MM_STORE:-ic}"
 case "$MODE" in

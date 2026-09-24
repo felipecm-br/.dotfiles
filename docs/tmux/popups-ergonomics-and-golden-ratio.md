@@ -161,5 +161,5 @@ To prevent accidental dismissal while inspecting a diff or composing a commit me
 * [`tmux/.config/tmux/sesh-picker.sh`](../../tmux/.config/tmux/sesh-picker.sh): Sesh picker with `⚡` badge.
 * [`tmux/.config/tmux/lazygitrs-popup.sh`](../../tmux/.config/tmux/lazygitrs-popup.sh): Lazygitrs popup with `󰊢` badge and Git orange theme.
 * [`tmux/.config/tmux/ai-agent-bell-popup.sh`](../../tmux/.config/tmux/ai-agent-bell-popup.sh): Reactive notification dispatcher with `󰮯` badge.
-* [`matchmaker/.config/matchmaker/presets/jump.toml`](../../matchmaker/.config/matchmaker/presets/jump.toml): Matchmaker Jump preset.
+* [`waymaker/.config/waymaker/presets/jump.toml`](../../waymaker/.config/waymaker/presets/jump.toml): Waymaker Jump preset.
 * [`docs/tmux/popup-isolation-and-debounce.md`](popup-isolation-and-debounce.md): Snapshot backdrops and ACPD event debounce.

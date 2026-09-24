@@ -39,7 +39,7 @@ The core principle across this dotfiles setup is **Zero Polling, Maximum Context
 * **How it works**: The ACPD daemon intercepts agent lifecycle hooks (Claude, Antigravity, OpenCode). Status updates are broadcast with a 400ms debounce to tmux status pills (`status-interval 0`), rendering spinners (`󱚤 󰑮 Running...`), error alerts, and bell popups.
 
 ### 3. Smart Tab Completion & On-Demand Preview (`_smart_tab`)
-* **Location**: [`zsh/.zsh/utils/binds.zsh`](../../zsh/.zsh/utils/binds.zsh), [`matchmaker/.config/matchmaker/presets/ftb.toml`](../../matchmaker/.config/matchmaker/presets/ftb.toml)
+* **Location**: [`zsh/.zsh/utils/binds.zsh`](../../zsh/.zsh/utils/binds.zsh), [`waymaker/.config/waymaker/presets/ftb.toml`](../../waymaker/.config/waymaker/presets/ftb.toml)
 * **Doc**: [Shell Completion & Matchmaker](../shell/completion.md)
 * **How it works**: Analyzes cursor context on `<Tab>`: auto-spaces single-word aliases (e.g. `gco<Tab>` ──► `gco <Tab>`), opens fast native fzf menus for short paths, or triggers rich Matchmaker TUI pickers (`mm-ftb`) with `Ctrl+P` syntax-highlighted previews for files and directories.
 

@@ -7,7 +7,8 @@ TPL_DEST="$HOME/.config/omarchy/themed/hyprland.lua.tpl"
 REPO_TPL_DEST="$HOME/.dotfiles/main/omarchy/.config/omarchy/themed/hyprland.lua.tpl"
 ANIM_FILE="$HOME/.config/hypr/animations.lua"
 REPO_ANIM_FILE="$HOME/.dotfiles/main/hypr/.config/hypr/animations.lua"
-PRESET_FILE="$HOME/.config/matchmaker/presets/borders.toml"
+PRESET_FILE="$HOME/.config/waymaker/presets/borders.toml"
+[[ -f "$PRESET_FILE" ]] || PRESET_FILE="$HOME/.config/matchmaker/presets/borders.toml"
 STATE_FILE="/dev/shm/hypr-border-state"
 
 # Ensure waymaker binary is accessible
