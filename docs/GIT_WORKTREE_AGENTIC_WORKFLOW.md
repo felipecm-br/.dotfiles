@@ -487,7 +487,7 @@ While low-level CLI utilities like `wt` (Worktree CLI) provide direct Git comman
 | **Multiplexer & Sesh** | None (only changes shell directory). | **Native Session Lifecycle**: creates named Tmux sessions, connects via Sesh, and isolates agent buffers. |
 | **Branch Creation** | Manual argument typing. | **4-Step Wizard**: Conventional Commits types (``, ``, `󰣪`), prompt box with memory, and base selector. |
 | **Live Previews** | None. | **3 Real-time Preview Tabs** (`p`): Git status/graph, Diff vs Main, and commit statistics. |
-| **Lifecycle Hooks** | None. | **Full Lifecycle Hooks** (`post-create.sh`, `pre-merge.sh`, `post-merge.sh`, `pre-remove.sh`) with declarative syncing (`files.copy`, `files.symlink`) and quality gates. |
+| **Lifecycle Hooks** | None. | **Full Lifecycle Hooks** (`post-create.sh`, `pre-merge.sh`, `post-merge.sh`, `pre-remove.sh`) with declarative TOML syncing (`.awt.toml`) and quality gates. |
 | **Dirty State Safety** | Fails or errors on uncommitted changes. | **Smart Auto-Stash & Fast Cleanup**: automatically stashes dirty worktree files before merge/rebase, cleans heavy caches on deletion, and pops upon completion. |
 | **Ergonomic Aliases** | Basic commands. | **Fast Shell Routing**: `awt new`, `awt switch`, `awt rm`, `awt merge`, `awt rebase`, `awt ship`, `awt popup`, `awc`, `awp`. |
 

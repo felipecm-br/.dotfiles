@@ -11,6 +11,52 @@ base_branch="$3"
 repo_root=$(git -C "$wt_path" rev-parse --show-toplevel 2>/dev/null || echo "$wt_path")
 parent_dir="$(cd "$wt_path/.." 2>/dev/null && pwd || dirname "$wt_path")"
 
+# Helper: parse declarative config key from .awt.toml (canonical) or YAML (fallback)
+awt_extract_config() {
+    local cfg="$1"
+    local q="$2"
+    [[ -f "$cfg" ]] || return 0
+    command -v python3 >/dev/null 2>&1 || return 0
+
+    python3 -c "
+import sys
+
+filepath = sys.argv[1]
+query = sys.argv[2]
+data = None
+
+if filepath.endswith('.toml'):
+    try:
+        import tomllib
+        with open(filepath, 'rb') as f:
+            data = tomllib.load(f)
+    except Exception:
+        pass
+elif filepath.endswith('.yaml') or filepath.endswith('.yml'):
+    try:
+        import yaml
+        with open(filepath, 'r') as f:
+            data = yaml.safe_load(f)
+    except Exception:
+        pass
+
+if isinstance(data, dict):
+    val = data
+    for k in query.split('.'):
+        if isinstance(val, dict):
+            val = val.get(k) or val.get(k.replace('-', '_'))
+        else:
+            val = None
+            break
+    if isinstance(val, list):
+        for x in val:
+            if x is not None:
+                print(x)
+    elif isinstance(val, str) and val.strip():
+        print(val.strip())
+" "$cfg" "$q" 2>/dev/null
+}
+
 # 1. Hermetic Secret & Environment Propagation (.env, .env.local, .env.*.local)
 primary_wt=""
 while IFS= read -r line; do
@@ -82,9 +128,11 @@ if [[ -n "$primary_wt" && -d "$primary_wt" ]]; then
         fi
     fi
 
-    # 2. Declarative File Copy & Symlink Synchronization (.awt.yaml / .workmux.yaml / .awt manifests)
+    # 2. Declarative File Copy & Symlink Synchronization (.awt.toml canonical / manifests / YAML fallback)
     config_file=""
-    for cf in "$wt_path/.awt.yaml" "$wt_path/.awt/config.yaml" "$wt_path/.workmux.yaml" "$primary_wt/.awt.yaml" "$primary_wt/.workmux.yaml"; do
+    for cf in "$wt_path/.awt.toml" "$wt_path/.awt/config.toml" "$primary_wt/.awt.toml" "$primary_wt/.awt/config.toml" \
+              "$wt_path/.awt.yaml" "$wt_path/.awt/config.yaml" "$wt_path/.workmux.yaml" \
+              "$primary_wt/.awt.yaml" "$primary_wt/.workmux.yaml"; do
         if [[ -f "$cf" ]]; then
             config_file="$cf"
             break
@@ -93,23 +141,10 @@ if [[ -n "$primary_wt" && -d "$primary_wt" ]]; then
 
     # 2a. Declarative file copies
     copy_targets=()
-    if [[ -n "$config_file" ]] && command -v python3 >/dev/null 2>&1; then
+    if [[ -n "$config_file" ]]; then
         while IFS= read -r item; do
             [[ -n "$item" ]] && copy_targets+=("$item")
-        done < <(python3 -c "
-import yaml
-try:
-    with open('$config_file', 'r') as f:
-        data = yaml.safe_load(f) or {}
-    items = data.get('files', {}).get('copy', [])
-    if isinstance(items, list):
-        for i in items:
-            if i: print(i)
-    elif isinstance(items, str) and items.strip():
-        print(items.strip())
-except Exception:
-    pass
-" 2>/dev/null)
+        done < <(awt_extract_config "$config_file" "files.copy")
     fi
 
     for cf_txt in "$wt_path/.awt/files.copy" "$primary_wt/.awt/files.copy"; do
@@ -133,23 +168,10 @@ except Exception:
 
     # 2b. Declarative symlinks (shared caches, large node_modules, build targets)
     symlink_targets=()
-    if [[ -n "$config_file" ]] && command -v python3 >/dev/null 2>&1; then
+    if [[ -n "$config_file" ]]; then
         while IFS= read -r item; do
             [[ -n "$item" ]] && symlink_targets+=("$item")
-        done < <(python3 -c "
-import yaml
-try:
-    with open('$config_file', 'r') as f:
-        data = yaml.safe_load(f) or {}
-    items = data.get('files', {}).get('symlink', [])
-    if isinstance(items, list):
-        for i in items:
-            if i: print(i)
-    elif isinstance(items, str) and items.strip():
-        print(items.strip())
-except Exception:
-    pass
-" 2>/dev/null)
+        done < <(awt_extract_config "$config_file" "files.symlink")
     fi
 
     for sf_txt in "$wt_path/.awt/files.symlink" "$primary_wt/.awt/files.symlink"; do
@@ -172,34 +194,21 @@ except Exception:
     done
 fi
 
-# 3. Declarative Post-Create Lifecycle Hook Commands (.awt.yaml / .workmux.yaml)
+# 3. Declarative Post-Create Lifecycle Hook Commands (.awt.toml / .workmux.yaml)
 config_file=""
-for cf in "$wt_path/.awt.yaml" "$wt_path/.awt/config.yaml" "$wt_path/.workmux.yaml"; do
+for cf in "$wt_path/.awt.toml" "$wt_path/.awt/config.toml" \
+          "$wt_path/.awt.yaml" "$wt_path/.awt/config.yaml" "$wt_path/.workmux.yaml"; do
     if [[ -f "$cf" ]]; then
         config_file="$cf"
         break
     fi
 done
 
-if [[ -n "$config_file" ]] && command -v python3 >/dev/null 2>&1; then
+if [[ -n "$config_file" ]]; then
     hook_cmds=()
     while IFS= read -r cmd; do
         [[ -n "$cmd" ]] && hook_cmds+=("$cmd")
-    done < <(python3 -c "
-import yaml
-try:
-    with open('$config_file', 'r') as f:
-        data = yaml.safe_load(f) or {}
-    hooks = data.get('hooks', {})
-    cmds = hooks.get('post-create') or hooks.get('post_create') or []
-    if isinstance(cmds, list):
-        for c in cmds:
-            if c: print(c)
-    elif isinstance(cmds, str) and cmds.strip():
-        print(cmds.strip())
-except Exception:
-    pass
-" 2>/dev/null)
+    done < <(awt_extract_config "$config_file" "hooks.post-create")
 
     for cmd in "${hook_cmds[@]}"; do
         (cd "$wt_path" && eval "$cmd") 2>/dev/null || true

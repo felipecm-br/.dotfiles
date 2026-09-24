@@ -47,10 +47,22 @@ Toggle instantly between 3 live preview panes in Nav Mode:
 3. **Commit Statistics**: Detailed author, date, message, and line change stats for the latest commit.
 
 ### 4. 🛡️ Built-in Safety, Pre-Merge Quality Gates & Fast Cleanup
-* **Pre-Merge Validation Gates**: Intercepts `merge` and `ship` commands with automated pre-merge hooks (`.hooks/pre-merge`, `.awt.yaml`, `scripts/docs-lint.sh`). If tests or linters fail, the merge is safely aborted with audio feedback and the worktree remains untouched.
+* **Pre-Merge Validation Gates**: Intercepts `merge` and `ship` commands with automated pre-merge hooks (`.hooks/pre-merge`, `.awt.toml`, `scripts/docs-lint.sh`). If tests or linters fail, the merge is safely aborted with audio feedback and the worktree remains untouched.
 * **Smart Auto-Stash**: Automatically creates an internal safety stash before running `merge` (`m`) or `rebase` (`R`), popping it transparently once Git completes.
 * **Pre-Remove Lifecycle Hooks & Fast Cleanup**: Runs pre-remove hooks before unlinking, then sweeps heavy caches (`node_modules`, `target`) to prevent lock contention, unmounts the directory, terminates the Tmux session, and gracefully redirects the client (`wm last` / `sesh last`).
-* **Declarative Synchronization (`files.copy` & `files.symlink`)**: Automatically copies secrets (`.env*`) and mirrors configured shared dependencies or build caches declared in `.awt.yaml`, `.workmux.yaml`, or `.awt/` manifests.
+* **Declarative TOML Synchronization (`.awt.toml`)**: Standardizes declarative worktree management in clean TOML, parsed natively via Python's standard library `tomllib`:
+  ```toml
+  # .awt.toml (or .awt/config.toml)
+  [files]
+  copy = [".env", ".env.local", "config/local.json"]
+  symlink = ["node_modules", ".pnpm-store", "target"]
+
+  [hooks]
+  post-create = ["pnpm install"]
+  pre-merge = ["cargo test", "npm test"]
+  pre-remove = ["echo 'cleaning worktree temp state'"]
+  ```
+  *(Also supports `.workmux.yaml` as an automatic fallback for legacy compatibility).*
 
 ---
 
