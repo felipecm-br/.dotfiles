@@ -259,18 +259,22 @@ fi
 
 # ── 3. Script Executability & Syntax ──
 echo -e "\n[3/6] Validating Popup Scripts & Symlinks..."
-FILES_SCRIPT="$ROOT/tmux/.config/tmux/files-picker.sh"
+FILES_SCRIPT="$ROOT/tmux/.config/tmux/workspace-picker.sh"
+[[ -f "$FILES_SCRIPT" ]] || FILES_SCRIPT="$ROOT/tmux/.config/tmux/files-picker.sh"
 GREP_SCRIPT="$ROOT/tmux/.config/tmux/grep-picker.sh"
 
-[ -x "$FILES_SCRIPT" ] && sh -n "$FILES_SCRIPT" && ok "files-picker.sh syntax and executable" || bad "files-picker.sh syntax/executable"
+[ -x "$FILES_SCRIPT" ] && sh -n "$FILES_SCRIPT" && ok "workspace-picker.sh syntax and executable" || bad "workspace-picker.sh syntax/executable"
 [ -x "$GREP_SCRIPT" ] && sh -n "$GREP_SCRIPT" && ok "grep-picker.sh syntax and executable" || bad "grep-picker.sh syntax/executable"
 
 # Check backward compatibility symlinks
-[ -L "$ROOT/tmux/.config/tmux/dir-peek.sh" ] && [ "$(readlink "$ROOT/tmux/.config/tmux/dir-peek.sh")" = "files-picker.sh" ] \
-  && ok "dir-peek.sh -> files-picker.sh symlink" || bad "dir-peek.sh symlink"
+[ -L "$ROOT/tmux/.config/tmux/files-picker.sh" ] && [ "$(readlink "$ROOT/tmux/.config/tmux/files-picker.sh")" = "workspace-picker.sh" ] \
+  && ok "files-picker.sh -> workspace-picker.sh compatibility symlink" || bad "files-picker.sh symlink"
 
-[ -L "$ROOT/tmux/.config/tmux/dir-picker.sh" ] && [ "$(readlink "$ROOT/tmux/.config/tmux/dir-picker.sh")" = "files-picker.sh" ] \
-  && ok "dir-picker.sh -> files-picker.sh symlink" || bad "dir-picker.sh symlink"
+[ -L "$ROOT/tmux/.config/tmux/dir-peek.sh" ] && { [ "$(readlink "$ROOT/tmux/.config/tmux/dir-peek.sh")" = "workspace-picker.sh" ] || [ "$(readlink "$ROOT/tmux/.config/tmux/dir-peek.sh")" = "files-picker.sh" ]; } \
+  && ok "dir-peek.sh -> workspace-picker.sh symlink" || bad "dir-peek.sh symlink"
+
+[ -L "$ROOT/tmux/.config/tmux/dir-picker.sh" ] && { [ "$(readlink "$ROOT/tmux/.config/tmux/dir-picker.sh")" = "workspace-picker.sh" ] || [ "$(readlink "$ROOT/tmux/.config/tmux/dir-picker.sh")" = "files-picker.sh" ]; } \
+  && ok "dir-picker.sh -> workspace-picker.sh symlink" || bad "dir-picker.sh symlink"
 
 [ -L "$ROOT/tmux/.config/tmux/rg-picker.sh" ] && [ "$(readlink "$ROOT/tmux/.config/tmux/rg-picker.sh")" = "grep-picker.sh" ] \
   && ok "rg-picker.sh -> grep-picker.sh symlink" || bad "rg-picker.sh symlink"
@@ -289,7 +293,7 @@ PRESETS_DIR="$ROOT/waymaker/.config/waymaker/presets"
 
 # Backdrop isolation in scripts (delegates to tmux-popup-isolate.sh or inline)
 (grep -q 'tmux-popup-isolate' "$FILES_SCRIPT" || (grep -q '@ai_agent_state_raw' "$FILES_SCRIPT" && grep -q 'tmux-backdrop' "$FILES_SCRIPT")) \
-  && ok "files-picker.sh AI backdrop protection" || bad "files-picker.sh AI backdrop"
+  && ok "workspace-picker.sh AI backdrop protection" || bad "workspace-picker.sh AI backdrop"
 
 (grep -q 'tmux-popup-isolate' "$GREP_SCRIPT" || (grep -q '@ai_agent_state_raw' "$GREP_SCRIPT" && grep -q 'tmux-backdrop' "$GREP_SCRIPT")) \
   && ok "grep-picker.sh AI backdrop protection" || bad "grep-picker.sh AI backdrop"
@@ -298,11 +302,11 @@ PRESETS_DIR="$ROOT/waymaker/.config/waymaker/presets"
 echo -e "\n[4/6] Validating tmux.conf Bindings..."
 CONF="$ROOT/tmux/.config/tmux/tmux.conf"
 
-grep -q "bind-key \"e\" run-shell \".*files-picker.sh '#{pane_id}' '#{pane_current_path}'\"" "$CONF" \
-  && ok "tmux.conf: prefix + e -> files-picker.sh" || bad "tmux.conf prefix+e"
+grep -qE "bind-key \"e\" run-shell \".*(workspace-picker|files-picker)\.sh '#{pane_id}' '#{pane_current_path}'\"" "$CONF" \
+  && ok "tmux.conf: prefix + e -> workspace-picker.sh" || bad "tmux.conf prefix+e"
 
-grep -q "bind-key C-e run-shell \".*files-picker.sh '#{pane_id}' '#{pane_current_path}'\"" "$CONF" \
-  && ok "tmux.conf: prefix + C-e -> files-picker.sh" || bad "tmux.conf prefix+C-e"
+grep -qE "bind-key C-e run-shell \".*(workspace-picker|files-picker)\.sh '#{pane_id}' '#{pane_current_path}'\"" "$CONF" \
+  && ok "tmux.conf: prefix + C-e -> workspace-picker.sh" || bad "tmux.conf prefix+C-e"
 
 grep -q "bind-key \"/\" run-shell \".*grep-picker.sh '#{pane_id}' '#{pane_current_path}'\"" "$CONF" \
   && ok "tmux.conf: prefix + / -> grep-picker.sh" || bad "tmux.conf prefix+/"
@@ -317,7 +321,7 @@ grep -q "bind-key \"u\" run-shell \".*reopen-window.sh\"" "$CONF" \
 echo -e "\n[5/6] Validating IntelliShell Custom Commands..."
 INTELLI="$ROOT/intelli-shell/.config/intelli-shell/custom.commands"
 
-grep -q 'files-picker.sh' "$INTELLI" && ok "intelli-shell contains files-picker.sh" || bad "intelli-shell missing files-picker.sh"
+grep -q 'workspace-picker.sh' "$INTELLI" && ok "intelli-shell contains workspace-picker.sh" || bad "intelli-shell missing workspace-picker.sh"
 grep -q 'grep-picker.sh' "$INTELLI" && ok "intelli-shell contains grep-picker.sh" || bad "intelli-shell missing grep-picker.sh"
 
 # ── 6. Documentation & Stow Integrity ──

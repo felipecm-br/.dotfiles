@@ -1,1 +1,1 @@
-files-picker.sh
+workspace-picker.sh

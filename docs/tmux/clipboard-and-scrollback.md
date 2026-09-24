@@ -69,7 +69,7 @@ alias scrollback='tmux capture-pane -epS - > /tmp/tmux_scrollback.ansi && nvim -
 
 Fuzzy copy/insert of structured tokens and commands (Linux CLI commands, paths, URLs, git hashes, IPs) from the full scrollback via `wm`, extrakto-style — no editor round-trip.
 
-Bind ([`tmux.conf`](../../tmux/.config/tmux/tmux.conf)): `Prefix` then `y` or `C-y` (yank / extract) runs [`scrollback-extract.sh`](../../tmux/.config/tmux/scrollback-extract.sh) (also aliased as [`yank-picker.sh`](../../tmux/.config/tmux/yank-picker.sh)) with the origin pane id. The script opens a themed popup itself (rounded border in theme green, pure icon badge ` 󰅍 `, golden `75% x 60%`). When an agent is streaming (`@ai_agent_state_raw` = busy/working), it opens over a frozen snapshot backdrop instead, per Issue B in `popup-isolation-and-debounce.md`:
+Bind ([`tmux.conf`](../../tmux/.config/tmux/tmux.conf)): `Prefix` then `y` or `C-y` (yank / extract) runs [`yank-picker.sh`](../../tmux/.config/tmux/yank-picker.sh) (also aliased as [`scrollback-extract.sh`](../../tmux/.config/tmux/scrollback-extract.sh)) with the origin pane id. The script opens a themed popup itself (rounded border in theme green, pure icon badge ` 󰅍 `, golden `75% x 60%`). When an agent is streaming (`@ai_agent_state_raw` = busy/working), it opens over a frozen snapshot backdrop instead, per Issue B in `popup-isolation-and-debounce.md`:
 
 1. `tmux capture-pane -pJS - -t <origin>` exports the origin pane explicitly (never the popup), joining wrapped lines (`-J`) so split commands and URLs survive; full text kept in `/tmp/scrollback-extract-src.txt`.
 2. Token files per filter precomputed (`-all/-cmd/-path/-url/-sha.txt`), deduped and recent-first. Commands are extracted from prompt-prefixed lines (`❯`, `$`, `#`, `>`), AI tool execution logs (`● Bash(...)`), and common Linux CLI verbs (`pacman`, `yay`, `rm`, `mv`, `git`, `cargo`, `just`, `systemctl`, etc.).
@@ -87,7 +87,7 @@ Browse workspace files and AI-generated code in a popup via `mm -o workspace` (o
 Bind ([`tmux.conf`](../../tmux/.config/tmux/tmux.conf)):
 - `Prefix + e` / `Prefix + C-e`: Opens Golden Ratio popup (`75% × 60%`) via inward roll (`e` = Explorer).
 
-Architecture ([`files-picker.sh`](../../tmux/.config/tmux/files-picker.sh) / [`workspace-picker.sh`](../../tmux/.config/tmux/workspace-picker.sh) and canonical preset [`workspace.toml`](../../waymaker/.config/waymaker/presets/workspace.toml), with compatibility alias [`files.toml`](../../waymaker/.config/waymaker/presets/files.toml)):
+Architecture ([`workspace-picker.sh`](../../tmux/.config/tmux/workspace-picker.sh) / [`files-picker.sh`](../../tmux/.config/tmux/files-picker.sh) and canonical preset [`workspace.toml`](../../waymaker/.config/waymaker/presets/workspace.toml), with compatibility alias [`files.toml`](../../waymaker/.config/waymaker/presets/files.toml)):
 1. **Themed Popup & Pure Icon Badge**: Uses theme blue/cyan border with pure icon badge ` 󰈞 󰄧 󰋩 ` (Explorer, Mermaid diagrams, and Photos), with frozen backdrop protection when an agent streams.
 2. **Native Markdown, Mermaid & Photos Rendering**: Automatically routes `.md`, `.markdown`, `.mmd`, `.png`, `.jpg`, `.webp` through native media and diagram pipelines with Kitty Graphics Protocol passthrough.
 3. **Diagram & Photo Zoom Controls & HUD Icons**:

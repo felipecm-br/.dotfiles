@@ -1,1 +1,1 @@
-scrollback-extract.sh
+yank-picker.sh
