@@ -41,12 +41,13 @@ This document provides a comprehensive audit and definitive reference of all key
 | **`Prefix + t`** | **Sesh Workspace / Task Picker** | `t` = **T**ask / **T**eleport to project sessions. |
 | **`Prefix + T`** | **Reopen Last Closed Window / Tab** | Shift+T mnemonic: uppercase of sesh `t`, aligned with browser/IDE tab restore with file, command, path & session. |
 | **`Prefix + u`** | **Undo Close Tab (`reopen-window.sh`)** | `u` = **U**ndo close tab. Aligned with Matchmaker file manager undo muscle memory. |
-| **`Prefix + i`** | **AI Agent Bell / Alert HUD** | `i` = **I**ntelligence / **I**nspect agent turn or question. Cycles pending alerts via floating popup HUD. |
-| **`Prefix + I`** | **AI Agent Attention Triage Direct Jump** | Shift+I direct focus jump without opening an intermediate popup. |
+| **`Prefix + i`** | **AI Agent Bell / Alert HUD** | `i` = **I**ntelligence / **I**nspect agent turn or question. Cycles pending alerts via floating modal popup HUD (`80% × 75%`). Focuses split pane if in current window; opens floating modal for any other window or session so `Esc` (or `Prefix + i`) instantly dismisses and restores origin. |
+| **`Prefix + I`** | **AI Agent Attention Triage Direct Jump** | Shift+I direct focus jump without opening an intermediate popup. Features **Bidirectional Trampoline Stack**: records origin context and automatically returns to starting window/session when alerts are clear. |
 | **`Prefix + n`** | **New Window (Current Path)** | `n` = **N**ew window. Aligned with universal browser tab creation. |
 | **`Prefix + w`** | **Close Pane / Window (`close-window.sh`)** | `w` = Close **W**indow. Records path, active file & command to reopen stack before closing. |
 | **`Prefix + W`** | **Kill Entire Session (`kill-session`)** | Shift+W symmetry: uppercase destroys the parent container. |
-| **`Prefix + o`** | **AI Split Pane (35% Right Side)** | `o` = **O**penCode side-by-side split. Toggle closes split if already open. |
+| **`Prefix + o`** | **AI Split Pane (35% Right Side)** | `o` = Polymorphic AI side-by-side split (`agy` or `opencode` via `$AI_AGENT`). Toggle closes split if already open. |
+
 | **`Prefix + N`** | **Neovim Floating Scratchpad (`90% × 90%`)** | Quick scratchpad editor over the active workspace. |
 | **`Prefix + \|`** | **Vertical Split Window** | Intuitive visual divider symbol. |
 | **`Prefix + -`** | **Horizontal Split Window** | Intuitive visual divider symbol. |
@@ -180,8 +181,9 @@ The table below consolidates the definitive keybindings across all layers, audit
 | **`Prefix + s`** | Tmux Multiplexer | Window Picker (`75% × 60%`) | Left Pinky (CapsLock) + Thumb (Space) $\rightarrow$ `s` | $240\text{ ms}$ | Prefix guard protects against accidental modal popups during fast typing. |
 | **`Prefix + f`** | Tmux Multiplexer | Vimium Window Hints (1-touch Jump) | Inward roll: CapsLock + Space $\rightarrow$ `f` | $240\text{ ms}$ | Replaces legacy `find-window` with instant Home-Row hints ($H=0$). |
 | **`Prefix + t`** | Tmux Multiplexer | Sesh Workspace Picker | Left Pinky (CapsLock) + Thumb (Space) $\rightarrow$ `t` | $240\text{ ms}$ | `t` = Task/Teleport; mnemonic alignment with project workflows. |
-| **`Prefix + i`** | Tmux Multiplexer | AI Agent Bell / Alert HUD | Left Pinky (CapsLock) + Thumb (Space) $\rightarrow$ `i` | $240\text{ ms}$ | `i` = Intelligence; cycles pending questions and permission alerts in popup HUD. |
-| **`Prefix + I`** | Tmux Multiplexer | AI Agent Triage Direct Jump | Left Pinky (CapsLock) + Thumb (Space) $\rightarrow$ `I` | $240\text{ ms}$ | Direct focus jump to next agent requiring attention (without popup). |
+| **`Prefix + i`** | Tmux Multiplexer | AI Agent Bell / Alert HUD | Left Pinky (CapsLock) + Thumb (Space) $\rightarrow$ `i` | $240\text{ ms}$ | `i` = Intelligence; cycles pending questions/permissions in universal floating popup modal (`Esc` returns to origin). Focuses split pane if in current window. |
+| **`Prefix + I`** | Tmux Multiplexer | AI Agent Triage Direct Jump | Left Pinky (CapsLock) + Thumb (Space) $\rightarrow$ `I` | $240\text{ ms}$ | Direct focus jump with Bidirectional Trampoline Stack (returns to starting window/session when alerts clear). |
+
 | **`Prefix + w`** | Tmux Multiplexer | Close Pane / Window (`kill-pane`) | Left Pinky (CapsLock) + Thumb (Space) $\rightarrow$ `w` | $240\text{ ms}$ | Prefix guard prevents accidental pane destruction. |
 | **`S`** (in `awt`) | Matchmaker AWT | Ship Worktree (Merge & Push) | Shift + S (Left Pinky + Left Ring) | $140\text{ ms}$ | Atomic local merge into base and push to remote origin. |
 | **`P`** (in `awt`) | Matchmaker AWT | Checkout GitHub PR Worktree | Shift + P (Left Pinky + Right Pinky) | $140\text{ ms}$ | Interactive PR list with live preview and dedicated worktree checkout. |
