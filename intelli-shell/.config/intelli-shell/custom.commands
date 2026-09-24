@@ -70,8 +70,8 @@ awtc {{repo_url}}
 # Open AI agent bell notification queue ring popup
 ~/.config/tmux/ai-agent-bell-popup.sh
 
-# Open interactive Sesh session picker in Tmux popup
-~/.config/tmux/sesh-picker.sh
+# Open interactive session picker in Tmux popup
+~/.config/tmux/session-picker.sh
 
 # Open interactive Tmux window picker with live pane preview and agent status
 ~/.config/tmux/window-picker.sh
