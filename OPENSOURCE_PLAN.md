@@ -54,18 +54,18 @@ Rather than forcing users to assemble disparate repositories or compile 13 C tre
 
 ### A. `fcmiranda/acpd` (The Broker Daemon)
 - **Role:** High-throughput async broker managing per-pane agent state transitions, dynamic spinner rendering, and status sinks (Tmux, Waybar).
-- **Status:** Release CI configured, dynamic token generation verified, clippy and formatting 100% compliant with 0 warnings, pushed to `origin/main`. Actively running via `systemd --user`.
-- **Next:** Tag `v0.1.0` release to trigger multi-arch static binary builds on GitHub Actions.
+- **Status:** Tagged and released as `v0.1.0`. Release CI active with multi-arch Linux builds (`x86_64` / `aarch64` musl + glibc) and sha256 checksums. 100% compliant with 0 clippy warnings and all 11 unit tests passing.
+- **Next:** Reference in Tier 2 `cockpit-manifest.json`.
 
 ### B. `fcmiranda/lazygitrs` (The Review Engine)
 - **Role:** Blazing fast Git TUI with `--commits`, worktree port discovery, and headless inline diff review note injection (`S` bracket-pasted to active AI pane).
-- **Status:** Branch `fecavmi` pushed to `origin/fecavmi` (commit `cad844944`). Notes relocated to `.git/info/lines.json` (eliminating working tree pollution) with full worktree resolution, XDG state fallback, and automatic migration. Compiles cleanly with all 168 unit tests passing.
-- **Next:** Remediate 69 unused/dead code warnings to pass `-D warnings` in CI, and tag `v0.1.0-cockpit`.
+- **Status:** Tagged and released as `v0.1.0-cockpit`. Notes relocated to `.git/info/lines.json` (eliminating working tree pollution) with full worktree resolution, XDG state fallback, and automatic migration. Compiles cleanly with all 168 unit tests passing and multi-arch release CI active with sha256 checksums.
+- **Next:** Reference in Tier 2 `cockpit-manifest.json`.
 
 ### C. `fcmiranda/matchmaker` / `waymaker` (The Nav, Frecency & Session Layer)
 - **Role:** Sub-millisecond fuzzy finder with live-reload inotify watch (`-w`), Kitty graphics caching, Mermaid diagram rendering, ACID `redb` frecency store, and **native workspace & session engine** (`wm session`, `wm connect`, `wm last`, `wm preview`).
-- **Status:** Sesh and frecency completely incorporated into Waymaker (`session.rs`). External `sesh-bin` (Go) and `zoxide` dependencies **100% eliminated**. Over 220 tests passing with 0 failures (`cargo test`). Canonical binary `~/.local/bin/wm` active throughout dotfiles with drop-in `sesh` wrapper in `utils/.local/bin/sesh`.
-- **Next:** Tag `v0.1.0` release on branch `waymaker` to trigger multi-arch binary packaging.
+- **Status:** Tagged and released as `v0.1.0`. Sesh and frecency completely incorporated into Waymaker (`session.rs`). External `sesh-bin` (Go) and `zoxide` dependencies **100% eliminated**. Over 228 tests passing with 0 failures (`cargo test`). Multi-arch release CI active with sha256 checksums.
+- **Next:** Reference in Tier 2 `cockpit-manifest.json`.
 
 ### D. `tmux` Backdrop Isolation Layer
 - **Role:** Guarantees popup stability during active token streaming via frozen ANSI backdrops.

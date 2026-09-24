@@ -692,10 +692,10 @@ To satisfy both the requirement for standalone open-source modularity and the us
   - Verified test suite passes 100% with zero failures.
 
 ### Phase 2: Two-Tier CI/CD & Multi-Arch Build Automation
-- [ ] **Tier 1 Engine Tagged Releases:**
-  - Publish `v0.1.0` tag on `acpd` to trigger `.github/workflows/release.yml`.
-  - Publish `v0.1.0` tag on `waymaker` to trigger `.github/workflows/release.yml`.
-  - Publish `v0.1.0-cockpit` tag on `lazygitrs` with multi-arch cross-compilation.
+- [x] **Tier 1 Engine Tagged Releases:**
+  - Published `v0.1.0` tag on `fcmiranda/acpd` triggering `.github/workflows/release.yml` with sha256 checksums.
+  - Published `v0.1.0` tag on `fcmiranda/waymaker` triggering `.github/workflows/release.yml` with sha256 checksums.
+  - Published `v0.1.0-cockpit` tag on `fcmiranda/lazygitrs` triggering `.github/workflows/release.yml` with musl-tools and sha256 checksums.
 - [ ] **Tier 2 Umbrella CI/CD (`terminal-ai-cockpit`):**
   - Create `cockpit-manifest.json` tracking pinned upstream engine release tags (`acpd: v0.1.0`, `lazygitrs: v0.1.0-cockpit`, `waymaker: v0.1.0`).
   - Create `.github/workflows/release.yml` that downloads pre-compiled Tier 1 assets, verifies SHA256 hashes, bundles them with scripts/plugins, and generates `terminal-ai-cockpit-v*.*.*-<arch>.tar.gz`.
