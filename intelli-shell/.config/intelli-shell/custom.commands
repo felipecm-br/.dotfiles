@@ -13,6 +13,9 @@ awc
 # Launch 5-step Conventional Commits creation wizard
 awt -c
 
+# Auto-derive conventional branch name from task prompt and provision worktree
+awt -c -A {{prompt}}
+
 # Create worktree from explicit base branch
 awt -c {{branch}} {{base}}
 
@@ -40,6 +43,12 @@ awt ship {{branch}}
 # Merge active worktree into base branch with hooks
 awt merge {{branch}}
 
+# Merge active worktree into explicit target branch
+awt merge --into {{target_branch}}
+
+# Merge active worktree bypassing pre-merge validation hooks
+awt merge --no-hooks
+
 # Perform linear rebase onto origin base before fast-forward merge
 awt merge --rebase {{branch}}
 
@@ -54,6 +63,9 @@ awt rebase {{base}}
 
 # Delete worktree, Git branch, and kill Tmux session
 awt rm {{branch}}
+
+# Delete worktree bypassing pre-remove validation hooks
+awt rm --no-hooks {{branch}}
 
 # Force delete dirty worktree, Git branch, and Tmux session
 awt rm -f {{branch}}

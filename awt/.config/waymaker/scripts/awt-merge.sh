@@ -15,9 +15,11 @@ no_remove=0
 no_tmux=0
 do_rebase=0
 do_push=0
+no_hooks=0
+explicit_target=""
 
-for arg in "$@"; do
-    case "$arg" in
+while [[ $# -gt 0 ]]; do
+    case "$1" in
         --squash) squash=1 ;;
         --no-squash) squash=0 ;;
         --no-commit) no_commit=1 ;;
@@ -27,7 +29,11 @@ for arg in "$@"; do
         --no-rebase) do_rebase=0 ;;
         --push|--ship) do_push=1 ;;
         --no-push) do_push=0 ;;
+        --no-hooks|--skip-pre-merge|-H) no_hooks=1 ;;
+        --into=*) explicit_target="${1#*=}" ;;
+        --into) shift; explicit_target="${1:-}" ;;
     esac
+    shift
 done
 
 # 1. Determine Current Worktree & Branch
@@ -38,7 +44,9 @@ current_session=$(tmux display-message -p '#{session_name}' 2>/dev/null)
 selected_branch=$(echo "$selected_raw" | sed -E 's/^[^a-zA-Z0-9._/-]+//; s/[[:space:]].*//')
 
 # 2. Determine Source and Target branches
-if [[ "$selected_branch" == "$current_branch" || -z "$selected_branch" ]]; then
+if [[ -n "$explicit_target" ]]; then
+    target_branch="$explicit_target"
+elif [[ "$selected_branch" == "$current_branch" || -z "$selected_branch" ]]; then
     target_branch=$(git -C "$current_wt" config "branch.${current_branch}.base" 2>/dev/null)
     target_branch="${target_branch:-main}"
 else
@@ -77,6 +85,38 @@ dirty_count=$(git -C "$current_wt" status --porcelain 2>/dev/null | wc -l)
 if [[ "$dirty_count" -gt 0 ]]; then
     if git -C "$current_wt" stash push -u -m "awt-merge-autostash: $source_branch" >/dev/null 2>&1; then
         stashed=1
+    fi
+fi
+
+# 4b. Pre-Merge Lifecycle Hook Validation Gate
+if [[ $no_hooks -eq 0 ]]; then
+    pre_merge_hook=""
+    if [[ -x "$current_wt/.hooks/pre-merge" ]]; then
+        pre_merge_hook="$current_wt/.hooks/pre-merge"
+    elif [[ -x "$current_wt/.awt/hooks/pre-merge" ]]; then
+        pre_merge_hook="$current_wt/.awt/hooks/pre-merge"
+    elif [[ -x "$current_wt/.git/hooks/pre-worktree-merge" ]]; then
+        pre_merge_hook="$current_wt/.git/hooks/pre-worktree-merge"
+    elif [[ -x "$HOME/.config/waymaker/hooks/pre-merge.sh" ]]; then
+        pre_merge_hook="$HOME/.config/waymaker/hooks/pre-merge.sh"
+    elif [[ -x "$HOME/.config/matchmaker/hooks/pre-merge.sh" ]]; then
+        pre_merge_hook="$HOME/.config/matchmaker/hooks/pre-merge.sh"
+    fi
+
+    if [[ -n "$pre_merge_hook" ]]; then
+        printf "\n\033[1;34m󰑮 Running pre-merge validation hook...\033[0m\n" >/dev/tty
+        if ! "$pre_merge_hook" "$current_wt" "$source_branch" "$target_branch"; then
+            printf "\n\033[1;31m󰅖 Pre-merge hook failed! Merge aborted and worktree kept intact.\033[0m\n" >/dev/tty
+            if [[ $stashed -eq 1 ]]; then
+                git -C "$current_wt" stash pop >/dev/null 2>&1 || true
+            fi
+            if command -v pw-play >/dev/null 2>&1 && [[ -f "$HOME/.local/share/sounds/ai/10-arcade-blip.wav" ]]; then
+                pw-play "$HOME/.local/share/sounds/ai/10-arcade-blip.wav" >/dev/null 2>&1 &
+            fi
+            sleep 2.5
+            exit 1
+        fi
+        printf "\033[1;32m󰄬 Pre-merge validation passed.\033[0m\n" >/dev/tty
     fi
 fi
 

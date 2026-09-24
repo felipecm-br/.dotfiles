@@ -487,9 +487,9 @@ While low-level CLI utilities like `wt` (Worktree CLI) provide direct Git comman
 | **Multiplexer & Sesh** | None (only changes shell directory). | **Native Session Lifecycle**: creates named Tmux sessions, connects via Sesh, and isolates agent buffers. |
 | **Branch Creation** | Manual argument typing. | **4-Step Wizard**: Conventional Commits types (``, ``, `󰣪`), prompt box with memory, and base selector. |
 | **Live Previews** | None. | **3 Real-time Preview Tabs** (`p`): Git status/graph, Diff vs Main, and commit statistics. |
-| **Lifecycle Hooks** | None. | **Automated Lifecycle Hooks** (`post-create.sh`, `post-merge.sh`) for `.env` replication, build & stow. |
-| **Dirty State Safety** | Fails or errors on uncommitted changes. | **Smart Auto-Stash**: automatically stashes dirty worktree files before merge/rebase and pops upon completion. |
-| **Ergonomic Aliases** | Basic commands. | **Fast Shell Routing**: `awt new`, `awt switch`, `awt rm`, `awt merge`, `awt rebase`, `awt popup`, `awc`, `awp`. |
+| **Lifecycle Hooks** | None. | **Full Lifecycle Hooks** (`post-create.sh`, `pre-merge.sh`, `post-merge.sh`, `pre-remove.sh`) with declarative syncing (`files.copy`, `files.symlink`) and quality gates. |
+| **Dirty State Safety** | Fails or errors on uncommitted changes. | **Smart Auto-Stash & Fast Cleanup**: automatically stashes dirty worktree files before merge/rebase, cleans heavy caches on deletion, and pops upon completion. |
+| **Ergonomic Aliases** | Basic commands. | **Fast Shell Routing**: `awt new`, `awt switch`, `awt rm`, `awt merge`, `awt rebase`, `awt ship`, `awt popup`, `awc`, `awp`. |
 
 ---
 
@@ -501,10 +501,11 @@ While low-level CLI utilities like `wt` (Worktree CLI) provide direct Git comman
 | :---: | :--- | :--- |
 | **`Enter`** | **Connect Sesh** | Switch to or create the Tmux session for the selected worktree. |
 | **`c`** / **`ctrl-n`** | **New WT Wizard** | Open the 4-step interactive Conventional Commits wizard. |
-| **`m`** | **Merge WT** | Merge active branch into selected branch (or base), run hooks, and clean up session. |
+| **`m`** | **Merge WT** | Merge active branch into selected branch (or base), run pre-merge hooks, and clean up session. |
+| **`S`** *(Shift+S)* | **Ship WT** | Atomic rebase, pre-merge gate, fast-forward merge into base, push to remote origin, and cleanup. |
 | **`R`** *(Shift+R)* | **Rebase WT** | Safely auto-stash and rebase feature branch onto its configured base branch. |
 | **`r`** / **`ctrl-r`** | **Rename WT** | Prompt popover to rename branch in Git, sibling directory, and Tmux session. |
-| **`d`** / **`ctrl-d`** | **Delete WT** | Delete worktree, terminate Tmux session, and redirect (`sesh last`). |
+| **`d`** / **`ctrl-d`** | **Delete WT** | Delete worktree, run pre-remove hooks, clean heavy caches, kill Tmux session, and redirect (`sesh last`). |
 | **`p`** / **`ctrl-p`** | **Switch Preview** | Cycle through the 3 preview tabs (Status, Diff vs Main, Log Stats). |
 | **`u`** / **`ctrl-u`** | **Fetch Remotes** | Run `git fetch --all --prune` on the selected worktree. |
 | **`j`** / **`k`** | **Navigation** | Move cursor down / up (Nav Mode). |
@@ -517,11 +518,13 @@ While low-level CLI utilities like `wt` (Worktree CLI) provide direct Git comman
 | **Floating Worktree Modal** | **`Ctrl + Shift + G`** / `awp` | Open floating AWT modal (`85% × 75%`) with live previews from anywhere in Tmux. |
 | **Open Interactive Dashboard** | `awt` | Open Matchmaker picker (`mm -o awt`) in current pane. |
 | **Launch Creation Wizard** | `awt -c` / `awt new` / `awc` | Launch interactive Conventional Commits creation wizard. |
+| **Auto-Named Worktree** | `awt -c -A <prompt> [base]` | Auto-derive conventional branch name slug from task prompt and provision worktree. |
 | **Direct CLI Worktree Creation** | `awt -c <branch> [base] [--no-tmux]` | Create branch and attach to Tmux session (or stay with `--no-tmux`). |
 | **Direct CLI Connect / Switch** | `awt <branch>` / `awt switch <branch>` | Jump directly to the Tmux session for specified worktree. |
-| **Direct CLI Delete Worktree** | `awt rm <branch> [-f] [--no-delete-branch]` | Delete worktree directory, Git branch (or keep ref), and kill session. |
+| **Direct CLI Delete Worktree** | `awt rm <branch> [-f] [--no-hooks]` | Delete worktree directory, run pre-remove hooks, clean caches, and kill session. |
 | **Direct CLI Rebase** | `awt rebase [base]` | Rebase active worktree onto base branch with auto-stash. |
-| **Direct CLI Merge** | `awt merge [branch] [flags]` | Merge with hooks (`--squash`, `--no-commit`, `--no-remove`, `--no-tmux`). |
+| **Direct CLI Merge** | `awt merge [branch] [--into <target>] [--no-hooks]` | Merge with pre-merge validation gate (`--squash`, `--rebase`, `--no-commit`, `--no-remove`, `--no-tmux`). |
+| **Direct CLI Ship** | `awt ship [branch] [--into <target>] [--no-hooks]` | Merge into base, push to remote origin, and clean up worktree. |
 | **PR / Issue Dashboard** | `gh dash` | GitHub TUI dashboard. Press `g` for `lazygitrs` or `s` for `sesh`. |
 | **Switch Tmux Sessions** | `Prefix + t` / `Prefix + s` | Fast session and window switcher via Sesh & Matchmaker. |
 | **Validate Dotfile Symlinks** | `./stow.sh -n` | Mandatory dry-run check before any merge into `main`. |

@@ -46,9 +46,11 @@ Toggle instantly between 3 live preview panes in Nav Mode:
 2. **Diff vs Base**: Full colorized diff against the merge-base of the target branch (`git diff <base>...HEAD`).
 3. **Commit Statistics**: Detailed author, date, message, and line change stats for the latest commit.
 
-### 4. 🛡️ Built-in Safety & Dirty State Protection
+### 4. 🛡️ Built-in Safety, Pre-Merge Quality Gates & Fast Cleanup
+* **Pre-Merge Validation Gates**: Intercepts `merge` and `ship` commands with automated pre-merge hooks (`.hooks/pre-merge`, `.awt.yaml`, `scripts/docs-lint.sh`). If tests or linters fail, the merge is safely aborted with audio feedback and the worktree remains untouched.
 * **Smart Auto-Stash**: Automatically creates an internal safety stash before running `merge` (`m`) or `rebase` (`R`), popping it transparently once Git completes.
-* **Clean Deletions**: Deleting a worktree (`d`) unmounts the directory, deletes the Git branch, terminates the associated Tmux session, and gracefully redirects the client to the last active workspace (`sesh last`).
+* **Pre-Remove Lifecycle Hooks & Fast Cleanup**: Runs pre-remove hooks before unlinking, then sweeps heavy caches (`node_modules`, `target`) to prevent lock contention, unmounts the directory, terminates the Tmux session, and gracefully redirects the client (`wm last` / `sesh last`).
+* **Declarative Synchronization (`files.copy` & `files.symlink`)**: Automatically copies secrets (`.env*`) and mirrors configured shared dependencies or build caches declared in `.awt.yaml`, `.workmux.yaml`, or `.awt/` manifests.
 
 ---
 
@@ -58,7 +60,7 @@ Toggle instantly between 3 live preview panes in Nav Mode:
 * **Git** ($\ge 2.30$)
 * **[Tmux](https://github.com/tmux/tmux)** ($\ge 3.2$)
 * **[Matchmaker (`mm`)](https://github.com/fcmiranda/matchmaker)** (Rust picker engine)
-* **[Sesh](https://github.com/joshmedeski/sesh)** (Smart terminal session manager)
+* **[Waymaker (`wm`)](https://github.com/fcmiranda/matchmaker)** / **[Sesh](https://github.com/joshmedeski/sesh)** (Terminal session manager)
 
 ### Installation via GNU Stow
 Inside your `.dotfiles` directory:
@@ -69,9 +71,9 @@ cd ~/.dotfiles
 
 This symlinks all presets, scripts, hooks, and CLI executables into:
 * `~/.local/bin/awt`, `~/.local/bin/awc`, `~/.local/bin/awp`, `~/.local/bin/awtc`
-* `~/.config/matchmaker/presets/awt*.toml`
-* `~/.config/matchmaker/scripts/awt*.sh`
-* `~/.config/matchmaker/hooks/post-*.sh`
+* `~/.config/waymaker/presets/awt*.toml`
+* `~/.config/waymaker/scripts/awt*.sh`
+* `~/.config/waymaker/hooks/*.sh`
 * `~/.config/tmux/awt-popup.sh`
 
 ---
@@ -83,13 +85,14 @@ This symlinks all presets, scripts, hooks, and CLI executables into:
 | `awt` | — | Open interactive Matchmaker TUI dashboard in current pane (30% height). |
 | `awt popup` | **`awp`** / `Ctrl+Shift+G` | Open full floating AWT modal ($85\% \times 75\%$) in Tmux. |
 | `awt -c` / `awt new` / `awt add` | **`awc`** | Launch the interactive 5-step Conventional Commits wizard. |
+| `awt -c -A <prompt> [base]` | — | Auto-derive conventional branch slug from task prompt and provision worktree. |
 | `awt -c <branch> [base] [flags] [-- cmd]` | — | Create worktree, optionally dispatch inline command in session & connect. |
 | `awt <branch>` / `awt switch <branch>` | — | Switch to existing worktree or auto-create from current `HEAD` if not yet provisioned. |
 | `awt pr [number]` | — | Interactive GitHub PR browser (`gh pr list`) or direct PR worktree checkout. |
-| `awt rm <branch> [-f] [--no-delete-branch]` | — | Delete worktree directory, Git branch (or keep ref), and kill session. |
+| `awt rm <branch> [-f] [--no-hooks]` | — | Delete worktree directory, Git branch (or keep ref), run pre-remove hooks, and kill session. |
 | `awt rebase [base]` | — | Safely rebase current worktree onto base branch with auto-stash. |
-| `awt merge [branch] [flags]` | — | Merge current worktree into base with hooks (`--squash`, `--rebase`, `--no-commit`, `--no-remove`, `--no-tmux`). |
-| `awt ship [branch] [flags]` | — | Merge active worktree into base, push to remote origin, and clean up. |
+| `awt merge [branch] [flags]` | — | Merge worktree with pre-merge validation gates (`--into <target>`, `--rebase`, `--squash`, `--no-hooks`). |
+| `awt ship [branch] [flags]` | — | Rebase onto target, run pre-merge gate, fast-forward merge, push to origin, and clean up. |
 | `awt clone <repo> [dir]` | **`awtc`** | Clone repository in `.bare` layout and provision initial worktree. |
 | `awt help` / `awt -h` | — | Display CLI help, usage options, and flag reference. |
 
@@ -97,6 +100,8 @@ This symlinks all presets, scripts, hooks, and CLI executables into:
 * **`awt <branch>`** *(Fast Jump & Auto-Provision)*:
   - If the worktree folder already exists, it immediately switches your Tmux client to that session.
   - If the worktree folder does not exist, it automatically creates the worktree (supporting both new and existing local/remote Git branches like `fecavmi` or `fecavmi-bk`) based on current `HEAD` and connects you.
+* **`awt -c -A <prompt> [base] [flags]`** *(Zero-Friction Prompt Slugification)*:
+  - Automatically derives conventional branch slugs from natural language prompts (e.g. `"add JWT auth"` $\rightarrow$ `feat/add-jwt-auth`, `"fix memory leak"` $\rightarrow$ `fix/memory-leak`).
 * **`awt -c <branch> [base] [-- <cmd...>]`** *(Explicit Creation with Base Branch & Inline Dispatch)*:
   - Allows specifying an explicit base branch as the 2nd argument (e.g. `awt -c feat/oauth staging`).
   - Everything after `--` is executed inside the newly provisioned worktree session (e.g. `awt -c fix/bug main -- cargo test`).
@@ -105,6 +110,9 @@ This symlinks all presets, scripts, hooks, and CLI executables into:
   - Both commands gracefully detect existing Git branches without erroring, linking the worktree directory directly to the pre-existing branch.
 
 ### 🚩 Flags Reference:
+* `-A <prompt>`, `--auto-name=<prompt>`: Automatically generate conventional branch name slug from task prompt.
+* `--into <branch>`, `--into=<branch>`: Explicitly specify target branch to merge into for `awt merge` or `awt ship`.
+* `--no-hooks`, `-H`: Bypass pre-merge and pre-remove validation lifecycle hooks.
 * `--continue`, `--ai-continue`: Resume the active AI conversation in the newly created worktree session.
 * `--no-continue`, `--fresh`: Start with a fresh AI session (skip the resume prompt).
 * `--ai=<cmd>`: Explicitly specify the AI launch command (e.g. `--ai="opencode -s id"`).
@@ -147,7 +155,7 @@ When inside the interactive Matchmaker dashboard (`awt` / `awp`):
 ~/.dotfiles/main/awt/
 ├── README.md                        # Documentation & quick start guide
 ├── .config/
-│   ├── matchmaker/
+│   ├── waymaker/
 │   │   ├── presets/
 │   │   │   ├── awt.toml             # Main dashboard preset with 3 live previews
 │   │   │   ├── awt-type.toml        # Step 1: Conventional types selection
@@ -155,13 +163,15 @@ When inside the interactive Matchmaker dashboard (`awt` / `awp`):
 │   │   │   └── awt-base.toml        # Step 3: Base branch selector
 │   │   ├── scripts/
 │   │   │   ├── awt-new.sh           # 4-step wizard orchestration script
-│   │   │   ├── awt-delete.sh        # Worktree deletion & Tmux session teardown
-│   │   │   ├── awt-merge.sh         # Merge handler with safety auto-stash
+│   │   │   ├── awt-delete.sh        # Worktree deletion, pre-remove hooks & cache cleanup
+│   │   │   ├── awt-merge.sh         # Merge handler with pre-merge validation gate
 │   │   │   ├── awt-rebase.sh        # Rebase handler with safety auto-stash
 │   │   │   └── awt-rename.sh        # Branch, folder, and session rename handler
 │   │   └── hooks/
-│   │       ├── post-create.sh       # .env copying & repo-level hook triggers
-│   │       └── post-merge.sh        # Post-merge cleanup & rebuild triggers
+│   │       ├── post-create.sh       # .env copying, declarative files & repo triggers
+│   │       ├── pre-merge.sh         # Pre-merge validation quality gate & docs check
+│   │       ├── post-merge.sh        # Post-merge cleanup & rebuild triggers
+│   │       └── pre-remove.sh        # Pre-remove lifecycle hooks & cleanup validation
 │   └── tmux/
 │       └── awt-popup.sh             # Floating modal wrapper with backdrop protection
 └── .local/

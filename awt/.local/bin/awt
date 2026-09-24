@@ -4,6 +4,71 @@
 
 set -e
 
+slugify_prompt() {
+    local prompt="$1"
+    prompt="$(echo "$prompt" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')"
+    [[ -z "$prompt" ]] && return 0
+    local prefix=""
+    local body=""
+
+    local conventional_re="^(feat|fix|refactor|docs|chore|test|perf|style|ci|build)(\([^)]+\))?[:/][[:space:]]*(.*)"
+    if [[ "$prompt" =~ $conventional_re ]]; then
+        prefix="${BASH_REMATCH[1]}"
+        body="${BASH_REMATCH[3]}"
+    fi
+
+    if [[ -z "$prefix" ]]; then
+        local first_word
+        first_word="$(echo "$prompt" | awk '{print tolower($1)}')"
+        case "$first_word" in
+            fix|bug|repair|resolve|patch|hotfix)
+                prefix="fix"
+                body="$(echo "$prompt" | sed -E 's/^[^[:space:]]+[[:space:]]*//')"
+                ;;
+            refactor|clean|cleanup|restructure|reorganize)
+                prefix="refactor"
+                body="$(echo "$prompt" | sed -E 's/^[^[:space:]]+[[:space:]]*//')"
+                ;;
+            doc|docs|document|documentation)
+                prefix="docs"
+                body="$(echo "$prompt" | sed -E 's/^[^[:space:]]+[[:space:]]*//')"
+                ;;
+            test|tests|testing)
+                prefix="test"
+                body="$(echo "$prompt" | sed -E 's/^[^[:space:]]+[[:space:]]*//')"
+                ;;
+            chore|bump|upgrade|deps|release)
+                prefix="chore"
+                body="$(echo "$prompt" | sed -E 's/^[^[:space:]]+[[:space:]]*//')"
+                ;;
+            perf|optimize|performance|speedup)
+                prefix="perf"
+                body="$(echo "$prompt" | sed -E 's/^[^[:space:]]+[[:space:]]*//')"
+                ;;
+            add|create|impl|implement|feat|feature|build|new)
+                prefix="feat"
+                body="$(echo "$prompt" | sed -E 's/^[^[:space:]]+[[:space:]]*//')"
+                ;;
+            *)
+                prefix="feat"
+                body="$prompt"
+                ;;
+        esac
+    fi
+
+    [[ -z "$body" ]] && body="$prompt"
+
+    local slug
+    slug="$(echo "$body" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9]+/-/g' | sed -E 's/^-+|-+$//g')"
+
+    if [[ ${#slug} -gt 45 ]]; then
+        slug="$(echo "$slug" | cut -c1-45 | sed -E 's/-[^-]*$//')"
+    fi
+
+    [[ -z "$slug" ]] && slug="worktree"
+    echo "${prefix}/${slug}"
+}
+
 show_help() {
     cat << 'HELP'
 awt - Agent Worktree Manager & Multi-Agent Git Orchestrator
@@ -11,6 +76,7 @@ awt - Agent Worktree Manager & Multi-Agent Git Orchestrator
 USAGE:
     awt                                     Open interactive Matchmaker TUI dashboard
     awt -c | new | add [flags]              Launch interactive 5-step Conventional Commits wizard (awc)
+    awt -c -A <prompt> [base] [flags]       Auto-derive conventional branch name from prompt & provision
     awt -c <branch> [base] [flags] [-- cmd] Create/provision worktree, run inline command & connect
     awt <branch> | switch <branch>          Switch to existing worktree session (or auto-create from HEAD)
     awt popup                               Open floating AWT modal in Tmux (85% × 75%) (awp)
@@ -18,21 +84,24 @@ USAGE:
     awt clone <repo> [dir]                  Clone repository into .bare container layout (awtc)
     awt rm | remove <branch> [flags]        Delete worktree, Git branch, and kill Tmux session
     awt rebase [base]                       Rebase active worktree onto base branch with auto-stash
-    awt merge [branch] [flags]              Merge active worktree into base branch with hooks
+    awt merge [branch] [flags]              Merge active worktree into base branch with hooks & validation
     awt ship [branch] [flags]               Merge into base, push to origin, and clean up worktree
     awt help | -h | --help                  Show this help message
 
 FLAGS & OPTIONS:
+    -A, --auto-name <prompt>                Auto-generate conventional branch slug from task prompt
     --no-tmux, --no-connect                 Create or merge worktree without switching Tmux session
     --continue, --ai-continue               Resume active AI conversation in the new worktree session
     --no-continue, --fresh                  Start with a fresh AI session (skip resume prompt)
     --ai=<cmd>                              Specify explicit AI launch command (e.g. --ai="opencode -s id")
     -- <command> [args...]                  Inline agent dispatch: launch command in new worktree session
+    --into <branch>, --into=<branch>        Specify explicit target branch for awt merge or awt ship
     --rebase / --no-rebase                  Rebase active branch onto target before merging
     --push / --ship                         Push target branch to remote origin after successful merge
     --squash / --no-squash                  Squash all commits on merge (default: no-squash / ff)
     --no-commit                             Perform merge without auto-committing (staged)
     --no-remove                             Keep worktree directory after merge
+    --no-hooks, -H                          Bypass pre-merge and pre-remove validation lifecycle hooks
     -f, --force                             Force remove dirty worktree on deletion
     --no-delete-branch                      Keep Git branch ref when removing worktree folder
 
@@ -73,7 +142,7 @@ case "$1" in
         branch=""
         for arg in "$@"; do
             case "$arg" in
-                -f|--force|--no-delete-branch|--no-tmux)
+                -f|--force|--no-delete-branch|--no-tmux|--no-hooks|--skip-pre-remove|-H)
                     flags+=("$arg")
                     ;;
                 *)
@@ -81,14 +150,17 @@ case "$1" in
                     ;;
             esac
         done
-        [[ -z "$branch" ]] && { echo "Usage: awt rm <branch> [-f|--force] [--no-delete-branch] [--no-tmux]"; exit 1; }
+        [[ -z "$branch" ]] && { echo "Usage: awt rm <branch> [-f|--force] [--no-delete-branch] [--no-tmux] [--no-hooks]"; exit 1; }
         repo_root="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
         branch_folder="${branch//\//-}"
         target_dir="$repo_root/../$branch_folder"
         repo_parent="$(basename "$(dirname "$repo_root")")"
         session_name="${repo_parent}/${branch_folder}"
         [[ "$repo_parent" == ".dotfiles" ]] && session_name="_dotfiles/$branch_folder"
-        delete_script="$HOME/.config/matchmaker/scripts/awt-delete.sh"
+        delete_script="$HOME/.config/waymaker/scripts/awt-delete.sh"
+        [ -x "$delete_script" ] || delete_script="$HOME/.config/matchmaker/scripts/awt-delete.sh"
+        [ -x "$delete_script" ] || delete_script="$(dirname "$0")/../../.config/waymaker/scripts/awt-delete.sh"
+        [ -x "$delete_script" ] || delete_script="$(dirname "$0")/../../.config/matchmaker/scripts/awt-delete.sh"
         if [[ -x "$delete_script" ]]; then
             exec "$delete_script" "$session_name" "$target_dir" "$branch" "${flags[@]}"
         fi
@@ -99,7 +171,10 @@ case "$1" in
         base="${1:-}"
         repo_root="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
         cur_branch="$(git rev-parse --abbrev-ref HEAD 2>/dev/null)"
-        rebase_script="$HOME/.config/matchmaker/scripts/awt-rebase.sh"
+        rebase_script="$HOME/.config/waymaker/scripts/awt-rebase.sh"
+        [ -x "$rebase_script" ] || rebase_script="$HOME/.config/matchmaker/scripts/awt-rebase.sh"
+        [ -x "$rebase_script" ] || rebase_script="$(dirname "$0")/../../.config/waymaker/scripts/awt-rebase.sh"
+        [ -x "$rebase_script" ] || rebase_script="$(dirname "$0")/../../.config/matchmaker/scripts/awt-rebase.sh"
         if [[ -x "$rebase_script" ]]; then
             exec "$rebase_script" "$cur_branch" "$repo_root" "$base" "$@"
         fi
@@ -109,15 +184,23 @@ case "$1" in
         shift
         flags=()
         target=""
-        for arg in "$@"; do
-            case "$arg" in
-                --squash|--no-squash|--no-commit|--no-remove|--no-tmux|--no-connect|--no-rebase|--rebase|--push|--ship)
-                    flags+=("$arg")
+        while [[ $# -gt 0 ]]; do
+            case "$1" in
+                --squash|--no-squash|--no-commit|--no-remove|--no-tmux|--no-connect|--no-rebase|--rebase|--push|--ship|--no-hooks|--skip-pre-merge|-H)
+                    flags+=("$1")
+                    ;;
+                --into=*)
+                    flags+=("$1")
+                    ;;
+                --into)
+                    shift
+                    flags+=("--into" "$1")
                     ;;
                 *)
-                    [[ -z "$target" ]] && target="$arg" || flags+=("$arg")
+                    [[ -z "$target" ]] && target="$1" || flags+=("$1")
                     ;;
             esac
+            shift
         done
         repo_root="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
         cur_branch="$(git rev-parse --abbrev-ref HEAD 2>/dev/null)"
@@ -125,7 +208,9 @@ case "$1" in
         cur_folder="$(basename "$repo_root")"
         session_name="${repo_parent}/${cur_folder}"
         [[ "$repo_parent" == ".dotfiles" ]] && session_name="_dotfiles/$cur_folder"
-        merge_script="$HOME/.config/matchmaker/scripts/awt-merge.sh"
+        merge_script="$HOME/.config/waymaker/scripts/awt-merge.sh"
+        [ -x "$merge_script" ] || merge_script="$HOME/.config/matchmaker/scripts/awt-merge.sh"
+        [ -x "$merge_script" ] || merge_script="$(dirname "$0")/../../.config/waymaker/scripts/awt-merge.sh"
         [ -x "$merge_script" ] || merge_script="$(dirname "$0")/../../.config/matchmaker/scripts/awt-merge.sh"
         if [[ -x "$merge_script" ]]; then
             exec "$merge_script" "$target" "$repo_root" "$session_name" "" "${flags[@]}"
@@ -136,15 +221,23 @@ case "$1" in
         shift
         flags=()
         target=""
-        for arg in "$@"; do
-            case "$arg" in
-                --squash|--no-squash|--no-commit|--no-remove|--no-tmux|--no-connect|--no-rebase|--rebase|--push|--ship)
-                    flags+=("$arg")
+        while [[ $# -gt 0 ]]; do
+            case "$1" in
+                --squash|--no-squash|--no-commit|--no-remove|--no-tmux|--no-connect|--no-rebase|--rebase|--push|--ship|--no-hooks|--skip-pre-merge|-H)
+                    flags+=("$1")
+                    ;;
+                --into=*)
+                    flags+=("$1")
+                    ;;
+                --into)
+                    shift
+                    flags+=("--into" "$1")
                     ;;
                 *)
-                    [[ -z "$target" ]] && target="$arg" || flags+=("$arg")
+                    [[ -z "$target" ]] && target="$1" || flags+=("$1")
                     ;;
             esac
+            shift
         done
         flags+=("--push")
         repo_root="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
@@ -153,7 +246,9 @@ case "$1" in
         cur_folder="$(basename "$repo_root")"
         session_name="${repo_parent}/${cur_folder}"
         [[ "$repo_parent" == ".dotfiles" ]] && session_name="_dotfiles/$cur_folder"
-        merge_script="$HOME/.config/matchmaker/scripts/awt-merge.sh"
+        merge_script="$HOME/.config/waymaker/scripts/awt-merge.sh"
+        [ -x "$merge_script" ] || merge_script="$HOME/.config/matchmaker/scripts/awt-merge.sh"
+        [ -x "$merge_script" ] || merge_script="$(dirname "$0")/../../.config/waymaker/scripts/awt-merge.sh"
         [ -x "$merge_script" ] || merge_script="$(dirname "$0")/../../.config/matchmaker/scripts/awt-merge.sh"
         if [[ -x "$merge_script" ]]; then
             exec "$merge_script" "$target" "$repo_root" "$session_name" "" "${flags[@]}"
@@ -162,7 +257,9 @@ case "$1" in
         ;;
     pr)
         shift
-        pr_script="$HOME/.config/matchmaker/scripts/awt-pr.sh"
+        pr_script="$HOME/.config/waymaker/scripts/awt-pr.sh"
+        [ -x "$pr_script" ] || pr_script="$HOME/.config/matchmaker/scripts/awt-pr.sh"
+        [ -x "$pr_script" ] || pr_script="$(dirname "$0")/../../.config/waymaker/scripts/awt-pr.sh"
         [ -x "$pr_script" ] || pr_script="$(dirname "$0")/../../.config/matchmaker/scripts/awt-pr.sh"
         if [[ -x "$pr_script" ]]; then
             exec "$pr_script" "$@"
@@ -192,20 +289,10 @@ if [[ $# -eq 0 ]]; then
         [[ -n "$cur_session" && "$cur_session" == "$session" ]] && exit 0
 
         # If session exists in Tmux, switch by name; otherwise connect to path
-        if command -v wm >/dev/null 2>&1; then
-            if tmux has-session -t "$session" 2>/dev/null; then
-                exec wm connect "$session"
-            else
-                exec wm connect "$target"
-            fi
-        elif command -v sesh >/dev/null 2>&1; then
-            if tmux has-session -t "$session" 2>/dev/null; then
-                exec sesh connect "$session"
-            else
-                exec sesh connect "$target"
-            fi
+        if tmux has-session -t "$session" 2>/dev/null; then
+            exec wm connect "$session"
         else
-            cd "$target"
+            exec wm connect "$target"
         fi
         exit 0
     else
@@ -238,6 +325,26 @@ while [[ $# -gt 0 ]]; do
             shift
             ;;
         -c|--create)
+            create=1
+            shift
+            ;;
+        -A|--auto-name)
+            shift
+            if [[ -n "${1:-}" ]]; then
+                branch="$(slugify_prompt "$1")"
+                create=1
+            fi
+            shift
+            ;;
+        --auto-name=*)
+            prompt="${1#*=}"
+            branch="$(slugify_prompt "$prompt")"
+            create=1
+            shift
+            ;;
+        -A=*)
+            prompt="${1#*=}"
+            branch="$(slugify_prompt "$prompt")"
             create=1
             shift
             ;;
@@ -285,6 +392,7 @@ if [[ "$create" -eq 1 && -z "$branch" ]]; then
     new_script="$HOME/.config/waymaker/scripts/awt-new.sh"
     [ -x "$new_script" ] || new_script="$HOME/.config/matchmaker/scripts/awt-new.sh"
     [ -x "$new_script" ] || new_script="$(dirname "$0")/../../.config/waymaker/scripts/awt-new.sh"
+    [ -x "$new_script" ] || new_script="$(dirname "$0")/../../.config/matchmaker/scripts/awt-new.sh"
     cur_branch="$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo '')"
     if [[ -x "$new_script" ]]; then
         exec "$new_script" "$cur_branch" "${extra_flags[@]}"
@@ -361,6 +469,10 @@ if [[ -x "$HOME/.config/waymaker/hooks/post-create.sh" ]]; then
     "$HOME/.config/waymaker/hooks/post-create.sh" "$target_dir" "$branch" "$base" 2>/dev/null || true
 elif [[ -x "$HOME/.config/matchmaker/hooks/post-create.sh" ]]; then
     "$HOME/.config/matchmaker/hooks/post-create.sh" "$target_dir" "$branch" "$base" 2>/dev/null || true
+elif [[ -x "$(dirname "$0")/../../.config/waymaker/hooks/post-create.sh" ]]; then
+    "$(dirname "$0")/../../.config/waymaker/hooks/post-create.sh" "$target_dir" "$branch" "$base" 2>/dev/null || true
+elif [[ -x "$(dirname "$0")/../../.config/matchmaker/hooks/post-create.sh" ]]; then
+    "$(dirname "$0")/../../.config/matchmaker/hooks/post-create.sh" "$target_dir" "$branch" "$base" 2>/dev/null || true
 fi
 
 echo "✓ Worktree ready at $target_dir"
@@ -374,6 +486,7 @@ if [[ $no_connect -eq 0 ]]; then
         detect_script="$HOME/.config/waymaker/scripts/awt-ai-detect.sh"
         [ -f "$detect_script" ] || detect_script="$HOME/.config/matchmaker/scripts/awt-ai-detect.sh"
         [ -f "$detect_script" ] || detect_script="$(dirname "$0")/../../.config/waymaker/scripts/awt-ai-detect.sh"
+        [ -f "$detect_script" ] || detect_script="$(dirname "$0")/../../.config/matchmaker/scripts/awt-ai-detect.sh"
         if [ -f "$detect_script" ]; then
             # shellcheck source=/dev/null
             . "$detect_script" 2>/dev/null || true

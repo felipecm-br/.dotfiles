@@ -81,11 +81,136 @@ if [[ -n "$primary_wt" && -d "$primary_wt" ]]; then
             cp "$wt_path/.env.local.example" "$wt_path/.env" 2>/dev/null || true
         fi
     fi
+
+    # 2. Declarative File Copy & Symlink Synchronization (.awt.yaml / .workmux.yaml / .awt manifests)
+    config_file=""
+    for cf in "$wt_path/.awt.yaml" "$wt_path/.awt/config.yaml" "$wt_path/.workmux.yaml" "$primary_wt/.awt.yaml" "$primary_wt/.workmux.yaml"; do
+        if [[ -f "$cf" ]]; then
+            config_file="$cf"
+            break
+        fi
+    done
+
+    # 2a. Declarative file copies
+    copy_targets=()
+    if [[ -n "$config_file" ]] && command -v python3 >/dev/null 2>&1; then
+        while IFS= read -r item; do
+            [[ -n "$item" ]] && copy_targets+=("$item")
+        done < <(python3 -c "
+import yaml
+try:
+    with open('$config_file', 'r') as f:
+        data = yaml.safe_load(f) or {}
+    items = data.get('files', {}).get('copy', [])
+    if isinstance(items, list):
+        for i in items:
+            if i: print(i)
+    elif isinstance(items, str) and items.strip():
+        print(items.strip())
+except Exception:
+    pass
+" 2>/dev/null)
+    fi
+
+    for cf_txt in "$wt_path/.awt/files.copy" "$primary_wt/.awt/files.copy"; do
+        if [[ -f "$cf_txt" ]]; then
+            while IFS= read -r line; do
+                line="$(echo "$line" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's/#.*//')"
+                [[ -n "$line" ]] && copy_targets+=("$line")
+            done < "$cf_txt"
+            break
+        fi
+    done
+
+    for item in "${copy_targets[@]}"; do
+        src="$primary_wt/$item"
+        dst="$wt_path/$item"
+        if [[ -e "$src" && ! -e "$dst" ]]; then
+            mkdir -p "$(dirname "$dst")" 2>/dev/null || true
+            cp -a "$src" "$dst" 2>/dev/null || cp -R "$src" "$dst" 2>/dev/null || true
+        fi
+    done
+
+    # 2b. Declarative symlinks (shared caches, large node_modules, build targets)
+    symlink_targets=()
+    if [[ -n "$config_file" ]] && command -v python3 >/dev/null 2>&1; then
+        while IFS= read -r item; do
+            [[ -n "$item" ]] && symlink_targets+=("$item")
+        done < <(python3 -c "
+import yaml
+try:
+    with open('$config_file', 'r') as f:
+        data = yaml.safe_load(f) or {}
+    items = data.get('files', {}).get('symlink', [])
+    if isinstance(items, list):
+        for i in items:
+            if i: print(i)
+    elif isinstance(items, str) and items.strip():
+        print(items.strip())
+except Exception:
+    pass
+" 2>/dev/null)
+    fi
+
+    for sf_txt in "$wt_path/.awt/files.symlink" "$primary_wt/.awt/files.symlink"; do
+        if [[ -f "$sf_txt" ]]; then
+            while IFS= read -r line; do
+                line="$(echo "$line" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' -e 's/#.*//')"
+                [[ -n "$line" ]] && symlink_targets+=("$line")
+            done < "$sf_txt"
+            break
+        fi
+    done
+
+    for item in "${symlink_targets[@]}"; do
+        src="$primary_wt/$item"
+        dst="$wt_path/$item"
+        if [[ -e "$src" && ! -e "$dst" && ! -L "$dst" ]]; then
+            mkdir -p "$(dirname "$dst")" 2>/dev/null || true
+            ln -s "$src" "$dst" 2>/dev/null || true
+        fi
+    done
 fi
 
-# 2. Project-level custom hooks (if defined in repository)
+# 3. Declarative Post-Create Lifecycle Hook Commands (.awt.yaml / .workmux.yaml)
+config_file=""
+for cf in "$wt_path/.awt.yaml" "$wt_path/.awt/config.yaml" "$wt_path/.workmux.yaml"; do
+    if [[ -f "$cf" ]]; then
+        config_file="$cf"
+        break
+    fi
+done
+
+if [[ -n "$config_file" ]] && command -v python3 >/dev/null 2>&1; then
+    hook_cmds=()
+    while IFS= read -r cmd; do
+        [[ -n "$cmd" ]] && hook_cmds+=("$cmd")
+    done < <(python3 -c "
+import yaml
+try:
+    with open('$config_file', 'r') as f:
+        data = yaml.safe_load(f) or {}
+    hooks = data.get('hooks', {})
+    cmds = hooks.get('post-create') or hooks.get('post_create') or []
+    if isinstance(cmds, list):
+        for c in cmds:
+            if c: print(c)
+    elif isinstance(cmds, str) and cmds.strip():
+        print(cmds.strip())
+except Exception:
+    pass
+" 2>/dev/null)
+
+    for cmd in "${hook_cmds[@]}"; do
+        (cd "$wt_path" && eval "$cmd") 2>/dev/null || true
+    done
+fi
+
+# 4. Project-level custom script hooks (if defined in repository)
 if [[ -x "$wt_path/.hooks/post-create" ]]; then
     "$wt_path/.hooks/post-create" "$wt_path" "$branch_name" "$base_branch"
+elif [[ -x "$wt_path/.awt/hooks/post-create" ]]; then
+    "$wt_path/.awt/hooks/post-create" "$wt_path" "$branch_name" "$base_branch"
 elif [[ -x "$wt_path/.git/hooks/post-worktree-create" ]]; then
     "$wt_path/.git/hooks/post-worktree-create" "$wt_path" "$branch_name" "$base_branch"
 fi

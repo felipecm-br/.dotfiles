@@ -13,12 +13,14 @@ wt_path="${wt_path/#\~/$HOME}"
 force=0
 keep_branch=0
 no_tmux=0
+no_hooks=0
 
 for arg in "$@"; do
     case "$arg" in
         -f|--force) force=1 ;;
         --no-delete-branch) keep_branch=1 ;;
         --no-tmux) no_tmux=1 ;;
+        --no-hooks|--skip-pre-remove|-H) no_hooks=1 ;;
     esac
 done
 
@@ -49,6 +51,41 @@ fi
 common_git_dir=$(git -C "$wt_path" rev-parse --git-common-dir 2>/dev/null || git rev-parse --git-common-dir 2>/dev/null || echo "")
 if [[ -n "$common_git_dir" && "$common_git_dir" != /* ]]; then
     common_git_dir="$(cd "$wt_path/$common_git_dir" 2>/dev/null && pwd)"
+fi
+
+# 4b. Pre-Remove Lifecycle Hook (e.g. archiving artifacts or sanity checks)
+if [[ $no_hooks -eq 0 && -d "$wt_path" ]]; then
+    pre_remove_hook=""
+    if [[ -x "$wt_path/.hooks/pre-remove" ]]; then
+        pre_remove_hook="$wt_path/.hooks/pre-remove"
+    elif [[ -x "$wt_path/.awt/hooks/pre-remove" ]]; then
+        pre_remove_hook="$wt_path/.awt/hooks/pre-remove"
+    elif [[ -x "$wt_path/.git/hooks/pre-worktree-remove" ]]; then
+        pre_remove_hook="$wt_path/.git/hooks/pre-worktree-remove"
+    elif [[ -x "$HOME/.config/waymaker/hooks/pre-remove.sh" ]]; then
+        pre_remove_hook="$HOME/.config/waymaker/hooks/pre-remove.sh"
+    elif [[ -x "$HOME/.config/matchmaker/hooks/pre-remove.sh" ]]; then
+        pre_remove_hook="$HOME/.config/matchmaker/hooks/pre-remove.sh"
+    fi
+
+    if [[ -n "$pre_remove_hook" ]]; then
+        if ! "$pre_remove_hook" "$wt_path" "$branch_clean"; then
+            if [[ $force -eq 0 ]]; then
+                printf "\n\033[1;31m󰅖 Pre-remove hook failed! Worktree removal aborted.\033[0m\n" >/dev/tty
+                sleep 2
+                exit 1
+            fi
+        fi
+    fi
+fi
+
+# 4c. Fast dependency cleanup (removes heavy node_modules/target before unlinking)
+if [[ -d "$wt_path" ]]; then
+    for heavy_dir in "$wt_path/node_modules" "$wt_path/target/debug/build" "$wt_path/target/release/build"; do
+        if [[ -d "$heavy_dir" ]]; then
+            rm -rf "$heavy_dir" 2>/dev/null || true
+        fi
+    done
 fi
 
 # 5. Remove Worktree purely via Native Git
