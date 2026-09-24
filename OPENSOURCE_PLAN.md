@@ -59,8 +59,8 @@ Rather than forcing users to assemble disparate repositories or compile 13 C tre
 
 ### B. `fcmiranda/lazygitrs` (The Review Engine)
 - **Role:** Blazing fast Git TUI with `--commits`, worktree port discovery, and headless inline diff review note injection (`S` bracket-pasted to active AI pane).
-- **Status:** Branch `fecavmi` pushed to `origin/fecavmi` (commit `27bce0347`). Bare worktree architecture active. Compiles cleanly.
-- **Next:** Remediate 69 unused/dead code warnings to pass `-D warnings` in CI, relocate `.lines.json` to `$XDG_STATE_HOME` or `.git/info/lines.json` to eliminate repository working tree pollution, and tag `v0.1.0-cockpit`.
+- **Status:** Branch `fecavmi` pushed to `origin/fecavmi` (commit `cad844944`). Notes relocated to `.git/info/lines.json` (eliminating working tree pollution) with full worktree resolution, XDG state fallback, and automatic migration. Compiles cleanly with all 168 unit tests passing.
+- **Next:** Remediate 69 unused/dead code warnings to pass `-D warnings` in CI, and tag `v0.1.0-cockpit`.
 
 ### C. `fcmiranda/matchmaker` / `waymaker` (The Nav, Frecency & Session Layer)
 - **Role:** Sub-millisecond fuzzy finder with live-reload inotify watch (`-w`), Kitty graphics caching, Mermaid diagram rendering, ACID `redb` frecency store, and **native workspace & session engine** (`wm session`, `wm connect`, `wm last`, `wm preview`).

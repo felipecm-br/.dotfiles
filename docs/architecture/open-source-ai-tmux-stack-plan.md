@@ -75,12 +75,9 @@ The README and value proposition must lead with the concrete problem solved for 
     - Each tree-sitter crate contains C/C++ grammar sources (`parser.c` and scanner files) compiled via `cc` in crate `build.rs`.
     - Naive cross-compilation via `cargo build --target x86_64-unknown-linux-musl` or `aarch64-unknown-linux-musl` fails in standard CI runner environments because target C toolchains (`musl-gcc`, `aarch64-linux-gnu-gcc`) are absent.
     - *Remediation:* CI must avoid naive `cargo build` for multi-arch releases. It must employ containerized builds via `cross-rs/cross` or `cargo-zigbuild` (with `zig` acting as the multi-arch C cross-compiler) to produce true static musl Linux and Apple Darwin binaries.
-  - **Repository Pollution via `.lines.json`:**
-    - In [`src/pager/notes_store.rs:152, 198`](file:///home/fecavmi/dev/github/lazygitrs/fecavmi/src/pager/notes_store.rs#L152) and [`src/gui/mod.rs:9684`](file:///home/fecavmi/dev/github/lazygitrs/fecavmi/src/gui/mod.rs#L9684), `lazygitrs` persists inline review notes and session data to `.lines.json` directly in the active repository root (`repo_path.join(".lines.json")`).
-    - When users launch `lazygitrs` inside any local Git repository, `.lines.json` is generated in the working tree. In repositories lacking `.lines.json` in their local `.gitignore`, it immediately surfaces as an untracked/modified file in `git status`, risking accidental commits to user codebases.
-    - *Remediation:* Two-tier mitigation:
-      1. *Immediate Stack Layer:* Installer configures a global gitignore entry (`git config --global core.excludesFile ~/.gitignore_global` containing `.lines.json`).
-      2. *Engine Layer:* Refactor `lazygitrs` to store review notes inside `.git/info/lines.json` (inside `.git/`, which Git ignores natively) or `$XDG_STATE_HOME/lazygitrs/<repo-hash>/lines.json`, guaranteeing a pristine working tree.
+  - **Repository Pollution via `.lines.json` (Resolved):**
+    - Previously, `lazygitrs` persisted inline review notes to `.lines.json` directly in the active repository root (`repo_path.join(".lines.json")`), causing untracked file pollution in repositories without a local `.gitignore` rule.
+    - *Resolution:* Implemented in `notes_store.rs` (commit `6480180d1`). Notes are now saved canonically to `<git_dir>/info/lines.json` (inside `.git/`, which Git ignores natively) with support for worktrees (`gitdir: <path>`) and XDG state fallback (`$XDG_STATE_HOME/lazygitrs/notes/<hash>.json`) for non-git folders. Existing root `.lines.json` files are automatically migrated and removed on save, keeping user working trees pristine.
   - **Installer Anti-Pattern in `install.sh`:**
     - Lines 13-20 prioritize `cargo install lazygitrs` if `cargo` is present. This violates Akita's golden rule: it forces developers to compile dozens of crates (taking 5-10 minutes) instead of downloading pre-built binaries, and pulls upstream `Blankeos/lazygitrs` from crates.io which **lacks** the `fecavmi` `--commits` and worktree features!
   - **Hardcoded Injector Invocation (Resolved):**
@@ -670,9 +667,9 @@ To satisfy both the requirement for standalone open-source modularity and the us
 - [ ] **lazygitrs (Clippy Remediation & Tree-Sitter Cross-Compilation):**
   - Remediate remaining 69 compiler warnings to pass strict `-D warnings` in CI.
   - Configure `cross-rs/cross` or `cargo-zigbuild` build targets for the 13 C tree-sitter language grammars.
-- [ ] **lazygitrs (.lines.json Repository Pollution Fix):**
+- [x] **lazygitrs (.lines.json Repository Pollution Fix):**
   - Immediate Stack Layer: Add global gitignore setup (`core.excludesFile ~/.gitignore_global` containing `.lines.json`) to `install.sh`.
-  - Engine Layer: Relocate review note persistence from repository root to `$XDG_STATE_HOME/lazygitrs/<repo-hash>/lines.json` or `.git/info/lines.json` to keep working trees completely clean.
+  - Engine Layer: Relocate review note persistence from repository root to `.git/info/lines.json` (inside `.git/`, natively ignored by Git) with fallback to `$XDG_STATE_HOME/lazygitrs/notes/<hash>.json` for non-git workspaces, plus automatic cleanup of legacy `.lines.json` on save. Verified with unit tests.
 - [x] **lazygitrs (Path Decoupling):**
   - Dynamic `process.env.TERMINAL_AI_INJECTOR` support wired into `lazygit-hook.mjs`.
 - [x] **matchmaker / waymaker (Remote Tracking & Rebrand):**
