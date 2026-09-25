@@ -51,6 +51,7 @@ See [.shell/install/README.md](.shell/install/README.md) for the current bootstr
 
 - [docs/README.md](docs/README.md)
 - [docs/architecture/terminal-ergonomics-and-ux-manifesto.md](docs/architecture/terminal-ergonomics-and-ux-manifesto.md)
+- [docs/architecture/universal-keyboard-ergonomics-and-profiles.md](docs/architecture/universal-keyboard-ergonomics-and-profiles.md)
 - [docs/architecture/workflow-keybindings-matrix.md](docs/architecture/workflow-keybindings-matrix.md)
 - [docs/architecture/zero-friction-file-transfer-benchmark.md](docs/architecture/zero-friction-file-transfer-benchmark.md)
 - [docs/tmux/popups-ergonomics-and-golden-ratio.md](docs/tmux/popups-ergonomics-and-golden-ratio.md)
