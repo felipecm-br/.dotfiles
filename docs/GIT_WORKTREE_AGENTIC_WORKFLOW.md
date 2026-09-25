@@ -534,14 +534,14 @@ While low-level CLI utilities like `wt` (Worktree CLI) provide direct Git comman
 
 ## 10. Multi-Repository Workflow with AI (Engine + Dotfiles)
 
-When a task spans multiple interdependent repositories (e.g. developing a Rust feature in [`matchmaker`](file:///home/fecavmi/dev/github/matchmaker) and creating or updating corresponding presets in [dotfiles](file:///home/fecavmi/.dotfiles/main/matchmaker/.config/matchmaker/presets)), the **"Engine First, Config Second"** pattern applies.
+When a task spans multiple interdependent repositories (e.g. developing a Rust feature in [`waymaker`](file:///home/fecavmi/dev/github/waymaker) and creating or updating corresponding presets in [dotfiles](file:///home/fecavmi/.dotfiles/main/matchmaker/.config/matchmaker/presets)), the **"Engine First, Config Second"** pattern applies.
 
 ```mermaid
 sequenceDiagram
     autonumber
     actor Dev as Developer
     participant Agent as Single AI Agent (Orchestrator)
-    participant Engine as Repo 1: matchmaker (~/dev/github/matchmaker/fecavmi)
+    participant Engine as Repo 1: waymaker (~/dev/github/waymaker/main)
     participant Dotfiles as Repo 2: .dotfiles (~/.dotfiles/main)
     participant Home as Live Environment ($HOME)
 

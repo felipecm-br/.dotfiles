@@ -84,7 +84,7 @@ The README and value proposition must lead with the concrete problem solved for 
     - `antigravity/.gemini/hooks/lazygit-hook.mjs` has been updated to dynamically resolve `lazygit-tmux-injector.sh` via `$PATH` and `process.env.TERMINAL_AI_INJECTOR`.
 
 ### 2.3 `matchmaker` / `waymaker` (`wm`)
-- **Path:** `/home/fecavmi/dev/github/matchmaker/waymaker` (worktrees: `.bare`, `main`, `waymaker`)
+- **Path:** `/home/fecavmi/dev/github/waymaker` (worktrees: `.bare`, `main`, `waymaker`)
 - **Current State & Evolution:**
   - Workspace containing `waymaker-cli` and `waymaker-lib` with Nucleo fuzzy matcher.
   - Enhanced features on `fecavmi`:
