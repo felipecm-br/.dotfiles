@@ -81,15 +81,58 @@ Instant teleportation between project workspaces, git worktrees, and tmux sessio
 EOF
     ;;
 
-  tmux-window)
+  tmux-window|tmux-window-fullscreen)
     cat <<'EOF'
-### 󱂬 Window & Session Tree Picker (`75% × 60%`)
+### 󱂬 Window & Session Tree Picker (`75% × 60%` or `Fullscreen`)
 Visual grouped view of all sessions and their windows with real-time AI agent status badges.
 
-- **Ergonomics**: `s` = Switch/Select window.
+- **Ergonomics**: `s` = Switch/Select window. `Prefix + S` opens full modal.
 - **Controls**:
   - `Enter`: Focuses selected window immediately.
-  - Previews live pane content and active processes.
+  - Previews live pane content, running process, and active AI status.
+EOF
+    ;;
+
+  tmux-select-0)
+    cat <<'EOF'
+### 󰌌 Direct Jump to Window 0 (`Ctrl + ` `)
+Instant switch to the first tab (Window 0) without pressing Prefix!
+
+- **Ergonomics**: `Ctrl + \`` (backtick). Left hand Home Row adjacent ($H=0$).
+- Single-touch reaction latency $T_R = 0\text{ ms}$.
+EOF
+    ;;
+
+  tmux-select-win)
+    cat <<'EOF'
+### 󰌌 Direct Window Jump (`Ctrl + 1 .. 9`)
+Instant switch directly to windows 1 through 9 with ZERO PREFIX!
+
+- **Ergonomics**: Hold `Ctrl` and tap the window index (`1` to `9`).
+- Eliminates prefix latency ($T_K = 120\text{ ms}$). Aligned with browser tab switching.
+EOF
+    ;;
+
+  tmux-move-win)
+    cat <<'EOF'
+### 󱂩 Move Window Slot (`Ctrl + Shift + 0 .. 9`)
+Reorder windows instantly by shifting the current window to target index.
+
+- **Ergonomics**: Hold `Ctrl + Shift` and tap the target number (`0` to `9`).
+- Automatically shifts intervening windows without overwriting existing tabs.
+EOF
+    ;;
+
+  tmux-awt)
+    cat <<'EOF'
+### 󰊢 AWT Autonomous Worktree Orchestrator (`Ctrl + Shift + G`)
+Autonomous Git worktree popup for isolated branch sandboxes and AI subagents.
+
+- **Ergonomics**: Zero-prefix global shortcut (`Ctrl + Shift + G`).
+- **Features**:
+  - Provision isolated worktree sandboxes in milliseconds.
+  - Checkout GitHub PRs and rebase linear history without touching primary worktree.
+  - Safe sandboxing for background AI agents (`awt run`).
 EOF
     ;;
 
@@ -109,7 +152,7 @@ EOF
 Cycles pending AI agent questions, approval prompts, and notifications.
 
 - **`Prefix + i`**: Floating modal popup HUD (`80% × 75%`). Focuses split pane if in current window; opens floating modal for any other window or session. `Esc` dismisses immediately.
-- **`Prefix + I`**: Direct focus jump with Bidirectional Trampoline Stack: remembers where you were and returns automatically when alerts clear.
+- **`Prefix + I` / `Ctrl + Shift + I` / `Alt + I`**: Direct focus jump with Bidirectional Trampoline Stack: remembers where you were and returns automatically when alerts clear.
 EOF
     ;;
 
@@ -130,6 +173,89 @@ Opens a floating scratchpad editor directly over your current workspace.
 
 - **Ergonomics**: `N` = Neovim scratchpad.
 - **Usage**: Jot quick notes, draft code, or inspect temporary buffers without altering existing window layouts.
+EOF
+    ;;
+
+  tmux-view-scrollback)
+    cat <<'EOF'
+### 󰤄 Full Scrollback in Neovim (`Prefix + E`)
+Captures complete ANSI scrollback buffer into read-only Neovim buffer with full syntax highlighting.
+
+- **Ergonomics**: `E` = Edit scrollback.
+EOF
+    ;;
+
+  tmux-reopen)
+    cat <<'EOF'
+### 󰙀 Reopen Closed Window / Tab (`Ctrl + Shift + T` / `Prefix + T` / `u`)
+Restores the last closed window or pane with its directory path, running command, and active buffer.
+
+- **Ergonomics**: Universal VSCode/Browser mnemonic (`Ctrl + Shift + T`), also available with `Prefix + T` and `u`.
+EOF
+    ;;
+
+  tmux-close)
+    cat <<'EOF'
+### 󰅖 Close Pane / Window (`Prefix + w` / `Prefix + x`)
+Guarded pane/window closure.
+
+- Records active path and command into the reopen stack before closing so `Ctrl + Shift + T` can restore it anytime.
+EOF
+    ;;
+
+  tmux-zoom)
+    cat <<'EOF'
+### 󰹑 Maximize / Zoom Active Pane (`Prefix + m` / `Prefix + z`)
+Toggles full-window zoom for the current pane.
+
+- **Ergonomics**: Bi-manual hand alternation: left hand prefix (`Ctrl + Space`), right index taps `m` (Home Row).
+EOF
+    ;;
+
+  tmux-resize)
+    cat <<'EOF'
+### 󱁐 Asymmetric Pane Resize (`Prefix + C-h / C-j / C-k / C-l`)
+Repeatable pane resizing holding `Ctrl`.
+
+- Shifts 20 columns horizontally (~10% width) or 5 lines vertically (~10% height) per tap.
+EOF
+    ;;
+
+  tmux-split-v|tmux-split-h)
+    cat <<'EOF'
+### 󱂩 Window Split (`Prefix + |` / `Prefix + -`)
+- **`Prefix + |`**: Splits active window vertically (side-by-side).
+- **`Prefix + -`**: Splits active window horizontally (top-bottom).
+EOF
+    ;;
+
+  tmux-prev-next|tmux-last-win|tmux-last-sess)
+    cat <<'EOF'
+### 󰮯 Window & Session MRU Navigation
+- **`Prefix + Tab`**: Instant toggle between the 2 most recently active windows.
+- **`Prefix + L`**: Instant toggle between the 2 most recently active sessions.
+- **`Prefix + h` / `Prefix + l`**: Previous / next window in sequence.
+EOF
+    ;;
+
+  tmux-reload)
+    cat <<'EOF'
+### 󰑐 Reload Tmux Configuration (`Prefix + r`)
+Re-reads and sources `~/.config/tmux/tmux.conf` on the fly without closing any sessions or windows.
+EOF
+    ;;
+
+  tmux-kill-sess)
+    cat <<'EOF'
+### 󰅖 Kill Entire Session (`Prefix + W`)
+Destroys the current tmux session and switches client to next available session.
+EOF
+    ;;
+
+  tmux-raw-keys)
+    cat <<'EOF'
+### 󰌌 Raw Tmux Keybindings (`list-keys -N`)
+Launches the native Tmux keybindings reference pager showing all internal table definitions.
 EOF
     ;;
 
@@ -155,7 +281,7 @@ Direct fuzzy picker for files and directories with Object-First insertion.
 EOF
     ;;
 
-  shell-lazygitrs)
+  shell-lazygitrs|tmux-lazygitrs)
     cat <<'EOF'
 ### 󰊢 Lazygitrs Floating Popup (`Ctrl + G`)
 Instant Git cockpit in a floating popup modal.

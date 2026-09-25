@@ -24,7 +24,7 @@ This document provides a comprehensive audit and definitive reference of all key
 | **`Ctrl + Shift + T`** (`C-S-t`) | Global / Tmux | **Reopen Last Closed Window / Tab** | Inward chord: CapsLock (Pinky) + Shift + T (VSCode-style tab restore with file, command, path & session) | $140\text{ ms}$ |
 | **`Ctrl + Shift + I`** (`C-S-i`) | Global / Tmux | **AI Attention Triage Direct Focus Jump** | Inward chord: CapsLock (Pinky) + Shift + I (No Alt, MacBook-ergonomic) | $140\text{ ms}$ |
 | **`Alt + i`** (`M-i`) | Global / Tmux | **AI Attention Triage Jump (Meta fallback)** | Left Thumb (Alt) + Right Middle (I) | $130\text{ ms}$ |
-| **`Ctrl + 0..9`** | Tmux | **Direct Window Select (Windows 0 to 9)** | CapsLock (Pinky) + Number Key | $130\text{ ms}$ |
+| **`Ctrl + \`` / `Ctrl + 1..9`** | Tmux | **Direct Window Select (Window 0: backtick, Windows 1 to 9)** | CapsLock (Pinky) + Number Key | $130\text{ ms}$ |
 | **`Ctrl + Shift + 0..9`** | Tmux | **Move & Shift Window to Slot 0..9** | Left Pinky + Left Ring + Number Key | $160\text{ ms}$ |
 
 ---
