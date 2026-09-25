@@ -81,10 +81,13 @@ Rather than forcing users to assemble disparate repositories or compile 13 C tre
 - [x] **Backdrop Isolator:** Author and deploy `tmux-popup-isolate.sh` with migration of all 7 callers.
 - [x] **Lints & Build Sanitization:** Fixed `acpd` clippy warnings, eliminated double-debounce, sanitized hardcoded `/home/fecavmi` fallbacks in agent hooks.
 - [x] **Native Sesh & Frecency Integration:** Fully incorporated `sesh` workspace management into `waymaker` (`session.rs`), eliminating external `sesh-bin` and `zoxide` dependencies with drop-in wrapper.
-- [ ] **Tier 1 Engine Tagged Releases:** Publish `v0.1.0` releases for `acpd` and `waymaker`, and `v0.1.0-cockpit` for `lazygitrs` to populate GitHub Release assets.
-- [ ] **Umbrella Meta-Repo:** Initialize `fcmiranda/terminal-ai-cockpit` with `cockpit-manifest.json`, `cockpit.tmux`, `scripts/`, `hooks/`, and `systemd/`.
-- [ ] **Universal Installer:** Ship POSIX `install.sh` for one-command, zero-compilation curl installation (< 30s execution).
-- [ ] **Problem-First README & VHS Demos:** Record animated SVGs showing flicker-free streaming popups and 1-key inline diff reviews.
+- [x] **Tier 1 Engine Tagged Releases:** Published `v0.1.0` releases for `acpd` and `waymaker`, and `v0.1.0-cockpit` for `lazygitrs` with multi-arch binary assets and SHA-256 checksums.
+- [x] **Umbrella Meta-Repo (`waymux`):** Initialized and published [`fcmiranda/waymux`](https://github.com/fcmiranda/waymux) (`v0.1.0`) with `waymux-manifest.json`, `tmux/waymux.tmux`, `scripts/`, `hooks/`, and `systemd/`.
+- [x] **Universal Installer:** Shipped POSIX `install.sh` for one-command, zero-compilation curl installation (< 10s execution) with architecture detection and SHA-256 verification.
+- [x] **Problem-First README:** Shipped high-impact README with banner, architecture diagrams, and clear problem-first value proposition.
+- [ ] **VHS Terminal Demos:** Record animated SVGs/GIFs showing flicker-free streaming popups and 1-key inline diff reviews.
+- [ ] **Packaging Distribution:** Publish Arch Linux AUR package (`waymux-bin`) and Homebrew formula (`brew tap fcmiranda/tap`).
+- [ ] **Container Smoke Test:** Validate `install.sh` against clean Ubuntu and Alpine Docker containers.
 
 ---
 
