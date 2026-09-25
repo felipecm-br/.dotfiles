@@ -64,7 +64,7 @@ Rather than forcing users to assemble disparate repositories or compile 13 C tre
 
 ### C. `fcmiranda/matchmaker` / `waymaker` (The Nav, Frecency & Session Layer)
 - **Role:** Sub-millisecond fuzzy finder with live-reload inotify watch (`-w`), Kitty graphics caching, Mermaid diagram rendering, ACID `redb` frecency store, and **native workspace & session engine** (`wm session`, `wm connect`, `wm last`, `wm preview`).
-- **Status:** Tagged and released as `v0.1.0`. Sesh and frecency completely incorporated into Waymaker (`session.rs`). External `sesh-bin` (Go) and `zoxide` dependencies **100% eliminated**. Over 228 tests passing with 0 failures (`cargo test`). Multi-arch release CI active with sha256 checksums.
+- **Status:** Tagged and released as `v0.1.0`. Branch `main` synchronized with `waymaker` as default branch; upstream history preserved in `upstream-main`. Sesh and frecency completely incorporated into Waymaker (`session.rs`). External `sesh-bin` (Go) and `zoxide` dependencies **100% eliminated**. Over 228 tests passing with 0 failures (`cargo test`). Multi-arch release CI active with sha256 checksums.
 - **Next:** Reference in Tier 2 `cockpit-manifest.json`.
 
 ### D. `tmux` Backdrop Isolation Layer
