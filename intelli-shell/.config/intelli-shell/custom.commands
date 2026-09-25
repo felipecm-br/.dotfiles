@@ -106,6 +106,9 @@ awtc {{repo_url}}
 # Open live full-text ripgrep picker in Tmux popup (Prefix + /)
 ~/.config/tmux/grep-picker.sh
 
+# Open interactive Keybindings & Navigation HUD in Tmux popup (Prefix + ?)
+~/.config/tmux/keybindings-picker.sh
+
 # Paste files or clipboard into last visited Matchmaker target directory
 ptl {{files}}
 

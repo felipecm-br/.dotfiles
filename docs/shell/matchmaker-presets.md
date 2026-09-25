@@ -16,6 +16,7 @@ Matchmaker (`mm`) uses TOML configuration presets located in `~/.config/matchmak
 | **memory** | `mm -o memory` | Fast explorer for project rules, `AGENTS.md`, agent skills, and durable memory. | `Enter`: Open selected file |
 | **sesh-picker** | `mm -o sesh-picker` | Tmux session picker grouped by status and Nerd Font icons. | `Enter`: Connect to session via `sesh connect` |
 | **window-picker** | `mm -o window-picker` | Cross-session Tmux window picker with dynamic ACPD agent indicators and live previews. | `Enter`: Switch to selected window |
+| **keybindings** | `mm -o keybindings` / `keybindings-picker.sh` | Interactive dotfiles keybindings & workflow HUD across Tmux, Shell, Frecency, and Hyprland with native Markdown documentation. | `Enter`: Execute runnable workflow / notify<br>`Tab` / `Shift-Tab`: Cycle categories (all → tmux → shell → frecency → hypr → all)<br>`y` / `Ctrl+Y`: Copy keybinding to clipboard<br>`Ctrl+V`: Insert into origin pane<br>`Esc` / `q`: Quit |
 | **borders** | `mm -o borders` / `hypr-border` | Interactive live Hyprland border gradient switcher with real-time preview and multi-theme template persistence. | `j` / `k`: Live-render gradient on active window<br>`Enter`: Persist style across all themes |
 | **animations** | `mm -o animations` / `hypr-anim` | Interactive live Hyprland window animation switcher with instant visual preview. | `j` / `k`: Live-apply animation curve<br>`Enter`: Persist animation style |
 

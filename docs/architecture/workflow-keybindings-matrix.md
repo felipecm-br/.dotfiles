@@ -60,6 +60,7 @@ This document provides a comprehensive audit and definitive reference of all key
 | **`Prefix + Ctrl + h / j / k / l`** | **Resize Pane (Asymmetric 10%: 20 cols / 5 lines)** | Repeatable with prefix held (`-r`). Keep holding `Ctrl` after prefix and tap Vim directions: `C-h`/`C-l` shifts 20 columns (~10% width), `C-j`/`C-k` shifts 5 lines (~10% height). |
 | **`Prefix + L`** | **Switch to Last Session** | `L` = **L**ast session (MRU toggle). Instant jump back to the previously active session. |
 | **`Prefix + /`** | **Workspace Full-Text Ripgrep (`85% × 75%`)** | `/` = Universal search mnemonic. Matchmaker live search modal (` 󰍉 `) with 45/55 foveal layout, debounced query reload, line-synced `bat` syntax preview, `Enter` opens in Neovim (`+{line} {file}`), `Ctrl+V` inserts `{file}:{line}` into origin pane. |
+| **`Prefix + ?`** | **Keybindings & Navigation HUD (`85% × 65%`)** | `?` = Universal help mnemonic. Interactive Waymaker workflow HUD (` 󰌌 `) with category filtering (`Tab`), native Markdown previews, and direct execution (`Enter`). |
 ### 🐚 Layer 2: Smart Shell (`zsh`) & Object-First Navigation Widgets
 
 | Keybinding | Widget / Function | Behavior & Context Awareness |
