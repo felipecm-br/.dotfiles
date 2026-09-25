@@ -25,14 +25,15 @@ if [ -z "${TMUX_POPUP:-}" ]; then
   ISOLATOR="$SCRIPT_DIR/tmux-popup-isolate.sh"
   [ -x "$ISOLATOR" ] || ISOLATOR="$(command -v tmux-popup-isolate.sh 2>/dev/null || echo "$HOME/.config/tmux/tmux-popup-isolate.sh")"
 
-  exec "$ISOLATOR" \
+  "$ISOLATOR" \
     -S "fg=$GREEN" \
     -s "fg=default" \
     -b rounded \
     -T " 󰅍 " \
     -w 75% -h 60% \
     -E \
-    -- "TMUX_POPUP=1 '$0' '$ORIGIN_ARG' '$CWD_ARG'"
+    -- "TMUX_POPUP=1 '$0' '$ORIGIN_ARG' '$CWD_ARG'" || true
+  exit 0
 fi
 
 [ -n "${TMUX:-}" ] || { echo "yank-picker: fora do tmux" >&2; exit 1; }
