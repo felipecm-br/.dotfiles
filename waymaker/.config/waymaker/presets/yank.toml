@@ -79,7 +79,7 @@ debounce_ms = 200
 delay_clear = true
 
 [footer]
-content = " {cyan,bold:[Enter]} {darkgray:Yank}  •  {magenta,bold:[Tab]} {darkgray:Filter}  •  {green,bold:[C-v]} {darkgray:Insert}  •  {yellow,bold:[C-e]} {darkgray:Open}  •  {magenta,bold:[C-y]} {darkgray:Copy}  •  {blue,bold:[J/K]} {darkgray:Scroll}  •  {cyan,bold:[Space]} {darkgray:Multi}"
+content = " {cyan,bold:[Enter]} {darkgray:Yank}  •  {magenta,bold:[Tab]} {darkgray:Filter}  •  {green,bold:[C-v]} {darkgray:Insert}  •  {yellow,bold:[C-e]} {darkgray:Open}  •  {blue,bold:[C-b]} {darkgray:Chrome}  •  {magenta,bold:[J/K]} {darkgray:Scroll}  •  {cyan,bold:[Space]} {darkgray:Multi}"
 match_indent = false
 row_connection = "Full"
 separator = "light"
@@ -103,6 +103,8 @@ ctrl-u = "PreviewHalfPageUp"
 ctrl-v = 'ExecuteSilent(test -n "$MM_ORIGIN_PANE" && tmux send-keys -t "$MM_ORIGIN_PANE" -l -- {})'
 ctrl-e = 'ExecuteSilent(~/.config/tmux/scrollback-open.sh {} "$MM_ORIGIN_CWD")'
 ctrl-o = 'ExecuteSilent(~/.config/tmux/scrollback-open.sh {} "$MM_ORIGIN_CWD")'
+ctrl-b = 'ExecuteSilent(~/.config/tmux/scrollback-chrome.sh {})'
+ctrl-w = 'ExecuteSilent(~/.config/tmux/scrollback-chrome.sh {})'
 
 # Filter modes: Tab advances, Shift-Tab goes back. Each state reloads its own
 # file explicitly — no dependence on additional_commands cycling.
@@ -170,3 +172,8 @@ e = 'ExecuteSilent(~/.config/tmux/scrollback-open.sh {} "$MM_ORIGIN_CWD")'
 o = 'ExecuteSilent(~/.config/tmux/scrollback-open.sh {} "$MM_ORIGIN_CWD")'
 ctrl-e = 'ExecuteSilent(~/.config/tmux/scrollback-open.sh {} "$MM_ORIGIN_CWD")'
 ctrl-o = 'ExecuteSilent(~/.config/tmux/scrollback-open.sh {} "$MM_ORIGIN_CWD")'
+b = 'ExecuteSilent(~/.config/tmux/scrollback-chrome.sh {})'
+w = 'ExecuteSilent(~/.config/tmux/scrollback-chrome.sh {})'
+x = 'ExecuteSilent(~/.config/tmux/scrollback-chrome.sh {})'
+ctrl-b = 'ExecuteSilent(~/.config/tmux/scrollback-chrome.sh {})'
+ctrl-w = 'ExecuteSilent(~/.config/tmux/scrollback-chrome.sh {})'

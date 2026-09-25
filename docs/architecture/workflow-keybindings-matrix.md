@@ -53,7 +53,7 @@ This document provides a comprehensive audit and definitive reference of all key
 | **`Prefix + -`** | **Horizontal Split Window** | Intuitive visual divider symbol. |
 | **`Prefix + h` / `l`**| **Previous / Next Window** | Vim standard directional motions. |
 | **`Prefix + Tab`** | **Last Active Window (MRU Toggle)** | Instant toggle between the two most recent windows. |
-| **`Prefix + y`** | **Token Extract / Yank (`75% × 60%`)** | `y` = **Y**ank tokens, URLs, hashes, paths via Matchmaker. Inward chord ($H=0$). Dynamic 60%/95% preview toggle (`Ctrl+P`). |
+| **`Prefix + y`** | **Token Extract / Yank (`75% × 60%`)** | `y` = **Y**ank tokens, URLs, hashes, paths via Matchmaker. Inward chord ($H=0$). Dynamic 60%/95% preview toggle (`Ctrl+P`), direct browser open in Chrome (`Ctrl+B`/`b`/`w`). |
 | **`Prefix + E`** | **Full Scrollback in Neovim** | Captures complete ANSI scrollback history into read-only Neovim buffer. |
 | **`Prefix + e`** / **`C-e`** | **Workspace Files Picker (`75% × 60%`)** | `e` = **E**xplore workspace files via Matchmaker popup (` 󰈞 󰄧 󰋩 `). Data sources cycle via `Tab`/`Shift+Tab` (Local -> Frecency -> Bookmarks), dynamic 60%/100% full preview modal (`Enter`), native Markdown, Mermaid & Photos rendering with Kitty graphics passthrough, diagram zoom (`+`/`-`/`0`), inspector (`s`), AI prompt insert (`Ctrl+V`), `e` / `o` / `Ctrl+E` opens in Golden Ratio split Neovim pane (62% × 38%) on left beside AI session. |
 | **`Prefix + m`** / **`z`** | **Maximize / Zoom Toggle Pane** | `m` = **M**aximize pane (bi-manual hand alternation: left hand prefix, right index taps `m`). Standard `z` also preserved. |

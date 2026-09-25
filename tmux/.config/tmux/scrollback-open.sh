@@ -31,6 +31,10 @@ if [ "$CHECK" = "1" ]; then
   exit 0
 fi
 if [ "$exists" != "1" ]; then
+  # If it looks like a URL or web link, open directly in Chrome
+  if printf '%s' "$t" | grep -qE '^(https?://|git@|www\.|localhost(:|/)|127\.0\.0\.1(:|/))'; then
+    exec "$(dirname "$0")/scrollback-chrome.sh" "$t"
+  fi
   tmux display-message "scrollback: não é arquivo: $file" 2>/dev/null || true
   exit 0
 fi

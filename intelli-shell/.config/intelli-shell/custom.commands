@@ -100,6 +100,9 @@ awtc {{repo_url}}
 # Open interactive scrollback token extractor in Tmux popup (Prefix + y legacy alias)
 ~/.config/tmux/scrollback-extract.sh
 
+# Open URL or link token directly in Google Chrome / browser
+~/.config/tmux/scrollback-chrome.sh {{url}}
+
 # Open live full-text ripgrep picker in Tmux popup (Prefix + /)
 ~/.config/tmux/grep-picker.sh
 
