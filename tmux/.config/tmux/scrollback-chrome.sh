@@ -74,18 +74,27 @@ else
   printf '%s' "$url" | tmux load-buffer - 2>/dev/null || true
 fi
 
-# Close Tmux popup overlay cleanly
-tmux display-popup -C 2>/dev/null || true
-rm -f "/tmp/tmux-active-popup-${USER:-default}" 2>/dev/null || true
+# Log invocation for diagnostic telemetry
+LOG="/tmp/scrollback-chrome.log"
+printf '%s [INFO] raw="%s" url="%s" bin="%s"\n' "$(date '+%Y-%m-%d %T')" "$raw" "$url" "$BROWSER_BIN" >>"$LOG" 2>&1 || true
 
-# User feedback in Tmux status bar
-tmux display-message " Chrome: $url" 2>/dev/null || true
+# Ignore SIGHUP so closing the popup doesn't terminate this script or its children
+trap '' HUP INT TERM
 
-# Launch browser detached from popup process group
-if command -v setsid >/dev/null 2>&1; then
-  setsid "$BROWSER_BIN" "$url" >/dev/null 2>&1 &
+# Launch browser detached OUTSIDE the popup's process group
+if [ -n "${TMUX:-}" ]; then
+  # tmux run-shell -b runs the command directly on the tmux server background loop,
+  # immune to popup teardown / pty SIGHUP termination.
+  tmux run-shell -b "$BROWSER_BIN $(printf '%q' "$url") >/dev/null 2>&1"
+  tmux display-message " Chrome: $url" 2>/dev/null || true
+  tmux display-popup -C 2>/dev/null || true
+  rm -f "/tmp/tmux-active-popup-${USER:-default}" 2>/dev/null || true
 else
-  nohup "$BROWSER_BIN" "$url" >/dev/null 2>&1 &
+  if command -v setsid >/dev/null 2>&1; then
+    setsid "$BROWSER_BIN" "$url" >/dev/null 2>&1 &
+  else
+    nohup "$BROWSER_BIN" "$url" >/dev/null 2>&1 &
+  fi
 fi
 
 exit 0
