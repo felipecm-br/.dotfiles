@@ -53,10 +53,10 @@ bar = "Plain"             # Estilo da barra na lista: "Plain" (â”‚), "Thick" (â–
 color = "black"           # Cor da barra: nomes ("black", "gray", "cyan", "lightblue", etc.) ou hex ("#000000", "#1e1e2e")
 
 [ui.nav.binds]
-"c"      = ["ExecuteSilent(printf '%s\\n' '{=}' | $HOME/.config/tmux/window-picker-create.sh)", "Reload($HOME/.config/tmux/window-picker-items.sh)"]
-"C"      = ["ExecuteSilent(printf '%s\\n' '{=}' | $HOME/.config/tmux/window-picker-create.sh)", "Reload($HOME/.config/tmux/window-picker-items.sh)"]
-"d"      = ["ExecuteSilent(printf '%s\\n' '{=}' | $HOME/.config/tmux/window-picker-delete.sh)", "Reload($HOME/.config/tmux/window-picker-items.sh)"]
-"D"      = ["ExecuteSilent(printf '%s\\n' '{=}' | $HOME/.config/tmux/window-picker-delete.sh)", "Reload($HOME/.config/tmux/window-picker-items.sh)"]
+"c"      = ["ExecuteAsync(printf '%s\\n' '{=}' | $HOME/.config/tmux/window-picker-create.sh)", "Reload($HOME/.config/tmux/window-picker-items.sh)"]
+"C"      = ["ExecuteAsync(printf '%s\\n' '{=}' | $HOME/.config/tmux/window-picker-create.sh)", "Reload($HOME/.config/tmux/window-picker-items.sh)"]
+"d"      = ["ExecuteAsync(printf '%s\\n' '{=}' | $HOME/.config/tmux/window-picker-delete.sh)", "Reload($HOME/.config/tmux/window-picker-items.sh)"]
+"D"      = ["ExecuteAsync(printf '%s\\n' '{=}' | $HOME/.config/tmux/window-picker-delete.sh)", "Reload($HOME/.config/tmux/window-picker-items.sh)"]
 "ctrl-r" = "Reload($HOME/.config/tmux/window-picker-items.sh)"
 
 [ui.border]
@@ -80,10 +80,10 @@ percentage = 60
 
 [binds]
 Start    = ["ToggleColumn(title)", "ToggleColumn(name)", "ToggleColumn(session)", "ToggleColumn(idx)"]
-"c"      = ["ExecuteSilent(printf '%s\\n' '{=}' | $HOME/.config/tmux/window-picker-create.sh)", "Reload($HOME/.config/tmux/window-picker-items.sh)"]
-"C"      = ["ExecuteSilent(printf '%s\\n' '{=}' | $HOME/.config/tmux/window-picker-create.sh)", "Reload($HOME/.config/tmux/window-picker-items.sh)"]
-"d"      = ["ExecuteSilent(printf '%s\\n' '{=}' | $HOME/.config/tmux/window-picker-delete.sh)", "Reload($HOME/.config/tmux/window-picker-items.sh)"]
-"D"      = ["ExecuteSilent(printf '%s\\n' '{=}' | $HOME/.config/tmux/window-picker-delete.sh)", "Reload($HOME/.config/tmux/window-picker-items.sh)"]
+"c"      = ["ExecuteAsync(printf '%s\\n' '{=}' | $HOME/.config/tmux/window-picker-create.sh)", "Reload($HOME/.config/tmux/window-picker-items.sh)"]
+"C"      = ["ExecuteAsync(printf '%s\\n' '{=}' | $HOME/.config/tmux/window-picker-create.sh)", "Reload($HOME/.config/tmux/window-picker-items.sh)"]
+"d"      = ["ExecuteAsync(printf '%s\\n' '{=}' | $HOME/.config/tmux/window-picker-delete.sh)", "Reload($HOME/.config/tmux/window-picker-items.sh)"]
+"D"      = ["ExecuteAsync(printf '%s\\n' '{=}' | $HOME/.config/tmux/window-picker-delete.sh)", "Reload($HOME/.config/tmux/window-picker-items.sh)"]
 "ctrl-r" = "Reload($HOME/.config/tmux/window-picker-items.sh)"
 "?"      = "ToggleFooter"
 "F1"     = "ToggleFooter"
