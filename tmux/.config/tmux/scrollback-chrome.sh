@@ -28,6 +28,9 @@ case "$token" in
   http://*|https://*|file://*)
     url="$token"
     ;;
+  //*)
+    url="https:${token}"
+    ;;
   localhost:*|localhost/*|localhost|127.0.0.1:*|127.0.0.1/*|127.0.0.1)
     url="http://$token"
     ;;

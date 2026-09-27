@@ -67,6 +67,11 @@ got="$(grep -oE 'https?://[^[:space:]"'"'"'<>]+|(~?/[A-Za-z0-9._~:/?#@!$&()*+,;=
 want="$(printf '192.168.0.10:8080\n/tmp/x\n./rel/path\n~/.config/tmux/tmux.conf\nhttps://api.exemplo.com/v2/jobs?x=1\nabc1234def5678\n~/projetos/api')"
 if [ "$got" = "$want" ]; then ok "extraction dedupe+order"; else bad "extraction output:"; printf '%s\n' "$got"; fi
 
+# 3b. tool call command extraction (Claude/Gemini/Antigravity ● Bash(...) (ctrl+o to expand))
+MOCK_BASH_LINE='● Bash(git log -p -n 3 tmux/.config/tmux/yank-picker.sh) (ctrl+o to expand)'
+cmd_got="$(printf '%s\n' "$MOCK_BASH_LINE" | sed -nE '/^[[:space:]]*●[[:space:]]*Bash\(/ { s/[[:space:]]*\(ctrl\+o.*$//; s/^[[:space:]]*●[[:space:]]*Bash\(//; s/\)[[:space:]]*$//; p; }' | sed -E 's/[[:space:]]*\)[[:space:]]*\(ctrl\+o.*$//; s/[[:space:]]*\(ctrl\+o.*$//')"
+[ "$cmd_got" = "git log -p -n 3 tmux/.config/tmux/yank-picker.sh" ] && ok "tool call command extraction" || bad "tool call command extraction"
+
 # 4. script syntax + uses preset + clipboard path
 sh -n "$SCRIPT" && ok "script syntax" || bad "script syntax"
 grep -qE -- '-o (yank|scrollback)' "$SCRIPT" && ok "script uses preset" || bad "script preset"
@@ -91,6 +96,8 @@ CSCRIPT="$ROOT/tmux/.config/tmux/scrollback-chrome.sh"
 [ "$("$CSCRIPT" --check 'https://github.com/fcmiranda/waymaker).')" = "https://github.com/fcmiranda/waymaker" ] && ok "chrome parser punctuation strip" || bad "chrome parser punctuation strip"
 [ "$("$CSCRIPT" --check 'git@github.com:foo/bar.git')" = "https://github.com/foo/bar" ] && ok "chrome parser git ssh url" || bad "chrome parser git ssh url"
 [ "$("$CSCRIPT" --check 'localhost:3000/api')" = "http://localhost:3000/api" ] && ok "chrome parser localhost url" || bad "chrome parser localhost url"
+[ "$("$CSCRIPT" --check '//akitaonrails.com/2026/03/01/ai-jail-sandbox-para-agentes-de-ia-de-shell-script-a-ferramenta-real/,')" = "https://akitaonrails.com/2026/03/01/ai-jail-sandbox-para-agentes-de-ia-de-shell-script-a-ferramenta-real/" ] && ok "chrome parser // protocol-relative url with trailing comma" || bad "chrome parser // protocol-relative url with trailing comma"
+[ "$("$CSCRIPT" --check 'https://akitaonrails.com/2026/03/01/ai-jail-sandbox-para-agentes-de-ia-de-shell-script-a-ferramenta-real/,')" = "https://akitaonrails.com/2026/03/01/ai-jail-sandbox-para-agentes-de-ia-de-shell-script-a-ferramenta-real/" ] && ok "chrome parser https url with trailing comma" || bad "chrome parser https url with trailing comma"
 PSCRIPT="$ROOT/tmux/.config/tmux/workspace-picker.sh"
 [[ -f "$PSCRIPT" ]] || PSCRIPT="$ROOT/tmux/.config/tmux/files-picker.sh"
 [ -x "$PSCRIPT" ] && sh -n "$PSCRIPT" && ok "workspace-picker script syntax" || bad "workspace-picker script syntax"

@@ -47,19 +47,23 @@ export MM_ORIGIN_CWD="${2:-}"
 MM_BIN="$HOME/.local/bin/wm"
 [ -x "$MM_BIN" ] || MM_BIN="$(command -v wm 2>/dev/null || command -v mm 2>/dev/null || echo mm)"
 
-P_URL='https?://[^[:space:]"'"'"'<>]+|git@[^[:space:]"'"'"'<>]+'
-P_PATH='(~?/[A-Za-z0-9._~:/?#@!$&()*+,;=%-]+|\./[A-Za-z0-9._~:/?#@!$&()*+,;=%-]+)'
+P_URL='https?://[^[:space:]"'"'"'<>]+|git@[^[:space:]"'"'"'<>]+|//[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}[^[:space:]"'"'"'<>]*|www\.[a-zA-Z0-9.-]+[^[:space:]"'"'"'<>]*'
+P_PATH='(~?/[A-Za-z0-9._~:/?#@!$&()*+,;=%-]+|\.\.?/[A-Za-z0-9._~:/?#@!$&()*+,;=%-]+)'
 P_SHA='\b[0-9a-f]{7,40}\b|\b[0-9]{1,3}(\.[0-9]{1,3}){3}(:[0-9]+)?\b'
 CMD_VERBS='sudo|doas|pacman|yay|paru|apt|apt-get|dnf|yum|brew|flatpak|snap|rm|mv|cp|mkdir|rmdir|touch|ln|chmod|chown|git|gh|cargo|rustc|just|make|systemctl|journalctl|docker|podman|kubectl|curl|wget|ssh|scp|rsync|tar|unzip|gzip|nvim|vim|bat|cat|rg|grep|find|fd|wm|mm|awt|sesh|tmux|kill|pkill|python|python3|node|npm|pnpm|bun|uv|zig|go'
 
 dedup_rev() { awk '!seen[$0]++ && length($0)>2 { lines[n++]=$0 } END { for (i=n-1;i>=0;i--) print lines[i] }'; }
 
+clean_tokens() {
+  sed -E 's/^[[:space:]<"'\''([{\[]+//; s/[][[:space:]>"'\''})]+$//; s/[.,;:)>]+$//' | dedup_rev
+}
+
 extract_commands() {
   {
     sed -nE 's/^[[:space:]]*[$#%❯➜→>][[:space:]]+//p' "$SRC"
-    sed -nE 's/^[[:space:]]*●[[:space:]]*Bash\((.*)\)[[:space:]]*(\(ctrl\+o to expand\))?[[:space:]]*$/\1/p' "$SRC"
+    sed -nE '/^[[:space:]]*●[[:space:]]*Bash\(/ { s/[[:space:]]*\(ctrl\+o.*$//; s/^[[:space:]]*●[[:space:]]*Bash\(//; s/\)[[:space:]]*$//; p; }' "$SRC"
     grep -E "^[[:space:]]*($CMD_VERBS)\b" "$SRC" | sed -E 's/^[[:space:]]+//'
-  } | sed -E 's/\)[[:space:]]*\(ctrl\+o to expand\)[[:space:]]*$//' | \
+  } | sed -E 's/[[:space:]]*\)[[:space:]]*\(ctrl\+o.*$//; s/[[:space:]]*\(ctrl\+o.*$//' | \
     awk '!seen[$0]++ && length($0)>=3 && !/^[0-9]+$/ { lines[n++]=$0 } END { for (i=n-1;i>=0;i--) print lines[i] }'
 }
 
@@ -69,9 +73,10 @@ if ! tmux capture-pane -pJS - -t "$ORIGIN" 2>/dev/null | sed '/^$/d' > "$SRC"; t
 fi
 
 extract_commands > "$TOK_CMD"
-grep -oE "$P_PATH" "$SRC" | dedup_rev > "$TOK_PATH"
-grep -oE "$P_URL" "$SRC" | dedup_rev > "$TOK_URL"
-grep -oE "$P_SHA" "$SRC" | dedup_rev > "$TOK_SHA"
+sed -E 's|https?://[^[:space:]"'\''<>]+||g; s|git@[^[:space:]"'\''<>]+||g; s|//[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}[^[:space:]"'\''<>]*||g; s|www\.[a-zA-Z0-9.-]+[^[:space:]"'\''<>]*||g' "$SRC" | \
+  grep -oE "$P_PATH" | clean_tokens > "$TOK_PATH"
+grep -oE "$P_URL" "$SRC" | sed -E 's/^[[:space:]<"'\''([{\[]+//; s/[][[:space:]>"'\''})]+$//; s/[.,;:)>]+$//; s|^//|https://|' | dedup_rev > "$TOK_URL"
+grep -oE "$P_SHA" "$SRC" | clean_tokens > "$TOK_SHA"
 
 {
   cat "$TOK_CMD" 2>/dev/null || true
