@@ -8,6 +8,7 @@ FILTER="${1:-all}"
 emit_tmux() {
   cat <<'EOF'
 󰈞  Prefix + e	Workspace Files Picker (Golden Ratio)	tmux	tmux-workspace	~/.config/tmux/workspace-picker.sh
+  Prefix + P	GitHub Pull Request Review Picker	tmux	tmux-pr	~/.config/tmux/pr-picker.sh
 󰅍  Prefix + y	Scrollback Yank & Chrome URL Extractor	tmux	tmux-yank	~/.config/tmux/yank-picker.sh
 󰍉  Prefix + /	Workspace Ripgrep Live Search	tmux	tmux-grep	~/.config/tmux/grep-picker.sh
 󰓩  Prefix + t	Sesh Workspace / Task Picker	tmux	tmux-sesh	~/.config/tmux/sesh-picker.sh

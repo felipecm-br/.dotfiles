@@ -91,6 +91,9 @@ awtc {{repo_url}}
 # Open interactive workspace context inspector in Tmux popup (Prefix + e)
 ~/.config/tmux/workspace-picker.sh
 
+# Open interactive GitHub Pull Request review picker in Tmux popup (Prefix + P)
+~/.config/tmux/pr-picker.sh
+
 # Open interactive workspace file picker in Tmux popup (Prefix + e legacy alias)
 ~/.config/tmux/files-picker.sh
 

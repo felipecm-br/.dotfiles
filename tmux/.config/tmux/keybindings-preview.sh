@@ -40,6 +40,26 @@ Inspect workspace files, tree structures, AI code, diagrams, and photos without 
 EOF
     ;;
 
+  tmux-pr)
+    cat <<'EOF'
+###  GitHub Pull Request Review Picker (`75% × 60%`)
+Interactive GitHub PR review workflow and worktree selector powered by Waymaker.
+
+- **Ergonomics**: Prefix + P (Golden Ratio popup modal, sub-100ms latency).
+- **Tabs**:
+  - `Tab` / `Shift + Tab`: Cycle between Review Requested (1/3), My PRs (2/3), and All Open (3/3).
+- **Previews**:
+  - Live GitHub PR overview with `gh pr view` (title, author, body, labels, reviewers).
+  - Live full syntax diff preview with `gh pr diff`.
+  - `p` / `Ctrl + P`: Toggle between PR Overview and PR Diff preview layouts.
+- **Controls**:
+  - `Enter`: Checkout PR into an isolated worktree via `awt pr <num>` and auto-switch session.
+  - `Ctrl + E` / `e` / `b`: Open PR directly in Google Chrome / browser.
+  - `Ctrl + D` / `d`: View interactive full diff in delta/less pager.
+  - `q` / `Esc`: Dismiss modal.
+EOF
+    ;;
+
   tmux-yank)
     cat <<'EOF'
 ### 󰅍 Scrollback Yank & Chrome URL Extractor (`75% × 60%`)

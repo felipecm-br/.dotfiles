@@ -1,10 +1,10 @@
-# Matchmaker Agent Worktree PR Preset (`mm -o awt-pr` / `wm -o awt-pr`)
+# Matchmaker / Waymaker Pull Request Preset (`wm -o pr`)
 # Interactive GitHub PR browser, review manager, and worktree provisioner with live preview.
 
 [tui]
-percentage = 35
+percentage = 75
 min = 12
-max = 25
+max = 40
 restore_fullscreen = false
 
 [ui.nav]
