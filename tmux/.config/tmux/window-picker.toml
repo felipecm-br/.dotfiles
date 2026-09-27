@@ -51,6 +51,7 @@ active = true
 focus_on_start = "picker"
 bar = "Plain"             # Estilo da barra na lista: "Plain" (│), "Thick" (█), "Double" (║), "Rounded" (│), "QuadrantOutside" (▌), "QuadrantInside" (▐)
 color = "black"           # Cor da barra: nomes ("black", "gray", "cyan", "lightblue", etc.) ou hex ("#000000", "#1e1e2e")
+hints = false
 
 [ui.nav.binds]
 "c"      = ["ExecuteAsync(printf '%s\\n' '{=}' | $HOME/.config/tmux/window-picker-create.sh)", "Reload($HOME/.config/tmux/window-picker-items.sh)"]
@@ -58,6 +59,7 @@ color = "black"           # Cor da barra: nomes ("black", "gray", "cyan", "light
 "d"      = ["ExecuteAsync(printf '%s\\n' '{=}' | $HOME/.config/tmux/window-picker-delete.sh)", "Reload($HOME/.config/tmux/window-picker-items.sh)"]
 "D"      = ["ExecuteAsync(printf '%s\\n' '{=}' | $HOME/.config/tmux/window-picker-delete.sh)", "Reload($HOME/.config/tmux/window-picker-items.sh)"]
 "ctrl-r" = "Reload($HOME/.config/tmux/window-picker-items.sh)"
+","      = []
 
 [ui.border]
 sides = ""
@@ -87,4 +89,5 @@ Start    = ["ToggleColumn(title)", "ToggleColumn(name)", "ToggleColumn(session)"
 "ctrl-r" = "Reload($HOME/.config/tmux/window-picker-items.sh)"
 "?"      = "ToggleFooter"
 "F1"     = "ToggleFooter"
+","      = []
 "@reload"= "Reload($HOME/.config/tmux/window-picker-items.sh)"
