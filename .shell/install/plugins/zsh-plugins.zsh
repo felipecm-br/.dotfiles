@@ -26,3 +26,4 @@ install_zsh_plugin "zsh-syntax-highlighting" "https://github.com/zsh-users/zsh-s
 install_zsh_plugin "zsh-transient-prompt" "https://github.com/olets/zsh-transient-prompt.git"
 install_zsh_plugin "zsh-vi-mode" "https://github.com/jeffreytse/zsh-vi-mode.git"
 install_zsh_plugin "fzf-tab" "https://github.com/Aloxaf/fzf-tab.git"
+install_zsh_plugin "zsh-you-should-use" "https://github.com/MichaelAquilina/zsh-you-should-use.git"

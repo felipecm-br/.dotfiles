@@ -39,7 +39,8 @@ source_plugins \
 	zsh-autosuggestions \
 	zsh-syntax-highlighting \
 	zsh-transient-prompt \
-	fzf-tab
+	fzf-tab \
+	zsh-you-should-use
 
 # Load binds last so keybindings have final authority over plugins
 source_utils binds
