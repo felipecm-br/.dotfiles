@@ -279,13 +279,13 @@ Item {
       actionFor: function(value) { return "omarchy-powerprofiles-set autodetect " + Util.shellQuote(value) }
     },
     "sessions": {
-      script: "current=$(tmux display-message -p '#S' 2>/dev/null || true); wm session list -d -c -t -z 2>/dev/null | grep -Ev '^(_lazygitrs|_popups)' | while read -r s; do [[ -z $s ]] && continue; printf '%s\\t%s\\t%s\\n' \"$s\" \"$s\" \"$current\"; done",
+      script: "wm_bin=\"$HOME/.local/bin/wm\"; [ -x \"$wm_bin\" ] || wm_bin=\"wm\"; current=$(tmux display-message -p '#S' 2>/dev/null || true); \"$wm_bin\" session list -d -c -t -z 2>/dev/null | grep -Ev '^(_lazygitrs|_popups)' | while read -r s; do [[ -z $s ]] && continue; printf '%s\\t%s\\t%s\\n' \"$s\" \"$s\" \"$current\"; done",
       icon: "⚡",
       volatile: true,
       actionFor: function(value) { return "omarchy-launch-session-connect " + Util.shellQuote(value) }
     },
     "sesh": {
-      script: "current=$(tmux display-message -p '#S' 2>/dev/null || true); wm session list -d -c -t -z 2>/dev/null | grep -Ev '^(_lazygitrs|_popups)' | while read -r s; do [[ -z $s ]] && continue; printf '%s\\t%s\\t%s\\n' \"$s\" \"$s\" \"$current\"; done",
+      script: "wm_bin=\"$HOME/.local/bin/wm\"; [ -x \"$wm_bin\" ] || wm_bin=\"wm\"; current=$(tmux display-message -p '#S' 2>/dev/null || true); \"$wm_bin\" session list -d -c -t -z 2>/dev/null | grep -Ev '^(_lazygitrs|_popups)' | while read -r s; do [[ -z $s ]] && continue; printf '%s\\t%s\\t%s\\n' \"$s\" \"$s\" \"$current\"; done",
       icon: "⚡",
       volatile: true,
       actionFor: function(value) { return "omarchy-launch-session-connect " + Util.shellQuote(value) }
