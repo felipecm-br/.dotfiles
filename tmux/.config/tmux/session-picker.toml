@@ -4,7 +4,7 @@ basic = true
 bar = "Plain"
 color = "Black"
 prompt = ""
-focus_on_start = "picker"
+focus_on_start = "filter"
 hints = false
 
 [start]
