@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# omarchy-launch-session - Open Quickshell Omarchy menu at sessions route
+
+exec omarchy-menu summon sessions

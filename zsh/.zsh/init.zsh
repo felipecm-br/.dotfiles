@@ -28,7 +28,6 @@ source_packages \
 	lolcat \
 	figlet \
 	procs \
-	sesh \
 	tmux \
 	intelli-shell
 

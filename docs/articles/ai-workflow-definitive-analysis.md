@@ -91,7 +91,7 @@ All critical bugs, performance friction points, read-side RPC expansions, securi
 | **Feature: Read-Side RPC Extensions** | [`acpd/src/api.rs:81-340`](file:///home/fecavmi/dev/github/acpd/src/api.rs#L81-L340) | Added RPCs: `tmux.capture_pane`, `tmux.list_panes`, `tmux.list_windows`, `tmux.list_sessions`, `agentState/list`, `tmux.send_keys`. | **IMPLEMENTED & VERIFIED** (Commits `6ce1c22` and `aeed302`). 9 unit tests passing. Verified live via curl. |
 | **Security: Session Token Auth & Strict State Parsing** | [`acpd/src/auth.rs`](file:///home/fecavmi/dev/github/acpd/src/auth.rs)<br>[`acpd/src/api.rs`](file:///home/fecavmi/dev/github/acpd/src/api.rs) | Token file in `$XDG_RUNTIME_DIR/acpd/token` with `0600` permissions. Strict state parsing returning `-32602` JSON-RPC error. | **IMPLEMENTED & VERIFIED** (Commit `70511f6`). Verified live via curl (401 without token, 200 with Bearer header, -32602 for invalid state). |
 | **Resilience: Dead Process Cleanup (Liveness)** | [`acpd/src/daemon.rs:44-58`](file:///home/fecavmi/dev/github/acpd/src/daemon.rs#L44-L58) | Abrupt `SIGKILL` or process crashes bypass exit handlers. | **RESOLVED & VERIFIED**. Spawns periodic 30s Tokio task in `daemon.rs` invoking `clean_stale_panes()`. |
-| **Ergonomics: High-Leverage Quick Wins** | [`tmux/.config/tmux/tmux.conf`](file:///home/fecavmi/.dotfiles/main/tmux/.config/tmux/tmux.conf)<br>[`sesh/.config/sesh/sesh.toml`](file:///home/fecavmi/.dotfiles/main/sesh/.config/sesh/sesh.toml) | Fast keybindings: `Alt+o` (overlay), `Alt+a` (semantic jump), `prefix+o` (sidebar split), and `sesh` wildcard rule. | **IMPLEMENTED & VERIFIED**. Added to dotfiles configs and tmux reloaded live (`tmux source-file`). |
+| **Ergonomics: High-Leverage Quick Wins** | [`tmux/.config/tmux/tmux.conf`](file:///home/fecavmi/.dotfiles/main/tmux/.config/tmux/tmux.conf)<br>[`waymaker/.config/waymaker/session.toml`](file:///home/fecavmi/.dotfiles/main/waymaker/.config/waymaker/session.toml) | Fast keybindings: `Alt+o` (overlay), `Alt+a` (semantic jump), `prefix+o` (sidebar split), and `sesh` wildcard rule. | **IMPLEMENTED & VERIFIED**. Added to dotfiles configs and tmux reloaded live (`tmux source-file`). |
 | **Review Loop Hardening** | [`lazygitrs/src/gui/mod.rs`](file:///home/fecavmi/dev/github/lazygitrs/ai-notes/src/gui/mod.rs) | Note status reset shortcut (`Sent` ➔ `New`) implemented and skill `lazygitrs-review` single-sourced via symlink. | **IMPLEMENTED & VERIFIED** (Commits `b65c67d` and `c6d6e26`). |
 
 ---
@@ -164,7 +164,7 @@ You are an expert in terminal multiplexers, TUI design, and AI developer workflo
 1. **Verify Source Repositories**:
    - `/home/fecavmi/dev/github/acpd`: Read `src/signals.rs`, `src/api.rs`, `src/daemon.rs`, `src/auth.rs`, `Cargo.toml`. Confirm that `cargo test` passes 9 tests.
    - `/home/fecavmi/dev/github/lazygitrs/ai-notes`: Read `src/acp.rs`, `src/gui/mod.rs`. Confirm commits `b65c67d` and `c6d6e26`.
-   - `~/.dotfiles/main`: Read `tmux/.config/tmux/tmux.conf`, `sesh/.config/sesh/sesh.toml`, `antigravity/.gemini/hooks/hook-lib.mjs`.
+   - `~/.dotfiles/main`: Read `tmux/.config/tmux/tmux.conf`, `waymaker/.config/waymaker/session.toml`, `antigravity/.gemini/hooks/hook-lib.mjs`.
 
 2. **Verify Project Completion Status**:
    - Confirm 100% completion across all 3 phases (Ergonomics, Security RPCs, and Review Loop Hardening).

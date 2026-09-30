@@ -89,15 +89,15 @@ Debounced full-text search across the current workspace or project via `ripgrep`
 EOF
     ;;
 
-  tmux-sesh)
+  tmux-sesh|tmux-session)
     cat <<'EOF'
-### 󰓩 Sesh Workspace / Task Picker (`75% × 60%`)
-Instant teleportation between project workspaces, git worktrees, and tmux sessions.
+### 󰓩 Session Workspace / Task Picker (`75% × 60%`)
+Instant teleportation between project workspaces, git worktrees, and tmux sessions powered by Waymaker.
 
 - **Ergonomics**: `t` = Task/Teleport ($H=0$).
 - **Controls**:
   - `Enter`: Connects to selected project workspace session.
-  - Integrates with `zoxide`, `git worktrees`, and configured sessions.
+  - Integrates with `waymaker`, `frecency`, `git worktrees`, and configured sessions.
 EOF
     ;;
 

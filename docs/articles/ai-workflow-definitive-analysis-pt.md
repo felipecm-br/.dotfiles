@@ -92,7 +92,7 @@ Todos os bugs críticos, expansões de RPC, autenticação de segurança, atalho
 | **Recurso: Expansão RPC de Leitura** | [`acpd/src/api.rs:81-340`](file:///home/fecavmi/dev/github/acpd/src/api.rs#L81-L340) | Adicionados RPCs: `tmux.capture_pane`, `tmux.list_panes`, `tmux.list_windows`, `tmux.list_sessions`, `agentState/list` e `tmux.send_keys`. | **IMPLEMENTADO E VALIDADO** (Commits `6ce1c22` e `aeed302`). 9 testes unitários aprovados. |
 | **Segurança: Autenticação Token Local & Validação Estrita** | [`acpd/src/auth.rs`](file:///home/fecavmi/dev/github/acpd/src/auth.rs)<br>[`acpd/src/api.rs`](file:///home/fecavmi/dev/github/acpd/src/api.rs) | Token de sessão gerado em arquivo `0600` em `$XDG_RUNTIME_DIR/acpd/token`. Rejeição de estados inválidos com erro JSON-RPC `-32602`. | **IMPLEMENTADO E VALIDADO** (Commit `70511f6`). Testes unitários e verificação ao vivo aprovados. |
 | **Resiliência: Limpeza de Processos Mortos (Liveness)** | [`acpd/src/daemon.rs:44-58`](file:///home/fecavmi/dev/github/acpd/src/daemon.rs#L44-L58) | Encerramentos abruptos (`SIGKILL` ou crash) ignoram handlers de saída. | **CORRIGIDO E VALIDADO**. Task assíncrona do Tokio executando `clean_stale_panes()` a cada 30s. |
-| **Ergonomia: Quick Wins em tmux.conf & sesh.toml** | [`tmux/.config/tmux/tmux.conf`](file:///home/fecavmi/.dotfiles/main/tmux/.config/tmux/tmux.conf)<br>[`sesh/.config/sesh/sesh.toml`](file:///home/fecavmi/.dotfiles/main/sesh/.config/sesh/sesh.toml) | Atalhos `Alt+o` (overlay), `Alt+a` (salto semântico), `prefix+o` (sidebar split) e regra `wildcard` no sesh. | **IMPLEMENTADO E VALIDADO**. Atalhos adicionados ao `tmux.conf`, regra adicionada ao `sesh.toml` e servidor do tmux recarregado com sucesso ao vivo (`tmux source-file`). |
+| **Ergonomia: Quick Wins em tmux.conf & sesh.toml** | [`tmux/.config/tmux/tmux.conf`](file:///home/fecavmi/.dotfiles/main/tmux/.config/tmux/tmux.conf)<br>[`waymaker/.config/waymaker/session.toml`](file:///home/fecavmi/.dotfiles/main/waymaker/.config/waymaker/session.toml) | Atalhos `Alt+o` (overlay), `Alt+a` (salto semântico), `prefix+o` (sidebar split) e regra `wildcard` no sesh. | **IMPLEMENTADO E VALIDADO**. Atalhos adicionados ao `tmux.conf`, regra adicionada ao `sesh.toml` e servidor do tmux recarregado com sucesso ao vivo (`tmux source-file`). |
 | **Hardening do Loop: Atalho de Reset & Skill Single-Source** | [`lazygitrs/src/gui/mod.rs`](file:///home/fecavmi/dev/github/lazygitrs/ai-notes/src/gui/mod.rs) | Atalho de reset de notas (`Sent` ➔ `New`) implementado e skill `lazygitrs-review` padronizado via symlink. | **IMPLEMENTADO E VALIDADO** (Commits `b65c67d` e `c6d6e26`). |
 
 ---
@@ -167,7 +167,7 @@ Você é um especialista em multiplexadores de terminal, interfaces TUI e workfl
 1. **Verificar os Repositórios de Origem**:
    - `/home/fecavmi/dev/github/acpd`: Leia `src/signals.rs`, `src/api.rs`, `src/daemon.rs`, `src/auth.rs`, `Cargo.toml`. Confirme que o `cargo test` passa 9 testes.
    - `/home/fecavmi/dev/github/lazygitrs/ai-notes`: Leia `src/acp.rs`, `src/gui/mod.rs`. Confirme commits `b65c67d` e `c6d6e26`.
-   - `~/.dotfiles/main`: Leia `tmux/.config/tmux/tmux.conf`, `sesh/.config/sesh/sesh.toml`, `antigravity/.gemini/hooks/hook-lib.mjs`.
+   - `~/.dotfiles/main`: Leia `tmux/.config/tmux/tmux.conf`, `waymaker/.config/waymaker/session.toml`, `antigravity/.gemini/hooks/hook-lib.mjs`.
 
 2. **Verificar o Status do Projeto**:
    - Confirme 100% de conclusão de todas as 3 fases do roadmap (Ergonomia, Segurança RPC e Hardening do Loop).

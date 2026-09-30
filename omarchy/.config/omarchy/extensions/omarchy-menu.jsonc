@@ -35,12 +35,12 @@
     "checked": "[[ \"$(omarchy-default-agent)\" == \"agy\" ]]",
     "action": "omarchy-default-agent agy"
   },
-  "apps.sesh": {
+  "apps.sessions": {
     "icon": "⚡",
-    "label": "Sesh Sessions",
-    "provider": "sesh",
-    "aliases": ["sessions", "tmux", "projects"],
-    "description": "Switch or connect to Tmux/Sesh sessions and projects"
+    "label": "Session Picker",
+    "provider": "sessions",
+    "aliases": ["sesh", "sessions", "tmux", "projects"],
+    "description": "Switch or connect to Tmux and Waymaker sessions and projects"
   },
   "setup.sounds": {
     "icon": "󱚤",

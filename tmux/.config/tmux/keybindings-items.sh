@@ -11,7 +11,7 @@ emit_tmux() {
   Prefix + P	GitHub Pull Request Review Picker	tmux	tmux-pr	~/.config/tmux/pr-picker.sh
 󰅍  Prefix + y	Scrollback Yank & Chrome URL Extractor	tmux	tmux-yank	~/.config/tmux/yank-picker.sh
 󰍉  Prefix + /	Workspace Ripgrep Live Search	tmux	tmux-grep	~/.config/tmux/grep-picker.sh
-󰓩  Prefix + t	Sesh Workspace / Task Picker	tmux	tmux-sesh	~/.config/tmux/sesh-picker.sh
+󰓩  Prefix + t	Session Workspace / Task Picker	tmux	tmux-sesh	~/.config/tmux/session-picker.sh
 󱂬  Prefix + s	Window & Session Tree Picker	tmux	tmux-window	~/.config/tmux/window-picker.sh
 󱂬  Prefix + S	Window Picker (100% Fullscreen Modal)	tmux	tmux-window-fullscreen	~/.config/tmux/window-picker.sh --fullscreen
 󰌌  Prefix + f	Vimium Window Hints (1-touch Jump)	tmux	tmux-hints	tmux switch-client -T window_hints

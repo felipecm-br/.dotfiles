@@ -66,7 +66,7 @@ o.bind("SUPER + SHIFT + R", "Toggle screen recording", "omarchy-capture-screenre
 -- Custom Launcher / Menu Overrides
 -- ==============================================================================
 hl.unbind("SUPER + SHIFT + K")
-o.bind("SUPER + SHIFT + K", "Sesh sessions", "omarchy-launch-sesh")
+o.bind("SUPER + SHIFT + K", "Session picker", "omarchy-launch-session")
 
 o.bind("SUPER + SHIFT + W", "Motion Wallpaper", home .. "/.local/bin/motion-wallpaper-toggle")
 o.bind("SUPER + F12", "Battery Menu", "uwsm-app -- " .. home .. "/.local/bin/battery-menu")

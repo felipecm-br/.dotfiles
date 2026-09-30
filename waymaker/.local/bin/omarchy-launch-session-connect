@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# omarchy-launch-sesh-connect - Connect or switch to a sesh session
+# omarchy-launch-session-connect - Connect or switch to a Waymaker/Tmux session
 
 target="$1"
 [[ -z "$target" ]] && exit 0

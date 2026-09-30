@@ -676,7 +676,7 @@ alias mtl='moveto -l' 2>/dev/null
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# AI Agent Worktree & Sesh Orchestration
+# AI Agent Worktree & Waymaker Orchestration
 # ─────────────────────────────────────────────────────────────────────────────
 # Note: 'awt', 'awc', 'awp', and 'awtc' are now standalone global executables
 # managed in the dedicated dotfiles package 'awt' (~/.local/bin/awt).
