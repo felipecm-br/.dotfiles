@@ -425,6 +425,16 @@ Item {
     if (spec && spec.volatile) root.providersLoaded[id] = false
   }
 
+  function invalidateAllVolatileProviders() {
+    for (var i = 0; i < root.itemOrder.length; i++) {
+      var entry = root.item(root.itemOrder[i])
+      if (entry && entry.provider) {
+        var spec = root.providers[entry.provider]
+        if (spec && spec.volatile) root.providersLoaded[entry.id] = false
+      }
+    }
+  }
+
   function loadProviderForMenu(id) {
     var entry = root.item(id)
     if (!entry || !entry.provider || root.providersLoaded[id]) return
@@ -821,6 +831,12 @@ Item {
     rebuildDisplay()
     invalidateVolatileProvider(activeMenu)
     loadProviderForMenu(activeMenu)
+    if (activeMenu === "root") {
+      root.invalidateAllVolatileProviders()
+      Qt.callLater(function() {
+        if (root.opened && !root.filterText.trim()) root.loadProvidersForSearch()
+      })
+    }
     // The shell may start before first-install packages have finished placing
     // their icons. Refresh here even when the desktop entry list did not change.
     if (root.appLibrary) root.appLibrary.refreshIcons()
