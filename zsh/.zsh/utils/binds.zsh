@@ -112,7 +112,7 @@ _auto_space_if_command() {
 }
 
 _smart_tab() {
-    # 1. Empty command line (or whitespace only) → trigger Matchmaker jump
+    # 1. Empty command line (or whitespace only) → trigger Waymaker jump
     if [[ -z "${BUFFER// /}" ]]; then
         zle _jump_widget
         return
@@ -124,9 +124,9 @@ _smart_tab() {
         return
     fi
 
-    # 3. Middle-of-line or argument completion → trigger Matchmaker completion via mm-ftb
+    # 3. Middle-of-line or argument completion → trigger Waymaker completion via wm-ftb
     _auto_space_if_command
-    zstyle ':fzf-tab:*' fzf-command mm-ftb
+    zstyle ':fzf-tab:*' fzf-command wm-ftb
     if (( $+widgets[fzf-tab-complete] )); then
         zle fzf-tab-complete
     else
@@ -139,21 +139,21 @@ bindkey -M viins '^I' _smart_tab
 bindkey -M vicmd '^I' _smart_tab
 
 # =============================================================================
-# Matchmaker Completion (Ctrl+N): Uses Matchmaker (mm-ftb) as the completion UI
+# Waymaker Completion (Ctrl+N): Uses Waymaker (wm-ftb) as the completion UI
 # =============================================================================
-_mm_tab_widget() {
+_wm_tab_widget() {
     _auto_space_if_command
-    zstyle ':fzf-tab:*' fzf-command mm-ftb
+    zstyle ':fzf-tab:*' fzf-command wm-ftb
     if (( $+widgets[fzf-tab-complete] )); then
         zle fzf-tab-complete
     else
         zle expand-or-complete
     fi
 }
-zle -N _mm_tab_widget
-bindkey '^N' _mm_tab_widget
-bindkey -M viins '^N' _mm_tab_widget
-bindkey -M emacs '^N' _mm_tab_widget
+zle -N _wm_tab_widget
+bindkey '^N' _wm_tab_widget
+bindkey -M viins '^N' _wm_tab_widget
+bindkey -M emacs '^N' _wm_tab_widget
 
 # Delete previous word with Ctrl+Backspace in vi insert mode
 bindkey -M viins $'\e\x7f' backward-kill-word
@@ -266,8 +266,8 @@ _binds_zvm_setup() {
     zvm_bindkey vicmd '^F' _jump_widget
     zvm_bindkey viins '^I' _smart_tab
     zvm_bindkey vicmd '^I' _smart_tab
-    zvm_bindkey viins '^N' _mm_tab_widget
-    zvm_bindkey vicmd '^N' _mm_tab_widget
+    zvm_bindkey viins '^N' _wm_tab_widget
+    zvm_bindkey vicmd '^N' _wm_tab_widget
 }
 zvm_after_init_commands+=('_binds_zvm_setup')
 
