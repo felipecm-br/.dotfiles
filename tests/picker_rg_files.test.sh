@@ -17,11 +17,11 @@ bad() { echo "  ✖ FAIL: $1"; FAILURES=$((FAILURES + 1)); }
 
 echo "=== Running Picker Harmonization & Ripgrep Live Search Test Suite ==="
 
-# ── 1. Validate files.toml Contract ──
-echo -e "\n[1/6] Validating files.toml Preset & Data Source Cycling..."
-FILES_PRESET="$ROOT/waymaker/.config/waymaker/presets/files.toml"
-[[ -f "$FILES_PRESET" ]] || FILES_PRESET="$ROOT/matchmaker/.config/matchmaker/presets/files.toml"
-python3 - "$FILES_PRESET" <<'EOF'
+# ── 1. Validate workspace.toml Contract ──
+echo -e "\n[1/6] Validating workspace.toml Preset & Data Source Cycling..."
+WORKSPACE_PRESET="$ROOT/waymaker/.config/waymaker/presets/workspace.toml"
+[[ -f "$WORKSPACE_PRESET" ]] || WORKSPACE_PRESET="$ROOT/matchmaker/.config/matchmaker/presets/workspace.toml"
+python3 - "$WORKSPACE_PRESET" <<'EOF'
 import sys, tomllib
 
 with open(sys.argv[1], "rb") as f:
@@ -59,21 +59,11 @@ assert nav_binds.get("y") == "Accept" and nav_binds.get("ctrl-y") == "Accept", "
 assert "send-keys" in binds["ctrl-v"], "binds.ctrl-v must insert to tmux"
 assert "send-keys" in nav_binds["ctrl-v"], "nav_binds.ctrl-v must insert to tmux"
 assert binds.get("enter") == "CyclePreview", "binds.enter must be CyclePreview"
-print("files.toml python validation ok")
+print("workspace.toml python validation ok")
 EOF
-if [ $? -eq 0 ]; then ok "files.toml schema & bindings contract"; else bad "files.toml schema & bindings contract"; fi
+if [ $? -eq 0 ]; then ok "workspace.toml schema & bindings contract"; else bad "workspace.toml schema & bindings contract"; fi
 
 TEST_BIN="$(command -v wm 2>/dev/null || command -v mm 2>/dev/null || echo wm)"
-WORKSPACE_PRESET="$ROOT/waymaker/.config/waymaker/presets/workspace.toml"
-[[ -f "$WORKSPACE_PRESET" ]] || WORKSPACE_PRESET="$ROOT/matchmaker/.config/matchmaker/presets/workspace.toml"
-FILES_PRESET_CHECK="$ROOT/waymaker/.config/waymaker/presets/files.toml"
-[[ -f "$FILES_PRESET_CHECK" ]] || FILES_PRESET_CHECK="$ROOT/matchmaker/.config/matchmaker/presets/files.toml"
-
-if "$TEST_BIN" --dump-config -o files >/dev/null 2>&1 || "$TEST_BIN" --dump-config -o "$FILES_PRESET_CHECK" >/dev/null 2>&1; then
-  ok "wm/mm loads files preset without errors"
-else
-  bad "wm/mm rejected files preset"
-fi
 
 if "$TEST_BIN" --dump-config -o workspace >/dev/null 2>&1 || "$TEST_BIN" --dump-config -o "$WORKSPACE_PRESET" >/dev/null 2>&1; then
   ok "wm/mm loads workspace preset without errors"
@@ -278,18 +268,6 @@ GREP_SCRIPT="$ROOT/tmux/.config/tmux/grep-picker.sh"
 
 [ -L "$ROOT/tmux/.config/tmux/rg-picker.sh" ] && [ "$(readlink "$ROOT/tmux/.config/tmux/rg-picker.sh")" = "grep-picker.sh" ] \
   && ok "rg-picker.sh -> grep-picker.sh symlink" || bad "rg-picker.sh symlink"
-
-PRESETS_DIR="$ROOT/waymaker/.config/waymaker/presets"
-[ -d "$PRESETS_DIR" ] || PRESETS_DIR="$ROOT/matchmaker/.config/matchmaker/presets"
-
-[ -L "$PRESETS_DIR/grep-picker.toml" ] && [ "$(readlink "$PRESETS_DIR/grep-picker.toml")" = "rg.toml" ] \
-  && ok "grep-picker.toml -> rg.toml symlink" || bad "grep-picker.toml symlink"
-
-[ -L "$PRESETS_DIR/files-picker.toml" ] && { [ "$(readlink "$PRESETS_DIR/files-picker.toml")" = "workspace.toml" ] || [ "$(readlink "$PRESETS_DIR/files-picker.toml")" = "files.toml" ]; } \
-  && ok "files-picker.toml -> workspace.toml symlink" || bad "files-picker.toml symlink"
-
-[ -L "$PRESETS_DIR/files.toml" ] && [ "$(readlink "$PRESETS_DIR/files.toml")" = "workspace.toml" ] \
-  && ok "files.toml -> workspace.toml compatibility symlink" || bad "files.toml compatibility symlink"
 
 # Backdrop isolation in scripts (delegates to tmux-popup-isolate.sh or inline)
 (grep -q 'tmux-popup-isolate' "$FILES_SCRIPT" || (grep -q '@ai_agent_state_raw' "$FILES_SCRIPT" && grep -q 'tmux-backdrop' "$FILES_SCRIPT")) \
