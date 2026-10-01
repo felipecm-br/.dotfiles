@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 # omarchy-starship-preset
-# Interactive Matchmaker (mm) picker to browse, preview, and apply starship.toml presets.
+# Interactive Waymaker (wm) picker to browse, preview, and apply starship.toml presets.
 #
 # Sources:
 #   Custom presets from ~/.config/omarchy/starship-presets/
 #
 # Usage:
-#   omarchy-starship-preset                  # interactive Matchmaker picker
+#   omarchy-starship-preset                  # interactive Waymaker picker
 #   omarchy-starship-preset --preview-only <name>   # print preset TOML to stdout
 #
 # Interactive controls inside the picker:
@@ -50,7 +50,7 @@ _mode_display() {
   esac
 }
 
-# Render a pretty preview for a Matchmaker panel: simulated prompt + highlighted TOML.
+# Render a pretty preview for a Waymaker panel: simulated prompt + highlighted TOML.
 #
 # Mock env vars that `eval "$(starship init <shell>)"` would normally set so
 # custom modules gated on them (zvm_insert_* / zvm_normal_* / zvm_visual_*)
@@ -67,7 +67,7 @@ _mode_display() {
 # STARSHIP_SHELL must NOT be fish: preset `when` scripts are sh/bash syntax
 # and starship runs them via $STARSHIP_SHELL when the module omits `shell`.
 # Fish can't parse them and silently skips the module. Bash wraps ANSI in
-# \[...\]; we strip those wrappers so Matchmaker gets clean ANSI.
+# \[...\]; we strip those wrappers so Waymaker gets clean ANSI.
 render_preview() {
   local label="$1" file="$2"
 
@@ -90,7 +90,7 @@ render_preview() {
                   ZVM_MODE="$mock_zvm" \
                   starship prompt \
                     --status "$mock_status" --jobs 0 \
-                    --terminal-width "${COLUMNS:-${MM_COLUMNS:-80}}" 2>/dev/null)"; then
+                    --terminal-width "${COLUMNS:-${WM_COLUMNS:-${MM_COLUMNS:-80}}}" 2>/dev/null)"; then
     rendered="${rendered//\\[/}"
     rendered="${rendered//\\]/}"
     printf '%s\n' "$rendered"
@@ -100,8 +100,8 @@ render_preview() {
   _bat_toml "$file"
 }
 
-# ─── --render-preview (self-invoked by Matchmaker preview) ─────────────────────
-# Handled BEFORE the temp-dir allocation below: when Matchmaker fires the preview,
+# ─── --render-preview (self-invoked by Waymaker preview) ─────────────────────
+# Handled BEFORE the temp-dir allocation below: when Waymaker fires the preview,
 # this branch runs in a fresh shell and reads shared state via the exported
 # OMARCHY_*  env vars. The temp dir must NOT be re-created here, otherwise
 # each preview render would point at a fresh empty state file and Ctrl-L/Ctrl-H
@@ -146,7 +146,7 @@ MODE_FILE="$TMPDIR_PRESETS/mode"
 printf 'i' > "$MODE_FILE"
 export OMARCHY_MODE_FILE="$MODE_FILE"
 
-# Small standalone helper invoked by Matchmaker keybinds. Updates
+# Small standalone helper invoked by Waymaker keybinds. Updates
 # $MODE_FILE in place (so the subsequent change-preview re-render picks it up).
 CYCLE_SCRIPT="$TMPDIR_PRESETS/cycle-mode.sh"
 cat > "$CYCLE_SCRIPT" <<'EOF'
@@ -191,18 +191,20 @@ if [[ ${#entries[@]} -eq 0 ]]; then
   exit 1
 fi
 
-# ─── Matchmaker picker ────────────────────────────────────────────────────────
+# ─── Waymaker picker ──────────────────────────────────────────────────────────
 
-if ! has mm; then
-  echo "Matchmaker (mm) is required but not installed." >&2
+if ! has wm && ! has mm; then
+  echo "Waymaker (wm) is required but not installed." >&2
   exit 1
 fi
+
+WM_BIN="$(has wm && echo "wm" || echo "mm")"
 
 SCRIPT_PATH="$(realpath "$0")"
 
 selection="$(
   printf '%s\n' "${entries[@]}" \
-  | mm -o starship-presets
+  | "$WM_BIN" -o starship-presets
 )" || exit 0
 
 [[ -z "$selection" ]] && exit 0
