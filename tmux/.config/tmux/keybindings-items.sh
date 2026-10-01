@@ -9,7 +9,7 @@ emit_tmux() {
   cat <<'EOF'
 󰈞  Prefix + e	Workspace Files Picker (Golden Ratio)	tmux	tmux-workspace	~/.config/tmux/workspace-picker.sh
   Prefix + P	GitHub Pull Request Review Picker	tmux	tmux-pr	~/.config/tmux/pr-picker.sh
-󰅍  Prefix + y	Scrollback Yank & Chrome URL Extractor	tmux	tmux-yank	~/.config/tmux/yank-picker.sh
+󰅍  Prefix + y	Scrollback Picker (Tokens, Links & Yank)	tmux	tmux-scrollback	~/.config/tmux/scrollback-picker.sh
 󰍉  Prefix + /	Workspace Ripgrep Live Search	tmux	tmux-grep	~/.config/tmux/grep-picker.sh
 󰓩  Prefix + t	Session Workspace / Task Picker	tmux	tmux-sesh	~/.config/tmux/session-picker.sh
 󱂬  Prefix + s	Window & Session Tree Picker	tmux	tmux-window	~/.config/tmux/window-picker.sh

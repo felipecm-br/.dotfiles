@@ -69,7 +69,7 @@ Rather than forcing users to assemble disparate repositories or compile 13 C tre
 
 ### D. `tmux` Backdrop Isolation Layer
 - **Role:** Guarantees popup stability during active token streaming via frozen ANSI backdrops.
-- **Status:** Core isolator script [`tmux/.config/tmux/tmux-popup-isolate.sh`](tmux/.config/tmux/tmux-popup-isolate.sh) implemented with full CLI parsing, conditional idle bypass, and `0600` UID-pane isolation. All 7 popup callers (`grep-picker.sh`, `lazygitrs-popup.sh`, `files-picker.sh`, `sesh-picker.sh`, `window-picker.sh`, `scrollback-extract.sh`, `awt-popup.sh`) 100% migrated and verified.
+- **Status:** Core isolator script [`tmux/.config/tmux/tmux-popup-isolate.sh`](tmux/.config/tmux/tmux-popup-isolate.sh) implemented with full CLI parsing, conditional idle bypass, and `0600` UID-pane isolation. All 7 popup callers (`grep-picker.sh`, `lazygitrs-popup.sh`, `files-picker.sh`, `sesh-picker.sh`, `window-picker.sh`, `scrollback-picker.sh`, `awt-popup.sh`) 100% migrated and verified.
 - **Next:** Package inside umbrella repo `terminal-ai-cockpit/scripts/`.
 
 ---

@@ -1,4 +1,4 @@
-# Matchmaker / Waymaker Yank Extractor (`wm -o yank` / `wm -o scrollback`)
+# Matchmaker / Waymaker Scrollback Extractor (`wm -o scrollback-picker`)
 # Extrakto-style: stdin = all-list (recent-first); Tab cycles explicit filter
 # modes (all -> cmd -> path -> url -> sha -> all) via mode-specific binds + SetMode.
 # (Deliberately NOT @reloadnext/additional_commands: cycle state lives in the
@@ -26,13 +26,13 @@ sort = false
 mode = "all"
 
 [start.command]
-command = "cat /tmp/scrollback-extract-all.txt"
+command = "cat /tmp/scrollback-picker-all.txt"
 additional = [
-  "cat /tmp/scrollback-extract-cmd.txt",
-  "cat /tmp/scrollback-extract-path.txt",
-  "cat /tmp/scrollback-extract-url.txt",
-  "cat /tmp/scrollback-extract-sha.txt",
-  "cat /tmp/scrollback-extract-all.txt",
+  "cat /tmp/scrollback-picker-cmd.txt",
+  "cat /tmp/scrollback-picker-path.txt",
+  "cat /tmp/scrollback-picker-url.txt",
+  "cat /tmp/scrollback-picker-sha.txt",
+  "cat /tmp/scrollback-picker-all.txt",
 ]
 
 [matcher.sort]
@@ -62,11 +62,11 @@ wrap = true
 scrollbar = true
 
 [[preview.layout]]
-command = 'grep -n -C 2 -F -m 3 --color=always {} /tmp/scrollback-extract-src.txt | head -40'
+command = 'grep -n -C 2 -F -m 3 --color=always {} /tmp/scrollback-picker-src.txt | head -40'
 side = "right"
 percentage = 60
 
-# Layout 1: Overrides and disables subsequent layouts (no fullscreen preview in yank popup)
+# Layout 1: Overrides and disables subsequent layouts (no fullscreen preview in scrollback popup)
 [[preview.layout]]
 max = 0
 
@@ -108,35 +108,35 @@ ctrl-w = 'ExecuteSilent(~/.config/tmux/scrollback-chrome.sh {})'
 
 # Filter modes: Tab advances, Shift-Tab goes back. Each state reloads its own
 # file explicitly — no dependence on additional_commands cycling.
-tab = ["SetPrompt(cmd> )", "SetQuery()", "Reload(cat /tmp/scrollback-extract-cmd.txt)", "SetMode(cmd)", "Pos(0)"]
-shift-backtab = ["SetPrompt(sha> )", "SetQuery()", "Reload(cat /tmp/scrollback-extract-sha.txt)", "SetMode(sha)", "Pos(0)"]
-backtab = ["SetPrompt(sha> )", "SetQuery()", "Reload(cat /tmp/scrollback-extract-sha.txt)", "SetMode(sha)", "Pos(0)"]
-shift-tab = ["SetPrompt(sha> )", "SetQuery()", "Reload(cat /tmp/scrollback-extract-sha.txt)", "SetMode(sha)", "Pos(0)"]
+tab = ["SetPrompt(cmd> )", "SetQuery()", "Reload(cat /tmp/scrollback-picker-cmd.txt)", "SetMode(cmd)", "Pos(0)"]
+shift-backtab = ["SetPrompt(sha> )", "SetQuery()", "Reload(cat /tmp/scrollback-picker-sha.txt)", "SetMode(sha)", "Pos(0)"]
+backtab = ["SetPrompt(sha> )", "SetQuery()", "Reload(cat /tmp/scrollback-picker-sha.txt)", "SetMode(sha)", "Pos(0)"]
+shift-tab = ["SetPrompt(sha> )", "SetQuery()", "Reload(cat /tmp/scrollback-picker-sha.txt)", "SetMode(sha)", "Pos(0)"]
 
-"all^^tab" = ["SetPrompt(cmd> )", "SetQuery()", "Reload(cat /tmp/scrollback-extract-cmd.txt)", "SetMode(cmd)", "Pos(0)"]
-"all^^shift-backtab" = ["SetPrompt(sha> )", "SetQuery()", "Reload(cat /tmp/scrollback-extract-sha.txt)", "SetMode(sha)", "Pos(0)"]
-"all^^backtab" = ["SetPrompt(sha> )", "SetQuery()", "Reload(cat /tmp/scrollback-extract-sha.txt)", "SetMode(sha)", "Pos(0)"]
-"all^^shift-tab" = ["SetPrompt(sha> )", "SetQuery()", "Reload(cat /tmp/scrollback-extract-sha.txt)", "SetMode(sha)", "Pos(0)"]
+"all^^tab" = ["SetPrompt(cmd> )", "SetQuery()", "Reload(cat /tmp/scrollback-picker-cmd.txt)", "SetMode(cmd)", "Pos(0)"]
+"all^^shift-backtab" = ["SetPrompt(sha> )", "SetQuery()", "Reload(cat /tmp/scrollback-picker-sha.txt)", "SetMode(sha)", "Pos(0)"]
+"all^^backtab" = ["SetPrompt(sha> )", "SetQuery()", "Reload(cat /tmp/scrollback-picker-sha.txt)", "SetMode(sha)", "Pos(0)"]
+"all^^shift-tab" = ["SetPrompt(sha> )", "SetQuery()", "Reload(cat /tmp/scrollback-picker-sha.txt)", "SetMode(sha)", "Pos(0)"]
 
-"cmd^^tab" = ["SetPrompt(path> )", "SetQuery()", "Reload(cat /tmp/scrollback-extract-path.txt)", "SetMode(path)", "Pos(0)"]
-"cmd^^shift-backtab" = ["SetPrompt(> )", "SetQuery()", "Reload(cat /tmp/scrollback-extract-all.txt)", "SetMode(all)", "Pos(0)"]
-"cmd^^backtab" = ["SetPrompt(> )", "SetQuery()", "Reload(cat /tmp/scrollback-extract-all.txt)", "SetMode(all)", "Pos(0)"]
-"cmd^^shift-tab" = ["SetPrompt(> )", "SetQuery()", "Reload(cat /tmp/scrollback-extract-all.txt)", "SetMode(all)", "Pos(0)"]
+"cmd^^tab" = ["SetPrompt(path> )", "SetQuery()", "Reload(cat /tmp/scrollback-picker-path.txt)", "SetMode(path)", "Pos(0)"]
+"cmd^^shift-backtab" = ["SetPrompt(> )", "SetQuery()", "Reload(cat /tmp/scrollback-picker-all.txt)", "SetMode(all)", "Pos(0)"]
+"cmd^^backtab" = ["SetPrompt(> )", "SetQuery()", "Reload(cat /tmp/scrollback-picker-all.txt)", "SetMode(all)", "Pos(0)"]
+"cmd^^shift-tab" = ["SetPrompt(> )", "SetQuery()", "Reload(cat /tmp/scrollback-picker-all.txt)", "SetMode(all)", "Pos(0)"]
 
-"path^^tab" = ["SetPrompt(url> )", "SetQuery()", "Reload(cat /tmp/scrollback-extract-url.txt)", "SetMode(url)", "Pos(0)"]
-"path^^shift-backtab" = ["SetPrompt(cmd> )", "SetQuery()", "Reload(cat /tmp/scrollback-extract-cmd.txt)", "SetMode(cmd)", "Pos(0)"]
-"path^^backtab" = ["SetPrompt(cmd> )", "SetQuery()", "Reload(cat /tmp/scrollback-extract-cmd.txt)", "SetMode(cmd)", "Pos(0)"]
-"path^^shift-tab" = ["SetPrompt(cmd> )", "SetQuery()", "Reload(cat /tmp/scrollback-extract-cmd.txt)", "SetMode(cmd)", "Pos(0)"]
+"path^^tab" = ["SetPrompt(url> )", "SetQuery()", "Reload(cat /tmp/scrollback-picker-url.txt)", "SetMode(url)", "Pos(0)"]
+"path^^shift-backtab" = ["SetPrompt(cmd> )", "SetQuery()", "Reload(cat /tmp/scrollback-picker-cmd.txt)", "SetMode(cmd)", "Pos(0)"]
+"path^^backtab" = ["SetPrompt(cmd> )", "SetQuery()", "Reload(cat /tmp/scrollback-picker-cmd.txt)", "SetMode(cmd)", "Pos(0)"]
+"path^^shift-tab" = ["SetPrompt(cmd> )", "SetQuery()", "Reload(cat /tmp/scrollback-picker-cmd.txt)", "SetMode(cmd)", "Pos(0)"]
 
-"url^^tab" = ["SetPrompt(sha> )", "SetQuery()", "Reload(cat /tmp/scrollback-extract-sha.txt)", "SetMode(sha)", "Pos(0)"]
-"url^^shift-backtab" = ["SetPrompt(path> )", "SetQuery()", "Reload(cat /tmp/scrollback-extract-path.txt)", "SetMode(path)", "Pos(0)"]
-"url^^backtab" = ["SetPrompt(path> )", "SetQuery()", "Reload(cat /tmp/scrollback-extract-path.txt)", "SetMode(path)", "Pos(0)"]
-"url^^shift-tab" = ["SetPrompt(path> )", "SetQuery()", "Reload(cat /tmp/scrollback-extract-path.txt)", "SetMode(path)", "Pos(0)"]
+"url^^tab" = ["SetPrompt(sha> )", "SetQuery()", "Reload(cat /tmp/scrollback-picker-sha.txt)", "SetMode(sha)", "Pos(0)"]
+"url^^shift-backtab" = ["SetPrompt(path> )", "SetQuery()", "Reload(cat /tmp/scrollback-picker-path.txt)", "SetMode(path)", "Pos(0)"]
+"url^^backtab" = ["SetPrompt(path> )", "SetQuery()", "Reload(cat /tmp/scrollback-picker-path.txt)", "SetMode(path)", "Pos(0)"]
+"url^^shift-tab" = ["SetPrompt(path> )", "SetQuery()", "Reload(cat /tmp/scrollback-picker-path.txt)", "SetMode(path)", "Pos(0)"]
 
-"sha^^tab" = ["SetPrompt(> )", "SetQuery()", "Reload(cat /tmp/scrollback-extract-all.txt)", "SetMode(all)", "Pos(0)"]
-"sha^^shift-backtab" = ["SetPrompt(url> )", "SetQuery()", "Reload(cat /tmp/scrollback-extract-url.txt)", "SetMode(url)", "Pos(0)"]
-"sha^^backtab" = ["SetPrompt(url> )", "SetQuery()", "Reload(cat /tmp/scrollback-extract-url.txt)", "SetMode(url)", "Pos(0)"]
-"sha^^shift-tab" = ["SetPrompt(url> )", "SetQuery()", "Reload(cat /tmp/scrollback-extract-url.txt)", "SetMode(url)", "Pos(0)"]
+"sha^^tab" = ["SetPrompt(> )", "SetQuery()", "Reload(cat /tmp/scrollback-picker-all.txt)", "SetMode(all)", "Pos(0)"]
+"sha^^shift-backtab" = ["SetPrompt(url> )", "SetQuery()", "Reload(cat /tmp/scrollback-picker-url.txt)", "SetMode(url)", "Pos(0)"]
+"sha^^backtab" = ["SetPrompt(url> )", "SetQuery()", "Reload(cat /tmp/scrollback-picker-url.txt)", "SetMode(url)", "Pos(0)"]
+"sha^^shift-tab" = ["SetPrompt(url> )", "SetQuery()", "Reload(cat /tmp/scrollback-picker-url.txt)", "SetMode(url)", "Pos(0)"]
 
 [ui.nav.binds]
 enter = "Accept"

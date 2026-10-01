@@ -41,7 +41,7 @@ if [ "$exists" != "1" ]; then
   exit 0
 fi
 
-# When inside a tmux popup (workspace-picker, yank-picker), open in split pane beside origin pane
+# When inside a tmux popup (workspace-picker, scrollback-picker), open in split pane beside origin pane
 # to preserve visual concurrency with AI agent / terminal sessions and prevent modal trapping.
 if [ -n "${TMUX:-}" ] && { [ -n "${TMUX_POPUP:-}" ] || [ -n "${MM_ORIGIN_PANE:-}" ]; }; then
   origin_pane="${MM_ORIGIN_PANE:-}"

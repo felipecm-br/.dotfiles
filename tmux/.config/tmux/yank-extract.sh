@@ -1,1 +1,0 @@
-yank-picker.sh

@@ -125,7 +125,7 @@ The README and value proposition must lead with the concrete problem solved for 
       1. [`tmux/.config/tmux/lazygitrs-popup.sh`](file:///home/fecavmi/.dotfiles/main/tmux/.config/tmux/lazygitrs-popup.sh)
       2. [`tmux/.config/tmux/sesh-picker.sh`](file:///home/fecavmi/.dotfiles/main/tmux/.config/tmux/sesh-picker.sh)
       3. [`tmux/.config/tmux/window-picker.sh`](file:///home/fecavmi/.dotfiles/main/tmux/.config/tmux/window-picker.sh)
-      4. [`tmux/.config/tmux/scrollback-extract.sh`](file:///home/fecavmi/.dotfiles/main/tmux/.config/tmux/scrollback-extract.sh)
+      4. [`tmux/.config/tmux/scrollback-picker.sh`](file:///home/fecavmi/.dotfiles/main/tmux/.config/tmux/scrollback-picker.sh)
       5. [`tmux/.config/tmux/files-picker.sh`](file:///home/fecavmi/.dotfiles/main/tmux/.config/tmux/files-picker.sh)
       6. [`tmux/.config/tmux/grep-picker.sh`](file:///home/fecavmi/.dotfiles/main/tmux/.config/tmux/grep-picker.sh)
       7. [`awt/.config/tmux/awt-popup.sh`](file:///home/fecavmi/.dotfiles/main/awt/.config/tmux/awt-popup.sh)
@@ -688,7 +688,7 @@ To satisfy both the requirement for standalone open-source modularity and the us
 - [x] **tmux (Backdrop Isolator Creation):**
   - Created and deployed [`tmux/.config/tmux/tmux-popup-isolate.sh`](file:///home/fecavmi/.dotfiles/main/tmux/.config/tmux/tmux-popup-isolate.sh) with `resize-pane -Z`, conditional idle bypass, CLI flags, and 0600 UID-pane isolation.
 - [x] **tmux (Backdrop Migration & Theming):**
-  - Refactored all 7 popup scripts (`lazygitrs-popup.sh`, `window-picker.sh`, `sesh-picker.sh`, `scrollback-extract.sh`, `files-picker.sh`, `grep-picker.sh`, `awt-popup.sh`) to delegate to `tmux-popup-isolate.sh`.
+  - Refactored all 7 popup scripts (`lazygitrs-popup.sh`, `window-picker.sh`, `sesh-picker.sh`, `scrollback-picker.sh`, `files-picker.sh`, `grep-picker.sh`, `awt-popup.sh`) to delegate to `tmux-popup-isolate.sh`.
   - Verified test suite passes 100% with zero failures.
 
 ### Phase 2: Two-Tier CI/CD & Multi-Arch Build Automation

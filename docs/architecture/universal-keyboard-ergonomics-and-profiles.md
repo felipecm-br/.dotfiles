@@ -168,10 +168,10 @@ escape_keys = ["q", "Escape", "ctrl-["]
 ```
 
 ### 4.2 Waymaker Preset Inheritance
-Presets like `yank.toml`, `workspace.toml`, and `keybindings.toml` define bindings cleanly:
+Presets like `scrollback-picker.toml`, `workspace.toml`, and `keybindings.toml` define bindings cleanly:
 
 ```toml
-# In waymaker/presets/yank.toml: Universal + Biomechanical Dual-Binding
+# In waymaker/presets/scrollback-picker.toml: Universal + Biomechanical Dual-Binding
 [binds]
 # Input mode: supports both standard terminal escapes and chords
 ctrl-b = 'ExecuteSilent(~/.config/tmux/scrollback-chrome.sh {})'

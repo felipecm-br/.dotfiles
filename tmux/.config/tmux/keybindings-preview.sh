@@ -60,10 +60,10 @@ Interactive GitHub PR review workflow and worktree selector powered by Waymaker.
 EOF
     ;;
 
-  tmux-yank)
+  tmux-scrollback|tmux-yank)
     cat <<'EOF'
-### 󰅍 Scrollback Yank & Chrome URL Extractor (`75% × 60%`)
-Fuzzy extract shell commands, file paths, URLs, git SHAs, and IPs directly from terminal scrollback.
+### 󰅍 Scrollback Picker (Tokens, Links & Yank) (`75% × 60%`)
+Fuzzy extract shell commands, file paths, URLs, git SHAs, and IPs directly from terminal scrollback (recent-first).
 
 - **Ergonomics**: Inward chord (`y` = Yank, $H=0$, sub-100ms latency).
 - **Controls**:
