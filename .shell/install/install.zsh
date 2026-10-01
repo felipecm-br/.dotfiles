@@ -62,7 +62,8 @@ install_packages \
     hibiki \
     aws-cli-v2 \
     uv \
-    posting
+    posting \
+    vhs
 
 install_plugins \
     zsh-plugins \
