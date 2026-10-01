@@ -214,6 +214,13 @@ posting
 # Open Posting TUI HTTP client with specific collection directory
 posting --collection {{collection_dir}}
 
+# Launch OBS Studio (Screen recorder and streaming studio)
+obs
+
+# Launch OBS Studio and start recording immediately
+obs --startrecording
+
+
 
 
 $ (awt) branch: git branch --format='%(refname:short)' 2>/dev/null

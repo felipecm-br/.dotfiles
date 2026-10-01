@@ -63,7 +63,8 @@ install_packages \
     aws-cli-v2 \
     uv \
     posting \
-    vhs
+    vhs \
+    obs-studio
 
 install_plugins \
     zsh-plugins \

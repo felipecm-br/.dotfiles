@@ -55,6 +55,7 @@ pkg_is_installed() {
     pacsea-bin) command -v pacsea &>/dev/null && return 0 ;;
     bitwarden-bin) command -v bitwarden &>/dev/null && return 0 ;;
     aws-cli-v2) command -v aws &>/dev/null && return 0 ;;
+    obs-studio) command -v obs &>/dev/null && return 0 ;;
   esac
 
   # Fallback to package database check
