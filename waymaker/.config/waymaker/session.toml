@@ -1,14 +1,10 @@
-# Waymaker Session Configuration (~/.config/waymaker/session.toml)
-# Compatible with both Waymaker and Sesh session definitions.
-# Used by: wm session, wm connect, and session-picker preset.
-
 [[wildcard]]
-pattern = "~/dev/**"
-startup_command = ""
+pattern = "~/dev/github/**"
+startup_command = "agy"
 
 [[wildcard]]
 pattern = "~/.dotfiles/*"
-startup_command = ""
+startup_command = "agy"
 
 [[session]]
 name = " Downloads"
