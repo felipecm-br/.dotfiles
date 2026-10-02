@@ -11,6 +11,7 @@ active = true
 focus_on_start = "picker"
 bar = "Plain"
 color = "white"
+hints = false
 
 [ui.parent_peek]
 enabled = false
@@ -88,7 +89,6 @@ done
 
 [start]
 ansi = true
-mode = "nav"
 output_template = "{=raw}"
 
 [binds]

@@ -12,8 +12,7 @@ active = true
 focus_on_start = "picker"
 bar = "Plain"
 color = "white"
-hints = true
-hints_columns = 4
+hints = false
 
 [ui.parent_peek]
 enabled = false
@@ -220,21 +219,35 @@ done
 
 [start]
 ansi = true
-mode = "nav"
 output_template = "{=session}\t{=path}"
 
 [binds]
-"@delete_worktree" = '''Confirm({red,bold:󱓌} Delete worktree {=branch}? (Enter/Esc) | ~/.config/waymaker/scripts/awt-delete.sh "{=session}" "{=path}" "{=raw}")'''
-"@new_worktree" = [
-    '''Execute(~/.config/waymaker/scripts/awt-new.sh "{=raw}")''',
+"@delete_worktree" = [
+    '''Execute($HOME/.config/waymaker/scripts/awt-delete.sh --confirm "{=session}" "{=path}" "{=raw}")''',
     "Reload",
 ]
-"@merge_worktree" = '''Confirm({magenta,bold:} Merge into {=branch}? (Enter/Esc) | ~/.config/waymaker/scripts/awt-merge.sh "{=raw}" "{=path}" "{=session}" "{=base}")'''
-"@ship_worktree" = '''Confirm({magenta,bold:󱓍} Ship (Merge & Push) into {=branch}? (Enter/Esc) | ~/.config/waymaker/scripts/awt-merge.sh "{=raw}" "{=path}" "{=session}" "{=base}" --push)'''
-"@rebase_worktree" = '''Confirm({yellow,bold:󱓎} Rebase {=branch} onto {=base}? (Enter/Esc) | ~/.config/waymaker/scripts/awt-rebase.sh "{=raw}" "{=path}" "{=base}")'''
-"@rename_worktree" = '''Prompt({cyan,bold:} Rename branch to: | ~/.config/waymaker/scripts/awt-rename.sh "{=raw}" "{=path}" "{input}" | {=raw})'''
+"@new_worktree" = [
+    '''Execute($HOME/.config/waymaker/scripts/awt-new.sh "{=raw}")''',
+    "Reload",
+]
+"@merge_worktree" = [
+    '''Execute($HOME/.config/waymaker/scripts/awt-merge.sh --confirm "{=raw}" "{=path}" "{=session}" "{=base}")''',
+    "Reload",
+]
+"@ship_worktree" = [
+    '''Execute($HOME/.config/waymaker/scripts/awt-merge.sh --confirm "{=raw}" "{=path}" "{=session}" "{=base}" --push)''',
+    "Reload",
+]
+"@rebase_worktree" = [
+    '''Execute($HOME/.config/waymaker/scripts/awt-rebase.sh --confirm "{=raw}" "{=path}" "{=base}")''',
+    "Reload",
+]
+"@rename_worktree" = [
+    '''Execute($HOME/.config/waymaker/scripts/awt-rename.sh "{=raw}" "{=path}")''',
+    "Reload",
+]
 "@pr_worktree" = [
-    '''Execute(~/.config/waymaker/scripts/awt-pr.sh)''',
+    '''Execute($HOME/.config/waymaker/scripts/awt-pr.sh)''',
     "Reload",
 ]
 "@fetch_remotes" = [
@@ -268,6 +281,28 @@ output_template = "{=session}\t{=path}"
 "ctrl-u" = "@fetch_remotes"
 "esc" = "FocusNav"
 
+# Nav Mode Binds (compatibility with nav^^ prefix in [binds])
+"nav^^/" = "FocusFilter"
+"nav^^i" = "FocusFilter"
+"nav^^j" = "Down"
+"nav^^k" = "Up"
+"nav^^down" = "Down"
+"nav^^up" = "Up"
+"nav^^enter" = "Accept"
+"nav^^q" = "Quit"
+"nav^^esc" = "Quit"
+"nav^^p" = "SwitchPreview"
+"nav^^g" = "Pos(0)"
+"nav^^G" = "Pos(-1)"
+"nav^^c" = "@new_worktree"
+"nav^^m" = "@merge_worktree"
+"nav^^S" = "@ship_worktree"
+"nav^^R" = "@rebase_worktree"
+"nav^^r" = "@rename_worktree"
+"nav^^P" = "@pr_worktree"
+"nav^^d" = "@delete_worktree"
+"nav^^u" = "@fetch_remotes"
+
 # Nav Mode Binds (active when Results / Nav Mode is focused)
 [ui.nav.binds]
 "/" = "FocusFilter"
@@ -289,27 +324,96 @@ output_template = "{=session}\t{=path}"
 "G" = "Pos(-1)"
 "p" = "SwitchPreview"
 "ctrl-p" = "SwitchPreview"
-"c" = "@new_worktree"
-"ctrl-c" = "@new_worktree"
-"ctrl-n" = "@new_worktree"
-"m" = "@merge_worktree"
-"ctrl-m" = "@merge_worktree"
-"S" = "@ship_worktree"
-"shift-s" = "@ship_worktree"
-"ctrl-s" = "@ship_worktree"
-"ctrl-shift-s" = "@ship_worktree"
-"ctrl-shift-S" = "@ship_worktree"
-"R" = "@rebase_worktree"
-"shift-r" = "@rebase_worktree"
-"ctrl-shift-r" = "@rebase_worktree"
-"ctrl-shift-R" = "@rebase_worktree"
-"r" = "@rename_worktree"
-"ctrl-r" = "@rename_worktree"
-"P" = "@pr_worktree"
-"shift-p" = "@pr_worktree"
-"ctrl-shift-p" = "@pr_worktree"
-"ctrl-shift-P" = "@pr_worktree"
-"d" = "@delete_worktree"
-"ctrl-d" = "@delete_worktree"
-"u" = "@fetch_remotes"
-"ctrl-u" = "@fetch_remotes"
+"c" = [
+    '''Execute($HOME/.config/waymaker/scripts/awt-new.sh "{=raw}")''',
+    "Reload",
+]
+"ctrl-c" = "Quit"
+"ctrl-n" = [
+    '''Execute($HOME/.config/waymaker/scripts/awt-new.sh "{=raw}")''',
+    "Reload",
+]
+"m" = [
+    '''Execute($HOME/.config/waymaker/scripts/awt-merge.sh --confirm "{=raw}" "{=path}" "{=session}" "{=base}")''',
+    "Reload",
+]
+"ctrl-m" = [
+    '''Execute($HOME/.config/waymaker/scripts/awt-merge.sh --confirm "{=raw}" "{=path}" "{=session}" "{=base}")''',
+    "Reload",
+]
+"S" = [
+    '''Execute($HOME/.config/waymaker/scripts/awt-merge.sh --confirm "{=raw}" "{=path}" "{=session}" "{=base}" --push)''',
+    "Reload",
+]
+"shift-s" = [
+    '''Execute($HOME/.config/waymaker/scripts/awt-merge.sh --confirm "{=raw}" "{=path}" "{=session}" "{=base}" --push)''',
+    "Reload",
+]
+"ctrl-s" = [
+    '''Execute($HOME/.config/waymaker/scripts/awt-merge.sh --confirm "{=raw}" "{=path}" "{=session}" "{=base}" --push)''',
+    "Reload",
+]
+"ctrl-shift-s" = [
+    '''Execute($HOME/.config/waymaker/scripts/awt-merge.sh --confirm "{=raw}" "{=path}" "{=session}" "{=base}" --push)''',
+    "Reload",
+]
+"ctrl-shift-S" = [
+    '''Execute($HOME/.config/waymaker/scripts/awt-merge.sh --confirm "{=raw}" "{=path}" "{=session}" "{=base}" --push)''',
+    "Reload",
+]
+"R" = [
+    '''Execute($HOME/.config/waymaker/scripts/awt-rebase.sh --confirm "{=raw}" "{=path}" "{=base}")''',
+    "Reload",
+]
+"shift-r" = [
+    '''Execute($HOME/.config/waymaker/scripts/awt-rebase.sh --confirm "{=raw}" "{=path}" "{=base}")''',
+    "Reload",
+]
+"ctrl-shift-r" = [
+    '''Execute($HOME/.config/waymaker/scripts/awt-rebase.sh --confirm "{=raw}" "{=path}" "{=base}")''',
+    "Reload",
+]
+"ctrl-shift-R" = [
+    '''Execute($HOME/.config/waymaker/scripts/awt-rebase.sh --confirm "{=raw}" "{=path}" "{=base}")''',
+    "Reload",
+]
+"r" = [
+    '''Execute($HOME/.config/waymaker/scripts/awt-rename.sh "{=raw}" "{=path}")''',
+    "Reload",
+]
+"ctrl-r" = [
+    '''Execute($HOME/.config/waymaker/scripts/awt-rename.sh "{=raw}" "{=path}")''',
+    "Reload",
+]
+"P" = [
+    '''Execute($HOME/.config/waymaker/scripts/awt-pr.sh)''',
+    "Reload",
+]
+"shift-p" = [
+    '''Execute($HOME/.config/waymaker/scripts/awt-pr.sh)''',
+    "Reload",
+]
+"ctrl-shift-p" = [
+    '''Execute($HOME/.config/waymaker/scripts/awt-pr.sh)''',
+    "Reload",
+]
+"ctrl-shift-P" = [
+    '''Execute($HOME/.config/waymaker/scripts/awt-pr.sh)''',
+    "Reload",
+]
+"d" = [
+    '''Execute($HOME/.config/waymaker/scripts/awt-delete.sh --confirm "{=session}" "{=path}" "{=raw}")''',
+    "Reload",
+]
+"ctrl-d" = [
+    '''Execute($HOME/.config/waymaker/scripts/awt-delete.sh --confirm "{=session}" "{=path}" "{=raw}")''',
+    "Reload",
+]
+"u" = [
+    '''Execute(git -C "{=path}" fetch --all --prune)''',
+    "Reload",
+]
+"ctrl-u" = [
+    '''Execute(git -C "{=path}" fetch --all --prune)''',
+    "Reload",
+]

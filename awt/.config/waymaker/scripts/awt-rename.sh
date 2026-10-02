@@ -7,6 +7,21 @@ wt_path="$2"
 new_branch_raw="$3"
 
 old_branch=$(echo "$old_branch_raw" | sed -E 's/^[^a-zA-Z0-9._/-]+//; s/[[:space:]].*//')
+
+if [[ "$old_branch" == "main" || "$old_branch" == "master" ]]; then
+    printf "\n\033[1;31m󰅖 Cannot rename default base branch '%s'!\033[0m\n" "$old_branch" >/dev/tty
+    sleep 1.2
+    exit 0
+fi
+
+if [[ -z "$new_branch_raw" && -t 0 ]]; then
+    if command -v gum >/dev/null 2>&1; then
+        new_branch_raw=$(gum input --prompt=" Rename branch to: " --value="$old_branch" </dev/tty)
+    else
+        read -r -p "Rename branch to: " new_branch_raw </dev/tty
+    fi
+fi
+
 new_branch=$(echo "$new_branch_raw" | sed -E 's/^[^a-zA-Z0-9._/-]+//; s/[[:space:]].*//')
 
 # 1. Validation
@@ -14,11 +29,6 @@ if [[ -z "$new_branch" || "$new_branch" == "$old_branch" ]]; then
     exit 0
 fi
 
-if [[ "$old_branch" == "main" || "$old_branch" == "master" ]]; then
-    printf "\n\033[1;31m󰅖 Cannot rename default base branch '%s'!\033[0m\n" "$old_branch" >/dev/tty
-    sleep 1.2
-    exit 0
-fi
 
 # 1.1 Self-heal worktree path if it was moved or out of sync
 if [[ ! -d "$wt_path" ]]; then

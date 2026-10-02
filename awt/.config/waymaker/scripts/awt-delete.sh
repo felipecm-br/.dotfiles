@@ -14,9 +14,11 @@ force=0
 keep_branch=0
 no_tmux=0
 no_hooks=0
+confirm_prompt=0
 
 for arg in "$@"; do
     case "$arg" in
+        --confirm|-i) confirm_prompt=1 ;;
         -f|--force) force=1 ;;
         --no-delete-branch) keep_branch=1 ;;
         --no-tmux) no_tmux=1 ;;
@@ -38,6 +40,20 @@ if [[ "$branch_clean" == "main" || "$branch_clean" == "master" ]]; then
     printf "\n\033[1;31m󰅖 Cannot delete default base branch '%s'!\033[0m\n" "$branch_clean" >/dev/tty
     sleep 1.2
     exit 0
+fi
+
+# 2b. Confirmation prompt before deletion
+if [[ $confirm_prompt -eq 1 && $force -eq 0 ]]; then
+    if command -v gum >/dev/null 2>&1; then
+        if ! gum confirm --prompt.foreground="196" "Delete worktree '$branch_clean' and kill session '$session_name'?"; then
+            exit 0
+        fi
+    else
+        read -r -p "Delete worktree '$branch_clean' and kill session '$session_name'? [y/N] " confirm </dev/tty
+        if [[ "$confirm" != [yY]* ]]; then
+            exit 0
+        fi
+    fi
 fi
 
 # 3. Check if currently attached to this session in Tmux

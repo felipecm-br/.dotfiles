@@ -18,8 +18,13 @@ do_push=0
 no_hooks=0
 explicit_target=""
 
+skip_confirm=0
+confirm_prompt=0
+
 while [[ $# -gt 0 ]]; do
     case "$1" in
+        --confirm|-i) confirm_prompt=1 ;;
+        -y|--yes) skip_confirm=1 ;;
         --squash) squash=1 ;;
         --no-squash) squash=0 ;;
         --no-commit) no_commit=1 ;;
@@ -59,6 +64,27 @@ if [[ "$source_branch" == "$target_branch" ]]; then
     printf "\n\033[1;31m󰅖 Cannot merge '%s' into itself!\033[0m\n" "$source_branch" >/dev/tty
     sleep 1.2
     exit 0
+fi
+
+# Confirmation prompt before merge / ship
+if [[ $confirm_prompt -eq 1 && $skip_confirm -eq 0 ]]; then
+    if [[ $do_push -eq 1 ]]; then
+        prompt_msg="Ship (Merge & Push) '$source_branch' into '$target_branch'?"
+        prompt_color="201"
+    else
+        prompt_msg="Merge '$source_branch' into '$target_branch'?"
+        prompt_color="129"
+    fi
+    if command -v gum >/dev/null 2>&1; then
+        if ! gum confirm --prompt.foreground="$prompt_color" "$prompt_msg"; then
+            exit 0
+        fi
+    else
+        read -r -p "$prompt_msg [y/N] " confirm </dev/tty
+        if [[ "$confirm" != [yY]* ]]; then
+            exit 0
+        fi
+    fi
 fi
 
 # 3. Resolve Target Worktree Directory & Session

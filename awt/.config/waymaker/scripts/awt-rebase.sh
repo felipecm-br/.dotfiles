@@ -28,6 +28,27 @@ if [[ "$branch" == "main" || "$branch" == "master" ]]; then
     exit 0
 fi
 
+confirm_prompt=0
+for arg in "$@"; do
+    case "$arg" in
+        --confirm|-i) confirm_prompt=1 ;;
+    esac
+done
+
+# 1.1 Confirmation prompt
+if [[ $confirm_prompt -eq 1 ]]; then
+    if command -v gum >/dev/null 2>&1; then
+        if ! gum confirm --prompt.foreground="220" "Rebase '$branch' onto '$base'?"; then
+            exit 0
+        fi
+    else
+        read -r -p "Rebase '$branch' onto '$base'? [y/N] " confirm </dev/tty
+        if [[ "$confirm" != [yY]* ]]; then
+            exit 0
+        fi
+    fi
+fi
+
 # 2. Safe Auto-Stash if dirty
 stashed=0
 dirty_count=$(git -C "$wt_path" status --porcelain 2>/dev/null | wc -l)
