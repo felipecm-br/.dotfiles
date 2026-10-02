@@ -64,7 +64,9 @@ install_packages \
     uv \
     posting \
     vhs \
-    obs-studio
+    obs-studio \
+    tailscale \
+    mosh
 
 install_plugins \
     zsh-plugins \
