@@ -1,0 +1,338 @@
+#!/usr/bin/env bash
+# acpd-cli — Ergonomic CLI and Workflow Orchestrator for ACPD & Tmux Agents
+# Integrates with ACPD (Agent Client Protocol Daemon) at 127.0.0.1:4040.
+
+set -euo pipefail
+
+ACPD_URL="${ACPD_URL:-http://127.0.0.1:4040}"
+TOKEN_PATH="/run/user/${UID:-1000}/acpd/token"
+FALLBACK_TOKEN_PATH="$HOME/.cache/acpd/token"
+
+get_token() {
+  if [[ -f "$TOKEN_PATH" ]]; then
+    cat "$TOKEN_PATH"
+  elif [[ -f "$FALLBACK_TOKEN_PATH" ]]; then
+    cat "$FALLBACK_TOKEN_PATH"
+  else
+    echo ""
+  fi
+}
+
+rpc_call() {
+  local method="$1"
+  local params="${2:-}"
+  [[ -z "$params" ]] && params="{}"
+  local token
+  token=$(get_token)
+
+  if [[ -z "$token" ]]; then
+    echo "Error: ACPD token not found. Is acpd running? (systemctl --user status acpd)" >&2
+    return 1
+  fi
+
+  local payload
+  payload=$(jq -nc \
+    --arg method "$method" \
+    --argjson params "$params" \
+    '{jsonrpc: "2.0", method: $method, params: $params, id: 1}')
+
+  curl -s -m 5 -X POST "${ACPD_URL}/rpc" \
+    -H "Authorization: Bearer $token" \
+    -H "Content-Type: application/json" \
+    -d "$payload"
+}
+
+cmd_health() {
+  local res
+  res=$(curl -s -m 2 "${ACPD_URL}/health" 2>/dev/null || true)
+  if [[ -n "$res" ]]; then
+    echo "$res"
+    return 0
+  else
+    echo "Error: ACPD daemon not reachable at ${ACPD_URL}" >&2
+    return 1
+  fi
+}
+
+cmd_status() {
+  echo "━━━ ⚙️  ACPD Control Plane Status ━━━"
+  local health
+  health=$(cmd_health) || return 1
+  echo "Daemon: $health"
+  echo ""
+
+  echo "── Active Agent States ──"
+  local agents_json
+  agents_json=$(rpc_call "agentState/list" "{}" | jq '.result // {}')
+
+  if [[ "$agents_json" == "{}" || "$agents_json" == "null" ]]; then
+    echo "  (No active agents reporting state)"
+  else
+    echo "$agents_json" | jq -r 'to_entries[] | "  󰑮 Pane: \(.key) | State: \(.value.state) | Last: \(.value.last_timestamp)"'
+  fi
+  echo ""
+
+  echo "── Tmux Sessions ──"
+  local sessions_json
+  sessions_json=$(rpc_call "tmux.list_sessions" "{}" | jq '.result // []')
+  if [[ "$sessions_json" == "[]" || "$sessions_json" == "null" ]]; then
+    echo "  (No active tmux sessions)"
+  else
+    echo "$sessions_json" | jq -r '.[] | "  󰍹 Session: \(.session_name) (Windows: \(.windows), Attached: \(.attached))"'
+  fi
+}
+
+cmd_list() {
+  local target="${1:-agents}"
+  case "$target" in
+    agents)
+      rpc_call "agentState/list" "{}" | jq -r '.result // {} | to_entries[] | "\(.key)\t\(.value.state)\t\(.value.last_timestamp)"'
+      ;;
+    sessions)
+      rpc_call "tmux.list_sessions" "{}" | jq -r '.result // [] | .[] | "\(.session_name)\tattached:\(.attached)\twindows:\(.windows)"'
+      ;;
+    windows)
+      rpc_call "tmux.list_windows" "{}" | jq -r '.result // [] | .[] | "\(.window_id)\t\(.window_name)\tactive:\(.active)"'
+      ;;
+    panes)
+      rpc_call "tmux.list_panes" '{"all": true}' | jq -r '.result // [] | .[] | "\(.pane_id)\t\(.current_path)\t\(.current_command)"'
+      ;;
+    *)
+      echo "Usage: acpd-cli list [agents|sessions|windows|panes]" >&2
+      return 1
+      ;;
+  esac
+}
+
+cmd_run() {
+  local session_name="agents"
+  local window_name=""
+  local detach=false
+  local split=false
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      -s|--session)
+        session_name="$2"
+        shift 2
+        ;;
+      -w|--window)
+        window_name="$2"
+        shift 2
+        ;;
+      -d|--detach)
+        detach=true
+        shift
+        ;;
+      -p|--split)
+        split=true
+        shift
+        ;;
+      --)
+        shift
+        break
+        ;;
+      *)
+        break
+        ;;
+    esac
+  done
+
+  if [[ $# -eq 0 ]]; then
+    echo "Usage: acpd-cli run [-s <session>] [-w <window>] [-d] [-p] <command...>" >&2
+    return 1
+  fi
+
+  local cmd="$*"
+  [[ -z "$window_name" ]] && window_name="$(echo "$cmd" | awk '{print $1}')"
+
+  # If tmux session doesn't exist, create it via ACPD RPC
+  local sessions
+  sessions=$(rpc_call "tmux.list_sessions" "{}" | jq -r '.result // [] | .[].session_name')
+
+  local session_exists=false
+  for s in $sessions; do
+    if [[ "$s" == "$session_name" ]]; then
+      session_exists=true
+      break
+    fi
+  done
+
+  if [[ "$session_exists" == "false" ]]; then
+    echo "Creating new session '$session_name' for command: $cmd"
+    local params
+    params=$(jq -nc --arg name "$session_name" --arg cmd "$cmd" '{name: $name, command: $cmd}')
+    rpc_call "tmux.new_session" "$params" > /dev/null
+  else
+    if [[ "$split" == "true" ]]; then
+      echo "Splitting pane in session '$session_name' with command: $cmd"
+      local params
+      params=$(jq -nc --arg cmd "$cmd" '{command: $cmd, vertical: true}')
+      rpc_call "tmux.split_pane" "$params" > /dev/null
+    else
+      echo "Creating new window '$window_name' in session '$session_name' with command: $cmd"
+      local params
+      params=$(jq -nc --arg target "$session_name:" --arg name "$window_name" --arg cmd "$cmd" \
+        '{target: $target, name: $name, command: $cmd}')
+      rpc_call "tmux.new_window" "$params" > /dev/null
+    fi
+  fi
+
+  if [[ "$detach" == "false" && -t 0 ]]; then
+    if [[ -z "${TMUX:-}" ]]; then
+      tmux attach -t "$session_name"
+    else
+      tmux switch-client -t "$session_name"
+    fi
+  else
+    echo "✓ Command dispatched in session: $session_name ($window_name)"
+  fi
+}
+
+cmd_capture() {
+  local target="$1"
+  local lines="${2:--35}"
+  local params
+  params=$(jq -nc --arg target "$target" --argjson lines "$lines" '{target: $target, start_line: $lines}')
+  rpc_call "tmux.capture_pane" "$params" | jq -r '.result.content // empty'
+}
+
+cmd_send() {
+  if [[ $# -lt 2 ]]; then
+    echo "Usage: acpd-cli send <target_pane> <keys...>" >&2
+    return 1
+  fi
+  local target="$1"
+  shift
+  local keys=("$@")
+
+  local keys_json
+  keys_json=$(printf '%s\n' "${keys[@]}" | jq -R . | jq -s .)
+
+  local params
+  params=$(jq -nc --arg target "$target" --argjson keys "$keys_json" '{target: $target, keys: $keys}')
+  rpc_call "tmux.send_keys" "$params" | jq -r '.result // "sent"'
+}
+
+cmd_msg() {
+  local message="$*"
+  local params
+  params=$(jq -nc --arg msg "$message" '{message: $msg}')
+  rpc_call "tmux.display_message" "$params" | jq -r '.result // "ok"'
+}
+
+cmd_bell() {
+  local target="${1:-%0}"
+  local params
+  params=$(jq -nc --arg target "$target" '{target: $target}')
+  rpc_call "tmux.ring_bell" "$params" | jq -r '.result // "bell triggered"'
+}
+
+cmd_kill() {
+  local target="$1"
+  local params
+  params=$(jq -nc --arg target "$target" '{target: $target}')
+
+  if [[ "$target" =~ ^%[0-9]+$ ]]; then
+    rpc_call "tmux.kill_pane" "$params"
+  elif [[ "$target" =~ ^@[0-9]+$ || "$target" =~ ^: ]]; then
+    rpc_call "tmux.kill_window" "$params"
+  else
+    rpc_call "tmux.kill_session" "$params"
+  fi
+}
+
+cmd_help() {
+  cat <<'EOF'
+acpd-cli — Agent Client Protocol Daemon CLI & Workflow Orchestrator
+
+USAGE:
+  acpd-cli <command> [arguments]
+
+COMMANDS:
+  status, info           Check daemon health, active agent states, and Tmux sessions
+  run [opts] <cmd...>    Dispatch agent or command into Tmux via ACPD
+                         Options:
+                           -s, --session <name>   Target session (default: "agents")
+                           -w, --window <name>    Target window name
+                           -d, --detach           Don't attach/switch to session
+                           -p, --split            Split pane instead of new window
+  list [target]          List agents, sessions, windows, or panes (default: agents)
+  capture <pane> [lines] Capture scrollback text from a target pane (default: 35 lines)
+  send <pane> <keys...>  Send keystrokes or commands to a target pane
+  msg <message>          Display banner message on Tmux status line
+  bell [pane]            Trigger visual/audible alert bell
+  kill <target>          Kill target pane (%X), window (@X / :X), or session (name)
+  health                 Quick healthcheck probe of ACPD daemon
+
+ENVIRONMENT:
+  ACPD_URL               ACPD HTTP URL (default: http://127.0.0.1:4040)
+  UID                    User ID for token lookup (/run/user/$UID/acpd/token)
+
+EXAMPLES:
+  # Check system & agent states
+  acpd-cli status
+
+  # Run Antigravity CLI detached in background session
+  acpd-cli run -d -s work -w agy agy
+
+  # Capture output from agent pane %0
+  acpd-cli capture %0 50
+
+  # Send prompt or confirmation to agent
+  acpd-cli send %0 "y" Enter
+EOF
+}
+
+case "${1:-}" in
+  status|info)
+    cmd_status
+    ;;
+  list|ls)
+    shift
+    cmd_list "${1:-agents}"
+    ;;
+  run)
+    shift
+    cmd_run "$@"
+    ;;
+  capture)
+    shift
+    if [[ $# -lt 1 ]]; then
+      echo "Usage: acpd-cli capture <pane_id> [lines]" >&2
+      exit 1
+    fi
+    cmd_capture "$@"
+    ;;
+  send)
+    shift
+    cmd_send "$@"
+    ;;
+  msg)
+    shift
+    cmd_msg "$@"
+    ;;
+  bell)
+    shift
+    cmd_bell "$@"
+    ;;
+  kill)
+    shift
+    if [[ $# -lt 1 ]]; then
+      echo "Usage: acpd-cli kill <target>" >&2
+      exit 1
+    fi
+    cmd_kill "$@"
+    ;;
+  health)
+    cmd_health
+    ;;
+  -h|--help|help|"")
+    cmd_help
+    ;;
+  *)
+    echo "Unknown command: $1" >&2
+    echo "Run 'acpd-cli help' for usage." >&2
+    exit 1
+    ;;
+esac

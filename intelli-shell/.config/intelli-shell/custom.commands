@@ -220,6 +220,33 @@ obs
 # Launch OBS Studio and start recording immediately
 obs --startrecording
 
+# Inspect ACPD control plane health, active AI agent states, and Tmux sessions
+acpd-cli status
+
+# Dispatch AI agent or command into Tmux via ACPD control plane
+acpd-cli run {{command}}
+
+# Dispatch AI agent or command into dedicated session and window detached
+acpd-cli run -d -s {{session}} -w {{window}} {{command}}
+
+# Capture terminal scrollback text from target pane via ACPD
+acpd-cli capture {{pane}}
+
+# Send keystrokes or confirmation into target pane via ACPD
+acpd-cli send {{pane}} {{keys}}
+
+# Display banner message on Tmux status line via ACPD
+acpd-cli msg {{message}}
+
+# Trigger visual or audible alert bell on target pane via ACPD
+acpd-cli bell {{pane}}
+
+# Authenticate and connect to Tailscale network with SSH enabled
+sudo tailscale up --ssh
+
+# Expose ACPD JSON-RPC control plane securely on private Tailnet
+tailscale serve --bg 4040
+
 
 
 
