@@ -9,7 +9,7 @@ restore_fullscreen = false
 
 [ui.nav]
 active = true
-focus_on_start = "filter"
+focus_on_start = "picker"
 bar = "Plain"
 color = "white"
 hints = true
@@ -220,6 +220,7 @@ done
 
 [start]
 ansi = true
+mode = "nav"
 output_template = "{=session}\t{=path}"
 
 [binds]
@@ -252,7 +253,7 @@ output_template = "{=session}\t{=path}"
 "ctrl-shift-J" = "PreviewDown(5)"
 "ctrl-shift-K" = "PreviewUp(5)"
 "ctrl-p" = "SwitchPreview"
-"ctrl-c" = "@new_worktree"
+"ctrl-c" = "Quit"
 "ctrl-n" = "@new_worktree"
 "ctrl-d" = "@delete_worktree"
 "ctrl-m" = "@merge_worktree"

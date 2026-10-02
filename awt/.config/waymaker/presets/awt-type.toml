@@ -8,6 +8,7 @@ restore_fullscreen = false
 
 [ui.nav]
 active = true
+focus_on_start = "picker"
 bar = "Plain"
 color = "white"
 
@@ -85,14 +86,20 @@ mode = "nav"
 output_template = "{=icon}\t{=prefix}"
 
 [binds]
+"enter" = "Accept"
+"esc" = "Quit"
+"ctrl-c" = "Quit"
 "ctrl-j" = "Down"
 "ctrl-k" = "Up"
-"nav^^j" = "Down"
-"nav^^k" = "Up"
-"nav^^down" = "Down"
-"nav^^up" = "Up"
-"nav^^enter" = "Accept"
-"nav^^q" = "Quit"
-"nav^^esc" = "Quit"
-"nav^^g" = "Pos(0)"
-"nav^^G" = "Pos(-1)"
+
+[ui.nav.binds]
+"enter" = "Accept"
+"esc" = "Quit"
+"q" = "Quit"
+"j" = "Down"
+"k" = "Up"
+"down" = "Down"
+"up" = "Up"
+"g" = "Pos(0)"
+"G" = "Pos(-1)"
+"/" = "FocusFilter"

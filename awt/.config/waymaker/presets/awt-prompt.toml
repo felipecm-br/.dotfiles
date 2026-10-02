@@ -39,3 +39,4 @@ command = "echo ''"
 [binds]
 "enter" = "Accept"
 "esc" = "Quit"
+"ctrl-c" = "Quit"
