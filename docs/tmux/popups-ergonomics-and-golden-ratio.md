@@ -108,8 +108,8 @@ Whenever the system theme switches (`omarchy theme set <name>`), 100% of termina
 │        │  │ (38.2% ≈ 40%)         │ (61.8% ≈ 60%)               │  │        │
 │        │  │                       │                             │  │        │
 │        │  │ 󱥂 0•  nvim    idle    │ $ git status -s             │  │        │
-│        │  │ 󰑮 1   agent   work    │ M tmux/tmux.conf            │  │        │
-│        │  │   2   zsh             │ M matchmaker/jump.toml      │  │        │
+│        │  │ 󰑮 1·  agent   work    │ M tmux/tmux.conf            │  │        │
+│        │  │   2·  zsh             │ M matchmaker/jump.toml      │  │        │
 │        │  │                       │                             │  │        │
 │        │  └───────────────────────┴─────────────────────────────┘  │        │
 │        │  [Enter] Switch  •  [t] Sessions  •  [c] Create  •  [d] Kill  •  [Esc] Exit │        │
@@ -141,8 +141,8 @@ The Window Picker (`prefix + s` / [`window-picker.sh`](../../tmux/.config/tmux/w
    When the cursor moves into a session grouping, Waymaker evaluates group membership in real time relative to the cursor position, dynamically promoting the enclosing group header to `BOLD` bright cyan (`results.group_header_style`). The user instantly perceives both the selected window and its owning session context at a glance.
 6. **Bottom-Anchored Live Preview Stream (`preview.initial.tail = true`)**:
    Terminal applications, CLI commands, and AI agent reasoning loops continuously stream output to the bottom of the viewport. Rather than starting at line 0 (which reveals stale header banners or empty top margins), the preview pane is pinned to the bottom of the active conversation stream (`tail = true`). Backed by [`window-picker-preview.sh`](../../tmux/.config/tmux/window-picker-preview.sh), it captures the last 100 history lines, trims trailing blank terminal rows, and positions the viewport directly on the active prompt and latest dialog lines with sub-4ms execution latency.
-7. **Leftmost Telemetry Gutter with Adjacent Index Dot (`0•`)**:
-   Process telemetry icons (`󰑮` working spinner, `󱜻` waiting for input, `󰨄` error, `󱥂` idle) are anchored directly to the leftmost column ($X=1$). This eliminates horizontal scanning jitter across variable window name widths, achieving preattentive visual detection in $<15\text{ ms}$. The origin window (the active Tmux window where the modal was invoked) is cleanly encoded via an adjacent cyan dot directly on the window index (`0•`), preserving full origin spatial awareness without consuming a separate marker column.
+7. **Leftmost Telemetry Gutter with Adjacent Index Dot (`0•` vs `1·`)**:
+   Process telemetry icons (`󰑮` working spinner, `󱜻` waiting for input, `󰨄` error, `󱥂` idle) are anchored directly to the leftmost column ($X=1$). This eliminates horizontal scanning jitter across variable window name widths, achieving preattentive visual detection in $<15\text{ ms}$. The origin window (the active Tmux window where the modal was invoked) is cleanly encoded via an adjacent bright cyan bullet directly on the window index (`0•`), while non-active windows feature a dimmed middle dot (`1·`, `2·`), maintaining rhythmic typographic alignment across all items without consuming a separate marker column.
 
 ---
 
