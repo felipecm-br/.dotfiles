@@ -1,5 +1,6 @@
 [keys]
 prefix = "ctrl+space"
+goto = "prefix+s"
 
 [ui]
 agent_panel_sort = "priority"
