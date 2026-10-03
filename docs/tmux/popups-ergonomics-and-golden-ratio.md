@@ -82,7 +82,7 @@ Whenever the system theme switches (`omarchy theme set <name>`), 100% of termina
 | Layer | Tool / Script | Omarchy Dynamic Key | Fallback Hex | Badge (`-T`) | Dimensions | Dismissal |
 | :--- | :--- | :--- | :--- | :---: | :---: | :--- |
 | **1. Ephemeral** | [`window-picker.sh`](../../tmux/.config/tmux/window-picker.sh) | `magenta` / `accent` | `#cba6f7` | ` 󱂬 ` | `75% × 60%` | `Esc` (1 tap) |
-| **1. Ephemeral** | [`sesh-picker.sh`](../../tmux/.config/tmux/sesh-picker.sh) | `cyan` / `blue` | `#89dceb` | ` ⚡ ` | `75% × 60%` | `Esc` (1 tap) |
+| **1. Ephemeral** | [`session-picker.sh`](../../tmux/.config/tmux/session-picker.sh) | `cyan` / `blue` | `#89dceb` | ` ⚡ ` | `75% × 60%` | `Esc` (1 tap) |
 | **1. Ephemeral** | [`scrollback-picker.sh`](../../tmux/.config/tmux/scrollback-picker.sh) (`scrollback-picker.toml`) | `green` | `#a6e3a1` | ` 󰅍 ` | `75% × 60%` | `Esc` (1 tap) |
 | **1. Ephemeral** | [`workspace-picker.sh`](../../tmux/.config/tmux/workspace-picker.sh) (`workspace.toml`) | `blue` / `cyan` | `#89b4fa` | ` 󰈞 󰄧 󰋩 ` | `75% × 60%` / `95% × 90%` | `Esc` (1 tap) |
 | **1. Ephemeral** | [`grep-picker.sh`](../../tmux/.config/tmux/grep-picker.sh) | `teal` / `cyan` | `#94e2d5` | ` 󰍉 ` | `85% × 75%` / `96% × 92%` | `Esc` (1 tap) |
@@ -166,7 +166,7 @@ To prevent accidental dismissal while inspecting a diff or composing a commit me
 | Operation / Flow | Conventional Setup | Optimized Dotfiles Architecture | Ergonomic / Latency Gain |
 | :--- | :--- | :--- | :---: |
 | **Open / Close Git** | Type `lazygit` $\rightarrow$ `q` | `Ctrl+G` $\rightarrow$ `Esc` (Modal 90x88%) | **-75% motor effort** |
-| **Sesh Navigation** | `Ctrl+A/T/X` chords | Direct single keys `a`, `t`, `x` in Nav mode | **-50% KLM cost ($120\text{ ms}$)** |
+| **Sesh Navigation** | `Ctrl+A/T/X` chords | Universal `Tab` / `Shift-Tab` cyclic rotation (All $\rightarrow$ Tmux $\rightarrow$ Dirs) | **-70% motor effort (Zero chord collisions)** |
 | **Window Selection** | `prefix + w` (Native vertical list) | `prefix + s` (Matchmaker 40/60 with AI states)| **-80% cognitive load** |
 | **Scroll Stutter** | White visual flash | Double Buffering (`delay_clear = true`) | **Zero-Flicker (60 FPS fluid)** |
 | **Empty AI Bell** | 1.5s frozen modal | `display-message` HUD (<1ms) | **-99% latency (Doherty <100ms)** |
@@ -179,7 +179,8 @@ To prevent accidental dismissal while inspecting a diff or composing a commit me
 * [`tmux/.config/tmux/window-picker.toml`](../../tmux/.config/tmux/window-picker.toml): Matchmaker preset with dynamic group header and row styling.
 * [`tmux/.config/tmux/window-picker-items.sh`](../../tmux/.config/tmux/window-picker-items.sh): Session and window item generator with ANSI color mapping.
 * [`tmux/.config/tmux/window-picker-preview.sh`](../../tmux/.config/tmux/window-picker-preview.sh): Bottom-anchored pane preview generator with trailing whitespace trimming.
-* [`tmux/.config/tmux/sesh-picker.sh`](../../tmux/.config/tmux/sesh-picker.sh): Sesh picker with `⚡` badge.
+* [`tmux/.config/tmux/session-picker.sh`](../../tmux/.config/tmux/session-picker.sh): Session picker with `⚡` badge and cyclic `Tab` source rotation.
+* [`tmux/.config/tmux/session-picker.toml`](../../tmux/.config/tmux/session-picker.toml): Matchmaker preset with multi-mode prompt icons and cyclic reload binds.
 * [`tmux/.config/tmux/lazygitrs-popup.sh`](../../tmux/.config/tmux/lazygitrs-popup.sh): Lazygitrs popup with `󰊢` badge and Git orange theme.
 * [`tmux/.config/tmux/ai-agent-bell-popup.sh`](../../tmux/.config/tmux/ai-agent-bell-popup.sh): Reactive notification dispatcher with `󰮯` badge.
 * [`waymaker/.config/waymaker/presets/jump.toml`](../../waymaker/.config/waymaker/presets/jump.toml): Waymaker Jump preset.

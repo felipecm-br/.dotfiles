@@ -35,10 +35,12 @@ _tmux_style="$HOME/.local/state/omarchy/current/theme/tmux-style.sh"
 . "$_tmux_style" 2>/dev/null || true
 unset _tmux_style
 
+export PATH="$HOME/.local/bin:$PATH"
+
 MM_BIN="$HOME/.local/bin/wm"
 [ -x "$MM_BIN" ] || MM_BIN="$(command -v wm 2>/dev/null || command -v mm 2>/dev/null || echo "wm")"
 
-chosen=$("$MM_BIN" session list --icons | grep -Ev '(_lazygitrs|_popups|[[:space:]]+\.)' | "$MM_BIN" \
+chosen=$("$MM_BIN" \
   -o "$SCRIPT_DIR/session-picker.toml" \
   --color "${TMUX_COLOR_SPEC:-}")
 
