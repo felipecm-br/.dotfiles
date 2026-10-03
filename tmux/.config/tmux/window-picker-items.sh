@@ -65,12 +65,12 @@ tmux list-sessions -F '#S' | grep -Ev '^(_lazygitrs|_popups|\.)' | while IFS= re
 
     if [ "$session" = "$cur_session" ] && [ "$idx" = "$cur_window" ]; then
       mark="${C_CURMARK}•${R}"
-      c_cur_name="${DIM}${C_CURMARK}"
-      c_title_color="${DIM}${C_CURMARK}"
+      c_cur_name="${C_CURMARK}"
+      c_title_color="${C_CURMARK}"
     else
       mark="${C_DIMMARK}·${R}"
-      c_cur_name="${DIM}${C_NAME}"
-      c_title_color="${DIM}${C_NAME}"
+      c_cur_name="${C_NAME}"
+      c_title_color="${C_NAME}"
     fi
 
 

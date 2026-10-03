@@ -29,6 +29,9 @@ multi = false
 row_connection = "Full"
 column_spacing = 0
 
+[results.style]
+modifier = "DIM"
+
 [results.current_style]
 modifier = "BOLD"
 

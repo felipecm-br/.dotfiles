@@ -125,6 +125,21 @@ The **Golden Ratio** ($\phi = \frac{1 + \sqrt{5}}{2} \approx 1.618$) provides th
 * **Concurrent Split Editor Integration (`62% / 38%` LTR):** When opening files from ephemeral pickers (`files`, `rg`, `scrollback`), the modal popup is closed immediately (`tmux display-popup -C`) to prevent nested modal trapping. The editor (Neovim) opens in a Golden Ratio left split (`tmux split-window -d -h -b -l 62%`) beside the origin pane, keeping the AI agent session visible on the right (38%), or reusing an existing Neovim pane via RPC socket (`/run/user/$UID/nvim.<pid>.0`) to eliminate duplicate split proliferation.
 * **The Z-Axis Navigation vs X-Axis Work Law:** Ephemeral popups operate strictly along the Z-Axis (depth), consuming zero permanent horizontal columns. This preserves the full 180+ column budget required for high-density side-by-side content splits (Neovim 62% + AI 38%), proving why static lateral sidebars (Chrome Splits) degrade terminal workflows. See detailed comparative analysis in [Terminal Ergonomics & UX Manifesto](../architecture/terminal-ergonomics-and-ux-manifesto.md#31-the-z-axis-vs-x-axis-law-ephemeral-overlays-vs-persistent-sidebars).
 
+### 3.1 Dynamic Visual Hierarchy & Contrast Model (Window Picker)
+
+The Window Picker (`prefix + s` / [`window-picker.sh`](../../tmux/.config/tmux/window-picker.sh) backed by [`window-picker.toml`](../../tmux/.config/tmux/window-picker.toml)) implements a zero-background-fill contrast hierarchy designed to eliminate cognitive noise across multi-session, multi-window navigation:
+
+1. **Zero Background Clutter (`bg = ""` / Transparent)**:
+   The focused candidate retains transparent background continuity, avoiding heavy solid-color cursor bars that clash with custom terminal color schemes or obscure syntax highlights in dense TUIs.
+2. **Peripheral Dimming (`results.style modifier = "DIM"`)**:
+   All inactive windows and non-selected candidates are rendered with `DIM`. Hardcoded ANSI escape dimming (`\033[2m`) was systematically extracted from candidate generators ([`window-picker-items.sh`](../../tmux/.config/tmux/window-picker-items.sh)) into Waymaker configuration, allowing Ratatui to manage and strip modifiers dynamically on the active row.
+3. **Focused Candidate Elevation (`results.current_style modifier = "BOLD"`)**:
+   The active item currently targeted by the selection cursor is dynamically promoted to `BOLD` without `DIM`, maximizing luminance contrast and guiding the foveal gaze instantly to the active candidate.
+4. **Contextual Group Header Attenuation (`results.inactive_group_header_style`)**:
+   Tmux session headers whose groups do not contain the active cursor are dimmed (`fg = "cyan", modifier = "DIM"`). This prevents inactive session titles from competing visually with the active list items.
+5. **Active Group Header Promotion (`results.group_header_style`)**:
+   When the cursor moves into a session grouping, Waymaker evaluates group membership in real time relative to the cursor position, dynamically promoting the enclosing group header to `BOLD` bright cyan (`results.group_header_style`). The user instantly perceives both the selected window and its owning session context at a glance.
+
 ---
 
 ## ⌨️ 4. Biomechanical Keymapping Architecture
@@ -159,6 +174,8 @@ To prevent accidental dismissal while inspecting a diff or composing a commit me
 
 ## 🔗 Related Repository Files
 * [`tmux/.config/tmux/window-picker.sh`](../../tmux/.config/tmux/window-picker.sh): Golden ratio window picker with `󱂬` badge.
+* [`tmux/.config/tmux/window-picker.toml`](../../tmux/.config/tmux/window-picker.toml): Matchmaker preset with dynamic group header and row styling.
+* [`tmux/.config/tmux/window-picker-items.sh`](../../tmux/.config/tmux/window-picker-items.sh): Session and window item generator with ANSI color mapping.
 * [`tmux/.config/tmux/sesh-picker.sh`](../../tmux/.config/tmux/sesh-picker.sh): Sesh picker with `⚡` badge.
 * [`tmux/.config/tmux/lazygitrs-popup.sh`](../../tmux/.config/tmux/lazygitrs-popup.sh): Lazygitrs popup with `󰊢` badge and Git orange theme.
 * [`tmux/.config/tmux/ai-agent-bell-popup.sh`](../../tmux/.config/tmux/ai-agent-bell-popup.sh): Reactive notification dispatcher with `󰮯` badge.

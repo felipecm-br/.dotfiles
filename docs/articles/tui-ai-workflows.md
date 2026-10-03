@@ -157,7 +157,7 @@ Powered by **Matchmaker** (`mm`), the window picker lists **all sessions and win
 
 ### Tmux Status Bar & Window Picker Architecture
 
-The AI agent state management pipeline consists of 5 integrated components:
+The AI agent state management pipeline consists of 6 integrated components:
 
 1. **Orthogonal State Options (`acpd` & Agent Hooks)**:
    - `@ai_agent_state`: Pure icon or animated spinner frame (e.g. `⠋`, `󱜻`, `󱅭`, `󰨄`, `󱥂`) without embedded ANSI escape sequences.
@@ -175,13 +175,16 @@ The AI agent state management pipeline consists of 5 integrated components:
    - Animates `@SPIN@` during `working`/`busy` states and renders matching Nerdfont state icons (`󱥂`, `󱜻`, `󱅭`, `󰨄`) colored with the active Omarchy theme palette.
    - Formats the AI session title dynamically (truncated to 28 characters for ergonomic layout preservation), matching the focused window's vibrant active color while keeping inactive windows cleanly readable in foreground text, and injects the full title into the search index so users can jump to any agent window by typing keywords from its current task.
 
+4. **Dynamic Visual Hierarchy & Contrast Model (`window-picker.toml`)**:
+   - **Inactive Candidate Dimming**: Unfocused candidates in the results list are dimmed via `results.style.modifier = "DIM"` (without hardcoding ANSI `\033[2m` in the generator script), keeping peripheral items visually quiet.
+   - **Focused Row Promotion**: The item under the cursor is rendered in `BOLD` without `DIM` and without solid background fill (`bg`), producing high contrast against the terminal backdrop without visual clutter.
+   - **Dynamic Session Group Headers**: Waymaker dynamically evaluates cursor position relative to session groupings. Headers of inactive sessions are dimmed (`results.inactive_group_header_style`), while the header of the session enclosing the focused window is promoted to bright bold (`results.group_header_style`), visually framing the active cluster.
 
-
-4. **Omarchy Theme Template (`acpd.toml.tpl`)**:
+5. **Omarchy Theme Template (`acpd.toml.tpl`)**:
    - Template located in [`acpd/.config/omarchy/themed/acpd.toml.tpl`](../../acpd/.config/omarchy/themed/acpd.toml.tpl) maps `idle` (`{{ color14 }}`), `busy/working` (`{{ color11 }}`), `question` (`{{ color13 }}`), and `error/permission` (`{{ color1 }}`).
    - Switching system themes (`omarchy-theme-set`) re-compiles `~/.config/acpd/config.toml` and automatically restarts `acpd` via systemd (`systemctl --user restart acpd`) to apply theme colors instantly.
 
-5. **Resilient Ctrl+C Interrupt Watchdog (`tmux-hook.mjs`)**:
+6. **Resilient Ctrl+C Interrupt Watchdog (`tmux-hook.mjs`)**:
    - When users press `<Ctrl+C>` during agent execution, normal exit hooks are bypassed by `SIGINT`.
    - The background watchdog loop polls pane content every 2 seconds. The instant prompt symbols (`❯`, `$`, `%`) reappear on the bottom line, the watchdog resets the state to `idle` automatically.
 
