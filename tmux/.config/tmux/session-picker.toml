@@ -29,7 +29,7 @@ prompt = " "
 status_inline = true
 
 [footer]
-content = " {cyan,bold:[Enter]} {darkgray:Connect}  •  {red,bold:[d]} {darkgray:Kill}  •  {yellow,bold:[a]} {darkgray:All}  •  {magenta,bold:[t]} {darkgray:Tmux}  •  {blue,bold:[x]} {darkgray:Frecency}"
+content = " {cyan,bold:[Enter]} {darkgray:Connect}  •  {magenta,bold:[s]} {darkgray:Windows}  •  {red,bold:[d]} {darkgray:Kill}  •  {yellow,bold:[a]} {darkgray:All}  •  {blue,bold:[t]} {darkgray:Tmux}  •  {green,bold:[x]} {darkgray:Frecency}"
 row_connection = "Full"
 match_indent = false
 
@@ -60,6 +60,8 @@ side = "right"
 percentage = 55
 
 [ui.nav.binds]
+"s" = ["Print(__SWITCH_WINDOW__)", "Quit"]
+"S" = ["Print(__SWITCH_WINDOW__)", "Quit"]
 "a" = "Reload(wm session list --icons)"
 "t" = "Reload(wm session list -t --icons)"
 "g" = "Reload(wm session list -c --icons)"
@@ -69,6 +71,7 @@ percentage = 55
 "," = []
 
 [binds]
+"ctrl-s" = ["Print(__SWITCH_WINDOW__)", "Quit"]
 "ctrl-a" = [ "SetPrompt(⚡  )", "Reload(wm session list --icons)" ]
 "ctrl-t" = [ "SetPrompt(🪟  )", "Reload(wm session list -t --icons)" ]
 "ctrl-g" = [ "SetPrompt(⚙️  )", "Reload(wm session list -c --icons)" ]

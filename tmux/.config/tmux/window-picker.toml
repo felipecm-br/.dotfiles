@@ -41,7 +41,7 @@ prompt = " "
 show = true
 
 [footer]
-content = " {cyan,bold:[Enter]} {darkgray:Switch Window}  •  {green,bold:[c]} {darkgray:New Window}  •  {red,bold:[d]} {darkgray:Kill Window}  •  {blue,bold:[Esc]} {darkgray:Cancel}  •  {magenta,bold:[?]} {darkgray:Toggle Footer}"
+content = " {cyan,bold:[Enter]} {darkgray:Switch Window}  •  {yellow,bold:[t]} {darkgray:Sessions}  •  {green,bold:[c]} {darkgray:New}  •  {red,bold:[d]} {darkgray:Kill}  •  {blue,bold:[Esc]} {darkgray:Cancel}  •  {magenta,bold:[?]} {darkgray:Help}"
 row_connection = "Full"
 match_indent = false
 separator = "light"
@@ -53,7 +53,11 @@ bar = "Plain"             # Estilo da barra na lista: "Plain" (│), "Thick" (�
 color = "black"           # Cor da barra: nomes ("black", "gray", "cyan", "lightblue", etc.) ou hex ("#000000", "#1e1e2e")
 hints = false
 
+
+
 [ui.nav.binds]
+"t"      = ["Print(__SWITCH_SESSION__)", "Quit"]
+"T"      = ["Print(__SWITCH_SESSION__)", "Quit"]
 "c"      = ["ExecuteAsync(printf '%s\\n' '{=}' | $HOME/.config/tmux/window-picker-create.sh)", "Reload($HOME/.config/tmux/window-picker-items.sh)"]
 "C"      = ["ExecuteAsync(printf '%s\\n' '{=}' | $HOME/.config/tmux/window-picker-create.sh)", "Reload($HOME/.config/tmux/window-picker-items.sh)"]
 "d"      = ["ExecuteAsync(printf '%s\\n' '{=}' | $HOME/.config/tmux/window-picker-delete.sh)", "Reload($HOME/.config/tmux/window-picker-items.sh)"]
@@ -82,10 +86,7 @@ percentage = 60
 
 [binds]
 Start    = ["ToggleColumn(title)", "ToggleColumn(name)", "ToggleColumn(session)", "ToggleColumn(idx)"]
-"c"      = ["ExecuteAsync(printf '%s\\n' '{=}' | $HOME/.config/tmux/window-picker-create.sh)", "Reload($HOME/.config/tmux/window-picker-items.sh)"]
-"C"      = ["ExecuteAsync(printf '%s\\n' '{=}' | $HOME/.config/tmux/window-picker-create.sh)", "Reload($HOME/.config/tmux/window-picker-items.sh)"]
-"d"      = ["ExecuteAsync(printf '%s\\n' '{=}' | $HOME/.config/tmux/window-picker-delete.sh)", "Reload($HOME/.config/tmux/window-picker-items.sh)"]
-"D"      = ["ExecuteAsync(printf '%s\\n' '{=}' | $HOME/.config/tmux/window-picker-delete.sh)", "Reload($HOME/.config/tmux/window-picker-items.sh)"]
+"ctrl-t" = ["Print(__SWITCH_SESSION__)", "Quit"]
 "ctrl-r" = "Reload($HOME/.config/tmux/window-picker-items.sh)"
 "?"      = "ToggleFooter"
 "F1"     = "ToggleFooter"

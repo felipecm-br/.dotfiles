@@ -35,10 +35,10 @@ This document provides a comprehensive audit and definitive reference of all key
 
 | Prefix Shortcut | Target Action | Ergonomic Justification & Mnemonic |
 | :--- | :--- | :--- |
-| **`Prefix + s`** | **Window Picker (Matchmaker `75% × 60%`)** | `s` = **S**witch / **S**elect window. Centered Golden Ratio modal with live preview. |
+| **`Prefix + s`** | **Window Picker (Matchmaker `75% × 60%`)** | `s` = **S**witch / **S**elect window. Centered Golden Ratio modal with live preview. Inside: `t` (nav) / `Ctrl+T` switches to Session Picker, `c` new window, `d` kill window. |
 | **`Prefix + S`** | **Fullscreen Window Picker** | Shift+S opens maximized picker for large multi-monitor overviews. |
 | **`Prefix + f`** | **Vimium Window Hints (1-touch Jump)** | `f` = **F**ollow / **F**ind window. In-situ Home-Row hints (`a, s, d, f, j, k, l, ;, g, h`) overlaid directly on tabs ($T_R = 0\text{ ms}$). |
-| **`Prefix + t`** | **Sesh Workspace / Task Picker** | `t` = **T**ask / **T**eleport to project sessions. |
+| **`Prefix + t`** | **Sesh Workspace / Task Picker** | `t` = **T**ask / **T**eleport to project sessions. Inside: `s` (nav) / `Ctrl+S` switches to Window Picker. |
 | **`Prefix + T`** | **Reopen Last Closed Window / Tab** | Shift+T mnemonic: uppercase of sesh `t`, aligned with browser/IDE tab restore with file, command, path & session. |
 | **`Prefix + u`** | **Undo Close Tab (`reopen-window.sh`)** | `u` = **U**ndo close tab. Aligned with Matchmaker file manager undo muscle memory. |
 | **`Prefix + i`** | **AI Agent Bell / Alert HUD** | `i` = **I**ntelligence / **I**nspect agent turn or question. Cycles pending alerts via floating modal popup HUD (`80% × 75%`). Focuses split pane if in current window; opens floating modal for any other window or session so `Esc` (or `Prefix + i`) instantly dismisses and restores origin. |

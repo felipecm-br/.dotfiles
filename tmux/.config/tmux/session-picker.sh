@@ -38,7 +38,16 @@ unset _tmux_style
 MM_BIN="$HOME/.local/bin/wm"
 [ -x "$MM_BIN" ] || MM_BIN="$(command -v wm 2>/dev/null || command -v mm 2>/dev/null || echo "wm")"
 
-"$MM_BIN" session list --icons | grep -Ev '(_lazygitrs|_popups|[[:space:]]+\.)' | "$MM_BIN" \
+chosen=$("$MM_BIN" session list --icons | grep -Ev '(_lazygitrs|_popups|[[:space:]]+\.)' | "$MM_BIN" \
   -o "$SCRIPT_DIR/session-picker.toml" \
-  --color "${TMUX_COLOR_SPEC:-}" \
-| (read chosen && [ -n "$chosen" ] && "$MM_BIN" connect "$chosen"); true
+  --color "${TMUX_COLOR_SPEC:-}")
+
+if [ "$chosen" = "__SWITCH_WINDOW__" ]; then
+  if [ "$1" = "--fullscreen" ]; then
+    exec "$SCRIPT_DIR/window-picker.sh" --fullscreen
+  else
+    exec "$SCRIPT_DIR/window-picker.sh"
+  fi
+elif [ -n "$chosen" ]; then
+  "$MM_BIN" connect "$chosen"
+fi

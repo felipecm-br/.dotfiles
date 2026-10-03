@@ -64,6 +64,14 @@ chosen=$(printf '%s\n' "$ITEMS" | "$MM_BIN" \
   --color "$TMUX_COLOR_SPEC" \
   --group-prefix '#')
 
+if [ "$chosen" = "__SWITCH_SESSION__" ]; then
+  if [ "$1" = "--fullscreen" ]; then
+    exec "$SCRIPT_DIR/session-picker.sh" --fullscreen
+  else
+    exec "$SCRIPT_DIR/session-picker.sh"
+  fi
+fi
+
 if [ -n "$chosen" ]; then
   session=$(printf '%s' "$chosen" | head -n1 | cut -f4)
   idx=$(printf '%s' "$chosen" | head -n1 | cut -f2)
