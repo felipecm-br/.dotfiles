@@ -40,6 +40,8 @@
         "stow",
         "matchmaker",
         "waymaker",
+        "architecture",
+        "keyd",
         "shell",
         "deps"
       ]

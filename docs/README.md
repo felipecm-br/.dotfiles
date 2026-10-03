@@ -13,6 +13,7 @@ Welcome to the central documentation index for this Arch Linux + Omarchy dotfile
 - [**Neovim Visual Intelligence & Smart Image Clipboard Workflow**](architecture/neovim-visual-workflow.md): Architecture, safe Wayland clipboard isolation, Mermaid hover preview, and VS Code-parity smart image pasting with Select Mode captioning.
 - [**Smart & Context-Aware Patterns Roadmap**](architecture/smart-patterns-roadmap.md): Architectural catalog of active event-driven intelligence and future roadmap (semantic breadcrumbs, workspace indicators, command alerts, scratchpads, and Neovim LSP sync).
 - [**Universal Keyboard Ergonomics & Dual-Profile Architecture**](architecture/universal-keyboard-ergonomics-and-profiles.md): Detailed specification for standard/vanilla keyboards vs biomechanical `keyd` overload, Leader sequences, Vim Nav Mode, and open-source packaging strategy for Waymux and Waymaker.
+- [**TUI UX & Terminal Workflow Architecture Evaluation**](architecture/tui-ux-workflow-evaluation-report.md): Definitive architectural evaluation report covering KLM-GOMS modeling, kernel ergonomics (keyd), Matchmaker, Lazygitrs, and Tmux modal workflows.
 - [**Open-Source AI Cockpit Stack Blueprint**](architecture/open-source-ai-tmux-stack-plan.md): Architecture and distribution strategy for the open-source `acpd` + `lazygitrs` + `mm` + `tmux` terminal AI cockpit stack.
 
 ### 🐚 1. Shell & Navigation (`docs/shell/`)
