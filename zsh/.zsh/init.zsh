@@ -3,7 +3,8 @@
 # Load helper functions
 source "${HOME}/.zsh/helpers.zsh"
 
-# Terminal Setup
+# Terminal Setup (disable flow control so Ctrl+S passes through to TUIs like Lazygitrs)
+stty -ixon 2>/dev/null
 # ghosttime -t 1 2>/dev/null || true
 # printf '\n%.0s' {1..75}
 # clear
