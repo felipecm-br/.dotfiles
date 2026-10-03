@@ -32,16 +32,16 @@ While a selection is active, tmux signals it visually: the active pane border sw
 
 ---
 
-## 2. Scrollback Capture to Neovim (`Prefix + C-e`)
+## 2. Scrollback Capture to Neovim (`Prefix + E`)
 
 You can capture the full scrollback history of the current tmux pane (with ANSI colors preserved) and open it directly in Neovim for searching, copying, or inspection.
 
-### Keybinding (`Prefix + C-e`)
+### Keybinding (`Prefix + E`)
 
-In [`tmux/.config/tmux/tmux.conf`](../../tmux/.config/tmux/tmux.conf), pressing `Prefix` (`Ctrl+Space`) then `Ctrl+e` (`C-e`) captures the active pane's scrollback buffer:
+In [`tmux/.config/tmux/tmux.conf`](../../tmux/.config/tmux/tmux.conf), pressing `Prefix` (`Ctrl+Space`) then `Shift+e` (`E`) captures the active pane's scrollback buffer:
 
 ```tmux
-bind-key C-e run-shell "~/.config/tmux/scrollback-view.sh"
+bind-key "E" run-shell "~/.config/tmux/scrollback-view.sh"
 ```
 
 **How it works:**
