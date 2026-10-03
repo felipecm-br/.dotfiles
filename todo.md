@@ -1,4 +1,19 @@
-organizar 
+ctrl-d nao esta funcionando
+
+
+preserve
+
+powerline pill
+powerline pastel
+grovbox rainbow
+tokyo night shading
+8bit pixtel steps
+rose pine horizon
+catppucn poweline
+slanted triangles
+
+
+
 
 my site v1 - create a blog v1 post
 
