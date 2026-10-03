@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { readCtx, getActiveTmuxPane, getAcpdHeaders, log } from './hook-lib.mjs';
+import { readCtx, getActiveTmuxPane, getAcpdHeaders, log, setAiAgentTitle, extractSessionTitle } from './hook-lib.mjs';
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
@@ -74,6 +74,10 @@ async function main() {
   log(LOG_FILE, `event=${eventType} pane=${tmuxPane} fullyIdle=${ctx.fullyIdle ?? 'n/a'}`);
 
   if (['SessionStart', 'PreInvocation'].includes(eventType)) {
+    const title = extractSessionTitle(ctx);
+    if (title) {
+      setAiAgentTitle(tmuxPane, title);
+    }
     await sendAcpState(tmuxPane, 'working');
   }
   else if (eventType === 'PreToolUse') {
@@ -93,6 +97,7 @@ async function main() {
     await sendAcpState(tmuxPane, 'idle');
   }
   else if (['SessionEnd', 'Exit'].includes(eventType)) {
+    setAiAgentTitle(tmuxPane, null);
     await sendAcpState(tmuxPane, 'closed');
   }
 

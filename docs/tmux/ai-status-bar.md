@@ -24,11 +24,13 @@ For inactive background tabs, `@ai_agent_state` is rendered in `#[fg=#{@ai_agent
 
 ---
 
-## 3. Orthogonal Tmux Options Pushed by `acpd`
+## 3. Orthogonal Tmux Options Pushed by `acpd` & Agent Hooks
 
 - `@ai_agent_state`: Pure icon or animated spinner frame string without embedded ANSI color tags (e.g. `⠋`, `󱜻`, `󱅭`, `󰨄`).
 - `@ai_agent_state_color`: Hex color string configured in `config.toml` (e.g. `#f9e2af`, `#cba6f7`, `#f38ba8`, `#94e2d5`).
-- `@ai_agent_state_raw`: Raw state identifier string (`busy`, `working`, `question`, `awaiting_input`, `permission`, `error`, `idle`, `closed`).
+- `@ai_agent_title`: Clean active session title or initial prompt (e.g. `Fix memory leak in parser`), rendered in the Window Picker (`Prefix + s` / [`window-picker.sh`](../../tmux/.config/tmux/window-picker.sh)) matching the window item color and indexed for instant Matchmaker fuzzy search.
+
+
 
 ---
 

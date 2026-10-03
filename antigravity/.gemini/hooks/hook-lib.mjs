@@ -84,6 +84,46 @@ export function setLazygitrsIcon(pane, icon) {
   } catch (e) {}
 }
 
+/** Set or unset the @ai_agent_title tmux window option. Never throws. */
+export function setAiAgentTitle(pane, title) {
+  if (!pane) return;
+  try {
+    if (title && title.trim().length > 0) {
+      const cleanTitle = title.trim().replace(/["\\$`]/g, '').slice(0, 80);
+      execSync(`tmux set-option -w -t "${pane}" @ai_agent_title "${cleanTitle}"`, { stdio: 'pipe' });
+    } else {
+      execSync(`tmux set-option -w -t "${pane}" -u @ai_agent_title`, { stdio: 'pipe' });
+    }
+    execSync(`tmux refresh-client -S`, { stdio: 'pipe' });
+  } catch (e) {}
+}
+
+/** Extract user request or session title from hook context or transcript. */
+export function extractSessionTitle(ctx) {
+  try {
+    if (ctx.title) return ctx.title;
+    if (ctx.sessionTitle) return ctx.sessionTitle;
+
+    if (ctx.transcriptPath && existsSync(ctx.transcriptPath)) {
+      const firstLine = readFileSync(ctx.transcriptPath, 'utf8').split('\n')[0];
+      if (firstLine) {
+        const parsed = JSON.parse(firstLine);
+        if (parsed.content) {
+          const match = parsed.content.match(/<USER_REQUEST>([\s\S]*?)<\/USER_REQUEST>/);
+          let raw = match ? match[1] : parsed.content;
+          raw = raw.replace(/^\s*\/[a-zA-Z0-9_-]+\s*/, '').trim();
+          raw = raw.replace(/\s+/g, ' ');
+          if (raw.length > 0) {
+            return raw;
+          }
+        }
+      }
+    }
+  } catch (e) {}
+  return null;
+}
+
+
 import { readFileSync, existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';

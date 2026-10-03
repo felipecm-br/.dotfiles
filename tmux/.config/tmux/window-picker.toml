@@ -26,8 +26,14 @@ spinner_inline = true
 current_prefix = ""
 unselected_prefix = ""
 multi = false
-row_connection = "Disjoint"
+row_connection = "Full"
 column_spacing = 0
+
+[results.current_style]
+modifier = "BOLD"
+
+[results.current_nav_bar_style]
+modifier = "BOLD"
 
 [results.autoscroll]
 enabled = false

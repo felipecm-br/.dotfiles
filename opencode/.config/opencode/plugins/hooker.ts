@@ -61,8 +61,22 @@ export const NotifyIdlePlugin: Plugin = async ({ $ }) => {
     }
   }
 
+  const setAiAgentTitle = (title: string | null) => {
+    const pane = getActiveTmuxPane()
+    if (!pane) return
+    try {
+      if (title && title.trim().length > 0) {
+        const cleanTitle = title.trim().replace(/["\\$`]/g, "").slice(0, 80)
+        execSync(`tmux set-option -w -t "${pane}" @ai_agent_title "${cleanTitle}"`, { stdio: "ignore" })
+      } else {
+        execSync(`tmux set-option -w -u -t "${pane}" @ai_agent_title`, { stdio: "ignore" })
+      }
+    } catch {}
+  }
+
   process.on("exit", () => {
     try {
+      setAiAgentTitle(null)
       const pane = getActiveTmuxPane()
       if (!pane) return
       const token = getAcpdToken()
@@ -84,6 +98,19 @@ export const NotifyIdlePlugin: Plugin = async ({ $ }) => {
     "event": async ({ event }) => {
       const evtType = (event as any)?.type ?? "unknown"
 
+      if (evtType === "session.created" || evtType === "session.updated") {
+        const title = (event as any)?.properties?.info?.title
+        if (title) {
+          setAiAgentTitle(title)
+        }
+        return
+      }
+
+      if (evtType === "session.deleted") {
+        setAiAgentTitle(null)
+        return
+      }
+
       if (evtType === "permission.asked") {
         waitingPermission = true
         await sendAcpState("permission")
@@ -98,6 +125,7 @@ export const NotifyIdlePlugin: Plugin = async ({ $ }) => {
       if (evtType !== "session.status") return
 
       const properties = (event as any)?.properties
+
       const statusType: string = properties?.status?.type ?? "unknown"
 
       // Keep permission indicator visible while waiting for user reply.

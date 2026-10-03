@@ -139,30 +139,31 @@ State management is centralized by **`acpd`** (Agent Client Protocol Daemon), a 
 
 **Binding**: `prefix+s` (popup 80×35%) / `prefix+S` (fullscreen split) → `window-picker.sh`
 
-Powered by **Matchmaker** (`mm`), the window picker lists **all sessions and windows** grouped by session, displaying real-time AI state icons and theme colors pushed by `acpd` (`@ai_agent_state`, `@ai_agent_state_color`, `@ai_agent_state_raw`):
+Powered by **Matchmaker** (`mm`), the window picker lists **all sessions and windows** grouped by session, displaying real-time AI state icons, theme colors, and active AI session titles (`@ai_agent_state`, `@ai_agent_state_color`, `@ai_agent_state_raw`, `@ai_agent_title`):
 
 ```
-┌─ 󰧞  windows ──────────────────────────────────────────────────┐
-│                                          ┆                     │
-│  #  dotfiles                             ┆  [pane preview]     │
-│     • 2  antigravity  ⠋                  ┆                     │
-│     · 1  nvim                            ┆  > analyzing...     │
-│     · 0  zsh                             ┆                     │
-│                                          ┆                     │
-│  #  webapp                               ┆                     │
-│     · 2  opencode     󱜻                  ┆                     │
-│     · 1  nvim                            ┆                     │
-└────────────────────────────────────────────────────────────────┘
+┌─ 󰧞  windows ────────────────────────────────────────────────────────┐
+│                                                ┆                    │
+│  #  dotfiles                                   ┆  [pane preview]    │
+│     • 2  antigravity  ⠋  Fix memory leak...    ┆                    │
+│     · 1  nvim                                  ┆  > analyzing...    │
+│     · 0  zsh                                   ┆                    │
+│                                                ┆                    │
+│  #  webapp                                     ┆                    │
+│     · 2  opencode     󱜻  Migrate auth...       ┆                    │
+│     · 1  nvim                                  ┆                    │
+└─────────────────────────────────────────────────────────────────────┘
 ```
 
 ### Tmux Status Bar & Window Picker Architecture
 
 The AI agent state management pipeline consists of 5 integrated components:
 
-1. **Orthogonal State Options (`acpd`)**:
+1. **Orthogonal State Options (`acpd` & Agent Hooks)**:
    - `@ai_agent_state`: Pure icon or animated spinner frame (e.g. `⠋`, `󱜻`, `󱅭`, `󰨄`, `󱥂`) without embedded ANSI escape sequences.
    - `@ai_agent_state_color`: Hex color string (`#89b482`, `#d8a657`, `#d3869b`, `#ea6962`) compiled from Omarchy theme templates.
    - `@ai_agent_state_raw`: Raw state string (`busy`, `working`, `question`, `awaiting_input`, `permission`, `error`, `idle`, `closed`).
+   - `@ai_agent_title`: Clean active session title or initial prompt (e.g. `Fix memory leak in parser`), rendered in the window picker and indexed for instant Matchmaker fuzzy search.
 
 2. **Dynamic Pill Layout (`window-status-current-format`)**:
    - The active window is rendered as a rounded pill (`` ... ``) whose background recolors dynamically to `@ai_agent_state_color` (Yellow for `working`, Purple for `question`, Red for `error/permission`, Cyan for `idle` or normal non-AI windows).
@@ -170,8 +171,11 @@ The AI agent state management pipeline consists of 5 integrated components:
    - Background tabs in `window-status-format` render `@ai_agent_state` in `#[fg=#{@ai_agent_state_color}]` so status icons light up on inactive windows.
 
 3. **Matchmaker Sync (`window-picker-items.sh`)**:
-   - Queries `@ai_agent_state` and `@ai_agent_state_color` in real time.
+   - Queries `@ai_agent_state`, `@ai_agent_state_color`, and `@ai_agent_title` in real time.
    - Animates `@SPIN@` during `working`/`busy` states and renders matching Nerdfont state icons (`󱥂`, `󱜻`, `󱅭`, `󰨄`) colored with the active Omarchy theme palette.
+   - Formats the AI session title dynamically (truncated to 28 characters for ergonomic layout preservation), matching the focused window's vibrant active color while keeping inactive windows cleanly readable in foreground text, and injects the full title into the search index so users can jump to any agent window by typing keywords from its current task.
+
+
 
 4. **Omarchy Theme Template (`acpd.toml.tpl`)**:
    - Template located in [`acpd/.config/omarchy/themed/acpd.toml.tpl`](../../acpd/.config/omarchy/themed/acpd.toml.tpl) maps `idle` (`{{ color14 }}`), `busy/working` (`{{ color11 }}`), `question` (`{{ color13 }}`), and `error/permission` (`{{ color1 }}`).
