@@ -50,7 +50,7 @@ prompt = " "
 show = true
 
 [footer]
-content = " {cyan,bold:[Enter]} {darkgray:Switch Window}  •  {yellow,bold:[t]} {darkgray:Sessions}  •  {green,bold:[c]} {darkgray:New}  •  {red,bold:[d]} {darkgray:Kill}  •  {blue,bold:[Esc]} {darkgray:Cancel}  •  {magenta,bold:[?]} {darkgray:Help}"
+content = " {cyan,bold:[Enter]} {darkgray:Switch Window}  •  {yellow,bold:[t]} {darkgray:Sessions}  •  {blue,bold:[/]} {darkgray:Filter}  •  {green,bold:[c]} {darkgray:New}  •  {red,bold:[d]} {darkgray:Kill}  •  {blue,bold:[Esc]} {darkgray:Cancel}  •  {magenta,bold:[?]} {darkgray:Help}"
 row_connection = "Full"
 match_indent = false
 separator = "light"
@@ -65,6 +65,7 @@ hints = false
 
 
 [ui.nav.binds]
+"/"      = "FocusFilter"
 "t"      = ["Print(__SWITCH_SESSION__)", "Quit"]
 "T"      = ["Print(__SWITCH_SESSION__)", "Quit"]
 "c"      = ["ExecuteAsync(printf '%s\\n' '{=}' | $HOME/.config/tmux/window-picker-create.sh)", "Reload($HOME/.config/tmux/window-picker-items.sh)"]
