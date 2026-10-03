@@ -64,11 +64,19 @@ tmux list-sessions -F '#S' | grep -Ev '^(_lazygitrs|_popups|\.)' | while IFS= re
     esac
 
     if [ "$session" = "$cur_session" ] && [ "$idx" = "$cur_window" ]; then
-      mark="${C_CURMARK}•${R}"
+      if [ "${#idx}" -eq 1 ]; then
+        idx_col="${C_IDX}${idx}${R}${C_CURMARK}•${R}  "
+      else
+        idx_col="${C_IDX}${idx}${R}${C_CURMARK}•${R} "
+      fi
       c_cur_name="${C_CURMARK}"
       c_title_color="${C_CURMARK}"
     else
-      mark="${C_DIMMARK}·${R}"
+      if [ "${#idx}" -eq 1 ]; then
+        idx_col="${C_IDX}${idx}${R}   "
+      else
+        idx_col="${C_IDX}${idx}${R}  "
+      fi
       c_cur_name="${C_NAME}"
       c_title_color="${C_NAME}"
     fi
@@ -101,50 +109,47 @@ tmux list-sessions -F '#S' | grep -Ev '^(_lazygitrs|_popups|\.)' | while IFS= re
       busy|working)
         c_st=${c_st:-$C_BUSY}
         icon=${state_icon:-"󰑮"}
+        ai_ico="${c_st}@SPIN@${R} "
         title="$idx $name $icon ${ai_search}"
-        display=" ${mark} ${C_IDX}${idx}${R}  ${c_cur_name}${name}${R} ${c_st}@SPIN@${R}${ai_badge}      "
-        printf '%s\t%s\t%s\t%s\t%b\n' "$title" "$idx" "$name" "$session" "$display"
         ;;
       idle)
         c_st=${c_st:-$C_IDLE}
         icon=${state_icon:-"󱥂"}
+        ai_ico="${c_st}${icon}${R} "
         title="$idx $name $icon ${ai_search}"
-        display=" ${mark} ${C_IDX}${idx}${R}  ${c_cur_name}${name}${R} ${c_st}${icon}${R}${ai_badge}      "
-        printf '%s\t%s\t%s\t%s\t%b\n' "$title" "$idx" "$name" "$session" "$display"
         ;;
       question|awaiting_input)
         c_st=${c_st:-$C_QUESTION}
         icon=${state_icon:-"󱜻"}
+        ai_ico="${c_st}${icon}${R} "
         title="$idx $name $icon ${ai_search}"
-        display=" ${mark} ${C_IDX}${idx}${R}  ${c_cur_name}${name}${R} ${c_st}${icon}${R}${ai_badge}      "
-        printf '%s\t%s\t%s\t%s\t%b\n' "$title" "$idx" "$name" "$session" "$display"
         ;;
       error)
         c_st=${c_st:-$C_ERROR}
         icon=${state_icon:-"󰨄"}
+        ai_ico="${c_st}${icon}${R} "
         title="$idx $name $icon ${ai_search}"
-        display=" ${mark} ${C_IDX}${idx}${R}  ${c_cur_name}${name}${R} ${c_st}${icon}${R}${ai_badge}      "
-        printf '%s\t%s\t%s\t%s\t%b\n' "$title" "$idx" "$name" "$session" "$display"
         ;;
       permission)
         c_st=${c_st:-$C_PERM}
         icon=${state_icon:-"󱅭"}
+        ai_ico="${c_st}${icon}${R} "
         title="$idx $name $icon ${ai_search}"
-        display=" ${mark} ${C_IDX}${idx}${R}  ${c_cur_name}${name}${R} ${c_st}${icon}${R}${ai_badge}      "
-        printf '%s\t%s\t%s\t%s\t%b\n' "$title" "$idx" "$name" "$session" "$display"
         ;;
       *)
         if [ -n "$state_icon" ]; then
           c_st=${c_st:-$C_IDLE}
+          ai_ico="${c_st}${state_icon}${R} "
           title="$idx $name $state_icon ${ai_search}"
-          display=" ${mark} ${C_IDX}${idx}${R}  ${c_cur_name}${name}${R} ${c_st}${state_icon}${R}${ai_badge}      "
         else
+          ai_ico="  "
           title="$idx $name ${ai_search}"
-          display=" ${mark} ${C_IDX}${idx}${R}  ${c_cur_name}${name}${R}${ai_badge}          "
         fi
-        printf '%s\t%s\t%s\t%s\t%b\n' "$title" "$idx" "$name" "$session" "$display"
         ;;
     esac
+
+    display=" ${ai_ico}${idx_col}${c_cur_name}${name}${R}${ai_badge}      "
+    printf '%s\t%s\t%s\t%s\t%b\n' "$title" "$idx" "$name" "$session" "$display"
 
   done
 done
