@@ -7,9 +7,10 @@ This document provides a comprehensive audit and definitive reference of all key
 ## 🔬 1. Architectural Principles of the Keybinding System
 
 1. **Home Row First ($H = 0$):** Every high-frequency operation is reachable without moving hands from the base typing position ($ASDF / JKL;$).
-2. **Kernel Dual-Function Modifiers (`keyd`):** `CapsLock` operates as `Ctrl` when held and `Esc` when tapped, eliminating awkward pinky stretches to the bottom-left corner.
+2. **Kernel Dual-Function Modifiers (`keyd`):** `CapsLock` operates as `Ctrl` when held and `Esc` when tapped, guarded by `overload_tap_timeout = 200` to prevent accidental stray Esc emission during hesitations.
 3. **Prefix Guarding for Destructive Actions:** Non-destructive navigation (switching windows, scratchpads, completions) uses **Zero-Prefix / Direct Chords**; destructive actions (closing windows, killing sessions) require a deliberate **Prefix Guard** to prevent accidental data loss.
-4. **Mnemonic Consistency:** `n` = New, `w` = Window/Close, `s` = Switch/Select, `t` = Task/Sesh, `g` = Git, `i` = Inspect AI.
+4. **TTY Flow Control Immunity (`stty -ixon`):** Shell initialization enforces `stty -ixon`, guaranteeing that chords like `Ctrl + S` (Lazygitrs commit log menu) never trigger legacy TTY `XOFF` software flow control terminal freezes.
+5. **Mnemonic Consistency:** `n` = New, `w` = Window/Close, `s` = Switch/Select, `t` = Task/Sesh, `g` = Git, `i` = Inspect AI.
 
 ---
 

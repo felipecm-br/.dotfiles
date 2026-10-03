@@ -148,7 +148,7 @@ $$\text{Ideal Line Length (80–100 cols)} \times 2 + \text{gutters/LSP diagnost
 ### 4.1 Kernel-Level Dual-Function Keys (`keyd`)
 In the kernel input pipeline:
 * **`CapsLock` (Hold):** Emits `Ctrl`.
-* **`CapsLock` (Tap):** Emits `Esc`.
+* **`CapsLock` (Tap):** Emits `Esc` (guarded by `overload_tap_timeout = 200` to prevent stray Esc during long holds without keys).
 
 This anchors the two most frequent modifiers directly under the left pinky at resting Home Row position, preventing ulnar deviation and repetitive strain injury (RSI).
 
