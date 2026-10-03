@@ -139,6 +139,8 @@ The Window Picker (`prefix + s` / [`window-picker.sh`](../../tmux/.config/tmux/w
    Tmux session headers whose groups do not contain the active cursor are dimmed (`fg = "cyan", modifier = "DIM"`). This prevents inactive session titles from competing visually with the active list items.
 5. **Active Group Header Promotion (`results.group_header_style`)**:
    When the cursor moves into a session grouping, Waymaker evaluates group membership in real time relative to the cursor position, dynamically promoting the enclosing group header to `BOLD` bright cyan (`results.group_header_style`). The user instantly perceives both the selected window and its owning session context at a glance.
+6. **Bottom-Anchored Live Preview Stream (`preview.initial.tail = true`)**:
+   Terminal applications, CLI commands, and AI agent reasoning loops continuously stream output to the bottom of the viewport. Rather than starting at line 0 (which reveals stale header banners or empty top margins), the preview pane is pinned to the bottom of the active conversation stream (`tail = true`). Backed by [`window-picker-preview.sh`](../../tmux/.config/tmux/window-picker-preview.sh), it captures the last 100 history lines, trims trailing blank terminal rows, and positions the viewport directly on the active prompt and latest dialog lines with sub-4ms execution latency.
 
 ---
 
@@ -176,6 +178,7 @@ To prevent accidental dismissal while inspecting a diff or composing a commit me
 * [`tmux/.config/tmux/window-picker.sh`](../../tmux/.config/tmux/window-picker.sh): Golden ratio window picker with `󱂬` badge.
 * [`tmux/.config/tmux/window-picker.toml`](../../tmux/.config/tmux/window-picker.toml): Matchmaker preset with dynamic group header and row styling.
 * [`tmux/.config/tmux/window-picker-items.sh`](../../tmux/.config/tmux/window-picker-items.sh): Session and window item generator with ANSI color mapping.
+* [`tmux/.config/tmux/window-picker-preview.sh`](../../tmux/.config/tmux/window-picker-preview.sh): Bottom-anchored pane preview generator with trailing whitespace trimming.
 * [`tmux/.config/tmux/sesh-picker.sh`](../../tmux/.config/tmux/sesh-picker.sh): Sesh picker with `⚡` badge.
 * [`tmux/.config/tmux/lazygitrs-popup.sh`](../../tmux/.config/tmux/lazygitrs-popup.sh): Lazygitrs popup with `󰊢` badge and Git orange theme.
 * [`tmux/.config/tmux/ai-agent-bell-popup.sh`](../../tmux/.config/tmux/ai-agent-bell-popup.sh): Reactive notification dispatcher with `󰮯` badge.

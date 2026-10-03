@@ -84,14 +84,18 @@ delay_clear = true
 [preview]
 wrap = false
 
+[preview.initial]
+tail = true
+
 [preview.border]
 sides = "LEFT"
 color = "Darkgray"
 
 [[preview.layout]]
-command = 'sess="{=session}"; tmux capture-pane -ep -t "${sess}:{=idx}" 2>/dev/null || printf "  \033[38;2;146;131;116m(no preview)\033[0m\n"'
+command = '$HOME/.config/tmux/window-picker-preview.sh "{=session}" "{=idx}"'
 side = "right"
 percentage = 60
+scroll.tail = true
 
 [binds]
 Start    = ["ToggleColumn(title)", "ToggleColumn(name)", "ToggleColumn(session)", "ToggleColumn(idx)"]
