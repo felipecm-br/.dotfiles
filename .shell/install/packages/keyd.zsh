@@ -13,7 +13,7 @@ if command -v pkg_is_installed &>/dev/null && command -v pkg_install &>/dev/null
 	fi
 elif ! command -v keyd &>/dev/null; then
 	echo "keyd is not installed. Please install it and rerun this script."
-	exit 1
+	return 1
 fi
 
 # Create keyd config directory if it doesn't exist
@@ -21,6 +21,9 @@ sudo mkdir -p /etc/keyd
 
 # Write the keyd configuration
 sudo tee /etc/keyd/default.conf > /dev/null <<EOF
+[global]
+overload_tap_timeout = 200
+
 [ids]
 
 *
@@ -32,9 +35,10 @@ EOF
 
 echo "Keyd configuration written to /etc/keyd/default.conf"
 
-# Enable and start keyd service
+# Enable and start/reload keyd service
 sudo systemctl enable keyd
 sudo systemctl start keyd
+sudo keyd reload 2>/dev/null || sudo systemctl restart keyd
 
 echo "Keyd service enabled and started."
 echo "Capslock is now remapped: tap for esc, hold for ctrl."
