@@ -8,6 +8,7 @@ local home = os.getenv("HOME") or "/home/fecavmi"
 -- ==============================================================================
 
 -- Core Applications
+o.bind("SUPER + CTRL + RETURN", "Tmux", 'uwsm-app -- xdg-terminal-exec --dir="$(omarchy-cmd-terminal-cwd)" tmux new')
 o.bind("SUPER + ALT + RETURN", "Tmux", 'uwsm-app -- xdg-terminal-exec --dir="$(omarchy-cmd-terminal-cwd)" tmux new')
 hl.unbind("SUPER + SHIFT + F")
 o.bind("SUPER + SHIFT + F", "Yazi", "uwsm-app -- ghostty -e zsh -c 'tmp=$(mktemp -t yazi-cwd.XXXXXX); trap \"rm -f $tmp\" EXIT; yazi --cwd-file=\"$tmp\"; [[ -s \"$tmp\" ]] && cd \"$(<$tmp)\"; exec zsh -i'")
@@ -40,7 +41,9 @@ o.bind("SUPER + SHIFT + SLASH", "Keybindings", "omarchy-menu-keybindings")
 
 -- Web Applications & Utilities
 o.bind("SUPER + SHIFT + A", "Animation Switcher", "omarchy-launch-tui " .. home .. "/.local/bin/hypr-anim")
+o.bind("SUPER + CTRL + B", "Border Style Switcher", "omarchy-launch-tui " .. home .. "/.local/bin/hypr-border")
 o.bind("SUPER + ALT + B", "Border Style Switcher", "omarchy-launch-tui " .. home .. "/.local/bin/hypr-border")
+o.bind("SUPER + CTRL + S", "AI Sound Switcher", "omarchy-launch-tui " .. home .. "/.local/bin/ai-sound-switcher")
 o.bind("SUPER + ALT + S", "AI Sound Switcher", "omarchy-launch-tui " .. home .. "/.local/bin/ai-sound-switcher")
 o.bind("SUPER + SHIFT + ALT + A", "Grok", "omarchy-launch-webapp 'https://grok.com'")
 
@@ -116,7 +119,11 @@ o.bind("SUPER + J", "Move window focus down", hl.dsp.focus({ direction = "d" }))
 o.bind("SUPER + K", "Move window focus up", hl.dsp.focus({ direction = "u" }))
 o.bind("SUPER + L", "Move window focus right", hl.dsp.focus({ direction = "r" }))
 
--- Window Moving (Vim keys)
+-- Window Moving (Vim keys) - Home Row No-Alt: SUPER + CTRL (CapsLock hold), with legacy SUPER + ALT fallback
+o.bind("SUPER + CTRL + H", "Move window left", hl.dsp.window.move({ direction = "l" }))
+o.bind("SUPER + CTRL + J", "Move window down", hl.dsp.window.move({ direction = "d" }))
+o.bind("SUPER + CTRL + K", "Move window up", hl.dsp.window.move({ direction = "u" }))
+o.bind("SUPER + CTRL + L", "Move window right", hl.dsp.window.move({ direction = "r" }))
 o.bind("SUPER + ALT + H", "Move window left", hl.dsp.window.move({ direction = "l" }))
 o.bind("SUPER + ALT + J", "Move window down", hl.dsp.window.move({ direction = "d" }))
 o.bind("SUPER + ALT + K", "Move window up", hl.dsp.window.move({ direction = "u" }))
@@ -144,4 +151,5 @@ o.bind("SUPER + SHIFT + Z", "Reset zoom", "hyprctl keyword cursor:zoom_factor 1"
 -- ==============================================================================
 -- System Maintenance
 -- ==============================================================================
+o.bind("SUPER + CTRL + C", "Clean memory", "uwsm-app -- clean-memory")
 o.bind("SUPER + ALT + C", "Clean memory", "uwsm-app -- clean-memory")
