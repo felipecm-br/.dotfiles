@@ -24,7 +24,6 @@ This document provides a comprehensive audit and definitive reference of all key
 | **`Ctrl + Shift + G`** | Global / Tmux | **AWT Worktree Manager Popup (`85% × 75%`)** | Inward chord: CapsLock (Pinky) + Shift + G | $140\text{ ms}$ |
 | **`Ctrl + Shift + T`** (`C-S-t`) | Global / Tmux | **Reopen Last Closed Window / Tab** | Inward chord: CapsLock (Pinky) + Shift + T (VSCode-style tab restore with file, command, path & session) | $140\text{ ms}$ |
 | **`Ctrl + Shift + I`** (`C-S-i`) | Global / Tmux | **AI Attention Triage Direct Focus Jump** | Inward chord: CapsLock (Pinky) + Shift + I (No Alt, MacBook-ergonomic) | $140\text{ ms}$ |
-| **`Alt + i`** (`M-i`) | Global / Tmux | **AI Attention Triage Jump (Meta fallback)** | Left Thumb (Alt) + Right Middle (I) | $130\text{ ms}$ |
 | **`Ctrl + \`` / `Ctrl + 1..9`** | Tmux | **Direct Window Select (Window 0: backtick, Windows 1 to 9)** | CapsLock (Pinky) + Number Key | $130\text{ ms}$ |
 | **`Ctrl + Shift + 0..9`** | Tmux | **Move & Shift Window to Slot 0..9** | Left Pinky + Left Ring + Number Key | $160\text{ ms}$ |
 
@@ -36,7 +35,7 @@ This document provides a comprehensive audit and definitive reference of all key
 
 | Prefix Shortcut | Target Action | Ergonomic Justification & Mnemonic |
 | :--- | :--- | :--- |
-| **`Prefix + s`** | **Window Picker (Matchmaker `75% × 60%`)** | `s` = **S**witch / **S**elect window. Centered Golden Ratio modal with live preview. Inside: `t` (nav) / `Ctrl+T` switches to Session Picker, `c` new window, `d` kill window. |
+| **`Prefix + s`** | **Window Picker (Waymaker `75% × 60%`)** | `s` = **S**witch / **S**elect window. Centered Golden Ratio modal with live preview. Inside: `t` (nav) / `Ctrl+T` switches to Session Picker, `n` (or `c`) creates a new window in the selected session/group, `d` kill window. |
 | **`Prefix + S`** | **Fullscreen Window Picker** | Shift+S opens maximized picker for large multi-monitor overviews. |
 | **`Prefix + f`** | **Vimium Window Hints (1-touch Jump)** | `f` = **F**ollow / **F**ind window. In-situ Home-Row hints (`a, s, d, f, j, k, l, ;, g, h`) overlaid directly on tabs ($T_R = 0\text{ ms}$). |
 | **`Prefix + t`** | **Sesh Workspace / Task Picker** | `t` = **T**ask / **T**eleport to project sessions. Inside: `Ctrl+S` (or `s` in nav) switches to Window Picker, `Tab` / `Shift+Tab` cycles sources (All $\rightarrow$ Tmux $\rightarrow$ Dirs), `Ctrl+D` (or `d` in nav) kills session. |
@@ -179,7 +178,6 @@ The table below consolidates the definitive keybindings across all layers, audit
 | **`Ctrl + G`** | Global / Shell | Open Lazygitrs Floating Popup | Inward roll: CapsLock (Pinky) + G (Index) | $130\text{ ms}$ | $H=0$. Immediate access to Git workspace without context switching. |
 | **`Ctrl + Shift + G`** | Global / Tmux | AWT Worktree Manager Popup | Inward chord: CapsLock (Pinky) + Shift + G | $140\text{ ms}$ | Direct access to worktrees; symmetric to `Ctrl+G`. |
 | **`Ctrl + Shift + I`** | Global / Tmux | AI Agent Triage Direct Focus Jump | Inward chord: CapsLock (Pinky) + Shift + I | $140\text{ ms}$ | Home Row, no-Alt, MacBook-ergonomic focus switch to next agent needing attention. |
-| **`Alt + i`** | Global / Tmux | AI Agent Triage (Meta Fallback) | Left Thumb (Alt) + Right Middle (I) | $130\text{ ms}$ | Zero-prefix focus switch when Meta/Alt is enabled. |
 | **`Prefix + s`** | Tmux Multiplexer | Window Picker (`75% × 60%`) | Left Pinky (CapsLock) + Thumb (Space) $\rightarrow$ `s` | $240\text{ ms}$ | Prefix guard protects against accidental modal popups during fast typing. |
 | **`Prefix + f`** | Tmux Multiplexer | Vimium Window Hints (1-touch Jump) | Inward roll: CapsLock + Space $\rightarrow$ `f` | $240\text{ ms}$ | Replaces legacy `find-window` with instant Home-Row hints ($H=0$). |
 | **`Prefix + t`** | Tmux Multiplexer | Sesh Workspace Picker | Left Pinky (CapsLock) + Thumb (Space) $\rightarrow$ `t` | $240\text{ ms}$ | `t` = Task/Teleport; mnemonic alignment with project workflows. |
