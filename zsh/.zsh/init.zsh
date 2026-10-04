@@ -22,7 +22,7 @@ source_packages \
 	git \
 	mise \
 	starship \
-	mm \
+	waymaker \
 	atuin \
 	yazi \
 	duf \
