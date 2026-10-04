@@ -1,0 +1,29 @@
+[Unit]
+Description=ACPD: Agent Client Protocol Daemon
+Documentation=https://github.com/felipecm-br/acpd
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=notify
+ExecStart=%h/.local/bin/acpd
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=on-failure
+RestartSec=5s
+
+# Security hardening
+NoNewPrivileges=yes
+# Resource limits
+LimitNOFILE=65536
+MemoryMax=512M
+
+# Runtime directory for PID file and sockets
+RuntimeDirectory=acpd
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=acpd
+
+[Install]
+WantedBy=default.target

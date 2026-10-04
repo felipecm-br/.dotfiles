@@ -66,7 +66,8 @@ install_packages \
     vhs \
     obs-studio \
     tailscale \
-    mosh
+    mosh \
+    acpd
 
 install_plugins \
     zsh-plugins \
