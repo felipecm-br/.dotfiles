@@ -10,10 +10,56 @@ unset _tmux_style
 # Collect all panes that require attention or have AI agent activity
 notifying_panes=()
 
-# 1. First, search for panes in active attention/question/permission/error state
-while IFS= read -r line; do
-  [ -n "$line" ] && notifying_panes+=("$line")
-done < <(tmux list-panes -a -F '#{pane_id} #{@ai_agent_state_raw}' 2>/dev/null | awk '$2 ~ /^(question|permission|error|awaiting_input)$/ {print $1}')
+# 0. Primary: Query acpd daemon RPC (http://127.0.0.1:4040/rpc) for real-time agent states
+acpd_token=""
+for token_path in "/run/user/$UID/acpd/token" "/run/user/$(id -u 2>/dev/null)/acpd/token" "/run/user/1001/acpd/token"; do
+  if [ -f "$token_path" ]; then
+    acpd_token=$(cat "$token_path" 2>/dev/null || true)
+    [ -n "$acpd_token" ] && break
+  fi
+done
+
+if [ -n "$acpd_token" ] && command -v curl >/dev/null 2>&1 && command -v jq >/dev/null 2>&1; then
+  acpd_res=$(curl -s -m 0.25 -X POST http://127.0.0.1:4040/rpc \
+    -H "Authorization: Bearer $acpd_token" \
+    -H "Content-Type: application/json" \
+    -d '{"jsonrpc":"2.0","method":"agentState/list","id":1}' 2>/dev/null || true)
+
+  if [ -n "$acpd_res" ]; then
+    # Urgent: permission, awaiting_input, question, error
+    while IFS= read -r p; do
+      if [[ -n "$p" && "$p" =~ ^%[0-9]+$ ]] && tmux display-message -t "$p" -p '#{pane_id}' >/dev/null 2>&1; then
+        notifying_panes+=("$p")
+      fi
+    done < <(echo "$acpd_res" | jq -r '
+      .result // {} | to_entries |
+      map(select(.value.state as $s | ["permission", "awaiting_input", "question", "error"] | index($s))) |
+      sort_by(-.value.last_timestamp) |
+      .[].key
+    ' 2>/dev/null || true)
+
+    # Active: working, busy (if no urgent panes found)
+    if [ "${#notifying_panes[@]}" -eq 0 ]; then
+      while IFS= read -r p; do
+        if [[ -n "$p" && "$p" =~ ^%[0-9]+$ ]] && tmux display-message -t "$p" -p '#{pane_id}' >/dev/null 2>&1; then
+          notifying_panes+=("$p")
+        fi
+      done < <(echo "$acpd_res" | jq -r '
+        .result // {} | to_entries |
+        map(select(.value.state as $s | ["working", "busy"] | index($s))) |
+        sort_by(-.value.last_timestamp) |
+        .[].key
+      ' 2>/dev/null || true)
+    fi
+  fi
+fi
+
+# 1. Native Tmux: search for panes in active attention/question/permission/error state
+if [ "${#notifying_panes[@]}" -eq 0 ]; then
+  while IFS= read -r line; do
+    [ -n "$line" ] && notifying_panes+=("$line")
+  done < <(tmux list-panes -a -F '#{pane_id} #{@ai_agent_state_raw}' 2>/dev/null | awk '$2 ~ /^(question|permission|error|awaiting_input)$/ {print $1}')
+fi
 
 # 2. Fallback to @ai_agent_last_bell if no state-filtered panes found
 if [ "${#notifying_panes[@]}" -eq 0 ]; then
@@ -122,7 +168,10 @@ tmux set-option -t "$POPUP_SESS" key-table popup 2>/dev/null || true
 ALERT_POPUP_COLOR=$(grep -E '^\s*yellow\s*=' "$HOME/.local/state/omarchy/current/theme/colors.toml" 2>/dev/null | sed -E 's/.*=\s*"([^"]+)".*/\1/')
 [ -z "$ALERT_POPUP_COLOR" ] && ALERT_POPUP_COLOR="${TMUX_POPUP_ALERT_BORDER_COLOR:-#f9e2af}"
 
-tmux display-popup \
+ISOLATOR="$HOME/.config/tmux/tmux-popup-isolate.sh"
+[ -x "$ISOLATOR" ] || ISOLATOR="$(command -v tmux-popup-isolate.sh 2>/dev/null || echo "$ISOLATOR")"
+
+exec "$ISOLATOR" \
   -S "fg=$ALERT_POPUP_COLOR" \
   -s "fg=${TMUX_POPUP_TEXT_COLOR:-default}" \
   -T " 󰮯 " \
@@ -130,4 +179,4 @@ tmux display-popup \
   -h "75%" \
   -b rounded \
   -E \
-  "tmux attach-session -t \"$POPUP_SESS:1\"; tmux unlink-window -t \"$POPUP_SESS:1\" >/dev/null 2>&1 || true"
+  -- "tmux attach-session -t \"$POPUP_SESS:1\"; tmux unlink-window -t \"$POPUP_SESS:1\" >/dev/null 2>&1 || true"

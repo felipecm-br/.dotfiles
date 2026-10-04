@@ -112,7 +112,7 @@ Whenever the system theme switches (`omarchy theme set <name>`), 100% of termina
 │        │  │   2·  zsh             │ M matchmaker/jump.toml      │  │        │
 │        │  │                       │                             │  │        │
 │        │  └───────────────────────┴─────────────────────────────┘  │        │
-│        │  [Enter] Switch  •  [t] Sessions  •  [/] Filter  •  [c] Create  •  [d] Kill  •  [Esc] Exit │        │
+│        │  [Enter] Switch  •  [t] Sessions  •  [/] Filter  •  [n] New  •  [d] Kill  •  [Esc] Exit │        │
 │        └───────────────────────────────────────────────────────────┘        │
 │                                                                             │
 └─────────────────────────────────────────────────────────────────────────────┘
