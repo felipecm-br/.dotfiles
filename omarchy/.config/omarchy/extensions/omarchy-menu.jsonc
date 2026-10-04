@@ -35,6 +35,21 @@
     "checked": "[[ \"$(omarchy-default-agent)\" == \"agy\" ]]",
     "action": "omarchy-default-agent agy"
   },
+  "apps.antigravity": {
+    "icon": "󱓞",
+    "label": "Antigravity",
+    "action": "omarchy-agent",
+    "aliases": ["antigravity", "agy", "agent", "ai"],
+    "description": "Launch Antigravity AI coding agent"
+  },
+  "apps.antigravity-ide": {
+    "icon": "󱓞",
+    "label": "Antigravity IDE",
+    "when": "omarchy-cmd-present antigravity-ide",
+    "action": "setsid uwsm-app -- /usr/bin/antigravity-ide",
+    "aliases": ["antigravity-ide", "ide", "editor"],
+    "description": "Launch Antigravity IDE"
+  },
   "apps.sessions": {
     "icon": "⚡",
     "label": "Session Picker",

@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Antigravity
+GenericName=AI Coding Agent
+Comment=Autonomous AI Coding Agent
+Exec=omarchy-agent
+Icon=antigravity
+Terminal=false
+Categories=Development;
+Keywords=ai;agent;antigravity;agy;google;coding;
