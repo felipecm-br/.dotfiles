@@ -4,13 +4,13 @@ Name=Default
 # Layout
 Default Layout=us
 # Default Input Method
-DefaultIM=keyboard-us-intl
+DefaultIM=keyboard-us
 
 [Groups/0/Items/0]
 # Name
-Name=keyboard-us-intl
+Name=keyboard-us
 # Layout
-Layout=
+# Layout=
 
 [GroupOrder]
 0=Default
