@@ -1,0 +1,41 @@
+general.import = [ "~/.local/state/omarchy/current/theme/alacritty.toml" ]
+
+[env]
+TERM = "xterm-256color"
+
+[font]
+normal = { family = "JetBrainsMono Nerd Font Propo" }
+bold = { family = "JetBrainsMono Nerd Font Propo" }
+italic = { family = "JetBrainsMono Nerd Font Propo" }
+size = 9
+
+[window]
+padding.x = 14
+padding.y = 14
+decorations = "None"
+
+[keyboard]
+bindings = [
+{ key = "Insert", mods = "Shift", action = "Paste" },
+{ key = "Insert", mods = "Control", action = "Copy" },
+  # Send Shift+Return as CSI-u so TUIs can distinguish it from Return without treating it as Alt+Return.
+  { key = "Return", mods = "Shift", chars = "\u001B[13;2u" },
+  # Legacy encoding sends Alt+Shift+Return the same as Alt+Return; send CSI-u so tmux can match M-S-Enter.
+  { key = "Return", mods = "Alt|Shift", chars = "\u001B[13;4u" },
+  # Send Alt+Backspace sequence for Ctrl+Backspace so Tmux/zsh deletes preceding word instead of C-h collision
+  { key = "Back", mods = "Control", chars = "\u001B\u007F" },
+  # Send CSI u sequences for Ctrl+grave and Ctrl+number (for tmux window switching)
+  { key = "Grave", mods = "Control", chars = "\u001B[96;5u" },
+  { key = "Key1", mods = "Control", chars = "\u001B[49;5u" },
+  { key = "Key2", mods = "Control", chars = "\u001B[50;5u" },
+  { key = "Key3", mods = "Control", chars = "\u001B[51;5u" },
+  { key = "Key4", mods = "Control", chars = "\u001B[52;5u" },
+  { key = "Key5", mods = "Control", chars = "\u001B[53;5u" },
+  { key = "Key6", mods = "Control", chars = "\u001B[54;5u" },
+  { key = "Key7", mods = "Control", chars = "\u001B[55;5u" },
+  { key = "Key8", mods = "Control", chars = "\u001B[56;5u" },
+  { key = "Key9", mods = "Control", chars = "\u001B[57;5u" }
+]
+
+[terminal]
+osc52 = "CopyPaste"
