@@ -3,7 +3,8 @@
 > **Repository:** `~/.dotfiles/main` (`fcmiranda/.dotfiles`)  
 > **Role:** Principal TUI UX Architect, Biomechanical Ergonomist & Low-Latency Systems Engineer  
 > **Date:** October 2026  
-> **Status:** Production Reference & Peer Review
+> **Status:** Production Reference & Peer Review  
+> **Notice (2026-10-06):** several citations, KLM figures and competitor statements in this report are corrected in [`workflow-flow-state-audit.md`](workflow-flow-state-audit.md) (see its §12 Errata). Prefer that document where the two disagree.
 
 ---
 
