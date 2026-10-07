@@ -42,8 +42,27 @@ C_NAME=$(_hex_esc "${_color_fg:-#d3c6aa}")
 C_BRANCH=$(_hex_esc "${_color_blue:-#7fbbb3}")
 C_MUTED=$(_hex_esc "${_color_muted:-#475258}")
 
-cur_session="${1:-${TMUX_ORIGIN_SESSION:-$(tmux display-message -p '#S' 2>/dev/null || echo "")}}"
-cur_window="${2:-${TMUX_ORIGIN_WINDOW:-$(tmux display-message -p '#I' 2>/dev/null || echo "")}}"
+filter_agents=0
+cur_session="${TMUX_ORIGIN_SESSION:-$(tmux display-message -p '#S' 2>/dev/null || echo "")}"
+cur_window="${TMUX_ORIGIN_WINDOW:-$(tmux display-message -p '#I' 2>/dev/null || echo "")}"
+
+for arg in "$@"; do
+  case "$arg" in
+    --agents|agents|-a)
+      filter_agents=1
+      ;;
+    --fleet|fleet)
+      filter_agents=0
+      ;;
+    *)
+      if [ -z "$cur_session" ]; then
+        cur_session="$arg"
+      elif [ -z "$cur_window" ]; then
+        cur_window="$arg"
+      fi
+      ;;
+  esac
+done
 
 # Query ACPD for timestamps
 token_file="${XDG_RUNTIME_DIR:-/run/user/$UID}/acpd/token"
@@ -174,7 +193,7 @@ tmux list-panes -a -F '#{session_name}|#{window_index}|#{window_name}|#{pane_id}
     is_agent=1
   fi
 
-  # Identify agent name
+  # Identify agent name or extract latest prompt
   agent_label=""
   if [ -n "$ai_title" ]; then
     agent_label="$ai_title"
@@ -182,6 +201,14 @@ tmux list-panes -a -F '#{session_name}|#{window_index}|#{window_name}|#{pane_id}
     agent_label="${detected_agent%-bin}"
   elif [[ "$pcmd" =~ ^(agy|antigravity|opencode|claude|codex)$ ]]; then
     agent_label="$pcmd"
+  fi
+
+  # If agent label is generic or empty, try extracting the user prompt from the pane
+  if [ -n "$pid" ] && { [ -z "$agent_label" ] || [[ "$agent_label" =~ ^(agy|antigravity|claude|opencode|codex|agent)$ ]]; }; then
+    captured_prompt=$(tmux capture-pane -p -t "$pid" -S -40 2>/dev/null | grep -E '^([>❯] |User:|Input:)' | tail -n 1 | sed -E 's/^[>❯[:space:]]+//; s/^(User:|Input:)[[:space:]]*//' | tr -s ' ' | head -c 50)
+    if [ -n "$captured_prompt" ]; then
+      agent_label="$captured_prompt"
+    fi
   fi
 
   # Truncate agent label for list display
@@ -229,94 +256,112 @@ done < "$tmp_raw"
 
 # Pass 2: Output sessions ordered by priority with group headers
 declare -A seen_windows=()
+agent_count=$(awk -F'\t' '$14 == 1 { c++ } END { print c+0 }' "$tmp_raw")
 
-for sess in $(for s in "${!sess_prio[@]}"; do printf "%d\t%s\t%s\n" "${sess_prio[$s]}" "${sess_ts[$s]}" "$s"; done | sort -t$'\t' -k1,1n -k2,2n -k3,3 | cut -f3); do
-  printf '#  %s\n' "$sess"
-
-  sort -t$'\t' -k1,1n -k4,4n "$tmp_raw" | while IFS=$'\t' read -r prio ts s idx wname pid ppath ico agent_label age_str branch is_cur st is_agent has_u u_ahead u_behind; do
-    [ "$s" != "$sess" ] && continue
-
-    # Deduplicate multiple panes in the same window (keep highest priority pane)
-    win_key="${sess}:${idx}"
-    if [ -n "${seen_windows["$win_key"]:-}" ]; then
+if [ "$filter_agents" -eq 1 ] && [ "$agent_count" -eq 0 ]; then
+  printf "· (no active AI agents)\t0\t-\t%s\t\t\t \033[2m(no AI agents running — press Tab for Fleet view)\033[0m\n" "${cur_session}"
+else
+  for sess in $(for s in "${!sess_prio[@]}"; do printf "%d\t%s\t%s\n" "${sess_prio[$s]}" "${sess_ts[$s]}" "$s"; done | sort -t$'\t' -k1,1n -k2,2n -k3,3 | cut -f3); do
+    if [ "$filter_agents" -eq 1 ] && [ -z "${session_has_agent["$sess"]:-}" ]; then
       continue
     fi
-    seen_windows["$win_key"]=1
 
-    [ "$agent_label" = "-" ] && agent_label=""
-    [ "$age_str" = "-" ] && age_str=""
-    [ "$branch" = "-" ] && branch=""
+    header_printed=0
 
-    # State icon formatted with color
-    case "$st" in
-      permission) c_ico="$C_PERM" ;;
-      question|awaiting_input) c_ico="$C_QUESTION" ;;
-      error) c_ico="$C_ERROR" ;;
-      busy|working) c_ico="$C_BUSY" ;;
-      idle) c_ico="$C_IDLE" ;;
-      *) c_ico="$C_NORMAL" ;;
-    esac
+    while IFS=$'\t' read -r prio ts s idx wname pid ppath ico agent_label age_str branch is_cur st is_agent has_u u_ahead u_behind; do
+      [ "$s" != "$sess" ] && continue
 
-    if [ "$is_agent" = "1" ]; then
-      ai_ico="${c_ico}${ico}${R} "
-    else
-      ai_ico="  "
-    fi
+      if [ "$filter_agents" -eq 1 ] && [ "$is_agent" -ne 1 ]; then
+        continue
+      fi
 
-    if [ "$is_cur" -eq 1 ]; then
-      cur_dot="${C_CUR}•${R}"
-      c_wname="${C_CUR}"
-    else
-      cur_dot="${C_MUTED}·${R}"
-      c_wname="${C_NAME}"
-    fi
+      # Deduplicate multiple panes in the same window (keep highest priority pane)
+      win_key="${sess}:${idx}"
+      if [ -n "${seen_windows["$win_key"]:-}" ]; then
+        continue
+      fi
+      seen_windows["$win_key"]=1
 
-    if [ "${#idx}" -eq 1 ]; then
-      idx_col="${C_MUTED}${idx}${R}${cur_dot}  "
-    else
-      idx_col="${C_MUTED}${idx}${R}${cur_dot} "
-    fi
+      if [ "$header_printed" -eq 0 ]; then
+        printf '#  %s\n' "$sess"
+        header_printed=1
+      fi
 
-    # Branch tag & remote sync status
-    branch_tag=""
-    sync_search=""
-    if [ -n "$branch" ]; then
-      branch_tag=" ${C_BRANCH}⎇ ${branch}${R}"
-      if [ "${has_u:-0}" -eq 1 ]; then
-        if [ "${u_ahead:-0}" -eq 0 ] && [ "${u_behind:-0}" -eq 0 ]; then
-          branch_tag+="${C_CYAN} 󰄬${R}"
-          sync_search="synced"
-        else
-          if [ "${u_ahead:-0}" -gt 0 ]; then
-            branch_tag+="${C_CYAN} 󰞕${u_ahead}${R}"
-            sync_search+=" ahead"
-          fi
-          if [ "${u_behind:-0}" -gt 0 ]; then
-            branch_tag+="${C_ERROR} 󰞒${u_behind}${R}"
-            sync_search+=" behind"
+      [ "$agent_label" = "-" ] && agent_label=""
+      [ "$age_str" = "-" ] && age_str=""
+      [ "$branch" = "-" ] && branch=""
+
+      # State icon formatted with color
+      case "$st" in
+        permission) c_ico="$C_PERM" ;;
+        question|awaiting_input) c_ico="$C_QUESTION" ;;
+        error) c_ico="$C_ERROR" ;;
+        busy|working) c_ico="$C_BUSY" ;;
+        idle) c_ico="$C_IDLE" ;;
+        *) c_ico="$C_NORMAL" ;;
+      esac
+
+      if [ "$is_agent" = "1" ]; then
+        ai_ico="${c_ico}${ico}${R} "
+      else
+        ai_ico="  "
+      fi
+
+      if [ "$is_cur" -eq 1 ]; then
+        cur_dot="${C_CUR}•${R}"
+        c_wname="${C_CUR}"
+      else
+        cur_dot="${C_MUTED}·${R}"
+        c_wname="${C_NAME}"
+      fi
+
+      if [ "${#idx}" -eq 1 ]; then
+        idx_col="${C_MUTED}${idx}${R}${cur_dot}  "
+      else
+        idx_col="${C_MUTED}${idx}${R}${cur_dot} "
+      fi
+
+      # Branch tag & remote sync status
+      branch_tag=""
+      sync_search=""
+      if [ -n "$branch" ]; then
+        branch_tag=" ${C_BRANCH}⎇ ${branch}${R}"
+        if [ "${has_u:-0}" -eq 1 ]; then
+          if [ "${u_ahead:-0}" -eq 0 ] && [ "${u_behind:-0}" -eq 0 ]; then
+            branch_tag+="${C_CYAN} 󰄬${R}"
+            sync_search="synced"
+          else
+            if [ "${u_ahead:-0}" -gt 0 ]; then
+              branch_tag+="${C_CYAN} 󰞕${u_ahead}${R}"
+              sync_search+=" ahead"
+            fi
+            if [ "${u_behind:-0}" -gt 0 ]; then
+              branch_tag+="${C_ERROR} 󰞒${u_behind}${R}"
+              sync_search+=" behind"
+            fi
           fi
         fi
       fi
-    fi
 
-    # Age tag
-    age_tag=""
-    if [ -n "$age_str" ]; then
-      age_tag=" ${C_MUTED}${age_str}${R}"
-    fi
+      # Age tag
+      age_tag=""
+      if [ -n "$age_str" ]; then
+        age_tag=" ${C_MUTED}${age_str}${R}"
+      fi
 
-    # Agent badge
-    agent_tag=""
-    if [ -n "$agent_label" ]; then
-      agent_tag=" ${c_ico}[${agent_label}]${R}"
-    fi
+      # Agent badge
+      agent_tag=""
+      if [ -n "$agent_label" ]; then
+        agent_tag=" ${c_ico}[${agent_label}]${R}"
+      fi
 
-    display_line=" ${ai_ico}${idx_col}${c_wname}${wname}${R}${agent_tag}${age_tag}${branch_tag}   "
-    search_title="${sess} ${idx} ${wname} ${agent_label} ${branch} ${st} ${age_str} ${sync_search}"
+      display_line=" ${ai_ico}${idx_col}${c_wname}${wname}${R}${agent_tag}${age_tag}${branch_tag}   "
+      search_title="${sess} ${idx} ${wname} ${agent_label} ${branch} ${st} ${age_str} ${sync_search}"
 
-    printf '%s\t%s\t%s\t%s\t%s\t%s\t%b\n' \
-      "$search_title" "$idx" "$wname" "$sess" "$pid" "$ppath" "$display_line"
+      printf '%s\t%s\t%s\t%s\t%s\t%s\t%b\n' \
+        "$search_title" "$idx" "$wname" "$sess" "$pid" "$ppath" "$display_line"
+    done < <(sort -t$'\t' -k1,1n -k4,4n "$tmp_raw")
   done
-done
+fi
 
 rm -f "$tmp_raw"

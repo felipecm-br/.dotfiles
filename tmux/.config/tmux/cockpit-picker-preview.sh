@@ -238,6 +238,18 @@ _box_line "${BOLD}󰈈 Status:${R} ${status_badge}"
 if [ -n "$agent_name" ]; then
   _box_line "${BOLD}󰑮 Agent:${R}  ${C_YELLOW}${agent_name}${R}"
 fi
+
+# Extract active task prompt if running/working or interactive
+captured_task=$(tmux capture-pane -p -t "$pane_id" -S -60 2>/dev/null | grep -E '^([>❯] |User:|Input:)' | tail -n 1 | sed -E 's/^[>❯[:space:]]+//; s/^(User:|Input:)[[:space:]]*//' | tr -s ' ' | head -c 80)
+if [ -n "$captured_task" ]; then
+  clean_task="$captured_task"
+  max_tk=$(( W - 14 ))
+  if (( ${#clean_task} > max_tk && max_tk > 5 )); then
+    clean_task="${clean_task:0:$(( max_tk - 1 ))}…"
+  fi
+  _box_line "${BOLD}󰞋 Task:${R}   ${C_FG}${clean_task}${R}"
+fi
+
 if [ "$is_git" -eq 1 ]; then
   sync_str=""
   [ -n "$upstream_div" ] && sync_str="  ${upstream_div}"
@@ -253,6 +265,59 @@ if [ "$is_git" -eq 1 ]; then
   fi
 
   _box_line "${BOLD}󰊢 Branch:${R} ${C_BLUE}${clean_branch}${R}${sync_str}${churn_part}"
+
+  # GitHub PR & CI status checks (cached 60s, non-blocking background refresh)
+  if command -v gh >/dev/null 2>&1 && [ "$branch" != "non-git" ] && [ "$branch" != "detached" ]; then
+    hash_key=$(printf '%s:%s' "$ppath" "$branch" | md5sum | awk '{print $1}')
+    cache_file="/tmp/gh-pr-cache-${hash_key}.json"
+    now_s=$(date +%s)
+    cache_age=9999
+    if [ -f "$cache_file" ]; then
+      cache_mtime=$(stat -c %Y "$cache_file" 2>/dev/null || echo 0)
+      cache_age=$(( now_s - cache_mtime ))
+    fi
+
+    if [ "$cache_age" -gt 60 ]; then
+      (
+        cd "$ppath" 2>/dev/null || exit 0
+        gh pr view --json number,title,state,statusCheckRollup > "${cache_file}.tmp" 2>/dev/null \
+          && mv "${cache_file}.tmp" "$cache_file"
+      ) &
+    fi
+
+    if [ -s "$cache_file" ]; then
+      pr_num=$(jq -r '.number // empty' "$cache_file" 2>/dev/null || true)
+      if [ -n "$pr_num" ]; then
+        pr_title=$(jq -r '.title // ""' "$cache_file" 2>/dev/null || true)
+        ci_status=$(jq -r '
+          if .statusCheckRollup == null or (.statusCheckRollup | length) == 0 then
+            "none"
+          elif ([.statusCheckRollup[] | select(.conclusion == "FAILURE" or .conclusion == "TIMED_OUT")] | length) > 0 then
+            "failure"
+          elif ([.statusCheckRollup[] | select(.status == "IN_PROGRESS" or .status == "QUEUED" or .conclusion == null)] | length) > 0 then
+            "pending"
+          elif ([.statusCheckRollup[] | select(.conclusion == "SUCCESS")] | length) > 0 then
+            "success"
+          else
+            "none"
+          end' "$cache_file" 2>/dev/null || echo "none")
+
+        ci_badge=""
+        case "$ci_status" in
+          success) ci_badge="${C_CYAN}󰄬 CI Passing${R}" ;;
+          failure) ci_badge="${C_RED}󰅚 CI Failing${R}" ;;
+          pending) ci_badge="${C_YELLOW}@SPIN@ CI Pending${R}" ;;
+        esac
+
+        clean_pr_title="$pr_title"
+        max_pr=$(( W - 18 - ${#ci_status} ))
+        if (( ${#clean_pr_title} > max_pr && max_pr > 5 )); then
+          clean_pr_title="${clean_pr_title:0:$(( max_pr - 1 ))}…"
+        fi
+        _box_line "${BOLD}󰏫 PR #${pr_num}:${R}  ${C_FG}${clean_pr_title}${R}${ci_badge:+  ${ci_badge}}"
+      fi
+    fi
+  fi
 
   clean_commit="$commit"
   max_c=$(( W - 14 ))

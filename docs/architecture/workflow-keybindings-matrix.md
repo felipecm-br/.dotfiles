@@ -35,7 +35,7 @@ This document provides a comprehensive audit and definitive reference of all key
 
 | Prefix Shortcut | Target Action | Ergonomic Justification & Mnemonic |
 | :--- | :--- | :--- |
-| **`Prefix + Space`** | **AI Fleet Cockpit & Window Manager (`85% × 75%`)** | Space = Instant zero-reach thumb roll ($H=0$). Central unified triage cockpit for windows, AI agents, and Git context. Inside: `s` switches to Session Picker, `t` / `c` creates new window, `d` kills window, `g` / `Ctrl+G` opens Lazygitrs, `y` / `n` responds to agent permissions. |
+| **`Prefix + Space`** | **AI Fleet Cockpit & Window Manager (`85% × 75%`)** | Space = Instant zero-reach thumb roll ($H=0$). Central unified triage cockpit for windows, AI agents, and Git context. Inside: `Tab` cycles between Fleet View (all windows) and Agent Triage (agents only), `s` switches to Session Picker, `S` ships worktree (`awt ship`), `t` / `c` creates new window, `d` kills window (or session/worktree on header), `g` / `Ctrl+G` opens Lazygitrs, `y` / `n` responds to agent permissions. |
 | **`Prefix + f`** | **Vimium Window Hints (1-touch Jump)** | `f` = **F**ollow / **F**ind window. In-situ Home-Row hints (`a, s, d, f, j, k, l, ;, g, h`) overlaid directly on tabs ($T_R = 0\text{ ms}$). |
 | **`Prefix + t`** | **Sesh Workspace / Task Picker** | `t` = **T**ask / **T**eleport to project sessions. Inside: `c` (or `w` / `s` / `Ctrl+S`) switches to Cockpit, `Tab` / `Shift+Tab` cycles sources (All $\rightarrow$ Tmux $\rightarrow$ Dirs), `d` (or `Ctrl+D`) kills session. |
 | **`Prefix + T`** | **Reopen Last Closed Window / Tab** | Shift+T mnemonic: uppercase of sesh `t`, aligned with browser/IDE tab restore with file, command, path & session. |

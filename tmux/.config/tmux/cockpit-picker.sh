@@ -64,7 +64,7 @@ MM_BIN="$HOME/.local/bin/wm"
 
 chosen=$(printf '%s\n' "$ITEMS" | "$MM_BIN" \
   -o "$SCRIPT_DIR/cockpit-picker.toml" \
-  "start.cmd=$ITEMS_SCRIPT $ORIG_SESS $ORIG_WIN" \
+  "start.cmd=$ITEMS_SCRIPT" \
   results.spinner="$TMUX_SPINNER_NAME" \
   --pos "$START_IDX" \
   --color "spinner:$TMUX_SPINNER_COLOR" \
@@ -78,6 +78,44 @@ case "$chosen" in
     if [ -n "$new_target" ]; then
       tmux switch-client -t "$new_target" 2>/dev/null || true
     fi
+    ;;
+  __SHIP_WORKTREE__*)
+    raw_item="${chosen#__SHIP_WORKTREE__}"
+    first_line=$(printf '%s' "$raw_item" | head -n1)
+    target_path=""
+
+    row_path=$(printf '%s' "$first_line" | cut -f6)
+    if [ -n "$row_path" ] && [ -d "$row_path" ]; then
+      target_path="$row_path"
+    fi
+
+    if [ -z "$target_path" ]; then
+      sess=$(printf '%s' "$first_line" | cut -f4)
+      if [ -z "$sess" ] || [ "$sess" = "$first_line" ]; then
+        sess=$(printf '%s' "$first_line" | sed -E 's/^#[[:space:]]*//')
+      fi
+      if [ -n "$sess" ]; then
+        target_path=$(tmux display-message -t "${sess}:" -p '#{pane_current_path}' 2>/dev/null || true)
+      fi
+    fi
+
+    if [ -z "$target_path" ] || [ ! -d "$target_path" ]; then
+      target_path="${TMUX_ORIGIN_SESSION:+$(tmux display-message -t "${TMUX_ORIGIN_SESSION}:" -p '#{pane_current_path}' 2>/dev/null || true)}"
+    fi
+    [ -z "$target_path" ] && target_path="$PWD"
+
+    if ! git -C "$target_path" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+      tmux display-message "Not in a git repository: $target_path"
+      exit 0
+    fi
+
+    branch=$(git -C "$target_path" rev-parse --abbrev-ref HEAD 2>/dev/null || echo "")
+    if [ -z "$branch" ] || [ "$branch" = "main" ] || [ "$branch" = "master" ] || [ "$branch" = "HEAD" ]; then
+      tmux display-message "Cannot ship default branch '$branch' (not a feature worktree)"
+      exit 0
+    fi
+
+    exec tmux display-popup -b rounded -w 85% -h 75% -d "$target_path" -E "awt ship '$branch'"
     ;;
   __LAZYGIT__*)
     raw_item="${chosen#__LAZYGIT__}"
@@ -139,9 +177,12 @@ case "$chosen" in
     ;;
   *)
     if [ -n "$chosen" ]; then
+      case "$chosen" in
+        *"no active AI agents"*) exit 0 ;;
+      esac
       session=$(printf '%s' "$chosen" | head -n1 | cut -f4)
       idx=$(printf '%s' "$chosen" | head -n1 | cut -f2)
-      if [ -n "$session" ] && [ -n "$idx" ]; then
+      if [ -n "$session" ] && [ -n "$idx" ] && [ "$idx" != "-" ]; then
         tmux switch-client -t "${session}:${idx}" 2>/dev/null || true
       fi
     fi

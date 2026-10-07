@@ -12,7 +12,7 @@ emit_tmux() {
 󰅍  Prefix + y	Scrollback Picker (Tokens, Links & Yank)	tmux	tmux-scrollback	~/.config/tmux/scrollback-picker.sh
 󰍉  Prefix + /	Workspace Ripgrep Live Search	tmux	tmux-grep	~/.config/tmux/grep-picker.sh
 󰓩  Prefix + t	Session Workspace / Task Picker	tmux	tmux-sesh	~/.config/tmux/session-picker.sh
-󰆍  Prefix + Space	AI Fleet Cockpit & Window Manager	tmux	tmux-cockpit	~/.config/tmux/cockpit-picker.sh
+󱂬  Prefix + Space	AI Fleet Cockpit & Window Manager	tmux	tmux-cockpit	~/.config/tmux/cockpit-picker.sh
 󰌌  Prefix + f	Vimium Window Hints (1-touch Jump)	tmux	tmux-hints	tmux switch-client -T window_hints
 󰌌  Ctrl + `	Direct Jump to Window 0 (Zero-Prefix)	tmux	tmux-select-0	tmux select-window -t 0
 󰌌  Ctrl + 1 .. 9	Direct Jump to Window 1 .. 9 (Zero-Prefix)	tmux	tmux-select-win	tmux select-window -t 1

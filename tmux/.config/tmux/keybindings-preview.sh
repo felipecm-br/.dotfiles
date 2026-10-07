@@ -103,17 +103,19 @@ EOF
 
   tmux-cockpit)
     cat <<'EOF'
-### 󰆍 AI Fleet Cockpit & Window Manager (`Prefix + Space`)
+### 󱂬 AI Fleet Cockpit & Window Manager (`Prefix + Space`)
 Unified triage cockpit, window manager, and autonomous agent fleet overview powered by Matchmaker.
 
 - **Ergonomics**: `Prefix + Space` = Zero-reach thumb roll ($H=0$).
 - **Controls**:
   - `Enter`: Instant jump to selected window / agent session.
+  - `Tab`: Cycle between Fleet View (all windows) and Agent Triage (agents only).
   - `s`: Flip to Session Picker (`Prefix + t`).
+  - `S`: Ship worktree with `awt ship` (pre-merge lint, rebase & push).
   - `t` / `c`: Create new window in selected session context.
-  - `d`: Close / terminate selected window.
-  - `g` / `Ctrl+G`: Contextual Lazygitrs bridge in window working directory.
-  - `y` / `n`: Quick-respond to agent permission prompts (OpenCode).
+  - `d`: Terminate selected window (or worktree/session if on session header).
+  - `g` / `Ctrl+G`: Contextual Lazygitrs bridge with Dual-Diff.
+  - `y` / `n`: Quick-respond to agent permission prompts (OpenCode / Antigravity).
   - `/`: Fuzzy filter / search query.
 EOF
     ;;

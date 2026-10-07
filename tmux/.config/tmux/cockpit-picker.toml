@@ -5,6 +5,13 @@ ansi = true
 [matcher.sort]
 threshold = false
 
+[start.command]
+command = "$HOME/.config/tmux/cockpit-picker-items.sh"
+additional = [
+    "$HOME/.config/tmux/cockpit-picker-items.sh",
+    "$HOME/.config/tmux/cockpit-picker-items.sh --agents",
+]
+
 [columns]
 split = '\t'
 max = 8
@@ -53,7 +60,7 @@ prompt = " "
 show = true
 
 [footer]
-content = " {cyan,bold:[Enter]} {darkgray:Jump}  •  {yellow,bold:[s]} {darkgray:Sessions}  •  {green,bold:[t]} {darkgray:New}  •  {magenta,bold:[g]} {darkgray:Git}  •  {blue,bold:[/]} {darkgray:Filter}  •  {yellow,bold:[y]} {darkgray:Approve}  •  {magenta,bold:[n]} {darkgray:Deny}  •  {red,bold:[d]} {darkgray:Kill}  •  {blue,bold:[Esc]} {darkgray:Exit}  •  {blue,bold:[?]} {darkgray:Help}"
+content = " {cyan,bold:[Enter]} {darkgray:Jump}  •  {yellow,bold:[Tab]} {darkgray:Fleet/Agents}  •  {yellow,bold:[s]} {darkgray:Sessions}  •  {cyan,bold:[S]} {darkgray:Ship}  •  {green,bold:[t]} {darkgray:New}  •  {magenta,bold:[g]} {darkgray:Git}  •  {blue,bold:[/]} {darkgray:Filter}  •  {yellow,bold:[y]} {darkgray:Approve}  •  {magenta,bold:[n]} {darkgray:Deny}  •  {red,bold:[d]} {darkgray:Kill}  •  {blue,bold:[Esc]} {darkgray:Exit}"
 row_connection = "Full"
 match_indent = false
 separator = "light"
@@ -66,9 +73,13 @@ color = "black"
 hints = false
 
 [ui.nav.binds]
-"/"      = "FocusFilter"
-"s"      = ["Print(__SWITCH_SESSION__)", "Quit"]
-"S"      = ["Print(__SWITCH_SESSION__)", "Quit"]
+"tab"           = "@reloadnext"
+"shift-tab"     = "@reloadprev"
+"backtab"       = "@reloadprev"
+"shift-backtab" = "@reloadprev"
+"/"             = "FocusFilter"
+"s"             = ["Print(__SWITCH_SESSION__)", "Quit"]
+"S"             = ["Print(__SHIP_WORKTREE__{=})", "Quit"]
 "t"      = ["Print(__CREATE_WINDOW__{=})", "Quit"]
 "T"      = ["Print(__CREATE_WINDOW__{=})", "Quit"]
 "c"      = ["Print(__CREATE_WINDOW__{=})", "Quit"]
@@ -111,6 +122,10 @@ scroll.tail = false
 
 [binds]
 Start    = ["ToggleColumn(title)", "ToggleColumn(name)", "ToggleColumn(session)", "ToggleColumn(idx)", "ToggleColumn(pid)", "ToggleColumn(path)"]
+"tab"           = "@reloadnext"
+"shift-tab"     = "@reloadprev"
+"backtab"       = "@reloadprev"
+"shift-backtab" = "@reloadprev"
 "ctrl-s" = ["Print(__SWITCH_SESSION__)", "Quit"]
 "ctrl-g" = ["Print(__LAZYGIT__{=})", "Quit"]
 "ctrl-t" = ["Print(__CREATE_WINDOW__{=})", "Quit"]
