@@ -73,9 +73,10 @@ hints = false
 "T"      = ["Print(__CREATE_WINDOW__{=})", "Quit"]
 "c"      = ["Print(__CREATE_WINDOW__{=})", "Quit"]
 "C"      = ["Print(__CREATE_WINDOW__{=})", "Quit"]
-"g"      = ["Print(__LAZYGIT__{=path})", "Quit"]
-"G"      = ["Print(__LAZYGIT__{=path})", "Quit"]
-"ctrl-g" = ["Print(__LAZYGIT__{=path})", "Quit"]
+"g"      = ["Print(__LAZYGIT__{=})", "Quit"]
+"gg"     = ["Print(__LAZYGIT__{=})", "Quit"]
+"G"      = ["Print(__LAZYGIT__{=})", "Quit"]
+"ctrl-g" = ["Print(__LAZYGIT__{=})", "Quit"]
 "y"      = ["ExecuteAsync(tmux send-keys -t '{=pid}' 'y' Enter)", "Reload($HOME/.config/tmux/cockpit-picker-items.sh)"]
 "Y"      = ["ExecuteAsync(tmux send-keys -t '{=pid}' 'y' Enter)", "Reload($HOME/.config/tmux/cockpit-picker-items.sh)"]
 "n"      = ["ExecuteAsync(tmux send-keys -t '{=pid}' 'n' Enter)", "Reload($HOME/.config/tmux/cockpit-picker-items.sh)"]
@@ -111,7 +112,7 @@ scroll.tail = false
 [binds]
 Start    = ["ToggleColumn(title)", "ToggleColumn(name)", "ToggleColumn(session)", "ToggleColumn(idx)", "ToggleColumn(pid)", "ToggleColumn(path)"]
 "ctrl-s" = ["Print(__SWITCH_SESSION__)", "Quit"]
-"ctrl-g" = ["Print(__LAZYGIT__{=path})", "Quit"]
+"ctrl-g" = ["Print(__LAZYGIT__{=})", "Quit"]
 "ctrl-t" = ["Print(__CREATE_WINDOW__{=})", "Quit"]
 "ctrl-r" = "Reload($HOME/.config/tmux/cockpit-picker-items.sh)"
 "?"      = "ToggleFooter"

@@ -80,15 +80,38 @@ case "$chosen" in
     fi
     ;;
   __LAZYGIT__*)
-    target_path="${chosen#__LAZYGIT__}"
-    if [ -z "$target_path" ] || [ ! -d "$target_path" ]; then
-      header_sess=$(printf '%s' "$target_path" | sed -E 's/^#[[:space:]]*//')
-      if [ -n "$header_sess" ]; then
-        target_path=$(tmux display-message -t "${header_sess}:" -p '#{pane_current_path}' 2>/dev/null || true)
+    raw_item="${chosen#__LAZYGIT__}"
+    first_line=$(printf '%s' "$raw_item" | head -n1)
+    target_path=""
+
+    # 1. If on window row: column 6 is pane current path
+    row_path=$(printf '%s' "$first_line" | cut -f6)
+    if [ -n "$row_path" ] && [ -d "$row_path" ]; then
+      target_path="$row_path"
+    fi
+
+    # 2. If on session header '#  <sess>' or session column 4: resolve session cwd
+    if [ -z "$target_path" ]; then
+      sess=$(printf '%s' "$first_line" | cut -f4)
+      if [ -z "$sess" ] || [ "$sess" = "$first_line" ]; then
+        sess=$(printf '%s' "$first_line" | sed -E 's/^#[[:space:]]*//')
       fi
+      if [ -n "$sess" ]; then
+        target_path=$(tmux display-message -t "${sess}:" -p '#{pane_current_path}' 2>/dev/null || true)
+      fi
+    fi
+
+    # 3. Fallback to origin session cwd or current directory
+    if [ -z "$target_path" ] || [ ! -d "$target_path" ]; then
+      target_path="${TMUX_ORIGIN_SESSION:+$(tmux display-message -t "${TMUX_ORIGIN_SESSION}:" -p '#{pane_current_path}' 2>/dev/null || true)}"
     fi
     if [ -z "$target_path" ] || [ ! -d "$target_path" ]; then
       target_path="$PWD"
+    fi
+
+    if ! git -C "$target_path" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+      tmux display-message "Not in a git repository: $target_path"
+      exit 0
     fi
 
     LZG_BIN="$HOME/.local/bin/lazygitrs"
@@ -96,10 +119,8 @@ case "$chosen" in
     [ -x "$LZG_BIN" ] || LZG_BIN="$(command -v lazygitrs 2>/dev/null || echo "lazygitrs")"
 
     open_commits=0
-    if git -C "$target_path" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
-      if [ -z "$(git -C "$target_path" status --porcelain 2>/dev/null)" ]; then
-        open_commits=1
-      fi
+    if [ -z "$(git -C "$target_path" status --porcelain 2>/dev/null)" ]; then
+      open_commits=1
     fi
 
     cd "$target_path" || true
