@@ -44,11 +44,11 @@ chosen=$("$MM_BIN" \
   -o "$SCRIPT_DIR/session-picker.toml" \
   --color "${TMUX_COLOR_SPEC:-}")
 
-if [ "$chosen" = "__SWITCH_WINDOW__" ]; then
+if [ "$chosen" = "__SWITCH_WINDOW__" ] || [ "$chosen" = "__SWITCH_COCKPIT__" ]; then
   if [ "$1" = "--fullscreen" ]; then
-    exec "$SCRIPT_DIR/window-picker.sh" --fullscreen
+    exec "$SCRIPT_DIR/cockpit-picker.sh" --fullscreen
   else
-    exec "$SCRIPT_DIR/window-picker.sh"
+    exec "$SCRIPT_DIR/cockpit-picker.sh"
   fi
 elif [ -n "$chosen" ]; then
   "$MM_BIN" connect "$chosen"

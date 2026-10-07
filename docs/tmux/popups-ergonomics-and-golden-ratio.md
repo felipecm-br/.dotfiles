@@ -81,7 +81,7 @@ Whenever the system theme switches (`omarchy theme set <name>`), 100% of termina
 
 | Layer | Tool / Script | Omarchy Dynamic Key | Fallback Hex | Badge (`-T`) | Dimensions | Dismissal |
 | :--- | :--- | :--- | :--- | :---: | :---: | :--- |
-| **1. Ephemeral** | [`window-picker.sh`](../../tmux/.config/tmux/window-picker.sh) | `magenta` / `accent` | `#cba6f7` | ` 󱂬 ` | `75% × 60%` | `Esc` (1 tap) |
+| **1. Ephemeral** | [`cockpit-picker.sh`](../../tmux/.config/tmux/cockpit-picker.sh) | `magenta` / `accent` | `#cba6f7` | ` 󰆍 ` | `85% × 75%` | `Esc` (1 tap) |
 | **1. Ephemeral** | [`session-picker.sh`](../../tmux/.config/tmux/session-picker.sh) | `cyan` / `blue` | `#89dceb` | ` ⚡ ` | `75% × 60%` | `Esc` (1 tap) |
 | **1. Ephemeral** | [`scrollback-picker.sh`](../../tmux/.config/tmux/scrollback-picker.sh) (`scrollback-picker.toml`) | `green` | `#a6e3a1` | ` 󰅍 ` | `75% × 60%` | `Esc` (1 tap) |
 | **1. Ephemeral** | [`workspace-picker.sh`](../../tmux/.config/tmux/workspace-picker.sh) (`workspace.toml`) | `blue` / `cyan` | `#89b4fa` | ` 󰈞 󰄧 󰋩 ` | `75% × 60%` / `95% × 90%` | `Esc` (1 tap) |
@@ -177,6 +177,8 @@ To prevent accidental dismissal while inspecting a diff or composing a commit me
 ---
 
 ## 🔗 Related Repository Files
+* [`tmux/.config/tmux/cockpit-picker.sh`](../../tmux/.config/tmux/cockpit-picker.sh): AI Fleet Cockpit & Window Manager with `󰆍` badge.
+* [`tmux/.config/tmux/cockpit-picker.toml`](../../tmux/.config/tmux/cockpit-picker.toml): Matchmaker preset with contextual agent triage, Lazygitrs bridge, and window management.
 * [`tmux/.config/tmux/window-picker.sh`](../../tmux/.config/tmux/window-picker.sh): Golden ratio window picker with `󱂬` badge.
 * [`tmux/.config/tmux/window-picker.toml`](../../tmux/.config/tmux/window-picker.toml): Matchmaker preset with dynamic group header and row styling.
 * [`tmux/.config/tmux/window-picker-items.sh`](../../tmux/.config/tmux/window-picker-items.sh): Session and window item generator with ANSI color mapping.

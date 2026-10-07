@@ -35,10 +35,9 @@ This document provides a comprehensive audit and definitive reference of all key
 
 | Prefix Shortcut | Target Action | Ergonomic Justification & Mnemonic |
 | :--- | :--- | :--- |
-| **`Prefix + s`** | **Window Picker (Waymaker `75% × 60%`)** | `s` = **S**witch / **S**elect window. Centered Golden Ratio modal with live preview. Inside: `t` (nav) / `Ctrl+T` switches to Session Picker, `n` (or `c`) creates a new window in the selected session/group, `d` kill window. |
-| **`Prefix + S`** | **Fullscreen Window Picker** | Shift+S opens maximized picker for large multi-monitor overviews. |
+| **`Prefix + Space`** | **AI Fleet Cockpit & Window Manager (`85% × 75%`)** | Space = Instant zero-reach thumb roll ($H=0$). Central unified triage cockpit for windows, AI agents, and Git context. Inside: `s` switches to Session Picker, `t` / `c` creates new window, `d` kills window, `g` / `Ctrl+G` opens Lazygitrs, `y` / `n` responds to agent permissions. |
 | **`Prefix + f`** | **Vimium Window Hints (1-touch Jump)** | `f` = **F**ollow / **F**ind window. In-situ Home-Row hints (`a, s, d, f, j, k, l, ;, g, h`) overlaid directly on tabs ($T_R = 0\text{ ms}$). |
-| **`Prefix + t`** | **Sesh Workspace / Task Picker** | `t` = **T**ask / **T**eleport to project sessions. Inside: `Ctrl+S` (or `s` in nav) switches to Window Picker, `Tab` / `Shift+Tab` cycles sources (All $\rightarrow$ Tmux $\rightarrow$ Dirs), `Ctrl+D` (or `d` in nav) kills session. |
+| **`Prefix + t`** | **Sesh Workspace / Task Picker** | `t` = **T**ask / **T**eleport to project sessions. Inside: `Space` (or `Ctrl+Space` / `s`) switches to Cockpit, `Tab` / `Shift+Tab` cycles sources (All $\rightarrow$ Tmux $\rightarrow$ Dirs), `d` (or `Ctrl+D`) kills session. |
 | **`Prefix + T`** | **Reopen Last Closed Window / Tab** | Shift+T mnemonic: uppercase of sesh `t`, aligned with browser/IDE tab restore with file, command, path & session. |
 | **`Prefix + u`** | **Undo Close Tab (`reopen-window.sh`)** | `u` = **U**ndo close tab. Aligned with Matchmaker file manager undo muscle memory. |
 | **`Prefix + i`** | **AI Agent Bell / Alert HUD** | `i` = **I**ntelligence / **I**nspect agent turn or question. Cycles pending alerts via floating modal popup HUD (`80% × 75%`). Focuses split pane if in current window; opens floating modal for any other window or session so `Esc` (or `Prefix + i`) instantly dismisses and restores origin. |
@@ -178,7 +177,7 @@ The table below consolidates the definitive keybindings across all layers, audit
 | **`Ctrl + G`** | Global / Shell | Open Lazygitrs Floating Popup | Inward roll: CapsLock (Pinky) + G (Index) | $130\text{ ms}$ | $H=0$. Immediate access to Git workspace without context switching. |
 | **`Ctrl + Shift + G`** | Global / Tmux | AWT Worktree Manager Popup | Inward chord: CapsLock (Pinky) + Shift + G | $140\text{ ms}$ | Direct access to worktrees; symmetric to `Ctrl+G`. |
 | **`Ctrl + Shift + I`** | Global / Tmux | AI Agent Triage Direct Focus Jump | Inward chord: CapsLock (Pinky) + Shift + I | $140\text{ ms}$ | Home Row, no-Alt, MacBook-ergonomic focus switch to next agent needing attention. |
-| **`Prefix + s`** | Tmux Multiplexer | Window Picker (`75% × 60%`) | Left Pinky (CapsLock) + Thumb (Space) $\rightarrow$ `s` | $240\text{ ms}$ | Prefix guard protects against accidental modal popups during fast typing. |
+| **`Prefix + Space`** | Tmux Multiplexer | AI Fleet Cockpit & Window Manager (`85% × 75%`) | Left Pinky (CapsLock) + Thumb (Space) $\rightarrow$ Space | $200\text{ ms}$ | Immediate double-thumb roll on Spacebar ($H=0$). Central hub for windows, AI agents, and Git. |
 | **`Prefix + f`** | Tmux Multiplexer | Vimium Window Hints (1-touch Jump) | Inward roll: CapsLock + Space $\rightarrow$ `f` | $240\text{ ms}$ | Replaces legacy `find-window` with instant Home-Row hints ($H=0$). |
 | **`Prefix + t`** | Tmux Multiplexer | Sesh Workspace Picker | Left Pinky (CapsLock) + Thumb (Space) $\rightarrow$ `t` | $240\text{ ms}$ | `t` = Task/Teleport; mnemonic alignment with project workflows. |
 | **`Prefix + i`** | Tmux Multiplexer | AI Agent Bell / Alert HUD | Left Pinky (CapsLock) + Thumb (Space) $\rightarrow$ `i` | $240\text{ ms}$ | `i` = Intelligence; cycles pending questions/permissions in universal floating popup modal (`Esc` returns to origin). Focuses split pane if in current window. |

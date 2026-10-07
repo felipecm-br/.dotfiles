@@ -101,6 +101,23 @@ Instant teleportation between project workspaces, git worktrees, and tmux sessio
 EOF
     ;;
 
+  tmux-cockpit)
+    cat <<'EOF'
+### 󰆍 AI Fleet Cockpit & Window Manager (`Prefix + Space`)
+Unified triage cockpit, window manager, and autonomous agent fleet overview powered by Matchmaker.
+
+- **Ergonomics**: `Prefix + Space` = Zero-reach thumb roll ($H=0$).
+- **Controls**:
+  - `Enter`: Instant jump to selected window / agent session.
+  - `s`: Flip to Session Picker (`Prefix + t`).
+  - `t` / `c`: Create new window in selected session context.
+  - `d`: Close / terminate selected window.
+  - `g` / `Ctrl+G`: Contextual Lazygitrs bridge in window working directory.
+  - `y` / `n`: Quick-respond to agent permission prompts (OpenCode).
+  - `/`: Fuzzy filter / search query.
+EOF
+    ;;
+
   tmux-window|tmux-window-fullscreen)
     cat <<'EOF'
 ### 󱂬 Window & Session Tree Picker (`75% × 60%` or `Fullscreen`)
