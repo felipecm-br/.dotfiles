@@ -71,20 +71,53 @@ chosen=$(printf '%s\n' "$ITEMS" | "$MM_BIN" \
   --color "$TMUX_COLOR_SPEC" \
   --group-prefix '#')
 
-if [ "$chosen" = "__SWITCH_SESSION__" ]; then
-  if [ "$1" = "--fullscreen" ]; then
-    exec "$SCRIPT_DIR/session-picker.sh" --fullscreen
-  else
-    exec "$SCRIPT_DIR/session-picker.sh"
-  fi
-fi
+case "$chosen" in
+  __LAZYGIT__*)
+    target_path="${chosen#__LAZYGIT__}"
+    if [ -z "$target_path" ] || [ ! -d "$target_path" ]; then
+      header_sess=$(printf '%s' "$target_path" | sed -E 's/^#[[:space:]]*//')
+      if [ -n "$header_sess" ]; then
+        target_path=$(tmux display-message -t "${header_sess}:" -p '#{pane_current_path}' 2>/dev/null || true)
+      fi
+    fi
+    if [ -z "$target_path" ] || [ ! -d "$target_path" ]; then
+      target_path="$PWD"
+    fi
 
-if [ -n "$chosen" ]; then
-  session=$(printf '%s' "$chosen" | head -n1 | cut -f4)
-  idx=$(printf '%s' "$chosen" | head -n1 | cut -f2)
-  if [ -n "$session" ] && [ -n "$idx" ]; then
-    tmux switch-client -t "${session}:${idx}" 2>/dev/null || true
-  fi
-fi
+    LZG_BIN="$HOME/.local/bin/lazygitrs"
+    [ -x "$LZG_BIN" ] || LZG_BIN="$HOME/.cargo/bin/lazygitrs"
+    [ -x "$LZG_BIN" ] || LZG_BIN="$(command -v lazygitrs 2>/dev/null || echo "lazygitrs")"
+
+    open_commits=0
+    if git -C "$target_path" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+      if [ -z "$(git -C "$target_path" status --porcelain 2>/dev/null)" ]; then
+        open_commits=1
+      fi
+    fi
+
+    cd "$target_path" || true
+    if [ "$open_commits" -eq 1 ]; then
+      exec "$LZG_BIN" -d -c popup --commits
+    else
+      exec "$LZG_BIN" -d -c popup
+    fi
+    ;;
+  __SWITCH_SESSION__)
+    if [ "$1" = "--fullscreen" ]; then
+      exec "$SCRIPT_DIR/session-picker.sh" --fullscreen
+    else
+      exec "$SCRIPT_DIR/session-picker.sh"
+    fi
+    ;;
+  *)
+    if [ -n "$chosen" ]; then
+      session=$(printf '%s' "$chosen" | head -n1 | cut -f4)
+      idx=$(printf '%s' "$chosen" | head -n1 | cut -f2)
+      if [ -n "$session" ] && [ -n "$idx" ]; then
+        tmux switch-client -t "${session}:${idx}" 2>/dev/null || true
+      fi
+    fi
+    ;;
+esac
 
 exit 0
