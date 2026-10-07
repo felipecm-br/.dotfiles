@@ -46,11 +46,12 @@ prompt = " "
 prompt_style.fg = "yellow"
 
 [footer]
-content = " {cyan,bold:[Enter]} {darkgray:Connect}  •  {magenta,bold:[Space]} {darkgray:Cockpit}  •  {yellow,bold:[Tab]} {darkgray:Cycle}  •  {green,bold:[/]} {darkgray:Filter}  •  {red,bold:[d]} {darkgray:Kill}  •  {blue,bold:[Esc]} {darkgray:Cancel}"
+content = " {cyan,bold:[Enter]} {darkgray:Connect}  •  {magenta,bold:[c]} {darkgray:Cockpit}  •  {yellow,bold:[Tab]} {darkgray:Cycle}  •  {green,bold:[/]} {darkgray:Filter}  •  {red,bold:[d]} {darkgray:Kill}  •  {blue,bold:[Esc]} {darkgray:Cancel}"
 row_connection = "Full"
 match_indent = false
 
 [results]
+multi = false
 spinner_inline = true
 current_prefix = " "
 unselected_prefix = "  "
@@ -82,8 +83,10 @@ percentage = 55
 "backtab"       = "@reloadprev"
 "shift-backtab" = "@reloadprev"
 "/"             = "FocusFilter"
-"space"         = ["Print(__SWITCH_COCKPIT__)", "Quit"]
-"ctrl-space"    = ["Print(__SWITCH_COCKPIT__)", "Quit"]
+"c"             = ["Print(__SWITCH_COCKPIT__)", "Quit"]
+"C"             = ["Print(__SWITCH_COCKPIT__)", "Quit"]
+"w"             = ["Print(__SWITCH_COCKPIT__)", "Quit"]
+"W"             = ["Print(__SWITCH_COCKPIT__)", "Quit"]
 "s"             = ["Print(__SWITCH_COCKPIT__)", "Quit"]
 "S"             = ["Print(__SWITCH_COCKPIT__)", "Quit"]
 "ctrl-s"        = ["Print(__SWITCH_COCKPIT__)", "Quit"]
@@ -97,7 +100,6 @@ percentage = 55
 "shift-tab"     = "@reloadprev"
 "backtab"       = "@reloadprev"
 "shift-backtab" = "@reloadprev"
-"ctrl-space"    = ["Print(__SWITCH_COCKPIT__)", "Quit"]
 "ctrl-s"        = ["Print(__SWITCH_COCKPIT__)", "Quit"]
 "ctrl-d"        = [ 'ExecuteAsync(wm session kill "{=}")', "SetQuery()", "Reload" ]
 ","             = []
