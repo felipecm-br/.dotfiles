@@ -38,7 +38,7 @@ color = "#d699b6"
 
 [theme.states.permission]
 icon = "󱅭"
-color = "#e67e80"
+color = "#e09d7f"
 
 [theme.states.error]
 icon = "󰨄"

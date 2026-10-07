@@ -38,7 +38,7 @@ color = "{{ color13 }}"
 
 [theme.states.permission]
 icon = "󱅭"
-color = "{{ color1 }}"
+color = "{{ orange }}"
 
 [theme.states.error]
 icon = "󰨄"

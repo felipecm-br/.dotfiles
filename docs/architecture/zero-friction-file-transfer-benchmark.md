@@ -37,6 +37,8 @@ The benchmark evaluates transferring 2 files (`app.css`, `logo.svg`) from the cu
 | ⌨️ **Traditional CLI (`cp`/`mv`)** | Manual typing `cp -a -- ... /path/to/target/` with Tab completions | $2200\text{ ms}$ | $0\text{ ms}$ | $0\text{ ms}$ | $2000\text{ ms}$ | $300\text{ ms}$ | **$4500\text{ ms}$** | **$1.0\times$ (Baseline)** | **$0.0\%$** |
 | 🤖 **AI Agents (NL Prompt)** | Natural Language instruction to LLM agent (`"copy these files..."`) | $1500\text{ ms}$ | $0\text{ ms}$ | $0\text{ ms}$ | $1200\text{ ms}$ | $4500\text{ ms}$ | **$7200\text{ ms}$** | **$0.62\times$ (Slower)** | **$+60.0\%$ (Overhead)** |
 
+> **Note on Baselines & Argument Entry:** The $220\text{ ms}$ timing for `ptl` isolates the destination-resolution and execution phase when files are already held in clipboard or piped from a picker. When file arguments are typed manually from scratch (e.g. `ptl file.txt`), argument keystrokes ($K \approx 0.12\text{ s} - 0.20\text{ s}$ per key) add $\approx 1.5\text{ s}$, resulting in a realistic total execution of $\approx 2.40\text{ s} - 2.95\text{ s}$ (still $1.6\times - 1.9\times$ faster than manual `cp` typing at $4.5\text{ s}$).
+
 ---
 
 ### 1.2 Speedup Multipliers Breakdown

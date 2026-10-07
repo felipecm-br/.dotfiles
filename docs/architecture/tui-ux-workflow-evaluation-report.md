@@ -78,10 +78,10 @@ flowchart TD
 ### 1.3 Musculoskeletal Biomechanics & RSI Risk Analysis
 - **MacBook Hand Physiology & The Ban on `Alt/Option` Chords**:
   On built-in unibody laptop keyboards (Apple MacBook and similar ultrabooks), the `Option/Alt` key sits immediately adjacent to `Control` and `Command` under the lower alphanumeric row (`Z` and `X`). Triggering chords such as `Alt+G`, `Alt+F`, or `Alt+O` forces **thumb hyper-adduction** (folding the thumb deep beneath the palm) and **pronounced ulnar deviation ($25^\circ-35^\circ$)**.
-  - *Medical Consensus (Marklin et al., 2020; Rempel et al., 1998, 2008)*: Hydrostatic pressure in the carpal canal increases dramatically when wrist ulnar deviation exceeds $20^\circ$. Sustained or repetitive deviation under finger flexion leads directly to median nerve compression and Tenosynovitis (RSI).
+  - *Medical Consensus (Keir, Bach, Hudes & Rempel, 2007; Rempel et al., 1998)*: Hydrostatic pressure in the carpal canal remains lowest when wrist ulnar deviation is kept under $\approx 14.5^\circ$ (staying below the 30 mmHg threshold for 75% of individuals). Sustained or repetitive deviation under finger flexion leads directly to median nerve compression and Tenosynovitis (RSI).
   - *Cockpit Policy*: Strict ban on `Alt/Option` chords for primary workflows. All primary chords rely on `CapsLock` (`Ctrl`), `Space` (natural resting thumb position), or sequential leader keys.
-- **Inward Flexor Rollover Advantage**:
-  Motor kinetics studies (Dhakal, Feit, Kristensson, Oulasvirta, ACM CHI 2018, analyzing 136 million keystrokes) demonstrate that **bilateral and unilateral inward rolls** (e.g. pinky $\to$ index: `CapsLock + G`, `j + Enter`) execute with significantly lower error rates and motor latencies ($100\text{ms}-120\text{ms}$) than outward extensions (`Ctrl + P`, `Alt + Q`).
+- **Rollover Mechanics & Home-Row Chords**:
+  Motor kinetics studies (Dhakal, Feit, Kristensson, Oulasvirta, ACM CHI 2018, analyzing 136 million keystrokes) show that **rollover** (overlapping key presses) is a hallmark of fast typing, used for 40%–70% of keystrokes by skilled typists. Sequential rolls like `j` $\to$ `Enter` execute rapidly (~100ms) with low error rates, while home-row placement of `CapsLock` (`Ctrl`) converts chords like `Ctrl + G` into neutral held finger presses that eliminate wrist extension.
 - **Cognitive Load Modeling**:
   - *Sweller's Cognitive Load Theory*: Extraneous cognitive load is minimized by decoupling navigation (Z-axis popups) from active workspace buffers (X-axis code).
   - *Working Memory Limits (Cowan 2001 vs. Miller 1956)*: While classic literature quotes Miller's $7 \pm 2$, modern cognitive neuroscience (Cowan) proves pure working memory capacity is strictly **$4 \pm 1$ chunks**. Grouping commands and status pills into $\le 4$ semantic categories directly prevents cognitive overload.
@@ -156,7 +156,7 @@ Here we synthesize 13 peer-reviewed scientific studies across Human-Computer Int
 │ METR (July 2025)                  │ METR      │ Experienced devs 19% slower with AI;     │ Cognitive bottleneck is     │
 │ Developer Productivity Study      │ Report    │ yet perceived themselves 20% faster.     │ diff review & verification. │
 ├───────────────────────────────────┼───────────┼──────────────────────────────────────────┼─────────────────────────────┤
-│ Barke, James & Polikarpova (2023) │ ACM CHI   │ Programmers operate in two distinct modes│ Split tools between quick   │
+│ Barke, James & Polikarpova (2023) │ OOPSLA    │ Programmers operate in two distinct modes│ Split tools between quick   │
 │ Grounded Copilot                  │ 2023      │ (Acceleration vs Exploration).           │ execution vs deep diff.     │
 ├───────────────────────────────────┼───────────┼──────────────────────────────────────────┼─────────────────────────────┤
 │ Olsen & Goodrich (2003)           │ HRI /     │ Fan-Out formula: FO = 1 + (AT / IT).     │ Max concurrent agents =     │
@@ -169,28 +169,28 @@ Here we synthesize 13 peer-reviewed scientific studies across Human-Computer Int
 │ Memory for Goals: Activation Model│ Science   │ decay exponentially (resumption lag).    │ preserves mental anchors.   │
 ├───────────────────────────────────┼───────────┼──────────────────────────────────────────┼─────────────────────────────┤
 │ Iqbal & Bailey (2008)             │ ACM CHI   │ Notifications at task "breakpoints"      │ Queue non-urgent agent      │
-│ Intelligent Notification Mgmt     │ 2008      │ reduce task disruption by 30%–50%.       │ alerts until tool turn ends.│
+│ Intelligent Notification Mgmt     │ 2008      │ significantly reduce task disruption.    │ alerts until tool turn ends.│
 ├───────────────────────────────────┼───────────┼──────────────────────────────────────────┼─────────────────────────────┤
-│ Parnin & DeLine (2010)            │ ACM/IEEE  │ Only 16% of interrupted tasks resumed    │ Prevent mid-keystroke popups│
-│ Impact of Work Interruptions      │ ICSE 2010 │ in 1 min; 10-15 min resumption lag.      │ with subtle auditory cues.  │
+│ Parnin & DeLine (2010)            │ ACM CHI   │ Only ~10% of interrupted tasks resume    │ Prevent mid-keystroke popups│
+│ Evaluating Resumption Cues        │ 2010      │ in <1 min; rebuilding context dominates. │ with subtle auditory cues.  │
 ├───────────────────────────────────┼───────────┼──────────────────────────────────────────┼─────────────────────────────┤
 │ Cockburn, Gutwin et al. (2015)    │ ACM Comp. │ Novice-to-expert performance dip requires│ In-situ cheat sheets and    │
 │ Novice to Expert Transitions      │ Surveys   │ progressive scaffolding & audio feedfwd. │ which-key HUDs (Prefix + ?).│
 ├───────────────────────────────────┼───────────┼──────────────────────────────────────────┼─────────────────────────────┤
 │ Scarr, Cockburn et al. (2012)     │ ACM CHI   │ Spatially stable CommandMaps outperform  │ Static 4-zone modal layout  │
-│ Improving Command Selection       │ 2012      │ dynamic adaptive menus by 35% in speed.  │ must never jitter or shift. │
+│ Improving Command Selection       │ 2012      │ dynamic adaptive menus via spatial memory│ must never jitter or shift. │
 ├───────────────────────────────────┼───────────┼──────────────────────────────────────────┼─────────────────────────────┤
 │ Grossman, Dragicevic et al. (2007)│ ACM CHI   │ Audio-visual hotkey feedforward          │ Delay-triggered which-key   │
-│ Accelerating On-line Hotkey Learn │ 2007      │ accelerates expert motor transition 2.5x.│ HUDs (Prefix + ?).          │
+│ Accelerating On-line Hotkey Learn │ 2007      │ accelerates expert motor transition.     │ HUDs (Prefix + ?).          │
 ├───────────────────────────────────┼───────────┼──────────────────────────────────────────┼─────────────────────────────┤
-│ Dhakal, Feit et al. (2018)        │ ACM CHI   │ 136M keystrokes: inward rolls are        │ Ban Alt chords; prefer      │
-│ Observations on Typing            │ 2018      │ significantly faster and lower error.    │ CapsLock + G inward rolls.  │
+│ Dhakal, Feit et al. (2018)        │ ACM CHI   │ 136M keystrokes: rollover strategy used  │ Fast sequential rolls;      │
+│ Observations on Typing            │ 2018      │ in 40–70% of keystrokes by fast typists. │ Home Row neutral chords.    │
 ├───────────────────────────────────┼───────────┼──────────────────────────────────────────┼─────────────────────────────┤
 │ Deber et al. (2015) / Ng (2012)   │ ACM CHI / │ Users perceive and prefer latency drops  │ Sub-10ms Rust event loops   │
 │ Latency Perception & Direct Touch │ UIST 2012 │ well below 10ms; 1ms is ideal.           │ preserve cognitive flow.    │
 ├───────────────────────────────────┼───────────┼──────────────────────────────────────────┼─────────────────────────────┤
-│ Doherty & Thadani (1982)          │ IBM Syst. │ Response times <400ms (down to 100ms)    │ Sub-100ms modal popups keep │
-│ Economic Value of Rapid Response  │ Journal   │ yield hyper-linear productivity gains.   │ thoughts unbroken.          │
+│ Doherty & Thadhani (1982); Miller │ IBM / ACM │ Super-linear productivity gains <400ms;  │ Sub-100ms modal popups keep │
+│ Response Time / Instantaneity     │ 1968/1982 │ 100ms defines human instantaneity limit. │ thoughts unbroken.          │
 └───────────────────────────────────┴───────────┴──────────────────────────────────────────┴─────────────────────────────┘
 ```
 
@@ -204,14 +204,14 @@ The July 2025 study by METR (*"Measuring the Impact of Early-2025 AI on Experien
 - **The Mathematical Span of Control**:
   $$FO = 1 + \frac{AT}{IT}$$
   Where $AT$ (Activity Time / Neglect Tolerance) is the duration an AI agent can execute autonomously without human input, and $IT$ (Interaction Time) is the time required for the human to review diffs, approve permissions, or provide guidance.
-- **The Ergonomic Bottleneck**:
-  If a developer uses a clumsy interface where inspecting diffs and switching windows takes $IT = 60\text{ seconds}$, and an agent works for $AT = 180\text{ seconds}$, the maximum sustainable fan-out is $FO = 1 + \frac{180}{60} = 4\text{ agents}$. Attempting to run 6 agents causes severe task starvation, rubber-stamping, and cognitive breakdown.
-  By dropping $IT$ to $10\text{ seconds}$ via `lazygitrs` ($T_K = 130\text{ms}$) and `acpd` direct triage jumping ($T_K = 140\text{ms}$), the sustainable fan-out capacity expands to $FO = 1 + \frac{180}{10} = 19\text{ agents}$ without operator overload.
+- **The Ergonomic & Cognitive Span**:
+  If a developer uses a clumsy interface where inspecting diffs and switching windows takes $IT = 60\text{ seconds}$, and an agent works for $AT = 180\text{ seconds}$, the mathematical fan-out is $FO = 1 + \frac{180}{60} = 4\text{ agents}$.
+  While sub-100ms keyboard navigation and instant Dual-Diff popups minimize tool transition latency ($p \approx 5\%$), human diff comprehension, test verification, and mental goal activation (Altmann & Trafton) dominate review time ($1 - p \approx 95\%$). Furthermore, working-memory capacity limits (Cowan's $4 \pm 1$ chunks) cap concurrent cognitive goal tracking at **3 to 4 agents** before quality collapses into rubber-stamping (Anthropic 2026 RCT, DORA 2025).
 
 ### 3.3 Interruption Costs & Task Resumption Lag (Altmann & Trafton, Iqbal & Bailey, Parnin & DeLine)
-- Parnin & DeLine (ICSE 2010) found that only 16% of interrupted developer tasks are resumed within 1 minute, and developers take 10 to 15 minutes to rebuild mental models after an interruption.
-- Altmann & Trafton's *Memory for Goals* shows that goal activation decays exponentially when interrupted.
-- Iqbal & Bailey (CHI 2008) showed that delivering notifications at **task breakpoints** reduces disruption by 30%–50%.
+- Parnin & DeLine (CHI 2010) found that only ~10% of interrupted programming tasks are resumed in under 1 minute, with context reconstruction dominating resumption lag.
+- Altmann & Trafton's *Memory for Goals* shows that goal activation decays over interruptions.
+- Iqbal & Bailey (CHI 2008) showed that delivering notifications at **task breakpoints** significantly reduces disruption and frustration compared to mid-task interruptions.
 - **The Cockpit Solution**: The `acpd` daemon uses **non-blocking auditory telemetry via PipeWire** and status bar icon changes rather than stealing window focus. The developer is notified peripherally and uses `Ctrl+Shift+I` to jump only when reaching a natural breakpoint.
 
 ---
@@ -286,11 +286,11 @@ During continuous background streaming from agents (like Claude Code, OpenCode, 
        4. Result: Zero screen tearing, zero clobbering, 0ms flicker!
 ```
 
-### 5.2 Deterministic ACPD Lifecycle & 300ms Consolidated Debounce
+### 5.2 Deterministic ACPD Lifecycle & 650ms Consolidated Debounce
 AI agents executing tool chains produce rapid sequential states:
 `PreInvocation` (`working`) $\to$ `PostInvocation` (`idle`) within 20ms–50ms.
 - **The Problem**: Without debouncing, the status bar pill and Tmux title strobe between yellow and green multiple times per second, inducing visual fatigue.
-- **The Solution**: In `acpd` (`api.rs:290-309`), a centralized 300ms debounce coordinator cancels transient idle states if a subsequent working state arrives, slashing idle flip latency from 1,050ms to 300ms while keeping all adapters synchronized.
+- **The Solution**: In `acpd` (`api.rs` / `adapters.rs`), a centralized 650ms debounce coordinator (`idle_debounce_ms = 650` in `config.toml`) cancels transient idle states if a subsequent working state arrives, preventing status bar strobing while keeping all adapters synchronized.
 
 ---
 

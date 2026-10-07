@@ -1,0 +1,116 @@
+[start]
+sort = false
+ansi = true
+
+[matcher.sort]
+threshold = false
+
+[columns]
+split = '\t'
+max = 8
+names = [
+    { name = "title", ignore = true },
+    { name = "idx" },
+    { name = "name" },
+    { name = "session" },
+    { name = "pid" },
+    { name = "path" },
+    { name = "display", ignore = true }
+]
+
+[tui]
+mouse = true
+percentage = 100
+max = 9999
+
+[results]
+spinner_prefix = "@SPIN@"
+spinner_inline = true
+current_prefix = ""
+unselected_prefix = ""
+multi = false
+row_connection = "Full"
+column_spacing = 0
+
+[results.style]
+modifier = "DIM"
+
+[results.current_style]
+modifier = "BOLD"
+
+[results.current_nav_bar_style]
+modifier = "BOLD"
+
+[results.autoscroll]
+enabled = false
+
+[results.border]
+sides = ""
+
+[query]
+status_inline = true
+prompt = " "
+show = true
+
+[footer]
+content = " {cyan,bold:[Enter]} {darkgray:Jump}  •  {yellow,bold:[s]} {darkgray:Sessions}  •  {green,bold:[t]} {darkgray:New}  •  {blue,bold:[/]} {darkgray:Filter}  •  {yellow,bold:[y]} {darkgray:Approve}  •  {magenta,bold:[n]} {darkgray:Deny}  •  {red,bold:[d]} {darkgray:Kill}  •  {blue,bold:[Esc]} {darkgray:Exit}  •  {blue,bold:[?]} {darkgray:Help}"
+row_connection = "Full"
+match_indent = false
+separator = "light"
+
+[ui.nav]
+active = true
+focus_on_start = "picker"
+bar = "Plain"
+color = "black"
+hints = false
+
+[ui.nav.binds]
+"/"      = "FocusFilter"
+"s"      = ["Print(__SWITCH_SESSION__)", "Quit"]
+"S"      = ["Print(__SWITCH_SESSION__)", "Quit"]
+"t"      = ["ExecuteAsync(printf '%s\\n' '{=}' | $HOME/.config/tmux/window-picker-create.sh; sleep 0.05)", "Reload($HOME/.config/tmux/cockpit-picker-items.sh)"]
+"T"      = ["ExecuteAsync(printf '%s\\n' '{=}' | $HOME/.config/tmux/window-picker-create.sh; sleep 0.05)", "Reload($HOME/.config/tmux/cockpit-picker-items.sh)"]
+"c"      = ["ExecuteAsync(printf '%s\\n' '{=}' | $HOME/.config/tmux/window-picker-create.sh; sleep 0.05)", "Reload($HOME/.config/tmux/cockpit-picker-items.sh)"]
+"C"      = ["ExecuteAsync(printf '%s\\n' '{=}' | $HOME/.config/tmux/window-picker-create.sh; sleep 0.05)", "Reload($HOME/.config/tmux/cockpit-picker-items.sh)"]
+"y"      = ["ExecuteAsync(tmux send-keys -t '{=pid}' 'y' Enter)", "Reload($HOME/.config/tmux/cockpit-picker-items.sh)"]
+"Y"      = ["ExecuteAsync(tmux send-keys -t '{=pid}' 'y' Enter)", "Reload($HOME/.config/tmux/cockpit-picker-items.sh)"]
+"n"      = ["ExecuteAsync(tmux send-keys -t '{=pid}' 'n' Enter)", "Reload($HOME/.config/tmux/cockpit-picker-items.sh)"]
+"N"      = ["ExecuteAsync(tmux send-keys -t '{=pid}' 'n' Enter)", "Reload($HOME/.config/tmux/cockpit-picker-items.sh)"]
+"d"      = ["ExecuteAsync(printf '%s\\n' '{=}' | $HOME/.config/tmux/window-picker-delete.sh; sleep 0.05)", "Reload($HOME/.config/tmux/cockpit-picker-items.sh)"]
+"D"      = ["ExecuteAsync(printf '%s\\n' '{=}' | $HOME/.config/tmux/window-picker-delete.sh; sleep 0.05)", "Reload($HOME/.config/tmux/cockpit-picker-items.sh)"]
+"ctrl-r" = "Reload($HOME/.config/tmux/cockpit-picker-items.sh)"
+","      = []
+
+[ui.border]
+sides = ""
+
+[previewer]
+debounce_ms = 20
+delay_clear = true
+
+[preview]
+wrap = false
+
+[preview.initial]
+tail = false
+
+[preview.border]
+sides = "LEFT"
+color = "Darkgray"
+
+[[preview.layout]]
+command = '$HOME/.config/tmux/cockpit-picker-preview.sh "{=session}" "{=idx}" "{=pid}" "{=path}"'
+side = "right"
+percentage = 60
+scroll.tail = false
+
+[binds]
+Start    = ["ToggleColumn(title)", "ToggleColumn(name)", "ToggleColumn(session)", "ToggleColumn(idx)", "ToggleColumn(pid)", "ToggleColumn(path)"]
+"ctrl-s" = ["Print(__SWITCH_SESSION__)", "Quit"]
+"ctrl-t" = ["ExecuteAsync(printf '%s\\n' '{=}' | $HOME/.config/tmux/window-picker-create.sh; sleep 0.05)", "Reload($HOME/.config/tmux/cockpit-picker-items.sh)"]
+"ctrl-r" = "Reload($HOME/.config/tmux/cockpit-picker-items.sh)"
+"?"      = "ToggleFooter"
+"F1"     = "ToggleFooter"
+","      = []
+"@reload"= "Reload($HOME/.config/tmux/cockpit-picker-items.sh)"

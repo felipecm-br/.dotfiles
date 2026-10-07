@@ -30,8 +30,8 @@ $$T_{\text{execute}} = \sum T_K + \sum T_P + \sum T_H + \sum T_M + \sum T_R$$
 * **$T_M$ (Mental Preparation / Hesitation):** Minimized to **$\approx 0\text{ ms}$** via immediate visual semiotics (semantic border colors and glyphs) and universal mnemonics (`Esc` cancels/unwinds, `Ctrl+G` opens Git, `s` switches windows).
 * **$T_K$ (Keystroke Cost):** Reduced from $240\text{ ms}$ (complex chords) to **$120\text{ ms}$** through 1-touch direct navigation (`nav^^` keys in Matchmaker) and dual-function kernel modifiers.
 
-### 1.2 The Doherty Threshold (<100ms)
-When human-computer interaction latency drops below **100 milliseconds**, human perception registers the system as an extension of thought, preserving cognitive flow without biological interruption.
+### 1.2 The 100ms Instantaneity Limit & The Doherty Threshold
+When human-computer interaction latency drops below **100 milliseconds** (Miller 1968; Card, Robertson & Mackinlay 1991), human perception registers the system as instantaneous, preserving cognitive flow without interruption. Furthermore, empirical response time studies (Doherty & Thadhani 1982, IBM) demonstrate that productivity rises super-linearly as system response drops below **~400 milliseconds**.
 * **Subprocess Latency:** `lazygitrs` (native Rust binary) starts in **~3ms** and exits in **0ms** via Tmux's `-E` flag.
 * **Zero-Flicker Double Buffering:** `delay_clear = true` and `debounce_ms = 20` in `matchmaker` eliminates screen tearing during rapid vertical scrolling.
 * **Non-Blocking Telemetry:** Notifications utilize asynchronous `tmux display-message` (<1ms), eliminating synchronous blocking popups.
@@ -58,7 +58,7 @@ When human-computer interaction latency drops below **100 milliseconds**, human 
 ```
 
 ### 2.1 Pure Icon Badges (Tufte's Data-Ink Principle)
-* **Glyph Recognition vs Text Decoding (15ms vs 200ms):** The human visual cortex decodes familiar pictograms (`󰊢`, `⚡`, `󱂬`, `󱜻`) preattentively in **$\approx 15\text{ ms}$**, whereas phonetic text parsing takes **$\approx 180\text{ ms}$ to $250\text{ ms}$**.
+* **Preattentive Glyph Recognition vs Phonetic Text Decoding (Treisman 1985):** The human visual cortex decodes familiar pictograms (`󰊢`, `⚡`, `󱂬`, `󱜻`) through preattentive feature processing (Treisman 1985) significantly faster than phonetic text parsing, which requires sequential cognitive parsing once glyphs are overlearned.
 * **Elimination of Semantic Redundancy:** Frame titles such as *"Windows & Agents"* or *"Lazygit"* are redundant noise. Clean icon badges (`-T " 󱂬 "`, `-T " ⚡ "`, `-T " 󰊢 "`) maximize the Signal-to-Noise ratio while maintaining minimalist geometry.
 
 ### 2.2 Universal Dynamic Omarchy Theme Inheritance
@@ -105,7 +105,7 @@ When switching themes via `omarchy theme set <theme>`, **100% of popups instantl
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
-* **Foveal Ergonomics (`75% × 60%`):** Human central visual acuity is confined to a 2°–5° foveal cone. The 75% × 60% viewport occupies the visual center without hiding the parent terminal backdrop.
+* **Spatial Stability & Context Preservation (`75% × 60%`):** While human central foveal acuity spans ~2° (with popups parsed through parafoveal vision and rapid saccades), the standard 75% × 60% viewport leverages spatial layout constancy (CommandMaps, Scarr et al. 2012). It provides predictable coordinates for candidate and preview panes while preserving the parent terminal backdrop as a cognitive anchor.
 * **Column Partitioning (`40% / 60%`):** Divides space according to $\frac{1}{\phi^2} \approx 38.2\%$ (list) and $\frac{1}{\phi} \approx 61.8\%$ (preview), preventing label truncation.
 * **Concurrent Split Editor Architecture (`62% / 38%` LTR):** When opening files from ephemeral pickers (e.g. `wm -o workspace` / `wm -o files` / [`workspace-picker.sh`](../../tmux/.config/tmux/workspace-picker.sh) with `Ctrl+E` or `e`), the modal is immediately dismissed (`display-popup -C`) via [`scrollback-open.sh`](../../tmux/.config/tmux/scrollback-open.sh) to prevent nested modal trapping. The editor (Neovim) is positioned on the left (`split-window -h -b -l 62%`) at $\frac{1}{\phi} \approx 61.8\%$ (62%), preserving the active terminal or AI session on the right at $\frac{1}{\phi^2} \approx 38.2\%$ (38%). This aligns with western Left-to-Right reading hierarchy and modern IDE sidebar architecture (primary workspace left, AI copilot right).
 * **High-Density Workspaces (`90% × 88%`):** Lazygitrs expands to 90% × 88% to satisfy Miller's Chunking Law ($7 \pm 2$) across 5 control panels and wide diff viewports.
@@ -137,9 +137,8 @@ $$\text{Ideal Line Length (80–100 cols)} \times 2 + \text{gutters/LSP diagnost
    * **Extremely Low Data-Ink Density:** 32 columns dedicated permanently to static branch names and window labels. 95% of the working time, these pixels remain static and unread.
    * **Attentional Taxation:** Positioned in the peripheral field ($30^\circ\text{–}60^\circ$), every agent stream, background spinner, or port update triggers the involuntary **orienting reflex** via the *superior colliculus*, breaking deep focus.
 
-#### 3. Architectural Scope: 1 Worktree = 1 Isolated Session vs. 1 Worktree = 1 Window
-* **The `workmux` Window Bottleneck:** `workmux` equates 1 worktree to 1 single Tmux window inside a shared session. This forces a persistent sidebar to manage the flat list of windows, yet completely breaks down when a worktree requires multiple internal windows (e.g., Neovim, test runner, server daemon, and log monitor).
-* **The Cockpit Session Advantage:** `awt` provisions an **entire, hermetically isolated Tmux session per worktree**. Worktrees can scale to multiple windows and internal splits without polluting other workspaces. The floating modal (`Ctrl+Shift+G` / `awp`) and ACPD sonic telemetry (`Prefix + Space` / `ai-agent-triage-jump.sh`) provide instantaneous cross-session switching without sacrificing a single column of horizontal workspace.
+#### 3. Architectural Scope: 1 Worktree = 1 Isolated Session vs. Window-Based Multi-Worktrees
+* **Worktree Multi-Window Isolation:** While tools like `workmux` default to 1 worktree = 1 Tmux window (though supporting an optional `--session` mode and sidebar), `awt` adopts an **entire, hermetically isolated Tmux session per worktree as its native foundation**. Worktrees scale naturally to multiple dedicated windows and internal splits without polluting other workspaces. The floating modal (`Ctrl+Shift+G` / `awp`) and ACPD sonic telemetry provide instantaneous cross-session switching without sacrificing a single column of horizontal workspace to a persistent sidebar.
 
 ---
 

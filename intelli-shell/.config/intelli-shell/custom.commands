@@ -247,8 +247,14 @@ sudo tailscale up --ssh
 # Expose ACPD JSON-RPC control plane securely on private Tailnet
 tailscale serve --bg 4040
 
+# Run automated cockpit health and system drift audit
+./scripts/drift-doctor.sh
 
+# Play audio alert at typing breakpoint (preserves cognitive flow)
+chime-at-breakpoint {{sound_file}}
 
+# Open AI Fleet & Window Cockpit HUD in Tmux (85% × 75%)
+~/.config/tmux/cockpit-picker.sh
 
 $ (awt) branch: git branch --format='%(refname:short)' 2>/dev/null
 $ (awt) base: git branch --format='%(refname:short)' 2>/dev/null

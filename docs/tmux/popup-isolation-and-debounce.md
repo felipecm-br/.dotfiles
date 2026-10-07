@@ -34,7 +34,7 @@ This document records the identified issues of visual flicker, rendering collisi
 │ Active Streaming Agent         │ Frozen Transparent Snapshot Backdrop   │
 │ (@ai_agent_state_raw = busy)   │ (tmux capture-pane -ep -> _popups)     │
 ├────────────────────────────────┼────────────────────────────────────────┤
-│ Rapid AI Tool Transitions      │ 400ms Idle Debounce in ACPD            │
+│ Rapid AI Tool Transitions      │ 650ms Idle Debounce in ACPD            │
 │ (Sequential tool calls)        │ (Cancels intermediate idle state flips)│
 ├────────────────────────────────┼────────────────────────────────────────┤
 │ CPU & Battery Consumption      │ status-interval 0 (100% Event-Driven)  │
@@ -44,13 +44,13 @@ This document records the identified issues of visual flicker, rendering collisi
 
 ---
 
-### 🛡️ 1. 400ms Debounce & Deduplication in ACPD
-Inside the `acpd` daemon (`adapters.rs`):
-- **400ms Debounce for `AgentState::Idle`:**
+### 🛡️ 1. 650ms Debounce & Deduplication in ACPD
+Inside the `acpd` daemon (`adapters.rs`, configured via `idle_debounce_ms = 650` in `acpd.toml`):
+- **650ms Debounce for `AgentState::Idle`:**
   ```rust
-  // When state transitions to Idle, schedule a 400ms async cancellation window
+  // When state transitions to Idle, schedule an async cancellation window (idle_debounce_ms)
   let task = tokio::spawn(async move {
-      tokio::time::sleep(tokio::time::Duration::from_millis(400)).await;
+      tokio::time::sleep(tokio::time::Duration::from_millis(idle_debounce_ms)).await;
       // Commit Idle only if no new tool call arrived during the window
       set_tmux_option(&pane_id, "@ai_agent_state", &t.icon).await;
       set_tmux_option(&pane_id, "@ai_agent_state_raw", "idle").await;

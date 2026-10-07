@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+# scripts/chime-at-breakpoint.sh — Defer auditory alert until cognitive typing pause
+# Based on Iqbal & Bailey (CHI 2008) notification deferral model
+set -uo pipefail
+
+sound_file="${1:-$HOME/.local/share/sounds/ai/02-gentle-ping.wav}"
+urgency="${2:-normal}"
+
+# Critical alerts (e.g. fatal errors or destructive prompts) play immediately
+if [ "$urgency" = "critical" ]; then
+  exec pw-play "$sound_file"
+fi
+
+idle_needed=${IDLE_NEEDED:-2}
+max_wait=${MAX_WAIT:-15}
+ticks=0
+
+while (( ticks < max_wait * 2 )); do
+  act=$(tmux display-message -p '#{client_activity}' 2>/dev/null) || break
+  printf -v now '%(%s)T' -1
+  idle_duration=$(( now - act ))
+
+  if (( idle_duration >= idle_needed )); then
+    break
+  fi
+  sleep 0.5
+  ticks=$(( ticks + 1 ))
+done
+
+exec pw-play "$sound_file"
