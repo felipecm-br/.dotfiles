@@ -72,6 +72,13 @@ chosen=$(printf '%s\n' "$ITEMS" | "$MM_BIN" \
   --group-prefix '#')
 
 case "$chosen" in
+  __CREATE_WINDOW__*)
+    raw_item="${chosen#__CREATE_WINDOW__}"
+    new_target=$(printf '%s\n' "$raw_item" | "$SCRIPT_DIR/window-picker-create.sh")
+    if [ -n "$new_target" ]; then
+      tmux switch-client -t "$new_target" 2>/dev/null || true
+    fi
+    ;;
   __LAZYGIT__*)
     target_path="${chosen#__LAZYGIT__}"
     if [ -z "$target_path" ] || [ ! -d "$target_path" ]; then

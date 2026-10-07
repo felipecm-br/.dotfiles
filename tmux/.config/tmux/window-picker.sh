@@ -64,20 +64,30 @@ chosen=$(printf '%s\n' "$ITEMS" | "$MM_BIN" \
   --color "$TMUX_COLOR_SPEC" \
   --group-prefix '#')
 
-if [ "$chosen" = "__SWITCH_SESSION__" ]; then
-  if [ "$1" = "--fullscreen" ]; then
-    exec "$SCRIPT_DIR/session-picker.sh" --fullscreen
-  else
-    exec "$SCRIPT_DIR/session-picker.sh"
-  fi
-fi
-
-if [ -n "$chosen" ]; then
-  session=$(printf '%s' "$chosen" | head -n1 | cut -f4)
-  idx=$(printf '%s' "$chosen" | head -n1 | cut -f2)
-  if [ -n "$session" ] && [ -n "$idx" ]; then
-    tmux switch-client -t "${session}:${idx}" 2>/dev/null || true
-  fi
-fi
+case "$chosen" in
+  __CREATE_WINDOW__*)
+    raw_item="${chosen#__CREATE_WINDOW__}"
+    new_target=$(printf '%s\n' "$raw_item" | "$SCRIPT_DIR/window-picker-create.sh")
+    if [ -n "$new_target" ]; then
+      tmux switch-client -t "$new_target" 2>/dev/null || true
+    fi
+    ;;
+  __SWITCH_SESSION__)
+    if [ "$1" = "--fullscreen" ]; then
+      exec "$SCRIPT_DIR/session-picker.sh" --fullscreen
+    else
+      exec "$SCRIPT_DIR/session-picker.sh"
+    fi
+    ;;
+  *)
+    if [ -n "$chosen" ]; then
+      session=$(printf '%s' "$chosen" | head -n1 | cut -f4)
+      idx=$(printf '%s' "$chosen" | head -n1 | cut -f2)
+      if [ -n "$session" ] && [ -n "$idx" ]; then
+        tmux switch-client -t "${session}:${idx}" 2>/dev/null || true
+      fi
+    fi
+    ;;
+esac
 
 exit 0

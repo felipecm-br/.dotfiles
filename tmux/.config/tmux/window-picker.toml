@@ -68,10 +68,10 @@ hints = false
 "/"      = "FocusFilter"
 "t"      = ["Print(__SWITCH_SESSION__)", "Quit"]
 "T"      = ["Print(__SWITCH_SESSION__)", "Quit"]
-"n"      = ["ExecuteAsync(printf '%s\\n' '{=}' | $HOME/.config/tmux/window-picker-create.sh)", "Reload($HOME/.config/tmux/window-picker-items.sh)"]
-"N"      = ["ExecuteAsync(printf '%s\\n' '{=}' | $HOME/.config/tmux/window-picker-create.sh)", "Reload($HOME/.config/tmux/window-picker-items.sh)"]
-"c"      = ["ExecuteAsync(printf '%s\\n' '{=}' | $HOME/.config/tmux/window-picker-create.sh)", "Reload($HOME/.config/tmux/window-picker-items.sh)"]
-"C"      = ["ExecuteAsync(printf '%s\\n' '{=}' | $HOME/.config/tmux/window-picker-create.sh)", "Reload($HOME/.config/tmux/window-picker-items.sh)"]
+"n"      = ["Print(__CREATE_WINDOW__{=})", "Quit"]
+"N"      = ["Print(__CREATE_WINDOW__{=})", "Quit"]
+"c"      = ["Print(__CREATE_WINDOW__{=})", "Quit"]
+"C"      = ["Print(__CREATE_WINDOW__{=})", "Quit"]
 "d"      = ["ExecuteAsync(printf '%s\\n' '{=}' | $HOME/.config/tmux/window-picker-delete.sh)", "Reload($HOME/.config/tmux/window-picker-items.sh)"]
 "D"      = ["ExecuteAsync(printf '%s\\n' '{=}' | $HOME/.config/tmux/window-picker-delete.sh)", "Reload($HOME/.config/tmux/window-picker-items.sh)"]
 "ctrl-r" = "Reload($HOME/.config/tmux/window-picker-items.sh)"

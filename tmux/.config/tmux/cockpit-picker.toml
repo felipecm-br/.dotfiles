@@ -69,10 +69,10 @@ hints = false
 "/"      = "FocusFilter"
 "s"      = ["Print(__SWITCH_SESSION__)", "Quit"]
 "S"      = ["Print(__SWITCH_SESSION__)", "Quit"]
-"t"      = ["ExecuteAsync(printf '%s\\n' '{=}' | $HOME/.config/tmux/window-picker-create.sh; sleep 0.05)", "Reload($HOME/.config/tmux/cockpit-picker-items.sh)"]
-"T"      = ["ExecuteAsync(printf '%s\\n' '{=}' | $HOME/.config/tmux/window-picker-create.sh; sleep 0.05)", "Reload($HOME/.config/tmux/cockpit-picker-items.sh)"]
-"c"      = ["ExecuteAsync(printf '%s\\n' '{=}' | $HOME/.config/tmux/window-picker-create.sh; sleep 0.05)", "Reload($HOME/.config/tmux/cockpit-picker-items.sh)"]
-"C"      = ["ExecuteAsync(printf '%s\\n' '{=}' | $HOME/.config/tmux/window-picker-create.sh; sleep 0.05)", "Reload($HOME/.config/tmux/cockpit-picker-items.sh)"]
+"t"      = ["Print(__CREATE_WINDOW__{=})", "Quit"]
+"T"      = ["Print(__CREATE_WINDOW__{=})", "Quit"]
+"c"      = ["Print(__CREATE_WINDOW__{=})", "Quit"]
+"C"      = ["Print(__CREATE_WINDOW__{=})", "Quit"]
 "g"      = ["Print(__LAZYGIT__{=path})", "Quit"]
 "G"      = ["Print(__LAZYGIT__{=path})", "Quit"]
 "ctrl-g" = ["Print(__LAZYGIT__{=path})", "Quit"]
@@ -112,7 +112,7 @@ scroll.tail = false
 Start    = ["ToggleColumn(title)", "ToggleColumn(name)", "ToggleColumn(session)", "ToggleColumn(idx)", "ToggleColumn(pid)", "ToggleColumn(path)"]
 "ctrl-s" = ["Print(__SWITCH_SESSION__)", "Quit"]
 "ctrl-g" = ["Print(__LAZYGIT__{=path})", "Quit"]
-"ctrl-t" = ["ExecuteAsync(printf '%s\\n' '{=}' | $HOME/.config/tmux/window-picker-create.sh; sleep 0.05)", "Reload($HOME/.config/tmux/cockpit-picker-items.sh)"]
+"ctrl-t" = ["Print(__CREATE_WINDOW__{=})", "Quit"]
 "ctrl-r" = "Reload($HOME/.config/tmux/cockpit-picker-items.sh)"
 "?"      = "ToggleFooter"
 "F1"     = "ToggleFooter"
