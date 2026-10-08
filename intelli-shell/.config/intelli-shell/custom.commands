@@ -259,6 +259,9 @@ sudo tailscale up --ssh
 # Expose ACPD JSON-RPC control plane securely on private Tailnet
 tailscale serve --bg 4040
 
+# Query ACPD daemon health and uptime status
+acpd health
+
 # Run automated cockpit health and system drift audit
 ./scripts/drift-doctor.sh
 

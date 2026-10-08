@@ -20,22 +20,27 @@ else
   warn "lazygitrs not found in PATH"
 fi
 
-# 2. Binary Drift Check for waymaker (wm)
-declare -A wm_seen=()
-wm_count=0
-for p in "$HOME/.local/bin/wm" "$HOME/.cargo/bin/wm" "$(command -v wm 2>/dev/null)"; do
-  [ -x "$p" ] || continue
-  v=$("$p" --version 2>&1 | head -n1)
-  if [ -z "${wm_seen[$v]:-}" ]; then
-    wm_seen[$v]="$p"
-    wm_count=$((wm_count + 1))
+# 2. Binary Drift Check for waymaker (wm) and acpd
+for bin in wm acpd; do
+  declare -A bin_seen=()
+  bin_count=0
+  for p in "$HOME/.local/bin/$bin" "$HOME/.cargo/bin/$bin" "$(command -v "$bin" 2>/dev/null)"; do
+    [ -n "$p" ] && [ -x "$p" ] || continue
+    v=$("$p" --version 2>&1 | head -n1)
+    if [ -z "${bin_seen[$v]:-}" ]; then
+      bin_seen[$v]="$p"
+      bin_count=$((bin_count + 1))
+    fi
+  done
+  if (( bin_count > 1 )); then
+    warn "$bin: multiple versions found on disk (${!bin_seen[*]})"
+  elif (( bin_count == 1 )); then
+    ok "$bin: single binary version consistency (${!bin_seen[*]})"
+  else
+    warn "$bin: not found in standard paths"
   fi
+  unset bin_seen
 done
-if (( wm_count > 1 )); then
-  warn "wm: multiple versions found on disk (${!wm_seen[*]})"
-else
-  ok "wm: single binary version consistency"
-fi
 
 # 3. keyd overload_tap_timeout Check
 if grep -q "overload_tap_timeout" /etc/keyd/default.conf 2>/dev/null; then
