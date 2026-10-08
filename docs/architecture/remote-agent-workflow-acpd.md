@@ -95,6 +95,17 @@ The `acpd-cli` utility ([`acpd/.local/bin/acpd-cli`](file:///home/fecavmi/.dotfi
 - `acpd-cli bell [pane_id]`: Trigger visual and audible bell notification.
 - `acpd-cli kill <target>`: Terminate pane, window, or session.
 
+### The `acpd` binary itself
+
+The daemon binary handles these arguments **before** initializing logging, the PID file or the network listener, so they are safe to call at any time (they never start or disturb a running daemon):
+
+- `acpd --version` / `acpd -V`: Print the version and exit.
+- `acpd --help` / `acpd -h`: Print usage and exit.
+- `acpd health`: `GET /health` against `127.0.0.1:4040`; prints the JSON (`status`, `uptime_secs`) and exits 0, or exits 1 if the daemon is unreachable.
+- `acpd --config <FILE>` (also `-c <FILE>` and `--config=<FILE>`): Start the daemon with a custom `config.toml`.
+
+> Running an already-running daemon's binary again with no arguments still attempts to start a second instance (it is stopped by the PID file guard). A rebuilt binary only takes effect in the running service after `systemctl --user restart acpd`, which clears in-memory agent state until each pane's next hook.
+
 ---
 
 ## 5. Remote Workflows in Practice

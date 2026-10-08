@@ -36,7 +36,7 @@ The core principle across this dotfiles setup is **Zero Polling, Maximum Context
 ### 2. Tmux AI Agent Status & Event-Driven Popups
 * **Location**: [`tmux/.config/tmux/`](../../tmux/.config/tmux/), [`acpd/`](../../acpd/)
 * **Doc**: [Tmux AI Status Bar](../tmux/ai-status-bar.md) & [Popup Isolation & Debounce](../tmux/popup-isolation-and-debounce.md)
-* **How it works**: The ACPD daemon intercepts agent lifecycle hooks (Claude, Antigravity, OpenCode). Status updates are broadcast with a 400ms debounce to tmux status pills (`status-interval 0`), rendering spinners (`󱚤 󰑮 Running...`), error alerts, and bell popups.
+* **How it works**: The ACPD daemon intercepts agent lifecycle hooks (Claude, Antigravity, OpenCode). Status updates are broadcast with a 650ms idle debounce (`idle_debounce_ms`, configurable) to tmux status pills (`status-interval 0`), rendering spinners (`󱚤 󰑮 Running...`), error alerts, and bell popups.
 
 ### 3. Smart Tab Completion & On-Demand Preview (`_smart_tab`)
 * **Location**: [`zsh/.zsh/utils/binds.zsh`](../../zsh/.zsh/utils/binds.zsh), [`waymaker/.config/waymaker/presets/ftb.toml`](../../waymaker/.config/waymaker/presets/ftb.toml)

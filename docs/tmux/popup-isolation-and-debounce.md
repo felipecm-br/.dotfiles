@@ -112,9 +112,9 @@ set -g status-interval 0
 
 ## 3. Related Files & Documentation
 
-- `acpd/src/adapters.rs`: Implementation of the 400ms async debounce and state deduplication.
+- `acpd/src/api.rs` (+ `daemon.rs`): authoritative idle-debounce coordinator (`idle_debounce_ms`, default 650ms, set in `~/.config/acpd/config.toml`); `acpd/src/adapters.rs`: pending-idle cancellation and state deduplication.
 - [`tmux/.config/tmux/tmux.conf`](../../tmux/.config/tmux/tmux.conf): Configuration of `status-interval 0` and ergonomic popups.
 - [`tmux/.config/tmux/sesh-picker.sh`](../../tmux/.config/tmux/sesh-picker.sh): Session picker with intelligent backdrop and navigation preservation.
 - [`tmux/.config/tmux/window-picker.sh`](../../tmux/.config/tmux/window-picker.sh): Matchmaker window picker with intelligent backdrop.
-- [`tmux/.config/tmux/lazygitrs-popup.sh`](../../tmux/.config/tmux/lazygitrs-popup.sh): Lazygitrs popup with smart `--commits` detection and backdrop handling.
+- [`tmux/.config/tmux/lazygitrs-popup.sh`](../../tmux/.config/tmux/lazygitrs-popup.sh): Lazygitrs popup with smart `--commits` detection and backdrop handling. The binary is resolved **by capability** (`resolve_lzg` requires `--commits` in `--help`; order: `~/.local/bin`, `PATH`, `~/.cargo/bin`) so a stale install cannot silently close the popup, and the clean-tree check uses `git diff --quiet` / `git diff --cached --quiet` / `git ls-files --others --exclude-standard` (exits on the first dirty file) instead of a full `git status --porcelain`.
 - [`docs/tmux/ai-status-bar.md`](ai-status-bar.md): Comprehensive guide to AI agent status pills and state animations.
