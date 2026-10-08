@@ -103,4 +103,15 @@ if [[ "$repo_parent" == ".dotfiles" ]]; then
     fi
 fi
 
+# If repository defines 'just check', enforce it
+if [[ -f "$wt_path/Justfile" ]] || [[ -f "$wt_path/justfile" ]]; then
+    if command -v just >/dev/null 2>&1 && (cd "$wt_path" && just --summary 2>/dev/null | grep -qw "check"); then
+        echo "Running pre-merge quality gate: 'just check' in $(basename "$wt_path")..."
+        (cd "$wt_path" && just check) || {
+            echo "pre-merge check failed: 'just check' reported errors." >&2
+            exit 1
+        }
+    fi
+fi
+
 exit 0
