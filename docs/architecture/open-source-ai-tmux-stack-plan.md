@@ -158,7 +158,7 @@ The README and value proposition must lead with the concrete problem solved for 
 ### 2.6 Workspace & Session Layer (`sesh` / `wm session`)
 - **Role:** Session management, project directory discovery, and workspace context switching.
 - **Where Sesh / Waymaker is Used in the Cockpit Stack:**
-  1. **`sesh-picker.sh` (`Prefix + t`):** Invokes `sesh list --icons` (or `wm session list --icons`) and pipes into Waymaker (`wm -o sesh-picker.toml`), connecting to chosen workspaces via `sesh connect "$chosen"`.
+  1. **`session-picker.sh` (`Prefix + s`):** Invokes `wm session list --icons` (or `sesh list --icons`) and pipes into Waymaker (`wm -o session-picker.toml`), connecting to chosen workspaces via `wm connect "$chosen"`.
   2. **`lazygitrs` Worktree Controller:** In [`src/gui/controller/worktrees.rs:40`](file:///home/fecavmi/dev/github/lazygitrs/fecavmi/src/gui/controller/worktrees.rs#L40), pressing Enter on a worktree branch natively triggers `std::process::Command::new("sesh").arg("connect").arg(&target_path)`. If `sesh` (or Waymaker's drop-in `sesh` wrapper) is installed, it switches directly into an isolated project session; otherwise, it cleanly falls back to native `tmux new-session / switch-client`.
   3. **`awt` (Agent Worktree Orchestrator):** Provisions isolated git worktrees mapped to 1 tmux session each via `sesh connect "$target_dir"`, with redirection on deletion via `sesh last` (or `wm last`).
   4. **`gh dash`:** Binds key `s` to `sesh connect {{.RepoPath}}`.

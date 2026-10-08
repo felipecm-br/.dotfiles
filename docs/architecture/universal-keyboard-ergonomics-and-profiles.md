@@ -127,7 +127,7 @@ In both profiles, the interface conforms strictly to the **Golden Ratio ($\phi \
 │ 󰈞  Prefix + e   Workspace Files (Golden Ratio)  │                             │
 │ 󰅍  Prefix + y   Scrollback Yank & Chrome URL       │ ── Controls ─────────────── │
 │ 󰍉  Prefix + /   Workspace Ripgrep Live Search      │ • Enter: Execute directly   │
-│ 󰓩  Prefix + t   Sesh Workspace / Task Picker       │ • b / w: Open link in Chrome│
+│ 󰓩  Prefix + s   Sesh Workspace / Task Picker       │ • b / w: Open link in Chrome│
 │ 󰊢  Ctrl + Shift+G AWT Autonomous Worktree Popup    │ • e / o: Open in Neovim     │
 │ 󰊢  Ctrl + G     Lazygitrs Floating Cockpit         │ • y: Copy key to clipboard  │
 │ 󰙀  Ctrl + Shift+T Reopen Closed Window/Tab         │ • q / Esc: Close modal      │

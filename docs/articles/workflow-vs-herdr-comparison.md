@@ -147,10 +147,9 @@ Em vez de migrar, você pode incorporar as boas ideias do Herdr sem perder nada 
 | **Ir para Janela da IA** | `Alt + a` (janela `ai`) | `prefix + 1..9` / sidebar |
 | **Popup do Git** | `Ctrl + g` (`lazygitrs`) | ❌ *(Precisa abrir em split/tab manual)* |
 | **Alternar Sidebar de IA** | `Prefix + o` (split de 35%) | `prefix + b` (toggle sidebar do Herdr) |
-| **Rotacionar Atenção (Bells)** | `Prefix + i` (`ai-agent-bell-popup.sh`) | `prefix + o` (`open_notification_target`) |
-| **Seletor de Janelas / Workspaces** | `Prefix + s` ([`window-picker.sh`](file:///home/fecavmi/.dotfiles/main/tmux/.config/tmux/window-picker.sh)) | `prefix + w` (`workspace_picker`) |
+| **Cockpit / Seletor de Janelas** | `Prefix + Space` ([`cockpit-picker.sh`](file:///home/fecavmi/.dotfiles/main/tmux/.config/tmux/cockpit-picker.sh)) | `prefix + w` (`workspace_picker`) |
 | **Alternar para Última Sessão** | `Prefix + L` ([`last-session.sh`](file:///home/fecavmi/.dotfiles/main/tmux/.config/tmux/last-session.sh)) | `prefix + l` *(se `last_pane` configurado)* |
-| **Seletor de Sessões (Sesh)** | `Prefix + t` ([`sesh-picker.sh`](file:///home/fecavmi/.dotfiles/main/tmux/.config/tmux/sesh-picker.sh)) | `prefix + w` |
+| **Seletor de Sessões** | `Prefix + s` ([`session-picker.sh`](file:///home/fecavmi/.dotfiles/main/tmux/.config/tmux/session-picker.sh)) | `prefix + w` |
 | **Navegação Direta 0-9** | `Ctrl + 0..9` (sem prefixo) | `prefix + 1..9` |
 
 ---

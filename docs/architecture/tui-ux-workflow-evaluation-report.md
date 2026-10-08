@@ -310,9 +310,9 @@ AI agents executing tool chains produce rapid sequential states:
 │ Ctrl + Shift + G   │ Global / Tmux    │ AWT Worktree Modal          │ Inward chord (Pinky+Idx) │ 140ms    │ Worktree HUD│
 │ Ctrl + Shift + T   │ Global / Tmux    │ Reopen Last Closed Tab      │ Inward chord             │ 140ms    │ VSCode style│
 │ Ctrl + Shift + I   │ Global / Tmux    │ AI Attention Triage Jump    │ Inward chord (No Alt!)   │ 140ms    │ Focus agent │
-│ Prefix + s         │ Tmux             │ Window Picker Modal         │ CapsLock+Space -> s      │ 240ms    │ Mnemonic    │
+│ Prefix + Space     │ Tmux             │ AI Fleet Cockpit HUD        │ CapsLock+Space -> Space  │ 200ms    │ Cockpit HUD │
 │ Prefix + f         │ Tmux             │ Vimium In-situ Tab Hints    │ CapsLock+Space -> f      │ 240ms    │ 1-touch tab │
-│ Prefix + t         │ Tmux             │ Sesh Workspace Picker       │ CapsLock+Space -> t      │ 240ms    │ Teleport    │
+│ Prefix + s         │ Tmux             │ Sesh Workspace Picker       │ CapsLock+Space -> s      │ 220ms    │ Sessions    │
 │ Prefix + i         │ Tmux             │ AI Bell Alert HUD Popup     │ CapsLock+Space -> i      │ 240ms    │ Inspect AI  │
 │ Prefix + e         │ Tmux             │ Workspace Files Explorer    │ CapsLock+Space -> e      │ 240ms    │ Golden split│
 │ Prefix + /         │ Tmux             │ Live Ripgrep Fulltext Search│ CapsLock+Space -> /      │ 240ms    │ Search      │

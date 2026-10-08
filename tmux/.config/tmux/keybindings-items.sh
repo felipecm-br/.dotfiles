@@ -11,7 +11,7 @@ emit_tmux() {
   Prefix + P	GitHub Pull Request Review Picker	tmux	tmux-pr	~/.config/tmux/pr-picker.sh
 󰅍  Prefix + y	Scrollback Picker (Tokens, Links & Yank)	tmux	tmux-scrollback	~/.config/tmux/scrollback-picker.sh
 󰍉  Prefix + /	Workspace Ripgrep Live Search	tmux	tmux-grep	~/.config/tmux/grep-picker.sh
-󰓩  Prefix + t	Session Workspace / Task Picker	tmux	tmux-sesh	~/.config/tmux/session-picker.sh
+󰓩  Prefix + s	Session Workspace / Task Picker	tmux	tmux-sesh	~/.config/tmux/session-picker.sh
 󱂬  Prefix + Space	AI Fleet Cockpit & Window Manager	tmux	tmux-cockpit	~/.config/tmux/cockpit-picker.sh
 󰌌  Prefix + f	Vimium Window Hints (1-touch Jump)	tmux	tmux-hints	tmux switch-client -T window_hints
 󰌌  Ctrl + `	Direct Jump to Window 0 (Zero-Prefix)	tmux	tmux-select-0	tmux select-window -t 0
@@ -26,6 +26,7 @@ emit_tmux() {
 󰄧  Prefix + o	AI Side-by-Side Split (35% Right)	tmux	tmux-ai-split	~/.config/tmux/toggle-ai-split.sh
 󰏫  Prefix + N	Neovim Floating Scratchpad (90%x90%)	tmux	tmux-scratchpad	~/.config/tmux/nvim-scratchpad.sh
 󰤄  Prefix + E	Full Scrollback Buffer in Neovim	tmux	tmux-view-scrollback	~/.config/tmux/scrollback-view.sh
+󰏌  Prefix + t	Create New Window in Current Path	tmux	tmux-new-win	tmux new-window -c '#{pane_current_path}'
 󰙀  Prefix + T / u	Reopen Last Closed Window / Tab	tmux	tmux-reopen	~/.config/tmux/reopen-window.sh
 󰅖  Prefix + w / x	Close Pane / Window (Save to Reopen)	tmux	tmux-close	~/.config/tmux/close-window.sh
 󰹑  Prefix + m / z	Maximize / Zoom Active Pane	tmux	tmux-zoom	tmux resize-pane -Z

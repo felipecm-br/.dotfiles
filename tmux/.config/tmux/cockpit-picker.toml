@@ -14,7 +14,7 @@ additional = [
 
 [columns]
 split = '\t'
-max = 8
+max = 14
 names = [
     { name = "title", ignore = true },
     { name = "idx" },
@@ -22,6 +22,11 @@ names = [
     { name = "session" },
     { name = "pid" },
     { name = "path" },
+    { name = "state" },
+    { name = "agent" },
+    { name = "age" },
+    { name = "branch" },
+    { name = "sync" },
     { name = "display", ignore = true }
 ]
 
@@ -60,7 +65,7 @@ prompt = " "
 show = true
 
 [footer]
-content = " {cyan,bold:[Enter]} {darkgray:Jump}  •  {yellow,bold:[Tab]} {darkgray:Fleet/Agents}  •  {yellow,bold:[s]} {darkgray:Sessions}  •  {cyan,bold:[S]} {darkgray:Ship}  •  {green,bold:[t]} {darkgray:New}  •  {magenta,bold:[g]} {darkgray:Git}  •  {blue,bold:[/]} {darkgray:Filter}  •  {yellow,bold:[y]} {darkgray:Approve}  •  {magenta,bold:[n]} {darkgray:Deny}  •  {red,bold:[d]} {darkgray:Kill}  •  {blue,bold:[Esc]} {darkgray:Exit}"
+content = " {cyan,bold:[Enter]} {darkgray:Jump}  •  {yellow,bold:[Tab]} {darkgray:Agents}  •  {yellow,bold:[w]} {darkgray:New WT}  •  {green,bold:[t]} {darkgray:New Win}  •  {yellow,bold:[s]} {darkgray:Sessions}  •  {magenta,bold:[g]} {darkgray:Git}  •  {blue,bold:[?]} {darkgray:Help}  •  {blue,bold:[Esc]} {darkgray:Exit}"
 row_connection = "Full"
 match_indent = false
 separator = "light"
@@ -80,20 +85,26 @@ hints = false
 "/"             = "FocusFilter"
 "s"             = ["Print(__SWITCH_SESSION__)", "Quit"]
 "S"             = ["Print(__SHIP_WORKTREE__{=})", "Quit"]
+"w"             = ["Print(__NEW_WORKTREE__{=})", "Quit"]
+"W"             = ["Print(__SWEEP_WORKTREES__{=})", "Quit"]
+"R"             = ["Print(__REAP_AGENTS__{=})", "Quit"]
 "t"      = ["Print(__CREATE_WINDOW__{=})", "Quit"]
 "T"      = ["Print(__CREATE_WINDOW__{=})", "Quit"]
-"c"      = ["Print(__CREATE_WINDOW__{=})", "Quit"]
-"C"      = ["Print(__CREATE_WINDOW__{=})", "Quit"]
+"c"      = ["Print(__NEW_WORKTREE__{=})", "Quit"]
+"C"      = ["Print(__NEW_WORKTREE__{=})", "Quit"]
 "g"      = ["Print(__LAZYGIT__{=})", "Quit"]
 "gg"     = ["Print(__LAZYGIT__{=})", "Quit"]
 "G"      = ["Print(__LAZYGIT__{=})", "Quit"]
 "ctrl-g" = ["Print(__LAZYGIT__{=})", "Quit"]
+"?"         = "SwitchPreview(1)"
+"shift-?"   = "SwitchPreview(1)"
+"F1"        = "SwitchPreview(1)"
 "y"      = ["ExecuteAsync(tmux send-keys -t '{=pid}' 'y' Enter)", "Reload($HOME/.config/tmux/cockpit-picker-items.sh)"]
 "Y"      = ["ExecuteAsync(tmux send-keys -t '{=pid}' 'y' Enter)", "Reload($HOME/.config/tmux/cockpit-picker-items.sh)"]
 "n"      = ["ExecuteAsync(tmux send-keys -t '{=pid}' 'n' Enter)", "Reload($HOME/.config/tmux/cockpit-picker-items.sh)"]
 "N"      = ["ExecuteAsync(tmux send-keys -t '{=pid}' 'n' Enter)", "Reload($HOME/.config/tmux/cockpit-picker-items.sh)"]
-"d"      = ["ExecuteAsync(printf '%s\\n' '{=}' | $HOME/.config/tmux/window-picker-delete.sh; sleep 0.05)", "Reload($HOME/.config/tmux/cockpit-picker-items.sh)"]
-"D"      = ["ExecuteAsync(printf '%s\\n' '{=}' | $HOME/.config/tmux/window-picker-delete.sh; sleep 0.05)", "Reload($HOME/.config/tmux/cockpit-picker-items.sh)"]
+"d"      = ["ExecuteAsync(printf '%s\n' '{=}' | $HOME/.config/tmux/window-picker-delete.sh; sleep 0.05)", "Reload($HOME/.config/tmux/cockpit-picker-items.sh)"]
+"D"      = ["ExecuteAsync(printf '%s\n' '{=}' | $HOME/.config/tmux/window-picker-delete.sh; sleep 0.05)", "Reload($HOME/.config/tmux/cockpit-picker-items.sh)"]
 "ctrl-r" = "Reload($HOME/.config/tmux/cockpit-picker-items.sh)"
 ","      = []
 
@@ -108,20 +119,30 @@ delay_clear = true
 wrap = false
 
 [preview.initial]
-tail = false
+tail = true
 
 [preview.border]
 sides = "LEFT"
 color = "Darkgray"
 
 [[preview.layout]]
-command = '$HOME/.config/tmux/cockpit-picker-preview.sh "{=session}" "{=idx}" "{=pid}" "{=path}"'
+command = '$HOME/.config/tmux/cockpit-picker-preview.sh "{=session}" "{=idx}" "{=pid}" "{=path}" "{=state}" "{=agent}" "{=age}" "{=branch}" "{=sync}"'
 side = "right"
 percentage = 60
-scroll.tail = false
+scroll.tail = true
+
+[[preview.layout]]
+command = '$HOME/.config/tmux/cockpit-picker-help.sh'
+side = "right"
+percentage = 60
 
 [binds]
-Start    = ["ToggleColumn(title)", "ToggleColumn(name)", "ToggleColumn(session)", "ToggleColumn(idx)", "ToggleColumn(pid)", "ToggleColumn(path)"]
+Start    = [
+    "ToggleColumn(title)", "ToggleColumn(name)", "ToggleColumn(session)",
+    "ToggleColumn(idx)", "ToggleColumn(pid)", "ToggleColumn(path)",
+    "ToggleColumn(state)", "ToggleColumn(agent)", "ToggleColumn(age)",
+    "ToggleColumn(branch)", "ToggleColumn(sync)"
+]
 "tab"           = "@reloadnext"
 "shift-tab"     = "@reloadprev"
 "backtab"       = "@reloadprev"
@@ -130,7 +151,8 @@ Start    = ["ToggleColumn(title)", "ToggleColumn(name)", "ToggleColumn(session)"
 "ctrl-g" = ["Print(__LAZYGIT__{=})", "Quit"]
 "ctrl-t" = ["Print(__CREATE_WINDOW__{=})", "Quit"]
 "ctrl-r" = "Reload($HOME/.config/tmux/cockpit-picker-items.sh)"
-"?"      = "ToggleFooter"
-"F1"     = "ToggleFooter"
+"?"         = "SwitchPreview(1)"
+"shift-?"   = "SwitchPreview(1)"
+"F1"        = "SwitchPreview(1)"
 ","      = []
 "@reload"= "Reload($HOME/.config/tmux/cockpit-picker-items.sh)"

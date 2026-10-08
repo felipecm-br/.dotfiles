@@ -259,7 +259,7 @@ declare -A seen_windows=()
 agent_count=$(awk -F'\t' '$14 == 1 { c++ } END { print c+0 }' "$tmp_raw")
 
 if [ "$filter_agents" -eq 1 ] && [ "$agent_count" -eq 0 ]; then
-  printf "· (no active AI agents)\t0\t-\t%s\t\t\t \033[2m(no AI agents running — press Tab for Fleet view)\033[0m\n" "${cur_session}"
+  printf "· (no active AI agents)\t0\t-\t%s\t-\t-\t-\t-\t-\t-\t-\t \033[2m(no AI agents running — press Tab for Fleet view)\033[0m\n" "${cur_session}"
 else
   for sess in $(for s in "${!sess_prio[@]}"; do printf "%d\t%s\t%s\n" "${sess_prio[$s]}" "${sess_ts[$s]}" "$s"; done | sort -t$'\t' -k1,1n -k2,2n -k3,3 | cut -f3); do
     if [ "$filter_agents" -eq 1 ] && [ -z "${session_has_agent["$sess"]:-}" ]; then
@@ -358,8 +358,10 @@ else
       display_line=" ${ai_ico}${idx_col}${c_wname}${wname}${R}${agent_tag}${age_tag}${branch_tag}   "
       search_title="${sess} ${idx} ${wname} ${agent_label} ${branch} ${st} ${age_str} ${sync_search}"
 
-      printf '%s\t%s\t%s\t%s\t%s\t%s\t%b\n' \
-        "$search_title" "$idx" "$wname" "$sess" "$pid" "$ppath" "$display_line"
+      printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%b\n' \
+        "$search_title" "$idx" "$wname" "$sess" "$pid" "$ppath" \
+        "$st" "${agent_label:--}" "${age_str:--}" "${branch:--}" "${sync_search:--}" \
+        "$display_line"
     done < <(sort -t$'\t' -k1,1n -k4,4n "$tmp_raw")
   done
 fi
