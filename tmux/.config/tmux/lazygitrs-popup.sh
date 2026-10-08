@@ -23,8 +23,10 @@ if ! git -C "$PROJECT_DIR" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
 fi
 
 if [ "$OPEN_COMMITS" -eq 0 ]; then
-    # Smart detection: if working tree is clean, auto-switch to commits
-    if [ -z "$(git -C "$PROJECT_DIR" status --porcelain 2>/dev/null)" ]; then
+    # Smart detection: fast check if working tree is clean, auto-switch to commits
+    if git -C "$PROJECT_DIR" diff --quiet 2>/dev/null && \
+       git -C "$PROJECT_DIR" diff --cached --quiet 2>/dev/null && \
+       [ -z "$(git -C "$PROJECT_DIR" ls-files --others --exclude-standard 2>/dev/null | head -n1)" ]; then
         OPEN_COMMITS=1
     fi
 fi
@@ -36,8 +38,22 @@ _tmux_style="$HOME/.local/state/omarchy/current/theme/tmux-style.sh"
 . "$_tmux_style" 2>/dev/null || true
 unset _tmux_style
 
-LZG_BIN="$HOME/.cargo/bin/lazygitrs"
-[ -x "$LZG_BIN" ] || LZG_BIN="$(command -v lazygitrs 2>/dev/null || echo "lazygitrs")"
+resolve_lzg() {
+    local candidate
+    for candidate in "$HOME/.local/bin/lazygitrs" "$(command -v lazygitrs 2>/dev/null)" "$HOME/.cargo/bin/lazygitrs"; do
+        [ -n "$candidate" ] && [ -x "$candidate" ] || continue
+        if "$candidate" --help 2>&1 | grep -q -- '--commits'; then
+            printf '%s\n' "$candidate"
+            return 0
+        fi
+    done
+    return 1
+}
+
+LZG_BIN="$(resolve_lzg)" || {
+    tmux display-message "lazygitrs with --commits support not found in PATH"
+    exit 0
+}
 
 LZG_CMD="$LZG_BIN -d -c popup"
 if [ "$OPEN_COMMITS" -eq 1 ]; then
