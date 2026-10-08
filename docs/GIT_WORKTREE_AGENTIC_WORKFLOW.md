@@ -526,7 +526,7 @@ While low-level CLI utilities like `wt` (Worktree CLI) provide direct Git comman
 | **Direct CLI Merge** | `awt merge [branch] [--into <target>] [--no-hooks]` | Merge with pre-merge validation gate (`--squash`, `--rebase`, `--no-commit`, `--no-remove`, `--no-tmux`). |
 | **Direct CLI Ship** | `awt ship [branch] [--into <target>] [--no-hooks]` | Merge into base, push to remote origin, and clean up worktree. |
 | **PR / Issue Dashboard** | `gh dash` | GitHub TUI dashboard. Press `g` for `lazygitrs` or `s` for `sesh`. |
-| **Switch Tmux Sessions** | `Prefix + t` / `Prefix + s` | Fast session and window switcher via Sesh & Matchmaker. |
+| **Switch Tmux Sessions** | `Prefix + s` | Fast session and window switcher via Sesh & Matchmaker. |
 | **Validate Dotfile Symlinks** | `./stow.sh -n` | Mandatory dry-run check before any merge into `main`. |
 | **Re-stow Updated Package** | `./stow.sh -r <package>` | Refresh symlinks in `$HOME` after merging into `main`. |
 

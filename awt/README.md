@@ -105,6 +105,8 @@ This symlinks all presets, scripts, hooks, and CLI executables into:
 | `awt rebase [base]` | — | Safely rebase current worktree onto base branch with auto-stash. |
 | `awt merge [branch] [flags]` | — | Merge worktree with pre-merge validation gates (`--into <target>`, `--rebase`, `--squash`, `--no-hooks`). |
 | `awt ship [branch] [flags]` | — | Rebase onto target, run pre-merge gate, fast-forward merge, push to origin, and clean up. |
+| `awt sweep [-y] [-n] [--fetch]` | — | Batch prune worktrees whose branches are already merged locally or via GitHub PRs. |
+| `awt reap [--hours N] [-y] [-n]` | — | Garbage-collect stale AI agents (idle > N hours) and orphan worktree Tmux sessions. |
 | `awt clone <repo> [dir]` | **`awtc`** | Clone repository in `.bare` layout and provision initial worktree. |
 | `awt help` / `awt -h` | — | Display CLI help, usage options, and flag reference. |
 

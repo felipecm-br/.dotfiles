@@ -84,8 +84,9 @@ USAGE:
     awt clone <repo> [dir]                  Clone repository into .bare container layout (awtc)
     awt rm | remove <branch> [flags]        Delete worktree, Git branch, and kill Tmux session
     awt rebase [base]                       Rebase active worktree onto base branch with auto-stash
-    awt merge [branch] [flags]              Merge active worktree into base branch with hooks & validation
     awt ship [branch] [flags]               Merge into base, push to origin, and clean up worktree
+    awt sweep [flags] [base]                Prune merged worktrees and dead Tmux sessions in batch
+    awt reap [flags]                        Garbage-collect stale AI agents and orphan worktree sessions
     awt help | -h | --help                  Show this help message
 
 FLAGS & OPTIONS:
@@ -265,6 +266,34 @@ case "$1" in
             exec "$pr_script" "$@"
         else
             echo "awt: awt-pr.sh not found."
+            exit 1
+        fi
+        exit 0
+        ;;
+    sweep)
+        shift
+        sweep_script="$HOME/.config/waymaker/scripts/awt-sweep.sh"
+        [ -x "$sweep_script" ] || sweep_script="$HOME/.config/matchmaker/scripts/awt-sweep.sh"
+        [ -x "$sweep_script" ] || sweep_script="$(dirname "$0")/../../.config/waymaker/scripts/awt-sweep.sh"
+        [ -x "$sweep_script" ] || sweep_script="$(dirname "$0")/../../.config/matchmaker/scripts/awt-sweep.sh"
+        if [[ -x "$sweep_script" ]]; then
+            exec "$sweep_script" "$@"
+        else
+            echo "awt: awt-sweep.sh not found."
+            exit 1
+        fi
+        exit 0
+        ;;
+    reap)
+        shift
+        reap_script="$HOME/.config/waymaker/scripts/awt-reap.sh"
+        [ -x "$reap_script" ] || reap_script="$HOME/.config/matchmaker/scripts/awt-reap.sh"
+        [ -x "$reap_script" ] || reap_script="$(dirname "$0")/../../.config/waymaker/scripts/awt-reap.sh"
+        [ -x "$reap_script" ] || reap_script="$(dirname "$0")/../../.config/matchmaker/scripts/awt-reap.sh"
+        if [[ -x "$reap_script" ]]; then
+            exec "$reap_script" "$@"
+        else
+            echo "awt: awt-reap.sh not found."
             exit 1
         fi
         exit 0

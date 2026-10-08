@@ -70,6 +70,18 @@ awt rm --no-hooks {{branch}}
 # Force delete dirty worktree, Git branch, and Tmux session
 awt rm -f {{branch}}
 
+# Batch sweep and prune merged Git worktrees and dead sessions
+awt sweep
+
+# Preview worktrees eligible for sweep without deleting
+awt sweep --dry-run
+
+# Garbage-collect stale AI agents and orphan worktree sessions (default: >4h)
+awt reap
+
+# Preview stale AI agents eligible for reaping without terminating
+awt reap --dry-run
+
 # Clone repository into .bare container layout
 awt clone {{repo_url}} {{target_dir}}
 
