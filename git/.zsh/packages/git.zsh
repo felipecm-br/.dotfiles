@@ -1514,3 +1514,79 @@ print(json.dumps(remaining))
     rm -f "$cache_hash_file" "$cache_json_file"
   fi
 }
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Test Badge & Quality Gate Helper: gtest
+# ─────────────────────────────────────────────────────────────────────────────
+# Runs tests and, if passing, amends HEAD with 'Test-Status: pass (<summary>)'
+# so that TUIs (lazygitrs, git log) render green pass badges on the commit.
+gtest() {
+  local root
+  root=$(git rev-parse --show-toplevel 2>/dev/null)
+  if [[ -z "$root" ]]; then
+    echo "gtest: not in a git repository" >&2
+    return 1
+  fi
+
+  local test_cmd="$*"
+  local summary=""
+  local output=""
+  local exit_code=0
+
+  if [[ -n "$test_cmd" ]]; then
+    echo "Running custom test command: $test_cmd..."
+    output=$(eval "$test_cmd" 2>&1)
+    exit_code=$?
+    summary="pass ($test_cmd)"
+  elif [[ -f "$root/Justfile" || -f "$root/justfile" ]] && command -v just >/dev/null 2>&1 && (cd "$root" && just --summary 2>/dev/null | grep -qw "check"); then
+    echo "Running 'just check' in $(basename "$root")..."
+    output=$(cd "$root" && just check 2>&1)
+    exit_code=$?
+    summary="pass (just check)"
+  elif [[ -f "$root/Cargo.toml" ]] && command -v cargo >/dev/null 2>&1; then
+    echo "Running 'cargo test' in $(basename "$root")..."
+    output=$(cd "$root" && cargo test 2>&1)
+    exit_code=$?
+    local count
+    count=$(echo "$output" | grep -E "test result: ok\." | sed -E 's/.*ok\.[[:space:]]*([0-9]+)[[:space:]]*passed.*/\1/' | head -n1)
+    if [[ -n "$count" && "$count" =~ ^[0-9]+$ ]]; then
+      summary="pass ($count/$count)"
+    else
+      summary="pass (cargo test)"
+    fi
+  elif [[ -f "$root/package.json" ]] && command -v npm >/dev/null 2>&1 && grep -q '"test"' "$root/package.json"; then
+    echo "Running 'npm test' in $(basename "$root")..."
+    output=$(cd "$root" && npm test 2>&1)
+    exit_code=$?
+    summary="pass (npm test)"
+  else
+    echo "gtest: no recognized test runner found (Justfile check, Cargo.toml, or package.json)" >&2
+    echo "Usage: gtest [custom-test-command...]" >&2
+    return 1
+  fi
+
+  if [[ $exit_code -ne 0 ]]; then
+    echo -e "\033[1;31m✘ Tests failed (exit code $exit_code):\033[0m" >&2
+    echo "$output" | tail -n 25 >&2
+    return $exit_code
+  fi
+
+  echo "$output" | tail -n 10
+  echo -e "\033[1;32m✔ Tests passed!\033[0m"
+
+  # Check if HEAD exists and working copy is clean before amending
+  if ! git -C "$root" rev-parse HEAD >/dev/null 2>&1; then
+    return 0
+  fi
+
+  if ! git -C "$root" diff --quiet 2>/dev/null || ! git -C "$root" diff --cached --quiet 2>/dev/null; then
+    echo "Note: working directory has uncommitted changes; skipping commit amend."
+    return 0
+  fi
+
+  git -C "$root" commit --amend --no-edit --trailer "Test-Status: $summary" >/dev/null 2>&1 || true
+  local short_sha
+  short_sha=$(git -C "$root" rev-parse --short HEAD 2>/dev/null)
+  echo -e "\033[1;32m✔ Stamped 'Test-Status: $summary' on commit $short_sha.\033[0m"
+}
+

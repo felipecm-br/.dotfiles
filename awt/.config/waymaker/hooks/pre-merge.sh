@@ -92,6 +92,25 @@ if [[ -n "$config_file" ]]; then
     done
 fi
 
+# Helper: stamp test status trailer onto HEAD commit if not already present
+awt_stamp_test_trailer() {
+    local wt="$1"
+    local status_label="$2"
+
+    local head_msg
+    head_msg=$(git -C "$wt" log -1 --format=%B 2>/dev/null || true)
+    [[ -z "$head_msg" ]] && return 0
+
+    if echo "$head_msg" | grep -Ei -q '^(test|tests|test-status|ci):'; then
+        return 0
+    fi
+
+    if git -C "$wt" diff --quiet 2>/dev/null && git -C "$wt" diff --cached --quiet 2>/dev/null; then
+        git -C "$wt" commit --amend --no-edit --trailer "Test-Status: $status_label" >/dev/null 2>&1 || true
+        echo "Stamped 'Test-Status: $status_label' on commit $(git -C "$wt" rev-parse --short HEAD 2>/dev/null)."
+    fi
+}
+
 # 3. Automated Repository Quality Gate Checks
 # If merging in .dotfiles, enforce docs and link integrity
 if [[ "$repo_parent" == ".dotfiles" ]]; then
@@ -100,6 +119,7 @@ if [[ "$repo_parent" == ".dotfiles" ]]; then
             echo "pre-merge check failed: ./scripts/docs-lint.sh detected broken links or misplaced root docs." >&2
             exit 1
         }
+        awt_stamp_test_trailer "$wt_path" "pass (docs-lint)"
     fi
 fi
 
@@ -107,10 +127,28 @@ fi
 if [[ -f "$wt_path/Justfile" ]] || [[ -f "$wt_path/justfile" ]]; then
     if command -v just >/dev/null 2>&1 && (cd "$wt_path" && just --summary 2>/dev/null | grep -qw "check"); then
         echo "Running pre-merge quality gate: 'just check' in $(basename "$wt_path")..."
-        (cd "$wt_path" && just check) || {
+        if (cd "$wt_path" && just check); then
+            awt_stamp_test_trailer "$wt_path" "pass (just check)"
+        else
             echo "pre-merge check failed: 'just check' reported errors." >&2
             exit 1
-        }
+        fi
+    fi
+elif [[ -f "$wt_path/Cargo.toml" ]] && command -v cargo >/dev/null 2>&1; then
+    echo "Running pre-merge quality gate: 'cargo test' in $(basename "$wt_path")..."
+    test_out=$(cd "$wt_path" && cargo test 2>&1)
+    test_exit=$?
+    if [[ $test_exit -eq 0 ]]; then
+        passed_count=$(echo "$test_out" | grep -E "test result: ok\." | sed -E 's/.*ok\.[[:space:]]*([0-9]+)[[:space:]]*passed.*/\1/' | head -n1)
+        if [[ -n "$passed_count" && "$passed_count" =~ ^[0-9]+$ ]]; then
+            awt_stamp_test_trailer "$wt_path" "pass ($passed_count/$passed_count)"
+        else
+            awt_stamp_test_trailer "$wt_path" "pass (cargo test)"
+        fi
+    else
+        echo "pre-merge check failed: 'cargo test' reported errors:" >&2
+        echo "$test_out" | tail -n 20 >&2
+        exit 1
     fi
 fi
 

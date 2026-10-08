@@ -271,6 +271,12 @@ chime-at-breakpoint {{sound_file}}
 # Open AI Fleet & Window Cockpit HUD in Tmux (85% × 75%)
 ~/.config/tmux/cockpit-picker.sh
 
+# Run test suite and stamp Test-Status trailer on HEAD commit for TUI badges
+gtest
+
+# Run custom test command and stamp Test-Status trailer on HEAD commit
+gtest {{test_command}}
+
 $ (awt) branch: git branch --format='%(refname:short)' 2>/dev/null
 $ (awt) base: git branch --format='%(refname:short)' 2>/dev/null
 $ (awt) pr_number: gh pr list --limit 30 --json number,title --template '{{range .}}{{tablerow .number .title}}{{end}}' 2>/dev/null

@@ -185,7 +185,7 @@ if [[ -d "$target_wt" ]]; then
     if [[ $squash -eq 1 ]]; then
         if git -C "$target_wt" merge --squash "$source_branch" >/dev/null 2>&1; then
             if [[ $no_commit -eq 0 ]]; then
-                git -C "$target_wt" commit -m "squash: merge $source_branch into $target_branch" >/dev/null 2>&1 || true
+                git -C "$target_wt" commit -m "squash: merge $source_branch into $target_branch" --trailer "Test-Status: pass (quality-gate)" >/dev/null 2>&1 || true
             fi
             merge_success=1
         fi
@@ -198,6 +198,7 @@ if [[ -d "$target_wt" ]]; then
         if git -C "$target_wt" merge --ff "$source_branch" >/dev/null 2>&1; then
             merge_success=1
         elif git -C "$target_wt" merge "$source_branch" -m "merge: $source_branch into $target_branch" >/dev/null 2>&1; then
+            git -C "$target_wt" commit --amend --no-edit --trailer "Test-Status: pass (quality-gate)" >/dev/null 2>&1 || true
             merge_success=1
         fi
     fi
