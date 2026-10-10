@@ -26,14 +26,14 @@ if [ -n "$acpd_token" ] && command -v curl >/dev/null 2>&1 && command -v jq >/de
     -d '{"jsonrpc":"2.0","method":"agentState/list","id":1}' 2>/dev/null || true)
 
   if [ -n "$acpd_res" ]; then
-    # Urgent: permission, awaiting_input, question, error
+    # Urgent: permission, awaiting_input, question, error, stalled
     while IFS= read -r p; do
       if [[ -n "$p" && "$p" =~ ^%[0-9]+$ ]] && tmux display-message -t "$p" -p '#{pane_id}' >/dev/null 2>&1; then
         notifying_panes+=("$p")
       fi
     done < <(echo "$acpd_res" | jq -r '
       .result // {} | to_entries |
-      map(select(.value.state as $s | ["permission", "awaiting_input", "question", "error"] | index($s))) |
+      map(select(.value.state as $s | ["permission", "awaiting_input", "question", "error", "stalled"] | index($s))) |
       sort_by(-.value.last_timestamp) |
       .[].key
     ' 2>/dev/null || true)
@@ -54,11 +54,11 @@ if [ -n "$acpd_token" ] && command -v curl >/dev/null 2>&1 && command -v jq >/de
   fi
 fi
 
-# 1. Native Tmux: search for panes in active attention/question/permission/error state
+# 1. Native Tmux: search for panes in active attention/question/permission/error/stalled state
 if [ "${#notifying_panes[@]}" -eq 0 ]; then
   while IFS= read -r line; do
     [ -n "$line" ] && notifying_panes+=("$line")
-  done < <(tmux list-panes -a -F '#{pane_id} #{@ai_agent_state_raw}' 2>/dev/null | awk '$2 ~ /^(question|permission|error|awaiting_input)$/ {print $1}')
+  done < <(tmux list-panes -a -F '#{pane_id} #{@ai_agent_state_raw}' 2>/dev/null | awk '$2 ~ /^(question|permission|error|awaiting_input|stalled)$/ {print $1}')
 fi
 
 # 2. Fallback to @ai_agent_last_bell if no state-filtered panes found
@@ -80,7 +80,7 @@ fi
 if [ "${#notifying_panes[@]}" -eq 0 ]; then
   while IFS= read -r line; do
     [ -n "$line" ] && notifying_panes+=("$line")
-  done < <(tmux list-panes -a -F '#{pane_id} #{@ai_agent_state_raw}' 2>/dev/null | awk '$2 ~ /^(idle|working|busy|question|permission|error|awaiting_input)$/ {print $1}')
+  done < <(tmux list-panes -a -F '#{pane_id} #{@ai_agent_state_raw}' 2>/dev/null | awk '$2 ~ /^(idle|working|busy|question|permission|error|awaiting_input|stalled)$/ {print $1}')
 fi
 
 # 5. Fallback: Search for any pane running agy, antigravity, or opencode (command or title)

@@ -4,7 +4,7 @@ basic = true
 bar = "Plain"
 color = "Darkgray"
 prompt = ""
-focus_on_start = "picker"
+focus_on_start = "filter"
 hints = false
 
 [start]
@@ -83,6 +83,8 @@ percentage = 55
 "backtab"       = "@reloadprev"
 "shift-backtab" = "@reloadprev"
 "/"             = "FocusFilter"
+"esc"           = "Quit"
+"q"             = "Quit"
 "c"             = ["Print(__SWITCH_COCKPIT__)", "Quit"]
 "C"             = ["Print(__SWITCH_COCKPIT__)", "Quit"]
 "w"             = ["Print(__SWITCH_COCKPIT__)", "Quit"]
@@ -100,6 +102,9 @@ percentage = 55
 "shift-tab"     = "@reloadprev"
 "backtab"       = "@reloadprev"
 "shift-backtab" = "@reloadprev"
+"esc"           = "ToggleFocus"
+"ctrl-c"        = "Quit"
 "ctrl-s"        = ["Print(__SWITCH_COCKPIT__)", "Quit"]
 "ctrl-d"        = [ 'ExecuteAsync(wm session kill "{=}")', "SetQuery()", "Reload" ]
 ","             = []
+

@@ -125,6 +125,11 @@ tmux list-panes -a -F '#{session_name}|#{window_index}|#{window_name}|#{pane_id}
       ico="󱜻"
       c_ico="$C_QUESTION"
       ;;
+    stalled|hanging)
+      prio=2
+      ico="󱥁"
+      c_ico="$C_PERM"
+      ;;
     error)
       prio=3
       ico="󰨄"
@@ -295,6 +300,7 @@ else
       case "$st" in
         permission) c_ico="$C_PERM" ;;
         question|awaiting_input) c_ico="$C_QUESTION" ;;
+        stalled|hanging) c_ico="$C_PERM" ;;
         error) c_ico="$C_ERROR" ;;
         busy|working) c_ico="$C_BUSY" ;;
         idle) c_ico="$C_IDLE" ;;

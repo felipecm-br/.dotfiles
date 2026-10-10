@@ -40,6 +40,10 @@ color = "#d699b6"
 icon = "󱅭"
 color = "#e09d7f"
 
+[theme.states.stalled]
+icon = "󱥁"
+color = "#e09d7f"
+
 [theme.states.error]
 icon = "󰨄"
 color = "#e67e80"

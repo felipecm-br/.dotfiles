@@ -23,14 +23,14 @@ if [ -n "$acpd_token" ] && command -v curl >/dev/null 2>&1 && command -v jq >/de
     -d '{"jsonrpc":"2.0","method":"agentState/list","id":1}' 2>/dev/null || true)
 
   if [ -n "$acpd_res" ]; then
-    # Urgent: permission, awaiting_input, question, error
+    # Urgent: permission, awaiting_input, question, error, stalled
     while IFS= read -r p; do
       if [[ -n "$p" && "$p" =~ ^%[0-9]+$ ]] && tmux display-message -t "$p" -p '#{pane_id}' >/dev/null 2>&1; then
         notifying_panes+=("$p")
       fi
     done < <(echo "$acpd_res" | jq -r '
       .result // {} | to_entries |
-      map(select(.value.state as $s | ["permission", "awaiting_input", "question", "error"] | index($s))) |
+      map(select(.value.state as $s | ["permission", "awaiting_input", "question", "error", "stalled"] | index($s))) |
       sort_by(-.value.last_timestamp) |
       .[].key
     ' 2>/dev/null || true)
@@ -51,11 +51,11 @@ if [ -n "$acpd_token" ] && command -v curl >/dev/null 2>&1 && command -v jq >/de
   fi
 fi
 
-# 2. Tmux Native Fallback: Panes in active question, permission, error, or awaiting_input state
+# 2. Tmux Native Fallback: Panes in active question, permission, error, awaiting_input, or stalled state
 if [ "${#notifying_panes[@]}" -eq 0 ]; then
   while IFS= read -r line; do
     [ -n "$line" ] && notifying_panes+=("$line")
-  done < <(tmux list-panes -a -F '#{pane_id} #{@ai_agent_state_raw}' 2>/dev/null | awk '$2 ~ /^(question|permission|error|awaiting_input)$/ {print $1}')
+  done < <(tmux list-panes -a -F '#{pane_id} #{@ai_agent_state_raw}' 2>/dev/null | awk '$2 ~ /^(question|permission|error|awaiting_input|stalled)$/ {print $1}')
 fi
 
 # 3. Fallback: Check @ai_agent_last_bell
@@ -77,7 +77,7 @@ fi
 if [ "${#notifying_panes[@]}" -eq 0 ]; then
   while IFS= read -r line; do
     [ -n "$line" ] && notifying_panes+=("$line")
-  done < <(tmux list-panes -a -F '#{pane_id} #{@ai_agent_state_raw}' 2>/dev/null | awk '$2 ~ /^(idle|working|busy|question|permission|error|awaiting_input)$/ {print $1}')
+  done < <(tmux list-panes -a -F '#{pane_id} #{@ai_agent_state_raw}' 2>/dev/null | awk '$2 ~ /^(idle|working|busy|question|permission|error|awaiting_input|stalled)$/ {print $1}')
 fi
 
 # 6. Fallback: Search for any pane running agy, antigravity, or opencode CLI
@@ -154,7 +154,7 @@ sound_file=""
 case "$target_state" in
   question|awaiting_input) sound_file="$HOME/.local/share/sounds/ai/02-gentle-ping.wav" ;;
   permission) sound_file="$HOME/.local/share/sounds/ai/06-cyber-pulse.wav" ;;
-  error) sound_file="$HOME/.local/share/sounds/ai/10-arcade-blip.wav" ;;
+  error|stalled) sound_file="$HOME/.local/share/sounds/ai/10-arcade-blip.wav" ;;
   *) sound_file="$HOME/.local/share/sounds/ai/04-subtle-bell.wav" ;;
 esac
 if [ -n "$sound_file" ] && [ -f "$sound_file" ]; then

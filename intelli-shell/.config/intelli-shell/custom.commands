@@ -253,6 +253,12 @@ acpd-cli msg {{message}}
 # Trigger visual or audible alert bell on target pane via ACPD
 acpd-cli bell {{pane}}
 
+# Wait synchronously for agent pane to reach target state (e.g. idle)
+acpd-cli wait {{pane}} --state {{state}} --timeout {{timeout}}
+
+# Dismiss agent attention, question, or permission badge on target pane
+acpd-cli dismiss {{pane}}
+
 # Authenticate and connect to Tailscale network with SSH enabled
 sudo tailscale up --ssh
 

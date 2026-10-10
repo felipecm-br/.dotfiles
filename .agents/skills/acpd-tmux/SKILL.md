@@ -37,6 +37,8 @@ All requests must be valid JSON-RPC 2.0 payloads with the Bearer token header fr
 - `tmux.kill_pane`: Kills a specific pane.
 - `tmux.kill_window`: Kills a specific window.
 - `tmux.kill_session`: Kills a specific session.
+- `agentState/wait`: Waits synchronously for a pane to reach a target state (`pane_id`, `target_state`, `timeout_secs`).
+- `agentState/dismiss`: Dismisses attention badge and notification on a pane (`pane_id`).
 
 ## Recipes
 

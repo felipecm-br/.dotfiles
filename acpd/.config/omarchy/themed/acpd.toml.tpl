@@ -40,6 +40,10 @@ color = "{{ color13 }}"
 icon = "󱅭"
 color = "{{ orange }}"
 
+[theme.states.stalled]
+icon = "󱥁"
+color = "{{ orange }}"
+
 [theme.states.error]
 icon = "󰨄"
 color = "{{ color1 }}"

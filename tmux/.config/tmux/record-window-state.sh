@@ -130,6 +130,7 @@ case "${1:-}" in
     if [ -n "$entry" ]; then
       echo "$entry" > "$ACTIVE_FILE"
     fi
+    acpd-cli dismiss >/dev/null 2>&1 &
     ;;
   --unlinked)
     if [ -f "$ACTIVE_FILE" ] && [ -s "$ACTIVE_FILE" ]; then

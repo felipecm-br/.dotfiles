@@ -242,6 +242,94 @@ cmd_kill() {
   fi
 }
 
+cmd_dismiss() {
+  local pane="${1:-}"
+  if [[ -z "$pane" ]]; then
+    pane=$(tmux display-message -p '#{pane_id}' 2>/dev/null || echo "")
+  fi
+
+  if [[ -z "$pane" ]]; then
+    return 0
+  fi
+
+  local res
+  res=$(rpc_call "agentState/dismiss" "$(jq -nc --arg p "$pane" '{"pane_id": $p}')" 2>/dev/null || true)
+  local status
+  status=$(echo "$res" | jq -r '.result.status // "noop"')
+  if [[ "$status" == "dismissed" ]]; then
+    echo "Dismissed attention badge for pane $pane."
+  fi
+}
+
+cmd_wait() {
+  local pane=""
+  local target_state="idle"
+  local timeout=300
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --state|-s)
+        target_state="$2"
+        shift 2
+        ;;
+      --timeout|-t)
+        timeout="$2"
+        shift 2
+        ;;
+      -*)
+        echo "Unknown option: $1" >&2
+        return 1
+        ;;
+      *)
+        if [[ -z "$pane" ]]; then
+          pane="$1"
+        fi
+        shift
+        ;;
+    esac
+  done
+
+  if [[ -z "$pane" ]]; then
+    pane=$(tmux display-message -p '#{pane_id}' 2>/dev/null || echo "")
+  fi
+
+  if [[ -z "$pane" ]]; then
+    echo "Usage: acpd-cli wait <pane_id> [--state <state>] [--timeout <secs>]" >&2
+    return 1
+  fi
+
+  local res
+  res=$(rpc_call "agentState/wait" "$(jq -nc \
+    --arg p "$pane" \
+    --arg s "$target_state" \
+    --argjson t "$timeout" \
+    '{"pane_id": $p, "target_state": $s, "timeout_secs": $t}')")
+
+  local status
+  status=$(echo "$res" | jq -r '.result.status // "error"')
+
+  case "$status" in
+    reached)
+      echo "Pane $pane reached state $target_state."
+      return 0
+      ;;
+    timeout)
+      echo "Timeout (${timeout}s) waiting for pane $pane to reach state $target_state." >&2
+      return 1
+      ;;
+    closed)
+      echo "Pane $pane was closed while waiting for state $target_state." >&2
+      return 2
+      ;;
+    *)
+      local err
+      err=$(echo "$res" | jq -r '.error.message // "Unknown error"')
+      echo "Error waiting for pane $pane: $err" >&2
+      return 1
+      ;;
+  esac
+}
+
 cmd_help() {
   cat <<'EOF'
 acpd-cli — Agent Client Protocol Daemon CLI & Workflow Orchestrator
@@ -260,6 +348,11 @@ COMMANDS:
   list [target]          List agents, sessions, windows, or panes (default: agents)
   capture <pane> [lines] Capture scrollback text from a target pane (default: 35 lines)
   send <pane> <keys...>  Send keystrokes or commands to a target pane
+  wait <pane> [opts]     Wait synchronously for pane to reach state (default: idle)
+                         Options:
+                           -s, --state <state>    Target agent state (default: "idle")
+                           -t, --timeout <secs>   Timeout in seconds (default: 300)
+  dismiss [pane]         Dismiss attention/permission badge (auto on pane-focus-in)
   msg <message>          Display banner message on Tmux status line
   bell [pane]            Trigger visual/audible alert bell
   kill <target>          Kill target pane (%X), window (@X / :X), or session (name)
@@ -272,6 +365,12 @@ ENVIRONMENT:
 EXAMPLES:
   # Check system & agent states
   acpd-cli status
+
+  # Wait synchronously for background subagent to finish
+  acpd-cli wait %2 --state idle --timeout 60
+
+  # Dismiss attention badge on focus
+  acpd-cli dismiss %2
 
   # Run Antigravity CLI detached in background session
   acpd-cli run -d -s work -w agy agy
@@ -307,6 +406,14 @@ case "${1:-}" in
   send)
     shift
     cmd_send "$@"
+    ;;
+  wait)
+    shift
+    cmd_wait "$@"
+    ;;
+  dismiss)
+    shift
+    cmd_dismiss "$@"
     ;;
   msg)
     shift

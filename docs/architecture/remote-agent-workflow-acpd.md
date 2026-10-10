@@ -82,18 +82,38 @@ The `acpd-cli` utility ([`acpd/.local/bin/acpd-cli`](file:///home/fecavmi/.dotfi
 
 ### Available Commands
 
-- `acpd-cli status`: Check daemon health, active AI agent states (`working`, `idle`, `waiting`, `error`), and active Tmux sessions.
+- `acpd-cli status`: Check daemon health, active AI agent states (`working`, `idle`, `waiting`, `permission`, `stalled`, `error`), and active Tmux sessions.
 - `acpd-cli run [options] <cmd...>`: Run an agent or command inside a managed Tmux session.
   - `-s, --session <name>`: Target session (default: `agents`).
   - `-w, --window <name>`: Target window name.
   - `-d, --detach`: Launch detached in background without attaching.
   - `-p, --split`: Split active pane instead of creating a new window.
+- `acpd-cli wait <pane_id> [options]`: Wait synchronously for an agent pane to reach a target state.
+  - `-s, --state <state>`: Target state (default: `idle`).
+  - `-t, --timeout <secs>`: Timeout in seconds (default: `300`).
+- `acpd-cli dismiss [pane_id]`: Dismiss attention/question/permission badge and notification (automatically called by Tmux `pane-focus-in` hook).
 - `acpd-cli list [agents|sessions|windows|panes]`: List active resources.
 - `acpd-cli capture <pane_id> [lines]`: Capture scrollback output from a target pane.
 - `acpd-cli send <pane_id> <keys...>`: Send keystrokes or prompts to an agent pane.
 - `acpd-cli msg <text>`: Display banner notification on the Tmux status bar.
 - `acpd-cli bell [pane_id]`: Trigger visual and audible bell notification.
 - `acpd-cli kill <target>`: Terminate pane, window, or session.
+
+### Proactive Agent Supervision & Stall Detection
+
+`acpd` includes built-in proactive supervision heuristics:
+1. **Stall Detection (Heurística de Detecção de Agente Travado):**
+   - When an agent is in `working` state, `acpd` samples pane output (scrollback diff and cursor position) and Linux process tree CPU ticks (`utime + stime`) every 5 seconds.
+   - If a pane emits **no new text output for > 20 seconds** and CPU delta is **zero**, `acpd` transitions the state to `stalled` (glyph `󱥁`, amber color `#fab387` / `#e09d7f`) and triggers an alert.
+   - If output resumes or CPU activity picks up, `acpd` automatically recovers the state back to `working`.
+2. **Auto-Dismiss on Pane Focus:**
+   - When an agent requests attention (`question` or `permission`), switching to that window/pane immediately triggers Tmux's `pane-focus-in` hook.
+   - The hook invokes `acpd-cli dismiss #{pane_id}`, which clears the notification bell banner and transitions the badge to `idle` without requiring any manual clicks or reset chords.
+3. **Synchronous Synchronization (`agentState/wait`):**
+   - Sub-agents, orchestrators, and shell scripts can wait for another agent to complete:
+     ```bash
+     acpd-cli wait %2 --state idle --timeout 120
+     ```
 
 ### The `acpd` binary itself
 

@@ -132,6 +132,10 @@ case "$ai_raw" in
     status_badge="${C_MAGENTA}${BOLD}󱜻 INTERACTIVE QUESTION${R}"
     card_border="$C_MAGENTA"
     ;;
+  stalled|hanging)
+    status_badge="${C_ORANGE}${BOLD}󱥁 STALLED / HANGING${R}"
+    card_border="$C_ORANGE"
+    ;;
   error)
     status_badge="${C_RED}${BOLD}󰨄 EXECUTION ERROR${R}"
     card_border="$C_RED"
