@@ -1,3 +1,5 @@
+# Ensure path arrays maintain unique entries across nested subshells and forks
+typeset -U path PATH
 
 # Source the Omarchy initialization script
 PATH="$HOME/.local/bin:$PATH"

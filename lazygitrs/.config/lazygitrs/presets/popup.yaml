@@ -83,11 +83,11 @@ keybinding:
     createPatchOptionsMenu: <c-p>
     revertBlock: <enter>
     undoRevertBlock: u
-    shrinkSidePanel: <a-h>
-    expandSidePanel: <a-l>
-    sidePanelFull: <a-k>
-    mainPanelFull: <a-j>
-    resetSidePanel: <a-r>
+    shrinkSidePanel: ""
+    expandSidePanel: ""
+    sidePanelFull: ""
+    mainPanelFull: ""
+    resetSidePanel: ""
     toggleWorkingTreeAndHead: <c-g>
   status:
     checkForUpdate: u

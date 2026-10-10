@@ -67,30 +67,30 @@ $$T_{\text{execute}} = \sum T_K + \sum T_P + \sum T_H + \sum T_M + \sum T_R$$
   - Executed via bilateral inward rolling (right index `j` + right pinky `Enter` in $<100\text{ ms}$).
   - **NEVER alter, break, or intercept this reflex.**
 
-### 2.2 Core TUI & File Navigation Engine: Matchmaker (`mm -o jump` & `fm.rs`)
-- High-performance Rust binary (`matchmaker-cli`, `matchmaker-lib`, `nucleo` SIMD, `fm.rs`).
-- **Flagship `jump` Mode (`mm -o jump` / `jump.toml`):** Multi-threaded SIMD fuzzy matching, adaptive frecency ranking, depth penalty (`depth_penalty = 15`), directory-first (`dir_first = true`), and typo tolerance.
+### 2.2 Core TUI & File Navigation Engine: Waymaker / Matchmaker (`wm -o jump` & `fm.rs`)
+- High-performance Rust binary (`wm` / `waymaker`, aliased to `mm`, `nucleo` SIMD, `fm.rs`).
+- **Flagship `jump` Mode (`wm -o jump` / `jump.toml`):** Multi-threaded SIMD fuzzy matching, adaptive frecency ranking, depth penalty (`depth_penalty = 15`), directory-first (`dir_first = true`), and typo tolerance.
 - **Tri-Modal Data Source Cycle (`@reloadnext` / `f` / `Ctrl+F` / `b`):**
   - **Source 0 (Local):** `""` $\rightarrow$ AsyncWalker native filesystem crawl (prompt `> `).
-  - **Source 1 (Frecency):** `mm list --dirs` $\rightarrow$ Global historical frecency ranking (prompt `󱅤 `).
-  - **Source 2 (Bookmarks):** `mm list --bookmarks` $\rightarrow$ Curated starred favorites (prompt ` `).
+  - **Source 1 (Frecency):** `wm list --dirs` $\rightarrow$ Global historical frecency ranking (prompt `󱅤 `).
+  - **Source 2 (Bookmarks):** `wm list --bookmarks` $\rightarrow$ Curated starred favorites (prompt ` `).
 - **Integrated File Manager Overlays (`fm.rs`):** In-place file manipulation with zero friction (`a` create, `r` rename, `d` trash, `y`/`x`/`p`/`P` clipboard & paste-into with directory traversal, `z`/`Z` compression).
 - **Semantic Disambiguation:**
-  - `u` in Matchmaker is **strictly reserved for `@undo`** (File Manager `UndoStack`) and clipboard restoration.
+  - `u` in Waymaker/Matchmaker is **strictly reserved for `@undo`** (File Manager `UndoStack`) and clipboard restoration.
   - `Ctrl+U` is the **Ancestor Jump** (ascend multiple directory levels to root in 1 step).
 - **Speculative Directory Scanning:** Asynchronous Tokio background thread loads LRU cache of directory under cursor, delivering **0ms perceived I/O** when descending with `l`.
 - **Off-Thread Media Decoding:** Terminal preview pipeline (`ratatui_image`) isolated in `tokio::task::spawn_blocking`, guaranteeing sustained 60 FPS and 0ms render-thread hitching.
 
 ### 2.3 Polymorphic Shell (Zsh ZLE) & Zero-Friction Frecency 2.0
 - **Smart Tab (`_smart_tab` on `Tab`):**
-  - Empty prompt $\rightarrow$ Triggers `_jump_widget` (`mm --no-read -o jump`) instantly without typing verbs (`j`, `z`, `cd`).
+  - Empty prompt $\rightarrow$ Triggers `_jump_widget` (`wm --no-read -o jump`) instantly without typing verbs (`j`, `z`, `cd`).
   - Active ghost text $\rightarrow$ Accepts suggestion (`autosuggest-accept`).
-  - Buffer with text $\rightarrow$ Triggers context-aware argument completion via `mm-ftb`.
+  - Buffer with text $\rightarrow$ Triggers context-aware argument completion via `wm-ftb`.
 - **Object-First Buffer Ergonomics:** Selecting a single directory on empty prompt executes `cd` immediately; selecting files or multiple items formats the paths (relative to `$PWD` or canonical with `~`) and injects them into the Zsh buffer with leading space and `CURSOR = 0` (`BUFFER=" <paths>"`), allowing instant verb entry (`nvim`, `bat`, `rm`, `git add`).
 - **Frecency 2.0 Navigation (`functions.zsh` & `aliases.zsh`):**
   - `j` without arguments $\rightarrow$ `$HOME` (`cd ~`, 100ms reflex).
   - `j <path>` $\rightarrow$ Direct jump if valid directory.
-  - `j <query>` $\rightarrow$ Resolves best match from frecency (`mm list --dirs`) and jumps directly; falls back to interactive `mm -o jump query.initial="$*"`.
+  - `j <query>` $\rightarrow$ Resolves best match from frecency (`wm list --dirs`) and jumps directly; falls back to interactive `wm -o jump query.initial="$*"`.
   - `ji` $\rightarrow$ Explicit interactive jump picker.
   - `mm_smart_chpwd` hook: Asynchronously records directory visits while filtering out ephemeral/volatile paths (`/tmp*`, `/proc*`, `/sys*`, `*/.git*`, `*/node_modules*`, `*/target/debug*`, `*/target/release*`, `*/.direnv*`).
 - **Ultra-Fast Volatile File Transfer Operations (`_MM_LAST_TARGET`):**
@@ -98,7 +98,7 @@ $$T_{\text{execute}} = \sum T_K + \sum T_P + \sum T_H + \sum T_M + \sum T_R$$
   - `ptg [files]`: Paste and **immediately navigate** to destination (`cd $target_dir`).
   - `ptl [files]`: Paste instantly to the **last selected target directory** (`_MM_LAST_TARGET`), bypassing the picker entirely ($T = 220\text{ ms}$).
   - `mt`, `mtg`, `mtl`: Move equivalents.
-  - **Auto-Frecency Boosting:** Every file transfer asynchronously boosts destination frecency (`mm add "$target_dir" &!`).
+  - **Auto-Frecency Boosting:** Every file transfer asynchronously boosts destination frecency (`wm add "$target_dir" &!`).
 
 ### 2.4 Lazygitrs Dual-Diff Toggle Pipeline & Git Worktrees
 - Rust-based Lazygit alternative: `/home/fecavmi/dev/github/lazygitrs/fecavmi`.
