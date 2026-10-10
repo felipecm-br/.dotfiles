@@ -67,7 +67,12 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ISOLATOR="$SCRIPT_DIR/tmux-popup-isolate.sh"
 [ -x "$ISOLATOR" ] || ISOLATOR="$(command -v tmux-popup-isolate.sh 2>/dev/null || echo "$HOME/.config/tmux/tmux-popup-isolate.sh")"
 
-exec "$ISOLATOR" \
+FLOW_LOG="$SCRIPT_DIR/flow-log.sh"
+[ -x "$FLOW_LOG" ] || FLOW_LOG="$(command -v flow-log 2>/dev/null || echo "$HOME/.config/tmux/flow-log.sh")"
+
+[ -x "$FLOW_LOG" ] && "$FLOW_LOG" review_start "$PROJECT_DIR" >/dev/null 2>&1 || true
+
+"$ISOLATOR" \
   -S "fg=$GIT_POPUP_COLOR" \
   -s "fg=${TMUX_POPUP_TEXT_COLOR:-default}" \
   -b rounded \
@@ -76,3 +81,7 @@ exec "$ISOLATOR" \
   -E \
   -w 90% -h 88% \
   -- "$LZG_CMD"
+rc=$?
+
+[ -x "$FLOW_LOG" ] && "$FLOW_LOG" review_end "$PROJECT_DIR" >/dev/null 2>&1 || true
+exit $rc

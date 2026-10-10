@@ -523,7 +523,7 @@ color = "{{ color1 }}"  # Vermelho estrito para erro/falha
 ### Checklist P1 (Curto Prazo)
 
 - [ ] Criar e testar `scripts/flow-doctor.sh`.
-- [ ] Implementar `flow-log.sh` e hooks de telemetria no Tmux.
+- [x] Implementar `flow-log.sh` e hooks de telemetria no Tmux (medição de latência humano/revisão e `flow-telemetry`).
 - [ ] Ajustar cores de `permission` vs `error` no template do ACPD.
 - [ ] Adicionar suporte a `clap` em `acpd` e testar `acpd --version`.
 

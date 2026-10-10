@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# utils/.local/bin/flow-telemetry — CLI launcher for personal flow & deep work telemetry
+set -euo pipefail
+
+TMUX_FLOW="$HOME/.config/tmux/flow-telemetry.sh"
+if [ -x "$TMUX_FLOW" ]; then
+  exec "$TMUX_FLOW" "$@"
+fi
+
+DOTFILES_FLOW="$HOME/.dotfiles/main/tmux/.config/tmux/flow-telemetry.sh"
+if [ -x "$DOTFILES_FLOW" ]; then
+  exec "$DOTFILES_FLOW" "$@"
+fi
+
+exec python3 "$HOME/.dotfiles/main/tmux/.config/tmux/flow-telemetry.py" "$@"

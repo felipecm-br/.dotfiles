@@ -29,7 +29,11 @@ C_RESET='\033[0m'
 C_BOLD='\033[1m'
 C_DIM='\033[2m'
 
-printf '\n'
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -f "$SCRIPT_DIR/flow-telemetry.py" ]; then
+  python3 "$SCRIPT_DIR/flow-telemetry.py" --hud
+fi
+
 printf '  %b󱂬 Cockpit HUD — Keybindings & Shortcuts%b\n\n' "$C_CYAN$C_BOLD" "$C_RESET"
 
 printf '  %b󰊢 Worktree Lifecycle%b\n' "$C_YELLOW$C_BOLD" "$C_RESET"

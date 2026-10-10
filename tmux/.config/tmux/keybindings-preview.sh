@@ -291,6 +291,26 @@ Destroys the current tmux session and switches client to next available session.
 EOF
     ;;
 
+  tmux-help|tmux-flow-telemetry)
+    _kb_script_dir="$(cd "$(dirname "$0")" && pwd)"
+    if [ -f "$_kb_script_dir/flow-telemetry.py" ]; then
+      python3 "$_kb_script_dir/flow-telemetry.py" --markdown
+    fi
+    cat <<'EOF'
+
+### 󰌌 Keybindings & Workflow Catalog HUD (`Prefix + ?`)
+Interactive catalog of all keyboard shortcuts, layer definitions, and ergonomics standards.
+
+- **Ergonomics**: Full Home Row navigation, sub-100ms latency ($H=0$).
+- **Controls**:
+  - `Enter`: Execute workflow action (if runnable)
+  - `Tab` / `Shift + Tab`: Filter modes (`all` → `tmux` → `shell` → `frecency` → `hypr`)
+  - `y` / `Ctrl + Y`: Copy keybinding shortcut to system clipboard
+  - `Ctrl + V`: Inject shortcut into active origin pane
+  - `Esc` / `q`: Dismiss modal
+EOF
+    ;;
+
   tmux-raw-keys)
     cat <<'EOF'
 ### 󰌌 Raw Tmux Keybindings (`list-keys -N`)

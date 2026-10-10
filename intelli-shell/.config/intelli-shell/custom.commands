@@ -283,6 +283,18 @@ gtest
 # Run custom test command and stamp Test-Status trailer on HEAD commit
 gtest {{test_command}}
 
+# Display personal flow state & deep work evidence telemetry
+flow-telemetry
+
+# Display daily evidence summary of uninterrupted focus and review latency
+flow-telemetry --summary
+
+# Render deep work hourly focus heatmap and metrics in terminal
+flow-telemetry --hud
+
+# Output GitHub-flavored markdown telemetry table and heatmap
+flow-telemetry --markdown
+
 $ (awt) branch: git branch --format='%(refname:short)' 2>/dev/null
 $ (awt) base: git branch --format='%(refname:short)' 2>/dev/null
 $ (awt) pr_number: gh pr list --limit 30 --json number,title --template '{{range .}}{{tablerow .number .title}}{{end}}' 2>/dev/null
