@@ -275,7 +275,16 @@ acpd health
 chime-at-breakpoint {{sound_file}}
 
 # Open AI Fleet & Window Cockpit HUD in Tmux (85% × 75%)
-~/.config/tmux/cockpit-picker.sh
+cockpit
+
+# Snapshot active Tmux workspace sessions and worktrees for post-reboot recovery
+cockpit snapshot
+
+# Restore saved Tmux workspace sessions, windows and layouts after reboot
+cockpit restore
+
+# Display saved Cockpit topology snapshot details and age
+cockpit status
 
 # Run test suite and stamp Test-Status trailer on HEAD commit for TUI badges
 gtest

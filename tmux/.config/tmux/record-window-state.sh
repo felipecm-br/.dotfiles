@@ -131,6 +131,15 @@ case "${1:-}" in
       echo "$entry" > "$ACTIVE_FILE"
     fi
     acpd-cli dismiss >/dev/null 2>&1 &
+    # Debounced periodic topology snapshot (zero-fork check, max once per 30s)
+    printf -v _now '%(%s)T' -1
+    _snap_lock="/tmp/cockpit-snap-debounce-${UID:-$(id -u)}.lock"
+    _last_snap=0
+    [ -f "$_snap_lock" ] && read -r _last_snap < "$_snap_lock" || true
+    if [ $((_now - _last_snap)) -ge 30 ]; then
+      printf '%s\n' "$_now" > "$_snap_lock"
+      ( "$HOME/.config/tmux/cockpit-snapshot.py" snapshot --quiet >/dev/null 2>&1 & )
+    fi
     ;;
   --unlinked)
     if [ -f "$ACTIVE_FILE" ] && [ -s "$ACTIVE_FILE" ]; then

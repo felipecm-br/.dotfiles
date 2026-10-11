@@ -1,0 +1,76 @@
+#!/usr/bin/env bash
+# utils/.local/bin/cockpit — Cockpit Unified CLI & Topology Lifecycle Manager
+set -euo pipefail
+
+SNAPSHOT_SCRIPT="$HOME/.config/tmux/cockpit-snapshot.py"
+[ -f "$SNAPSHOT_SCRIPT" ] || SNAPSHOT_SCRIPT="$HOME/.dotfiles/main/tmux/.config/tmux/cockpit-snapshot.py"
+
+PICKER_SCRIPT="$HOME/.config/tmux/cockpit-picker.sh"
+[ -f "$PICKER_SCRIPT" ] || PICKER_SCRIPT="$HOME/.dotfiles/main/tmux/.config/tmux/cockpit-picker.sh"
+
+cmd="${1:-}"
+
+case "$cmd" in
+  snapshot|snap|save)
+    shift
+    exec python3 "$SNAPSHOT_SCRIPT" snapshot "$@"
+    ;;
+  restore|load)
+    shift
+    exec python3 "$SNAPSHOT_SCRIPT" restore "$@"
+    ;;
+  status|info)
+    shift
+    exec python3 "$SNAPSHOT_SCRIPT" status "$@"
+    ;;
+  hud|picker)
+    shift
+    exec "$PICKER_SCRIPT" "$@"
+    ;;
+  -h|--help|help)
+    cat <<'EOF'
+cockpit — Cockpit Unified CLI & Session Topology Manager
+
+USAGE:
+  cockpit [command] [options]
+
+COMMANDS:
+  (no args)    Open Cockpit HUD interactive window & fleet picker
+  snapshot     Save current Tmux session topology & worktree states
+  restore      Restore saved sessions, windows, paths and layouts post-reboot
+  status       Display saved snapshot details and age
+  hud          Open interactive Cockpit HUD modal
+
+OPTIONS:
+  --dry-run    Simulate restoration without creating Tmux sessions
+  --quiet      Suppress non-error snapshot output
+  --file <path> Custom session-topology.json location
+
+EXAMPLES:
+  # Open interactive cockpit
+  cockpit
+
+  # Snapshot all active workspace sessions
+  cockpit snapshot
+
+  # Restore full topology after machine reboot
+  cockpit restore
+EOF
+    exit 0
+    ;;
+  *)
+    if [ $# -eq 0 ]; then
+      exec "$PICKER_SCRIPT"
+    else
+      # Check if invoked as cockpit-snapshot or cockpit-restore basename
+      base="$(basename "$0")"
+      if [ "$base" = "cockpit-snapshot" ]; then
+        exec python3 "$SNAPSHOT_SCRIPT" snapshot "$@"
+      elif [ "$base" = "cockpit-restore" ]; then
+        exec python3 "$SNAPSHOT_SCRIPT" restore "$@"
+      else
+        exec "$PICKER_SCRIPT" "$@"
+      fi
+    fi
+    ;;
+esac
