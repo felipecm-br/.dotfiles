@@ -43,6 +43,7 @@ printf '    %b[W]%b      Sweep Worktrees   Batch-prune merged worktrees\n\n' "$C
 
 printf '  %b󱚥 AI Fleet & Agent Triage%b\n' "$C_MAGENTA$C_BOLD" "$C_RESET"
 printf '    %b[Tab]%b    Toggle View       Fleet View ↔ Agent Triage\n' "$C_YELLOW$C_BOLD" "$C_RESET"
+printf '    %b[i]%b      Prompt Agent      Send inline prompt to agent\n' "$C_MAGENTA$C_BOLD" "$C_RESET"
 printf '    %b[y]%b      Approve Agent     Send '\''y'\'' Enter to prompt\n' "$C_YELLOW$C_BOLD" "$C_RESET"
 printf '    %b[n]%b      Deny Agent        Send '\''n'\'' Enter to prompt\n' "$C_MAGENTA$C_BOLD" "$C_RESET"
 printf '    %b[R]%b      Reap Agents       Garbage-collect stale agents\n\n' "$C_RED$C_BOLD" "$C_RESET"
@@ -52,9 +53,12 @@ printf '    %b[Enter]%b  Jump / Connect    Focus selected window/session\n' "$C_
 printf '    %b[t]%b      New Window        Create window in current path\n' "$C_CYAN$C_BOLD" "$C_RESET"
 printf '    %b[s]%b      Sessions          Open Session Picker (Sesh)\n' "$C_YELLOW$C_BOLD" "$C_RESET"
 printf '    %b[g]%b      Git Cockpit       Open Lazygitrs (Dual-Diff)\n' "$C_MAGENTA$C_BOLD" "$C_RESET"
-printf '    %b[d]%b      Kill / Delete     Kill window or delete session\n' "$C_RED$C_BOLD" "$C_RESET"
+printf '    %b[v]%b      Diff View         Toggle side-by-side Git Diff\n' "$C_CYAN$C_BOLD" "$C_RESET"
+printf '    %b[d / C-d]%b Kill / Delete     Kill window or delete session\n' "$C_RED$C_BOLD" "$C_RESET"
+printf '    %b[J/K]%b    Scroll Preview    Scroll preview pane up/down\n' "$C_BLUE$C_BOLD" "$C_RESET"
+printf '    %b[+ / -]%b  Resize Preview    Expand/shrink preview split\n' "$C_BLUE$C_BOLD" "$C_RESET"
 printf '    %b[/]%b      Filter            Enter fuzzy query filter mode\n' "$C_BLUE$C_BOLD" "$C_RESET"
 printf '    %b[Esc]%b    Exit              Dismiss Cockpit modal\n\n' "$C_BLUE$C_BOLD" "$C_RESET"
 
 printf '  %b────────────────────────────────────────────────────────────%b\n' "$C_DIM" "$C_RESET"
-printf '  %bPress %b?%b%b to toggle live preview%b\n' "$C_DIM" "$C_BLUE$C_BOLD" "$C_RESET" "$C_DIM" "$C_RESET"
+printf '  %bPress %b?%b%b for HUD help • %bv%b%b for Side-by-Side Diff • %bg%b%b for Lazygitrs%b\n' "$C_DIM" "$C_BLUE$C_BOLD" "$C_RESET" "$C_DIM" "$C_CYAN$C_BOLD" "$C_RESET" "$C_DIM" "$C_MAGENTA$C_BOLD" "$C_RESET" "$C_DIM" "$C_RESET"
