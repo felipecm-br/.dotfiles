@@ -6,10 +6,16 @@ set -euo pipefail
 
 POPUP_ARGS=()
 CMD_ARGS=()
+FORCE_ISOLATE=0
 
 # 1. Parse all valid Tmux display-popup flags
 while [[ $# -gt 0 ]]; do
     case "$1" in
+        # Explicit isolation override (forces frozen backdrop even if AI is idle)
+        -I|--isolate|--freeze)
+            FORCE_ISOLATE=1
+            shift 1
+            ;;
         # Options taking an argument
         -w|-h|-x|-y|-d|-S|-s|-b|-T|-c|-e|-t)
             [[ $# -ge 2 ]] || { echo "Error: $1 requires an argument" >&2; exit 1; }
@@ -59,10 +65,10 @@ if [[ -z "${TMUX:-}" ]]; then
     exec "${CMD_ARGS[@]}"
 fi
 
-# 2. Conditional Idle Bypass: Check AI agent streaming state
+# 2. Conditional Idle Bypass: Check AI agent streaming state (unless forced)
 AI_STATE="$(tmux display-message -p '#{@ai_agent_state_raw}' 2>/dev/null || echo 'idle')"
 
-if [[ "$AI_STATE" != "busy" && "$AI_STATE" != "working" ]]; then
+if [[ "$FORCE_ISOLATE" -eq 0 && "$AI_STATE" != "busy" && "$AI_STATE" != "working" ]]; then
     # Zero overhead: spawn popup directly without backdrop pane creation
     tmux display-popup "${POPUP_ARGS[@]}" "${CMD_ARGS[@]}" || {
         rc=$?

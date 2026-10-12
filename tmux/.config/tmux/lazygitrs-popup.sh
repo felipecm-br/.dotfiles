@@ -73,6 +73,7 @@ FLOW_LOG="$SCRIPT_DIR/flow-log.sh"
 [ -x "$FLOW_LOG" ] && "$FLOW_LOG" review_start "$PROJECT_DIR" >/dev/null 2>&1 || true
 
 "$ISOLATOR" \
+  --isolate \
   -S "fg=$GIT_POPUP_COLOR" \
   -s "fg=${TMUX_POPUP_TEXT_COLOR:-default}" \
   -b rounded \
