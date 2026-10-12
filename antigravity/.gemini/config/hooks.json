@@ -1,65 +1,83 @@
 {
   "tmux": {
-    "PreInvocation": [
-      {
-        "type": "command",
-        "command": "node /home/fecavmi/.gemini/hooks/tmux-hook.mjs PreInvocation",
-        "timeout": 0
-      },
-      {
-        "type": "command",
-        "command": "node /home/fecavmi/.gemini/hooks/lazygit-hook.mjs PreInvocation",
-        "timeout": 0
-      }
-    ],
-    "PreToolUse": [
-      {
-        "matcher": "*",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node /home/fecavmi/.gemini/hooks/tmux-hook.mjs PreToolUse",
-            "timeout": 0
-          }
-        ]
-      }
-    ],
     "PostInvocation": [
       {
-        "type": "command",
         "command": "node /home/fecavmi/.gemini/hooks/tmux-hook.mjs PostInvocation",
-        "timeout": 0
-      }
-    ],
-    "Stop": [
-      {
-        "type": "command",
-        "command": "node /home/fecavmi/.gemini/hooks/tmux-hook.mjs Stop",
-        "timeout": 0
-      }
-    ],
-    "SessionEnd": [
-      {
-        "type": "command",
-        "command": "node /home/fecavmi/.gemini/hooks/tmux-hook.mjs SessionEnd",
-        "timeout": 0
-      },
-      {
-        "type": "command",
-        "command": "node /home/fecavmi/.gemini/hooks/lazygit-hook.mjs SessionEnd",
-        "timeout": 0
+        "timeout": 0,
+        "type": "command"
       }
     ],
     "PostToolUse": [
       {
-        "matcher": "*",
         "hooks": [
           {
-            "type": "command",
             "command": "node /home/fecavmi/.gemini/hooks/tmux-hook.mjs PostToolUse",
-            "timeout": 0
+            "timeout": 0,
+            "type": "command"
           }
-        ]
+        ],
+        "matcher": "*"
+      }
+    ],
+    "PreInvocation": [
+      {
+        "command": "node /home/fecavmi/.gemini/hooks/tmux-hook.mjs PreInvocation",
+        "timeout": 0,
+        "type": "command"
+      },
+      {
+        "command": "node /home/fecavmi/.gemini/hooks/lazygit-hook.mjs PreInvocation",
+        "timeout": 0,
+        "type": "command"
+      }
+    ],
+    "PreToolUse": [
+      {
+        "hooks": [
+          {
+            "command": "node /home/fecavmi/.gemini/hooks/tmux-hook.mjs PreToolUse",
+            "timeout": 0,
+            "type": "command"
+          }
+        ],
+        "matcher": "*"
+      }
+    ],
+    "SessionEnd": [
+      {
+        "command": "node /home/fecavmi/.gemini/hooks/tmux-hook.mjs SessionEnd",
+        "timeout": 0,
+        "type": "command"
+      },
+      {
+        "command": "node /home/fecavmi/.gemini/hooks/lazygit-hook.mjs SessionEnd",
+        "timeout": 0,
+        "type": "command"
+      }
+    ],
+    "Stop": [
+      {
+        "command": "node /home/fecavmi/.gemini/hooks/tmux-hook.mjs Stop",
+        "timeout": 0,
+        "type": "command"
+      }
+    ]
+  },
+  "workmux-status": {
+    "PreInvocation": [
+      {
+        "command": "workmux register-agent >/dev/null 2>&1 || true; printf '{}\\n'",
+        "type": "command"
+      },
+      {
+        "command": "workmux set-window-status working >/dev/null 2>&1 || true; printf '{}\\n'",
+        "type": "command"
+      }
+    ],
+    "Stop": [
+      {
+        "command": "workmux set-window-status done >/dev/null 2>&1 || true; printf '{}\\n'",
+        "type": "command"
       }
     ]
   }

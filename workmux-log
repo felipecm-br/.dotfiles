@@ -1,0 +1,76 @@
+workmux init
+
+┌ Nerdfont Setup
+│
+│  Does this look like a git branch icon?  →  
+│
+└─ [y] Yes  [n] No: y
+✔ Nerdfont icons enabled
+
+
+┌ Status Tracking
+│
+│  Detected Claude Code (found Claude config directory)
+│  Detected Antigravity CLI (found agy executable)
+│  Detected Codex (found ~/.codex/)
+│  Detected Copilot CLI (found Copilot config directory)
+│  Detected Gemini CLI (found ~/.gemini/)
+│  Detected pi (found ~/.pi/agent/)
+│  Detected OpenCode (found OpenCode config directory)
+│
+│  Status tracking shows agent activity in your tmux window list:
+│
+│    1:main*  2:user-auth 🤖  3:refactor 💬  4:dark-mode ✅
+│
+│  🤖 = working  💬 = waiting for input  ✅ = done
+│  https://workmux.raine.dev/guide/status-tracking
+│
+  Install or update status tracking hooks? [Y/n] y
+  ✔ Installed hooks to /home/fecavmi/.claude/settings.json
+  ✔ Installed Antigravity lifecycle hooks to /home/fecavmi/.gemini/config/hooks.json
+  ✔ Installed hooks to /home/fecavmi/.codex/hooks.json, enabled hooks in /home/fecavmi/.codex/config.toml
+  ✔ Installed hooks to /home/fecavmi/.copilot/hooks/workmux-status.json
+  ✔ Installed hooks to /home/fecavmi/.gemini/settings.json
+  ✔ Installed extension to /home/fecavmi/.pi/agent/extensions/workmux-status.ts. Restart pi for it to take effect.
+  ✔ Installed OpenCode plugin to /home/fecavmi/.config/opencode/plugins/workmux-status.ts. Restart OpenCode for it to take effect.
+│
+│ Skills
+│
+│  workmux includes skills: merge, rebase, worktree, coordinator, open-pr, workmux
+│  Learn more: https://workmux.raine.dev/guide/skills
+│
+  Install skills? [Y/n]
+
+
+  Skills
+│
+│  workmux includes skills: merge, rebase, worktree, coordinator, open-pr, workmux
+│  Learn more: https://workmux.raine.dev/guide/skills
+│
+  Install skills? [Y/n] y
+  ✓ installed merge/SKILL.md
+  ✓ installed rebase/SKILL.md
+  ✓ installed worktree/SKILL.md
+  ✓ installed coordinator/SKILL.md
+  ✓ installed open-pr/SKILL.md
+  ✓ installed workmux/SKILL.md
+  Skills for Claude Code (/home/fecavmi/.claude/skills): 6 installed
+  ✓ installed merge/SKILL.md
+  ✓ installed rebase/SKILL.md
+  ✓ installed worktree/SKILL.md
+  ✓ installed coordinator/SKILL.md
+  ✓ installed open-pr/SKILL.md
+  ✓ installed workmux/SKILL.md
+  Skills for pi (/home/fecavmi/.pi/agent/skills): 6 installed
+  ✓ installed merge/SKILL.md
+  ✓ installed rebase/SKILL.md
+  ✓ installed worktree/SKILL.md
+  ✓ installed coordinator/SKILL.md
+  ✓ installed open-pr/SKILL.md
+  ✓ installed workmux/SKILL.md
+  Skills for OpenCode (/home/fecavmi/.config/opencode/skills): 6 installed
+
+✓ Created .workmux.yaml
+
+This file provides project-specific overrides.
+For global settings, edit /home/fecavmi/.config/workmux/config.yaml
