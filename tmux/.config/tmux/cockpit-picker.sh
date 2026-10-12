@@ -46,15 +46,42 @@ TMUX_SPINNER_NAME="$ACPD_SPINNER"
 ORIG_SESS="${TMUX_ORIGIN_SESSION:-$(tmux display-message -p '#S')}"
 ORIG_WIN="${TMUX_ORIGIN_WINDOW:-$(tmux display-message -p '#I')}"
 
-LAST_POS=""
+SAVED_SESS=""
+SAVED_IDX=""
 
 while true; do
   ITEMS=$("$ITEMS_SCRIPT" "$ORIG_SESS" "$ORIG_WIN")
 
-  if [ -n "$LAST_POS" ]; then
-    START_IDX="$LAST_POS"
-    LAST_POS=""
-  else
+  START_IDX=""
+  if [ -n "$SAVED_SESS" ]; then
+    if [ -n "$SAVED_IDX" ] && [ "$SAVED_IDX" != "-" ]; then
+      START_IDX=$(printf '%s\n' "$ITEMS" | awk -F'\t' -v s="$SAVED_SESS" -v i="$SAVED_IDX" '
+        BEGIN { n = 0 }
+        !/^#/ {
+          if ($4 == s && $2 == i) {
+            print n
+            exit
+          }
+          n++
+        }
+      ')
+    else
+      START_IDX=$(printf '%s\n' "$ITEMS" | awk -F'\t' -v s="$SAVED_SESS" '
+        BEGIN { n = 0 }
+        !/^#/ {
+          if ($4 == s) {
+            print n
+            exit
+          }
+          n++
+        }
+      ')
+    fi
+    SAVED_SESS=""
+    SAVED_IDX=""
+  fi
+
+  if [ -z "$START_IDX" ]; then
     # Adaptive start position:
     # If an agent needs urgent attention (permission 󱅭 or question 󱜻), start at top (index 0).
     # Otherwise, focus on the current active window (row containing •).
@@ -62,7 +89,7 @@ while true; do
     if [ -n "$has_urgent" ]; then
       START_IDX=0
     else
-      START_IDX=$(printf '%s\n' "$ITEMS" | awk '!/^#/ {n++} /•/ {print n-1; exit}')
+      START_IDX=$(printf '%s\n' "$ITEMS" | awk 'BEGIN { n = 0 } !/^#/ { if ($0 ~ /•/) { print n; exit } n++ }')
       [ -z "$START_IDX" ] && START_IDX=0
     fi
   fi
@@ -204,24 +231,28 @@ while true; do
     first_line=$(printf '%s' "$raw_item" | head -n1)
     target_path=""
 
-    # 1. If on window row: column 6 is pane current path
-    row_path=$(printf '%s' "$first_line" | cut -f6)
-    if [ -n "$row_path" ] && [ -d "$row_path" ]; then
-      target_path="$row_path"
+    case "$first_line" in
+      \#*)
+        target_sess=$(printf '%s' "$first_line" | sed -E 's/^#[[:space:]]*//' | awk '{print $1}')
+        target_idx=""
+        target_path=""
+        ;;
+      *)
+        target_sess=$(printf '%s' "$first_line" | cut -f4)
+        target_idx=$(printf '%s' "$first_line" | cut -f2)
+        row_path=$(printf '%s' "$first_line" | cut -f6)
+        if [ -n "$row_path" ] && [ -d "$row_path" ]; then
+          target_path="$row_path"
+        fi
+        ;;
+    esac
+
+    # If target_path not resolved from row: resolve session cwd
+    if [ -z "$target_path" ] && [ -n "$target_sess" ]; then
+      target_path=$(tmux display-message -t "${target_sess}:" -p '#{pane_current_path}' 2>/dev/null || true)
     fi
 
-    # 2. If on session header '#  <sess>' or session column 4: resolve session cwd
-    if [ -z "$target_path" ]; then
-      sess=$(printf '%s' "$first_line" | cut -f4)
-      if [ -z "$sess" ] || [ "$sess" = "$first_line" ]; then
-        sess=$(printf '%s' "$first_line" | sed -E 's/^#[[:space:]]*//')
-      fi
-      if [ -n "$sess" ]; then
-        target_path=$(tmux display-message -t "${sess}:" -p '#{pane_current_path}' 2>/dev/null || true)
-      fi
-    fi
-
-    # 3. Fallback to origin session cwd or current directory
+    # Fallback to origin session cwd or current directory
     if [ -z "$target_path" ] || [ ! -d "$target_path" ]; then
       target_path="${TMUX_ORIGIN_SESSION:+$(tmux display-message -t "${TMUX_ORIGIN_SESSION}:" -p '#{pane_current_path}' 2>/dev/null || true)}"
     fi
@@ -243,11 +274,8 @@ while true; do
       open_commits=1
     fi
 
-    # Record position of the selected item to restore upon return
-    if [ -n "$first_line" ]; then
-      match_pos=$(printf '%s\n' "$ITEMS" | awk -v tgt="$first_line" '!/^#/ {n++} $0 == tgt {print n-1; exit}')
-      [ -n "$match_pos" ] && LAST_POS="$match_pos"
-    fi
+    SAVED_SESS="$target_sess"
+    SAVED_IDX="$target_idx"
 
     (
       cd "$target_path" || exit 1
