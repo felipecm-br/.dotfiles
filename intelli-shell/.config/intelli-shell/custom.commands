@@ -307,6 +307,15 @@ flow-telemetry --markdown
 # Dispatch review note directly to active AI agent pane in worktree
 agent-note.sh {{target_dir}} {{prompt}}
 
+# Launch Antigravity CLI interactive agent session
+agy
+
+# Launch Antigravity CLI secondary account session (isolated profile)
+agyy
+
+# Resume most recent conversation in secondary Antigravity CLI account
+agyy -c
+
 $ (awt) branch: git branch --format='%(refname:short)' 2>/dev/null
 $ (awt) base: git branch --format='%(refname:short)' 2>/dev/null
 $ (awt) pr_number: gh pr list --limit 30 --json number,title --template '{{range .}}{{tablerow .number .title}}{{end}}' 2>/dev/null

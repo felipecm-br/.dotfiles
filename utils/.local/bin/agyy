@@ -1,0 +1,71 @@
+#!/usr/bin/env bash
+# agyy — Secondary Account Launcher for Antigravity CLI (agy)
+# Runs Antigravity with an isolated profile, isolated OAuth token, and isolated session state.
+
+set -e
+
+REAL_HOME="${REAL_HOME:-$HOME}"
+PROFILE_DIR="${AGYY_HOME:-$REAL_HOME/.local/share/agy-profiles/secondary}"
+
+# Ensure profile directory structure exists
+mkdir -p "$PROFILE_DIR/.gemini/antigravity-cli"
+mkdir -p "$PROFILE_DIR/.config"
+mkdir -p "$PROFILE_DIR/.local/bin"
+
+# Symlink core user configs so git, ssh, gpg, and agent skills work seamlessly
+[ -f "$REAL_HOME/.gitconfig" ] && [ ! -e "$PROFILE_DIR/.gitconfig" ] && ln -sf "$REAL_HOME/.gitconfig" "$PROFILE_DIR/.gitconfig"
+[ -d "$REAL_HOME/.ssh" ] && [ ! -e "$PROFILE_DIR/.ssh" ] && ln -sf "$REAL_HOME/.ssh" "$PROFILE_DIR/.ssh"
+[ -d "$REAL_HOME/.gnupg" ] && [ ! -e "$PROFILE_DIR/.gnupg" ] && ln -sf "$REAL_HOME/.gnupg" "$PROFILE_DIR/.gnupg"
+[ -d "$REAL_HOME/.agents" ] && [ ! -e "$PROFILE_DIR/.agents" ] && ln -sf "$REAL_HOME/.agents" "$PROFILE_DIR/.agents"
+
+# Mirror non-antigravity .config directories so editor/terminal configs remain accessible
+if [ -d "$REAL_HOME/.config" ]; then
+  for item in "$REAL_HOME/.config/"*; do
+    [ -e "$item" ] || continue
+    base="$(basename "$item")"
+    if [ "$base" != "antigravity" ] && [ ! -e "$PROFILE_DIR/.config/$base" ]; then
+      ln -sf "$item" "$PROFILE_DIR/.config/$base"
+    fi
+  done
+fi
+
+# Seed settings, keybindings, and mcp configs from primary account if not yet present
+if [ -d "$REAL_HOME/.gemini/antigravity-cli" ]; then
+  for cfg in settings.json keybindings.json mcp_config.json; do
+    if [ -f "$REAL_HOME/.gemini/antigravity-cli/$cfg" ] && [ ! -f "$PROFILE_DIR/.gemini/antigravity-cli/$cfg" ]; then
+      cp "$REAL_HOME/.gemini/antigravity-cli/$cfg" "$PROFILE_DIR/.gemini/antigravity-cli/$cfg"
+    fi
+  done
+fi
+
+# Locate the real agy-bin executable
+REAL_BIN="$REAL_HOME/.local/bin/agy-bin"
+if [ ! -x "$REAL_BIN" ]; then
+  REAL_BIN=$(which -a agy-bin 2>/dev/null | head -n 1)
+fi
+
+if [ -z "$REAL_BIN" ] || [ ! -x "$REAL_BIN" ]; then
+  echo "Error: agy-bin not found." >&2
+  exit 1
+fi
+
+# Link agy binaries in profile for subprocesses
+[ ! -e "$PROFILE_DIR/.local/bin/agy-bin" ] && ln -sf "$REAL_BIN" "$PROFILE_DIR/.local/bin/agy-bin"
+[ -x "$REAL_HOME/.local/bin/agy" ] && [ ! -e "$PROFILE_DIR/.local/bin/agy" ] && ln -sf "$REAL_HOME/.local/bin/agy" "$PROFILE_DIR/.local/bin/agy"
+[ -x "$REAL_HOME/.local/bin/agyy" ] && [ ! -e "$PROFILE_DIR/.local/bin/agyy" ] && ln -sf "$REAL_HOME/.local/bin/agyy" "$PROFILE_DIR/.local/bin/agyy"
+
+# Handle Tmux pane status & icon cleanup on exit
+if [ -n "$TMUX_PANE" ]; then
+  SCRIPT_DIR="$REAL_HOME/.dotfiles/main/antigravity/.gemini/hooks"
+  trap '
+    curl -s -X POST http://127.0.0.1:4040/api/status -H "Content-Type: application/json" -d "{\"pane_id\":\"'"$TMUX_PANE"'\",\"state\":\"closed\"}" > /dev/null 2>&1 || true
+    node "'"$SCRIPT_DIR"'/lazygit-hook.mjs" Unregister </dev/null > /dev/null 2>&1 || true
+    tmux set-option -w -t "'"$TMUX_PANE"'" -u @lazygitrs_icon > /dev/null 2>&1 || true
+    tmux refresh-client -S > /dev/null 2>&1 || true
+  ' EXIT INT TERM
+fi
+
+# Launch agy with isolated profile HOME and disabled D-Bus session keyring
+HOME="$PROFILE_DIR" \
+DBUS_SESSION_BUS_ADDRESS="unix:path=/dev/null" \
+"$REAL_BIN" "$@"

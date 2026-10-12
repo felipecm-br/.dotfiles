@@ -19,6 +19,8 @@ These come from the [`utils`](../utils) stow package.
 | `killothers [--dry-run] [--force] [--signal SIGNAL]` | Kill processes owned by *other* users while preserving the current user's session. |
 | `memtop [--kill] [--report] [--watch] [--top N]` | Interactive memory analyzer and process killer. |
 | `git` | Thin wrapper around `/usr/bin/git` (unsets `LD_LIBRARY_PATH` before execving real git). |
+| `agy` | PATH wrapper for Antigravity CLI ensuring graceful Tmux state and lazygitrs icon cleanup on exit. |
+| `agyy` | Secondary account launcher for Antigravity CLI with an isolated profile, OAuth token, and session storage. |
 
 ## Zsh Shell Helpers
 
