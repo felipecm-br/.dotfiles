@@ -43,7 +43,8 @@ printf '    %b[W]%b      Sweep Worktrees   Batch-prune merged worktrees\n\n' "$C
 
 printf '  %b󱚥 AI Fleet & Agent Triage%b\n' "$C_MAGENTA$C_BOLD" "$C_RESET"
 printf '    %b[Tab]%b    Toggle View       Fleet View ↔ Agent Triage\n' "$C_YELLOW$C_BOLD" "$C_RESET"
-printf '    %b[i]%b      Prompt Agent      Send inline prompt to agent\n' "$C_MAGENTA$C_BOLD" "$C_RESET"
+printf '    %b[i]%b      Live Passthrough  Stream keystrokes to agent ([Esc] exit)\n' "$C_CYAN$C_BOLD" "$C_RESET"
+printf '    %b[I]%b      Prompt Agent      Send inline prompt to agent\n' "$C_MAGENTA$C_BOLD" "$C_RESET"
 printf '    %b[y]%b      Approve Agent     Send '\''y'\'' Enter to prompt\n' "$C_YELLOW$C_BOLD" "$C_RESET"
 printf '    %b[n]%b      Deny Agent        Send '\''n'\'' Enter to prompt\n' "$C_MAGENTA$C_BOLD" "$C_RESET"
 printf '    %b[R]%b      Reap Agents       Garbage-collect stale agents\n\n' "$C_RED$C_BOLD" "$C_RESET"
