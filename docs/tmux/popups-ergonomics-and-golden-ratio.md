@@ -185,7 +185,7 @@ To prevent accidental dismissal while inspecting a diff or composing a commit me
 
 ## 🔗 Related Repository Files
 * [`tmux/.config/tmux/cockpit-picker.sh`](../../tmux/.config/tmux/cockpit-picker.sh): AI Fleet Cockpit & Window Manager with `󰆍` badge.
-* [`tmux/.config/tmux/cockpit-picker.toml`](../../tmux/.config/tmux/cockpit-picker.toml): Matchmaker preset with contextual agent triage, Lazygitrs bridge, and window management.
+* [`tmux/.config/tmux/cockpit-picker.toml`](../../tmux/.config/tmux/cockpit-picker.toml): Matchmaker preset with contextual agent triage, bidirectional Lazygitrs toggle (`g`), and window management.
 * [`tmux/.config/tmux/cockpit-picker-preview.sh`](../../tmux/.config/tmux/cockpit-picker-preview.sh): Layout 0 live terminal snapshot and contextual agent metadata card.
 * [`tmux/.config/tmux/cockpit-picker-help.sh`](../../tmux/.config/tmux/cockpit-picker-help.sh): Layout 1 telemetry heatmap and keybindings HUD.
 * [`tmux/.config/tmux/cockpit-picker-diff.sh`](../../tmux/.config/tmux/cockpit-picker-diff.sh): Layout 2 live git diff inspector with syntax highlighting and churn stats.

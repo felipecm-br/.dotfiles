@@ -264,9 +264,9 @@ printf "%b─── 󰜘 Side-by-Side Diff %s%b\n\n" "$C_GRAY" "${DASHES:0:$(( s
 _render_stream() {
   if command -v delta >/dev/null 2>&1; then
     if (( preview_w >= 60 )); then
-      delta --side-by-side --line-numbers --paging=never --width="$preview_w"
+      delta --side-by-side --line-numbers --paging=never --width="$preview_w" --hunk-header-style omit
     else
-      delta --line-numbers --paging=never --width="$preview_w"
+      delta --line-numbers --paging=never --width="$preview_w" --hunk-header-style omit
     fi
   elif command -v bat >/dev/null 2>&1; then
     bat --paging=never --color=always --language=diff --style=plain

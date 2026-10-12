@@ -46,39 +46,48 @@ TMUX_SPINNER_NAME="$ACPD_SPINNER"
 ORIG_SESS="${TMUX_ORIGIN_SESSION:-$(tmux display-message -p '#S')}"
 ORIG_WIN="${TMUX_ORIGIN_WINDOW:-$(tmux display-message -p '#I')}"
 
-ITEMS=$("$ITEMS_SCRIPT" "$ORIG_SESS" "$ORIG_WIN")
+LAST_POS=""
 
-# Adaptive start position:
-# If an agent needs urgent attention (permission 󱅭 or question 󱜻), start at top (index 0).
-# Otherwise, focus on the current active window (row containing •).
-has_urgent=$(printf '%s\n' "$ITEMS" | grep -m1 -E '(󱅭|󱜻)' || true)
-if [ -n "$has_urgent" ]; then
-  START_IDX=0
-else
-  START_IDX=$(printf '%s\n' "$ITEMS" | awk '!/^#/ {n++} /•/ {print n-1; exit}')
-  [ -z "$START_IDX" ] && START_IDX=0
-fi
+while true; do
+  ITEMS=$("$ITEMS_SCRIPT" "$ORIG_SESS" "$ORIG_WIN")
 
-MM_BIN="$HOME/.local/bin/wm"
-[ -x "$MM_BIN" ] || MM_BIN="$(command -v wm 2>/dev/null || command -v mm 2>/dev/null || echo "wm")"
-
-chosen=$(printf '%s\n' "$ITEMS" | "$MM_BIN" \
-  -o "$SCRIPT_DIR/cockpit-picker.toml" \
-  "start.cmd=$ITEMS_SCRIPT" \
-  results.spinner="$TMUX_SPINNER_NAME" \
-  --pos "$START_IDX" \
-  --color "spinner:$TMUX_SPINNER_COLOR" \
-  --color "$TMUX_COLOR_SPEC" \
-  --group-prefix '#')
-
-case "$chosen" in
-  __CREATE_WINDOW__*)
-    raw_item="${chosen#__CREATE_WINDOW__}"
-    new_target=$(printf '%s\n' "$raw_item" | "$SCRIPT_DIR/window-picker-create.sh")
-    if [ -n "$new_target" ]; then
-      tmux switch-client -t "$new_target" 2>/dev/null || true
+  if [ -n "$LAST_POS" ]; then
+    START_IDX="$LAST_POS"
+    LAST_POS=""
+  else
+    # Adaptive start position:
+    # If an agent needs urgent attention (permission 󱅭 or question 󱜻), start at top (index 0).
+    # Otherwise, focus on the current active window (row containing •).
+    has_urgent=$(printf '%s\n' "$ITEMS" | grep -m1 -E '(󱅭|󱜻)' || true)
+    if [ -n "$has_urgent" ]; then
+      START_IDX=0
+    else
+      START_IDX=$(printf '%s\n' "$ITEMS" | awk '!/^#/ {n++} /•/ {print n-1; exit}')
+      [ -z "$START_IDX" ] && START_IDX=0
     fi
-    ;;
+  fi
+
+  MM_BIN="$HOME/.local/bin/wm"
+  [ -x "$MM_BIN" ] || MM_BIN="$(command -v wm 2>/dev/null || command -v mm 2>/dev/null || echo "wm")"
+
+  chosen=$(printf '%s\n' "$ITEMS" | "$MM_BIN" \
+    -o "$SCRIPT_DIR/cockpit-picker.toml" \
+    "start.cmd=$ITEMS_SCRIPT" \
+    results.spinner="$TMUX_SPINNER_NAME" \
+    --pos "$START_IDX" \
+    --color "spinner:$TMUX_SPINNER_COLOR" \
+    --color "$TMUX_COLOR_SPEC" \
+    --group-prefix '#')
+
+  case "$chosen" in
+    __CREATE_WINDOW__*)
+      raw_item="${chosen#__CREATE_WINDOW__}"
+      new_target=$(printf '%s\n' "$raw_item" | "$SCRIPT_DIR/window-picker-create.sh")
+      if [ -n "$new_target" ]; then
+        tmux switch-client -t "$new_target" 2>/dev/null || true
+      fi
+      exit 0
+      ;;
   __NEW_WORKTREE__*)
     raw_item="${chosen#__NEW_WORKTREE__}"
     first_line=$(printf '%s' "$raw_item" | head -n1)
@@ -234,12 +243,27 @@ case "$chosen" in
       open_commits=1
     fi
 
-    cd "$target_path" || true
-    if [ "$open_commits" -eq 1 ]; then
-      exec "$LZG_BIN" -d -c popup --commits
-    else
-      exec "$LZG_BIN" -d -c popup
+    # Record position of the selected item to restore upon return
+    if [ -n "$first_line" ]; then
+      match_pos=$(printf '%s\n' "$ITEMS" | awk -v tgt="$first_line" '!/^#/ {n++} $0 == tgt {print n-1; exit}')
+      [ -n "$match_pos" ] && LAST_POS="$match_pos"
     fi
+
+    (
+      cd "$target_path" || exit 1
+      export LAZYGITRS_COCKPIT=1
+      if [ "$open_commits" -eq 1 ]; then
+        "$LZG_BIN" -d -c popup --commits
+      else
+        "$LZG_BIN" -d -c popup
+      fi
+    )
+    lzg_rc=$?
+
+    if [ "$lzg_rc" -eq 10 ]; then
+      continue
+    fi
+    exit 0
     ;;
   __SWITCH_SESSION__)
     if [ "$1" = "--fullscreen" ]; then
@@ -259,7 +283,9 @@ case "$chosen" in
         tmux switch-client -t "${session}:${idx}" 2>/dev/null || true
       fi
     fi
+    exit 0
     ;;
 esac
+done
 
 exit 0
