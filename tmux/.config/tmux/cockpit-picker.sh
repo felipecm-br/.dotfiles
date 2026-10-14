@@ -17,18 +17,14 @@ elif [ -z "${TMUX_POPUP:-}" ]; then
   COCKPIT_POPUP_COLOR=$(grep -E '^\s*orange\s*=' "$HOME/.local/state/omarchy/current/theme/colors.toml" 2>/dev/null | sed -E 's/.*=\s*"([^"]+)".*/\1/')
   [ -z "$COCKPIT_POPUP_COLOR" ] && COCKPIT_POPUP_COLOR="#e09d7f"
 
-  SCRIPT_DIR=$(dirname "$REAL_SCRIPT")
-  ISOLATOR="$SCRIPT_DIR/tmux-popup-isolate.sh"
-  [ -x "$ISOLATOR" ] || ISOLATOR="$(command -v tmux-popup-isolate.sh 2>/dev/null || echo "$HOME/.config/tmux/tmux-popup-isolate.sh")"
-
-  exec "$ISOLATOR" -I \
+  exec tmux display-popup \
     -S "fg=$COCKPIT_POPUP_COLOR" \
     -s "fg=${TMUX_POPUP_TEXT_COLOR:-default}" \
     -b rounded \
     -T " 󱂬 " \
     -w 85% -h 75% \
     -E \
-    -- "TMUX_POPUP=1 TMUX_ORIGIN_SESSION='$ORIG_SESS' TMUX_ORIGIN_WINDOW='$ORIG_WIN' '$REAL_SCRIPT'"
+    "TMUX_POPUP=1 TMUX_ORIGIN_SESSION='$ORIG_SESS' TMUX_ORIGIN_WINDOW='$ORIG_WIN' '$REAL_SCRIPT'"
 fi
 
 SCRIPT_DIR=$(dirname "$REAL_SCRIPT")
