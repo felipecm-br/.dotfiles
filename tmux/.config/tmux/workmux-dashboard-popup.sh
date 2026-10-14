@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # workmux-dashboard-popup.sh — Floating Workmux Dashboard Popup Modal with dynamic Omarchy palette
-# Launches the workmux agent fleet dashboard inside a hardened, zero-flicker Tmux popup.
+# Launches the workmux agent fleet dashboard inside a standard Tmux popup.
 trap 'exit 0' HUP INT TERM
 
 PROJECT_DIR="."
@@ -29,17 +29,16 @@ POPUP_COLOR=$(grep -E '^\s*accent\s*=' "$HOME/.local/state/omarchy/current/theme
 [ -z "$POPUP_COLOR" ] && POPUP_COLOR=$(grep -E '^\s*blue\s*=' "$HOME/.local/state/omarchy/current/theme/colors.toml" 2>/dev/null | sed -E 's/.*=\s*"([^"]+)".*/\1/')
 [ -z "$POPUP_COLOR" ] && POPUP_COLOR="#7aa2f7"
 
-ISOLATOR="$SCRIPT_DIR/tmux-popup-isolate.sh"
-[ -x "$ISOLATOR" ] || ISOLATOR="$(command -v tmux-popup-isolate.sh 2>/dev/null || echo "$HOME/.config/tmux/tmux-popup-isolate.sh")"
-
-"$ISOLATOR" \
-  -S "fg=$POPUP_COLOR" \
-  -s "fg=${TMUX_POPUP_TEXT_COLOR:-default}" \
-  -b rounded \
-  -T " 󱙝 " \
-  -d "$PROJECT_DIR" \
-  -E \
-  -w 85% -h 75% \
-  -- "$WORKMUX_BIN" dashboard "$@"
-rc=$?
-exit $rc
+if [ -n "$TMUX" ]; then
+    exec tmux display-popup \
+      -S "fg=$POPUP_COLOR" \
+      -s "fg=${TMUX_POPUP_TEXT_COLOR:-default}" \
+      -b rounded \
+      -T " 󱙝 " \
+      -d "$PROJECT_DIR" \
+      -E \
+      -w 85% -h 75% \
+      "$WORKMUX_BIN" dashboard "$@"
+else
+    exec "$WORKMUX_BIN" dashboard "$@"
+fi
