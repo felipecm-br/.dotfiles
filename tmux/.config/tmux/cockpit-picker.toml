@@ -1,6 +1,7 @@
 [start]
 sort = false
 ansi = true
+reload_interval = 1000
 
 [matcher.sort]
 threshold = false
@@ -39,6 +40,7 @@ max = 9999
 reverse = false
 spinner_prefix = "@SPIN@"
 spinner_inline = true
+spinner = "minidot"
 current_prefix = ""
 unselected_prefix = ""
 multi = false
@@ -130,6 +132,7 @@ delay_clear = true
 
 [preview]
 wrap = false
+poll_ms = 250
 
 [preview.media]
 active = false
@@ -146,6 +149,7 @@ command = '$HOME/.config/tmux/cockpit-picker-preview.sh "{=session}" "{=idx}" "{
 side = "right"
 percentage = 60
 scroll.tail = true
+poll_ms = 250
 
 [[preview.layout]]
 command = '$HOME/.config/tmux/cockpit-picker-help.sh'

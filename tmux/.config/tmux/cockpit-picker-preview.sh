@@ -141,7 +141,10 @@ case "$ai_raw" in
     card_border="$C_RED"
     ;;
   busy|working)
-    status_badge="${C_YELLOW}${BOLD}󰑮 WORKING (${agent_name:-agent})${R}"
+    _ms=$(date +%s%3N 2>/dev/null || echo 0)
+    _frames=('⠋' '⠙' '⠹' '⠸' '⠼' '⠴' '⠦' '⠧' '⠇' '⠏')
+    _spin="${_frames[$(( (_ms / 100) % 10 ))]}"
+    status_badge="${C_YELLOW}${BOLD}${_spin} WORKING (${agent_name:-agent})${R}"
     card_border="$C_YELLOW"
     ;;
   idle)
