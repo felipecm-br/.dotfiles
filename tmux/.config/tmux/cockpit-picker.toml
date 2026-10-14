@@ -130,6 +130,9 @@ delay_clear = true
 [preview]
 wrap = false
 
+[preview.media]
+active = false
+
 [preview.initial]
 tail = true
 
