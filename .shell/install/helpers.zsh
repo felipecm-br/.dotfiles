@@ -37,13 +37,15 @@ pkg_install() {
 pkg_is_installed() {
   local pkg="$1"
 
-  # If the binary exists in PATH, consider it installed
-  if command -v "$pkg" &>/dev/null; then
-    return 0
-  fi
-
-  # Known package-to-binary or service aliases
+  # Known package-to-binary, version, or service aliases
   case "$pkg" in
+    tmux)
+      if command -v tmux &>/dev/null; then
+        local ver="$(tmux -V 2>/dev/null | awk '{print $2}')"
+        [[ "$ver" == 3.8* ]] && return 0
+      fi
+      return 1
+      ;;
     mpv-wallpaper) command -v mpvpaper &>/dev/null && return 0 ;;
     upscayl-bin) command -v upscayl &>/dev/null && return 0 ;;
     apm-unix) command -v apm &>/dev/null && return 0 ;;
@@ -57,6 +59,11 @@ pkg_is_installed() {
     aws-cli-v2) command -v aws &>/dev/null && return 0 ;;
     obs-studio) command -v obs &>/dev/null && return 0 ;;
   esac
+
+  # If the binary exists in PATH, consider it installed
+  if command -v "$pkg" &>/dev/null; then
+    return 0
+  fi
 
   # Fallback to package database check
   if command -v yay &>/dev/null; then
