@@ -32,8 +32,6 @@ names = [
 
 [tui]
 mouse = true
-percentage = 100
-max = 9999
 
 [results]
 reverse = false
