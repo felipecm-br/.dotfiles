@@ -21,7 +21,7 @@ elif [ -z "${TMUX_POPUP:-}" ]; then
   ISOLATOR="$SCRIPT_DIR/tmux-popup-isolate.sh"
   [ -x "$ISOLATOR" ] || ISOLATOR="$(command -v tmux-popup-isolate.sh 2>/dev/null || echo "$HOME/.config/tmux/tmux-popup-isolate.sh")"
 
-  exec "$ISOLATOR" \
+  exec "$ISOLATOR" -I \
     -S "fg=$COCKPIT_POPUP_COLOR" \
     -s "fg=${TMUX_POPUP_TEXT_COLOR:-default}" \
     -b rounded \
