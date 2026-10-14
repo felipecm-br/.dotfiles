@@ -89,6 +89,28 @@ Debounced full-text search across the current workspace or project via `ripgrep`
 EOF
     ;;
 
+  tmux-workmux-dashboard)
+    cat <<'EOF'
+### 󱙝 Workmux Agent Fleet Dashboard (`85% × 75%`)
+Floating TUI dashboard displaying active workmux agents, git worktrees, diffs, and live output previews across all sessions.
+
+- **Ergonomics**: Prefix + D / Prefix + C-d (`D` = Dashboard, Home-Row $H=0$, sub-100ms latency).
+- **Views & Tabs**:
+  - `Tab`: Switch between **Agents** and **Worktrees** tabs (or WIP/review in diff view).
+  - `d`: View diff for selected agent (`Tab` toggles WIP vs review).
+  - `a`: Enter patch mode from WIP diff (stage individual hunks).
+- **Controls**:
+  - `s`: Cycle sort modes (Priority → Project → Recency → Natural).
+  - `/`: Fuzzy filter agent list by project or worktree name.
+  - `f`: Toggle hiding stale agents.
+  - `i`: Enter input mode to type directly to the agent's pane.
+  - `c`: Send commit command to agent.
+  - `m`: Trigger merge and exit dashboard.
+  - `1`..`9`: Quick jump to agent row.
+  - `q` / `Esc`: Dismiss modal.
+EOF
+    ;;
+
   tmux-sesh|tmux-session)
     cat <<'EOF'
 ### 󰓩 Session Workspace / Task Picker (`75% × 60%`)

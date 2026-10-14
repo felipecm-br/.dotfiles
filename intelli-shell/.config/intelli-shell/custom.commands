@@ -121,6 +121,12 @@ awtc {{repo_url}}
 # Open interactive Keybindings & Navigation HUD in Tmux popup (Prefix + ?)
 ~/.config/tmux/keybindings-picker.sh
 
+# Open Workmux agent fleet dashboard in Tmux popup (Prefix + D / Prefix + C-d)
+~/.config/tmux/workmux-dashboard-popup.sh
+
+# Open Workmux agent fleet dashboard directly in terminal
+workmux dashboard
+
 # Paste files or clipboard into last visited Matchmaker target directory
 ptl {{files}}
 

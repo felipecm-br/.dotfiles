@@ -11,6 +11,7 @@ emit_tmux() {
   Prefix + P	GitHub Pull Request Review Picker	tmux	tmux-pr	~/.config/tmux/pr-picker.sh
 󰅍  Prefix + y	Scrollback Picker (Tokens, Links & Yank)	tmux	tmux-scrollback	~/.config/tmux/scrollback-picker.sh
 󰍉  Prefix + /	Workspace Ripgrep Live Search	tmux	tmux-grep	~/.config/tmux/grep-picker.sh
+󱙝  Prefix + D / C-d	Workmux Agent Fleet Dashboard	tmux	tmux-workmux-dashboard	~/.config/tmux/workmux-dashboard-popup.sh
 󰓩  Prefix + s	Session Workspace / Task Picker	tmux	tmux-sesh	~/.config/tmux/session-picker.sh
 󱂬  Prefix + Space	AI Fleet Cockpit & Window Manager	tmux	tmux-cockpit	~/.config/tmux/cockpit-picker.sh
 󰌌  Prefix + f	Vimium Window Hints (1-touch Jump)	tmux	tmux-hints	tmux switch-client -T window_hints

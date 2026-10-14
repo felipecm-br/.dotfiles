@@ -88,6 +88,7 @@ Whenever the system theme switches (`omarchy theme set <name>`), 100% of termina
 | **1. Ephemeral** | [`grep-picker.sh`](../../tmux/.config/tmux/grep-picker.sh) | `teal` / `cyan` | `#94e2d5` | ` 󰍉 ` | `85% × 75%` / `96% × 92%` | `Esc` (1 tap) |
 | **1. Ephemeral** | [`awt-popup.sh`](../../awt/.config/tmux/awt-popup.sh) | `orange` / `peach` | `#e84d31` | `  ` | `85% × 75%` | `Esc` / `q` |
 | **2. Persistent** | [`lazygitrs-popup.sh`](../../tmux/.config/tmux/lazygitrs-popup.sh)| `orange` / `peach` | `#e84d31` | ` 󰊢 ` | `90% × 88%` | `Esc` (Files) / `q` |
+| **2. Persistent** | [`workmux-dashboard-popup.sh`](../../tmux/.config/tmux/workmux-dashboard-popup.sh) | `accent` / `blue` | `#7aa2f7` | ` 󱙝 ` | `85% × 75%` | `q` / `Esc` |
 | **2. Persistent** | Floating Agent Overlay | `accent` / `blue` | `#b4befe` | ` 󱜻 ` | `85% × 85%` | `Ctrl+C` / `exit` |
 | **2. Persistent** | `nvim` (`prefix+N`) | `orange` / `peach` | `#fab387` | `  ` | `90% × 90%` | `:q` |
 | **3. Reactive** | [`ai-agent-bell`](../../tmux/.config/tmux/ai-agent-bell-popup.sh) | `yellow` / `bright_yellow` | `#f9e2af` | ` 󰮯 ` | `80% × 75%` | `Esc` / `prefix+i` |
