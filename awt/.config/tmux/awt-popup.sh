@@ -22,10 +22,7 @@ if [ -z "${TMUX_POPUP:-}" ]; then
     [ -z "$AWT_POPUP_COLOR" ] && AWT_POPUP_COLOR="#e84d31"
 
     CURRENT_PANE=$(tmux display-message -p '#{pane_id}')
-    ISOLATOR="$HOME/.config/tmux/tmux-popup-isolate.sh"
-    [ -x "$ISOLATOR" ] || ISOLATOR="$(command -v tmux-popup-isolate.sh 2>/dev/null || echo "$ISOLATOR")"
-
-    exec "$ISOLATOR" \
+    exec tmux display-popup \
       -S "fg=$AWT_POPUP_COLOR" \
       -s "fg=${TMUX_POPUP_TEXT_COLOR:-default}" \
       -b rounded \
@@ -33,7 +30,7 @@ if [ -z "${TMUX_POPUP:-}" ]; then
       -d "$PROJECT_DIR" \
       -E \
       -w 85% -h 75% \
-      -- "TMUX_POPUP=1 AWT_ORIGIN_PANE='$CURRENT_PANE' '$REAL_SCRIPT' '$PROJECT_DIR' || true"
+      "TMUX_POPUP=1 AWT_ORIGIN_PANE='$CURRENT_PANE' '$REAL_SCRIPT' '$PROJECT_DIR' || true"
     exit 0
 fi
 

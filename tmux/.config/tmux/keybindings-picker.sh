@@ -12,18 +12,14 @@ if [ -z "${TMUX_POPUP:-}" ]; then
   YELLOW_COLOR=$(grep -E '^\s*yellow\s*=' "$HOME/.local/state/omarchy/current/theme/colors.toml" 2>/dev/null | head -n1 | sed -E 's/.*=\s*"([^"]+)".*/\1/')
   [ -n "$YELLOW_COLOR" ] || YELLOW_COLOR="#f9e2af"
 
-  SCRIPT_DIR="$(cd "$(dirname "$REAL_SCRIPT")" && pwd)"
-  ISOLATOR="$SCRIPT_DIR/tmux-popup-isolate.sh"
-  [ -x "$ISOLATOR" ] || ISOLATOR="$(command -v tmux-popup-isolate.sh 2>/dev/null || echo "$HOME/.config/tmux/tmux-popup-isolate.sh")"
-
-  "$ISOLATOR" \
+  tmux display-popup \
     -S "fg=$YELLOW_COLOR" \
     -s "fg=default" \
     -b rounded \
     -T " 󰌌 Keybindings & Workflow HUD " \
     -w 85% -h 65% \
     -E \
-    -- "TMUX_POPUP=1 '$REAL_SCRIPT' '$ORIGIN_ARG' '$CWD_ARG'" || true
+    "TMUX_POPUP=1 '$REAL_SCRIPT' '$ORIGIN_ARG' '$CWD_ARG'" || true
   exit 0
 fi
 

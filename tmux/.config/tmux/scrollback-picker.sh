@@ -20,18 +20,14 @@ if [ -z "${TMUX_POPUP:-}" ]; then
   GREEN=$(grep -E '^\s*green\s*=' "$HOME/.local/state/omarchy/current/theme/colors.toml" 2>/dev/null | sed -E 's/.*=\s*"([^"]+)".*/\1/')
   [ -n "$GREEN" ] || GREEN="#a6e3a1"
 
-  SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-  ISOLATOR="$SCRIPT_DIR/tmux-popup-isolate.sh"
-  [ -x "$ISOLATOR" ] || ISOLATOR="$(command -v tmux-popup-isolate.sh 2>/dev/null || echo "$HOME/.config/tmux/tmux-popup-isolate.sh")"
-
-  "$ISOLATOR" \
+  tmux display-popup \
     -S "fg=$GREEN" \
     -s "fg=default" \
     -b rounded \
     -T " 󰅍 " \
     -w 75% -h 60% \
     -E \
-    -- "TMUX_POPUP=1 '$0' '$ORIGIN_ARG' '$CWD_ARG'" || true
+    "TMUX_POPUP=1 '$0' '$ORIGIN_ARG' '$CWD_ARG'" || true
   exit 0
 fi
 

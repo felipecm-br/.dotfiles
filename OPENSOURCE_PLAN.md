@@ -67,10 +67,10 @@ Rather than forcing users to assemble disparate repositories or compile 13 C tre
 - **Status:** Tagged and released as `v0.1.0`. Branch `main` synchronized with `waymaker` as default branch; upstream history preserved in `upstream-main`. Sesh and frecency completely incorporated into Waymaker (`session.rs`). External `sesh-bin` (Go) and `zoxide` dependencies **100% eliminated**. Over 228 tests passing with 0 failures (`cargo test`). Multi-arch release CI active with sha256 checksums.
 - **Next:** Reference in Tier 2 `cockpit-manifest.json`.
 
-### D. `tmux` Backdrop Isolation Layer
-- **Role:** Guarantees popup stability during active token streaming via frozen ANSI backdrops.
-- **Status:** Core isolator script [`tmux/.config/tmux/tmux-popup-isolate.sh`](tmux/.config/tmux/tmux-popup-isolate.sh) implemented with full CLI parsing, conditional idle bypass, and `0600` UID-pane isolation. All 7 popup callers (`grep-picker.sh`, `lazygitrs-popup.sh`, `files-picker.sh`, `sesh-picker.sh`, `window-picker.sh`, `scrollback-picker.sh`, `awt-popup.sh`) 100% migrated and verified.
-- **Next:** Package inside umbrella repo `terminal-ai-cockpit/scripts/`.
+### D. `tmux` Popup Layer
+- **Role:** Native zero-flicker floating modal popups powered by Tmux 3.8.
+- **Status:** With Tmux 3.8 resolving upstream floating pane and background redraw tearing, popups run directly via native `tmux display-popup` without requiring auxiliary backdrop freeze workarounds.
+- **Next:** Maintain native `tmux display-popup` across all modal pickers.
 
 ---
 

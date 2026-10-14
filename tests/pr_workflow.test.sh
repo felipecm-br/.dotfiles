@@ -87,11 +87,11 @@ else
     fail "pr-picker.sh missing 75% × 60% dimensions"
 fi
 
-# Check isolator delegation and backdrop protection
-if grep -q "tmux-popup-isolate\.sh" "$PR_PICKER"; then
-    pass "pr-picker.sh delegates to tmux-popup-isolate.sh"
+# Check native display-popup invocation
+if grep -q "display-popup" "$PR_PICKER"; then
+    pass "pr-picker.sh invokes native display-popup"
 else
-    fail "pr-picker.sh missing tmux-popup-isolate.sh delegation"
+    fail "pr-picker.sh missing display-popup invocation"
 fi
 
 # Check dynamic Omarchy theme color integration

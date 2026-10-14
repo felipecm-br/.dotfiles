@@ -168,10 +168,7 @@ tmux set-option -t "$POPUP_SESS" key-table popup 2>/dev/null || true
 ALERT_POPUP_COLOR=$(grep -E '^\s*yellow\s*=' "$HOME/.local/state/omarchy/current/theme/colors.toml" 2>/dev/null | sed -E 's/.*=\s*"([^"]+)".*/\1/')
 [ -z "$ALERT_POPUP_COLOR" ] && ALERT_POPUP_COLOR="${TMUX_POPUP_ALERT_BORDER_COLOR:-#f9e2af}"
 
-ISOLATOR="$HOME/.config/tmux/tmux-popup-isolate.sh"
-[ -x "$ISOLATOR" ] || ISOLATOR="$(command -v tmux-popup-isolate.sh 2>/dev/null || echo "$ISOLATOR")"
-
-exec "$ISOLATOR" \
+exec tmux display-popup \
   -S "fg=$ALERT_POPUP_COLOR" \
   -s "fg=${TMUX_POPUP_TEXT_COLOR:-default}" \
   -T " 󰮯 " \
@@ -179,4 +176,4 @@ exec "$ISOLATOR" \
   -h "75%" \
   -b rounded \
   -E \
-  -- "tmux attach-session -t \"$POPUP_SESS:1\"; tmux unlink-window -t \"$POPUP_SESS:1\" >/dev/null 2>&1 || true"
+  "tmux attach-session -t \"$POPUP_SESS:1\"; tmux unlink-window -t \"$POPUP_SESS:1\" >/dev/null 2>&1 || true"

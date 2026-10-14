@@ -63,17 +63,12 @@ fi
 GIT_POPUP_COLOR=$(grep -E '^\s*orange\s*=' "$HOME/.local/state/omarchy/current/theme/colors.toml" 2>/dev/null | sed -E 's/.*=\s*"([^"]+)".*/\1/')
 [ -z "$GIT_POPUP_COLOR" ] && GIT_POPUP_COLOR="#e84d31"
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-ISOLATOR="$SCRIPT_DIR/tmux-popup-isolate.sh"
-[ -x "$ISOLATOR" ] || ISOLATOR="$(command -v tmux-popup-isolate.sh 2>/dev/null || echo "$HOME/.config/tmux/tmux-popup-isolate.sh")"
-
 FLOW_LOG="$SCRIPT_DIR/flow-log.sh"
 [ -x "$FLOW_LOG" ] || FLOW_LOG="$(command -v flow-log 2>/dev/null || echo "$HOME/.config/tmux/flow-log.sh")"
 
 [ -x "$FLOW_LOG" ] && "$FLOW_LOG" review_start "$PROJECT_DIR" >/dev/null 2>&1 || true
 
-"$ISOLATOR" \
-  --isolate \
+tmux display-popup \
   -S "fg=$GIT_POPUP_COLOR" \
   -s "fg=${TMUX_POPUP_TEXT_COLOR:-default}" \
   -b rounded \
@@ -81,7 +76,7 @@ FLOW_LOG="$SCRIPT_DIR/flow-log.sh"
   -d "$PROJECT_DIR" \
   -E \
   -w 90% -h 88% \
-  -- "$LZG_CMD"
+  "$LZG_CMD"
 rc=$?
 
 [ -x "$FLOW_LOG" ] && "$FLOW_LOG" review_end "$PROJECT_DIR" >/dev/null 2>&1 || true

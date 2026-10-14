@@ -34,10 +34,7 @@ if [ -z "${TMUX_POPUP:-}" ]; then
   PR_POPUP_COLOR=$(grep -E '^\s*blue\s*=' "$HOME/.local/state/omarchy/current/theme/colors.toml" 2>/dev/null | sed -E 's/.*=\s*"([^"]+)".*/\1/')
   [ -z "$PR_POPUP_COLOR" ] && PR_POPUP_COLOR="${TMUX_POPUP_BORDER_COLOR:-#7aa2f7}"
 
-  ISOLATOR="$SCRIPT_DIR/tmux-popup-isolate.sh"
-  [ -x "$ISOLATOR" ] || ISOLATOR="$(command -v tmux-popup-isolate.sh 2>/dev/null || echo "$HOME/.config/tmux/tmux-popup-isolate.sh")"
-
-  exec "$ISOLATOR" \
+  exec tmux display-popup \
     -S "fg=$PR_POPUP_COLOR" \
     -s "fg=${TMUX_POPUP_TEXT_COLOR:-default}" \
     -b rounded \
@@ -45,7 +42,7 @@ if [ -z "${TMUX_POPUP:-}" ]; then
     -d "$PROJECT_DIR" \
     -w 75% -h 60% \
     -E \
-    -- "TMUX_POPUP=1 '$REAL_SCRIPT' '$ORIGIN_ARG' '$PROJECT_DIR'"
+    "TMUX_POPUP=1 '$REAL_SCRIPT' '$ORIGIN_ARG' '$PROJECT_DIR'"
 fi
 
 [ -n "${TMUX:-}" ] || { echo "pr-picker: not inside tmux" >&2; exit 1; }

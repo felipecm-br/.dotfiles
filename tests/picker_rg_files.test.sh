@@ -269,12 +269,12 @@ GREP_SCRIPT="$ROOT/tmux/.config/tmux/grep-picker.sh"
 [ -L "$ROOT/tmux/.config/tmux/rg-picker.sh" ] && [ "$(readlink "$ROOT/tmux/.config/tmux/rg-picker.sh")" = "grep-picker.sh" ] \
   && ok "rg-picker.sh -> grep-picker.sh symlink" || bad "rg-picker.sh symlink"
 
-# Backdrop isolation in scripts (delegates to tmux-popup-isolate.sh or inline)
-(grep -q 'tmux-popup-isolate' "$FILES_SCRIPT" || (grep -q '@ai_agent_state_raw' "$FILES_SCRIPT" && grep -q 'tmux-backdrop' "$FILES_SCRIPT")) \
-  && ok "workspace-picker.sh AI backdrop protection" || bad "workspace-picker.sh AI backdrop"
+# Popup launcher validation (native tmux display-popup)
+grep -q 'display-popup' "$FILES_SCRIPT" \
+  && ok "workspace-picker.sh native display-popup" || bad "workspace-picker.sh native display-popup"
 
-(grep -q 'tmux-popup-isolate' "$GREP_SCRIPT" || (grep -q '@ai_agent_state_raw' "$GREP_SCRIPT" && grep -q 'tmux-backdrop' "$GREP_SCRIPT")) \
-  && ok "grep-picker.sh AI backdrop protection" || bad "grep-picker.sh AI backdrop"
+grep -q 'display-popup' "$GREP_SCRIPT" \
+  && ok "grep-picker.sh native display-popup" || bad "grep-picker.sh native display-popup"
 
 # ── 4. Validate tmux.conf Keybindings ──
 echo -e "\n[4/6] Validating tmux.conf Bindings..."

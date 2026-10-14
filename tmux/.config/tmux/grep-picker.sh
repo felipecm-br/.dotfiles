@@ -31,18 +31,14 @@ if [ -z "${TMUX_POPUP:-}" ]; then
     HEIGHT="92%"
   fi
 
-  SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-  ISOLATOR="$SCRIPT_DIR/tmux-popup-isolate.sh"
-  [ -x "$ISOLATOR" ] || ISOLATOR="$(command -v tmux-popup-isolate.sh 2>/dev/null || echo "$HOME/.config/tmux/tmux-popup-isolate.sh")"
-
-  exec "$ISOLATOR" \
+  exec tmux display-popup \
     -S "fg=$BORDER_COLOR" \
     -s "fg=default" \
     -b rounded \
     -T " 󰍉 " \
     -w "$WIDTH" -h "$HEIGHT" \
     -E \
-    -- "TMUX_POPUP=1 '$0' '$ORIGIN_ARG' '$CWD_ARG' '$FULLSCREEN_ARG'"
+    "TMUX_POPUP=1 '$0' '$ORIGIN_ARG' '$CWD_ARG' '$FULLSCREEN_ARG'"
 fi
 
 [ -n "${TMUX:-}" ] || { echo "grep-picker: not inside tmux" >&2; exit 1; }
