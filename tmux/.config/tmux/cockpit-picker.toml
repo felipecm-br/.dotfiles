@@ -36,6 +36,7 @@ percentage = 100
 max = 9999
 
 [results]
+reverse = false
 spinner_prefix = "@SPIN@"
 spinner_inline = true
 current_prefix = ""
