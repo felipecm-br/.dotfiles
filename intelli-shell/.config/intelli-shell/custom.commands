@@ -283,6 +283,12 @@ chime-at-breakpoint {{sound_file}}
 # Open AI Fleet & Window Cockpit HUD in Tmux (85% × 75%)
 cockpit
 
+# Open Lazygitrs interactive Git TUI
+lazygitrs
+
+# Launch Lazygitrs Turbo Patch mode (diff focused, hunk staging)
+lazygitrs --patch
+
 # Snapshot active Tmux workspace sessions and worktrees for post-reboot recovery
 cockpit snapshot
 

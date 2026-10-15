@@ -35,7 +35,7 @@ This document provides a comprehensive audit and definitive reference of all key
 
 | Prefix Shortcut | Target Action | Ergonomic Justification & Mnemonic |
 | :--- | :--- | :--- |
-| **`Prefix + Space`** | **AI Fleet Cockpit & Window Manager (`85% × 75%`)** | Space = Instant zero-reach thumb roll ($H=0$). Central unified triage cockpit for windows, AI agents, and Git context. Clean curated HUD: **Footer** (`Enter` jump, `Tab` agents, `w`/`c` new worktree, `t` new window, `s` session picker, `g`/`Ctrl+G` toggle Lazygitrs with bidirectional `g` return, `?` complete keybindings catalog, `Esc` exit); inside modal: `S` ship, `W` sweep, `R` reap, `y`/`n` approve/deny, `d` kill. |
+| **`Prefix + Space`** | **AI Fleet Cockpit & Window Manager (`85% × 75%`)** | Space = Instant zero-reach thumb roll ($H=0$). Central unified triage cockpit for windows, AI agents, and Git context. Clean curated HUD: **Footer** (`Enter` jump, `Tab` agents, `w`/`c` new worktree, `t` new window, `s` session picker, `g`/`Ctrl+G` toggle Lazygitrs with bidirectional `g` return, `p`/`Ctrl+P` Turbo Patch mode with hunk staging, `?` complete keybindings catalog, `Esc` exit); inside modal: `S` ship, `W` sweep, `R` reap, `y`/`n` approve/deny, `d` kill. |
 | **`Prefix + f`** | **Vimium Window Hints (1-touch Jump)** | `f` = **F**ollow / **F**ind window. In-situ Home-Row hints (`a, s, d, f, j, k, l, ;, g, h`) overlaid directly on tabs ($T_R = 0\text{ ms}$). |
 | **`Prefix + s`** | **Sesh Workspace / Task Picker** | `s` = **S**essions / **S**esh project switcher. Inside: `c` (or `w` / `Ctrl+S`) switches to Cockpit, `Tab` / `Shift+Tab` cycles sources (All $\rightarrow$ Tmux $\rightarrow$ Dirs), `d` (or `Ctrl+D`) kills session. |
 | **`Prefix + T`** | **Reopen Last Closed Window / Tab** | Shift+T mnemonic: uppercase of new tab `Prefix + t`, aligned with browser/IDE tab restore with file, command, path & session. |
@@ -210,6 +210,7 @@ The table below consolidates the definitive keybindings across all layers, audit
 | **`i`** | Lazygitrs Commits | Interactive Rebase Menu | Right Middle reach up to `i` | $110\text{ ms}$ | Standard Git interactive rebase mnemonic. |
 | **`C` / `V`** | Lazygitrs Commits | Cherry-Pick Copy / Paste | Shift + C / Shift + V (Pinky + Index) | $140\text{ ms}$ | Universal OS clipboard mnemonics adapted for Git commits. |
 | **`:`** (Colon) | Lazygitrs Global | Universal Shell Command Runner | Shift + `;` (Right Pinky chord) | $130\text{ ms}$ | Vim ex-command mnemonic; executes arbitrary scripts in repo root. |
+| **`Space`** (in diff) | Lazygitrs Diff | Stage Active Hunk & Auto-Advance | Thumb tap on Spacebar ($H=0$) | $100\text{ ms}$ | Turbo patch mode: stages current hunk and cycles to next hunk instantly. |
 | **`{` / `}`** | Lazygitrs Diff | Previous / Next Diff Hunk | Shift + `[` / `]` (Right Pinky reach) | $140\text{ ms}$ | Classic Vim paragraph/block motion applied to diff hunks. |
 | **`[` / `]`** | Lazygitrs Diff | Old / New / Both Diff Side Switch | Right Pinky reach to bracket keys | $120\text{ ms}$ | Fast inspection of individual file revisions. |
 | **`Enter`** (in diff) | Lazygitrs Diff | Revert Hovered Diff Block | Right Pinky tap on Enter | $100\text{ ms}$ | Immediate hunk rejection during review. |
@@ -221,7 +222,7 @@ The table below consolidates the definitive keybindings across all layers, audit
 | **`r` / `R`** (on note)| Lazygitrs Diff | Reset Note Status to `New` | Left Index reach up to `r` | $110\text{ ms}$ | Enables re-reviewing or re-dispatching notes to agent. |
 | **`d`** (on note) | Lazygitrs Diff | Delete Review Note | Left Middle tap on Home Row `d` | $100\text{ ms}$ | Destructive single-note dismissal with auto-selection of next note. |
 | **`Enter` / `o`** | Lazygitrs Diff | View Note Full Details Popup | Right Pinky tap / Right Ring reach | $100\text{ ms}$ / $110\text{ ms}$ | Full markdown rendering of rationale, author, and timestamp. |
-| **`Esc`** | Lazygitrs Global | Hierarchical Context Unwind / Close | Left Pinky tap (keyd CapsLock tap) | $100\text{ ms}$ | $H=0$. Unwinds diff/submenu $\rightarrow$ Files list $\rightarrow$ closes popup. |
+| **`Esc`** | Lazygitrs Global | Hierarchical Context Unwind / Cockpit Return | Left Pinky tap (keyd CapsLock tap) | $100\text{ ms}$ | $H=0$. In diff: unwinds to Files panel. At Files panel: returns to Cockpit (code 10) or dismisses standalone popup (code 0). |
 | **`K`** | Neovim Normal | Smart Universal Hover (Visual/LSP) | Right Middle tap on Home Row `k` | $100\text{ ms}$ | $H=0$. Previews Mermaid diagram/image or delegates to LSP hover. |
 | **`p`** | Neovim Markdown | Smart Image Paste After Cursor | Right Pinky reach to `p` | $100\text{ ms}$ | Automatically saves to `assets/` and activates Select Mode for captioning. |
 | **`P`** | Neovim Markdown | Smart Image Paste Before Cursor | Shift + P (Pinky + Ring) | $140\text{ ms}$ | Direct counterpart to `p` inserting above the cursor with alt selection. |

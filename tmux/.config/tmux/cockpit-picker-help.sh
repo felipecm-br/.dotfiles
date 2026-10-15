@@ -54,6 +54,7 @@ printf '    %b[Enter]%b  Jump / Connect    Focus selected window/session\n' "$C_
 printf '    %b[t]%b      New Window        Create window in current path\n' "$C_CYAN$C_BOLD" "$C_RESET"
 printf '    %b[s]%b      Sessions          Open Session Picker (Sesh)\n' "$C_YELLOW$C_BOLD" "$C_RESET"
 printf '    %b[g]%b      Git Cockpit       Toggle Lazygitrs (Dual-Diff, g returns)\n' "$C_MAGENTA$C_BOLD" "$C_RESET"
+printf '    %b[p]%b      Patch Mode        Turbo Hunk Staging in Lazygitrs ([Space] stage, [Esc] exit)\n' "$C_MAGENTA$C_BOLD" "$C_RESET"
 printf '    %b[v]%b      Diff View         Toggle side-by-side Git Diff\n' "$C_CYAN$C_BOLD" "$C_RESET"
 printf '    %b[d / C-d]%b Kill / Delete     Kill window or delete session\n' "$C_RED$C_BOLD" "$C_RESET"
 printf '    %b[J/K]%b    Scroll Preview    Scroll preview pane up/down\n' "$C_BLUE$C_BOLD" "$C_RESET"
@@ -62,4 +63,4 @@ printf '    %b[/]%b      Filter            Enter fuzzy query filter mode\n' "$C_
 printf '    %b[Esc]%b    Exit              Dismiss Cockpit modal\n\n' "$C_BLUE$C_BOLD" "$C_RESET"
 
 printf '  %b────────────────────────────────────────────────────────────%b\n' "$C_DIM" "$C_RESET"
-printf '  %bPress %b?%b%b for HUD help • %bv%b%b for Side-by-Side Diff • %bg%b%b for Lazygitrs%b\n' "$C_DIM" "$C_BLUE$C_BOLD" "$C_RESET" "$C_DIM" "$C_CYAN$C_BOLD" "$C_RESET" "$C_DIM" "$C_MAGENTA$C_BOLD" "$C_RESET" "$C_DIM" "$C_RESET"
+printf '  %bPress %b?%b%b for HUD help • %bv%b%b for Diff • %bg%b%b for Git • %bp%b%b for Patch%b\n' "$C_DIM" "$C_BLUE$C_BOLD" "$C_RESET" "$C_DIM" "$C_CYAN$C_BOLD" "$C_RESET" "$C_DIM" "$C_MAGENTA$C_BOLD" "$C_RESET" "$C_DIM" "$C_MAGENTA$C_BOLD" "$C_RESET" "$C_DIM"

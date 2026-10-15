@@ -289,6 +289,69 @@ while true; do
     fi
     exit 0
     ;;
+  __PATCH_MODE__*)
+    raw_item="${chosen#__PATCH_MODE__}"
+    first_line=$(printf '%s' "$raw_item" | head -n1)
+    target_path=""
+
+    case "$first_line" in
+      \#*)
+        target_sess=$(printf '%s' "$first_line" | sed -E 's/^#[[:space:]]*//' | awk '{print $1}')
+        target_idx=""
+        target_path=""
+        ;;
+      *)
+        target_sess=$(printf '%s' "$first_line" | cut -f4)
+        target_idx=$(printf '%s' "$first_line" | cut -f2)
+        row_path=$(printf '%s' "$first_line" | cut -f6)
+        if [ -n "$row_path" ] && [ -d "$row_path" ]; then
+          target_path="$row_path"
+        fi
+        ;;
+    esac
+
+    # If target_path not resolved from row: resolve session cwd
+    if [ -z "$target_path" ] && [ -n "$target_sess" ]; then
+      target_path=$(tmux display-message -t "${target_sess}:" -p '#{pane_current_path}' 2>/dev/null || true)
+    fi
+
+    # Fallback to origin session cwd or current directory
+    if [ -z "$target_path" ] || [ ! -d "$target_path" ]; then
+      target_path="${TMUX_ORIGIN_SESSION:+$(tmux display-message -t "${TMUX_ORIGIN_SESSION}:" -p '#{pane_current_path}' 2>/dev/null || true)}"
+    fi
+    if [ -z "$target_path" ] || [ ! -d "$target_path" ]; then
+      target_path="$PWD"
+    fi
+
+    if ! git -C "$target_path" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+      tmux display-message "Not in a git repository: $target_path"
+      continue
+    fi
+
+    LZG_BIN="$HOME/.local/bin/lazygitrs"
+    [ -x "$LZG_BIN" ] || LZG_BIN="$HOME/.cargo/bin/lazygitrs"
+    [ -x "$LZG_BIN" ] || LZG_BIN="$(command -v lazygitrs 2>/dev/null || echo "lazygitrs")"
+
+    if [ -z "$(git -C "$target_path" status --porcelain 2>/dev/null)" ]; then
+      tmux display-message "Working tree is clean: nothing to patch in $target_path"
+      continue
+    fi
+
+    SAVED_SESS="$target_sess"
+    SAVED_IDX="$target_idx"
+
+    (
+      cd "$target_path" || exit 1
+      export LAZYGITRS_COCKPIT=1
+      "$LZG_BIN" -d -c popup
+    )
+    lzg_rc=$?
+
+    if [ "$lzg_rc" -eq 10 ]; then
+      continue
+    fi
+    exit 0
+    ;;
   __SWITCH_AWT__*)
     raw_item="${chosen#__SWITCH_AWT__}"
     first_line=$(printf '%s' "$raw_item" | head -n1)
