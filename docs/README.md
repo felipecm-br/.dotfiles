@@ -30,6 +30,7 @@ Welcome to the central documentation index for this Arch Linux + Omarchy dotfile
 - [**Popup Isolation, Debounce & Event-Driven Architecture**](tmux/popup-isolation-and-debounce.md): Transparent frozen snapshot backdrops for rock-solid popups, 650ms idle debounce in ACPD, and 100% event-driven `status-interval 0`.
 - [**Clipboard & Scrollback Capture**](tmux/clipboard-and-scrollback.md): Click-and-hold drag-to-copy to system clipboard, and `Prefix + C-e` scrollback buffer export to Neovim with full ANSI color formatting.
 - [**Tmux Activity Monitoring**](tmux/tmux-activity.md): Activity alert and notification behavior.
+- [**Cockpit HUD & Floating Popups Architecture Audit**](tmux/cockpit-and-popups-audit.md): Comprehensive staff-level architectural, ergonomic, and latency audit of the Cockpit HUD, floating modals, action safety, and prioritized roadmap.
 
 ### 🖥️ 3. Desktop, Terminal & Hardware (`docs/desktop/`)
 - [**Hyprland Aesthetics vs. Performance Benchmark**](desktop/hyprland-aesthetics-and-performance.md): Deep-dive comparing Liquid Glass (`hyprglass`), Tokyo Night Solar Dawn (current), Catppuccin Pastel, Cyberpunk Neon, and OLED Zen with GPU/battery benchmarks on Apple Silicon M1 Pro.
