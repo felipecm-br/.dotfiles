@@ -26,7 +26,7 @@ emit_tmux() {
 󰒭  Prefix + I	AI Attention Trampoline Direct Jump	tmux	tmux-triage	~/.config/tmux/ai-agent-bell-triage.sh
 󰄧  Prefix + o	AI Side-by-Side Split (35% Right)	tmux	tmux-ai-split	~/.config/tmux/toggle-ai-split.sh
 󰏫  Prefix + N	Neovim Floating Scratchpad (90%x90%)	tmux	tmux-scratchpad	~/.config/tmux/nvim-scratchpad.sh
-󰤄  Prefix + E	Full Scrollback Buffer in Neovim	tmux	tmux-view-scrollback	~/.config/tmux/scrollback-view.sh
+󰄧  Prefix + E	Scrollback & AI Mermaid Modal (90%x88%)	tmux	tmux-view-scrollback	~/.config/tmux/scrollback-view.sh
 󰏌  Prefix + t	Create New Window in Current Path	tmux	tmux-new-win	tmux new-window -c '#{pane_current_path}'
 󰙀  Prefix + T / u	Reopen Last Closed Window / Tab	tmux	tmux-reopen	~/.config/tmux/reopen-window.sh
 󰅖  Prefix + w / x	Close Pane / Window (Save to Reopen)	tmux	tmux-close	~/.config/tmux/close-window.sh

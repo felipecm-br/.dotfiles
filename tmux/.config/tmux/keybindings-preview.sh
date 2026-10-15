@@ -239,10 +239,13 @@ EOF
 
   tmux-view-scrollback)
     cat <<'EOF'
-### 󰤄 Full Scrollback in Neovim (`Prefix + E`)
-Captures complete ANSI scrollback buffer into read-only Neovim buffer with full syntax highlighting.
+### 󰄧 Scrollback & AI Mermaid Inspector (`Prefix + E`)
+Captures complete terminal scrollback into a high-density floating Neovim popup (90% × 88% Golden Ratio) with full Markdown & Treesitter support.
 
-- **Ergonomics**: `E` = Edit scrollback.
+- **Mermaid Hopping**: `n` / `]` jumps to next diagram; `N` / `[` jumps to previous.
+- **Sidecar & Lightbox**: Diagram renders in floating sidecar automatically; press `<CR>` or `<leader>mz` for interactive zoom & pan.
+- **Zero Friction Yank**: `yc` copies entire Mermaid block with fences; `yC` copies chart syntax only.
+- **Instant Dismissal**: `q` or `Esc` closes popup and returns immediately to terminal prompt ($T_M \approx 0$).
 EOF
     ;;
 

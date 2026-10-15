@@ -101,3 +101,13 @@ if w then
     end)
   end)
 end
+
+-- Auto-setup for tmux scrollback viewer buffers
+vim.api.nvim_create_autocmd({ "BufReadPost", "BufNewFile" }, {
+  group = vim.api.nvim_create_augroup("tmux_scrollback_setup", { clear = true }),
+  pattern = "*/tmux_scrollback.*",
+  callback = function(args)
+    pcall(vim.cmd, "silent! BaleiaColorize")
+    require("config.scrollback").setup(args.buf)
+  end,
+})
