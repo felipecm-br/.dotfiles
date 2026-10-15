@@ -29,7 +29,7 @@ style.fg = "Cyan"
 style.modifier = "BOLD"
 
 [footer]
-content = " {cyan,bold:[Enter]} {darkgray:Connect}  •  {yellow,bold:[c]} {darkgray:New}  •  {magenta,bold:[m]} {darkgray:Merge}  •  {magenta,bold:[S]} {darkgray:Ship}  •  {yellow,bold:[R]} {darkgray:Rebase}  •  {cyan,bold:[r]} {darkgray:Rename}  •  {blue,bold:[P]} {darkgray:PR}  •  {red,bold:[d]} {darkgray:Delete}  •  {blue,bold:[p]} {darkgray:Preview}  •  {darkgray,bold:[q]} {darkgray:Quit}"
+content = " {cyan,bold:[Enter]} {darkgray:Connect}  •  {yellow,bold:[Tab]} {darkgray:Cockpit}  •  {yellow,bold:[c]} {darkgray:New}  •  {magenta,bold:[m]} {darkgray:Merge}  •  {magenta,bold:[S]} {darkgray:Ship}  •  {yellow,bold:[R]} {darkgray:Rebase}  •  {cyan,bold:[r]} {darkgray:Rename}  •  {blue,bold:[P]} {darkgray:PR}  •  {red,bold:[d]} {darkgray:Delete}  •  {blue,bold:[p]} {darkgray:Preview}  •  {darkgray,bold:[q]} {darkgray:Quit}"
 row_connection = "Full"
 match_indent = false
 style.fg = "gray"
@@ -280,8 +280,16 @@ output_template = "{=session}\t{=path}"
 "ctrl-shift-P" = "@pr_worktree"
 "ctrl-u" = "@fetch_remotes"
 "esc" = "FocusNav"
+"tab" = ["Print(__SWITCH_COCKPIT__)", "Quit"]
+"shift-tab" = ["Print(__SWITCH_COCKPIT__)", "Quit"]
+"backtab" = ["Print(__SWITCH_COCKPIT__)", "Quit"]
+"shift-backtab" = ["Print(__SWITCH_COCKPIT__)", "Quit"]
 
 # Nav Mode Binds (compatibility with nav^^ prefix in [binds])
+"nav^^tab" = ["Print(__SWITCH_COCKPIT__)", "Quit"]
+"nav^^shift-tab" = ["Print(__SWITCH_COCKPIT__)", "Quit"]
+"nav^^backtab" = ["Print(__SWITCH_COCKPIT__)", "Quit"]
+"nav^^shift-backtab" = ["Print(__SWITCH_COCKPIT__)", "Quit"]
 "nav^^/" = "FocusFilter"
 "nav^^i" = "FocusFilter"
 "nav^^j" = "Down"
@@ -305,6 +313,10 @@ output_template = "{=session}\t{=path}"
 
 # Nav Mode Binds (active when Results / Nav Mode is focused)
 [ui.nav.binds]
+"tab" = ["Print(__SWITCH_COCKPIT__)", "Quit"]
+"shift-tab" = ["Print(__SWITCH_COCKPIT__)", "Quit"]
+"backtab" = ["Print(__SWITCH_COCKPIT__)", "Quit"]
+"shift-backtab" = ["Print(__SWITCH_COCKPIT__)", "Quit"]
 "/" = "FocusFilter"
 "i" = "FocusFilter"
 "esc" = "Quit"

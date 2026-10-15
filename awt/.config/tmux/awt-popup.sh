@@ -35,11 +35,23 @@ if [ -z "${TMUX_POPUP:-}" ]; then
 fi
 
 # Inside the popup modal:
+if [ -n "$PROJECT_DIR" ] && [ -d "$PROJECT_DIR" ]; then
+    cd "$PROJECT_DIR" || true
+fi
+
 MM_BIN="$HOME/.local/bin/wm"
 [ -x "$MM_BIN" ] || MM_BIN="$(command -v wm 2>/dev/null || command -v mm 2>/dev/null || echo "wm")"
 
 output=$("$MM_BIN" -o awt tui.percentage=100 tui.max=9999)
 [ -z "$output" ] && exit 0
+
+case "$output" in
+  __SWITCH_COCKPIT__*)
+    COCKPIT_BIN="$HOME/.config/tmux/cockpit-picker.sh"
+    [ -x "$COCKPIT_BIN" ] || COCKPIT_BIN="$(command -v cockpit-picker.sh 2>/dev/null || echo "cockpit-picker.sh")"
+    exec "$COCKPIT_BIN"
+    ;;
+esac
 
 # If awt-new.sh already provisioned and connected to the session, exit immediately to prevent double execution
 if [ -f "/tmp/awt_new_created_${USER:-user}" ]; then

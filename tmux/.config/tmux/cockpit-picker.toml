@@ -67,7 +67,7 @@ prompt = " "
 show = true
 
 [footer]
-content = " {cyan,bold:[Enter]} {darkgray:Jump}  •  {green,bold:[i]} {darkgray:Live}  •  {magenta,bold:[I]} {darkgray:Prompt}  •  {yellow,bold:[Tab]} {darkgray:Agents}  •  {cyan,bold:[v]} {darkgray:Diff}  •  {red,bold:[d]} {darkgray:Delete}  •  {yellow,bold:[w]} {darkgray:New WT}  •  {green,bold:[t]} {darkgray:New Win}  •  {yellow,bold:[s]} {darkgray:Sessions}  •  {magenta,bold:[g]} {darkgray:Git}  •  {blue,bold:[?]} {darkgray:Help}  •  {blue,bold:[Esc]} {darkgray:Exit}"
+content = " {cyan,bold:[Enter]} {darkgray:Jump}  •  {green,bold:[i]} {darkgray:Live}  •  {magenta,bold:[I]} {darkgray:Prompt}  •  {yellow,bold:[Tab]} {darkgray:AWT}  •  {yellow,bold:[a]} {darkgray:Agents}  •  {cyan,bold:[v]} {darkgray:Diff}  •  {red,bold:[d]} {darkgray:Delete}  •  {yellow,bold:[w]} {darkgray:New WT}  •  {green,bold:[t]} {darkgray:New Win}  •  {yellow,bold:[s]} {darkgray:Sessions}  •  {magenta,bold:[g]} {darkgray:Git}  •  {blue,bold:[?]} {darkgray:Help}  •  {blue,bold:[Esc]} {darkgray:Exit}"
 row_connection = "Full"
 match_indent = false
 separator = "light"
@@ -80,10 +80,13 @@ color = "black"
 hints = false
 
 [ui.nav.binds]
-"tab"           = "@reloadnext"
-"shift-tab"     = "@reloadprev"
-"backtab"       = "@reloadprev"
-"shift-backtab" = "@reloadprev"
+"tab"           = ["Print(__SWITCH_AWT__{=})", "Quit"]
+"shift-tab"     = ["Print(__SWITCH_AWT__{=})", "Quit"]
+"backtab"       = ["Print(__SWITCH_AWT__{=})", "Quit"]
+"shift-backtab" = ["Print(__SWITCH_AWT__{=})", "Quit"]
+"a"             = "@reloadnext"
+"A"             = "@reloadprev"
+"ctrl-a"        = "@reloadnext"
 "/"             = "FocusFilter"
 "s"             = ["Print(__SWITCH_SESSION__)", "Quit"]
 "S"             = ["Print(__SHIP_WORKTREE__{=})", "Quit"]
@@ -167,10 +170,13 @@ Start    = [
     "ToggleColumn(state)", "ToggleColumn(agent)", "ToggleColumn(age)",
     "ToggleColumn(branch)", "ToggleColumn(sync)"
 ]
-"tab"           = "@reloadnext"
-"shift-tab"     = "@reloadprev"
-"backtab"       = "@reloadprev"
-"shift-backtab" = "@reloadprev"
+"tab"           = ["Print(__SWITCH_AWT__{=})", "Quit"]
+"shift-tab"     = ["Print(__SWITCH_AWT__{=})", "Quit"]
+"backtab"       = ["Print(__SWITCH_AWT__{=})", "Quit"]
+"shift-backtab" = ["Print(__SWITCH_AWT__{=})", "Quit"]
+"a"             = "@reloadnext"
+"A"             = "@reloadprev"
+"ctrl-a"        = "@reloadnext"
 "ctrl-s" = ["Print(__SWITCH_SESSION__)", "Quit"]
 "ctrl-g" = ["Print(__LAZYGIT__{=})", "Quit"]
 "ctrl-t" = ["Print(__CREATE_WINDOW__{=})", "Quit"]

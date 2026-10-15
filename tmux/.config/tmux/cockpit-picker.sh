@@ -289,6 +289,35 @@ while true; do
     fi
     exit 0
     ;;
+  __SWITCH_AWT__*)
+    raw_item="${chosen#__SWITCH_AWT__}"
+    first_line=$(printf '%s' "$raw_item" | head -n1)
+    target_path=""
+
+    row_path=$(printf '%s' "$first_line" | cut -f6)
+    if [ -n "$row_path" ] && [ -d "$row_path" ]; then
+      target_path="$row_path"
+    fi
+
+    if [ -z "$target_path" ]; then
+      sess=$(printf '%s' "$first_line" | cut -f4)
+      if [ -z "$sess" ] || [ "$sess" = "$first_line" ]; then
+        sess=$(printf '%s' "$first_line" | sed -E 's/^#[[:space:]]*//')
+      fi
+      if [ -n "$sess" ]; then
+        target_path=$(tmux display-message -t "${sess}:" -p '#{pane_current_path}' 2>/dev/null || true)
+      fi
+    fi
+
+    if [ -z "$target_path" ] || [ ! -d "$target_path" ]; then
+      target_path="${TMUX_ORIGIN_SESSION:+$(tmux display-message -t "${TMUX_ORIGIN_SESSION}:" -p '#{pane_current_path}' 2>/dev/null || true)}"
+    fi
+    [ -z "$target_path" ] && target_path="$PWD"
+
+    AWT_POPUP="$HOME/.config/tmux/awt-popup.sh"
+    [ -x "$AWT_POPUP" ] || AWT_POPUP="$SCRIPT_DIR/awt-popup.sh"
+    exec "$AWT_POPUP" "$target_path"
+    ;;
   __SWITCH_SESSION__)
     if [ "$1" = "--fullscreen" ]; then
       exec "$SCRIPT_DIR/session-picker.sh" --fullscreen
