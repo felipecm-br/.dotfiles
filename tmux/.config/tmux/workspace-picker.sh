@@ -5,7 +5,7 @@
 # Tab / Shift+Tab cycles data sources (Local files -> Frecency -> Bookmarks);
 # Ctrl+V inserts the path directly into the origin pane (AI prompt);
 # Ctrl+E / e opens in $EDITOR;
-# y copies the selected path(s) to clipboard.
+trap 'exit 0' HUP INT TERM
 set -u
 
 LOG=/tmp/workspace-picker.log
@@ -32,14 +32,15 @@ if [ -z "${TMUX_POPUP:-}" ]; then
     HEIGHT="92%"
   fi
 
-  exec tmux display-popup \
+  tmux display-popup \
     -S "fg=$BLUE" \
     -s "fg=default" \
     -b rounded \
     -T " 󰈞 " \
     -w "$WIDTH" -h "$HEIGHT" \
     -E \
-    "TMUX_POPUP=1 '$0' '$ORIGIN_ARG' '$CWD_ARG' '$FULLSCREEN_ARG'"
+    "TMUX_POPUP=1 '$0' '$ORIGIN_ARG' '$CWD_ARG' '$FULLSCREEN_ARG' || true" || true
+  exit 0
 fi
 
 [ -n "${TMUX:-}" ] || { echo "workspace-picker: not inside tmux" >&2; exit 1; }

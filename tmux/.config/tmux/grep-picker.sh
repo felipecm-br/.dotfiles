@@ -5,8 +5,7 @@
 # Enter opens Neovim directly at the matched line: nvim +{line} {file};
 # Ctrl+V inserts {file}:{line} directly into origin pane (AI prompt);
 # 45/55 foveal layout with line-synced bat preview;
-# Ctrl+P / Ctrl+/ toggles fullscreen preview;
-# Esc / q quits.
+trap 'exit 0' HUP INT TERM
 set -u
 
 if [ -z "${TMUX_POPUP:-}" ]; then
@@ -31,14 +30,15 @@ if [ -z "${TMUX_POPUP:-}" ]; then
     HEIGHT="92%"
   fi
 
-  exec tmux display-popup \
+  tmux display-popup \
     -S "fg=$BORDER_COLOR" \
     -s "fg=default" \
     -b rounded \
     -T " 󰍉 " \
     -w "$WIDTH" -h "$HEIGHT" \
     -E \
-    "TMUX_POPUP=1 '$0' '$ORIGIN_ARG' '$CWD_ARG' '$FULLSCREEN_ARG'"
+    "TMUX_POPUP=1 '$0' '$ORIGIN_ARG' '$CWD_ARG' '$FULLSCREEN_ARG' || true" || true
+  exit 0
 fi
 
 [ -n "${TMUX:-}" ] || { echo "grep-picker: not inside tmux" >&2; exit 1; }

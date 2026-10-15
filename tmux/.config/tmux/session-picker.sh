@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 # session-picker.sh - cross-session window picker using wm
-# Replicates session switching functionality with Waymaker
+trap 'exit 0' HUP INT TERM
 
 REAL_SCRIPT=$(readlink -f "$0" 2>/dev/null || realpath "$0")
 
@@ -13,14 +13,15 @@ elif [ -z "${TMUX_POPUP:-}" ]; then
   SESSION_POPUP_COLOR=$(grep -E '^\s*cyan\s*=' "$HOME/.local/state/omarchy/current/theme/colors.toml" 2>/dev/null | sed -E 's/.*=\s*"([^"]+)".*/\1/')
   [ -z "$SESSION_POPUP_COLOR" ] && SESSION_POPUP_COLOR="${TMUX_POPUP_BORDER_COLOR:-#89dceb}"
 
-  exec tmux display-popup \
+  tmux display-popup \
     -S "fg=$SESSION_POPUP_COLOR" \
     -s "fg=${TMUX_POPUP_TEXT_COLOR:-default}" \
     -b rounded \
     -T " ⚡ " \
     -w 85% -h 75% \
     -E \
-    "TMUX_POPUP=1 '$REAL_SCRIPT'"
+    "TMUX_POPUP=1 '$REAL_SCRIPT' || true" || true
+  exit 0
 fi
 
 SCRIPT_DIR=$(dirname "$REAL_SCRIPT")
