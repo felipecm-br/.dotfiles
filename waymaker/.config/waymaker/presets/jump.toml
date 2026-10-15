@@ -3,6 +3,8 @@ percentage = 43
 
 [query]
 status_inline = true
+prompt = " "
+show = true
 
 [query.filter]
 prompt_style.fg = "blue"
@@ -11,7 +13,7 @@ underline = true
 underline_style.fg = "#8999f1"
 
 [query.local]
-prompt = "> "
+prompt = " "
 prompt_style.fg = "cyan"
 underline_style.fg = "cyan"
 
@@ -30,9 +32,11 @@ active = true
 profile = "fm"
 focus_on_start = "picker"
 bar = "Plain"
-color = "Darkgray"
-hints = true
-hints_columns = 4
+color = "black"
+hints = false
+
+[ui.border]
+sides = ""
 
 [ui.parent_peek]
 enabled = false
@@ -41,9 +45,8 @@ enabled = false
 show = false
 
 [footer]
+row_connection = "Full"
 separator = "light"
-style.fg = "gray"
-style.modifier = "DIM"
 match_indent = false
 
 [matcher]
@@ -69,6 +72,9 @@ icons = true
 uncolor_current_icon = true
 invert_current_icon = false
 row_connection = "Full"
+
+[results.border]
+sides = ""
 
 [results.tier]
 separator = "Underline"

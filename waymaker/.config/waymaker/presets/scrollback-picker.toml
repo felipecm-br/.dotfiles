@@ -13,11 +13,14 @@ active = true
 profile = "list"
 focus_on_start = "filter"
 bar = "Plain"
-color = "Darkgray"
-hints = true
-hints_columns = 4
+color = "black"
+hints = false
+
+[ui.border]
+sides = ""
 
 [tui]
+mouse = true
 percentage = 100
 max = 9999
 
@@ -40,13 +43,16 @@ threshold = false
 
 [query]
 prompt = "> "
-prompt_style.fg = "Cyan"
 status_inline = true
+show = true
 
 [results]
 scroll_wrap = true
 max = 15
 row_connection = "Full"
+
+[results.border]
+sides = ""
 
 [results.current_style]
 fg = "black"
@@ -79,7 +85,7 @@ debounce_ms = 200
 delay_clear = true
 
 [footer]
-content = " {cyan,bold:[Enter]} {darkgray:Yank}  •  {magenta,bold:[Tab]} {darkgray:Filter}  •  {green,bold:[C-v]} {darkgray:Insert}  •  {yellow,bold:[C-e]} {darkgray:Open}  •  {blue,bold:[C-b]} {darkgray:Chrome}  •  {magenta,bold:[J/K]} {darkgray:Scroll}  •  {cyan,bold:[Space]} {darkgray:Multi}"
+content = " {cyan,bold:[Enter]} {darkgray:Yank}  •  {magenta,bold:[Tab]} {darkgray:Filter}  •  {green,bold:[C-v]} {darkgray:Insert}  •  {yellow,bold:[C-e]} {darkgray:Open}  •  {blue,bold:[C-b]} {darkgray:Chrome}  •  {magenta,bold:[J/K]} {darkgray:Scroll}  •  {cyan,bold:[Space]} {darkgray:Multi}  •  {blue,bold:[Esc]} {darkgray:Exit}"
 match_indent = false
 row_connection = "Full"
 separator = "light"

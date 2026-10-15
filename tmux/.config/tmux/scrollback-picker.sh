@@ -25,7 +25,7 @@ if [ -z "${TMUX_POPUP:-}" ]; then
     -s "fg=default" \
     -b rounded \
     -T " 󰅍 " \
-    -w 75% -h 60% \
+    -w 85% -h 75% \
     -E \
     "TMUX_POPUP=1 '$0' '$ORIGIN_ARG' '$CWD_ARG'" || true
   exit 0

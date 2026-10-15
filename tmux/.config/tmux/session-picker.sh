@@ -18,7 +18,7 @@ elif [ -z "${TMUX_POPUP:-}" ]; then
     -s "fg=${TMUX_POPUP_TEXT_COLOR:-default}" \
     -b rounded \
     -T " ⚡ " \
-    -w 75% -h 60% \
+    -w 85% -h 75% \
     -E \
     "TMUX_POPUP=1 '$REAL_SCRIPT'"
 fi

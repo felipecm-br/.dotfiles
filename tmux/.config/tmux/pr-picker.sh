@@ -38,7 +38,7 @@ if [ -z "${TMUX_POPUP:-}" ]; then
     -S "fg=$PR_POPUP_COLOR" \
     -s "fg=${TMUX_POPUP_TEXT_COLOR:-default}" \
     -b rounded \
-    -T "   Pull Requests " \
+    -T "  " \
     -d "$PROJECT_DIR" \
     -w 75% -h 60% \
     -E \

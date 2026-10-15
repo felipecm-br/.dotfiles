@@ -1,6 +1,7 @@
 # Matchmaker Agent Worktree Base Branch Preset (`mm -o awt-base`)
 
 [tui]
+mouse = true
 percentage = 30
 min = 10
 max = 25
@@ -10,27 +11,28 @@ restore_fullscreen = false
 active = true
 focus_on_start = "picker"
 bar = "Plain"
-color = "white"
+color = "black"
 hints = false
+
+[ui.border]
+sides = ""
 
 [ui.parent_peek]
 enabled = false
 
 [query]
-status_inline = false
-prompt = "> "
-prompt_style.fg = "white"
-prompt_style.modifier = "BOLD"
+status_inline = true
+prompt = " "
+show = true
 
 [status]
 show = false
 
 [footer]
-content = " {cyan,bold:[Enter]} {darkgray:Select Base}  •  {darkgray,bold:[Esc/q]} {darkgray:Back}"
+content = " {cyan,bold:[Enter]} {darkgray:Select Base}  •  {blue,bold:[Esc]} {darkgray:Back}"
 row_connection = "Full"
 match_indent = false
-style.fg = "gray"
-style.modifier = "DIM"
+separator = "light"
 
 [matcher]
 typo_tolerance = true
@@ -41,6 +43,10 @@ threshold = "smart"
 [results]
 reverse = false
 column_spacing = 2
+row_connection = "Full"
+
+[results.border]
+sides = ""
 
 [results.symlink]
 active = false

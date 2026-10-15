@@ -8,22 +8,25 @@
 active = true
 focus_on_start = "filter"
 bar = "Plain"
-color = "Darkgray"
-hints = true
-hints_columns = 4
+color = "black"
+hints = false
+
+[ui.border]
+sides = ""
 
 [tui]
+mouse = true
 percentage = 100
 max = 9999
 
 [query]
-prompt = " > "
-prompt_style.fg = "Cyan"
+prompt = " "
 status_inline = true
+show = true
 
 # Data source mode prompts and styling (aligning with jump.toml)
 [query.local]
-prompt = "> "
+prompt = " "
 prompt_style.fg = "cyan"
 underline_style.fg = "cyan"
 
@@ -54,6 +57,9 @@ weight = 2
 icons = true
 scroll_wrap = true
 row_connection = "Full"
+
+[results.border]
+sides = ""
 
 [results.tier]
 separator = "Underline"
@@ -120,7 +126,7 @@ color = "Darkgray"
 title_fg = "Cyan"
 
 [footer]
-# content = " {cyan,bold:[Enter]} {darkgray:Full}  •  {magenta,bold:[Tab]} {darkgray:Cycle}  •  {yellow,bold:[C-h/l]} {darkgray:Dir}  •  {cyan,bold:[C-j/k]} {darkgray:Move}  •  {blue,bold:[C-d/u]} {darkgray:Scroll}  •  {green,bold:[C-v]} {darkgray:Insert}  •  {yellow,bold:[C-e]} {darkgray:Edit}  •  {magenta,bold:[C-y]} {darkgray:Copy}  •  {red,bold:[Esc]} {darkgray:Nav}"
+content = " {cyan,bold:[Enter]} {darkgray:Full}  •  {magenta,bold:[Tab]} {darkgray:Cycle}  •  {yellow,bold:[C-h/l]} {darkgray:Dir}  •  {cyan,bold:[C-j/k]} {darkgray:Move}  •  {blue,bold:[C-d/u]} {darkgray:Scroll}  •  {green,bold:[C-v]} {darkgray:Insert}  •  {yellow,bold:[C-e]} {darkgray:Edit}  •  {magenta,bold:[C-y]} {darkgray:Copy}  •  {blue,bold:[Esc]} {darkgray:Exit}"
 match_indent = false
 row_connection = "Full"
 separator = "light"

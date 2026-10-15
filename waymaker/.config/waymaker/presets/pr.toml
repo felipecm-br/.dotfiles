@@ -2,24 +2,28 @@
 # Interactive GitHub PR browser, review manager, and worktree provisioner with live preview.
 
 [tui]
-percentage = 75
-min = 12
-max = 40
+mouse = true
+percentage = 100
+max = 9999
 restore_fullscreen = false
 
 [ui.nav]
 active = true
+focus_on_start = "picker"
 bar = "Plain"
-color = "white"
+color = "black"
+hints = false
+
+[ui.border]
+sides = ""
 
 [ui.parent_peek]
 enabled = false
 
 [query]
 status_inline = true
-prompt = "PR > "
-prompt_style.fg = "white"
-prompt_style.modifier = "BOLD"
+prompt = " "
+show = true
 
 [header]
 header_lines = 1
@@ -27,11 +31,10 @@ style.fg = "Cyan"
 style.modifier = "BOLD"
 
 [footer]
-content = " {cyan,bold:[Enter]} {darkgray:Checkout Worktree}  •  {magenta,bold:[Tab]} {darkgray:Cycle Tab}  •  {blue,bold:[C-e]} {darkgray:Chrome}  •  {yellow,bold:[C-d]} {darkgray:Diff}  •  {blue,bold:[p]} {darkgray:Preview}  •  {darkgray,bold:[q]} {darkgray:Quit}"
+content = " {cyan,bold:[Enter]} {darkgray:Checkout Worktree}  •  {magenta,bold:[Tab]} {darkgray:Cycle Tab}  •  {blue,bold:[C-e]} {darkgray:Chrome}  •  {yellow,bold:[C-d]} {darkgray:Diff}  •  {blue,bold:[p]} {darkgray:Preview}  •  {blue,bold:[Esc]} {darkgray:Exit}"
 row_connection = "Full"
 match_indent = false
-style.fg = "gray"
-style.modifier = "DIM"
+separator = "light"
 
 [matcher]
 typo_tolerance = true
@@ -42,6 +45,10 @@ threshold = "smart"
 [results]
 reverse = false
 column_spacing = 2
+row_connection = "Full"
+
+[results.border]
+sides = ""
 
 [results.current_style]
 bg = "darkgray"
@@ -71,6 +78,10 @@ delay_clear = true
 show = true
 wrap = true
 
+[preview.border]
+sides = "LEFT"
+color = "Darkgray"
+
 # ── Preview Layout 0: PR Overview & Metadata ──
 [[preview.layout]]
 command = '''
@@ -82,7 +93,7 @@ if [ -n "$num" ]; then
 fi
 '''
 side = "right"
-percentage = 55
+percentage = 60
 
 # ── Preview Layout 1: PR Full Diff ──
 [[preview.layout]]

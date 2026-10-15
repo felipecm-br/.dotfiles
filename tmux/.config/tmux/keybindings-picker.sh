@@ -16,8 +16,8 @@ if [ -z "${TMUX_POPUP:-}" ]; then
     -S "fg=$YELLOW_COLOR" \
     -s "fg=default" \
     -b rounded \
-    -T " 󰌌 Keybindings & Workflow HUD " \
-    -w 85% -h 65% \
+    -T " 󰌌 " \
+    -w 85% -h 75% \
     -E \
     "TMUX_POPUP=1 '$REAL_SCRIPT' '$ORIGIN_ARG' '$CWD_ARG'" || true
   exit 0

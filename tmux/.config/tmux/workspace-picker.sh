@@ -25,8 +25,8 @@ if [ -z "${TMUX_POPUP:-}" ]; then
   BLUE=$(grep -E '^\s*blue\s*=' "$HOME/.local/state/omarchy/current/theme/colors.toml" 2>/dev/null | sed -E 's/.*=\s*"([^"]+)".*/\1/')
   [ -n "$BLUE" ] || BLUE="#89b4fa"
 
-  WIDTH="90%"
-  HEIGHT="85%"
+  WIDTH="85%"
+  HEIGHT="75%"
   if [ "$FULLSCREEN_ARG" = "--fullscreen" ]; then
     WIDTH="96%"
     HEIGHT="92%"

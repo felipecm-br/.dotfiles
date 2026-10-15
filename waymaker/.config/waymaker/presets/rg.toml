@@ -13,18 +13,21 @@ ansi = true
 active = true
 focus_on_start = "filter"
 bar = "Plain"
-color = "Darkgray"
-hints = true
-hints_columns = 4
+color = "black"
+hints = false
+
+[ui.border]
+sides = ""
 
 [tui]
+mouse = true
 percentage = 100
 max = 9999
 
 [query]
-prompt = " > "
-prompt_style.fg = "Cyan"
+prompt = " "
 status_inline = true
+show = true
 
 [columns]
 max = 3
@@ -44,6 +47,9 @@ scroll.index = "line"
 
 [preview.media]
 active = false
+
+[results.border]
+sides = ""
 
 # Layout 0: Standard 45/55 foveal split (45% list on left, 55% preview on right)
 [[preview.layout]]
@@ -82,7 +88,7 @@ if [ -f "$file" ]; then
 fi
 '''
 
-# Layout 2: Overrides and disables the 3rd layout from base config (strictly toggles 55% <-> 100%)
+# Layout 2: Overrides and disables the 3rd layout from base config (strictly toggles 60% <-> 100%)
 [[preview.layout]]
 max = 0
 
@@ -93,7 +99,7 @@ title = " Preview "
 title_fg = "Cyan"
 
 [footer]
-content = " {cyan,bold:[Enter]} {darkgray:Nvim}  •  {green,bold:[C-v]} {darkgray:Insert}  •  {magenta,bold:[y]} {darkgray:Copy}  •  {blue,bold:[J/K]} {darkgray:Scroll}  •  {cyan,bold:[C-/]} {darkgray:Layout}  •  {yellow,bold:[C-s]} {darkgray:Case}  •  {green,bold:[C-w]} {darkgray:Word}  •  {red,bold:[Esc]} {darkgray:Quit}"
+content = " {cyan,bold:[Enter]} {darkgray:Nvim}  •  {green,bold:[C-v]} {darkgray:Insert}  •  {magenta,bold:[y]} {darkgray:Copy}  •  {blue,bold:[J/K]} {darkgray:Scroll}  •  {cyan,bold:[C-/]} {darkgray:Layout}  •  {yellow,bold:[C-s]} {darkgray:Case}  •  {green,bold:[C-w]} {darkgray:Word}  •  {blue,bold:[Esc]} {darkgray:Exit}"
 match_indent = false
 row_connection = "Full"
 separator = "light"

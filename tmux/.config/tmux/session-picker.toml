@@ -2,7 +2,7 @@
 active = true
 basic = true
 bar = "Plain"
-color = "Darkgray"
+color = "black"
 prompt = ""
 focus_on_start = "filter"
 hints = false
@@ -20,6 +20,7 @@ additional = [
 ]
 
 [tui]
+mouse = true
 percentage = 100
 max = 9999
 
@@ -32,6 +33,7 @@ sides = ""
 [query]
 prompt = " "
 status_inline = true
+show = true
 
 [query.local]
 prompt = " "
@@ -46,16 +48,17 @@ prompt = " "
 prompt_style.fg = "yellow"
 
 [footer]
-content = " {cyan,bold:[Enter]} {darkgray:Connect}  •  {magenta,bold:[c]} {darkgray:Cockpit}  •  {yellow,bold:[Tab]} {darkgray:Cycle}  •  {green,bold:[/]} {darkgray:Filter}  •  {red,bold:[d]} {darkgray:Kill}  •  {blue,bold:[Esc]} {darkgray:Cancel}"
+content = " {cyan,bold:[Enter]} {darkgray:Connect}  •  {magenta,bold:[c]} {darkgray:Cockpit}  •  {yellow,bold:[Tab]} {darkgray:Cycle}  •  {green,bold:[/]} {darkgray:Filter}  •  {red,bold:[d]} {darkgray:Kill}  •  {blue,bold:[Esc]} {darkgray:Exit}"
 row_connection = "Full"
 match_indent = false
+separator = "light"
 
 [results]
 multi = false
 spinner_inline = true
 current_prefix = " "
 unselected_prefix = "  "
-row_connection = "Disjoint"
+row_connection = "Full"
 column_spacing = 1
 
 [results.border]
@@ -75,7 +78,7 @@ color = "Darkgray"
 [[preview.layout]]
 command = 'wm session preview {=}'
 side = "right"
-percentage = 55
+percentage = 60
 
 [ui.nav.binds]
 "tab"           = "@reloadnext"

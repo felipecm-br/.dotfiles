@@ -1,4 +1,5 @@
 [tui]
+mouse = true
 percentage = 30
 min = 8
 max = 20
@@ -7,23 +8,24 @@ restore_fullscreen = false
 [ui.nav]
 active = true
 bar = "Plain"
-color = "white"
+color = "black"
+
+[ui.border]
+sides = ""
 
 [query]
-status_inline = false
-prompt = "> "
-prompt_style.fg = "cyan"
-prompt_style.modifier = "BOLD"
+status_inline = true
+prompt = " "
+show = true
 
 [status]
 show = false
 
 [footer]
-content = " {cyan,bold:[Enter]} {darkgray:Confirm}  •  {yellow,bold:[Esc]} {darkgray:Back}"
+content = " {cyan,bold:[Enter]} {darkgray:Confirm}  •  {blue,bold:[Esc]} {darkgray:Back}"
 row_connection = "Full"
 match_indent = false
-style.fg = "gray"
-style.modifier = "DIM"
+separator = "light"
 
 [exit]
 allow_empty = true

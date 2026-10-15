@@ -8,11 +8,14 @@ active = true
 profile = "list"
 focus_on_start = "filter"
 bar = "Plain"
-color = "Yellow"
-hints = true
-hints_columns = 4
+color = "black"
+hints = false
+
+[ui.border]
+sides = ""
 
 [tui]
+mouse = true
 percentage = 100
 max = 9999
 
@@ -27,14 +30,17 @@ command = "~/.config/tmux/keybindings-items.sh all"
 threshold = false
 
 [query]
-prompt = "> "
-prompt_style.fg = "Yellow"
+prompt = " "
 status_inline = true
+show = true
 
 [results]
 scroll_wrap = true
 max = 16
 row_connection = "Full"
+
+[results.border]
+sides = ""
 
 [columns]
 split = "\t"
@@ -65,10 +71,10 @@ delay_clear = false
 [[preview.layout]]
 command = "~/.config/tmux/keybindings-preview.sh {1} {2} {3} {4} {5}"
 side = "right"
-percentage = 58
+percentage = 60
 
 [footer]
-content = " {cyan,bold:[Enter]} {darkgray:Run}  •  {magenta,bold:[Tab]} {darkgray:Filter}  •  {yellow,bold:[y]} {darkgray:Copy}  •  {blue,bold:[J/K]} {darkgray:Scroll}  •  {red,bold:[Esc]} {darkgray:Quit}"
+content = " {cyan,bold:[Enter]} {darkgray:Run}  •  {magenta,bold:[Tab]} {darkgray:Filter}  •  {yellow,bold:[y]} {darkgray:Copy}  •  {blue,bold:[J/K]} {darkgray:Scroll}  •  {blue,bold:[Esc]} {darkgray:Exit}"
 match_indent = false
 row_connection = "Full"
 separator = "light"
