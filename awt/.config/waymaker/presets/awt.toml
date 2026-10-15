@@ -2,26 +2,28 @@
 # Interactive worktree switcher with Nav Mode, BASE branch column, ANSI colors, and multi-tab previews.
 
 [tui]
-percentage = 30
-min = 12
-max = 25
+mouse = true
+percentage = 100
+max = 9999
 restore_fullscreen = false
 
 [ui.nav]
 active = true
 focus_on_start = "picker"
 bar = "Plain"
-color = "white"
+color = "black"
 hints = false
+
+[ui.border]
+sides = ""
 
 [ui.parent_peek]
 enabled = false
 
 [query]
 status_inline = true
-prompt = "> "
-prompt_style.fg = "white"
-prompt_style.modifier = "BOLD"
+prompt = " "
+show = true
 
 [header]
 header_lines = 1
@@ -29,11 +31,10 @@ style.fg = "Cyan"
 style.modifier = "BOLD"
 
 [footer]
-content = " {cyan,bold:[Enter]} {darkgray:Connect}  •  {yellow,bold:[Tab]} {darkgray:Cockpit}  •  {yellow,bold:[c]} {darkgray:New}  •  {magenta,bold:[m]} {darkgray:Merge}  •  {magenta,bold:[S]} {darkgray:Ship}  •  {yellow,bold:[R]} {darkgray:Rebase}  •  {cyan,bold:[r]} {darkgray:Rename}  •  {blue,bold:[P]} {darkgray:PR}  •  {red,bold:[d]} {darkgray:Delete}  •  {blue,bold:[p]} {darkgray:Preview}  •  {darkgray,bold:[q]} {darkgray:Quit}"
+content = " {cyan,bold:[Enter]} {darkgray:Connect}  •  {yellow,bold:[Tab]} {darkgray:Cockpit}  •  {yellow,bold:[c]} {darkgray:New}  •  {magenta,bold:[m]} {darkgray:Merge}  •  {magenta,bold:[S]} {darkgray:Ship}  •  {yellow,bold:[R]} {darkgray:Rebase}  •  {cyan,bold:[r]} {darkgray:Rename}  •  {blue,bold:[P]} {darkgray:PR}  •  {red,bold:[d]} {darkgray:Delete}  •  {blue,bold:[p]} {darkgray:Preview}  •  {blue,bold:[Esc]} {darkgray:Exit}"
 row_connection = "Full"
 match_indent = false
-style.fg = "gray"
-style.modifier = "DIM"
+separator = "light"
 
 [matcher]
 typo_tolerance = true
@@ -44,6 +45,10 @@ threshold = "smart"
 [results]
 reverse = false
 column_spacing = 2
+row_connection = "Full"
+
+[results.border]
+sides = ""
 
 [results.symlink]
 active = false
@@ -79,6 +84,11 @@ delay_clear = true
 
 [preview]
 show = true
+wrap = false
+
+[preview.border]
+sides = "LEFT"
+color = "Darkgray"
 
 # ── Preview Layout 1: Status & Local Changes + Recent Commits ──
 [[preview.layout]]
@@ -94,7 +104,7 @@ if [ -d "$wt_path" ]; then
 fi
 '''
 side = "right"
-percentage = 55
+percentage = 60
 
 # ── Preview Layout 2: Diff vs Main (Merge Base) ──
 [[preview.layout]]
@@ -107,7 +117,7 @@ if [ -d "$wt_path" ]; then
 fi
 '''
 side = "right"
-percentage = 55
+percentage = 60
 
 # ── Preview Layout 3: Commit History & Stats ──
 [[preview.layout]]
@@ -120,7 +130,7 @@ if [ -d "$wt_path" ]; then
 fi
 '''
 side = "right"
-percentage = 55
+percentage = 60
 
 [start.command]
 command = '''

@@ -3,20 +3,20 @@
 trap 'exit 0' HUP INT TERM
 
 REAL_SCRIPT=$(readlink -f "$0" 2>/dev/null || realpath "$0")
+SCRIPT_DIR=$(dirname "$REAL_SCRIPT")
 PROJECT_DIR="${1:-$PWD}"
+
+_tmux_style="$HOME/.local/state/omarchy/current/theme/tmux-style.sh"
+[ -f "$_tmux_style" ] || _tmux_style="$SCRIPT_DIR/tmux-style.sh"
+# shellcheck source=/dev/null
+. "$_tmux_style" 2>/dev/null || true
+unset _tmux_style
 
 if [ -z "${TMUX_POPUP:-}" ]; then
     if ! git -C "$PROJECT_DIR" rev-parse --is-inside-work-tree >/dev/null 2>&1 && ! git -C "$PROJECT_DIR" rev-parse --is-bare-repository >/dev/null 2>&1; then
         tmux display-message "Not in a git repository"
         exit 0
     fi
-
-    SCRIPT_DIR=$(dirname "$REAL_SCRIPT")
-    _tmux_style="$HOME/.local/state/omarchy/current/theme/tmux-style.sh"
-    [ -f "$_tmux_style" ] || _tmux_style="$SCRIPT_DIR/tmux-style.sh"
-    # shellcheck source=/dev/null
-    . "$_tmux_style" 2>/dev/null || true
-    unset _tmux_style
 
     AWT_POPUP_COLOR=$(grep -E '^\s*orange\s*=' "$HOME/.local/state/omarchy/current/theme/colors.toml" 2>/dev/null | sed -E 's/.*=\s*"([^"]+)".*/\1/')
     [ -z "$AWT_POPUP_COLOR" ] && AWT_POPUP_COLOR="#e84d31"
@@ -42,7 +42,8 @@ fi
 MM_BIN="$HOME/.local/bin/wm"
 [ -x "$MM_BIN" ] || MM_BIN="$(command -v wm 2>/dev/null || command -v mm 2>/dev/null || echo "wm")"
 
-output=$("$MM_BIN" -o awt tui.percentage=100 tui.max=9999)
+output=$("$MM_BIN" -o awt \
+    ${TMUX_COLOR_SPEC:+--color "$TMUX_COLOR_SPEC"})
 [ -z "$output" ] && exit 0
 
 case "$output" in
