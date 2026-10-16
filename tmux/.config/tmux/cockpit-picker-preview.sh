@@ -185,7 +185,8 @@ _box_line() {
 }
 
 # Single capture-pane call for both task prompt and bottom snapshot (captures 120 lines of scrollback)
-raw_terminal=$(tmux capture-pane -ep -S -120 -t "$pane_id" 2>/dev/null || true)
+# Strips ANSI underline attributes (SGR 4 / 24 / 4:x) to prevent distracting underlines on AI links/paths
+raw_terminal=$(tmux capture-pane -ep -S -120 -t "$pane_id" 2>/dev/null | sed -E 's/\x1b\[(4|24|21|4:[0-9]+)m//g; s/\x1b\[4;([0-9;]+m)/\x1b[\1/g; s/\x1b\[([0-9;]+);4([;m])/\x1b[\1\2/g' || true)
 
 # Render Top Context Card
 printf "${card_border}╭%s╮${R}\n" "${DASHES:0:$(( W - 2 ))}"
