@@ -30,3 +30,7 @@ export PATH="/home/fecavmi/.local/bin:$PATH"
 
 # Disable Omarchy's legacy zoxide wrapper for cd in favor of native cd and Waymaker frecency
 unalias cd 2>/dev/null
+
+# >>> Codex installer >>>
+export PATH="/home/fecavmi/.local/bin:$PATH"
+# <<< Codex installer <<<
