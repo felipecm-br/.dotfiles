@@ -168,15 +168,83 @@ While standard horizontal splits (e.g. `workmux dashboard`'s 50/50 Top/Bottom sp
 
 ### 3.3 Bichromatic Uniform Footer Standard (`│` Separators, Zero Bracket Clutter)
 
-Legacy popups displayed a 5-to-6-color "rainbow" footer with heavy square brackets (`[Enter]`, `[Tab]`, `[y/n]`, `[v]`). The state-of-the-art dotfiles standard unifies all footers:
+Legacy popups displayed a 5-to-6-color "rainbow" footer with heavy square brackets (`[Enter]`, `[Tab]`, `[y/n]`, `[v]`). The state-of-the-art dotfiles standard unifies all footers across the entire fleet:
 
 1. **Treisman's Hue Reservation Principle (1985):**
    - The human visual cortex can preattentively process $\le 5$ simultaneous hues before feature pop-out degrades into slow serial searching.
-   - Chromatic hue is strictly reserved for **real-time operational urgency** in the candidate list and preview. Footers must adopt a **bichromatic neutral palette**: uniform accent keys (`cyan,bold` or `white,bold`), muted action labels (`darkgray`), and dimmed vertical hairline dividers (` {darkgray:│} `).
+   - Chromatic hue is strictly reserved for **real-time operational urgency** in the candidate list and preview. Footers must adopt a **bichromatic neutral palette**: uniform accent keys (`cyan,bold`), muted action labels (`darkgray`), and dimmed vertical hairline dividers (` {darkgray:│} `).
 2. **Bouma's Visual Crowding Law (1970) & Bracket Elimination:**
    - Removing surrounding brackets (`[ ]`) eliminates 14–22 non-data-ink glyphs that crowd letterforms, accelerating peripheral readability and saving horizontal columns.
 3. **Chunking Limit ($\le 7$ Pairs):**
    - Caps visible shortcuts to $\le 7$ core operational bindings (Miller 1956 / Cowan 2001), offloading secondary keybindings to `? Help`.
+
+#### Fleet-Wide Preset Harmonization Matrix
+
+Every interactive popup, picker, and confirmation dialog has been harmonized under this unified standard:
+
+| Scope | Preset / Script | Uniform Footer Contract |
+| :--- | :--- | :--- |
+| **Cockpit HUD** | [`cockpit-picker.toml`](../../tmux/.config/tmux/cockpit-picker.toml) | `{cyan,bold:Enter} Jump │ y/n Ack │ i Input │ v Diff │ g Git │ a Agents │ Tab Worktrees │ ? Help │ Esc Exit` |
+| **AWT Worktrees** | [`awt.toml`](../../awt/.config/waymaker/presets/awt.toml) | `{cyan,bold:Enter} Connect │ Tab Cockpit │ c New │ S Ship │ m Merge │ R Rebase │ P PR │ d Delete │ p Preview │ Esc Exit` |
+| **AWT PR Review** | [`awt-pr.toml`](../../awt/.config/waymaker/presets/awt-pr.toml) | `{cyan,bold:Enter} Checkout │ Tab Cycle Tab │ C-e Chrome │ C-d Diff │ p Preview │ Esc Exit` |
+| **AWT Sub-Wizards** | `awt-prompt`, `awt-ai`, `awt-base`, `awt-type` | `{cyan,bold:Enter} Confirm/Select │ Esc Back/Cancel` |
+| **Tmux Windows** | [`window-picker.toml`](../../tmux/.config/tmux/window-picker.toml) | `{cyan,bold:Enter} Switch │ t Sessions │ / Filter │ n New │ d Kill │ ? Help │ Esc Exit` |
+| **Tmux Sessions** | [`session-picker.toml`](../../tmux/.config/tmux/session-picker.toml) | `{cyan,bold:Enter} Connect │ c Cockpit │ Tab Cycle │ / Filter │ d Kill │ Esc Exit` |
+| **Live Ripgrep** | [`rg.toml`](../../waymaker/.config/waymaker/presets/rg.toml) | `{cyan,bold:Enter} Nvim │ C-v Insert │ y Copy │ J/K Scroll │ C-/ Layout │ C-s Case │ C-w Word │ Esc Exit` |
+| **Workspace / Files** | [`workspace.toml`](../../waymaker/.config/waymaker/presets/workspace.toml) | `{cyan,bold:Enter} Full │ Tab Cycle │ C-h/l Dir │ C-j/k Move │ C-d/u Scroll │ C-v Insert │ C-e Edit │ C-y Copy │ Esc Exit` |
+| **Keybindings HUD** | [`keybindings.toml`](../../waymaker/.config/waymaker/presets/keybindings.toml) | `{cyan,bold:Enter} Run │ Tab Filter │ y Copy │ J/K Scroll │ Esc Exit` |
+| **Scrollback Buffer** | [`scrollback-picker.toml`](../../waymaker/.config/waymaker/presets/scrollback-picker.toml) | `{cyan,bold:Enter} Yank │ Tab Filter │ C-v Insert │ C-e Open │ C-b Chrome │ J/K Scroll │ Space Multi │ Esc Exit` |
+| **Process Killer** | [`kill.toml`](../../waymaker/.config/waymaker/presets/kill.toml) | `{cyan,bold:Enter} SIGTERM (15) │ C-x SIGKILL (-9) │ C-p Toggle Preview` |
+| **System Sounds** | [`sounds.toml`](../../waymaker/.config/waymaker/presets/sounds.toml) | `{cyan,bold:Enter} Set Sound │ p / Space Replay │ Esc / q Quit` |
+| **Hyprland Borders** | [`borders.toml`](../../waymaker/.config/waymaker/presets/borders.toml) | `{cyan,bold:Enter} Salvar │ j/k Estilo │ h/l Velocidade │ r Girar Ângulo │ Esc Cancelar` |
+| **Starship Presets** | [`starship-presets.toml`](../../waymaker/.config/waymaker/presets/starship-presets.toml) | `{cyan,bold:Enter} Selecionar │ j/k Navegar │ C-l/h Modo Vim │ Esc Cancelar` |
+| **Guard Modals** | [`close-session.sh`](../../tmux/.config/tmux/close-session.sh), [`close-window.sh`](../../tmux/.config/tmux/close-window.sh) | `y Kill ... │ n / Esc Keep ...` (hairline `│` divider) |
+
+### 3.4 Omarchy Dynamic Theme Color Synchronization
+
+A frequent architectural question in TUI design is: **Do the colors of keys, actions, and borders change when switching Omarchy themes?**
+
+The answer is **yes, completely and automatically**, through a three-tier synchronized pipeline:
+
+```text
+ ┌────────────────────────────────────────────────────────┐
+ │        Omarchy Theme Engine (~/.local/state/...)       │
+ │   catppuccin │ tokyo-night │ everforest │ nord │ ...   │
+ └───────────────────────────┬────────────────────────────┘
+                             │
+            ┌────────────────┴────────────────┐
+            ▼                                 ▼
+ ┌─────────────────────────┐       ┌─────────────────────────┐
+ │ Terminal Emulator       │       │ Tmux Script Integration │
+ │ (Ghostty/Alacritty/...) │       │ (Bash/POSIX Generators) │
+ │ 16 ANSI Palette Remap   │       │ Reads colors.toml       │
+ └──────────┬──────────────┘       └────────────┬────────────┘
+            │                                   │
+            ▼                                   ▼
+ ┌─────────────────────────┐       ┌─────────────────────────┐
+ │ Waymaker / Matchmaker   │       │ Popup Window Frames     │
+ │ {cyan,bold:Key}         │       │ display-popup -s bg=... │
+ │ {darkgray:Action}       │       │ display-popup -b fg=... │
+ └─────────────────────────┘       └─────────────────────────┘
+```
+
+1. **Terminal ANSI Color Pipeline (Waymaker / Matchmaker Presets):**
+   - Waymaker presets specify colors using standard ANSI/Crossterm semantic names (`cyan`, `darkgray`).
+   - The terminal emulator (Ghostty, Alacritty, Kitty, Foot) receives its active 16-color ANSI palette dynamically from Omarchy (`colors.toml`).
+   - When switching themes (e.g. `omarchy theme set tokyo-night` $\to$ `everforest` $\to$ `rose-pine`), the terminal updates its ANSI color table:
+     - ANSI Cyan (`color6`/`color14`) shifts instantly to the active theme's cyan (e.g., `#7aa2f7` in Tokyo Night, `#83c092` in Everforest, `#89dceb` in Catppuccin Mocha).
+     - ANSI DarkGray (`color8` / bright black) shifts to the theme's calibrated muted tone (`#565f89`, `#6c7086`, etc.).
+   - No presets require manual edits; the visual hue shifts dynamically across all TUI elements.
+
+2. **Shell Script Runtime Integration (TrueColor 24-bit):**
+   - Dynamic Tmux scripts ([`cockpit-picker-items.sh`](../../tmux/.config/tmux/cockpit-picker-items.sh), [`close-session.sh`](../../tmux/.config/tmux/close-session.sh), [`close-window.sh`](../../tmux/.config/tmux/close-window.sh), [`cockpit-picker-help.sh`](../../tmux/.config/tmux/cockpit-picker-help.sh)) parse `~/.local/state/omarchy/current/theme/colors.toml` on every invocation.
+   - Hex values (`cyan`, `yellow`, `red`, `magenta`, `muted`, `accent`) are converted to TrueColor ANSI escape sequences (`\033[38;2;R;G;Bm`), providing pixel-perfect fidelity with the window manager, status bar, and Neovim themes.
+
+3. **Popup Frame & Border Styling (`display-popup`):**
+   - Launcher scripts ([`cockpit-picker.sh`](../../tmux/.config/tmux/cockpit-picker.sh), [`session-picker.sh`](../../tmux/.config/tmux/session-picker.sh), [`workspace-picker.sh`](../../tmux/.config/tmux/workspace-picker.sh), [`pr-picker.sh`](../../tmux/.config/tmux/pr-picker.sh)) query `colors.toml` to dynamically inject the active accent color into the Tmux modal border (`display-popup -s "bg=$BG,fg=$FG" -b "rounded"`).
+
+4. **Light vs. Dark Theme Contrast Compliance:**
+   - In light themes (e.g., `catppuccin-latte`, `flexoki-light`, `white`), Omarchy remaps the ANSI palette so that `cyan` translates to a deep, legible teal/cyan on a light canvas, and `darkgray` maps to a crisp medium-dark gray, preserving WCAG 2.1 AA luminance contrast ($\ge 4.5:1$).
 
 *See complete comparative audit and benchmarks in [Cockpit HUD vs. workmux Dashboard: Visual Semiotics & Eye-Tracking](cockpit-vs-workmux-visual-ergonomics.md).*
 

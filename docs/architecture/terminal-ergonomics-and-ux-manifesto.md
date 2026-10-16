@@ -153,9 +153,11 @@ A critical visual ergonomic discovery emerged from head-to-head empirical testin
    - Fixed-width columnar padding allows the fovea ($2^\circ$) to drop vertically in $O(1)$ ballistic sweeps ($X = \text{const}$, $\approx 25\text{–}35\text{ ms/row}$).
    - **Gutter Rule:** Semantic urgency glyphs (`󱅭`, `󱜻`, `󰨄`, `⠋`, `󱥂`, `·`) must reside at column $X=1$, never buried across 45+ columns.
    - **UTF-8 Visual Width Rule:** Character widths in Bash/POSIX formatters must be computed using codepoint length (`${#str}`) in UTF-8 locales and padded via space injection (`printf -v spaces "%*s" "$pad" ""`), avoiding byte-based `printf "%-24s"` which breaks alignment on multibyte Nerd Font glyphs (``, `⎇`, `󰄬`, `…`, `↑`, `↓`).
-3. **Footer Chromatic Discipline & De-Cluttering:**
+3. **Footer Chromatic Discipline, De-Cluttering & Dynamic Theme Sync:**
    - **Treisman Hue Reservation (1985):** Matiz is reserved exclusively for real-time operational urgency in candidate rows. Footers must adopt a **uniform bichromatic neutral palette** (`cyan,bold` keys, `darkgray` action labels, `{darkgray:│}` hairline separators) with zero "rainbow" clutter.
    - **Bouma Visual Crowding Law (1970):** Bracket elimination (`[Enter]` $\to$ `Enter`) removes 14–22 redundant punctuation marks, dramatically accelerating peripheral legibility.
+   - **Chunking Limit ($\le 7$ Pairs):** Limits visible footer shortcuts to $\le 7$ core actions (Miller 1956 / Cowan 2001), offloading tertiary options to `? Help`.
+   - **Omarchy Theme Synchronization:** Waymaker footers bind to standard ANSI semantic names (`cyan`, `darkgray`), which the terminal emulator automatically remaps based on the active Omarchy palette (`~/.local/state/omarchy/current/theme/colors.toml`). Switching between dark themes (e.g. `tokyo-night`, `catppuccin`, `everforest`) and light themes (e.g. `flexoki-light`, `catppuccin-latte`) dynamically updates footer hues and preserves WCAG 2.1 AA luminance contrast without requiring preset edits.
 
 *See comprehensive scientific comparison and benchmarks in [Cockpit HUD vs. workmux Dashboard: Visual Semiotics & Eye-Tracking](../tmux/cockpit-vs-workmux-visual-ergonomics.md).*
 
