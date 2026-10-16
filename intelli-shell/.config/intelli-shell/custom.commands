@@ -106,6 +106,12 @@ awtc {{repo_url}}
 # Force terminate Tmux session bypassing confirmation safeguards
 ~/.config/tmux/close-session.sh --force
 
+# Close active Tmux window or pane with AI agent safeguards
+~/.config/tmux/close-window.sh
+
+# Force close active Tmux window or pane bypassing AI agent safeguards
+~/.config/tmux/close-window.sh --force
+
 # Open interactive Tmux window picker with live pane preview and agent status
 ~/.config/tmux/window-picker.sh
 

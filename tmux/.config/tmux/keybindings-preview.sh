@@ -261,9 +261,10 @@ EOF
   tmux-close)
     cat <<'EOF'
 ### 󰅖 Close Pane / Window (`Prefix + w` / `Prefix + x`)
-Guarded pane/window closure.
+Guarded pane/window closure with AI agent safeguard.
 
-- Records active path and command into the reopen stack before closing so `Ctrl + Shift + T` can restore it anytime.
+- **AI Safeguard**: If an active AI agent (OpenCode, Antigravity, Claude, Codex, Gemini, Aider) is running in the window/pane, prompts with an amber warning HUD modal (``) requiring `y` to confirm or `n`/`Esc` to keep.
+- **Reopen Stack**: Records active path and command into the reopen stack before closing so `Prefix + T` / `Ctrl + Shift + T` can restore it anytime.
 EOF
     ;;
 

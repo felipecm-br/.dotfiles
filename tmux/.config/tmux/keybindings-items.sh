@@ -29,7 +29,7 @@ emit_tmux() {
 󰄧  Prefix + E	Scrollback & AI Mermaid Modal (90%x88%)	tmux	tmux-view-scrollback	~/.config/tmux/scrollback-view.sh
 󰏌  Prefix + t	Create New Window in Current Path	tmux	tmux-new-win	tmux new-window -c '#{pane_current_path}'
 󰙀  Prefix + T / u	Reopen Last Closed Window / Tab	tmux	tmux-reopen	~/.config/tmux/reopen-window.sh
-󰅖  Prefix + w / x	Close Pane / Window (Save to Reopen)	tmux	tmux-close	~/.config/tmux/close-window.sh
+󰅖  Prefix + w / x	Close Window / Pane (AI Guarded)	tmux	tmux-close	~/.config/tmux/close-window.sh
 󰹑  Prefix + m / z	Maximize / Zoom Active Pane	tmux	tmux-zoom	tmux resize-pane -Z
 󱁐  Prefix + C-h/j/k/l	Resize Pane (Asymmetric 10%: 20c/5l)	tmux	tmux-resize	tmux resize-pane -L 20
 󱂩  Prefix + |	Split Window Vertically	tmux	tmux-split-v	tmux split-window -h
