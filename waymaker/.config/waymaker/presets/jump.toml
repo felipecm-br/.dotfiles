@@ -110,7 +110,7 @@ indicator = ""
 indicator_style.fg = "blue"
 
 [previewer]
-debounce_ms = 200
+debounce_ms = 25
 delay_clear = true
 
 [preview]
@@ -140,16 +140,12 @@ percentage = 60
 "esc" = "ToggleFocus"
 "ctrl-j" = "Down"
 "ctrl-k" = "Up"
-"alt-j" = "Down"
-"alt-k" = "Up"
 "ctrl-shift-j" = "PreviewDown(5)"
 "ctrl-shift-k" = "PreviewUp(5)"
 "ctrl-shift-J" = "PreviewDown(5)"
 "ctrl-shift-K" = "PreviewUp(5)"
 "ctrl-l" = ["ChDir({=})", "Cancel", "Reload", "Pos(0)", "FocusNav"]
-"alt-l" = ["ChDir({=})", "Cancel", "Reload", "Pos(0)", "FocusNav"]
 "ctrl-h" = ["ChDir(..)", "Cancel", "Reload", "FocusNav"]
-"alt-h" = ["ChDir(..)", "Cancel", "Reload", "FocusNav"]
 "ctrl-u" = ["Reload(curr=\"$(pwd)\"; while [ \"$curr\" != \"/\" ] && [ -n \"$curr\" ]; do curr=\"$(dirname \"$curr\")\"; echo \"$curr\"; done)", "Cancel", "Pos(0)"]
 "ctrl-e" = "Execute(nvim {+})"
 "ctrl-p" = "SwitchPreview"
@@ -170,8 +166,6 @@ percentage = 60
 "k" = "Up"
 "ctrl-j" = "Down"
 "ctrl-k" = "Up"
-"alt-j" = "Down"
-"alt-k" = "Up"
 "J" = "PreviewDown(5)"
 "K" = "PreviewUp(5)"
 "shift-j" = "PreviewDown(5)"
@@ -184,12 +178,10 @@ percentage = 60
 "l" = ["ChDir({=})", "Cancel", "Reload", "Pos(0)", "FocusNav"]
 "right" = ["ChDir({=})", "Cancel", "Reload", "Pos(0)", "FocusNav"]
 "ctrl-l" = ["ChDir({=})", "Cancel", "Reload", "Pos(0)", "FocusNav"]
-"alt-l" = ["ChDir({=})", "Cancel", "Reload", "Pos(0)", "FocusNav"]
 "h" = ["ChDir(..)", "Cancel", "Reload", "FocusNav"]
 "left" = ["ChDir(..)", "Cancel", "Reload", "FocusNav"]
 "backspace" = ["ChDir(..)", "Cancel", "Reload", "FocusNav"]
 "ctrl-h" = ["ChDir(..)", "Cancel", "Reload", "FocusNav"]
-"alt-h" = ["ChDir(..)", "Cancel", "Reload", "FocusNav"]
 "ctrl-u" = ["Reload(curr=\"$(pwd)\"; while [ \"$curr\" != \"/\" ] && [ -n \"$curr\" ]; do curr=\"$(dirname \"$curr\")\"; echo \"$curr\"; done)", "Cancel", "Pos(0)"]
 "e" = "Execute(nvim {+})"
 "ctrl-e" = "Execute(nvim {+})"

@@ -46,11 +46,8 @@ sides = "LEFT"
 color = "Darkgray"
 
 [[preview.layout]]
-command = '''p={1}; p="${p/#\~/$HOME}"; if [ -d "$p" ]; then wm tree "$p" 2>/dev/null || eza --tree --level=2 --icons=always --git-ignore --color=always "$p" 2>/dev/null || ls -la "$p"; else mime=$(file -b --mime-type "$p" 2>/dev/null); if [[ "$mime" == image/* ]]; then if command -v chafa >/dev/null 2>&1; then chafa --probe=off --format=symbols --size=80x35 "$p" 2>/dev/null; elif command -v img2txt >/dev/null 2>&1; then img2txt -f ansi -W 60 "$p" 2>/dev/null; fi; echo ""; identify "$p" 2>/dev/null || file "$p"; else bat --style=numbers --color=always --line-range=:300 "$p" 2>/dev/null || cat "$p"; fi; fi'''
-
-
 side = "right"
-percentage = 40
+percentage = 60
 min = 30
 
 [[preview.layout]]
@@ -104,7 +101,6 @@ ansi = false # don't set to true here
 "ctrl-c" = "Quit"
 "esc" = "Quit(1)"
 "enter" = "@accept"
-"alt-enter" = "@Accept"
 "ctrl-enter" = "@accept_2"
 "ctrl-a" = "CycleAll"
 "tab" = ["Toggle", "Down"]
@@ -118,7 +114,6 @@ ansi = false # don't set to true here
 "backspace" = "DeleteChar"
 "ctrl-h" = "DeleteWord"
 "ctrl-u" = "Cancel"
-"alt-a" = "QueryPos(0)"
 
 # Navigation
 "up" = "Up"
@@ -133,12 +128,6 @@ ansi = false # don't set to true here
 "ctrl-shift-down" = "VScroll(-1)"
 "ctrl-shift-left" = "HScroll(-1)"
 "ctrl-shift-right" = "HScroll(1)"
-"alt-up" = "VScroll(1)"
-"alt-down" = "VScroll(-1)"
-"alt-left" = "HScroll(-1)"
-"alt-right" = "HScroll(1)"
-"alt-1" = "Pos(0)"
-"alt-0" = "Pos(-1)"
 
 # Columns
 "ctrl-." = "NextColumn"
@@ -147,16 +136,11 @@ ansi = false # don't set to true here
 # Preview
 "shift+scrollup" = "PreviewUp"
 "shift+scrolldown" = "PreviewDown"
-"alt-/" = "PreviewJump"
 "ctrl-p" = "SwitchPreview"
 "?" = "Help"
 "shift-?" = "SwitchPreview"
 "ctrl-/" = "CyclePreview" # cycle preview layouts
 "ctrl-shift-/" = "CyclePreview"
-"alt-h" = "Help"
-"alt-=" = "ExpandPreview(2)"
-"alt-shift-=" = "ExpandPreview(10)"
-"alt-hyphen" = "ShrinkPreview(2)"
 
 # Reserved
 "F1" = "@help"
@@ -175,7 +159,6 @@ ansi = false # don't set to true here
 # Programmable
 "ctrl-l" = "@look" # "maximize" the preview
 "ctrl-o" = "@open"
-"alt-o" = "@open_2"
 "ctrl-r" = "@reload"
 "ctrl-shift-r" = "@reload_2"
 "ctrl-shift-n" = "@next"
@@ -202,11 +185,8 @@ ansi = false # don't set to true here
 "@break" = "Redraw" # invalid unicode or unsupported emoji can break rendering
 
 # Printing
-"alt-p" = "@print"
-"alt-shift-p" = "@print_2"
 "ctrl-y" = "@copy"
 "ctrl-shift-y" = "@copy_all"
-"alt-y" = "@copy_active"
 
 "@print" = "Print({-})"
 "@print_2" = "Print({-!})"
