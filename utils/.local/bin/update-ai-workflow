@@ -61,6 +61,7 @@ ICON_TMUX=""
 ICON_FONT=""
 ICON_CODEX=""
 ICON_AGY=""
+ICON_IDE="󰨞"
 ICON_CLAUDE="󰚩"
 ICON_OPENCODE="󰘦"
 ICON_CRUSH="󰻿"
@@ -103,7 +104,9 @@ usage() {
   echo -e "  tmux                  Tmux multiplexer & TPM plugins"
   echo -e "  fonts, nerd-fonts     Nerd Font packages (Cascadia, JetBrains, Symbols)"
   echo -e "  codex                 OpenAI Codex CLI (via mise)"
-  echo -e "  agy, antigravity      Google Antigravity CLI (agy-bin & AUR)"
+  echo -e "  agy, antigravity-cli  Google Antigravity CLI (agy-bin self-update)"
+  echo -e "  antigravity-ide, ide  Google Antigravity IDE (via AUR/yay)"
+  echo -e "  antigravity           Both Antigravity CLI and IDE"
   echo -e "  claude                Anthropic Claude Code CLI (via mise)"
   echo -e "  opencode              OpenCode CLI (via mise)"
   echo -e "  crush                 Charm Crush CLI (via mise)"
@@ -125,6 +128,7 @@ usage() {
   echo -e "  update-ai-workflow --only tmux\n"
   echo -e "  # Update only Antigravity and Codex"
   echo -e "  update-ai-workflow --only agy"
+  echo -e "  update-ai-workflow --only antigravity-ide"
   echo -e "  update-ai-workflow --only codex"
   exit 0
 }
@@ -175,7 +179,9 @@ normalize_target() {
   case "$1" in
     fonts|font|nerd-fonts|nerdfonts) echo "fonts" ;;
     tmux|tmux-plugins|plugins) echo "tmux" ;;
-    agy|antigravity|antigravity-cli|antigravity-ide) echo "agy" ;;
+    agy|antigravity-cli) echo "agy" ;;
+    antigravity-ide|ide) echo "antigravity-ide" ;;
+    antigravity) echo "antigravity" ;;
     codex) echo "codex" ;;
     claude|claudecode) echo "claude" ;;
     opencode) echo "opencode" ;;
@@ -202,6 +208,9 @@ should_run() {
   fi
   if [[ "$TARGET_ONLY" == "tmux" ]]; then
     [[ "$comp" == "tmux" || "$comp" == "plugins" ]] && return 0
+  fi
+  if [[ "$TARGET_ONLY" == "antigravity" ]]; then
+    [[ "$comp" == "agy" || "$comp" == "antigravity-ide" ]] && return 0
   fi
   if [[ "$TARGET_ONLY" == "ai-suite" ]]; then
     [[ "$comp" == "ai-memory" || "$comp" == "ai-jail" || "$comp" == "ai-usagebar" ]] && return 0
@@ -391,7 +400,43 @@ inspect_agy() {
   record_status "agy" "antigravity (agy)" "$ICON_AGY" "$cur" "$lat" "$status"
 }
 
-# 6. ACPD Daemon
+# 6. Antigravity IDE (GUI)
+inspect_antigravity_ide() {
+  local cur="missing"
+  if pacman -Q antigravity-ide &>/dev/null; then
+    cur=$(pacman -Q antigravity-ide 2>/dev/null | awk '{print $2}')
+  elif command -v antigravity-ide &>/dev/null; then
+    cur="installed"
+  fi
+
+  local lat="$cur"
+  local status="OK"
+  if [[ "$cur" == "missing" ]]; then
+    status="MISSING"
+  else
+    local aur_json
+    aur_json=$(curl -fsSL --max-time 4 "https://aur.archlinux.org/rpc/v5/info?arg[]=antigravity-ide" 2>/dev/null || true)
+    if [[ -n "$aur_json" ]] && command -v jq &>/dev/null; then
+      local aur_ver
+      aur_ver=$(echo "$aur_json" | jq -r '.results[0].Version // empty' 2>/dev/null || true)
+      if [[ -n "$aur_ver" ]]; then
+        lat="$aur_ver"
+        if [[ "$cur" != "$lat" ]]; then
+          status="UPDATE"
+        fi
+      fi
+    elif command -v yay &>/dev/null; then
+      if yay -Qu antigravity-ide 2>/dev/null | grep -q 'antigravity-ide'; then
+        status="UPDATE"
+        lat="AUR update"
+      fi
+    fi
+  fi
+
+  record_status "antigravity-ide" "antigravity-ide (gui)" "$ICON_IDE" "$cur" "$lat" "$status"
+}
+
+# 7. ACPD Daemon
 inspect_acpd() {
   local cur="missing"
   if [[ -x "$TARGET_HOME/.local/bin/acpd" ]]; then
@@ -517,6 +562,10 @@ run_parallel_audit() {
     inspect_agy & pids+=($!)
   fi
 
+  if should_run "antigravity-ide"; then
+    inspect_antigravity_ide & pids+=($!)
+  fi
+
   if should_run "acpd"; then
     inspect_acpd & pids+=($!)
   fi
@@ -562,7 +611,7 @@ display_report() {
   printf "${C_BOLD}%-3s %-28s %-15s %-15s %-18s${C_RESET}\n" " " "Component" "Current" "Latest" "Status"
   echo -e "${C_GRAY}────────────────────────────────────────────────────────────────────────────${C_RESET}"
 
-  local order=("tmux" "plugins" "fonts" "codex" "agy" "claude" "opencode" "crush" "acpd" "ai-memory" "ai-jail" "ai-usagebar" "worktrunk" "mise")
+  local order=("tmux" "plugins" "fonts" "codex" "agy" "antigravity-ide" "claude" "opencode" "crush" "acpd" "ai-memory" "ai-jail" "ai-usagebar" "worktrunk" "mise")
 
   for key in "${order[@]}"; do
     should_run "$key" || continue
@@ -691,18 +740,24 @@ update_codex() {
 }
 
 update_agy() {
-  echo -e "${C_BLUE}${ICON_INFO}${C_RESET} Checking and upgrading ${C_BOLD}Google Antigravity (agy)${C_RESET}..."
+  echo -e "${C_BLUE}${ICON_INFO}${C_RESET} Checking and upgrading ${C_BOLD}Google Antigravity CLI (agy)${C_RESET}..."
   if [[ -x "$TARGET_HOME/.local/bin/agy-bin" ]]; then
     HOME="$TARGET_HOME" "$TARGET_HOME/.local/bin/agy-bin" update || true
   fi
-
-  if command -v yay &>/dev/null; then
-    if yay -Qu antigravity-ide 2>/dev/null | grep -q 'antigravity-ide'; then
-      echo -e "${C_BLUE}${ICON_INFO}${C_RESET} Updating Antigravity IDE AUR package..."
-      yay -S --noconfirm antigravity-ide || true
-    fi
-  fi
   echo -e "  ${C_GREEN}${ICON_OK}${C_RESET} Antigravity CLI updated"
+}
+
+update_antigravity_ide() {
+  echo -e "${C_BLUE}${ICON_INFO}${C_RESET} Updating ${C_BOLD}Google Antigravity IDE (antigravity-ide)${C_RESET} via yay..."
+  if command -v yay &>/dev/null; then
+    yay -S --noconfirm antigravity-ide || true
+    local new_ver
+    new_ver=$(pacman -Q antigravity-ide 2>/dev/null | awk '{print $2}' || true)
+    echo -e "  ${C_GREEN}${ICON_OK}${C_RESET} Antigravity IDE version: ${C_GREEN}v${new_ver}${C_RESET}"
+  else
+    echo -e "  ${C_RED}${ICON_FAIL}${C_RESET} yay is required to update AUR package antigravity-ide"
+    return 1
+  fi
 }
 
 update_claude() {
@@ -890,6 +945,10 @@ main() {
 
   if should_run "agy" && needs_update "agy"; then
     update_agy
+  fi
+
+  if should_run "antigravity-ide" && needs_update "antigravity-ide"; then
+    update_antigravity_ide
   fi
 
   if should_run "claude" && needs_update "claude"; then

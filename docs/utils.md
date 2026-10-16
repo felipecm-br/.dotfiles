@@ -21,7 +21,7 @@ These come from the [`utils`](../utils) stow package.
 | `git` | Thin wrapper around `/usr/bin/git` (unsets `LD_LIBRARY_PATH` before execving real git). |
 | `agy` | PATH wrapper for Antigravity CLI ensuring graceful Tmux state and lazygitrs icon cleanup on exit. |
 | `agyy` | Secondary account launcher for Antigravity CLI with an isolated profile, OAuth token, and session storage. |
-| `update-ai-workflow` / `ai-update` | Comprehensive CLI manager to audit and update all AI workflow dependencies (`tmux`, Nerd Fonts, `codex`, `agy`, `claude`, `opencode`, `acpd`, `ai-suite`, `worktrunk`, `mise`). Supports `--check`, `--update`, `--all`, and `--only <comp>`. |
+| `update-ai-workflow` / `ai-update` | Comprehensive CLI manager to audit and update all AI workflow dependencies (`tmux`, Nerd Fonts, `codex`, `agy`, `antigravity-ide`, `claude`, `opencode`, `acpd`, `ai-suite`, `worktrunk`, `mise`). Supports `--check`, `--update`, `--all`, and `--only <comp>`. |
 
 ## Zsh Shell Helpers
 

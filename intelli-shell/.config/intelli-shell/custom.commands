@@ -16,6 +16,9 @@ awt -c
 # Auto-derive conventional branch name from task prompt and provision worktree
 awt -c -A {{prompt}}
 
+# Create worktree and migrate uncommitted dirty working tree changes
+awt -c -W {{branch}}
+
 # Create worktree from explicit base branch
 awt -c {{branch}} {{base}}
 
@@ -367,4 +370,4 @@ $ (./stow.sh) package: find . -maxdepth 1 -mindepth 1 -type d ! -name '.*' ! -na
 $ (wm) session: wm session list 2>/dev/null
 $ (wm) file: find . -maxdepth 3 -type f \( -name '*.md' -o -name '*.markdown' -o -name '*.mmd' \) 2>/dev/null
 $ (mmdc) mmd_file: find . -maxdepth 4 -type f \( -name '*.mmd' -o -name '*.mermaid' \) 2>/dev/null
-$ (update-ai-workflow) component: echo -e "tmux\nfonts\ncodex\nagy\nclaude\nopencode\ncrush\nacpd\nai-suite\nworktrunk\nmise"
+$ (update-ai-workflow) component: echo -e "tmux\nfonts\ncodex\nagy\nantigravity-ide\nclaude\nopencode\ncrush\nacpd\nai-suite\nworktrunk\nmise"
