@@ -39,7 +39,6 @@ COLOR_ACCENT=$(_get_color "accent" "#7aa2f7")
 COLOR_MAGENTA=$(_get_color "magenta" "#ad8ee6")
 COLOR_MUTED=$(_get_color "dark_foreground" "#565f89")
 COLOR_FG=$(_get_color "foreground" "#a9b1d6")
-COLOR_LIGHT_BG=$(_get_color "lighter_background" "#24283b")
 
 _hex_to_ansi() {
   local h="${1#\#}"
@@ -241,12 +240,13 @@ run_confirm_modal() {
     if gum confirm \
         --no-show-help \
         --default=false \
-        --affirmative=" 󰅖 Kill Session [y] " \
-        --negative=" 󰜺 Keep Session [n/Esc] " \
-        --selected.background="$COLOR_RED" \
-        --selected.foreground="#ffffff" \
-        --unselected.background="$COLOR_LIGHT_BG" \
-        --unselected.foreground="$COLOR_FG" \
+        --affirmative="[ 󰅖 Kill Session (y) ]" \
+        --negative="[ 󰜺 Keep Session (n/Esc) ]" \
+        --selected.foreground="$COLOR_RED" \
+        --selected.background="" \
+        --unselected.foreground="$COLOR_MUTED" \
+        --unselected.background="" \
+        --prompt.background="" \
         "" 2>/dev/null; then
       perform_kill "$target"
       exit 0
@@ -403,10 +403,11 @@ EOF
     # Close any currently open ephemeral popup to avoid conflicts
     tmux display-popup -C 2>/dev/null || true
 
-    # Launch Golden Ratio confirmation popup modal
+    # Launch Golden Ratio confirmation popup modal with transparent background
     exec tmux display-popup \
       -b rounded \
-      -S "fg=$border_color" \
+      -s "bg=default,fg=default" \
+      -S "fg=$border_color,bg=default" \
       -T "$badge" \
       -w "$popup_w" \
       -h "$popup_h" \
