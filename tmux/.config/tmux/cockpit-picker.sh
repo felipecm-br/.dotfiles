@@ -129,8 +129,7 @@ while true; do
   [ -x "$MM_BIN" ] || MM_BIN="$(command -v wm 2>/dev/null || command -v mm 2>/dev/null || echo "wm")"
 
   chosen=$(printf '%s\n' "$ITEMS" | "$MM_BIN" \
-    -o "$SCRIPT_DIR/cockpit-picker.toml" \
-    "start.cmd=$ITEMS_SCRIPT" \
+    --config "$SCRIPT_DIR/cockpit-picker.toml" \
     results.spinner="$TMUX_SPINNER_NAME" \
     --pos "$START_IDX" \
     --color "spinner:$TMUX_SPINNER_COLOR" \

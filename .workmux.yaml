@@ -117,7 +117,7 @@
 
 # Auto-apply agent status icons to tmux window format.
 # Default: true
-# status_format: true
+status_format: false
 
 # Custom icons for agent status display.
 # status_icons:

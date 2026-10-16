@@ -58,7 +58,7 @@ MM_BIN="$HOME/.local/bin/wm"
 [ -x "$MM_BIN" ] || MM_BIN="$(command -v wm 2>/dev/null || command -v mm 2>/dev/null || echo wm)"
 
 # Prefer dedicated workspace preset (with 60%/100% layouts and ctrl-v insert), fallback to jump
-if "$MM_BIN" --dump-config -o workspace >/dev/null 2>&1; then
+if [ -f "$HOME/.config/waymaker/presets/workspace.toml" ]; then
   PRESET="workspace"
 else
   PRESET="jump"
