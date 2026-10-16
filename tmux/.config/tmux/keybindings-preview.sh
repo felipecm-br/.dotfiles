@@ -311,8 +311,12 @@ EOF
 
   tmux-kill-sess)
     cat <<'EOF'
-### 󰅖 Kill Entire Session (`Prefix + W`)
-Destroys the current tmux session and switches client to next available session.
+### 󰅖 Smart Kill Session (`Prefix + W`)
+Gracefully closes the current tmux session with built-in safeguard heuristics:
+- **Active AI Agents**: If any window runs an AI agent (OpenCode, Antigravity, Claude, Codex, etc.), a confirmation popup is presented.
+- **Window Count**: If the session has more than 3 windows (>3 threshold), a confirmation popup is presented.
+- **Frictionless**: Sessions with <= 3 windows and 0 active agents close immediately without prompting.
+- **Home Row Navigation**: Tap `y` to confirm, `n` / `Esc` / `Enter` to cancel and keep session intact.
 EOF
     ;;
 

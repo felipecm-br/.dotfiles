@@ -1,0 +1,397 @@
+#!/usr/bin/env bash
+# close-session.sh — smart guarded session termination for Tmux
+#
+# Safeguards against accidental session termination:
+# - If active AI agents are running (in any window), OR
+# - If the session has more than 3 windows (>3 threshold):
+# Displays a high-contrast, Golden-Ratio styled confirmation popup modal
+# with Omarchy theme colors, pure Nerd Font badges, and Home Row navigation
+# (y: confirm, n / Esc / Enter: cancel).
+#
+# If neither condition is met (<= 3 windows and 0 AI agents), closes
+# the session immediately without friction.
+set -euo pipefail
+
+REAL_SCRIPT=$(readlink -f "$0" 2>/dev/null || realpath "$0")
+SCRIPT_DIR=$(dirname "$REAL_SCRIPT")
+
+# -----------------------------------------------------------------------------
+# 1. Omarchy Dynamic Color Palette
+# -----------------------------------------------------------------------------
+_colors_toml="$HOME/.local/state/omarchy/current/theme/colors.toml"
+
+_get_color() {
+  local key="$1"
+  local fallback="$2"
+  local val
+  val=$(grep -E "^\s*${key}\s*=" "$_colors_toml" 2>/dev/null | sed -E 's/.*=\s*"([^"]+)".*/\1/' || true)
+  if [ -n "$val" ]; then
+    printf '%s' "$val"
+  else
+    printf '%s' "$fallback"
+  fi
+}
+
+COLOR_YELLOW=$(_get_color "yellow" "#e0af68")
+COLOR_RED=$(_get_color "red" "#f7768e")
+COLOR_ORANGE=$(_get_color "orange" "#eb927b")
+COLOR_ACCENT=$(_get_color "accent" "#7aa2f7")
+COLOR_MUTED=$(_get_color "muted" "#414868")
+COLOR_FG=$(_get_color "foreground" "#a9b1d6")
+
+_hex_to_ansi() {
+  local h="${1#\#}"
+  if [[ ! "$h" =~ ^[0-9a-fA-F]{6}$ ]]; then
+    h="e0af68"
+  fi
+  local r=$(( 16#${h:0:2} ))
+  local g=$(( 16#${h:2:2} ))
+  local b=$(( 16#${h:4:2} ))
+  printf '\033[38;2;%d;%d;%dm' "$r" "$g" "$b"
+}
+
+# -----------------------------------------------------------------------------
+# 2. Session Analysis: Windows & AI Agent Detection
+# -----------------------------------------------------------------------------
+analyze_session() {
+  local target="$1"
+
+  WIN_COUNT=0
+  AGENT_COUNT=0
+  AGENT_DETAILS=()
+  REASONS=()
+
+  if ! tmux has-session -t "$target" 2>/dev/null; then
+    return 0
+  fi
+
+  WIN_COUNT=$(tmux list-windows -t "$target" 2>/dev/null | wc -l)
+
+  declare -A agent_windows=()
+  declare -A acpd_panes=()
+
+  # Query ACPD control plane daemon if available
+  if command -v acpd-cli >/dev/null 2>&1; then
+    while IFS=$'\t' read -r apid astate atime; do
+      if [ -n "$apid" ] && [ "$astate" != "closed" ]; then
+        acpd_panes["$apid"]="$astate"
+      fi
+    done < <(acpd-cli list 2>/dev/null || true)
+  fi
+
+  while IFS="|" read -r wid wnum wname pid pcmd ptitle raw_state raw_title; do
+    local is_agent=0
+    local agent_desc=""
+    local st=""
+
+    # 1. ACPD registration check
+    if [ -n "${acpd_panes["$pid"]:-}" ]; then
+      is_agent=1
+      st="${acpd_panes["$pid"]}"
+    fi
+
+    # 2. Tmux window/pane options check
+    if [ -n "$raw_state" ] && [ "$raw_state" != "closed" ]; then
+      is_agent=1
+      [ -z "$st" ] && st="$raw_state"
+    fi
+    if [ -n "$raw_title" ]; then
+      is_agent=1
+      [ -z "$agent_desc" ] && agent_desc="$raw_title"
+    fi
+
+    # 3. Direct command matching
+    case "$pcmd" in
+      agy|agy-bin|antigravity|opencode|claude|codex|gemini|aider)
+        is_agent=1
+        [ -z "$st" ] && st="running"
+        ;;
+    esac
+
+    # 4. Process tree inspection (descendants of pane PID)
+    if [ "$is_agent" -eq 0 ] && [ -n "$pid" ]; then
+      if ps -s "$pid" -o comm= 2>/dev/null | grep -qE "^(agy|agy-bin|antigravity|opencode|claude|codex|gemini|aider)$"; then
+        is_agent=1
+        [ -z "$st" ] && st="running"
+      fi
+    fi
+
+    if [ "$is_agent" -eq 1 ]; then
+      agent_windows["$wid"]=1
+      [ -z "$agent_desc" ] && agent_desc="${raw_title:-$wname}"
+      # Clean and truncate description if needed
+      agent_desc=$(printf '%s' "$agent_desc" | tr '\n\r\t' ' ' | sed -E 's/[[:space:]]+/ /g')
+      if [ "${#agent_desc}" -gt 38 ]; then
+        agent_desc="${agent_desc:0:35}..."
+      fi
+      AGENT_DETAILS+=("Window $wnum: $agent_desc [${st:-active}]")
+    fi
+  done < <(tmux list-panes -s -t "$target" -F "#{window_id}|#{window_index}|#{window_name}|#{pane_id}|#{pane_current_command}|#{pane_title}|#{@ai_agent_state_raw}|#{@ai_agent_title}" 2>/dev/null || true)
+
+  AGENT_COUNT="${#agent_windows[@]}"
+
+  if [ "$AGENT_COUNT" -gt 0 ]; then
+    REASONS+=("$AGENT_COUNT window(s) with active AI agents")
+  fi
+
+  if [ "$WIN_COUNT" -gt 3 ]; then
+    REASONS+=("$WIN_COUNT windows open (>3 threshold)")
+  fi
+}
+
+# -----------------------------------------------------------------------------
+# 3. Session Termination & Client Switcher
+# -----------------------------------------------------------------------------
+perform_kill() {
+  local target="$1"
+
+  if ! tmux has-session -t "$target" 2>/dev/null; then
+    return 0
+  fi
+
+  local cur_sess
+  cur_sess=$(tmux display-message -p '#{session_name}' 2>/dev/null || echo "")
+
+  if [ "$cur_sess" = "$target" ]; then
+    # Find most recently attached non-ephemeral session to land on
+    local next_sess
+    next_sess=$(tmux list-sessions -F '#{session_last_attached} #{session_name}' 2>/dev/null \
+      | sort -nr \
+      | sed 's/^[0-9]* *//' \
+      | awk -v cur="$target" '$0 != cur && $0 !~ /^(_popups|_lazygitrs|\.)/ {print; exit}' || true)
+
+    if [ -n "$next_sess" ]; then
+      tmux switch-client -t "$next_sess" 2>/dev/null || true
+    else
+      # Fallback to any other existing session
+      tmux switch-client -n 2>/dev/null || tmux switch-client -p 2>/dev/null || true
+    fi
+  fi
+
+  tmux kill-session -t "$target" 2>/dev/null || true
+}
+
+# -----------------------------------------------------------------------------
+# 4. Confirmation Modal Runner (executed inside display-popup or terminal)
+# -----------------------------------------------------------------------------
+run_confirm_modal() {
+  local target="$1"
+
+  analyze_session "$target"
+
+  local c_yellow c_red c_cyan c_muted c_fg c_reset c_bold
+  c_yellow=$(_hex_to_ansi "$COLOR_YELLOW")
+  c_red=$(_hex_to_ansi "$COLOR_RED")
+  c_cyan=$(_hex_to_ansi "$COLOR_ACCENT")
+  c_muted=$(_hex_to_ansi "$COLOR_MUTED")
+  c_fg=$(_hex_to_ansi "$COLOR_FG")
+  c_reset="\033[0m"
+  c_bold="\033[1m"
+
+  printf "\n  ${c_bold}${c_yellow}󰅖 Kill Tmux Session: %s${c_reset}\n\n" "$target"
+  printf "  ${c_yellow}⚠️  Protected session safeguards triggered:${c_reset}\n"
+
+  if [ "$AGENT_COUNT" -gt 0 ]; then
+    printf "  ${c_red}󰮯 %d window(s) with active AI agents:${c_reset}\n" "$AGENT_COUNT"
+    local count=0
+    for detail in "${AGENT_DETAILS[@]}"; do
+      if [ "$count" -lt 3 ]; then
+        printf "    ${c_muted}• %s${c_reset}\n" "$detail"
+      fi
+      count=$((count + 1))
+    done
+    if [ "$count" -gt 3 ]; then
+      printf "    ${c_muted}• ... and %d more agent window(s)${c_reset}\n" "$((count - 3))"
+    fi
+  fi
+
+  if [ "$WIN_COUNT" -gt 3 ]; then
+    printf "  ${c_cyan}󱂬 %d windows open in session (>3 threshold)${c_reset}\n" "$WIN_COUNT"
+  fi
+  printf "\n"
+
+  if command -v gum >/dev/null 2>&1; then
+    if gum confirm \
+        --default=false \
+        --affirmative="Kill session" \
+        --negative="Cancel" \
+        --prompt.foreground="$COLOR_YELLOW" \
+        --selected.background="$COLOR_RED" \
+        --selected.foreground="#ffffff" \
+        --unselected.foreground="$COLOR_FG" \
+        "Proceed with closing session '$target'?" 2>/dev/null; then
+      perform_kill "$target"
+      exit 0
+    else
+      # Cancelled by user (Esc, n, or Cancel button)
+      exit 0
+    fi
+  else
+    # Simple terminal fallback if gum is missing
+    printf "  Proceed with closing session '%s'? [y/N] " "$target"
+    read -r response
+    if [[ "$response" =~ ^[yY] ]]; then
+      perform_kill "$target"
+      exit 0
+    fi
+    exit 0
+  fi
+}
+
+# -----------------------------------------------------------------------------
+# 5. CLI Entrypoint
+# -----------------------------------------------------------------------------
+main() {
+  local force=0
+  local check_only=0
+  local is_modal=0
+  local target_session=""
+
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      -f|--force)
+        force=1
+        shift
+        ;;
+      --check)
+        check_only=1
+        shift
+        ;;
+      --confirm-modal)
+        is_modal=1
+        shift
+        ;;
+      -h|--help)
+        cat <<EOF
+Usage: close-session.sh [OPTIONS] [SESSION]
+
+Smart guarded session termination for Tmux.
+
+Safeguards:
+  Prompts for confirmation if active AI agents are running in any window,
+  or if the session contains more than 3 windows (>3 threshold).
+  Otherwise closes the session immediately without confirmation.
+
+Options:
+  -f, --force         Bypass checks and terminate session immediately
+  --check             Diagnostic check: output analysis without killing
+  --confirm-modal     Internal modal execution inside popup
+  -h, --help          Show this help message
+EOF
+        exit 0
+        ;;
+      *)
+        if [ -z "$target_session" ]; then
+          target_session="$1"
+        fi
+        shift
+        ;;
+    esac
+  done
+
+  # Default to current tmux session
+  if [ -z "$target_session" ]; then
+    target_session=$(tmux display-message -p '#{session_name}' 2>/dev/null || echo "")
+  fi
+
+  if [ -z "$target_session" ]; then
+    echo "close-session: No active tmux session detected" >&2
+    exit 1
+  fi
+
+  if ! tmux has-session -t "$target_session" 2>/dev/null; then
+    echo "close-session: Session '$target_session' not found" >&2
+    exit 1
+  fi
+
+  # 1. Modal execution path
+  if [ "$is_modal" -eq 1 ]; then
+    run_confirm_modal "$target_session"
+    exit 0
+  fi
+
+  # 2. Force termination path
+  if [ "$force" -eq 1 ]; then
+    perform_kill "$target_session"
+    exit 0
+  fi
+
+  # 3. Analyze session state
+  analyze_session "$target_session"
+
+  # Diagnostic check mode
+  if [ "$check_only" -eq 1 ]; then
+    local needs_confirm=0
+    if [ "$AGENT_COUNT" -gt 0 ] || [ "$WIN_COUNT" -gt 3 ]; then
+      needs_confirm=1
+    fi
+    echo "session=$target_session"
+    echo "windows=$WIN_COUNT"
+    echo "agent_windows=$AGENT_COUNT"
+    echo "needs_confirm=$needs_confirm"
+    for r in "${REASONS[@]}"; do
+      echo "reason=$r"
+    done
+    exit 0
+  fi
+
+  # 4. Evaluate safeguard criteria
+  # Condition: Active AI agents running OR > 3 windows on session
+  if [ "$AGENT_COUNT" -eq 0 ] && [ "$WIN_COUNT" -le 3 ]; then
+    # Neither condition met: safe to close immediately
+    perform_kill "$target_session"
+    exit 0
+  fi
+
+  # 5. Condition triggered: show confirmation
+  if [ -n "${TMUX:-}" ] && command -v gum >/dev/null 2>&1; then
+    # Calculate adaptive popup height (Golden Ratio compact HUD)
+    local detail_lines=0
+    if [ "$AGENT_COUNT" -gt 0 ]; then
+      detail_lines=$(( AGENT_COUNT > 3 ? 4 : AGENT_COUNT ))
+      detail_lines=$(( detail_lines + 1 )) # agent section header
+    fi
+    if [ "$WIN_COUNT" -gt 3 ]; then
+      detail_lines=$(( detail_lines + 1 ))
+    fi
+
+    local popup_h=$(( 9 + detail_lines ))
+    [ "$popup_h" -lt 10 ] && popup_h=10
+    [ "$popup_h" -gt 16 ] && popup_h=16
+    local popup_w=62
+
+    local border_color="$COLOR_YELLOW"
+    local badge=" 󰅖 "
+    if [ "$AGENT_COUNT" -gt 0 ]; then
+      border_color="$COLOR_RED"
+      badge=" 󰮯 "
+    fi
+
+    # Escape session name for safety
+    local target_escaped
+    target_escaped=$(printf '%q' "$target_session")
+
+    # Close any currently open ephemeral popup to avoid conflicts
+    tmux display-popup -C 2>/dev/null || true
+
+    # Launch Golden Ratio confirmation popup modal
+    exec tmux display-popup \
+      -b rounded \
+      -S "fg=$border_color" \
+      -T "$badge" \
+      -w "$popup_w" \
+      -h "$popup_h" \
+      -E \
+      "'$REAL_SCRIPT' --confirm-modal $target_escaped"
+  elif [ -n "${TMUX:-}" ]; then
+    # Fallback: Native tmux confirm-before on status bar if gum is missing
+    local reason_str="${REASONS[0]:-Protected session}"
+    tmux confirm-before -p "Kill session '$target_session' ($reason_str)? (y/n)" \
+      "run-shell '$REAL_SCRIPT --force \"$target_session\"'"
+  else
+    # Terminal fallback outside tmux
+    run_confirm_modal "$target_session"
+  fi
+}
+
+main "$@"

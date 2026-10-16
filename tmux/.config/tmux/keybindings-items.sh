@@ -38,7 +38,7 @@ emit_tmux() {
 󰮯  Prefix + Tab	Last Active Window (MRU Flip-Flop)	tmux	tmux-last-win	tmux last-window
 󰮯  Prefix + L	Last Active Session (MRU Flip-Flop)	tmux	tmux-last-sess	tmux switch-client -l
 󰑐  Prefix + r	Reload Tmux Configuration	tmux	tmux-reload	tmux source-file ~/.config/tmux/tmux.conf
-󰅖  Prefix + W	Kill Entire Session	tmux	tmux-kill-sess	tmux kill-session
+󰅖  Prefix + W	Smart Kill Session (Guarded)	tmux	tmux-kill-sess	~/.config/tmux/close-session.sh
 󰌌  Prefix + ?	Keybindings & Workflow Catalog HUD	tmux	tmux-help	~/.config/tmux/keybindings-picker.sh
 󰌌  Prefix + :	Tmux Raw Keybindings (list-keys -N)	tmux	tmux-raw-keys	tmux list-keys -N
 EOF

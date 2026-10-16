@@ -97,6 +97,12 @@ awtc {{repo_url}}
 # Open interactive session picker in Tmux popup
 ~/.config/tmux/session-picker.sh
 
+# Gracefully terminate Tmux session with AI agent and multi-window safeguards
+~/.config/tmux/close-session.sh
+
+# Force terminate Tmux session bypassing confirmation safeguards
+~/.config/tmux/close-session.sh --force
+
 # Open interactive Tmux window picker with live pane preview and agent status
 ~/.config/tmux/window-picker.sh
 
@@ -334,6 +340,24 @@ agyy
 # Resume most recent conversation in secondary Antigravity CLI account
 agyy -c
 
+# Audit, check, and update all dependencies of the AI workflow stack
+update-ai-workflow
+
+# Dry-run audit of AI workflow dependencies (tmux, fonts, codex, agy, daemons)
+update-ai-workflow --check
+
+# Non-interactive batch update of all AI workflow dependencies
+update-ai-workflow -y
+
+# Force reinstallation or rebuild of all AI workflow dependencies
+update-ai-workflow --all
+
+# Update only a specific AI workflow component (tmux, fonts, codex, agy, claude, opencode)
+update-ai-workflow --only {{component}}
+
+# Convenient shortcut to update AI workflow dependencies
+ai-update
+
 $ (awt) branch: git branch --format='%(refname:short)' 2>/dev/null
 $ (awt) base: git branch --format='%(refname:short)' 2>/dev/null
 $ (awt) pr_number: gh pr list --limit 30 --json number,title --template '{{range .}}{{tablerow .number .title}}{{end}}' 2>/dev/null
@@ -343,3 +367,4 @@ $ (./stow.sh) package: find . -maxdepth 1 -mindepth 1 -type d ! -name '.*' ! -na
 $ (wm) session: wm session list 2>/dev/null
 $ (wm) file: find . -maxdepth 3 -type f \( -name '*.md' -o -name '*.markdown' -o -name '*.mmd' \) 2>/dev/null
 $ (mmdc) mmd_file: find . -maxdepth 4 -type f \( -name '*.mmd' -o -name '*.mermaid' \) 2>/dev/null
+$ (update-ai-workflow) component: echo -e "tmux\nfonts\ncodex\nagy\nclaude\nopencode\ncrush\nacpd\nai-suite\nworktrunk\nmise"
