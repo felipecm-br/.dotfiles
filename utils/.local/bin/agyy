@@ -18,6 +18,12 @@ mkdir -p "$PROFILE_DIR/.local/bin"
 [ -d "$REAL_HOME/.gnupg" ] && [ ! -e "$PROFILE_DIR/.gnupg" ] && ln -sf "$REAL_HOME/.gnupg" "$PROFILE_DIR/.gnupg"
 [ -d "$REAL_HOME/.agents" ] && [ ! -e "$PROFILE_DIR/.agents" ] && ln -sf "$REAL_HOME/.agents" "$PROFILE_DIR/.agents"
 
+# Symlink hooks, skills, and configuration so lifecycle telemetry (ACPD/tmux) and workmux tracking work
+mkdir -p "$PROFILE_DIR/.gemini/config"
+[ -f "$REAL_HOME/.gemini/config/hooks.json" ] && [ ! -e "$PROFILE_DIR/.gemini/config/hooks.json" ] && ln -sf "$REAL_HOME/.gemini/config/hooks.json" "$PROFILE_DIR/.gemini/config/hooks.json"
+[ -f "$REAL_HOME/.gemini/config/skills.json" ] && [ ! -e "$PROFILE_DIR/.gemini/config/skills.json" ] && ln -sf "$REAL_HOME/.gemini/config/skills.json" "$PROFILE_DIR/.gemini/config/skills.json"
+[ -d "$REAL_HOME/.gemini/hooks" ] && [ ! -e "$PROFILE_DIR/.gemini/hooks" ] && ln -sf "$REAL_HOME/.gemini/hooks" "$PROFILE_DIR/.gemini/hooks"
+
 # Mirror non-antigravity .config directories so editor/terminal configs remain accessible
 if [ -d "$REAL_HOME/.config" ]; then
   for item in "$REAL_HOME/.config/"*; do
@@ -61,8 +67,10 @@ if [ -n "$TMUX_PANE" ]; then
     curl -s -X POST http://127.0.0.1:4040/api/status -H "Content-Type: application/json" -d "{\"pane_id\":\"'"$TMUX_PANE"'\",\"state\":\"closed\"}" > /dev/null 2>&1 || true
     node "'"$SCRIPT_DIR"'/lazygit-hook.mjs" Unregister </dev/null > /dev/null 2>&1 || true
     tmux set-option -w -t "'"$TMUX_PANE"'" -u @lazygitrs_icon > /dev/null 2>&1 || true
+    tmux set-window-option -t "'"$TMUX_PANE"'" automatic-rename on > /dev/null 2>&1 || true
     tmux refresh-client -S > /dev/null 2>&1 || true
   ' EXIT INT TERM
+  tmux rename-window -t "'"$TMUX_PANE"'" "" > /dev/null 2>&1 || true
 fi
 
 # Launch agy with isolated profile HOME and disabled D-Bus session keyring

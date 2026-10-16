@@ -13,8 +13,10 @@ if [ -n "$TMUX_PANE" ]; then
     curl -s -X POST http://127.0.0.1:4040/api/status -H "Content-Type: application/json" -d "{\"pane_id\":\"'"$TMUX_PANE"'\",\"state\":\"closed\"}" > /dev/null 2>&1 || true
     node "'"$SCRIPT_DIR"'/lazygit-hook.mjs" Unregister </dev/null > /dev/null 2>&1 || true
     tmux set-option -w -t "'"$TMUX_PANE"'" -u @lazygitrs_icon > /dev/null 2>&1 || true
+    tmux set-window-option -t "'"$TMUX_PANE"'" automatic-rename on > /dev/null 2>&1 || true
     tmux refresh-client -S > /dev/null 2>&1 || true
   ' EXIT INT TERM
+  tmux rename-window -t "'"$TMUX_PANE"'" "" > /dev/null 2>&1 || true
 fi
 
 # Execute the actual CLI, passing all arguments transparently
