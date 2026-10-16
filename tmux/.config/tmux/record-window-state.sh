@@ -102,20 +102,43 @@ inspect_pane() {
 
     # AI Agents (smart resume & continuation)
     if [[ "$pname" =~ ^(opencode|agy|agy-bin|antigravity|claude|codex|gemini|aider)$ ]]; then
-      local resume_cmd="$raw_cmdline"
-      [ -z "$resume_cmd" ] && resume_cmd="$pname"
-
-      # Normalize executable name to canonical CLI
-      resume_cmd=$(printf '%s' "$resume_cmd" | sed -E 's|^([^[:space:]]*/)+(agy-bin|agy)|agy|; s|^([^[:space:]]*/)+opencode|opencode|; s|^([^[:space:]]*/)+claude|claude|; s|^([^[:space:]]*/)+codex|codex|')
-
+      local canonical_bin="$pname"
       case "$pname" in
+        agy|agy-bin|antigravity) canonical_bin="agy" ;;
+        opencode) canonical_bin="opencode" ;;
+        claude) canonical_bin="claude" ;;
+        codex) canonical_bin="codex" ;;
+        gemini) canonical_bin="gemini" ;;
+        aider) canonical_bin="aider" ;;
+      esac
+
+      local cmd_args=""
+      if [[ "$raw_cmdline" =~ [[:space:]] ]]; then
+        cmd_args="${raw_cmdline#*[[:space:]]}"
+        cmd_args=$(printf '%s' "$cmd_args" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+      fi
+
+      local resume_cmd="$canonical_bin"
+      [ -n "$cmd_args" ] && resume_cmd="$canonical_bin $cmd_args"
+
+      case "$canonical_bin" in
         opencode)
           if [[ ! "$resume_cmd" =~ (^|[[:space:]])(-c|--continue|-s|--session)($|[[:space:]]) ]]; then
             resume_cmd="${resume_cmd} --continue"
           fi
           ;;
-        agy|agy-bin|antigravity)
-          if [[ ! "$resume_cmd" =~ (^|[[:space:]])(-c|--continue|--conversation)($|[[:space:]]) ]]; then
+        agy)
+          # Check if an exact conversation lock exists in open file descriptors
+          local conv_id=""
+          local lock_file
+          lock_file=$(ls -l "/proc/$p/fd" 2>/dev/null | grep -oE '/presence/[a-f0-9-]+\.lock' | head -n1 || true)
+          if [ -n "$lock_file" ]; then
+            conv_id=$(basename "$lock_file" .lock)
+          fi
+
+          if [ -n "$conv_id" ] && [[ ! "$resume_cmd" =~ (^|[[:space:]])(--conversation)($|[[:space:]]) ]]; then
+            resume_cmd="agy --conversation $conv_id"
+          elif [[ ! "$resume_cmd" =~ (^|[[:space:]])(-c|--continue|--conversation)($|[[:space:]]) ]]; then
             resume_cmd="${resume_cmd} --continue"
           fi
           ;;

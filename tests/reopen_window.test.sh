@@ -20,7 +20,8 @@ BACKUP_FILE="$STATE_DIR/closed-windows.json.testbackup"
 restore_backup() {
   tmux kill-session -t "_test_reopen_pos" 2>/dev/null || true
   tmux kill-session -t "_test_ai_restore" 2>/dev/null || true
-  rm -f /tmp/_test_fake_stack.json
+  tmux kill-session -t "_test_malformed" 2>/dev/null || true
+  rm -f /tmp/_test_fake_stack.json /tmp/_test_malformed_stack.json
   if [ -f "$BACKUP_FILE" ]; then
     mv "$BACKUP_FILE" "$STACK_FILE"
   else
@@ -117,7 +118,34 @@ RESTORED_STATE=$(tmux show-option -w -t "_test_ai_restore:1" -qv @ai_agent_state
 [ "$RESTORED_TITLE" = "Refactoring agent" ] && ok "AI agent title restored on window options" || bad "agent title not restored"
 [ "$RESTORED_STATE" = "busy" ] && ok "AI agent state restored on window options" || bad "agent state not restored"
 
-tmux kill-session -t "_test_ai_restore" 2>/dev/null || true
-rm -f /tmp/_test_fake_stack.json
+# 7. Malformed command fallback (prevent 'zsh: command not found: --continue')
+cat <<'EOF' > /tmp/_test_malformed_stack.json
+[
+  {
+    "session": "_test_malformed",
+    "name": "malformed-tab",
+    "index": 1,
+    "path": "/tmp",
+    "cmd": " --continue",
+    "file": "",
+    "layout": "",
+    "agent_title": "Antigravity task",
+    "agent_state": "idle",
+    "time": 1729000000
+  }
+]
+EOF
+tmux kill-session -t "_test_malformed" 2>/dev/null || true
+tmux new-session -d -s "_test_malformed" -n "init0"
+cp /tmp/_test_malformed_stack.json "$STACK_FILE"
+"$REOPEN_SCRIPT"
+
+# Capture pane contents to ensure "command not found: --continue" did NOT occur
+sleep 0.2
+PANE_OUTPUT=$(tmux capture-pane -pt "_test_malformed:1" 2>/dev/null || true)
+! echo "$PANE_OUTPUT" | grep -q "command not found: --continue" && ok "malformed cmd sanitized and prefixed with agy" || bad "unhandled command not found: --continue"
+
+tmux kill-session -t "_test_malformed" 2>/dev/null || true
+rm -f /tmp/_test_malformed_stack.json
 
 echo "=== All reopen-window tests passed! ==="

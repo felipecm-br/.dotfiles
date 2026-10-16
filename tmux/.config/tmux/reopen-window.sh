@@ -35,6 +35,14 @@ file=$(echo "$TOP_ITEM" | jq -r '.file // empty')
 agent_title=$(echo "$TOP_ITEM" | jq -r '.agent_title // empty')
 agent_state=$(echo "$TOP_ITEM" | jq -r '.agent_state // empty')
 
+# Sanitize cmd and fallback for malformed or legacy stack items
+cmd=$(printf '%s' "$cmd" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+if [[ "$cmd" =~ ^-- ]]; then
+  cmd="agy $cmd"
+elif [ -z "$cmd" ] && [ -n "$agent_title" ]; then
+  cmd="agy --continue"
+fi
+
 # Directory validation
 if [ -z "$path" ] || [ ! -d "$path" ]; then
   path="$HOME"
