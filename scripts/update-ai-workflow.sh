@@ -1,0 +1,1 @@
+../utils/.local/bin/update-ai-workflow
