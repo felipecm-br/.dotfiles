@@ -36,8 +36,10 @@ COLOR_YELLOW=$(_get_color "yellow" "#e0af68")
 COLOR_RED=$(_get_color "red" "#f7768e")
 COLOR_ORANGE=$(_get_color "orange" "#eb927b")
 COLOR_ACCENT=$(_get_color "accent" "#7aa2f7")
-COLOR_MUTED=$(_get_color "muted" "#414868")
+COLOR_MAGENTA=$(_get_color "magenta" "#ad8ee6")
+COLOR_MUTED=$(_get_color "dark_foreground" "#565f89")
 COLOR_FG=$(_get_color "foreground" "#a9b1d6")
+COLOR_LIGHT_BG=$(_get_color "lighter_background" "#24283b")
 
 _hex_to_ansi() {
   local h="${1#\#}"
@@ -58,7 +60,9 @@ analyze_session() {
 
   WIN_COUNT=0
   AGENT_COUNT=0
-  AGENT_DETAILS=()
+  AGENT_TABS=()
+  AGENT_DESCS=()
+  AGENT_STATES=()
   REASONS=()
 
   if ! tmux has-session -t "$target" 2>/dev/null; then
@@ -121,10 +125,12 @@ analyze_session() {
       [ -z "$agent_desc" ] && agent_desc="${raw_title:-$wname}"
       # Clean and truncate description if needed
       agent_desc=$(printf '%s' "$agent_desc" | tr '\n\r\t' ' ' | sed -E 's/[[:space:]]+/ /g')
-      if [ "${#agent_desc}" -gt 38 ]; then
-        agent_desc="${agent_desc:0:35}..."
+      if [ "${#agent_desc}" -gt 30 ]; then
+        agent_desc="${agent_desc:0:27}..."
       fi
-      AGENT_DETAILS+=("Window $wnum: $agent_desc [${st:-active}]")
+      AGENT_TABS+=("$wnum")
+      AGENT_DESCS+=("$agent_desc")
+      AGENT_STATES+=("${st:-active}")
     fi
   done < <(tmux list-panes -s -t "$target" -F "#{window_id}|#{window_index}|#{window_name}|#{pane_id}|#{pane_current_command}|#{pane_title}|#{@ai_agent_state_raw}|#{@ai_agent_title}" 2>/dev/null || true)
 
@@ -179,47 +185,69 @@ run_confirm_modal() {
 
   analyze_session "$target"
 
-  local c_yellow c_red c_cyan c_muted c_fg c_reset c_bold
+  local c_yellow c_red c_cyan c_magenta c_muted c_fg c_reset c_bold
   c_yellow=$(_hex_to_ansi "$COLOR_YELLOW")
   c_red=$(_hex_to_ansi "$COLOR_RED")
   c_cyan=$(_hex_to_ansi "$COLOR_ACCENT")
+  c_magenta=$(_hex_to_ansi "$COLOR_MAGENTA")
   c_muted=$(_hex_to_ansi "$COLOR_MUTED")
   c_fg=$(_hex_to_ansi "$COLOR_FG")
   c_reset="\033[0m"
   c_bold="\033[1m"
 
-  printf "\n  ${c_bold}${c_yellow}󰅖 Kill Tmux Session: %s${c_reset}\n\n" "$target"
-  printf "  ${c_yellow}⚠️  Protected session safeguards triggered:${c_reset}\n"
-
-  if [ "$AGENT_COUNT" -gt 0 ]; then
-    printf "  ${c_red}󰮯 %d window(s) with active AI agents:${c_reset}\n" "$AGENT_COUNT"
-    local count=0
-    for detail in "${AGENT_DETAILS[@]}"; do
-      if [ "$count" -lt 3 ]; then
-        printf "    ${c_muted}• %s${c_reset}\n" "$detail"
-      fi
-      count=$((count + 1))
-    done
-    if [ "$count" -gt 3 ]; then
-      printf "    ${c_muted}• ... and %d more agent window(s)${c_reset}\n" "$((count - 3))"
-    fi
-  fi
-
-  if [ "$WIN_COUNT" -gt 3 ]; then
-    printf "  ${c_cyan}󱂬 %d windows open in session (>3 threshold)${c_reset}\n" "$WIN_COUNT"
-  fi
   printf "\n"
+  if [ "$AGENT_COUNT" -gt 0 ]; then
+    printf "  ${c_bold}${c_red}󰅖  KILL SESSION${c_reset} ${c_muted}·${c_reset} ${c_bold}${c_fg}%s${c_reset}\n\n" "$target"
+  else
+    printf "  ${c_bold}${c_yellow}󰅖  KILL SESSION${c_reset} ${c_muted}·${c_reset} ${c_bold}${c_fg}%s${c_reset}\n\n" "$target"
+  fi
+
+  # Section 1: Active AI Agent Fleet
+  if [ "$AGENT_COUNT" -gt 0 ]; then
+    printf "  ${c_bold}${c_red}󰮯  Active AI Agents Detected (%d)${c_reset}\n" "$AGENT_COUNT"
+    local show_count=$(( AGENT_COUNT > 4 ? 4 : AGENT_COUNT ))
+    for ((i=0; i<show_count; i++)); do
+      local tab="${AGENT_TABS[$i]}"
+      local desc="${AGENT_DESCS[$i]}"
+      local st="${AGENT_STATES[$i]}"
+      local icon="󱥁"
+      local st_color="$c_yellow"
+      case "$st" in
+        idle) icon="󱥂"; st_color="$c_cyan" ;;
+        busy|working) icon="󱥁"; st_color="$c_yellow" ;;
+        question|permission|awaiting_input) icon="󱜻"; st_color="$c_magenta" ;;
+        error) icon="󰨄"; st_color="$c_red" ;;
+      esac
+      printf "     ${c_muted}󰚩${c_reset} ${c_bold}Tab %-2s${c_reset}  ${c_fg}%-28s${c_reset}  ${st_color}%s %-7s${c_reset}\n" \
+        "$tab" "$desc" "$icon" "$st"
+    done
+    if [ "$AGENT_COUNT" -gt 4 ]; then
+      printf "     ${c_muted}󰚩 ... and %d more active agent window(s)${c_reset}\n" "$((AGENT_COUNT - 4))"
+    fi
+    printf "\n"
+  fi
+
+  # Section 2: Session Window Layout Threshold
+  if [ "$WIN_COUNT" -gt 3 ]; then
+    printf "  ${c_bold}${c_cyan}󱂬  Layout Threshold Triggered${c_reset}\n"
+    printf "     ${c_muted}󱂬${c_reset}  ${c_fg}%d active windows in session${c_reset} ${c_muted}(>3 threshold)${c_reset}\n\n" "$WIN_COUNT"
+  fi
+
+  # Divider & Hints
+  printf "  ${c_muted}────────────────────────────────────────────────────────────${c_reset}\n"
+  printf "  ${c_muted}Tab / ← / →  toggle selection   •   Enter  confirm selection${c_reset}\n\n"
 
   if command -v gum >/dev/null 2>&1; then
     if gum confirm \
+        --no-show-help \
         --default=false \
-        --affirmative="Kill session" \
-        --negative="Cancel" \
-        --prompt.foreground="$COLOR_YELLOW" \
+        --affirmative=" 󰅖 Kill Session [y] " \
+        --negative=" 󰜺 Keep Session [n/Esc] " \
         --selected.background="$COLOR_RED" \
         --selected.foreground="#ffffff" \
+        --unselected.background="$COLOR_LIGHT_BG" \
         --unselected.foreground="$COLOR_FG" \
-        "Proceed with closing session '$target'?" 2>/dev/null; then
+        "" 2>/dev/null; then
       perform_kill "$target"
       exit 0
     else
@@ -348,17 +376,18 @@ EOF
     # Calculate adaptive popup height (Golden Ratio compact HUD)
     local detail_lines=0
     if [ "$AGENT_COUNT" -gt 0 ]; then
-      detail_lines=$(( AGENT_COUNT > 3 ? 4 : AGENT_COUNT ))
-      detail_lines=$(( detail_lines + 1 )) # agent section header
+      local show_agents=$(( AGENT_COUNT > 4 ? 4 : AGENT_COUNT ))
+      detail_lines=$(( detail_lines + show_agents + 2 ))
+      [ "$AGENT_COUNT" -gt 4 ] && detail_lines=$(( detail_lines + 1 ))
     fi
     if [ "$WIN_COUNT" -gt 3 ]; then
-      detail_lines=$(( detail_lines + 1 ))
+      detail_lines=$(( detail_lines + 3 ))
     fi
 
-    local popup_h=$(( 9 + detail_lines ))
-    [ "$popup_h" -lt 10 ] && popup_h=10
-    [ "$popup_h" -gt 16 ] && popup_h=16
-    local popup_w=62
+    local popup_h=$(( 10 + detail_lines ))
+    [ "$popup_h" -lt 12 ] && popup_h=12
+    [ "$popup_h" -gt 20 ] && popup_h=20
+    local popup_w=66
 
     local border_color="$COLOR_YELLOW"
     local badge=" 󰅖 "
