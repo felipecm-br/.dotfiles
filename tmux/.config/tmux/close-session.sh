@@ -204,7 +204,7 @@ run_confirm_modal() {
   # Section 1: Active AI Agent Fleet
   if [ "$AGENT_COUNT" -gt 0 ]; then
     printf "  ${c_bold}${c_red}󰮯  Active AI Agents Detected (%d)${c_reset}\n" "$AGENT_COUNT"
-    local show_count=$(( AGENT_COUNT > 4 ? 4 : AGENT_COUNT ))
+    local show_count=$(( AGENT_COUNT > 3 ? 3 : AGENT_COUNT ))
     for ((i=0; i<show_count; i++)); do
       local tab="${AGENT_TABS[$i]}"
       local desc="${AGENT_DESCS[$i]}"
@@ -220,8 +220,8 @@ run_confirm_modal() {
       printf "     ${c_muted}󰚩${c_reset} ${c_bold}Tab %-2s${c_reset}  ${c_fg}%-28s${c_reset}  ${st_color}%s %-7s${c_reset}\n" \
         "$tab" "$desc" "$icon" "$st"
     done
-    if [ "$AGENT_COUNT" -gt 4 ]; then
-      printf "     ${c_muted}󰚩 ... and %d more active agent window(s)${c_reset}\n" "$((AGENT_COUNT - 4))"
+    if [ "$AGENT_COUNT" -gt 3 ]; then
+      printf "     ${c_muted}󰚩 ... and %d more active agent window(s)${c_reset}\n" "$((AGENT_COUNT - 3))"
     fi
     printf "\n"
   fi
@@ -234,7 +234,7 @@ run_confirm_modal() {
 
   # Divider & Hints
   printf "  ${c_muted}────────────────────────────────────────────────────────────${c_reset}\n"
-  printf "  ${c_muted}Tab / ← / →  toggle selection   •   Enter  confirm selection${c_reset}\n\n"
+  printf "  ${c_muted}Tab / ← / →  toggle selection   •   Enter  confirm selection${c_reset}\n"
 
   if command -v gum >/dev/null 2>&1; then
     if gum confirm \
@@ -246,6 +246,7 @@ run_confirm_modal() {
         --selected.background="" \
         --unselected.foreground="$COLOR_MUTED" \
         --unselected.background="" \
+        --prompt.foreground="$COLOR_MUTED" \
         --prompt.background="" \
         "" 2>/dev/null; then
       perform_kill "$target"
@@ -376,18 +377,18 @@ EOF
     # Calculate adaptive popup height (Golden Ratio compact HUD)
     local detail_lines=0
     if [ "$AGENT_COUNT" -gt 0 ]; then
-      local show_agents=$(( AGENT_COUNT > 4 ? 4 : AGENT_COUNT ))
+      local show_agents=$(( AGENT_COUNT > 3 ? 3 : AGENT_COUNT ))
       detail_lines=$(( detail_lines + show_agents + 2 ))
-      [ "$AGENT_COUNT" -gt 4 ] && detail_lines=$(( detail_lines + 1 ))
+      [ "$AGENT_COUNT" -gt 3 ] && detail_lines=$(( detail_lines + 1 ))
     fi
     if [ "$WIN_COUNT" -gt 3 ]; then
       detail_lines=$(( detail_lines + 3 ))
     fi
 
-    local popup_h=$(( 10 + detail_lines ))
-    [ "$popup_h" -lt 12 ] && popup_h=12
-    [ "$popup_h" -gt 20 ] && popup_h=20
-    local popup_w=66
+    local popup_h=$(( 12 + detail_lines ))
+    [ "$popup_h" -lt 14 ] && popup_h=14
+    [ "$popup_h" -gt 24 ] && popup_h=24
+    local popup_w=68
 
     local border_color="$COLOR_YELLOW"
     local badge=" 󰅖 "
