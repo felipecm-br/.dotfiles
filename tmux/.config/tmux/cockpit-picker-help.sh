@@ -68,4 +68,4 @@ printf '    %b[/]%b      Filter            Enter fuzzy query filter mode\n' "$C_
 printf '    %b[Esc]%b    Exit              Dismiss Cockpit modal\n\n' "$C_BLUE$C_BOLD" "$C_RESET"
 
 printf '  %b────────────────────────────────────────────────────────────%b\n' "$C_DIM" "$C_RESET"
-printf '  %bPress %b?%b%b for HUD help • %bv%b%b for Diff • %bg%b%b for Git • %bp%b%b for Patch%b\n' "$C_DIM" "$C_BLUE$C_BOLD" "$C_RESET" "$C_DIM" "$C_CYAN$C_BOLD" "$C_RESET" "$C_DIM" "$C_MAGENTA$C_BOLD" "$C_RESET" "$C_DIM" "$C_MAGENTA$C_BOLD" "$C_RESET" "$C_DIM"
+printf '  %b?%b %bHUD help%b   %b│%b   %bv%b %bDiff%b   %b│%b   %bg%b %bGit%b   %b│%b   %bp%b %bPatch%b\n' "$C_CYAN$C_BOLD" "$C_RESET" "$C_DIM" "$C_RESET" "$C_DIM" "$C_RESET" "$C_CYAN$C_BOLD" "$C_RESET" "$C_DIM" "$C_RESET" "$C_DIM" "$C_RESET" "$C_CYAN$C_BOLD" "$C_RESET" "$C_DIM" "$C_RESET" "$C_DIM" "$C_RESET" "$C_CYAN$C_BOLD" "$C_RESET" "$C_DIM" "$C_RESET"

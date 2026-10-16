@@ -166,5 +166,5 @@ if [ -n "$sound_file" ] && [ -f "$sound_file" ]; then
 fi
 
 # HUD feedback
-tmux display-message -d 2000 " 󰮯 AI Triage: $target_sess › $target_win_name ($((curr_idx + 1))/$total) [${target_state}] • [Prefix+I to return]"
+tmux display-message -d 2000 " 󰮯 AI Triage: $target_sess › $target_win_name ($((curr_idx + 1))/$total) [${target_state}] │ Prefix+I to return"
 

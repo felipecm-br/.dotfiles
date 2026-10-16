@@ -126,7 +126,7 @@ color = "Darkgray"
 title_fg = "Cyan"
 
 [footer]
-content = " {cyan,bold:[Enter]} {darkgray:Full}  •  {magenta,bold:[Tab]} {darkgray:Cycle}  •  {yellow,bold:[C-h/l]} {darkgray:Dir}  •  {cyan,bold:[C-j/k]} {darkgray:Move}  •  {blue,bold:[C-d/u]} {darkgray:Scroll}  •  {green,bold:[C-v]} {darkgray:Insert}  •  {yellow,bold:[C-e]} {darkgray:Edit}  •  {magenta,bold:[C-y]} {darkgray:Copy}  •  {blue,bold:[Esc]} {darkgray:Exit}"
+content = " {cyan,bold:Enter} {darkgray:Full} {darkgray:│} {cyan,bold:Tab} {darkgray:Cycle} {darkgray:│} {cyan,bold:C-h/l} {darkgray:Dir} {darkgray:│} {cyan,bold:C-j/k} {darkgray:Move} {darkgray:│} {cyan,bold:C-d/u} {darkgray:Scroll} {darkgray:│} {cyan,bold:C-v} {darkgray:Insert} {darkgray:│} {cyan,bold:C-e} {darkgray:Edit} {darkgray:│} {cyan,bold:C-y} {darkgray:Copy} {darkgray:│} {cyan,bold:Esc} {darkgray:Exit}"
 match_indent = false
 row_connection = "Full"
 separator = "light"

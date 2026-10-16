@@ -99,7 +99,7 @@ title = " Preview "
 title_fg = "Cyan"
 
 [footer]
-content = " {cyan,bold:[Enter]} {darkgray:Nvim}  •  {green,bold:[C-v]} {darkgray:Insert}  •  {magenta,bold:[y]} {darkgray:Copy}  •  {blue,bold:[J/K]} {darkgray:Scroll}  •  {cyan,bold:[C-/]} {darkgray:Layout}  •  {yellow,bold:[C-s]} {darkgray:Case}  •  {green,bold:[C-w]} {darkgray:Word}  •  {blue,bold:[Esc]} {darkgray:Exit}"
+content = " {cyan,bold:Enter} {darkgray:Nvim} {darkgray:│} {cyan,bold:C-v} {darkgray:Insert} {darkgray:│} {cyan,bold:y} {darkgray:Copy} {darkgray:│} {cyan,bold:J/K} {darkgray:Scroll} {darkgray:│} {cyan,bold:C-/} {darkgray:Layout} {darkgray:│} {cyan,bold:C-s} {darkgray:Case} {darkgray:│} {cyan,bold:C-w} {darkgray:Word} {darkgray:│} {cyan,bold:Esc} {darkgray:Exit}"
 match_indent = false
 row_connection = "Full"
 separator = "light"

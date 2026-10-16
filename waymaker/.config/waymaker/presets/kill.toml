@@ -12,9 +12,9 @@ prompt_style.fg = "Red"
 prompt_style.modifier = "BOLD"
 
 [footer]
-content = "  Enter: SIGTERM (15)  •  Ctrl+X: SIGKILL (-9)  •  Ctrl+P: Toggle Preview"
-style.fg = "DarkGray"
-style.modifier = "DIM"
+content = " {cyan,bold:Enter} {darkgray:SIGTERM (15)} {darkgray:│} {cyan,bold:C-x} {darkgray:SIGKILL (-9)} {darkgray:│} {cyan,bold:C-p} {darkgray:Toggle Preview}"
+row_connection = "Full"
+match_indent = false
 separator = "light"
 
 [columns]

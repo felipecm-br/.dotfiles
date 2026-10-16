@@ -237,7 +237,7 @@ run_confirm_modal() {
 
   # Divider & Hints (English Action Guide)
   printf "  ${c_muted}────────────────────────────────────────────────────────────${c_reset}\n"
-  printf "  ${c_bold}${c_red}y${c_reset} ${c_muted}Kill Session${c_reset}   ${c_muted}•${c_reset}   ${c_bold}${c_cyan}n${c_reset} ${c_muted}/${c_reset} ${c_bold}${c_cyan}Esc${c_reset} ${c_muted}Keep Session${c_reset}\n"
+  printf "  ${c_bold}${c_red}y${c_reset} ${c_muted}Kill Session${c_reset}   ${c_muted}│${c_reset}   ${c_bold}${c_cyan}n${c_reset} ${c_muted}/${c_reset} ${c_bold}${c_cyan}Esc${c_reset} ${c_muted}Keep Session${c_reset}\n"
 
   # Hide cursor during prompt to eliminate blinking artifacts
   printf '\033[?25l'

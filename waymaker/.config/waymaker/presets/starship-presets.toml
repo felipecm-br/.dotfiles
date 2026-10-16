@@ -44,7 +44,7 @@ names = [
 ]
 
 [footer]
-content = " {magenta,bold:[Enter]} {darkgray:Selecionar}  •  {cyan,bold:[j/k | ↓/↑]} {darkgray:Navegar}  •  {yellow,bold:[Ctrl-L/H]} {darkgray:Modo Vim (Ins/Norm/Vis)}  •  {darkgray,bold:[Esc]} {darkgray:Cancelar}"
+content = " {cyan,bold:Enter} {darkgray:Selecionar} {darkgray:│} {cyan,bold:j/k} {darkgray:Navegar} {darkgray:│} {cyan,bold:C-l/h} {darkgray:Modo Vim} {darkgray:│} {cyan,bold:Esc} {darkgray:Cancelar}"
 row_connection = "Full"
 match_indent = false
 separator = "light"

@@ -74,7 +74,7 @@ side = "right"
 percentage = 60
 
 [footer]
-content = " {cyan,bold:[Enter]} {darkgray:Run}  •  {magenta,bold:[Tab]} {darkgray:Filter}  •  {yellow,bold:[y]} {darkgray:Copy}  •  {blue,bold:[J/K]} {darkgray:Scroll}  •  {blue,bold:[Esc]} {darkgray:Exit}"
+content = " {cyan,bold:Enter} {darkgray:Run} {darkgray:│} {cyan,bold:Tab} {darkgray:Filter} {darkgray:│} {cyan,bold:y} {darkgray:Copy} {darkgray:│} {cyan,bold:J/K} {darkgray:Scroll} {darkgray:│} {cyan,bold:Esc} {darkgray:Exit}"
 match_indent = false
 row_connection = "Full"
 separator = "light"

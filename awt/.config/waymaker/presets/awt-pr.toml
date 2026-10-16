@@ -31,7 +31,7 @@ style.fg = "Cyan"
 style.modifier = "BOLD"
 
 [footer]
-content = " {cyan,bold:[Enter]} {darkgray:Checkout Worktree}  •  {magenta,bold:[Tab]} {darkgray:Cycle Tab}  •  {blue,bold:[C-e]} {darkgray:Chrome}  •  {yellow,bold:[C-d]} {darkgray:Diff}  •  {blue,bold:[p]} {darkgray:Preview}  •  {blue,bold:[Esc]} {darkgray:Exit}"
+content = " {cyan,bold:Enter} {darkgray:Checkout} {darkgray:│} {cyan,bold:Tab} {darkgray:Cycle Tab} {darkgray:│} {cyan,bold:C-e} {darkgray:Chrome} {darkgray:│} {cyan,bold:C-d} {darkgray:Diff} {darkgray:│} {cyan,bold:p} {darkgray:Preview} {darkgray:│} {cyan,bold:Esc} {darkgray:Exit}"
 row_connection = "Full"
 match_indent = false
 separator = "light"
