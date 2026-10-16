@@ -18,6 +18,7 @@ Welcome to the central documentation index for this Arch Linux + Omarchy dotfile
 - [**Flow-State Engineering Implementation Plan**](architecture/flow-state-implementation-plan.md): Actionable, prioritized implementation plan (P0 to P3) translating flow-state audit findings and defects (F1–F10) into concrete diffs, scripts, validation procedures, and zero-churn safeguards.
 - [**Flow-State Re-Audit, Post-Fixes (PT, Oct 8 2026)**](articles/workflow-flow-state-reaudit-pt.md): Portuguese re-evaluation after the P0/P1 fixes: F1–F10 status verified live, new findings (N1–N5), re-measured performance, revised scorecard (6.8 → 7.8 installed), head-to-head comparison with workmux and the other agent-orchestration competitors, and the remaining prioritized roadmap.
 - [**Open-Source AI Cockpit Stack Blueprint**](architecture/open-source-ai-tmux-stack-plan.md): Architecture and distribution strategy for the open-source `acpd` + `lazygitrs` + `mm` + `tmux` terminal AI cockpit stack.
+- [**Waymux Ecosystem Audit vs. `workmux` & `herdr` & Upgrade Blueprint**](architecture/waymux-competitor-audit-and-upgrade-plan.md): Live empirical benchmarks, 9-dimension ergonomic scorecard, head-to-head source-code audit against `workmux` and `herdr`, and a deterministic 8-item implementation & testing spec.
 
 ### 🐚 1. Shell & Navigation (`docs/shell/`)
 - [**Smart Tab Completion & Matchmaker**](shell/completion.md): Context-aware `<Tab>`, auto-spacing on aliases (`gco<Tab>`), dual backends (`Ctrl+N` vs `Ctrl+F`), and the [`ftb.toml`](../waymaker/.config/waymaker/presets/ftb.toml) preset with on-demand preview (`Ctrl+P`).
@@ -31,6 +32,7 @@ Welcome to the central documentation index for this Arch Linux + Omarchy dotfile
 - [**Clipboard & Scrollback Capture**](tmux/clipboard-and-scrollback.md): Click-and-hold drag-to-copy to system clipboard, and `Prefix + C-e` scrollback buffer export to Neovim with full ANSI color formatting.
 - [**Tmux Activity Monitoring**](tmux/tmux-activity.md): Activity alert and notification behavior.
 - [**Cockpit HUD & Floating Popups Architecture Audit**](tmux/cockpit-and-popups-audit.md): Comprehensive staff-level architectural, ergonomic, and latency audit of the Cockpit HUD, floating modals, action safety, and prioritized roadmap.
+- [**Cockpit HUD vs. `workmux` Dashboard: Visual Semiotics & Eye-Tracking**](tmux/cockpit-vs-workmux-visual-ergonomics.md): Scientific comparison of macro/micro topology, saccadic eye-tracking mechanics, tabular vs. ragged alignment, and uniform bichromatic `│`-separated footers.
 
 ### 🖥️ 3. Desktop, Terminal & Hardware (`docs/desktop/`)
 - [**Hyprland Aesthetics vs. Performance Benchmark**](desktop/hyprland-aesthetics-and-performance.md): Deep-dive comparing Liquid Glass (`hyprglass`), Tokyo Night Solar Dawn (current), Catppuccin Pastel, Cyberpunk Neon, and OLED Zen with GPU/battery benchmarks on Apple Silicon M1 Pro.
