@@ -168,6 +168,22 @@ awt_ai_detect_all() {
     done < <(tmux list-panes -s -F "#{pane_id} #{window_index} #{pane_index} #{pane_pid} #{window_name} #{pane_title}" 2>/dev/null)
 }
 
+awt_prepare_cross_worktree_resume() {
+    local src_wt="$1" dst_wt="$2" resume_cmd="$3"
+    if [[ "$resume_cmd" =~ ^claude[[:space:]]+--resume[[:space:]]+([^[:space:]]+) ]]; then
+        local sid="${BASH_REMATCH[1]}"
+        local src_enc="${src_wt//\//-}"
+        local dst_enc="${dst_wt//\//-}"
+        local cdir="$HOME/.claude/projects"
+        if [[ -f "$cdir/$src_enc/${sid}.jsonl" && ! -f "$cdir/$dst_enc/${sid}.jsonl" ]]; then
+            mkdir -p "$cdir/$dst_enc"
+            cp -a "$cdir/$src_enc/${sid}.jsonl" "$cdir/$dst_enc/${sid}.jsonl" 2>/dev/null || true
+            [[ -d "$cdir/$src_enc/${sid}" ]] && cp -a "$cdir/$src_enc/${sid}" "$cdir/$dst_enc/" 2>/dev/null || true
+        fi
+    fi
+    printf '%s' "$resume_cmd"
+}
+
 # If executed directly:
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     awt_ai_detect_all

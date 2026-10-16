@@ -95,25 +95,24 @@ if [[ $no_hooks -eq 0 && -d "$wt_path" ]]; then
     fi
 fi
 
-# 4c. Fast dependency cleanup (removes heavy node_modules/target before unlinking)
+# 5. Atomic Quarantine Trash-Rename & Asynchronous Background Purge (0.1ms UI latency)
 if [[ -d "$wt_path" ]]; then
-    for heavy_dir in "$wt_path/node_modules" "$wt_path/target/debug/build" "$wt_path/target/release/build"; do
-        if [[ -d "$heavy_dir" ]]; then
-            rm -rf "$heavy_dir" 2>/dev/null || true
+    trash_dir="$(dirname "$wt_path")/.awt_trash_$(basename "$wt_path")_$$_${RANDOM}"
+    if mv "$wt_path" "$trash_dir" 2>/dev/null; then
+        if [[ -n "$common_git_dir" ]]; then
+            git --git-dir="$common_git_dir" worktree prune >/dev/null 2>&1 || true
+        else
+            git worktree prune >/dev/null 2>&1 || true
         fi
-    done
-fi
-
-# 5. Remove Worktree purely via Native Git
-if [[ -n "$common_git_dir" ]]; then
-    if [[ $force -eq 1 ]]; then
-        git --git-dir="$common_git_dir" worktree remove --force "$wt_path" >/dev/null 2>&1 || (rm -rf "$wt_path" && git --git-dir="$common_git_dir" worktree prune >/dev/null 2>&1) || true
+        (rm -rf "$trash_dir" >/dev/null 2>&1 &)
     else
-        git --git-dir="$common_git_dir" worktree remove "$wt_path" >/dev/null 2>&1 || git --git-dir="$common_git_dir" worktree remove --force "$wt_path" >/dev/null 2>&1 || (rm -rf "$wt_path" && git --git-dir="$common_git_dir" worktree prune >/dev/null 2>&1) || true
+        if [[ -n "$common_git_dir" ]]; then
+            git --git-dir="$common_git_dir" worktree remove --force "$wt_path" >/dev/null 2>&1 || rm -rf "$wt_path" 2>/dev/null || true
+            git --git-dir="$common_git_dir" worktree prune >/dev/null 2>&1 || true
+        else
+            git worktree remove -f "$wt_path" >/dev/null 2>&1 || rm -rf "$wt_path" 2>/dev/null || true
+        fi
     fi
-    git --git-dir="$common_git_dir" worktree prune >/dev/null 2>&1 || true
-else
-    git worktree remove -f "$wt_path" >/dev/null 2>&1 || rm -rf "$wt_path"
 fi
 
 # 6. Delete Git branch unless --no-delete-branch was specified

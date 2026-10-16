@@ -69,6 +69,25 @@ slugify_prompt() {
     echo "${prefix}/${slug}"
 }
 
+awt_spawn_session_and_send() {
+    local sess="$1" target_dir="$2" cmd="$3"
+    if tmux has-session -t "$sess" 2>/dev/null; then
+        if [[ -n "$cmd" && "$cmd" != "__FRESH__" ]]; then
+            tmux send-keys -t "${sess}:0.0" " $cmd" C-m
+        fi
+    else
+        if [[ -n "$cmd" && "$cmd" != "__FRESH__" ]]; then
+            local chan="awt_ready_$$_${RANDOM}"
+            tmux new-session -d -s "$sess" -c "$target_dir" \
+                "sh -c 'tmux wait-for -S $chan; exec ${SHELL:-/bin/zsh} -l'"
+            tmux wait-for "$chan" 2>/dev/null || true
+            tmux send-keys -t "${sess}:0.0" " $cmd" C-m
+        else
+            tmux new-session -d -s "$sess" -c "$target_dir"
+        fi
+    fi
+}
+
 show_help() {
     cat << 'HELP'
 awt - Agent Worktree Manager & Multi-Agent Git Orchestrator
@@ -91,6 +110,7 @@ USAGE:
 
 FLAGS & OPTIONS:
     -A, --auto-name <prompt>                Auto-generate conventional branch slug from task prompt
+    -W, --with-changes                      Migrate uncommitted working tree changes into new worktree
     --no-tmux, --no-connect                 Create or merge worktree without switching Tmux session
     --continue, --ai-continue               Resume active AI conversation in the new worktree session
     --no-continue, --fresh                  Start with a fresh AI session (skip resume prompt)
@@ -337,6 +357,7 @@ fi
 
 # 3. Parse arguments and flags
 create=0
+with_changes=0
 no_connect=0
 ai_continue_mode="auto"
 custom_ai_cmd=""
@@ -354,6 +375,11 @@ while [[ $# -gt 0 ]]; do
             shift
             ;;
         -c|--create)
+            create=1
+            shift
+            ;;
+        -W|--with-changes)
+            with_changes=1
             create=1
             shift
             ;;
@@ -447,12 +473,7 @@ fi
 # If the worktree directory already exists, dispatch command (if provided) and connect
 if [[ -d "$target_dir" ]]; then
     if [ -n "$custom_ai_cmd" ] && [ "$custom_ai_cmd" != "__FRESH__" ]; then
-        if tmux has-session -t "$sess" 2>/dev/null; then
-            tmux send-keys -t "$sess:0.0" "$custom_ai_cmd" C-m
-        else
-            tmux new-session -d -s "$sess" -c "$target_dir"
-            tmux send-keys -t "$sess:0.0" "$custom_ai_cmd" C-m
-        fi
+        awt_spawn_session_and_send "$sess" "$target_dir" "$custom_ai_cmd"
         if [[ $no_connect -eq 1 ]]; then
             echo "✓ Dispatched '$custom_ai_cmd' in session '$sess'"
             exit 0
@@ -485,12 +506,24 @@ fi
 
 # Create worktree purely via native Git
 if [[ ! -d "$target_dir" ]]; then
+    stashed_changes=0
+    if [[ "$with_changes" -eq 1 && -n "$(git -C "$repo_root" status --porcelain 2>/dev/null)" ]]; then
+        git -C "$repo_root" stash push --include-untracked -m "awt-with-changes: $branch" >/dev/null
+        stashed_changes=1
+    fi
+
     git worktree add "$target_dir" -b "$branch" "$base" 2>/dev/null || \
     git worktree add "$target_dir" "$branch" 2>/dev/null || {
         echo "awt: Failed to create worktree at $target_dir"
         exit 1
     }
     git -C "$target_dir" config "branch.${branch}.base" "$base" 2>/dev/null || true
+
+    if [[ "$stashed_changes" -eq 1 ]]; then
+        if ! git -C "$target_dir" stash pop >/dev/null 2>&1; then
+            echo "⚠ Stash pop had conflicts in $target_dir; your changes remain safe in 'git stash list'." >&2
+        fi
+    fi
 fi
 
 # Run lifecycle post-create hook
@@ -527,12 +560,10 @@ if [[ $no_connect -eq 0 ]]; then
     fi
 
     if [ -n "$ai_cmd" ] && [ "$ai_cmd" != "__FRESH__" ]; then
-        if tmux has-session -t "$sess" 2>/dev/null; then
-            tmux send-keys -t "$sess:0.0" "$ai_cmd" C-m
-        else
-            tmux new-session -d -s "$sess" -c "$target_dir"
-            tmux send-keys -t "$sess:0.0" "$ai_cmd" C-m
+        if command -v awt_prepare_cross_worktree_resume >/dev/null 2>&1; then
+            ai_cmd=$(awt_prepare_cross_worktree_resume "$repo_root" "$target_dir" "$ai_cmd")
         fi
+        awt_spawn_session_and_send "$sess" "$target_dir" "$ai_cmd"
         if command -v wm >/dev/null 2>&1; then
             exec wm connect "$sess"
         elif command -v sesh >/dev/null 2>&1; then
@@ -556,12 +587,10 @@ if [[ $no_connect -eq 0 ]]; then
 else
     # Headless / --no-connect mode: spawn in background tmux session if command was given
     if [ -n "$custom_ai_cmd" ] && [ "$custom_ai_cmd" != "__FRESH__" ]; then
-        if tmux has-session -t "$sess" 2>/dev/null; then
-            tmux send-keys -t "$sess:0.0" "$custom_ai_cmd" C-m
-        else
-            tmux new-session -d -s "$sess" -c "$target_dir"
-            tmux send-keys -t "$sess:0.0" "$custom_ai_cmd" C-m
+        if command -v awt_prepare_cross_worktree_resume >/dev/null 2>&1; then
+            custom_ai_cmd=$(awt_prepare_cross_worktree_resume "$repo_root" "$target_dir" "$custom_ai_cmd")
         fi
+        awt_spawn_session_and_send "$sess" "$target_dir" "$custom_ai_cmd"
         echo "✓ Dispatched '$custom_ai_cmd' in background session '$sess'"
     fi
     cd "$target_dir"
