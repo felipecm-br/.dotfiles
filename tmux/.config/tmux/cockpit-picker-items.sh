@@ -41,6 +41,10 @@ C_CUR=$(_hex_esc "${_color_cyan:-#83c092}")
 C_NAME=$(_hex_esc "${_color_fg:-#d3c6aa}")
 C_BRANCH=$(_hex_esc "${_color_blue:-#7fbbb3}")
 C_MUTED=$(_hex_esc "${_color_muted:-#475258}")
+C_DIFF_INS=$(_hex_esc "${_color_cyan:-#83c092}")
+C_DIFF_DEL=$(_hex_esc "${_color_red:-#e67e80}")
+C_DIFF_DIRTY=$(_hex_esc "${_color_yellow:-#dbbc7f}")
+C_PR=$(_hex_esc "${_color_magenta:-#d699b6}")
 
 filter_agents=0
 cur_session="${TMUX_ORIGIN_SESSION:-$(tmux display-message -p '#S' 2>/dev/null || echo "")}"
@@ -64,20 +68,51 @@ for arg in "$@"; do
   esac
 done
 
-# Query ACPD for timestamps
+# Step 1: Query ACPD once and extract pane map in a single jq pass
 token_file="${XDG_RUNTIME_DIR:-/run/user/$UID}/acpd/token"
-acpd_json=""
+declare -A acpd_st=()
+declare -A acpd_ts=()
+
 if [ -f "$token_file" ]; then
-  token="$(cat "$token_file" 2>/dev/null || true)"
+  token="$(< "$token_file" 2>/dev/null || true)"
   if [ -n "$token" ]; then
-    acpd_json=$(curl -s -m 0.25 -X POST http://127.0.0.1:4040/rpc \
+    acpd_json=$(curl -s -m 0.15 -X POST http://127.0.0.1:4040/rpc \
       -H "Authorization: Bearer $token" \
       -H "Content-Type: application/json" \
       -d '{"jsonrpc":"2.0","method":"agentState/list","id":1}' 2>/dev/null || true)
+    if [ -n "$acpd_json" ]; then
+      while IFS=$'\t' read -r apid ast ats; do
+        if [ -n "$apid" ]; then
+          acpd_st["$apid"]="$ast"
+          acpd_ts["$apid"]="$ats"
+        fi
+      done < <(echo "$acpd_json" | jq -r '.result | to_entries[] | "\(.key)\t\(.value.state // "")\t\(.value.last_timestamp // 0)"' 2>/dev/null || true)
+    fi
   fi
 fi
 
+# Step 2: Query running processes once globally to map agent sessions
+declare -A sess_agent=()
+while read -r p_sess p_comm; do
+  case "$p_comm" in
+    agy|agy-bin|antigravity|opencode|claude|codex)
+      sess_agent["$p_sess"]="${p_comm%-bin}"
+      ;;
+  esac
+done < <(ps -eo sess,comm 2>/dev/null || true)
+
 now_ms=$(date +%s000)
+
+# Memoization caches for Git and PR metadata by directory path (ppath)
+declare -A git_checked=()
+declare -A git_is_repo=()
+declare -A git_branch=()
+declare -A git_has_u=()
+declare -A git_ahead=()
+declare -A git_behind=()
+declare -A git_diffstat=()
+declare -A git_pr_num=()
+declare -A git_pr_ci=()
 
 # Temporary file to collect candidates for priority sorting
 tmp_raw=$(mktemp /tmp/triage-items-XXXXXX)
@@ -91,19 +126,16 @@ tmux list-panes -a -F '#{session_name}|#{window_index}|#{window_name}|#{pane_id}
   [ -z "$raw_state" ] && raw_state=$(tmux show-option -wqv -t "${sess}:${idx}" @ai_agent_state_raw 2>/dev/null || true)
   [ -z "$ai_title" ] && ai_title=$(tmux show-option -wqv -t "${sess}:${idx}" @ai_agent_title 2>/dev/null || true)
 
-  # Detect agent processes under this pane even if wrapped in bash/zsh
+  # Check pre-scanned process table for agent binaries
   detected_agent=""
   if [ -n "$pane_os_pid" ]; then
-    detected_agent=$(ps -s "$pane_os_pid" -o comm= 2>/dev/null | grep -E '^(agy|agy-bin|antigravity|opencode|claude|codex)$' | head -n 1 || true)
+    detected_agent="${sess_agent["$pane_os_pid"]:-}"
   fi
 
-  # Extract ACPD state & timestamp
-  st=""
-  ts=0
-  if [ -n "$acpd_json" ]; then
-    st=$(echo "$acpd_json" | jq -r ".result[\"$pid\"].state // empty" 2>/dev/null || true)
-    ts=$(echo "$acpd_json" | jq -r ".result[\"$pid\"].last_timestamp // 0" 2>/dev/null || echo 0)
-  fi
+  # Extract ACPD state & timestamp from pre-parsed hash map
+  st="${acpd_st["$pid"]:-}"
+  ts=${acpd_ts["$pid"]:-0}
+
   [ -z "$st" ] && st="$raw_state"
   if [ -z "$st" ]; then
     if [ -n "$detected_agent" ]; then
@@ -161,7 +193,7 @@ tmux list-panes -a -F '#{session_name}|#{window_index}|#{window_name}|#{pane_id}
 
   # Elapsed waiting age string
   age_str=""
-  age_search=""
+  diff_s=0
   if (( ts > 0 )); then
     diff_s=$(( (now_ms - ts) / 1000 ))
     if (( diff_s < 60 )); then
@@ -171,23 +203,103 @@ tmux list-panes -a -F '#{session_name}|#{window_index}|#{window_name}|#{pane_id}
     else
       age_str="$((diff_s / 3600))h$(((diff_s % 3600) / 60))m"
     fi
-    age_search="$age_str"
   fi
 
-  # Git branch and remote upstream divergence
+  # Resolve Git & PR metadata with path memoization
   branch=""
   u_ahead=0
   u_behind=0
   has_u=0
-  if [ -d "$ppath/.git" ] || git -C "$ppath" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
-    branch=$(git -C "$ppath" rev-parse --abbrev-ref HEAD 2>/dev/null || true)
-    if git -C "$ppath" rev-parse --abbrev-ref '@{u}' >/dev/null 2>&1; then
-      has_u=1
-      u_counts=$(git -C "$ppath" rev-list --left-right --count '@{u}...HEAD' 2>/dev/null || true)
-      u_behind=$(echo "$u_counts" | awk '{print $1}')
-      u_ahead=$(echo "$u_counts" | awk '{print $2}')
-      [ -z "$u_behind" ] && u_behind=0
-      [ -z "$u_ahead" ] && u_ahead=0
+  diffstat_str=""
+  pr_num=""
+  pr_ci=""
+
+  if [ -n "$ppath" ] && [ -d "$ppath" ]; then
+    if [ -z "${git_checked["$ppath"]:-}" ]; then
+      git_checked["$ppath"]=1
+      if [ -d "$ppath/.git" ] || git -C "$ppath" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+        git_is_repo["$ppath"]=1
+        br=$(git -C "$ppath" rev-parse --abbrev-ref HEAD 2>/dev/null || echo "")
+        git_branch["$ppath"]="$br"
+
+        if git -C "$ppath" rev-parse --abbrev-ref '@{u}' >/dev/null 2>&1; then
+          git_has_u["$ppath"]=1
+          u_counts=$(git -C "$ppath" rev-list --left-right --count '@{u}...HEAD' 2>/dev/null || true)
+          git_behind["$ppath"]="$(echo "$u_counts" | awk '{print $1}')"
+          git_ahead["$ppath"]="$(echo "$u_counts" | awk '{print $2}')"
+        fi
+
+        # Diffstat calculation
+        ds_str=""
+        diff_out=$(git -C "$ppath" diff --shortstat HEAD 2>/dev/null || true)
+        if [ -n "$diff_out" ]; then
+          ins=$(echo "$diff_out" | sed -nE 's/.*, ([0-9]+) insertion.*/+\1/p')
+          del=$(echo "$diff_out" | sed -nE 's/.*, ([0-9]+) deletion.*/-\1/p')
+          [ -n "$ins" ] && ds_str="$ins"
+          if [ -n "$del" ]; then
+            [ -n "$ds_str" ] && ds_str="$ds_str $del" || ds_str="$del"
+          fi
+        fi
+        dirty_files=$(git -C "$ppath" status --porcelain 2>/dev/null | wc -l)
+        if (( dirty_files > 0 )) && [ -z "$ds_str" ]; then
+          ds_str="*${dirty_files}"
+        fi
+        git_diffstat["$ppath"]="$ds_str"
+
+        # GitHub PR & CI status cache
+        if [ -n "$br" ] && [ "$br" != "main" ] && [ "$br" != "master" ] && [ "$br" != "HEAD" ] && [ "$br" != "detached" ] && command -v gh >/dev/null 2>&1; then
+          hash_key=$(printf '%s:%s' "$ppath" "$br" | md5sum | awk '{print $1}')
+          cache_file="/tmp/gh-pr-cache-${hash_key}.json"
+          now_s=$(date +%s)
+          cache_age=9999
+          if [ -f "$cache_file" ]; then
+            cache_mtime=$(stat -c %Y "$cache_file" 2>/dev/null || echo 0)
+            cache_age=$(( now_s - cache_mtime ))
+          fi
+
+          if [ "$cache_age" -gt 60 ]; then
+            touch "$cache_file" 2>/dev/null || true
+            (
+              cd "$ppath" 2>/dev/null || exit 0
+              if gh pr view --json number,title,state,statusCheckRollup > "${cache_file}.tmp" 2>/dev/null && [ -s "${cache_file}.tmp" ]; then
+                mv "${cache_file}.tmp" "$cache_file"
+              else
+                c_sha=$(git rev-parse HEAD 2>/dev/null || echo "")
+                if [ -n "$c_sha" ]; then
+                  c_state=$(gh api "repos/:owner/:repo/commits/${c_sha}/status" --jq .state 2>/dev/null || echo "none")
+                  if [ -n "$c_state" ] && [ "$c_state" != "none" ]; then
+                    echo "{\"commit_state\":\"$c_state\"}" > "$cache_file"
+                  else
+                    echo "{}" > "$cache_file"
+                  fi
+                else
+                  echo "{}" > "$cache_file"
+                fi
+                rm -f "${cache_file}.tmp"
+              fi
+            ) &
+          fi
+
+          if [ -s "$cache_file" ]; then
+            pr_tsv=$(jq -r '[.number // "", (if .statusCheckRollup == null or (.statusCheckRollup | length) == 0 then (.commit_state // "none") elif ([.statusCheckRollup[] | select(.conclusion == "FAILURE" or .conclusion == "TIMED_OUT")] | length) > 0 then "failure" elif ([.statusCheckRollup[] | select(.status == "IN_PROGRESS" or .status == "QUEUED" or .conclusion == null)] | length) > 0 then "pending" elif ([.statusCheckRollup[] | select(.conclusion == "SUCCESS")] | length) > 0 then "success" else (.commit_state // "none") end)] | @tsv' "$cache_file" 2>/dev/null || true)
+            if [ -n "$pr_tsv" ]; then
+              IFS=$'\t' read -r pr_n pr_ci <<< "$pr_tsv"
+              git_pr_num["$ppath"]="$pr_n"
+              git_pr_ci["$ppath"]="$pr_ci"
+            fi
+          fi
+        fi
+      fi
+    fi
+
+    if [ "${git_is_repo["$ppath"]:-0}" -eq 1 ]; then
+      branch="${git_branch["$ppath"]:-}"
+      has_u="${git_has_u["$ppath"]:-0}"
+      u_ahead="${git_ahead["$ppath"]:-0}"
+      u_behind="${git_behind["$ppath"]:-0}"
+      diffstat_str="${git_diffstat["$ppath"]:-}"
+      pr_num="${git_pr_num["$ppath"]:-}"
+      pr_ci="${git_pr_ci["$ppath"]:-}"
     fi
   fi
 
@@ -198,22 +310,14 @@ tmux list-panes -a -F '#{session_name}|#{window_index}|#{window_name}|#{pane_id}
     is_agent=1
   fi
 
-  # Identify agent name or extract latest prompt
+  # Identify agent label without slow pane captures
   agent_label=""
   if [ -n "$ai_title" ]; then
     agent_label="$ai_title"
   elif [ -n "$detected_agent" ]; then
-    agent_label="${detected_agent%-bin}"
+    agent_label="$detected_agent"
   elif [[ "$pcmd" =~ ^(agy|antigravity|opencode|claude|codex)$ ]]; then
     agent_label="$pcmd"
-  fi
-
-  # If agent label is generic or empty, try extracting the user prompt from the pane
-  if [ -n "$pid" ] && { [ -z "$agent_label" ] || [[ "$agent_label" =~ ^(agy|antigravity|claude|opencode|codex|agent)$ ]]; }; then
-    captured_prompt=$(tmux capture-pane -p -t "$pid" -S -40 2>/dev/null | grep -E '^([>❯] |User:|Input:)' | tail -n 1 | sed -E 's/^[>❯[:space:]]+//; s/^(User:|Input:)[[:space:]]*//' | tr -s ' ' | head -c 50)
-    if [ -n "$captured_prompt" ]; then
-      agent_label="$captured_prompt"
-    fi
   fi
 
   # Truncate agent label for list display
@@ -237,9 +341,12 @@ tmux list-panes -a -F '#{session_name}|#{window_index}|#{window_name}|#{pane_id}
   [ -z "$short_label" ] && short_label="-"
   [ -z "$age_str" ] && age_str="-"
   [ -z "$branch" ] && branch="-"
+  [ -z "$diffstat_str" ] && diffstat_str="-"
+  [ -z "$pr_num" ] && pr_num="-"
+  [ -z "$pr_ci" ] && pr_ci="-"
 
-  printf '%d\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%d\t%s\t%d\t%d\t%d\t%d\n' \
-    "$prio" "$ts" "$sess" "$idx" "$wname" "$pid" "$ppath" "$ico" "$short_label" "$age_str" "$branch" "$is_cur" "$st" "$is_agent" "$has_u" "$u_ahead" "$u_behind" \
+  printf '%d\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%d\t%s\t%d\t%d\t%d\t%d\t%s\t%s\t%s\t%d\n' \
+    "$prio" "$ts" "$sess" "$idx" "$wname" "$pid" "$ppath" "$ico" "$short_label" "$age_str" "$branch" "$is_cur" "$st" "$is_agent" "$has_u" "$u_ahead" "$u_behind" "$diffstat_str" "$pr_num" "$pr_ci" "$diff_s" \
     >> "$tmp_raw"
 done
 
@@ -248,7 +355,7 @@ declare -A sess_prio=()
 declare -A sess_ts=()
 declare -A session_has_agent=()
 
-while IFS=$'\t' read -r prio ts sess idx wname pid ppath ico agent_label age_str branch is_cur st is_agent rest; do
+while IFS=$'\t' read -r prio ts sess idx wname pid ppath ico agent_label age_str branch is_cur st is_agent has_u u_ahead u_behind diffstat_str pr_num pr_ci diff_s; do
   if [ "$is_agent" = "1" ]; then
     session_has_agent["$sess"]=1
   fi
@@ -264,7 +371,7 @@ declare -A seen_windows=()
 agent_count=$(awk -F'\t' '$14 == 1 { c++ } END { print c+0 }' "$tmp_raw")
 
 if [ "$filter_agents" -eq 1 ] && [ "$agent_count" -eq 0 ]; then
-  printf "· (no active AI agents)\t0\t-\t%s\t-\t-\t-\t-\t-\t-\t-\t \033[2m(no AI agents running — press Tab for Fleet view)\033[0m\n" "${cur_session}"
+  printf "· (no active AI agents)\t0\t-\t%s\t-\t-\t-\t-\t-\t-\t-\t \033[2m(no AI agents running — press a for Fleet view)\033[0m\n" "${cur_session}"
 else
   for sess in $(for s in "${!sess_prio[@]}"; do printf "%d\t%s\t%s\n" "${sess_prio[$s]}" "${sess_ts[$s]}" "$s"; done | sort -t$'\t' -k1,1n -k2,2n -k3,3 | cut -f3); do
     if [ "$filter_agents" -eq 1 ] && [ -z "${session_has_agent["$sess"]:-}" ]; then
@@ -273,7 +380,7 @@ else
 
     header_printed=0
 
-    while IFS=$'\t' read -r prio ts s idx wname pid ppath ico agent_label age_str branch is_cur st is_agent has_u u_ahead u_behind; do
+    while IFS=$'\t' read -r prio ts s idx wname pid ppath ico agent_label age_str branch is_cur st is_agent has_u u_ahead u_behind diffstat_str pr_num pr_ci diff_s; do
       [ "$s" != "$sess" ] && continue
 
       if [ "$filter_agents" -eq 1 ] && [ "$is_agent" -ne 1 ]; then
@@ -295,6 +402,9 @@ else
       [ "$agent_label" = "-" ] && agent_label=""
       [ "$age_str" = "-" ] && age_str=""
       [ "$branch" = "-" ] && branch=""
+      [ "$diffstat_str" = "-" ] && diffstat_str=""
+      [ "$pr_num" = "-" ] && pr_num=""
+      [ "$pr_ci" = "-" ] && pr_ci=""
 
       # State icon formatted with color
       case "$st" in
@@ -349,6 +459,41 @@ else
         fi
       fi
 
+      # Diffstat badge
+      diff_badge=""
+      if [ -n "$diffstat_str" ]; then
+        for part in $diffstat_str; do
+          if [[ "$part" =~ ^\+ ]]; then
+            diff_badge+=" ${C_DIFF_INS}${part}${R}"
+          elif [[ "$part" =~ ^\- ]]; then
+            diff_badge+=" ${C_DIFF_DEL}${part}${R}"
+          else
+            diff_badge+=" ${C_DIFF_DIRTY}${part}${R}"
+          fi
+        done
+      fi
+
+      # PR and CI badge
+      pr_badge=""
+      pr_search=""
+      if [ -n "$pr_num" ]; then
+        ci_ico=""
+        case "$pr_ci" in
+          success) ci_ico="${C_CYAN}󰄬${R}" ;;
+          failure) ci_ico="${C_RED}󰅚${R}" ;;
+          pending) ci_ico="${C_YELLOW}@SPIN@${R}" ;;
+        esac
+        pr_badge=" ${C_PR}󰏫#${pr_num}${R}${ci_ico:+ ${ci_ico}}"
+        pr_search="PR:#${pr_num} ci:${pr_ci}"
+      elif [ -n "$pr_ci" ] && [ "$pr_ci" != "none" ]; then
+        case "$pr_ci" in
+          success) pr_badge=" ${C_CYAN}󰄬 CI${R}" ;;
+          failure) pr_badge=" ${C_RED}󰅚 CI${R}" ;;
+          pending) pr_badge=" ${C_YELLOW}@SPIN@ CI${R}" ;;
+        esac
+        pr_search="ci:${pr_ci}"
+      fi
+
       # Age tag
       age_tag=""
       if [ -n "$age_str" ]; then
@@ -361,8 +506,8 @@ else
         agent_tag=" ${c_ico}[${agent_label}]${R}"
       fi
 
-      display_line=" ${ai_ico}${idx_col}${c_wname}${wname}${R}${agent_tag}${age_tag}${branch_tag}   "
-      search_title="${sess} ${idx} ${wname} ${agent_label} ${branch} ${st} ${age_str} ${sync_search}"
+      display_line=" ${ai_ico}${idx_col}${c_wname}${wname}${R}${agent_tag}${age_tag}${branch_tag}${diff_badge}${pr_badge}   "
+      search_title="${sess} ${idx} ${wname} ${agent_label} ${branch} ${st} ${age_str} ${sync_search} ${pr_search} ${diffstat_str}"
 
       printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%b\n' \
         "$search_title" "$idx" "$wname" "$sess" "$pid" "$ppath" \

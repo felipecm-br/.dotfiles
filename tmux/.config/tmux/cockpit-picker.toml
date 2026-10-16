@@ -67,7 +67,7 @@ prompt = " "
 show = true
 
 [footer]
-content = " {cyan,bold:[Enter]} {darkgray:Jump}  •  {green,bold:[i]} {darkgray:Live}  •  {magenta,bold:[I]} {darkgray:Prompt}  •  {yellow,bold:[Tab]} {darkgray:AWT}  •  {yellow,bold:[a]} {darkgray:Agents}  •  {cyan,bold:[v]} {darkgray:Diff}  •  {red,bold:[d]} {darkgray:Delete}  •  {yellow,bold:[w]} {darkgray:New WT}  •  {green,bold:[t]} {darkgray:New Win}  •  {yellow,bold:[s]} {darkgray:Sessions}  •  {magenta,bold:[g]} {darkgray:Git}  •  {magenta,bold:[p]} {darkgray:Patch}  •  {blue,bold:[?]} {darkgray:Help}  •  {blue,bold:[Esc]} {darkgray:Exit}"
+content = " {cyan,bold:[Enter]} {darkgray:Jump}  •  {green,bold:[y/n]} {darkgray:Ack}  •  {cyan,bold:[v]} {darkgray:Diff}  •  {yellow,bold:[Tab]} {darkgray:AWT}  •  {yellow,bold:[a]} {darkgray:Agents}  •  {blue,bold:[?]} {darkgray:Help}  •  {blue,bold:[Esc]} {darkgray:Exit}"
 row_connection = "Full"
 match_indent = false
 separator = "light"
@@ -84,49 +84,53 @@ hints = false
 "shift-tab"     = ["Print(__SWITCH_AWT__{=})", "Quit"]
 "backtab"       = ["Print(__SWITCH_AWT__{=})", "Quit"]
 "shift-backtab" = ["Print(__SWITCH_AWT__{=})", "Quit"]
+"backspace"     = ["Print(__JUMP_LAST_AGENT__)", "Quit"]
+"ctrl-h"        = ["Print(__JUMP_LAST_AGENT__)", "Quit"]
 "a"             = "@reloadnext"
 "A"             = "@reloadprev"
 "ctrl-a"        = "@reloadnext"
+"o"             = ["Print(__OPEN_PR__{=})", "Quit"]
+"O"             = ["Print(__OPEN_PR_CHECKS__{=})", "Quit"]
 "/"             = "FocusFilter"
 "s"             = ["Print(__SWITCH_SESSION__)", "Quit"]
 "S"             = ["Print(__SHIP_WORKTREE__{=})", "Quit"]
 "w"             = ["Print(__NEW_WORKTREE__{=})", "Quit"]
 "W"             = ["Print(__SWEEP_WORKTREES__{=})", "Quit"]
 "R"             = ["Print(__REAP_AGENTS__{=})", "Quit"]
-"t"      = ["Print(__CREATE_WINDOW__{=})", "Quit"]
-"T"      = ["Print(__CREATE_WINDOW__{=})", "Quit"]
-"c"      = ["Print(__NEW_WORKTREE__{=})", "Quit"]
-"C"      = ["Print(__NEW_WORKTREE__{=})", "Quit"]
-"g"      = ["Print(__LAZYGIT__{=})", "Quit"]
-"gg"     = ["Print(__LAZYGIT__{=})", "Quit"]
-"G"      = ["Print(__LAZYGIT__{=})", "Quit"]
-"ctrl-g" = ["Print(__LAZYGIT__{=})", "Quit"]
-"p"      = ["Print(__PATCH_MODE__{=})", "Quit"]
-"P"      = ["Print(__PATCH_MODE__{=})", "Quit"]
-"ctrl-p" = ["Print(__PATCH_MODE__{=})", "Quit"]
-"?"         = "SwitchPreview(1)"
-"shift-?"   = "SwitchPreview(1)"
-"F1"        = "SwitchPreview(1)"
-"i"      = "LiveInput(tmux send-keys -t '{=pid}' {=keys})"
-"I"      = ["PromptInput(tmux send-keys -t '{=pid}' {input} Enter)", "Reload($HOME/.config/tmux/cockpit-picker-items.sh)"]
-"y"      = ["ExecuteAsync(tmux send-keys -t '{=pid}' 'y' Enter)", "Reload($HOME/.config/tmux/cockpit-picker-items.sh)"]
-"Y"      = ["ExecuteAsync(tmux send-keys -t '{=pid}' 'y' Enter)", "Reload($HOME/.config/tmux/cockpit-picker-items.sh)"]
-"n"      = ["ExecuteAsync(tmux send-keys -t '{=pid}' 'n' Enter)", "Reload($HOME/.config/tmux/cockpit-picker-items.sh)"]
-"N"      = ["ExecuteAsync(tmux send-keys -t '{=pid}' 'n' Enter)", "Reload($HOME/.config/tmux/cockpit-picker-items.sh)"]
-"v"      = "SwitchPreview(2)"
-"V"      = "SwitchPreview(2)"
-"d"      = ["ExecuteAsync(printf '%s\n' '{=}' | $HOME/.config/tmux/window-picker-delete.sh; sleep 0.05)", "Reload($HOME/.config/tmux/cockpit-picker-items.sh)"]
-"D"      = ["ExecuteAsync(printf '%s\n' '{=}' | $HOME/.config/tmux/window-picker-delete.sh; sleep 0.05)", "Reload($HOME/.config/tmux/cockpit-picker-items.sh)"]
-"ctrl-d" = ["ExecuteAsync(printf '%s\n' '{=}' | $HOME/.config/tmux/window-picker-delete.sh; sleep 0.05)", "Reload($HOME/.config/tmux/cockpit-picker-items.sh)"]
-"x"      = ["ExecuteAsync(printf '%s\n' '{=}' | $HOME/.config/tmux/window-picker-delete.sh; sleep 0.05)", "Reload($HOME/.config/tmux/cockpit-picker-items.sh)"]
-"X"      = ["ExecuteAsync(printf '%s\n' '{=}' | $HOME/.config/tmux/window-picker-delete.sh; sleep 0.05)", "Reload($HOME/.config/tmux/cockpit-picker-items.sh)"]
-"J"      = "PreviewDown(5)"
-"K"      = "PreviewUp(5)"
-"+"      = "ExpandPreview(5)"
-"="      = "ExpandPreview(5)"
-"-"      = "ShrinkPreview(5)"
-"ctrl-r" = "Reload($HOME/.config/tmux/cockpit-picker-items.sh)"
-","      = []
+"t"             = ["Print(__CREATE_WINDOW__{=})", "Quit"]
+"T"             = ["Print(__CREATE_WINDOW__{=})", "Quit"]
+"c"             = ["Print(__NEW_WORKTREE__{=})", "Quit"]
+"C"             = ["Print(__NEW_WORKTREE__{=})", "Quit"]
+"g"             = ["Print(__LAZYGIT__{=})", "Quit"]
+"gg"            = ["Print(__LAZYGIT__{=})", "Quit"]
+"G"             = ["Print(__LAZYGIT__{=})", "Quit"]
+"ctrl-g"        = ["Print(__LAZYGIT__{=})", "Quit"]
+"p"             = ["Print(__PATCH_MODE__{=})", "Quit"]
+"P"             = ["Print(__PATCH_MODE__{=})", "Quit"]
+"ctrl-p"        = ["Print(__PATCH_MODE__{=})", "Quit"]
+"?"             = "SwitchPreview(1)"
+"shift-?"       = "SwitchPreview(1)"
+"F1"            = "SwitchPreview(1)"
+"i"             = "LiveInput(tmux send-keys -t '{=pid}' {=keys})"
+"I"             = ["PromptInput($HOME/.config/tmux/agent-action.sh prompt '{=state}' '{=pid}' {input})", "Reload($HOME/.config/tmux/cockpit-picker-items.sh)"]
+"y"             = ["ExecuteAsync($HOME/.config/tmux/agent-action.sh approve '{=state}' '{=pid}')", "Reload($HOME/.config/tmux/cockpit-picker-items.sh)"]
+"Y"             = ["ExecuteAsync($HOME/.config/tmux/agent-action.sh approve '{=state}' '{=pid}')", "Reload($HOME/.config/tmux/cockpit-picker-items.sh)"]
+"n"             = ["ExecuteAsync($HOME/.config/tmux/agent-action.sh deny '{=state}' '{=pid}')", "Reload($HOME/.config/tmux/cockpit-picker-items.sh)"]
+"N"             = ["ExecuteAsync($HOME/.config/tmux/agent-action.sh deny '{=state}' '{=pid}')", "Reload($HOME/.config/tmux/cockpit-picker-items.sh)"]
+"v"             = "SwitchPreview(2)"
+"V"             = "SwitchPreview(2)"
+"d"             = ["ExecuteAsync(printf '%s\n' '{=}' | $HOME/.config/tmux/window-picker-delete.sh; sleep 0.05)", "Reload($HOME/.config/tmux/cockpit-picker-items.sh)"]
+"D"             = ["ExecuteAsync(printf '%s\n' '{=}' | $HOME/.config/tmux/window-picker-delete.sh; sleep 0.05)", "Reload($HOME/.config/tmux/cockpit-picker-items.sh)"]
+"ctrl-d"        = ["ExecuteAsync(printf '%s\n' '{=}' | $HOME/.config/tmux/window-picker-delete.sh; sleep 0.05)", "Reload($HOME/.config/tmux/cockpit-picker-items.sh)"]
+"x"             = ["ExecuteAsync(printf '%s\n' '{=}' | $HOME/.config/tmux/window-picker-delete.sh; sleep 0.05)", "Reload($HOME/.config/tmux/cockpit-picker-items.sh)"]
+"X"             = ["ExecuteAsync(printf '%s\n' '{=}' | $HOME/.config/tmux/window-picker-delete.sh; sleep 0.05)", "Reload($HOME/.config/tmux/cockpit-picker-items.sh)"]
+"J"             = "PreviewDown(5)"
+"K"             = "PreviewUp(5)"
+"+"             = "ExpandPreview(5)"
+"="             = "ExpandPreview(5)"
+"-"             = "ShrinkPreview(5)"
+"ctrl-r"        = "Reload($HOME/.config/tmux/cockpit-picker-items.sh)"
+","             = []
 
 [ui.border]
 sides = ""
@@ -177,19 +181,23 @@ Start    = [
 "shift-tab"     = ["Print(__SWITCH_AWT__{=})", "Quit"]
 "backtab"       = ["Print(__SWITCH_AWT__{=})", "Quit"]
 "shift-backtab" = ["Print(__SWITCH_AWT__{=})", "Quit"]
+"backspace"     = ["Print(__JUMP_LAST_AGENT__)", "Quit"]
+"ctrl-h"        = ["Print(__JUMP_LAST_AGENT__)", "Quit"]
 "a"             = "@reloadnext"
 "A"             = "@reloadprev"
 "ctrl-a"        = "@reloadnext"
-"ctrl-s" = ["Print(__SWITCH_SESSION__)", "Quit"]
-"ctrl-g" = ["Print(__LAZYGIT__{=})", "Quit"]
-"ctrl-p" = ["Print(__PATCH_MODE__{=})", "Quit"]
-"ctrl-t" = ["Print(__CREATE_WINDOW__{=})", "Quit"]
-"ctrl-v" = "SwitchPreview(2)"
-"ctrl-d" = ["ExecuteAsync(printf '%s\n' '{=}' | $HOME/.config/tmux/window-picker-delete.sh; sleep 0.05)", "Reload($HOME/.config/tmux/cockpit-picker-items.sh)"]
-"ctrl-x" = ["ExecuteAsync(printf '%s\n' '{=}' | $HOME/.config/tmux/window-picker-delete.sh; sleep 0.05)", "Reload($HOME/.config/tmux/cockpit-picker-items.sh)"]
-"ctrl-r" = "Reload($HOME/.config/tmux/cockpit-picker-items.sh)"
-"?"         = "SwitchPreview(1)"
-"shift-?"   = "SwitchPreview(1)"
-"F1"        = "SwitchPreview(1)"
-","      = []
-"@reload"= "Reload($HOME/.config/tmux/cockpit-picker-items.sh)"
+"o"             = ["Print(__OPEN_PR__{=})", "Quit"]
+"O"             = ["Print(__OPEN_PR_CHECKS__{=})", "Quit"]
+"ctrl-s"        = ["Print(__SWITCH_SESSION__)", "Quit"]
+"ctrl-g"        = ["Print(__LAZYGIT__{=})", "Quit"]
+"ctrl-p"        = ["Print(__PATCH_MODE__{=})", "Quit"]
+"ctrl-t"        = ["Print(__CREATE_WINDOW__{=})", "Quit"]
+"ctrl-v"        = "SwitchPreview(2)"
+"ctrl-d"        = ["ExecuteAsync(printf '%s\n' '{=}' | $HOME/.config/tmux/window-picker-delete.sh; sleep 0.05)", "Reload($HOME/.config/tmux/cockpit-picker-items.sh)"]
+"ctrl-x"        = ["ExecuteAsync(printf '%s\n' '{=}' | $HOME/.config/tmux/window-picker-delete.sh; sleep 0.05)", "Reload($HOME/.config/tmux/cockpit-picker-items.sh)"]
+"ctrl-r"        = "Reload($HOME/.config/tmux/cockpit-picker-items.sh)"
+"?"             = "SwitchPreview(1)"
+"shift-?"       = "SwitchPreview(1)"
+"F1"            = "SwitchPreview(1)"
+","             = []
+"@reload"       = "Reload($HOME/.config/tmux/cockpit-picker-items.sh)"

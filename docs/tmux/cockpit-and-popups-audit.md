@@ -204,16 +204,16 @@ flowchart TD
 
 ### Action Items Checklist
 
-- [ ] **Step 1: Guard Approval Keystrokes (`y`/`n`)**
-  - Create a helper script checking if `{=state}` is `permission` or `question` before issuing `tmux send-keys`.
-- [ ] **Step 2: Sanitize Prompt Keystroke Delivery (`I`)**
-  - Ensure `send-keys -l --` is utilized to deliver exact text without command expansion.
-- [ ] **Step 3: Refactor `cockpit-picker-items.sh` for Batch Execution**
-  - Replace per-pane linear subprocess loops with bulk extraction, reducing 21-pane latency from >1,000ms to <100ms.
-- [ ] **Step 4: Synchronize Documentation and Help HUDs**
+- [x] **Step 1: Guard Approval Keystrokes (`y`/`n`)**
+  - Create a helper script checking if `{=state}` is `permission` or `question` before issuing `tmux send-keys` (`agent-action.sh approve`).
+- [x] **Step 2: Sanitize Prompt Keystroke Delivery (`I`)**
+  - Ensure `send-keys -l --` is utilized to deliver exact text without command expansion (`agent-action.sh prompt`).
+- [x] **Step 3: Refactor `cockpit-picker-items.sh` for Batch Execution**
+  - Replace per-pane linear subprocess loops with bulk extraction, reducing 21-pane latency from >1,000ms to <100ms (measured ~89ms with path memoization, single-pass ACPD TSV & ps scan).
+- [x] **Step 4: Synchronize Documentation and Help HUDs**
   - Correct `Tab` key documentation in `cockpit-picker-help.sh` and `workflow-keybindings-matrix.md`.
   - Harmonize badge and dimension specifications in `popups-ergonomics-and-golden-ratio.md`.
-- [ ] **Step 5: Deduplicate Helper Logic in `cockpit-picker.sh`**
+- [x] **Step 5: Deduplicate Helper Logic in `cockpit-picker.sh`**
   - Consolidate worktree and session path discovery into a reusable `resolve_target_path()` function.
 - [ ] **Step 6: Build Cockpit Test Suite**
   - Implement automated test scenarios on an isolated Tmux server socket (`tmux -S`) verifying list generation, filter flags, and return codes.

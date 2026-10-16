@@ -286,6 +286,9 @@ chime-at-breakpoint {{sound_file}}
 # Open AI Fleet & Window Cockpit HUD in Tmux (85% × 75%)
 cockpit
 
+# Execute guarded agent prompt action (approve, deny, prompt)
+agent-action {{action}} {{state}} {{pid}}
+
 # Open Lazygitrs interactive Git TUI
 lazygitrs
 
