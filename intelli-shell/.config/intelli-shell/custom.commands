@@ -304,6 +304,9 @@ cockpit
 # Execute guarded agent prompt action (approve, deny, prompt)
 agent-action {{action}} {{state}} {{pid}}
 
+# Dispatch pending Lazygitrs AI review comments to target agent
+cockpit-review-notes send {{path}} {{session}} {{idx}} {{pane_id}}
+
 # Open Lazygitrs interactive Git TUI
 lazygitrs
 

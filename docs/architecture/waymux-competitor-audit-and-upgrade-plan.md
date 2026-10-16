@@ -519,6 +519,29 @@ echo "PASS: Test 6"
 
 ---
 
+## 🚀 6. High-ROI Ecosystem Enhancements (Completed)
+
+### 📦 Item 9: Multi-Pane Urgency Aggregation in `acpd::TmuxAdapter`
+- **Location:** `~/dev/github/acpd/src/adapters.rs`
+- **Mechanism:** Maintains internal `window_panes: Arc<Mutex<HashMap<String, HashMap<String, AgentState>>>>` mapping. Each pane's specific state is tracked via `@ai_agent_state_raw` pane options (`set-option -p`), while the window-level state is aggregated to the maximum urgency score across all active panes in that window:
+  $$\text{Urgency: } \text{Permission (6)} > \text{AwaitingInput (5)} > \text{Stalled (4)} > \text{Error (3)} > \text{Working (2)} > \text{Idle (1)}$$
+- **Guarantee:** A background task finishing with `Idle` in Pane B can never clobber an active `Permission` or `AwaitingInput` alert in Pane A within the same Tmux window.
+
+### 📦 Item 10: Lazygitrs $\leftrightarrow$ Cockpit Review Bridge
+- **Location:**
+  - `tmux/.config/tmux/cockpit-review-notes.sh`
+  - `tmux/.config/tmux/cockpit-picker-diff.sh`
+  - `tmux/.config/tmux/cockpit-picker-preview.sh`
+  - `tmux/.config/tmux/cockpit-picker.toml`
+  - `~/dev/github/lazygitrs/fecavmi/src/gui/mod.rs`
+- **Workflow:**
+  1. In `lazygitrs`: Creating review comments on diff lines stores structured entries in `<git_dir>/info/lines.json`. Pressing `S` dispatches the selected note, while `A` or `R` (or `S` when no note is selected) consolidates all new review notes into a formatted Markdown prompt and dispatches them directly to the AI session.
+  2. In Cockpit HUD (`Prefix + Space`):
+     - `cockpit-picker-diff.sh` and `cockpit-picker-preview.sh` dynamically detect and render pending review notes from `<git_dir>/info/lines.json`.
+     - Pressing `r` executes `cockpit-review-notes.sh send`, atomically pasting the consolidated review prompt into the active agent pane and updating the notes' status to `Sent`.
+
+---
+
 ## 🔗 Related Documentation
 - [`docs/architecture/terminal-ergonomics-and-ux-manifesto.md`](terminal-ergonomics-and-ux-manifesto.md)
 - [`docs/architecture/workflow-keybindings-matrix.md`](workflow-keybindings-matrix.md)

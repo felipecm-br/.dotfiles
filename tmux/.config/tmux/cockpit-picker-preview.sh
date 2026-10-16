@@ -297,6 +297,9 @@ if [ "$is_git" -eq 1 ]; then
 fi
 printf "${card_border}╰%s╯${R}\n" "${DASHES:0:$(( W - 2 ))}"
 
+# Render Lazygitrs AI Review Notes Section (if any pending)
+"$HOME/.config/tmux/cockpit-review-notes.sh" list "$ppath" 2>/dev/null || true
+
 # If there are modified files, show a compact preview
 if [ -n "$churn_files" ]; then
   printf "${DIM}%s${R}\n" "$churn_files"

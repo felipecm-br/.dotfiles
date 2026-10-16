@@ -67,7 +67,7 @@ prompt = " "
 show = true
 
 [footer]
-content = " {cyan,bold:Enter} {darkgray:Jump} {darkgray:│} {cyan,bold:y/n} {darkgray:Ack} {darkgray:│} {cyan,bold:i} {darkgray:Input} {darkgray:│} {cyan,bold:v} {darkgray:Diff} {darkgray:│} {cyan,bold:g} {darkgray:Git} {darkgray:│} {cyan,bold:a} {darkgray:Agents} {darkgray:│} {cyan,bold:Tab} {darkgray:Worktrees} {darkgray:│} {cyan,bold:?} {darkgray:Help} {darkgray:│} {cyan,bold:Esc} {darkgray:Exit}"
+content = " {cyan,bold:Enter} {darkgray:Jump} {darkgray:│} {cyan,bold:y/n} {darkgray:Ack} {darkgray:│} {cyan,bold:r} {darkgray:Review} {darkgray:│} {cyan,bold:i} {darkgray:Input} {darkgray:│} {cyan,bold:v} {darkgray:Diff} {darkgray:│} {cyan,bold:g} {darkgray:Git} {darkgray:│} {cyan,bold:a} {darkgray:Agents} {darkgray:│} {cyan,bold:Tab} {darkgray:Worktrees} {darkgray:│} {cyan,bold:?} {darkgray:Help} {darkgray:│} {cyan,bold:Esc} {darkgray:Exit}"
 row_connection = "Full"
 match_indent = false
 separator = "light"
@@ -94,6 +94,7 @@ hints = false
 "/"             = "FocusFilter"
 "s"             = ["Print(__SWITCH_SESSION__)", "Quit"]
 "S"             = ["Print(__SHIP_WORKTREE__{=})", "Quit"]
+"r"             = ["Execute($HOME/.config/tmux/cockpit-review-notes.sh send \"{=path}\" \"{=session}\" \"{=idx}\" \"{=pid}\")", "Reload($HOME/.config/tmux/cockpit-picker-items.sh)"]
 "w"             = ["Print(__NEW_WORKTREE__{=})", "Quit"]
 "W"             = ["Print(__SWEEP_WORKTREES__{=})", "Quit"]
 "R"             = ["Print(__REAP_AGENTS__{=})", "Quit"]

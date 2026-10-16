@@ -231,6 +231,9 @@ fi
 printf "${card_border}╰%s╯${R}\n" "${DASHES:0:$(( W - 2 ))}"
 printf "\n"
 
+# Render Lazygitrs AI Review Notes Section (if any pending)
+"$HOME/.config/tmux/cockpit-review-notes.sh" list "$ppath" 2>/dev/null || true
+
 # Render Untracked Files Section
 if [ -n "$untracked_files" ]; then
   printf "  %b󰄱 Untracked Files (%d):%b\n" "$C_YELLOW$BOLD" "$untracked_count" "$R"

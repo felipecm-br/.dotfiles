@@ -43,6 +43,7 @@ printf '    %b[W]%b      Sweep Worktrees   Batch-prune merged worktrees\n\n' "$C
 
 printf '  %b󱚥 AI Fleet & Agent Triage%b\n' "$C_MAGENTA$C_BOLD" "$C_RESET"
 printf '    %b[y / n]%b  Approve / Deny    Guarded prompt reply (permission/question only)\n' "$C_YELLOW$C_BOLD" "$C_RESET"
+printf '    %b[r]%b      Review Notes      Dispatch Lazygitrs review notes to agent\n' "$C_CYAN$C_BOLD" "$C_RESET"
 printf '    %b[i]%b      Live Passthrough  Stream keystrokes to agent ([Esc] exit)\n' "$C_CYAN$C_BOLD" "$C_RESET"
 printf '    %b[I]%b      Prompt Agent      Send sanitized inline prompt to agent\n' "$C_MAGENTA$C_BOLD" "$C_RESET"
 printf '    %b[a]%b      Toggle Fleet      Fleet View (all windows) ↔ Agent Triage\n' "$C_YELLOW$C_BOLD" "$C_RESET"
