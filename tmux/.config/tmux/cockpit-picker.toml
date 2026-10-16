@@ -140,6 +140,7 @@ debounce_ms = 20
 delay_clear = true
 
 [preview]
+show = true
 wrap = false
 poll_ms = 250
 
