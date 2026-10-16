@@ -20,7 +20,7 @@ emit_tmux() {
 󱂩  Ctrl + Shift + 0 .. 9	Move Window to Target Slot (Shift Reorder)	tmux	tmux-move-win	~/.config/tmux/move-window-to.sh 1
 󰊢  Ctrl + Shift + G	AWT Autonomous Worktree Popup	tmux	tmux-awt	~/.config/tmux/awt-popup.sh
 󰊢  Ctrl + G	Lazygitrs Floating Popup & Dual-Diff	tmux	tmux-lazygitrs	~/.config/tmux/lazygitrs-popup.sh
-󰙀  Ctrl + Shift + T	Undo Close Tab (VSCode Reopen Stack)	tmux	tmux-reopen	~/.config/tmux/reopen-window.sh
+󰙀  Ctrl + Shift + T	Undo Close Tab (Exact Index & AI Resume)	tmux	tmux-reopen	~/.config/tmux/reopen-window.sh
 󰒭  Ctrl + Shift + I	AI Attention Trampoline Direct Jump	tmux	tmux-triage	~/.config/tmux/ai-agent-bell-triage.sh
 󰘳  Prefix + i	AI Agent Bell / Alert HUD	tmux	tmux-bell	~/.config/tmux/ai-agent-bell-popup.sh
 󰒭  Prefix + I	AI Attention Trampoline Direct Jump	tmux	tmux-triage	~/.config/tmux/ai-agent-bell-triage.sh
@@ -28,7 +28,7 @@ emit_tmux() {
 󰏫  Prefix + N	Neovim Floating Scratchpad (90%x90%)	tmux	tmux-scratchpad	~/.config/tmux/nvim-scratchpad.sh
 󰄧  Prefix + E	Scrollback & AI Mermaid Modal (90%x88%)	tmux	tmux-view-scrollback	~/.config/tmux/scrollback-view.sh
 󰏌  Prefix + t	Create New Window in Current Path	tmux	tmux-new-win	tmux new-window -c '#{pane_current_path}'
-󰙀  Prefix + T / u	Reopen Last Closed Window / Tab	tmux	tmux-reopen	~/.config/tmux/reopen-window.sh
+󰙀  Prefix + T / u	Reopen Last Closed Tab (Exact Index & AI Resume)	tmux	tmux-reopen	~/.config/tmux/reopen-window.sh
 󰅖  Prefix + w / x	Close Window / Pane (AI Guarded)	tmux	tmux-close	~/.config/tmux/close-window.sh
 󰹑  Prefix + m / z	Maximize / Zoom Active Pane	tmux	tmux-zoom	tmux resize-pane -Z
 󱁐  Prefix + C-h/j/k/l	Resize Pane (Asymmetric 10%: 20c/5l)	tmux	tmux-resize	tmux resize-pane -L 20

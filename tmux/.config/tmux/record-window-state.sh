@@ -9,20 +9,29 @@ ACTIVE_FILE="$STATE_DIR/last-active-window.json"
 
 inspect_pane() {
   local target="${1:-}"
-  local pane_pid pane_path pane_session pane_win_name win_layout
+  local pane_pid pane_path pane_session pane_win_name win_layout pane_win_idx
+  local agent_title agent_raw_state pane_cmd
 
   if [ -n "$target" ]; then
     pane_pid=$(tmux display-message -p -t "$target" '#{pane_pid}' 2>/dev/null || true)
     pane_path=$(tmux display-message -p -t "$target" '#{pane_current_path}' 2>/dev/null || true)
     pane_session=$(tmux display-message -p -t "$target" '#{session_name}' 2>/dev/null || true)
     pane_win_name=$(tmux display-message -p -t "$target" '#{window_name}' 2>/dev/null || true)
+    pane_win_idx=$(tmux display-message -p -t "$target" '#{window_index}' 2>/dev/null || true)
     win_layout=$(tmux display-message -p -t "$target" '#{window_layout}' 2>/dev/null || true)
+    pane_cmd=$(tmux display-message -p -t "$target" '#{pane_current_command}' 2>/dev/null || true)
+    agent_title=$(tmux display-message -p -t "$target" '#{?@ai_agent_title,#{@ai_agent_title},#{@w:@ai_agent_title}}' 2>/dev/null || true)
+    agent_raw_state=$(tmux display-message -p -t "$target" '#{?@ai_agent_state_raw,#{@ai_agent_state_raw},#{@w:@ai_agent_state_raw}}' 2>/dev/null || true)
   else
     pane_pid=$(tmux display-message -p '#{pane_pid}' 2>/dev/null || true)
     pane_path=$(tmux display-message -p '#{pane_current_path}' 2>/dev/null || true)
     pane_session=$(tmux display-message -p '#{session_name}' 2>/dev/null || true)
     pane_win_name=$(tmux display-message -p '#{window_name}' 2>/dev/null || true)
+    pane_win_idx=$(tmux display-message -p '#{window_index}' 2>/dev/null || true)
     win_layout=$(tmux display-message -p '#{window_layout}' 2>/dev/null || true)
+    pane_cmd=$(tmux display-message -p '#{pane_current_command}' 2>/dev/null || true)
+    agent_title=$(tmux display-message -p '#{?@ai_agent_title,#{@ai_agent_title},#{@w:@ai_agent_title}}' 2>/dev/null || true)
+    agent_raw_state=$(tmux display-message -p '#{?@ai_agent_state_raw,#{@ai_agent_state_raw},#{@w:@ai_agent_state_raw}}' 2>/dev/null || true)
   fi
 
   # Ignore popup sessions
@@ -91,7 +100,44 @@ inspect_pane() {
       break
     fi
 
-    if [[ "$pname" =~ ^(lazygit|lazygitrs|opencode|yazi|btop|htop|cargo|git|python|python3|node)$ ]]; then
+    # AI Agents (smart resume & continuation)
+    if [[ "$pname" =~ ^(opencode|agy|agy-bin|antigravity|claude|codex|gemini|aider)$ ]]; then
+      local resume_cmd="$raw_cmdline"
+      [ -z "$resume_cmd" ] && resume_cmd="$pname"
+
+      # Normalize executable name to canonical CLI
+      resume_cmd=$(printf '%s' "$resume_cmd" | sed -E 's|^([^[:space:]]*/)+(agy-bin|agy)|agy|; s|^([^[:space:]]*/)+opencode|opencode|; s|^([^[:space:]]*/)+claude|claude|; s|^([^[:space:]]*/)+codex|codex|')
+
+      case "$pname" in
+        opencode)
+          if [[ ! "$resume_cmd" =~ (^|[[:space:]])(-c|--continue|-s|--session)($|[[:space:]]) ]]; then
+            resume_cmd="${resume_cmd} --continue"
+          fi
+          ;;
+        agy|agy-bin|antigravity)
+          if [[ ! "$resume_cmd" =~ (^|[[:space:]])(-c|--continue|--conversation)($|[[:space:]]) ]]; then
+            resume_cmd="${resume_cmd} --continue"
+          fi
+          ;;
+        claude)
+          if [[ ! "$resume_cmd" =~ (^|[[:space:]])(-c|--continue|-r|--resume)($|[[:space:]]) ]]; then
+            resume_cmd="${resume_cmd} --continue"
+          fi
+          ;;
+        codex)
+          if [[ ! "$resume_cmd" =~ (^|[[:space:]])(resume)($|[[:space:]]) ]]; then
+            resume_cmd="${resume_cmd} resume"
+          fi
+          ;;
+      esac
+
+      found_cmd="$resume_cmd"
+      [ -n "$cwd" ] && found_cwd="$cwd"
+      break
+    fi
+
+    # CLI tools and runtimes
+    if [[ "$pname" =~ ^(lazygit|lazygitrs|yazi|btop|htop|cargo|git|python|python3|node)$ ]]; then
       found_cmd="$raw_cmdline"
       [ -z "$found_cmd" ] && found_cmd="$pname"
       [ -n "$cwd" ] && found_cwd="$cwd"
@@ -99,27 +145,47 @@ inspect_pane() {
     fi
   done
 
+  # Fallback if found_cmd is empty but pane_cmd was an AI agent
+  if [ -z "$found_cmd" ] && [ -n "${pane_cmd:-}" ]; then
+    case "$pane_cmd" in
+      opencode) found_cmd="opencode --continue" ;;
+      agy|agy-bin|antigravity) found_cmd="agy --continue" ;;
+      claude) found_cmd="claude --continue" ;;
+      codex) found_cmd="codex resume" ;;
+    esac
+  fi
+
   [ -n "$found_cwd" ] && pane_path="$found_cwd"
   [ -z "$pane_path" ] && pane_path="$HOME"
 
   jq -n \
     --arg session "$pane_session" \
     --arg name "$pane_win_name" \
+    --arg index "${pane_win_idx:-0}" \
     --arg path "$pane_path" \
     --arg cmd "$found_cmd" \
     --arg file "$found_file" \
     --arg layout "$win_layout" \
+    --arg agent_title "$agent_title" \
+    --arg agent_state "$agent_raw_state" \
     --arg time "$(date +%s)" \
-    '{session: $session, name: $name, path: $path, cmd: $cmd, file: $file, layout: $layout, time: ($time | tonumber)}'
+    '{session: $session, name: $name, index: ($index | tonumber), path: $path, cmd: $cmd, file: $file, layout: $layout, agent_title: $agent_title, agent_state: $agent_state, time: ($time | tonumber)}'
 }
 
 push_entry() {
   local entry="$1"
   [ -z "$entry" ] && return 0
 
-  if [ -f "$STACK_FILE" ] && [ -s "$STACK_FILE" ]; then
-    jq --argjson item "$entry" '[$item] + .[:24]' "$STACK_FILE" > "$STACK_FILE.tmp" && mv "$STACK_FILE.tmp" "$STACK_FILE"
+  local tmp_file="${STACK_FILE}.${$}.tmp"
+  if [ -f "$STACK_FILE" ] && [ -s "$STACK_FILE" ] && jq -e . "$STACK_FILE" >/dev/null 2>&1; then
+    if jq --argjson item "$entry" '[$item] + .[:24]' "$STACK_FILE" > "$tmp_file" 2>/dev/null; then
+      mv "$tmp_file" "$STACK_FILE"
+    else
+      rm -f "$tmp_file"
+      echo "[$entry]" > "$STACK_FILE"
+    fi
   else
+    rm -f "$tmp_file"
     echo "[$entry]" > "$STACK_FILE"
   fi
 }

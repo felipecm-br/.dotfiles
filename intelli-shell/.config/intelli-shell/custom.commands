@@ -241,7 +241,7 @@ hibiki
 # Launch Hibiki keystroke visualizer directly without UI launcher (daemon / overlay mode)
 hibiki --no-ui
 
-# Reopen last closed Tmux window/tab with file, command, path, and session (Ctrl+Shift+T)
+# Reopen last closed Tmux window/tab with exact position, file, command, AI session, path, and session (Ctrl+Shift+T)
 ~/.config/tmux/reopen-window.sh
 
 # Open Posting TUI HTTP client
