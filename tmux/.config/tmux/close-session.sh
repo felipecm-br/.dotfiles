@@ -233,35 +233,28 @@ run_confirm_modal() {
   printf "  ${c_muted}────────────────────────────────────────────────────────────${c_reset}\n"
   printf "  ${c_bold}${c_red}y${c_reset} ${c_muted}Kill Session${c_reset}   ${c_muted}•${c_reset}   ${c_bold}${c_cyan}n${c_reset} ${c_muted}/${c_reset} ${c_bold}${c_cyan}Esc${c_reset} ${c_muted}Keep Session${c_reset}\n"
 
-  if command -v gum >/dev/null 2>&1; then
-    if gum confirm \
-        --no-show-help \
-        --default=false \
-        --affirmative="  󰅖 Kill Session (y)  " \
-        --negative="  󰜺 Keep Session (n/Esc)  " \
-        --selected.foreground="$COLOR_BG" \
-        --selected.background="$COLOR_YELLOW" \
-        --unselected.foreground="$COLOR_MUTED" \
-        --unselected.background="" \
-        --prompt.foreground="$COLOR_MUTED" \
-        --prompt.background="" \
-        "" 2>/dev/null; then
-      perform_kill "$target"
-      exit 0
-    else
-      # Cancelled by user (Esc, n, or Cancel button)
-      exit 0
-    fi
-  else
-    # Simple terminal fallback if gum is missing
-    printf "  Proceed with closing session '%s'? [y/N] " "$target"
-    read -r response
-    if [[ "$response" =~ ^[yY] ]]; then
-      perform_kill "$target"
-      exit 0
-    fi
-    exit 0
+  # Hide cursor during prompt to eliminate blinking artifacts
+  printf '\033[?25l'
+  trap 'printf "\033[?25h"' EXIT
+
+  local key
+  IFS= read -rsn1 key
+  # Handle Esc sequences
+  if [[ "$key" == $'\e' ]]; then
+    read -rsn2 -t 0.05 esc_rest 2>/dev/null || true
+    key="Esc"
   fi
+
+  case "$key" in
+    y|Y)
+      perform_kill "$target"
+      exit 0
+      ;;
+    *)
+      # Cancelled by user (n, N, Esc, q, Enter, etc.)
+      exit 0
+      ;;
+  esac
 }
 
 # -----------------------------------------------------------------------------
@@ -370,8 +363,8 @@ EOF
   fi
 
   # 5. Condition triggered: show confirmation
-  if [ -n "${TMUX:-}" ] && command -v gum >/dev/null 2>&1; then
-    # Calculate adaptive popup height (Golden Ratio compact HUD)
+  if [ -n "${TMUX:-}" ]; then
+    # Calculate adaptive popup height (compact HUD)
     local detail_lines=0
     if [ "$AGENT_COUNT" -gt 0 ]; then
       local show_agents=$(( AGENT_COUNT > 3 ? 3 : AGENT_COUNT ))
@@ -382,9 +375,9 @@ EOF
       detail_lines=$(( detail_lines + 3 ))
     fi
 
-    local popup_h=$(( 10 + detail_lines ))
-    [ "$popup_h" -lt 12 ] && popup_h=12
-    [ "$popup_h" -gt 20 ] && popup_h=20
+    local popup_h=$(( 8 + detail_lines ))
+    [ "$popup_h" -lt 11 ] && popup_h=11
+    [ "$popup_h" -gt 18 ] && popup_h=18
     local popup_w=68
 
     # Warning theme: golden yellow border and nf-cod-warning badge
@@ -408,11 +401,6 @@ EOF
       -h "$popup_h" \
       -E \
       "'$REAL_SCRIPT' --confirm-modal $target_escaped"
-  elif [ -n "${TMUX:-}" ]; then
-    # Fallback: Native tmux confirm-before on status bar if gum is missing
-    local reason_str="${REASONS[0]:-Protected session}"
-    tmux confirm-before -p "Kill session '$target_session' ($reason_str)? (y/n)" \
-      "run-shell '$REAL_SCRIPT --force \"$target_session\"'"
   else
     # Terminal fallback outside tmux
     run_confirm_modal "$target_session"
