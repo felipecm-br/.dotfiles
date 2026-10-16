@@ -50,7 +50,7 @@ prompt = " "
 show = true
 
 [footer]
-content = " {cyan,bold:[Enter]} {darkgray:Switch Window}  •  {yellow,bold:[t]} {darkgray:Sessions}  •  {blue,bold:[/]} {darkgray:Filter}  •  {green,bold:[n]} {darkgray:New}  •  {red,bold:[d]} {darkgray:Kill}  •  {blue,bold:[Esc]} {darkgray:Cancel}  •  {magenta,bold:[?]} {darkgray:Help}"
+content = " {cyan,bold:Enter} {darkgray:Switch} {darkgray:│} {cyan,bold:t} {darkgray:Sessions} {darkgray:│} {cyan,bold:/} {darkgray:Filter} {darkgray:│} {cyan,bold:n} {darkgray:New} {darkgray:│} {cyan,bold:d} {darkgray:Kill} {darkgray:│} {cyan,bold:?} {darkgray:Help} {darkgray:│} {cyan,bold:Esc} {darkgray:Exit}"
 row_connection = "Full"
 match_indent = false
 separator = "light"

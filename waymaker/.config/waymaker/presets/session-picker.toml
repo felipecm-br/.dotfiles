@@ -48,7 +48,7 @@ prompt = " "
 prompt_style.fg = "yellow"
 
 [footer]
-content = " {cyan,bold:[Enter]} {darkgray:Connect}  •  {magenta,bold:[c]} {darkgray:Cockpit}  •  {yellow,bold:[Tab]} {darkgray:Cycle}  •  {green,bold:[/]} {darkgray:Filter}  •  {red,bold:[d]} {darkgray:Kill}  •  {blue,bold:[Esc]} {darkgray:Exit}"
+content = " {cyan,bold:Enter} {darkgray:Connect} {darkgray:│} {cyan,bold:c} {darkgray:Cockpit} {darkgray:│} {cyan,bold:Tab} {darkgray:Cycle} {darkgray:│} {cyan,bold:/} {darkgray:Filter} {darkgray:│} {cyan,bold:d} {darkgray:Kill} {darkgray:│} {cyan,bold:Esc} {darkgray:Exit}"
 row_connection = "Full"
 match_indent = false
 separator = "light"
