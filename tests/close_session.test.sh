@@ -49,21 +49,29 @@ tmux kill-session -t "_test_sess_agent" 2>/dev/null || true
 echo "$OUT_AGENT" | grep -q "needs_confirm=1" && ok "AI agent window triggers confirmation" || bad "AI agent missed confirmation"
 echo "$OUT_AGENT" | grep -q "window(s) with active AI agents" && ok "AI agent reports active agent reason" || bad "missing AI agent reason"
 
-# 6. Direct execution closes clean session immediately
+# 6. Session with IDLE AI agent (<= 3 windows): must NOT require confirmation
+tmux new-session -d -s "_test_sess_idle"
+tmux set-option -w -t "_test_sess_idle:0" @ai_agent_state_raw "idle"
+tmux set-option -w -t "_test_sess_idle:0" @ai_agent_title "Completed parser"
+OUT_IDLE=$("$SCRIPT" --check "_test_sess_idle")
+tmux kill-session -t "_test_sess_idle" 2>/dev/null || true
+echo "$OUT_IDLE" | grep -q "needs_confirm=0" && ok "idle AI agent session bypasses confirmation" || bad "idle AI agent session required confirmation"
+
+# 7. Direct execution closes clean session immediately
 tmux new-session -d -s "_test_sess_clean_kill"
 "$SCRIPT" "_test_sess_clean_kill"
 ! tmux has-session -t "_test_sess_clean_kill" 2>/dev/null && ok "clean session terminated directly without prompt" || bad "clean session not terminated"
 
-# 7. Force flag terminates guarded session immediately
+# 8. Force flag terminates guarded session immediately
 tmux new-session -d -s "_test_sess_force_kill"
 tmux set-option -w -t "_test_sess_force_kill:0" @ai_agent_state_raw "busy"
 "$SCRIPT" --force "_test_sess_force_kill"
 ! tmux has-session -t "_test_sess_force_kill" 2>/dev/null && ok "force kill terminated guarded session" || bad "force kill failed"
 
-# 8. Check tmux.conf binding
+# 9. Check tmux.conf binding
 grep -qE 'bind W run-shell ".*close-session\.sh' "$CONF" && ok "tmux.conf binds Prefix + W to close-session.sh" || bad "tmux.conf missing close-session.sh bind"
 
-# 9. Check keybindings catalog items & preview
+# 10. Check keybindings catalog items & preview
 grep -qE 'Prefix \+ W.*close-session\.sh' "$KEY_ITEMS" && ok "keybindings-items.sh references close-session.sh" || bad "keybindings-items.sh missing close-session.sh"
 grep -qE 'Smart Kill Session' "$KEY_PREV" && ok "keybindings-preview.sh documents Smart Kill Session" || bad "keybindings-preview.sh missing Smart Kill Session"
 

@@ -61,6 +61,7 @@ PANE_COUNT=1
 IS_ACTIVE=0
 
 AGENT_COUNT=0
+ACTIVE_AGENT_COUNT=0
 AGENT_LABELS=()
 AGENT_DESCS=()
 AGENT_STATES=()
@@ -83,6 +84,7 @@ analyze_target() {
   IS_ACTIVE="${IS_ACTIVE:-0}"
 
   AGENT_COUNT=0
+  ACTIVE_AGENT_COUNT=0
   AGENT_LABELS=()
   AGENT_DESCS=()
   AGENT_STATES=()
@@ -179,10 +181,19 @@ analyze_target() {
       if [ "${#agent_desc}" -gt 28 ]; then
         agent_desc="${agent_desc:0:25}..."
       fi
+      local curr_st="${st:-active}"
       AGENT_LABELS+=("$agent_label")
       AGENT_DESCS+=("$agent_desc")
-      AGENT_STATES+=("${st:-active}")
+      AGENT_STATES+=("$curr_st")
       AGENT_COUNT=$(( AGENT_COUNT + 1 ))
+
+      case "$curr_st" in
+        idle|done|closed|inactive|completed)
+          ;;
+        *)
+          ACTIVE_AGENT_COUNT=$(( ACTIVE_AGENT_COUNT + 1 ))
+          ;;
+      esac
     fi
   done < <(tmux list-panes -t "$query_target" -F "#{window_id}|#{window_index}|#{window_name}|#{pane_id}|#{pane_current_command}|#{pane_title}|#{@ai_agent_state_raw}|#{@ai_agent_title}" 2>/dev/null || true)
 }
@@ -251,24 +262,32 @@ run_confirm_modal() {
   printf "  ${c_bold}${c_yellow}  KILL WINDOW${c_reset} ${c_muted}·${c_reset} ${c_bold}${c_fg}%s${c_reset}\n\n" "$tab_label"
 
   printf "  ${c_bold}${c_red}󰮯  Active AI Agent in Window${c_reset}\n"
-  local show_count=$(( AGENT_COUNT > 3 ? 3 : AGENT_COUNT ))
-  for ((i=0; i<show_count; i++)); do
+  local shown=0
+  for ((i=0; i<AGENT_COUNT; i++)); do
+    local st="${AGENT_STATES[$i]}"
+    case "$st" in
+      idle|done|closed|inactive|completed)
+        continue
+        ;;
+    esac
+
     local label="${AGENT_LABELS[$i]}"
     local desc="${AGENT_DESCS[$i]}"
-    local st="${AGENT_STATES[$i]}"
     local icon="󱥁"
     local st_color="$c_yellow"
     case "$st" in
-      idle) icon="󱥂"; st_color="$c_cyan" ;;
       busy|working) icon="󱥁"; st_color="$c_yellow" ;;
       question|permission|awaiting_input) icon="󱜻"; st_color="$c_magenta" ;;
-      error) icon="󰨄"; st_color="$c_red" ;;
+      error|stalled) icon="󰨄"; st_color="$c_red" ;;
+      *) icon="󰑮"; st_color="$c_yellow" ;;
     esac
     printf "     ${c_muted}󰚩${c_reset} ${c_bold}%-12s${c_reset}  ${c_fg}%-28s${c_reset}  ${st_color}%s %-7s${c_reset}\n" \
       "$label" "$desc" "$icon" "$st"
+    shown=$(( shown + 1 ))
+    [ "$shown" -ge 3 ] && break
   done
-  if [ "$AGENT_COUNT" -gt 3 ]; then
-    printf "     ${c_muted}󰚩 ... and %d more active agent(s)${c_reset}\n" "$((AGENT_COUNT - 3))"
+  if [ "$ACTIVE_AGENT_COUNT" -gt 3 ]; then
+    printf "     ${c_muted}󰚩 ... and %d more active agent(s)${c_reset}\n" "$((ACTIVE_AGENT_COUNT - 3))"
   fi
   printf "\n"
 
@@ -373,13 +392,14 @@ EOF
   # Diagnostic check mode
   if [ "$check_only" -eq 1 ]; then
     local needs_confirm=0
-    [ "$AGENT_COUNT" -gt 0 ] && needs_confirm=1
+    [ "$ACTIVE_AGENT_COUNT" -gt 0 ] && needs_confirm=1
     echo "target=$target"
     echo "pane_id=$PANE_ID"
     echo "win_id=$WIN_ID"
     echo "win_index=$WIN_INDEX"
     echo "win_name=$WIN_NAME"
     echo "agent_count=$AGENT_COUNT"
+    echo "active_agent_count=$ACTIVE_AGENT_COUNT"
     echo "needs_confirm=$needs_confirm"
     for ((i=0; i<AGENT_COUNT; i++)); do
       echo "agent=${AGENT_LABELS[$i]}:${AGENT_STATES[$i]}:${AGENT_DESCS[$i]}"
@@ -388,17 +408,17 @@ EOF
   fi
 
   # 4. Evaluate safeguard criteria:
-  # If NO AI agents are active: safe to close immediately with 0ms delay!
-  if [ "$AGENT_COUNT" -eq 0 ]; then
+  # If NO AI agents are actively working/waiting (or if all agents are idle): safe to close immediately with 0ms delay!
+  if [ "$ACTIVE_AGENT_COUNT" -eq 0 ]; then
     perform_close "$target"
     exit 0
   fi
 
   # 5. Safeguard triggered: show confirmation popup
   if [ -n "${TMUX:-}" ]; then
-    local show_agents=$(( AGENT_COUNT > 3 ? 3 : AGENT_COUNT ))
+    local show_agents=$(( ACTIVE_AGENT_COUNT > 3 ? 3 : ACTIVE_AGENT_COUNT ))
     local detail_lines=$(( show_agents + 2 ))
-    [ "$AGENT_COUNT" -gt 3 ] && detail_lines=$(( detail_lines + 1 ))
+    [ "$ACTIVE_AGENT_COUNT" -gt 3 ] && detail_lines=$(( detail_lines + 1 ))
 
     local popup_h=$(( 8 + detail_lines ))
     [ "$popup_h" -lt 11 ] && popup_h=11

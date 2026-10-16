@@ -121,7 +121,13 @@ analyze_session() {
     fi
 
     if [ "$is_agent" -eq 1 ]; then
-      agent_windows["$wid"]=1
+      case "${st:-active}" in
+        idle|done|closed|inactive|completed)
+          ;;
+        *)
+          agent_windows["$wid"]=1
+          ;;
+      esac
       [ -z "$agent_desc" ] && agent_desc="${raw_title:-$wname}"
       # Clean and truncate description if needed
       agent_desc=$(printf '%s' "$agent_desc" | tr '\n\r\t' ' ' | sed -E 's/[[:space:]]+/ /g')
