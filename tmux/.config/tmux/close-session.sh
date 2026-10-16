@@ -39,6 +39,7 @@ COLOR_ACCENT=$(_get_color "accent" "#7aa2f7")
 COLOR_MAGENTA=$(_get_color "magenta" "#ad8ee6")
 COLOR_MUTED=$(_get_color "dark_foreground" "#565f89")
 COLOR_FG=$(_get_color "foreground" "#a9b1d6")
+COLOR_BG=$(_get_color "background" "#1a1b26")
 
 _hex_to_ansi() {
   local h="${1#\#}"
@@ -232,18 +233,18 @@ run_confirm_modal() {
     printf "     ${c_muted}󱂬${c_reset}  ${c_fg}%d active windows in session${c_reset} ${c_muted}(>3 threshold)${c_reset}\n\n" "$WIN_COUNT"
   fi
 
-  # Divider & Hints
+  # Divider & Hints (English Action Guide)
   printf "  ${c_muted}────────────────────────────────────────────────────────────${c_reset}\n"
-  printf "  ${c_muted}Tab / ← / →  toggle selection   •   Enter  confirm selection${c_reset}\n"
+  printf "  ${c_bold}${c_red}y${c_reset} ${c_muted}Kill Session${c_reset}   ${c_muted}•${c_reset}   ${c_bold}${c_cyan}n${c_reset} ${c_muted}/${c_reset} ${c_bold}${c_cyan}Esc${c_reset} ${c_muted}Keep Session${c_reset}   ${c_muted}•${c_reset}   ${c_bold}${c_fg}Tab${c_reset} ${c_muted}Toggle Focus${c_reset}\n"
 
   if command -v gum >/dev/null 2>&1; then
     if gum confirm \
         --no-show-help \
         --default=false \
-        --affirmative="[ 󰅖 Kill Session (y) ]" \
-        --negative="[ 󰜺 Keep Session (n/Esc) ]" \
-        --selected.foreground="$COLOR_RED" \
-        --selected.background="" \
+        --affirmative="  󰅖 Kill Session (y)  " \
+        --negative="  󰜺 Keep Session (n/Esc)  " \
+        --selected.foreground="$COLOR_BG" \
+        --selected.background="$COLOR_ACCENT" \
         --unselected.foreground="$COLOR_MUTED" \
         --unselected.background="" \
         --prompt.foreground="$COLOR_MUTED" \
