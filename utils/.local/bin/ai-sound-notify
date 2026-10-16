@@ -18,9 +18,13 @@ resolve_sound() {
   local pointers=(
     "$home/.config/omarchy/sounds/ai-${evt}.sound"
     "$home/.config/acpd/sounds/${evt}.sound"
-    "$home/.config/omarchy/sounds/ai-response.sound"
-    "$home/.config/acpd/sounds/response.sound"
   )
+  if [[ "$evt" == "response" ]]; then
+    pointers+=(
+      "$home/.config/omarchy/sounds/ai-response.sound"
+      "$home/.config/acpd/sounds/response.sound"
+    )
+  fi
   for ptr in "${pointers[@]}"; do
     if [[ -f "$ptr" ]]; then
       local val
@@ -39,11 +43,33 @@ resolve_sound() {
   # Check direct files
   local direct=(
     "$home/.config/omarchy/sounds/ai-${evt}.wav"
-    "$home/.config/omarchy/sounds/ai-response.wav"
-    "$home/.local/share/sounds/ai/01-crystal-chime.wav"
-    "/usr/share/sounds/freedesktop/stereo/complete.oga"
-    "/usr/share/sounds/freedesktop/stereo/message.oga"
+    "$home/.config/acpd/sounds/${evt}.wav"
   )
+  if [[ "$evt" == "response" ]]; then
+    direct+=(
+      "$home/.config/omarchy/sounds/ai-response.wav"
+      "$home/.config/acpd/sounds/ai-response.wav"
+    )
+  fi
+
+  case "$evt" in
+    question)
+      direct+=("$home/.local/share/sounds/ai/02-gentle-ping.wav")
+      ;;
+    permission)
+      direct+=("$home/.local/share/sounds/ai/06-cyber-pulse.wav")
+      ;;
+    error|stalled)
+      direct+=("$home/.local/share/sounds/ai/10-arcade-blip.wav")
+      ;;
+    *)
+      direct+=(
+        "$home/.local/share/sounds/ai/01-crystal-chime.wav"
+        "/usr/share/sounds/freedesktop/stereo/complete.oga"
+        "/usr/share/sounds/freedesktop/stereo/message.oga"
+      )
+      ;;
+  esac
   for f in "${direct[@]}"; do
     if [[ -f "$f" ]]; then
       echo "$f"

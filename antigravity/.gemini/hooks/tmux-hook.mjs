@@ -89,7 +89,7 @@ async function main() {
     const toolCall = ctx.toolCall || {};
     const toolName = (toolCall.name || ctx.tool_name || ctx.tool || '').toLowerCase();
 
-    if (toolName.includes('question') || toolName.includes('ask')) {
+    if (toolName.includes('question') || /(^|_)ask(_|$)/.test(toolName)) {
       await sendAcpState(tmuxPane, 'awaiting_input');
     } else if (toolName.includes('permission')) {
       await sendAcpState(tmuxPane, 'permission');
