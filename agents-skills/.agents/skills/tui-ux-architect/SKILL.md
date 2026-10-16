@@ -46,6 +46,20 @@ $$T_{\text{execute}} = \sum T_K + \sum T_P + \sum T_H + \sum T_M + \sum T_R$$
 - **$T_K$ (Keystroke Cost): Reduced to $120\text{ ms}$.** Single home-row taps or inward rolls with kernel-overloaded `CapsLock` (`Ctrl`).
 - **$T_R$ (System Response): $< 10\text{ ms}$.** Multi-threaded asynchronous Rust binaries with non-blocking event loops.
 
+### 1.2 Applied Visual Neuroscience, Saccadic Mechanics & Eye-Tracking
+- **Saccadic Anisotropy (Horizontal vs. Vertical Superiority - Rayner 1998, Yarbus 1967):**
+  - Horizontal saccades (Left $\leftrightarrow$ Right) are driven purely by a single antagonistic muscle pair (*medial* and *lateral rectus*, CN III & VI), reaching peak velocities of $400\text{–}500^\circ/\text{s}$ with minimal motor fatigue and straight trajectories.
+  - Vertical saccades (Top $\leftrightarrow$ Bottom) require co-contraction and torsional compensation across four extraocular muscles (*superior/inferior rectus* and *superior/inferior oblique*), inducing higher oculomotor fatigue and curved glissades.
+  - **Macro-Layout Rule:** Avoid horizontal 50/50 splits (*Top list / Bottom preview* like `workmux`), which create **Negative Space Starvation ("Dead Void")** in the center and vertically crush terminal/code streams. Enforce **40/60 Left-Right Golden Ratio ($\phi \approx 1.618$) splits** granting 100% vertical viewport height to inspection panes.
+- **Foveal Columnar Search ($O(1)$) vs. Ragged Inline Scanning ($O(N)$):**
+  - The human fovea spans a narrow $2^\circ\text{–}5^\circ$ central field of high acuity. When list items are formatted as ragged, variable-length inline strings, scanning requires continuous corrective horizontal micro-saccades on every row ($\approx +140\text{–}210\text{ ms/row}$).
+  - Strictly aligned, fixed-width columnar grids allow ballistic vertical saccades ($X = \text{const}$) in $O(1)$ sweeps ($\approx 25\text{–}35\text{ ms/row}$).
+- **Preattentive Hue Reservation (Treisman 1985):**
+  - The visual cortex preattentively parses $\le 5$ simultaneous hues before feature search degrades into slow serial inspection.
+  - Chromatic hue (`orange`, `magenta`, `red`, `yellow`, `cyan`) must be strictly reserved for **dynamic operational state & urgency** (blocked agent, uncommitted churn, error, CI failure).
+- **Bouma's Law of Visual Crowding (1970) & Bracket Elimination:**
+  - Punctuation flanking text within $0.5\times$ eccentricity crowds letter identification. Eliminating redundant square brackets (`[Key]`) in footers and candidate rows removes 14–22 non-data-ink glyphs and dramatically accelerates peripheral readability.
+
 *See detailed benchmarks and comparisons in [references/klm-goms-benchmarks.md](references/klm-goms-benchmarks.md).*
 
 ---
@@ -115,14 +129,25 @@ $$T_{\text{execute}} = \sum T_K + \sum T_P + \sum T_H + \sum T_M + \sum T_R$$
 - **ACP Port Isolation:** AI review notes daemon reads port strictly from `.lazygitrs.port` in active worktree root (global `~/.lazygitrs_active_session.json` is fallback only).
 
 ### 2.5 Tmux Multiplexer Orchestration & Golden Ratio Geometry
-- **Golden Ratio Popups ($\phi \approx 1.618$):** Standard foveal geometry `75% × 60%`, with internal column division of 40% candidate list and 60% preview pane.
+- **Golden Ratio Popups ($\phi \approx 1.618$):** Standard foveal geometry `75% × 60%` (or `85% × 75%` for dense triage), with internal column division of 40% candidate list and 60% preview pane.
+- **The Hybrid Golden-Grid Architecture (40/60 Split + Columnar Alignment):**
+  - Synthesizes the macro-superiority of 40/60 Left-Right vertical splits (100% vertical viewport height for preview streams; avoids the central "Dead Void" of 50/50 horizontal splits) with micro-tabular column alignment.
+  - Candidate lists must never use ragged, variable-length inline strings. They must use deterministic fixed-width columns (`[St 2c (X=1)] [Idx 3c] [Title/Agent 24c] [Branch+Sync 14c] [Churn/PR 11c] [Age 6c]`).
+  - **Leftmost $X=1$ Preattentive Urgency Gutter:** Critical agent status glyphs (`󱅭`, `󱜻`, `󰨄`, `⠋`, `󱥂`, `·`) must reside at column $X=1$ (the start of LTR saccades), never buried at Column 5 or 7.
+  - **Urgency-Aware Age Luminance:** Waiting time (`Age`) must render in bold urgency colors (`C_PERM`/`C_QUESTION`/`C_ERROR`) when an agent is stalled or requesting input (`prio <= 3`), dimming to `C_MUTED` only when healthy/idle.
+  - **UTF-8 Visual Width Rule:** In Bash/POSIX candidate generators, never use byte-based `printf "%-24s"`. Always compute visual character width via `${#str}` in UTF-8 locales and pad using space injection (`printf -v spaces "%*s" "$pad" ""`) to prevent multibyte icon (``, `⎇`, `󰄬`, `…`, `↑`, `↓`) misalignment.
+- **Bichromatic Uniform Footer Standard (` {darkgray:│} ` Separators):**
+  - **Zero Bracket Clutter:** Never wrap keys in square brackets (`[Enter]`, `[Tab]`, `[y/n]`). Removing brackets eliminates 14–22 non-data-ink characters and prevents Bouma visual crowding.
+  - **Uniform Key Palette:** All keys must share a single uniform accent (`cyan,bold` or `white,bold`), actions in `darkgray`, and delimiters in dimmed vertical hairlines (`{darkgray:│}`).
+  - **Hue Reservation:** Never use a multi-colored "rainbow" footer (`green`, `yellow`, `magenta`, `red`, `blue`). Matiz is strictly reserved for real-time operational alerts in the list and preview.
+  - **Chunk Cap ($\le 7$):** Strictly limit visible footer key-action pairs to 7 core items (Miller's $7 \pm 2$ / Cowan's $4 \pm 1$), offloading secondary actions to `? Help`.
 - **Dynamic Semantic Color Palette:** Inherits dynamically from Omarchy system theme (`~/.local/state/omarchy/current/theme/colors.toml`):
-  - *Ephemeral Layer* (Fast Pickers < 5s): Mauve / Magenta (`-T " 󱂬 "`).
+  - *Ephemeral Layer* (Fast Pickers < 5s): Mauve / Magenta (`-T " 󱂬 "` or `-T " 󰆍 "`).
   - *Persistent Layer* (Lazygitrs / High-Density Workspaces): Git Orange (`-T " 󰊢 "`).
   - *Reactive Layer* (AI Agent Alerts & Approvals): Alert Yellow (`-T " 󰮯 "`).
 - **Auditory Telemetry:** Low-latency non-blocking PipeWire sound cues via `acpd` daemon, freeing visual attention.
 
-*See layout details in [references/tmux-golden-ratio-popups.md](references/tmux-golden-ratio-popups.md).*
+*See layout details in [references/tmux-golden-ratio-popups.md](references/tmux-golden-ratio-popups.md) and canonical audit in [`docs/tmux/cockpit-vs-workmux-visual-ergonomics.md`](../../../docs/tmux/cockpit-vs-workmux-visual-ergonomics.md).*
 
 ---
 
@@ -143,16 +168,18 @@ Whenever asked to **audit**, **design**, **refactor**, or **generate code** for 
 - Total absence of `Alt/Option` dependencies.
 
 ### 3. Visual Semiotics, Colors & Eye-Tracking
-- Conformance to Golden Ratio ($\phi \approx 1.618$) and 40/60 foveal split.
-- Specification of pure Nerd Font glyph badges for preattentive decoding (<15ms).
+- Conformance to Golden Ratio ($\phi \approx 1.618$) and 40/60 foveal split (vs. 50/50 horizontal splits).
+- Proof of fixed-width columnar alignment (Hybrid Golden-Grid) eliminating horizontal zig-zag micro-saccades.
+- Specification of pure Nerd Font glyph badges for preattentive decoding (<15ms) anchored at $X=1$.
+- Footer chromatic discipline: uniform bichromatic scheme with `│` separators, zero bracket clutter, and Treisman hue reservation.
 - Dynamic theme color integration bound to Omarchy `colors.toml`.
 
 ### 4. High-Fidelity ASCII / Unicode Layout
 - Text-rendered wireframe with rounded corners (`╭─╮`) respecting the 4 LTR reading zones:
-  1. *Header / Top-Left:* Context prompt and mode badges (`>`, `󱅤`, ``).
-  2. *Left Column:* Candidate list with file-type icons and cursor badge.
-  3. *Right Column:* Debounced preview pane.
-  4. *Bottom Border / HUD:* Minimalist keyboard hint bar and inline counter.
+  1. *Header / Top-Left:* Context prompt, mode badges (`>`, `󱅤`, ``), and tab indicator.
+  2. *Left Column:* Aligned candidate grid with fixed-width columns, $X=1$ urgency gutter, and cursor badge.
+  3. *Right Column:* Full-height debounced preview pane / side-by-side diff.
+  4. *Bottom Border / HUD:* Minimalist uniform bichromatic keyboard hint bar (`│` separators) and inline counter.
 
 ### 5. Production-Ready Implementation Code
 - Complete, tested, low-latency implementation:

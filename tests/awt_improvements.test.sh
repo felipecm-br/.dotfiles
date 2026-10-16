@@ -35,8 +35,8 @@ assert "@pr_worktree" in awt["binds"], "awt.toml missing @pr_worktree"
 nav_binds = awt.get("ui", {}).get("nav", {}).get("binds", {})
 assert awt["binds"].get("nav^^S") == "@ship_worktree" or nav_binds.get("S") == "@ship_worktree", "awt.toml missing nav S bind"
 assert awt["binds"].get("nav^^P") == "@pr_worktree" or nav_binds.get("P") == "@pr_worktree", "awt.toml missing nav P bind"
-assert "[S]" in awt["footer"]["content"], "awt.toml footer missing [S] Ship indicator"
-assert "[P]" in awt["footer"]["content"], "awt.toml footer missing [P] PR indicator"
+assert ("S" in awt["footer"]["content"] and "Ship" in awt["footer"]["content"]), "awt.toml footer missing S Ship indicator"
+assert ("P" in awt["footer"]["content"] and "PR" in awt["footer"]["content"]), "awt.toml footer missing P PR indicator"
 
 # 1.2 awt-pr.toml
 with open(os.path.join(presets_dir, "awt-pr.toml"), "rb") as f:

@@ -58,6 +58,8 @@ _set_hex C_DIFF_INS "${_color_cyan:-#83c092}"
 _set_hex C_DIFF_DEL "${_color_red:-#e67e80}"
 _set_hex C_DIFF_DIRTY "${_color_yellow:-#dbbc7f}"
 _set_hex C_PR "${_color_magenta:-#d699b6}"
+C_RED="$C_ERROR"
+C_YELLOW="$C_BUSY"
 
 filter_agents=0
 cur_session="${TMUX_ORIGIN_SESSION:-}"
@@ -115,15 +117,17 @@ if [ -f "$token_file" ]; then
   fi
 fi
 
-# Step 2: Query running processes once globally to map agent sessions
+# Step 2: Query running processes once globally to map agent sessions and elapsed time
 declare -A sess_agent=()
-while read -r p_sess p_comm; do
+declare -A sess_etimes=()
+while read -r p_sess p_etimes p_comm; do
   case "$p_comm" in
     agy|agy-bin|antigravity|opencode|claude|codex)
       sess_agent["$p_sess"]="${p_comm%-bin}"
+      sess_etimes["$p_sess"]="$p_etimes"
       ;;
   esac
-done < <(ps -C agy,agy-bin,antigravity,opencode,claude,codex -o sess=,comm= 2>/dev/null || true)
+done < <(ps -C agy,agy-bin,antigravity,opencode,claude,codex -o sess=,etimes=,comm= 2>/dev/null || true)
 
 now_ms="${EPOCHSECONDS}000"
 
@@ -140,7 +144,7 @@ declare -A git_pr_ci=()
 
 tmp_raw=""
 
-while IFS=$'\t' read -r sess idx wname pid pane_os_pid ppath pcmd ptitle raw_state ai_title; do
+while IFS=$'\x1f' read -r sess idx wname pid pane_os_pid ppath pcmd ptitle raw_state ai_title; do
   case "$sess" in
     _lazygitrs*|_popups*|\.*) continue ;;
   esac
@@ -210,21 +214,27 @@ while IFS=$'\t' read -r sess idx wname pid pane_os_pid ppath pcmd ptitle raw_sta
       ;;
   esac
 
-  # Elapsed waiting age string
+  # Elapsed waiting / session age string
   age_str=""
   diff_s=0
   if (( ts > 0 )); then
     diff_s=$(( (now_ms - ts) / 1000 ))
+  elif [ -n "$pane_os_pid" ] && [ -n "${sess_etimes["$pane_os_pid"]:-}" ]; then
+    diff_s="${sess_etimes["$pane_os_pid"]}"
+  fi
+  if (( diff_s > 0 )); then
     if (( diff_s < 60 )); then
       age_str="${diff_s}s"
     elif (( diff_s < 3600 )); then
-      age_str="$((diff_s / 60))m$((diff_s % 60))s"
-    else
+      age_str="$((diff_s / 60))m"
+    elif (( diff_s < 86400 )); then
       age_str="$((diff_s / 3600))h$(((diff_s % 3600) / 60))m"
+    else
+      age_str="$((diff_s / 86400))d"
     fi
   fi
 
-  # Resolve Git & PR metadata with path memoization
+  # Resolve Git & PR metadata with path memoization (including .bare container fallback to main)
   branch=""
   u_ahead=0
   u_behind=0
@@ -234,6 +244,9 @@ while IFS=$'\t' read -r sess idx wname pid pane_os_pid ppath pcmd ptitle raw_sta
   pr_ci=""
 
   if [ -n "$ppath" ] && [ -d "$ppath" ]; then
+    if [ ! -e "$ppath/.git" ] && [ -d "$ppath/.bare" ] && [ -d "$ppath/main" ]; then
+      ppath="$ppath/main"
+    fi
     if [ -z "${git_checked["$ppath"]:-}" ]; then
       git_checked["$ppath"]=1
       porcelain_b=$(git -C "$ppath" -c submodule.recurse=false --no-optional-locks status --porcelain -b 2>/dev/null || true)
@@ -264,7 +277,7 @@ while IFS=$'\t' read -r sess idx wname pid pane_os_pid ppath pcmd ptitle raw_sta
 
         ds_str=""
         if (( dirty_files > 0 )); then
-          diff_out=$(git -C "$ppath" -c submodule.recurse=false --no-ext-diff --no-optional-locks diff --shortstat HEAD 2>/dev/null || true)
+          diff_out=$(git -C "$ppath" -c submodule.recurse=false --no-optional-locks diff --no-ext-diff --shortstat HEAD 2>/dev/null || true)
           [[ "$diff_out" =~ ([0-9]+)\ insertion ]] && ds_str="+${BASH_REMATCH[1]}"
           if [[ "$diff_out" =~ ([0-9]+)\ deletion ]]; then
             [[ -n "$ds_str" ]] && ds_str="$ds_str -${BASH_REMATCH[1]}" || ds_str="-${BASH_REMATCH[1]}"
@@ -375,7 +388,7 @@ while IFS=$'\t' read -r sess idx wname pid pane_os_pid ppath pcmd ptitle raw_sta
   printf -v row '%d\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%d\t%s\t%d\t%d\t%d\t%d\t%s\t%s\t%s\t%d\n' \
     "$prio" "$ts" "$sess" "$idx" "$wname" "$pid" "$ppath" "$ico" "$short_label" "$age_str" "$branch" "$is_cur" "$st" "$is_agent" "$has_u" "$u_ahead" "$u_behind" "$diffstat_str" "$pr_num" "$pr_ci" "$diff_s"
   tmp_raw+="$row"
-done < <(tmux list-panes -a -F $'#{session_name}\t#{window_index}\t#{window_name}\t#{pane_id}\t#{pane_pid}\t#{pane_current_path}\t#{pane_current_command}\t#{pane_title}\t#{?@ai_agent_state_raw,#{@ai_agent_state_raw},#{@w:@ai_agent_state_raw}}\t#{?@ai_agent_title,#{@ai_agent_title},#{@w:@ai_agent_title}}' 2>/dev/null)
+done < <(tmux list-panes -a -F $'#{session_name}\x1f#{window_index}\x1f#{window_name}\x1f#{pane_id}\x1f#{pane_pid}\x1f#{pane_current_path}\x1f#{pane_current_command}\x1f#{pane_title}\x1f#{?@ai_agent_state_raw,#{@ai_agent_state_raw},#{@w:@ai_agent_state_raw}}\x1f#{?@ai_agent_title,#{@ai_agent_title},#{@w:@ai_agent_title}}' 2>/dev/null)
 
 # Pass 1: Identify sessions and pre-format items grouped by session
 declare -A sess_prio=()
@@ -413,7 +426,7 @@ while IFS=$'\t' read -r prio ts s idx wname pid ppath ico agent_label age_str br
   [ "$pr_num" = "-" ] && pr_num=""
   [ "$pr_ci" = "-" ] && pr_ci=""
 
-  # State icon formatted with color
+  # State icon formatted with color (Col 1: 2 visual chars at X=1)
   case "$st" in
     permission) c_ico="$C_PERM" ;;
     question|awaiting_input) c_ico="$C_QUESTION" ;;
@@ -427,7 +440,7 @@ while IFS=$'\t' read -r prio ts s idx wname pid ppath ico agent_label age_str br
   if [ "$is_agent" = "1" ]; then
     ai_ico="${c_ico}${ico}${R} "
   else
-    ai_ico="  "
+    ai_ico="${C_MUTED}·${R} "
   fi
 
   if [ "$is_cur" -eq 1 ]; then
@@ -438,82 +451,128 @@ while IFS=$'\t' read -r prio ts s idx wname pid ppath ico agent_label age_str br
     c_wname="${C_NAME}"
   fi
 
+  # Col 2: Fixed-width Window Index + Origin Dot (3 visual chars: "0· " or "12•")
   if [ "${#idx}" -eq 1 ]; then
-    idx_col="${C_MUTED}${idx}${R}${cur_dot}  "
-  else
     idx_col="${C_MUTED}${idx}${R}${cur_dot} "
+  else
+    idx_col="${C_MUTED}${idx}${R}${cur_dot}"
   fi
 
-  # Branch tag & remote sync status
-  branch_tag=""
+  # Col 3: Fixed-width Window + Agent Title Column (24 visual chars, UTF-8 safe)
+  w_len=${#wname}
+  if [ -n "$agent_label" ] && [ "$agent_label" != "$wname" ]; then
+    max_lbl=$(( 24 - w_len - 1 ))
+    (( max_lbl < 4 )) && max_lbl=4
+    if (( ${#agent_label} > max_lbl )); then
+      lbl_trunc="${agent_label:0:$(( max_lbl - 1 ))}…"
+    else
+      lbl_trunc="$agent_label"
+    fi
+    vis_title_len=$(( w_len + 1 + ${#lbl_trunc} ))
+    pad_t=$(( 24 - vis_title_len ))
+    (( pad_t < 0 )) && pad_t=0
+    printf -v title_spaces "%*s" "$pad_t" ""
+    title_col="${c_wname}${wname}${R} ${c_ico}${lbl_trunc}${R}${title_spaces}"
+  else
+    if (( w_len > 24 )); then
+      w_trunc="${wname:0:23}…"
+      w_len=24
+    else
+      w_trunc="$wname"
+    fi
+    pad_t=$(( 24 - w_len ))
+    (( pad_t < 0 )) && pad_t=0
+    printf -v title_spaces "%*s" "$pad_t" ""
+    title_col="${c_wname}${w_trunc}${R}${title_spaces}"
+  fi
+
+  # Col 4: Fixed-width Branch + Remote Sync Column (14 visual chars, UTF-8 safe)
   sync_search=""
   if [ -n "$branch" ]; then
-    branch_tag=" ${C_BRANCH}⎇ ${branch}${R}"
+    if (( ${#branch} > 8 )); then
+      br_trunc="${branch:0:7}…"
+    else
+      br_trunc="$branch"
+    fi
+    sync_glyph=""
+    sync_col_c="$C_CYAN"
     if [ "${has_u:-0}" -eq 1 ]; then
       if [ "${u_ahead:-0}" -eq 0 ] && [ "${u_behind:-0}" -eq 0 ]; then
-        branch_tag+="${C_CYAN} 󰄬${R}"
+        sync_glyph=" 󰄬"
         sync_search="synced"
       else
         if [ "${u_ahead:-0}" -gt 0 ]; then
-          branch_tag+="${C_CYAN} 󰞕${u_ahead}${R}"
+          sync_glyph=" ↑${u_ahead}"
           sync_search+=" ahead"
         fi
         if [ "${u_behind:-0}" -gt 0 ]; then
-          branch_tag+="${C_ERROR} 󰞒${u_behind}${R}"
+          sync_glyph+=" ↓${u_behind}"
+          sync_col_c="$C_ERROR"
           sync_search+=" behind"
         fi
       fi
     fi
+    vis_br_len=$(( 2 + ${#br_trunc} + ${#sync_glyph} ))
+    pad_b=$(( 14 - vis_br_len ))
+    (( pad_b < 0 )) && pad_b=0
+    printf -v br_spaces "%*s" "$pad_b" ""
+    branch_col="  ${C_BRANCH}⎇ ${br_trunc}${R}${sync_col_c}${sync_glyph}${R}${br_spaces}"
+  else
+    branch_col="  ${C_MUTED}-             ${R}"
   fi
 
-  # Diffstat badge
+  # Col 5: Fixed-width Git Diffstat / PR Badge Column (11 visual chars)
   diff_badge=""
   if [ -n "$diffstat_str" ]; then
     for part in $diffstat_str; do
       if [[ "$part" =~ ^\+ ]]; then
-        diff_badge+=" ${C_DIFF_INS}${part}${R}"
+        diff_badge+="${diff_badge:+ }${C_DIFF_INS}${part}${R}"
       elif [[ "$part" =~ ^\- ]]; then
-        diff_badge+=" ${C_DIFF_DEL}${part}${R}"
+        diff_badge+="${diff_badge:+ }${C_DIFF_DEL}${part}${R}"
       else
-        diff_badge+=" ${C_DIFF_DIRTY}${part}${R}"
+        diff_badge+="${diff_badge:+ }${C_DIFF_DIRTY}${part}${R}"
       fi
     done
   fi
 
-  # PR and CI badge
-  pr_badge=""
   pr_search=""
   if [ -n "$pr_num" ]; then
-    ci_ico=""
-    case "$pr_ci" in
-      success) ci_ico="${C_CYAN}󰄬${R}" ;;
-      failure) ci_ico="${C_RED}󰅚${R}" ;;
-      pending) ci_ico="${C_YELLOW}@SPIN@${R}" ;;
-    esac
-    pr_badge=" ${C_PR}󰏫#${pr_num}${R}${ci_ico:+ ${ci_ico}}"
     pr_search="PR:#${pr_num} ci:${pr_ci}"
   elif [ -n "$pr_ci" ] && [ "$pr_ci" != "none" ]; then
-    case "$pr_ci" in
-      success) pr_badge=" ${C_CYAN}󰄬 CI${R}" ;;
-      failure) pr_badge=" ${C_RED}󰅚 CI${R}" ;;
-      pending) pr_badge=" ${C_YELLOW}@SPIN@ CI${R}" ;;
-    esac
     pr_search="ci:${pr_ci}"
   fi
 
-  # Age tag
-  age_tag=""
+  if [ -n "$diffstat_str" ]; then
+    vis_ds_len=${#diffstat_str}
+    pad_d=$(( 11 - vis_ds_len ))
+    (( pad_d < 0 )) && pad_d=0
+    printf -v ds_spaces "%*s" "$pad_d" ""
+    diff_col=" ${diff_badge}${ds_spaces}"
+  elif [ -n "$pr_num" ]; then
+    vis_pr="󰏫#${pr_num}"
+    pad_d=$(( 11 - ${#vis_pr} ))
+    (( pad_d < 0 )) && pad_d=0
+    printf -v ds_spaces "%*s" "$pad_d" ""
+    diff_col=" ${C_PR}${vis_pr}${R}${ds_spaces}"
+  else
+    diff_col=" ${C_MUTED}-          ${R}"
+  fi
+
+  # Col 6: Right-aligned Elapsed Age Column (6 visual chars, urgency-colored for prio <= 3)
   if [ -n "$age_str" ]; then
-    age_tag=" ${C_MUTED}${age_str}${R}"
+    pad_a=$(( 6 - ${#age_str} ))
+    (( pad_a < 0 )) && pad_a=0
+    printf -v age_spaces "%*s" "$pad_a" ""
+    if (( prio <= 3 )); then
+      age_col=" ${age_spaces}${c_ico}${BOLD}${age_str}${R}"
+    else
+      age_col=" ${age_spaces}${C_MUTED}${age_str}${R}"
+    fi
+  else
+    age_col=" ${C_MUTED}     -${R}"
   fi
 
-  # Agent badge
-  agent_tag=""
-  if [ -n "$agent_label" ]; then
-    agent_tag=" ${c_ico}[${agent_label}]${R}"
-  fi
-
-  display_line=" ${ai_ico}${idx_col}${c_wname}${wname}${R}${agent_tag}${age_tag}${branch_tag}${diff_badge}${pr_badge}   "
+  display_line=" ${ai_ico}${idx_col} ${title_col}${branch_col}${diff_col}${age_col}  "
   search_title="${s} ${idx} ${wname} ${agent_label} ${branch} ${st} ${age_str} ${sync_search} ${pr_search} ${diffstat_str}"
 
   printf -v row '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%b\n' \
