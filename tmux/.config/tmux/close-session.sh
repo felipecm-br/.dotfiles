@@ -196,11 +196,7 @@ run_confirm_modal() {
   c_bold="\033[1m"
 
   printf "\n"
-  if [ "$AGENT_COUNT" -gt 0 ]; then
-    printf "  ${c_bold}${c_red}󰅖  KILL SESSION${c_reset} ${c_muted}·${c_reset} ${c_bold}${c_fg}%s${c_reset}\n\n" "$target"
-  else
-    printf "  ${c_bold}${c_yellow}󰅖  KILL SESSION${c_reset} ${c_muted}·${c_reset} ${c_bold}${c_fg}%s${c_reset}\n\n" "$target"
-  fi
+  printf "  ${c_bold}${c_yellow}  KILL SESSION${c_reset} ${c_muted}·${c_reset} ${c_bold}${c_fg}%s${c_reset}\n\n" "$target"
 
   # Section 1: Active AI Agent Fleet
   if [ "$AGENT_COUNT" -gt 0 ]; then
@@ -235,7 +231,7 @@ run_confirm_modal() {
 
   # Divider & Hints (English Action Guide)
   printf "  ${c_muted}────────────────────────────────────────────────────────────${c_reset}\n"
-  printf "  ${c_bold}${c_red}y${c_reset} ${c_muted}Kill Session${c_reset}   ${c_muted}•${c_reset}   ${c_bold}${c_cyan}n${c_reset} ${c_muted}/${c_reset} ${c_bold}${c_cyan}Esc${c_reset} ${c_muted}Keep Session${c_reset}   ${c_muted}•${c_reset}   ${c_bold}${c_fg}Tab${c_reset} ${c_muted}Toggle Focus${c_reset}\n"
+  printf "  ${c_bold}${c_red}y${c_reset} ${c_muted}Kill Session${c_reset}   ${c_muted}•${c_reset}   ${c_bold}${c_cyan}n${c_reset} ${c_muted}/${c_reset} ${c_bold}${c_cyan}Esc${c_reset} ${c_muted}Keep Session${c_reset}\n"
 
   if command -v gum >/dev/null 2>&1; then
     if gum confirm \
@@ -244,7 +240,7 @@ run_confirm_modal() {
         --affirmative="  󰅖 Kill Session (y)  " \
         --negative="  󰜺 Keep Session (n/Esc)  " \
         --selected.foreground="$COLOR_BG" \
-        --selected.background="$COLOR_ACCENT" \
+        --selected.background="$COLOR_YELLOW" \
         --unselected.foreground="$COLOR_MUTED" \
         --unselected.background="" \
         --prompt.foreground="$COLOR_MUTED" \
@@ -386,17 +382,14 @@ EOF
       detail_lines=$(( detail_lines + 3 ))
     fi
 
-    local popup_h=$(( 12 + detail_lines ))
-    [ "$popup_h" -lt 14 ] && popup_h=14
-    [ "$popup_h" -gt 24 ] && popup_h=24
+    local popup_h=$(( 10 + detail_lines ))
+    [ "$popup_h" -lt 12 ] && popup_h=12
+    [ "$popup_h" -gt 20 ] && popup_h=20
     local popup_w=68
 
+    # Warning theme: golden yellow border and nf-cod-warning badge
     local border_color="$COLOR_YELLOW"
-    local badge=" 󰅖 "
-    if [ "$AGENT_COUNT" -gt 0 ]; then
-      border_color="$COLOR_RED"
-      badge=" 󰮯 "
-    fi
+    local badge="  "
 
     # Escape session name for safety
     local target_escaped
