@@ -76,13 +76,16 @@ if ! grep -q "src/adapters.rs:42" <<< "$list_out" || ! grep -q "src/main.rs:105"
 fi
 echo "PASS: List formats pending notes properly"
 
-# 2.5: Send notes to a dummy pane
-# If tmux is running, use current pane or mock
-CURRENT_PANE=$(tmux display-message -p '#{pane_id}' 2>/dev/null || echo "")
-if [[ -n "$CURRENT_PANE" ]]; then
-  # Dry-run send using current pane
-  "$REVIEW_SCRIPT" send "$TMP_REPO" "" "" "$CURRENT_PANE"
-  
+# 2.5: Send notes to an isolated dummy tmux pane (never touch active/current pane!)
+if command -v tmux >/dev/null 2>&1 && tmux ls >/dev/null 2>&1; then
+  DUMMY_SESSION="test-review-dummy-$$"
+  tmux new-session -d -s "$DUMMY_SESSION" "sleep 30"
+  DUMMY_PANE=$(tmux display-message -p -t "$DUMMY_SESSION" '#{pane_id}')
+
+  "$REVIEW_SCRIPT" send "$TMP_REPO" "" "" "$DUMMY_PANE"
+
+  tmux kill-session -t "$DUMMY_SESSION" 2>/dev/null || true
+
   # Verify status updated to Sent in lines.json
   after_count=$("$REVIEW_SCRIPT" count "$TMP_REPO")
   if [[ "$after_count" -ne 0 ]]; then
