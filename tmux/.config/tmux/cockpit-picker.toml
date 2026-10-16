@@ -53,6 +53,7 @@ modifier = "DIM"
 modifier = "BOLD"
 
 [results.current_nav_bar_style]
+fg = "cyan"
 modifier = "BOLD"
 
 [results.autoscroll]

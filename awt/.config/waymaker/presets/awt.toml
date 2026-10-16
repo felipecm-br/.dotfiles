@@ -54,7 +54,6 @@ sides = ""
 active = false
 
 [results.current_style]
-bg = "darkgray"
 modifier = "BOLD"
 
 [results.current_nav_bar_style]
