@@ -84,7 +84,7 @@ fi
 if [ "${#notifying_panes[@]}" -eq 0 ]; then
   while IFS= read -r line; do
     [ -n "$line" ] && notifying_panes+=("$line")
-  done < <(tmux list-panes -a -F '#{pane_id} #{pane_current_command} #{pane_title}' 2>/dev/null | awk '$2 ~ /^(agy|antigravity|opencode)$/ || $3 ~ /^(agy|antigravity|opencode)$/ {print $1}')
+  done < <(tmux list-panes -a -F '#{pane_id} #{pane_current_command} #{pane_title}' 2>/dev/null | awk '$2 ~ /^(agy|antigravity|opencode|claude|codex|muse)$/ || $3 ~ /^(agy|antigravity|opencode|claude|codex|muse)$/ {print $1}')
 fi
 
 current_pane=$(tmux display-message -p '#{pane_id}' 2>/dev/null || echo "")
