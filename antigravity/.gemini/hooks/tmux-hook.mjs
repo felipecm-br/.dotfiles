@@ -74,6 +74,11 @@ async function main() {
   log(LOG_FILE, `event=${eventType} pane=${tmuxPane} fullyIdle=${ctx.fullyIdle ?? 'n/a'}`);
 
   if (['SessionStart', 'PreInvocation'].includes(eventType)) {
+    if (tmuxPane) {
+      try {
+        execSync(`tmux rename-window -t "${tmuxPane}" "" 2>/dev/null || true`);
+      } catch (_) {}
+    }
     const title = extractSessionTitle(ctx);
     if (title) {
       setAiAgentTitle(tmuxPane, title);
@@ -98,6 +103,11 @@ async function main() {
   }
   else if (['SessionEnd', 'Exit'].includes(eventType)) {
     setAiAgentTitle(tmuxPane, null);
+    if (tmuxPane) {
+      try {
+        execSync(`tmux set-window-option -t "${tmuxPane}" automatic-rename on 2>/dev/null || true`);
+      } catch (_) {}
+    }
     await sendAcpState(tmuxPane, 'closed');
   }
 

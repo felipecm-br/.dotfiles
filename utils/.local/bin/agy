@@ -12,7 +12,7 @@ if [ -n "$TMUX_PANE" ]; then
     tmux set-window-option -t "'"$TMUX_PANE"'" automatic-rename on > /dev/null 2>&1 || true
     tmux refresh-client -S > /dev/null 2>&1 || true
   ' EXIT INT TERM
-  tmux rename-window -t "'"$TMUX_PANE"'" "" > /dev/null 2>&1 || true
+  tmux rename-window -t "$TMUX_PANE" "" > /dev/null 2>&1 || true
 fi
 
 # Execute the real agy binary (without exec so trap fires on exit)
