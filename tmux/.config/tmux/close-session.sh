@@ -106,7 +106,7 @@ analyze_session() {
 
     # 3. Direct command matching
     case "$pcmd" in
-      agy|agy-bin|antigravity|opencode|claude|codex|gemini|aider)
+      agy|agy-bin|antigravity|opencode|claude|codex|muse|gemini|aider)
         is_agent=1
         [ -z "$st" ] && st="running"
         ;;
@@ -114,7 +114,7 @@ analyze_session() {
 
     # 4. Process tree inspection (descendants of pane PID)
     if [ "$is_agent" -eq 0 ] && [ -n "$pid" ]; then
-      if ps -s "$pid" -o comm= 2>/dev/null | grep -qE "^(agy|agy-bin|antigravity|opencode|claude|codex|gemini|aider)$"; then
+      if ps -s "$pid" -o comm= 2>/dev/null | grep -qE "^(agy|agy-bin|antigravity|opencode|claude|codex|muse|gemini|aider)$"; then
         is_agent=1
         [ -z "$st" ] && st="running"
       fi

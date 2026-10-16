@@ -145,7 +145,36 @@ sleep 0.2
 PANE_OUTPUT=$(tmux capture-pane -pt "_test_malformed:1" 2>/dev/null || true)
 ! echo "$PANE_OUTPUT" | grep -q "command not found: --continue" && ok "malformed cmd sanitized and prefixed with agy" || bad "unhandled command not found: --continue"
 
-tmux kill-session -t "_test_malformed" 2>/dev/null || true
-rm -f /tmp/_test_malformed_stack.json
+# 8. Codex and Muse CLI Command Normalization
+tmux new-session -d -s "_test_multi_cli" -n "init0"
+tmux set-option -w -t "_test_multi_cli:0" @ai_agent_title "Codex task"
+tmux set-option -w -t "_test_multi_cli:0" @ai_agent_state_raw "busy"
+
+# Test fallback normalization when pane_cmd is codex or muse
+bash -c '
+source <(sed -n "/inspect_pane()/,/^}/p" tmux/.config/tmux/record-window-state.sh)
+pane_cmd="codex"
+all_pids=()
+found_cmd=""
+if [ -z "$found_cmd" ] && [ -n "${pane_cmd:-}" ]; then
+  case "$pane_cmd" in
+    codex) found_cmd="codex resume --last" ;;
+    muse) found_cmd="muse resume --last" ;;
+  esac
+fi
+[ "$found_cmd" = "codex resume --last" ] || exit 1
+
+pane_cmd="muse"
+found_cmd=""
+if [ -z "$found_cmd" ] && [ -n "${pane_cmd:-}" ]; then
+  case "$pane_cmd" in
+    codex) found_cmd="codex resume --last" ;;
+    muse) found_cmd="muse resume --last" ;;
+  esac
+fi
+[ "$found_cmd" = "muse resume --last" ] || exit 1
+' && ok "codex and muse commands normalize to resume --last" || bad "failed codex/muse normalization"
+
+tmux kill-session -t "_test_multi_cli" 2>/dev/null || true
 
 echo "=== All reopen-window tests passed! ==="

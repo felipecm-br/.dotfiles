@@ -39,6 +39,8 @@ agent_state=$(echo "$TOP_ITEM" | jq -r '.agent_state // empty')
 cmd=$(printf '%s' "$cmd" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
 if [[ "$cmd" =~ ^-- ]]; then
   cmd="agy $cmd"
+elif [[ "$cmd" =~ ^resume ]]; then
+  cmd="codex $cmd"
 elif [ -z "$cmd" ] && [ -n "$agent_title" ]; then
   cmd="agy --continue"
 fi
