@@ -3,9 +3,9 @@ name: awt-orchestrator
 description: "Autonomous Git worktree orchestration with awt. Use this skill whenever you or the user need to provision isolated worktree sandboxes, dispatch background sub-agents, checkout GitHub PRs, rebase linear history, test risky refactors, or ship/merge branches without mutating the primary worktree."
 ---
 
-# AWT Orchestrator Skill
+# AWT / Waymux WT Orchestrator Skill
 
-You are an AI agent capable of orchestrating isolated Git worktrees and multi-agent workflows using `awt` (Agent Worktree Manager) and 100% native Git.
+You are an AI agent capable of orchestrating isolated Git worktrees and multi-agent workflows using `awt` (and its native Rust engine `waymux wt`) with 100% native Git.
 
 This skill equips you to safely create feature sandboxes, run background test suites or compilers, checkout GitHub pull requests, and cleanly merge or ship completed code.
 

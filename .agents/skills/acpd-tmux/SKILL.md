@@ -3,9 +3,9 @@ name: acpd-tmux
 description: "Control Tmux from inside your terminal using the ACPD daemon. Manage windows, split panes, select windows/panes, display status messages, ring bells, apply layouts, capture outputs, and inject keystrokes via JSON-RPC POST requests to localhost:4040/rpc. Use this skill whenever you need to orchestrate parallel tasks, monitor servers, run tests in background, or switch focus across panes/windows."
 ---
 
-# ACPD Tmux Controller Skill
+# Waymux / ACPD Tmux Controller Skill
 
-You are an AI agent running inside a Tmux session connected to the ACPD (Agent Client Protocol Daemon). ACPD exposes a lightweight JSON-RPC 2.0 API on `http://127.0.0.1:4040/rpc` that allows you to control Tmux natively without relying on complex, raw `tmux` bash commands.
+You are an AI agent running inside a Tmux session connected to **Waymux** (`waymux` / `acpd`, Agent Client Protocol Daemon). Waymux exposes both sub-millisecond synchronous CLI commands (`waymux`) and a lightweight JSON-RPC 2.0 API on `http://127.0.0.1:4040/rpc` that allows you to control Tmux natively without relying on complex, raw `tmux` bash commands.
 
 This means you can orchestrate your workspace:
 - Create and switch focus between Tmux windows and panes.
@@ -17,8 +17,8 @@ This means you can orchestrate your workspace:
 
 ## Core Concepts
 
-You can control Tmux via `acpd-cli` (`acpd-cli status`, `acpd-cli run [-d] [-s sess] [-w win] <cmd>`, `acpd-cli capture <pane>`, `acpd-cli send <pane> <keys>`, `acpd-cli wait <pane> --state idle`, `acpd-cli dismiss <pane>`, `acpd-cli msg <text>`, `acpd-cli bell <pane>`) or by sending HTTP POST requests using `curl` to `http://127.0.0.1:4040/rpc`.
-All raw HTTP requests must be valid JSON-RPC 2.0 payloads with the Bearer token header from `/run/user/$UID/acpd/token`.
+You can control Tmux via `waymux` (`waymux status`, `waymux list`, `waymux dismiss [pane]`, `waymux cockpit`, `waymux triage --popup|--jump`, `waymux wt`, `waymux review-notes`, `waymux inject`), `acpd-cli` (`acpd-cli run [-d] [-s sess] [-w win] <cmd>`, `acpd-cli capture <pane>`, `acpd-cli send <pane> <keys>`, `acpd-cli wait <pane> --state idle`, `acpd-cli msg <text>`, `acpd-cli bell <pane>`), or by sending HTTP POST requests using `curl` to `http://127.0.0.1:4040/rpc`.
+All raw HTTP requests must be valid JSON-RPC 2.0 payloads with the Bearer token header from `/run/user/$UID/waymux/token` (or `/run/user/$UID/acpd/token`).
 
 **Endpoints Available via RPC `method`:**
 - `tmux.new_window`: Creates a new Tmux window (tab).
@@ -46,7 +46,7 @@ All raw HTTP requests must be valid JSON-RPC 2.0 payloads with the Bearer token 
 To bring focus to a specific window or pane (e.g. window index `:0` or pane `%6`):
 
 ```bash
-TOKEN=$(cat /run/user/$UID/acpd/token 2>/dev/null || cat /run/user/1001/acpd/token)
+TOKEN=$(cat /run/user/$UID/waymux/token 2>/dev/null || cat /run/user/$UID/acpd/token)
 curl -X POST http://127.0.0.1:4040/rpc \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
