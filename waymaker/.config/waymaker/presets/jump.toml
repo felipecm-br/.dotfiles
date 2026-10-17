@@ -97,12 +97,11 @@ folder_icon_style.fg = "#8999f1"
 icon = "󱋢"
 icon_style.fg = "#8999f1"
 
-[results.current_nav_bar_style]
-fg = "white"
-
 [results.current_style]
-fg = "black"
-bg = "Darkgray"
+modifier = "BOLD"
+
+[results.current_nav_bar_style]
+fg = "cyan"
 modifier = "BOLD"
 
 [results.autoscroll]

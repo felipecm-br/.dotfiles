@@ -61,6 +61,17 @@ unselected_prefix = "  "
 row_connection = "Full"
 column_spacing = 1
 
+[results.prefix_style]
+fg = "cyan"
+modifier = "BOLD"
+
+[results.current_style]
+modifier = "BOLD"
+
+[results.current_nav_bar_style]
+fg = "cyan"
+modifier = "BOLD"
+
 [results.border]
 sides = ""
 

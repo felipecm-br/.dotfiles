@@ -68,12 +68,11 @@ separator = "Underline"
 fg = "#555555"
 
 [results.current_style]
-fg = "black"
-bg = "Darkgray"
 modifier = "BOLD"
 
 [results.current_nav_bar_style]
-fg = "white"
+fg = "cyan"
+modifier = "BOLD"
 
 [results.bookmark]
 folder_icon = "󰮟"
