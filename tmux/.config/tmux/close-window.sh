@@ -92,12 +92,12 @@ analyze_target() {
   [ -z "$WIN_ID" ] && return 0
 
   declare -A acpd_panes=()
-  if command -v acpd-cli >/dev/null 2>&1; then
+  if command -v waymux >/dev/null 2>&1; then
     while IFS=$'\t' read -r apid astate atime; do
       if [ -n "$apid" ] && [ "$astate" != "closed" ]; then
         acpd_panes["$apid"]="$astate"
       fi
-    done < <(acpd-cli list 2>/dev/null || true)
+    done < <(waymux list 2>/dev/null || true)
   fi
 
   # Determine which panes to inspect:

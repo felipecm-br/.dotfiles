@@ -436,13 +436,13 @@ inspect_antigravity_ide() {
   record_status "antigravity-ide" "antigravity-ide (gui)" "$ICON_IDE" "$cur" "$lat" "$status"
 }
 
-# 7. ACPD Daemon
+# 7. Waymux / ACPD Daemon
 inspect_acpd() {
   local cur="missing"
-  if [[ -x "$TARGET_HOME/.local/bin/acpd" ]]; then
-    cur=$("$TARGET_HOME/.local/bin/acpd" --version 2>/dev/null | awk '{print $2}' || true)
-  elif command -v acpd &>/dev/null; then
-    cur=$(acpd --version 2>/dev/null | awk '{print $2}' || true)
+  if [[ -x "$TARGET_HOME/.local/bin/waymux" ]]; then
+    cur=$("$TARGET_HOME/.local/bin/waymux" --version 2>/dev/null | awk '{print $2}' || true)
+  elif command -v waymux &>/dev/null; then
+    cur=$(waymux --version 2>/dev/null | awk '{print $2}' || true)
   fi
 
   local lat="$cur"
@@ -458,7 +458,7 @@ inspect_acpd() {
     lat="git:${remote_head}"
   fi
 
-  record_status "acpd" "acpd (agent rpc daemon)" "$ICON_ACPD" "$cur" "$lat" "$status"
+  record_status "acpd" "waymux (cockpit & rpc daemon)" "$ICON_ACPD" "$cur" "$lat" "$status"
 }
 
 # 7. AI Memory
@@ -800,9 +800,9 @@ update_acpd() {
       fi
       echo -e "  ${C_GREEN}${ICON_OK}${C_RESET} ACPD & Waymux binaries updated at ${C_BOLD}~/.local/bin/{acpd,waymux}${C_RESET}"
 
-      echo -e "${C_BLUE}${ICON_INFO}${C_RESET} Restarting ${C_BOLD}acpd.service${C_RESET} systemd daemon..."
-      systemctl --user restart acpd 2>/dev/null || true
-      echo -e "  ${C_GREEN}${ICON_OK}${C_RESET} acpd service restarted successfully"
+      echo -e "${C_BLUE}${ICON_INFO}${C_RESET} Restarting ${C_BOLD}waymux.service${C_RESET} systemd daemon..."
+      systemctl --user restart waymux.service 2>/dev/null || true
+      echo -e "  ${C_GREEN}${ICON_OK}${C_RESET} waymux service restarted successfully"
     else
       echo -e "  ${C_RED}${ICON_FAIL}${C_RESET} Failed to compile acpd via cargo"
       return 1

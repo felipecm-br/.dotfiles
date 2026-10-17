@@ -74,13 +74,13 @@ analyze_session() {
   declare -A agent_windows=()
   declare -A acpd_panes=()
 
-  # Query ACPD control plane daemon if available
-  if command -v acpd-cli >/dev/null 2>&1; then
+  # Query Waymux control plane daemon if available
+  if command -v waymux >/dev/null 2>&1; then
     while IFS=$'\t' read -r apid astate atime; do
       if [ -n "$apid" ] && [ "$astate" != "closed" ]; then
         acpd_panes["$apid"]="$astate"
       fi
-    done < <(acpd-cli list 2>/dev/null || true)
+    done < <(waymux list 2>/dev/null || true)
   fi
 
   while IFS="|" read -r wid wnum wname pid pcmd ptitle raw_state raw_title; do

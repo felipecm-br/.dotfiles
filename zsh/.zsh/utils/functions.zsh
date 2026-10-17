@@ -412,28 +412,28 @@ bd() {
     return 1
 }
 
-# acpd - Manage the ACPD daemon service
+# acpd - Manage the Waymux daemon service
 # Usage: acpd [status|start|stop|restart|logs|kill]
 acpd() {
     local action="${1:-status}"
     case "$action" in
         start)
-            systemctl --user start acpd.service && echo "acpd started"
+            systemctl --user start waymux.service && echo "waymux started"
             ;;
         stop)
-            systemctl --user stop acpd.service && echo "acpd stopped"
+            systemctl --user stop waymux.service && echo "waymux stopped"
             ;;
         restart)
-            systemctl --user restart acpd.service && echo "acpd restarted"
+            systemctl --user restart waymux.service && echo "waymux restarted"
             ;;
         status)
-            systemctl --user status acpd.service
+            systemctl --user status waymux.service
             ;;
         logs|log)
-            journalctl --user -u acpd.service -f
+            journalctl --user -u waymux.service -f
             ;;
         kill)
-            pkill -9 -x acpd 2>/dev/null && echo "acpd killed" || systemctl --user stop acpd.service
+            pkill -9 -x waymux 2>/dev/null && echo "waymux killed" || systemctl --user stop waymux.service
             ;;
         *)
             echo "Usage: acpd [status|start|stop|restart|logs|kill]"

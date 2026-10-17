@@ -230,7 +230,6 @@ case "${1:-}" in
     if [ -n "$entry" ]; then
       echo "$entry" > "$ACTIVE_FILE"
     fi
-    acpd-cli dismiss >/dev/null 2>&1 &
     # Debounced periodic topology snapshot (zero-fork check, max once per 30s)
     printf -v _now '%(%s)T' -1
     _snap_lock="/tmp/cockpit-snap-debounce-${UID:-$(id -u)}.lock"

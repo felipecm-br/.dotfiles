@@ -298,6 +298,15 @@ cockpit
 # Launch Waymux native AI Fleet & Window Cockpit HUD
 waymux cockpit
 
+# Inspect Waymux daemon health and active AI agent states
+waymux status
+
+# List active AI agent pane states in TSV format
+waymux list
+
+# Dismiss attention, question, or permission badge on target pane
+waymux dismiss {{pane}}
+
 # Generate Waymux Cockpit TSV items with /proc CPU/RAM telemetry
 waymux cockpit-items
 

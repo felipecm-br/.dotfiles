@@ -1,12 +1,12 @@
 [Unit]
-Description=ACPD: Agent Client Protocol Daemon
+Description=Waymux: Terminal AI Cockpit & Agent Control Plane Daemon
 Documentation=https://github.com/felipecm-br/acpd
 After=network-online.target
 Wants=network-online.target
 
 [Service]
 Type=notify
-ExecStart=%h/.local/bin/acpd
+ExecStart=%h/.local/bin/waymux daemon
 ExecReload=/bin/kill -HUP $MAINPID
 Restart=on-failure
 RestartSec=5s
@@ -17,13 +17,14 @@ NoNewPrivileges=yes
 LimitNOFILE=65536
 MemoryMax=512M
 
-# Runtime directory for PID file and sockets
-RuntimeDirectory=acpd
+# Runtime directory for PID file, presets, and tokens
+RuntimeDirectory=waymux acpd
 
 # Logging
 StandardOutput=journal
 StandardError=journal
-SyslogIdentifier=acpd
+SyslogIdentifier=waymux
 
 [Install]
 WantedBy=default.target
+Alias=acpd.service

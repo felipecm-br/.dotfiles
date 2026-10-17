@@ -2,7 +2,7 @@
   "tmux": {
     "PostInvocation": [
       {
-        "command": "node /home/fecavmi/.gemini/hooks/tmux-hook.mjs PostInvocation",
+        "command": "waymux hook tmux PostInvocation",
         "timeout": 0,
         "type": "command"
       }
@@ -11,7 +11,7 @@
       {
         "hooks": [
           {
-            "command": "node /home/fecavmi/.gemini/hooks/tmux-hook.mjs PostToolUse",
+            "command": "waymux hook tmux PostToolUse",
             "timeout": 0,
             "type": "command"
           }
@@ -21,12 +21,12 @@
     ],
     "PreInvocation": [
       {
-        "command": "node /home/fecavmi/.gemini/hooks/tmux-hook.mjs PreInvocation",
+        "command": "waymux hook tmux PreInvocation",
         "timeout": 0,
         "type": "command"
       },
       {
-        "command": "node /home/fecavmi/.gemini/hooks/lazygit-hook.mjs PreInvocation",
+        "command": "waymux hook lazygit PreInvocation",
         "timeout": 0,
         "type": "command"
       }
@@ -35,7 +35,7 @@
       {
         "hooks": [
           {
-            "command": "node /home/fecavmi/.gemini/hooks/tmux-hook.mjs PreToolUse",
+            "command": "waymux hook tmux PreToolUse",
             "timeout": 0,
             "type": "command"
           }
@@ -45,19 +45,19 @@
     ],
     "SessionEnd": [
       {
-        "command": "node /home/fecavmi/.gemini/hooks/tmux-hook.mjs SessionEnd",
+        "command": "waymux hook tmux SessionEnd",
         "timeout": 0,
         "type": "command"
       },
       {
-        "command": "node /home/fecavmi/.gemini/hooks/lazygit-hook.mjs SessionEnd",
+        "command": "waymux hook lazygit SessionEnd",
         "timeout": 0,
         "type": "command"
       }
     ],
     "Stop": [
       {
-        "command": "node /home/fecavmi/.gemini/hooks/tmux-hook.mjs Stop",
+        "command": "waymux hook tmux Stop",
         "timeout": 0,
         "type": "command"
       }

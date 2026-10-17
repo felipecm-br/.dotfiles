@@ -122,7 +122,10 @@ Starting in `v0.2.0`, the crate builds both `acpd` and `waymux` from a single un
 - `waymux --version` / `acpd --version` (`-V`): Print the version and exit.
 - `waymux --help` / `acpd --help` (`-h`): Print usage and exit.
 - `waymux health` / `acpd health`: `GET /health` against `127.0.0.1:4040`; prints the JSON (`status`, `uptime_secs`) and exits 0, or exits 1 if the daemon is unreachable.
-- `waymux daemon [--config <FILE>]` (or running `acpd` with no subcommand): Start the async Axum/Tokio control plane daemon.
+- `waymux status`: Print daemon health and active AI agent states across Tmux panes.
+- `waymux list`: List active AI agent pane states in TSV format (`pane_id`, `state`, `last_timestamp`).
+- `waymux dismiss [pane_id]`: Dismiss attention/question/permission badge for a pane (invoked directly by Tmux `pane-focus-in` hook).
+- `waymux daemon [--config <FILE>]` (managed via `waymux.service`): Start the async Axum/Tokio control plane daemon.
 - `waymux cockpit`: Launch the Golden-Ratio (`85% × 75%`) AI Fleet & Window Cockpit HUD via Waymaker (`wm`) with an embedded preset and `@SEGMENT_BG`/`@FG`/`@ACCENT_COLOR` theme synchronization.
 - `waymux cockpit-items`: Generate the 12-column TSV rows for Waymaker using native `/proc/<pid>/stat` and `/proc/<pid>/comm` scanning (~14ms).
 - `waymux cockpit-preview <session> <idx> <pane_id> [path]` / `waymux cockpit-diff <path> [pane_id]` / `waymux cockpit-help`: Render live terminal previews, `delta` side-by-side git diffs, and telemetry help cards.
@@ -132,7 +135,7 @@ Starting in `v0.2.0`, the crate builds both `acpd` and `waymux` from a single un
 - `waymux wt <subcommand>` (or invoked via `awt` symlink): Native Git worktree orchestrator (`new`, `go`, `ls`, `rm`, `ship`, `reap`, `sweep`, `pick`).
 - `waymux init <--tmux|--systemd|--hooks>`: Emit portable integration snippets for `.tmux.conf`, user systemd, and agent hooks.
 
-> Running an already-running daemon's binary again with no arguments still attempts to start a second instance (it is stopped by the PID file guard). A rebuilt binary only takes effect in the running service after `systemctl --user restart acpd`, which clears in-memory agent state until each pane's next hook.
+> Running an already-running daemon's binary again with no arguments still attempts to start a second instance (it is stopped by the PID file guard). A rebuilt binary only takes effect in the running service after `systemctl --user restart waymux.service`.
 
 ---
 
