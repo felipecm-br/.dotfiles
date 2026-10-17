@@ -52,28 +52,43 @@ Border colors and titles dynamically synchronize with the current Omarchy system
 
 ---
 
-## 3. High-Fidelity ASCII / Unicode Wireframe Specification
+## 3. Triadic Cold-Color Architecture & Clean Zero-Background
+
+All popup components adhere to the deterministic Triadic Cold-Color Architecture and Clean Zero-Background standard:
+
+1. **Blue (`#89b4fa` / `blue`) — Passive Frame:** Modal boundary, headers, and tabs. Interpreted by the visual cortex as stable architectural ground without falsely signaling keyboard focus.
+2. **Cyan (`#94e2d5` / `cyan`) — Action Trigger:** The left lateral focus bar (`▌` at $X=1$) and interactive shortcut keys in the footer. Anchors foveal attention to actionable affordances in $<15\text{ ms}$.
+3. **Darkgray (`#585b70` / `darkgray`) — Low-Noise Metadata:** Action descriptions, vertical dividers (`│`), and inactive counts. Suppressed below the threshold of preattentive distraction.
+
+### Clean Zero-Background Standard
+- **No Opaque Selection Strips:** Opaque background highlights (`bg = "darkgray"`, `bg = "black"`) are strictly eliminated across all pickers and modals.
+- **Transparency with BOLD:** The active selection preserves the terminal's native transparency and indicates primacy through `modifier = "BOLD"`.
+- **Cyan Lateral Indicator:** A crisp 2-character cyan focus bar (`current_nav_bar_style fg = "cyan"`) anchors the selection at $X=1$.
+
+---
+
+## 4. High-Fidelity ASCII / Unicode Wireframe Specification
 
 ```text
 ╭── 󱂬  Matchmaker Jump ────────────────────────────────────────────────────────╮
 │ > git                                                              8 matches │
 │──────────────────────────────────────────────────────────────────────────────│
-│ 󱅤  main/                                    │ commit bb603d9 (HEAD)          │
-│ 󱅤  feat-eval/                                │ Author: felipe                 │
-│ 󱅤  pr-42/                                   │ Date:   Thu Sep 17 18:56:06    │
-│    .bare/                                   │                                │
-│    .git/                                    │ feat(stow): migrate agent      │
-│    scripts/                                 │ skills into dedicated stow     │
-│    docs/                                    │ package                        │
-│                                             │                                │
-│                                             │ - Move awt-orchestrator skill  │
-│                                             │ - Symlink .agents/skills       │
-╰── l/Enter Open │ h Parent │ u Undo │ Tab Cycle Scope │ Esc Close ────────────╯
+│▌󱅤  main/                                    │ commit bb603d9 (HEAD)          │
+│  󱅤  feat-eval/                                │ Author: felipe                 │
+│  󱅤  pr-42/                                   │ Date:   Thu Sep 17 18:56:06    │
+│     .bare/                                   │                                │
+│     .git/                                    │ feat(stow): migrate agent      │
+│     scripts/                                 │ skills into dedicated stow     │
+│     docs/                                    │ package                        │
+│                                              │                                │
+│                                              │ - Move awt-orchestrator skill  │
+│                                              │ - Symlink .agents/skills       │
+╰── l/Enter Open │ h Parent │ u Undo │ Tab Scope │ ? Help │ Esc Close ─────────╯
 ```
 
 ---
 
-## 4. Auditory Telemetry via `acpd`
+## 5. Auditory Telemetry via `acpd`
 
 Visual popups can be accompanied or replaced by non-blocking auditory cues managed by the `acpd` daemon:
 - PipeWire low-latency sound cues (<10ms).

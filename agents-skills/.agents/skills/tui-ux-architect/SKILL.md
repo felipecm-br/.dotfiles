@@ -10,8 +10,10 @@ description: >-
   Frecency 2.0 (ptl, ptg, pt, mtl, mtg, mt, _smart_tab, mm_smart_chpwd), Lazygitrs Dual-Diff toggle
   (Ctrl+G between Files and HEAD), Tmux Golden Ratio popups (75%x60%, 40/60 split), Omarchy dynamic
   theme color sync, auditory telemetry via acpd, KLM-GOMS modeling, Doherty threshold (<100ms),
-  cognitive load reduction (Hick-Hyman, Miller, Sweller), visual semiotics (pure Nerd Font icon badges,
-  Tufte Data-Ink ratio), and zero-churn ergonomic stability.
+  cognitive load reduction (Hick-Hyman, Miller, Sweller), triadic cold-color architecture
+  (blue passive architecture, cyan control trigger, darkgray metadata), Treisman preattentive
+  hue reservation, CIE 1931 foveal photobiology, clean zero-background, Gestalt figure-ground contrast,
+  visual semiotics (pure Nerd Font icon badges, Tufte Data-Ink ratio), and zero-churn ergonomic stability.
 ---
 
 # Principal TUI UX Architect, Biomechanical Ergonomist & Systems Engineer
@@ -32,8 +34,9 @@ flowchart TD
         KLM["<b>KLM-GOMS (Card, Moran & Newell)</b><br/>T_execute = ∑K + ∑P + ∑H + ∑M + ∑R<br/>Target: H = 0, P = 0, M ≈ 0, minimal K"]
         DOH["<b>Doherty Threshold (&lt;100ms)</b><br/>Sub-100ms execution & destruction<br/>Sub-16ms render loops, 60 FPS"]
         TUFTE["<b>Visual Semiotics & Data-Ink (Tufte / Treisman)</b><br/>Minimalist Nerd Font badges (󱂬, ⚡, 󰊢)<br/>Preattentive decoding in &lt;15ms"]
-        SEMIOTICS["<b>Dynamic Visual Semiotics</b><br/>Omarchy theme color sync (colors.toml)<br/>Ephemeral vs Persistent vs Reactive layers"]
+        TRIADIC["<b>Triadic Cold-Color Law</b><br/>Blue = Architecture • Cyan = Control Trigger<br/>Darkgray = Zero-Noise Metadata"]
         AUREA["<b>Golden Ratio (φ ≈ 1.618)</b><br/>75% × 60% viewport geometry & 40/60 split<br/>Optimal foveal focus (2°-5° cone)"]
+        SEMIOTICS["<b>Dynamic Visual Semiotics</b><br/>Omarchy theme color sync (colors.toml)<br/>Clean Zero-Background & BOLD focus"]
         STABILITY["<b>Ergonomic Stability Rule</b><br/>Consolidated muscle memory is sacred<br/>Zero unnecessary key churn"]
     end
 ```
@@ -56,9 +59,53 @@ $$T_{\text{execute}} = \sum T_K + \sum T_P + \sum T_H + \sum T_M + \sum T_R$$
   - Strictly aligned, fixed-width columnar grids allow ballistic vertical saccades ($X = \text{const}$) in $O(1)$ sweeps ($\approx 25\text{–}35\text{ ms/row}$).
 - **Preattentive Hue Reservation (Treisman 1985):**
   - The visual cortex preattentively parses $\le 5$ simultaneous hues before feature search degrades into slow serial inspection.
-  - Chromatic hue (`orange`, `magenta`, `red`, `yellow`, `cyan`) must be strictly reserved for **dynamic operational state & urgency** (blocked agent, uncommitted churn, error, CI failure).
+  - Warm chromatic hues (`red`, `yellow`, `orange`, `magenta`) must be strictly reserved for **dynamic operational state & urgency** (blocked agent, uncommitted churn, error, CI failure). They must NEVER be used for routine navigation chrome or static borders.
 - **Bouma's Law of Visual Crowding (1970) & Bracket Elimination:**
   - Punctuation flanking text within $0.5\times$ eccentricity crowds letter identification. Eliminating redundant square brackets (`[Key]`) in footers and candidate rows removes 14–22 non-data-ink glyphs and dramatically accelerates peripheral readability.
+
+### 1.3 Triadic Cold-Color Architecture & Chromatic Neuro-Semiotics
+
+In mature terminal and developer environments (Neovim, Tokyo Night, Catppuccin, Omarchy), colors are deterministic cognitive signals mapped directly to human visual channels:
+
+```mermaid
+flowchart TD
+    subgraph TriadicColdSystem ["Triadic Cold-Color Architecture"]
+        BLUE["<b>Blue (#89b4fa / Blue)</b><br/><b>Passive Architecture (Where I Am)</b><br/>Window frames, chrome, headers, modal borders<br/>Gestalt: Ground • Low cognitive interrupt"]
+        CYAN["<b>Cyan (#94e2d5 / Cyan)</b><br/><b>Control Trigger & Focus (What I Can Press)</b><br/>Lateral indicator, active item, footer shortcuts<br/>Gestalt: Figure • High foveal affordance (&lt;15ms)"]
+        GRAY["<b>Darkgray (#585b70 / Muted)</b><br/><b>Passive Metadata (Zero Noise)</b><br/>Descriptions, hairpins (│), counters, timestamps<br/>Filtered out until voluntary inspection"]
+    end
+```
+
+- **The Triadic Cold-Color Law (Cognitive Role Partitioning):**
+  - **Blue (`#89b4fa` / `blue`) — Passive Architecture ("Where I Am"):**
+    - Window frames, modal borders, static headers, breadcrumbs, and inactive category dividers.
+    - *Neuro-Cognitive Role:* Parsed as stable visual background (*Gestalt Ground*). Provides structural boundaries without competing for cognitive attention or falsely signaling actionable focus.
+  - **Cyan (`#94e2d5` / `cyan`) — Action Affordance & Control Trigger ("What I Can Press / Focus"):**
+    - Active selection cursor, left lateral focus bar (`current_nav_bar_style fg = "cyan"`), interactive shortcut keys in footers and HUDs.
+    - *Neuro-Cognitive Role:* Operates as immediate actionable affordance (*Gestalt Figure*). Steers foveal fixation straight to the active decision point in $<15\text{ ms}$ without cognitive overhead.
+  - **Darkgray / Muted (`#585b70` / `darkgray`) — Low-Luminance Metadata ("Zero-Noise Context"):**
+    - Shortcut action descriptions, delimiter hairlines (`│`), inactive counts, timestamps, secondary metrics.
+    - *Neuro-Cognitive Role:* Intentionally suppressed below the peripheral distraction threshold. Ignored by early visual processing until the user initiates a deliberate, voluntary saccade.
+
+- **Treisman Preattentive Warm-Hue Reservation:**
+  - The human visual cortex preattentively parses $\le 5$ simultaneous hues before visual search degrades into slow serial inspection (Treisman 1985).
+  - Warm chromatic hues (**Red, Orange, Yellow, Magenta**) are **strictly prohibited from routine navigation chrome, borders, and passive menus**.
+  - Warm hues are reserved exclusively for **asynchronous operational states & urgency**:
+    - *Red (`#f38ba8`):* Critical error, merge conflict, stalled background agent.
+    - *Yellow (`#f9e2af`):* User intervention required, question awaiting input.
+    - *Orange (`#fab387`):* Uncommitted git churn, dirty working tree, high-density persistent layer.
+    - *Magenta / Mauve (`#cba6f7`):* Ephemeral layer transitions ($< 5\text{s}$).
+    - *Green (`#a6e3a1`):* Atomic task completion, clean tree, synchronized branch.
+
+- **Foveal Photobiology & CIE 1931 Photopic Curve (~490–520nm):**
+  - Human photopic luminous efficiency peaks between $505\text{ nm}$ and $555\text{ nm}$ (green-cyan spectrum).
+  - Deep blue ($400\text{–}450\text{ nm}$) suffers from longitudinal chromatic aberration (myopic defocus on dark screens), causing deep blue text to appear blurry and hard to resolve when scanning at high speeds.
+  - Cyan ($490\text{–}520\text{ nm}$) stimulates both S-cones and M-cones with high foveal sharpness, providing instantaneous pop-out contrast against dark terminal backdrops without triggering the sympathetic amygdalar threat response associated with warm wavelengths ($>600\text{ nm}$).
+
+- **Gestalt Figure-Ground Separation & Clean Zero-Background Standard:**
+  - **Elimination of Opaque Block Clutter:** Opaque rectangular selection backgrounds (`bg = "darkgray"`, `bg = "black"`) produce jarring horizontal "bars" that break terminal transparency, introduce high-contrast edges across entire rows, and cause cognitive clutter.
+  - **The Transparent BOLD Standard:** Active list items preserve the terminal's native background transparency and express hierarchical primacy via `modifier = "BOLD"`.
+  - **The $X=1$ Lateral Indicator:** Combined with a 2-character wide cyan lateral bar (`current_nav_bar_style fg = "cyan"`), this establishes an unshakeable foveal anchor at $X=1$ without obscuring text or jarring peripheral vision.
 
 *See detailed benchmarks and comparisons in [references/klm-goms-benchmarks.md](references/klm-goms-benchmarks.md).*
 
@@ -174,6 +221,9 @@ Whenever asked to **audit**, **design**, **refactor**, or **generate code** for 
 ### 3. Visual Semiotics, Colors & Eye-Tracking
 - Conformance to Golden Ratio ($\phi \approx 1.618$) and 40/60 foveal split (vs. 50/50 horizontal splits).
 - Proof of fixed-width columnar alignment (Hybrid Golden-Grid) eliminating horizontal zig-zag micro-saccades.
+- Strict adherence to the Triadic Cold-Color Architecture: Blue for passive architecture/frames, Cyan for control triggers/focus/shortcuts, and Darkgray for metadata.
+- Clean Zero-Background compliance: No opaque rectangular background strips; active state conveyed via BOLD + cyan lateral indicator (`fg = "cyan"`).
+- Warm hue reservation: Red, yellow, orange, and magenta strictly isolated to operational state changes and urgency alerts.
 - Specification of pure Nerd Font glyph badges for preattentive decoding (<15ms) anchored at $X=1$.
 - Footer chromatic discipline: uniform bichromatic scheme with `│` separators, zero bracket clutter, and Treisman hue reservation.
 - Dynamic theme color integration bound to Omarchy `colors.toml`.
