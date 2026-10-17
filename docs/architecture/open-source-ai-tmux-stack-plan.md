@@ -42,20 +42,20 @@ The README and value proposition must lead with the concrete problem solved for 
 
 ## 2. Technical Audit of the Components
 
-### 2.1 `acpd` / `waymux` (Unified Agent Control Plane & Orchestrator `v0.2.0`)
-- **Path:** `~/dev/github/acpd` (produces both `acpd` and `waymux` binaries from a single crate)
+### 2.1 `waymux` (Unified Agent Control Plane & Orchestrator `v0.2.0`)
+- **Path:** `~/dev/github/waymux` (`https://github.com/felipecm-br/waymux`, produces `waymux` and `acpd` binaries from a single crate)
 - **Current State (`v0.2.0`):**
   - Robust core: Axum 0.8, Tokio 1.52, nix 0.29, sd-notify.
-  - Synchronous CLI fast-path (`src/lib.rs`) intercepts client subcommands (`cockpit`, `cockpit-items`, `cockpit-preview`, `cockpit-diff`, `cockpit-help`, `agent-action`, `review-notes`, `window-create`, `window-delete`, `triage`, `hook`, `inject`, `wt`, `init`, `health`) **before** initializing the multi-threaded Tokio runtime (<1.5ms startup overhead).
+  - Synchronous CLI fast-path (`src/lib.rs`) intercepts client subcommands (`cockpit`, `cockpit-items`, `cockpit-preview`, `cockpit-diff`, `cockpit-help`, `agent-action`, `review-notes`, `window-create`, `window-delete`, `triage`, `hook`, `inject`, `wt`, `init`, `health`, `status`, `list`, `dismiss`) **before** initializing the multi-threaded Tokio runtime (<1.5ms startup overhead).
   - Native `/proc/<pid>/stat` and `/proc/<pid>/comm` process tree telemetry scanner (`cockpit-items` completes in ~14ms vs ~140ms in Bash/awk).
   - Native AI agent hooks (`waymux hook tmux`, `waymux hook lazygit`) and bracketed-paste prompt injector (`waymux inject`), replacing Node.js cold-start latency (~45ms -> ~8ms).
   - Native Git worktree orchestrator (`waymux wt` / `awt` symlink parity) and bootstrapper (`waymux init --tmux|--systemd|--hooks`).
   - Embedded Waymaker preset (`cockpit-picker.toml`) materialized dynamically to `$XDG_RUNTIME_DIR/waymux/cockpit-picker.toml`.
-  - JSON-RPC 2.0 at `POST /rpc` (`agentState/update`, `agentState/list`, `tmux.*`).
+  - JSON-RPC 2.0 at `POST /rpc` (`agentState/update`, `agentState/list`, `agentState/dismiss`, `agentState/wait`, `tmux.*`).
   - **30 unit tests passing** (`cargo test`), 0 Clippy warnings (`cargo clippy --all-targets --all-features -- -D warnings`), ~5.0 MB release binary.
-  - Systemd user service unit (`systemd/acpd.service`).
-  - **Token generation is dynamic:** `acpd/src/auth.rs` checks `$XDG_RUNTIME_DIR/acpd/token`, then `$HOME/.cache/acpd/token`, then `/tmp/acpd-<uid>/token` with `0600` permissions.
-  - **Git Remote Status (Resolved):** Tagged `v0.2.0` and pushed to `origin/main`. Service `acpd.service` is actively running via user systemd (`~/.local/bin/acpd` and `~/.local/bin/waymux`).
+  - Systemd user service unit (`systemd/waymux.service`).
+  - **Token generation is dynamic:** `src/auth.rs` writes `$XDG_RUNTIME_DIR/waymux/token` (mirrored to `acpd/token`) with `0600` permissions.
+  - **Git Remote Status (Resolved):** Tagged `v0.2.0` and pushed to `origin/main` (`felipecm-br/waymux`). Service `waymux.service` is actively running via user systemd (`~/.local/bin/waymux`).
 
 ### 2.2 `lazygitrs` (`fecavmi` branch)
 - **Path:** `/home/fecavmi/dev/github/lazygitrs/fecavmi`

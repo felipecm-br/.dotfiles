@@ -453,7 +453,7 @@ inspect_acpd() {
 
   # Check remote git commit
   local remote_head
-  remote_head=$(git ls-remote --exit-code https://github.com/felipecm-br/acpd.git HEAD 2>/dev/null | cut -c1-7 || true)
+  remote_head=$(git ls-remote --exit-code https://github.com/felipecm-br/waymux.git HEAD 2>/dev/null | cut -c1-7 || true)
   if [[ -n "$remote_head" ]]; then
     lat="git:${remote_head}"
   fi
@@ -788,23 +788,19 @@ update_crush() {
 }
 
 update_acpd() {
-  echo -e "${C_BLUE}${ICON_INFO}${C_RESET} Building and upgrading ${C_BOLD}ACPD & Waymux (Unified Orchestrator)${C_RESET} via cargo..."
+  echo -e "${C_BLUE}${ICON_INFO}${C_RESET} Building and upgrading ${C_BOLD}Waymux (Unified Orchestrator & Daemon)${C_RESET} via cargo..."
   if command -v cargo &>/dev/null; then
-    if HOME="$TARGET_HOME" cargo install --force --git https://github.com/felipecm-br/acpd acpd; then
+    if HOME="$TARGET_HOME" cargo install --force --git https://github.com/felipecm-br/waymux waymux; then
       mkdir -p "$TARGET_HOME/.local/bin"
-      ln -sf "$TARGET_HOME/.cargo/bin/acpd" "$TARGET_HOME/.local/bin/acpd"
-      if [[ -x "$TARGET_HOME/.cargo/bin/waymux" ]]; then
-        ln -sf "$TARGET_HOME/.cargo/bin/waymux" "$TARGET_HOME/.local/bin/waymux"
-      else
-        ln -sf "$TARGET_HOME/.cargo/bin/acpd" "$TARGET_HOME/.local/bin/waymux"
-      fi
-      echo -e "  ${C_GREEN}${ICON_OK}${C_RESET} ACPD & Waymux binaries updated at ${C_BOLD}~/.local/bin/{acpd,waymux}${C_RESET}"
+      ln -sf "$TARGET_HOME/.cargo/bin/waymux" "$TARGET_HOME/.local/bin/waymux"
+      ln -sf "$TARGET_HOME/.local/bin/waymux" "$TARGET_HOME/.local/bin/acpd"
+      echo -e "  ${C_GREEN}${ICON_OK}${C_RESET} Waymux binary updated at ${C_BOLD}~/.local/bin/{waymux,acpd}${C_RESET}"
 
       echo -e "${C_BLUE}${ICON_INFO}${C_RESET} Restarting ${C_BOLD}waymux.service${C_RESET} systemd daemon..."
       systemctl --user restart waymux.service 2>/dev/null || true
       echo -e "  ${C_GREEN}${ICON_OK}${C_RESET} waymux service restarted successfully"
     else
-      echo -e "  ${C_RED}${ICON_FAIL}${C_RESET} Failed to compile acpd via cargo"
+      echo -e "  ${C_RED}${ICON_FAIL}${C_RESET} Failed to compile waymux via cargo"
       return 1
     fi
   else

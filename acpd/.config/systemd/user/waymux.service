@@ -1,6 +1,6 @@
 [Unit]
 Description=Waymux: Terminal AI Cockpit & Agent Control Plane Daemon
-Documentation=https://github.com/felipecm-br/acpd
+Documentation=https://github.com/felipecm-br/waymux
 After=network-online.target
 Wants=network-online.target
 
