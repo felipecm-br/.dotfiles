@@ -19,22 +19,22 @@ engine. The engine itself is upstream code installed under `~/.local/share/omarc
 ~/.config/omarchy/theme-overrides/<name>/    # Overrides shipped in this repo
 └── colors.toml                              #   color edits layered over the built-in theme
 
-~/.config/omarchy/current/theme/             # Active, rendered theme (generated — don't edit)
-~/.config/omarchy/current/theme.name         # Plain text file holding the active theme name
+~/.local/state/omarchy/current/theme/        # Active, rendered theme (generated — don't edit)
+~/.local/state/omarchy/current/theme.name    # Plain text file holding the active theme name
 ```
 
 Themes shipped as overrides here: `catppuccin`, `catppuccin-latte`, `ethereal`, `everforest`,
 `flexoki-light`, `gruvbox`, `hackerman`, `kanagawa`, `lumon`, `matte-black`, `miasma`, `nord`,
 `osaka-jade`, `retro-82`, `ristretto`, `rose-pine`, `tokyo-night`, `vantablack`, `white`.
 
-See `omarchy/.config/omarchy/theme-overrides/`.
+See [`omarchy/.config/omarchy/theme-overrides/`](../../omarchy/.config/omarchy/theme-overrides/).
 
 ## How a theme switch works
 
 Switching is triggered by the `omarchy-theme-set <name>` command
 (`~/.local/share/omarchy/bin/omarchy-theme-set`):
 
-1. Build a *next* theme dir (`~/.config/omarchy/current/next-theme`) by copying the built-in
+1. Build a *next* theme dir (`~/.local/state/omarchy/current/next-theme`) by copying the built-in
    theme and overlaying the matching override directory from this repo on top.
 2. Render `*.tpl` templates against `colors.toml` via `omarchy-theme-set-templates`. Templates
    live in two places:
@@ -42,9 +42,9 @@ Switching is triggered by the `omarchy-theme-set <name>` command
      (e.g. `ghostty.conf.tpl`, `hyprland.conf.tpl`, `waybar.css.tpl`, `mako.ini.tpl`,
      `alacritty.toml.tpl`, `btop.theme.tpl`, `hyprlock.conf.tpl`, `walker.css.tpl`,
      `chromium.theme.tpl`, `obsidian.css.tpl`, `swayosd.css.tpl`, `keyboard.rgb.tpl`)
-   - User (this repo): `~/.config/omarchy/themed/*.tpl`
-     (currently only `kitty.conf.tpl`)
-3. Atomically swap the *next* dir into `~/.config/omarchy/current/theme` and write the theme
+   - User (this repo): [`omarchy/.config/omarchy/themed/*.tpl`](../../omarchy/.config/omarchy/themed/)
+     (`acpd-config.toml.tpl`, `ghostty.conf.tpl`, `hyprland.lua.tpl`, `kitty.conf.tpl`, `tmux-colors.conf.tpl`, `waybar.css.tpl`)
+3. Atomically swap the *next* dir into `~/.local/state/omarchy/current/theme` and write the theme
    name to `theme.name`.
 4. Restart components: `omarchy-restart-waybar`, `omarchy-restart-fuzzel`, `omarchy-restart-swayosd`,
    `omarchy-restart-terminal`, `omarchy-restart-hyprctl`, `omarchy-restart-btop`,
@@ -65,18 +65,15 @@ Templates substitute `{{ key }}` placeholders from `colors.toml`:
 
 Override colors take precedence over the built-in theme's `colors.toml` (first-match wins in the
 underlying `sed` pass). See the render logic in
-`omarchy/.config/omarchy/hooks/theme-set`.
+[`omarchy/.config/omarchy/hooks/theme-set`](../../omarchy/.config/omarchy/hooks/theme-set).
 
 ## The `theme-set` hook (extending the theme system)
 
-`omarchy/.config/omarchy/hooks/theme-set` runs after every theme switch and does extra work this
+[`omarchy/.config/omarchy/hooks/theme-set`](../../omarchy/.config/omarchy/hooks/theme-set) runs after every theme switch and does extra work this
 repo needs:
 
-- Re-sources `~/.config/tmux/tmux.conf` so tmux picks up the freshly rendered `tmux-colors.conf`.
-- Re-renders any user template in `~/.config/omarchy/themed/` using both the active theme's
-  `colors.toml` and any matching override file, applying them with the same `{{ key }}` substitution.
-- Calls `omarchy-restart-hyprctl` (i.e. `hyprctl reload`) to apply new Hyprland colors.
-- Writes the Neovim colorscheme name so running Neovim instances pick it up via an fs watcher.
+- Re-sources `~/.config/tmux/tmux.conf` across running tmux servers so tmux immediately picks up the freshly rendered `tmux-colors.conf`.
+- Copies the rendered `~/.local/state/omarchy/current/theme/acpd-config.toml` into `~/.config/acpd/config.toml` and restarts `acpd.service` (`systemctl --user restart acpd.service`) so AI agent status pills and colors match the active theme.
 
 This is also where additional per-app refresh logic should be added when adopting a new tool into
 the dotfiles.

@@ -3,7 +3,7 @@
 **Scope**: Custom tmux + acpd + lazygitrs control plane vs. [herdr](https://github.com/ogulcancelik/herdr) vs. [age-of-agents](https://github.com/agentsmill/age-of-agents)  
 **Date**: 2026-07-22  
 **Status**: Definitive Analysis (100% Features, Security, Ergonomics & Hardening Complete)  
-**Location**: [`/home/fecavmi/.dotfiles/main/ai-workflow-definitive-analysis.md`](file:///home/fecavmi/.dotfiles/main/ai-workflow-definitive-analysis.md)  
+**Location**: [`docs/articles/ai-workflow-definitive-analysis.md`](ai-workflow-definitive-analysis.md)  
 
 ---
 
@@ -17,7 +17,7 @@ You have built a **composable, Unix-philosophy agent control plane** leveraging 
 > Do **NOT** migrate to `herdr` or `age-of-agents`.
 
 - **Why NOT `herdr`?**  
-  `herdr` is an AI-native terminal multiplexer that seeks to replace `tmux` entirely. Migrating would require abandoning your entire `tmux` ecosystem: `vim-tmux-navigator` (seamless Neovim pane switching), `tmux-resurrect` (session persistence), `tmux-thumbs`, Waybar integration, Matchmaker (`mm`) pickers, and years of muscle memory. Furthermore, `herdr` lacks the inline Git review loop that makes your setup unique.
+  `herdr` is an AI-native terminal multiplexer that seeks to replace `tmux` entirely. Migrating would require abandoning your entire `tmux` ecosystem: `vim-tmux-navigator` (seamless Neovim pane switching), `tmux-resurrect` (session persistence), `tmux-thumbs`, Waybar integration, Waymaker (`wm`) pickers, and years of muscle memory. Furthermore, `herdr` lacks the inline Git review loop that makes your setup unique.
   - **Action regarding `herdr`**: **Raid its architecture.** Adopt `herdr`'s read-side RPC capabilities into `acpd` (now completed for `capture_pane`, `list_panes`, `list_windows`, `list_sessions`, and `send_keys`).
 
 - **Why NOT `age-of-agents`?**  
@@ -25,7 +25,7 @@ You have built a **composable, Unix-philosophy agent control plane** leveraging 
   - **Action regarding `age-of-agents`**: **Adopt its security model.** Implemented local session-token authentication (`0600` file permissions) on `acpd`.
 
 - **What makes your stack irreplaceable?**  
-  The **bidirectional Git review loop** in `lazygitrs` (ai-notes branch). Highlighting diff lines, pressing `S`, injecting structured prompt annotations directly into the live AI session, and rendering AI responses inline inside the diff view is a capability no off-the-shelf multiplexer or observer possesses.
+  The **bidirectional Git review loop** in `lazygitrs` (ai-notes branch). Highlighting diff lines, pressing `c` / `S`, injecting structured prompt annotations directly into the live AI session, and rendering AI responses inline inside the diff view is a capability no off-the-shelf multiplexer or observer possesses.
 
 ---
 
@@ -36,7 +36,7 @@ You have built a **composable, Unix-philosophy agent control plane** leveraging 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │ 1. HUMAN REVIEWER (in lazygitrs)                                           │
-│    Inspect Git diff ➔ Position cursor on target line ➔ Press 'S'           │
+│    Inspect Git diff ➔ Position cursor on target line ➔ Press 'c' / 'S'     │
 │    Enter note: "Refactor this function to handle empty list gracefully"     │
 └──────────────────────┬──────────────────────────────────────────────────────┘
                        │
@@ -66,7 +66,7 @@ You have built a **composable, Unix-philosophy agent control plane** leveraging 
 
 1. **Zero Context Switching**:
    - **Without the loop**: You must copy code snippets, switch to the AI window, paste, explain file paths and line numbers, and switch back to your editor.
-   - **With the loop**: You perform code review directly inside your Git TUI using motion keys and pressing `S`.
+   - **With the loop**: You perform code review directly inside your Git TUI using motion keys and pressing `c` / `S`.
 
 2. **Surgical AI Precision**:
    - Notes include exact metadata (`path: "src/main.rs"`, `line: 42`, `hunkRange`). The AI receives exact line context without prompt ambiguity.
@@ -85,14 +85,14 @@ All critical bugs, performance friction points, read-side RPC expansions, securi
 
 | Item | File & Location | Description | Status & Verification |
 |---|---|---|---|
-| **Bug 1: SIGHUP Daemon Termination** | [`acpd/src/signals.rs:8-25`](file:///home/fecavmi/dev/github/acpd/src/signals.rs#L8-L25) | SIGHUP dropped `shutdown_tx` by RAII, instantly shutting down Axum with exit code 0. | **RESOLVED & VERIFIED** (Commit `cde70b5`). Handler refactored into a `loop` block. |
-| **Bug 2: Port Range Mismatch (5 vs 100)** | [`antigravity/.gemini/hooks/lazygit-hook.mjs:8`](file:///home/fecavmi/.dotfiles/main/antigravity/.gemini/hooks/lazygit-hook.mjs#L8) | Server binds 100 ports (`47657..47757`), client scanned only 5 ports (`[47657..47661]`). | **RESOLVED & VERIFIED**. `CANDIDATE_PORTS` updated to `Array.from({ length: 100 }, (_, i) => 47657 + i)`. |
-| **Bug 3: Double-Debounce & Out-of-Order Race** | [`acpd/src/api.rs:6-150`](file:///home/fecavmi/dev/github/acpd/src/api.rs#L6-L150)<br>[`tmux-hook.mjs:10-27`](file:///home/fecavmi/.dotfiles/main/antigravity/.gemini/hooks/tmux-hook.mjs#L10-L27) | Client `setTimeout` plus server debounce caused ~1300ms idle latency and state races. | **RESOLVED & VERIFIED** (Commits `cde70b5` and `50ae43b`). Client sends immediate timestamped payloads (`Date.now()`); server centralizes 650ms Tokio debounce. |
-| **Feature: Read-Side RPC Extensions** | [`acpd/src/api.rs:81-340`](file:///home/fecavmi/dev/github/acpd/src/api.rs#L81-L340) | Added RPCs: `tmux.capture_pane`, `tmux.list_panes`, `tmux.list_windows`, `tmux.list_sessions`, `agentState/list`, `tmux.send_keys`. | **IMPLEMENTED & VERIFIED** (Commits `6ce1c22` and `aeed302`). 9 unit tests passing. Verified live via curl. |
-| **Security: Session Token Auth & Strict State Parsing** | [`acpd/src/auth.rs`](file:///home/fecavmi/dev/github/acpd/src/auth.rs)<br>[`acpd/src/api.rs`](file:///home/fecavmi/dev/github/acpd/src/api.rs) | Token file in `$XDG_RUNTIME_DIR/acpd/token` with `0600` permissions. Strict state parsing returning `-32602` JSON-RPC error. | **IMPLEMENTED & VERIFIED** (Commit `70511f6`). Verified live via curl (401 without token, 200 with Bearer header, -32602 for invalid state). |
-| **Resilience: Dead Process Cleanup (Liveness)** | [`acpd/src/daemon.rs:44-58`](file:///home/fecavmi/dev/github/acpd/src/daemon.rs#L44-L58) | Abrupt `SIGKILL` or process crashes bypass exit handlers. | **RESOLVED & VERIFIED**. Spawns periodic 30s Tokio task in `daemon.rs` invoking `clean_stale_panes()`. |
-| **Ergonomics: High-Leverage Quick Wins** | [`tmux/.config/tmux/tmux.conf`](file:///home/fecavmi/.dotfiles/main/tmux/.config/tmux/tmux.conf)<br>[`waymaker/.config/waymaker/session.toml`](file:///home/fecavmi/.dotfiles/main/waymaker/.config/waymaker/session.toml) | Fast keybindings: `Alt+o` (overlay), `Alt+a` (semantic jump), `prefix+o` (sidebar split), and `sesh` wildcard rule. | **IMPLEMENTED & VERIFIED**. Added to dotfiles configs and tmux reloaded live (`tmux source-file`). |
-| **Review Loop Hardening** | [`lazygitrs/src/gui/mod.rs`](file:///home/fecavmi/dev/github/lazygitrs/ai-notes/src/gui/mod.rs) | Note status reset shortcut (`Sent` ➔ `New`) implemented and skill `lazygitrs-review` single-sourced via symlink. | **IMPLEMENTED & VERIFIED** (Commits `b65c67d` and `c6d6e26`). |
+| **Bug 1: SIGHUP Daemon Termination** | `acpd/src/signals.rs:8-25` | SIGHUP dropped `shutdown_tx` by RAII, instantly shutting down Axum with exit code 0. | **RESOLVED & VERIFIED** (Commit `cde70b5`). Handler refactored into a `loop` block. |
+| **Bug 2: Port Range Mismatch (5 vs 100)** | [`antigravity/.gemini/hooks/lazygit-hook.mjs`](../../antigravity/.gemini/hooks/lazygit-hook.mjs) | Server binds 100 ports (`47657..47757`), client scanned only 5 ports (`[47657..47661]`). | **RESOLVED & VERIFIED**. `CANDIDATE_PORTS` updated to `Array.from({ length: 100 }, (_, i) => 47657 + i)`. |
+| **Bug 3: Double-Debounce & Out-of-Order Race** | `acpd/src/api.rs:6-150`<br>[`tmux-hook.mjs`](../../antigravity/.gemini/hooks/tmux-hook.mjs) | Client `setTimeout` plus server debounce caused ~1300ms idle latency and state races. | **RESOLVED & VERIFIED** (Commits `cde70b5` and `50ae43b`). Client sends immediate timestamped payloads (`Date.now()`); server centralizes 650ms Tokio debounce. |
+| **Feature: Read-Side RPC Extensions** | `acpd/src/api.rs:81-340` | Added RPCs: `tmux.capture_pane`, `tmux.list_panes`, `tmux.list_windows`, `tmux.list_sessions`, `agentState/list`, `tmux.send_keys`. | **IMPLEMENTED & VERIFIED** (Commits `6ce1c22` and `aeed302`). 9 unit tests passing. Verified live via curl. |
+| **Security: Session Token Auth & Strict State Parsing** | `acpd/src/auth.rs`<br>`acpd/src/api.rs` | Token file in `$XDG_RUNTIME_DIR/acpd/token` with `0600` permissions. Strict state parsing returning `-32602` JSON-RPC error. | **IMPLEMENTED & VERIFIED** (Commit `70511f6`). Verified live via curl (401 without token, 200 with Bearer header, -32602 for invalid state). |
+| **Resilience: Dead Process Cleanup (Liveness)** | `acpd/src/daemon.rs:44-58` | Abrupt `SIGKILL` or process crashes bypass exit handlers. | **RESOLVED & VERIFIED**. Spawns periodic 30s Tokio task in `daemon.rs` invoking `clean_stale_panes()`. |
+| **Ergonomics: High-Leverage Quick Wins** | [`tmux/.config/tmux/tmux.conf`](../../tmux/.config/tmux/tmux.conf)<br>[`waymaker/.config/waymaker/session.toml`](../../waymaker/.config/waymaker/session.toml) | Fast keybindings: `Alt+o` (overlay), `Alt+a` (semantic jump), `prefix+o` (sidebar split), and `sesh` wildcard rule. | **IMPLEMENTED & VERIFIED**. Added to dotfiles configs and tmux reloaded live (`tmux source-file`). |
+| **Review Loop Hardening** | `lazygitrs/src/gui/mod.rs` | Note status reset shortcut (`Sent` ➔ `New`) implemented and skill `lazygitrs-review` single-sourced via symlink. | **IMPLEMENTED & VERIFIED** (Commits `b65c67d` and `c6d6e26`). |
 
 ---
 
@@ -102,7 +102,7 @@ All critical bugs, performance friction points, read-side RPC expansions, securi
 ┌────────────────────────────────────────────────────────────────────────┐
 │ PRESENTATION                                                           │
 │  tmux status-right (@ai_agent_bell) · window tabs (@ai_agent_state)    │
-│  Waybar module (RTMIN+13 + state json) · Matchmaker pickers (mm)       │
+│  Waybar module (RTMIN+13 + state json) · Waymaker pickers (wm)         │
 ├────────────────────────────────────────────────────────────────────────┤
 │ BROKER: acpd (Rust/axum, systemd --user, 127.0.0.1:4040, AUTH TOKEN)   │
 │  Auth: Token 0600 in $XDG_RUNTIME_DIR/acpd/token (Authorization Header) │
@@ -140,7 +140,7 @@ All critical bugs, performance friction points, read-side RPC expansions, securi
 - [x] **Sesh Wildcard**: Added `windows = ["ai"]` under `[[wildcard]]` in `~/.config/sesh/sesh.toml`.
 
 ### Phase 2: Security & Remaining RPC Extensions in `acpd` — Status: **COMPLETED (100%)**
-- [x] Added `tmux.list_windows`, `tmux.list_sessions`, and `agentState/list` to [`acpd/src/api.rs`](file:///home/fecavmi/dev/github/acpd/src/api.rs).
+- [x] Added `tmux.list_windows`, `tmux.list_sessions`, and `agentState/list` to `acpd/src/api.rs`.
 - [x] Rejection of unknown states with JSON-RPC error `-32602` validated with unit test `test_strict_agent_state_parsing`.
 - [x] Session-token auth (`$XDG_RUNTIME_DIR/acpd/token` with `0600` permissions) enabled in `auth.rs` and integrated in client hooks (`hook-lib.mjs`).
 

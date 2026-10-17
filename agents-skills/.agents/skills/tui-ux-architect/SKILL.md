@@ -106,7 +106,7 @@ $$T_{\text{execute}} = \sum T_K + \sum T_P + \sum T_H + \sum T_M + \sum T_R$$
   - `j <path>` $\rightarrow$ Direct jump if valid directory.
   - `j <query>` $\rightarrow$ Resolves best match from frecency (`wm list --dirs`) and jumps directly; falls back to interactive `wm -o jump query.initial="$*"`.
   - `ji` $\rightarrow$ Explicit interactive jump picker.
-  - `mm_smart_chpwd` hook: Asynchronously records directory visits while filtering out ephemeral/volatile paths (`/tmp*`, `/proc*`, `/sys*`, `*/.git*`, `*/node_modules*`, `*/target/debug*`, `*/target/release*`, `*/.direnv*`).
+  - `wm_smart_chpwd` hook: Asynchronously records directory visits while filtering out ephemeral/volatile paths (`/tmp*`, `/proc*`, `/sys*`, `*/.git*`, `*/node_modules*`, `*/target/debug*`, `*/target/release*`, `*/.direnv*`).
 - **Ultra-Fast Volatile File Transfer Operations (`_MM_LAST_TARGET`):**
   - `pt [files]`: Paste clipboard or passed files to directory selected via picker.
   - `ptg [files]`: Paste and **immediately navigate** to destination (`cd $target_dir`).
@@ -151,7 +151,7 @@ $$T_{\text{execute}} = \sum T_K + \sum T_P + \sum T_H + \sum T_M + \sum T_R$$
   - *Reactive Layer* (AI Agent Alerts & Approvals): Alert Yellow (`-T " 󰮯 "`).
 - **Auditory Telemetry:** Low-latency non-blocking PipeWire sound cues via `acpd` daemon, freeing visual attention.
 
-*See layout details in [references/tmux-golden-ratio-popups.md](references/tmux-golden-ratio-popups.md) and canonical audit in [`docs/architecture/state-of-the-art-terminal-agent-workflow.md`](../../../docs/architecture/state-of-the-art-terminal-agent-workflow.md).*
+*See layout details in [references/tmux-golden-ratio-popups.md](references/tmux-golden-ratio-popups.md) and canonical audit in [`docs/architecture/state-of-the-art-terminal-agent-workflow.md`](../../../../docs/architecture/state-of-the-art-terminal-agent-workflow.md).*
 
 ---
 

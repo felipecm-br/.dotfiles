@@ -1,8 +1,7 @@
 # Autonomous AI Agent & Terminal Multiplexer Integration Guide
 
 > **Scope**: Practical guide and real-world demonstrations of how `acpd` JSON-RPC methods (`tmux.list_sessions`, `tmux.list_windows`, `tmux.list_panes`, `tmux.capture_pane`, `tmux.send_keys`, `agentState/list`) empower AI coding agents to interact with terminal multiplexers as full-stack pair programming partners.
-> **File**: [`/home/fecavmi/.dotfiles/main/docs/autonomous-agent-examples-en.md`](file:///home/fecavmi/.dotfiles/main/docs/autonomous-agent-examples-en.md)
-> **Portuguese Version**: [`/home/fecavmi/.dotfiles/main/docs/autonomous-agent-examples.md`](file:///home/fecavmi/.dotfiles/main/docs/autonomous-agent-examples.md)
+> **File**: [`docs/articles/autonomous-agent-examples-en.md`](autonomous-agent-examples-en.md)
 
 ---
 
@@ -13,7 +12,7 @@
 - It allows agents to list panes, send keystrokes, and capture output buffers from panes created inside `herdr`.
 
 ### Why the `acpd` + `tmux` architecture is superior:
-1. **Full Ecosystem Preservation**: `herdr` requires abandoning `tmux` completely. With `acpd`, the same JSON-RPC control plane is layered on top of native `tmux`, retaining your entire toolset (`vim-tmux-navigator`, `tmux-resurrect`, `tmux-thumbs`, `sesh`, Matchmaker `mm` pickers, and Waybar widgets).
+1. **Full Ecosystem Preservation**: `herdr` requires abandoning `tmux` completely. With `acpd`, the same JSON-RPC control plane is layered on top of native `tmux`, retaining your entire toolset (`vim-tmux-navigator`, `tmux-resurrect`, `tmux-thumbs`, `sesh`, Waymaker `wm` pickers, and Waybar widgets).
 2. **Git Review Loop Integration**: `herdr` lacks a bi-directional code review annotation server (`lazygitrs`). The `acpd` stack integrates terminal-wide navigation with inline Git diff reviews.
 
 ---
@@ -109,13 +108,13 @@ User prompt in floating window (`Alt+o`): *"Workspace summary."*
 ### 🟢 Example 5: Inter-Window Remote Key Injection & Interactive Execution
 
 #### 🎬 Scenario:
-You want the agent in window A to trigger an calculation, command, or prompt in window B.
+You want the agent in window A to trigger a calculation, command, or prompt in window B.
 
 #### 🤖 AI Action via RPC:
-1. AI calls `tmux.send_keys` with target `@4` and keys `["quanto e 2+2?", "Enter"]`.
+1. AI calls `tmux.send_keys` with target `@4` and keys `["what is 2+2?", "Enter"]`.
 2. AI calls `tmux.capture_pane` on target `@4` to capture the output:
    ```text
-   > quanto e 2+2?
+   > what is 2+2?
 
      2 + 2 = 4
    ```
@@ -155,4 +154,4 @@ You are running load benchmarks and want to monitor resource spikes.
 | `tmux.kill_pane/window/session` | Teardown | `{target}` | Clean up completed background windows/panes |
 
 ---
-*Document saved at: [`/home/fecavmi/.dotfiles/main/docs/autonomous-agent-examples-en.md`](file:///home/fecavmi/.dotfiles/main/docs/autonomous-agent-examples-en.md)*
+*Document saved at: [`docs/articles/autonomous-agent-examples-en.md`](autonomous-agent-examples-en.md)*

@@ -1,7 +1,7 @@
 # Per-Pane AI Agent Status in Tmux Status Bar
 
-The tmux status bar displays real-time, dynamic state for AI agents (Antigravity / OpenCode / Copilot) running in each pane.
-State is pushed into tmux options `@ai_agent_state`, `@ai_agent_state_color`, `@ai_agent_state_raw`, `@copilot_state`, and `@ai_agent_bell` by the centralized `acpd` daemon (`127.0.0.1:4040`) and client hooks (`tmux-hook.mjs` / `hooker.ts`).
+The tmux status bar displays real-time, dynamic state for AI agents (Antigravity / Claude Code / Codex / Muse / OpenCode) running in each pane.
+State is pushed into tmux options `@ai_agent_state`, `@ai_agent_state_color`, `@ai_agent_state_raw`, `@ai_agent_title`, and `@ai_agent_bell` by the centralized `acpd` daemon (`127.0.0.1:4040`) and client hooks (`tmux-hook.mjs` / `hooker.ts`).
 
 ---
 
@@ -28,9 +28,7 @@ For inactive background tabs, `@ai_agent_state` is rendered in `#[fg=#{@ai_agent
 
 - `@ai_agent_state`: Pure icon or animated spinner frame string without embedded ANSI color tags (e.g. `⠋`, `󱜻`, `󱅭`, `󰨄`).
 - `@ai_agent_state_color`: Hex color string configured in `config.toml` (e.g. `#f9e2af`, `#cba6f7`, `#f38ba8`, `#94e2d5`).
-- `@ai_agent_title`: Clean active session title or initial prompt (e.g. `Fix memory leak in parser`), rendered in the Window Picker (`Prefix + s` / [`window-picker.sh`](../../tmux/.config/tmux/window-picker.sh)) matching the window item color and indexed for instant Matchmaker fuzzy search.
-
-
+- `@ai_agent_title`: Clean active session title or initial prompt (e.g. `Fix memory leak in parser`), rendered in the Cockpit & Window Pickers (`Prefix + Space` / [`cockpit-picker.sh`](../../tmux/.config/tmux/cockpit-picker.sh) and [`window-picker.sh`](../../tmux/.config/tmux/window-picker.sh)) matching the window item color and indexed for instant Waymaker fuzzy search.
 
 ---
 
@@ -38,7 +36,7 @@ For inactive background tabs, `@ai_agent_state` is rendered in `#[fg=#{@ai_agent
 
 To navigate tabs with zero screen occlusion and sub-100ms latency without opening modal pickers, `Prefix + f` activates the `window_hints` keytable:
 
-- **Visual State**: The session pill turns into `󰌌 JUMP` (`@PREFIX_COLOR`), inactive tab indices (`#I:`) transform into high-contrast Powerline half-round pills (`a`, `s`, `d`...), and the active window displays its bracketed hint (`[s]`).
+- **Visual State**: The session pill turns into `󰌌 #S` (`@PREFIX_COLOR`), inactive tab indices (`#I:`) transform into high-contrast Powerline half-round pills (`a`, `s`, `d`...), and the active window displays its bracketed hint (`[s]`).
 - **Home-Row Mapping**:
   - Windows 0 to 3: `a`, `s`, `d`, `f` (Left hand Home Row)
   - Windows 4 to 7: `j`, `k`, `l`, `;` (Right hand Home Row)

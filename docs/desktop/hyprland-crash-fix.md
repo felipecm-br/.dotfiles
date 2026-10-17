@@ -5,17 +5,15 @@ This document explains the reason behind sudden Hyprland crashes (which resulted
 ---
 
 ## 1. The Problem
-The Hyprland theme template file:
-`~/.dotfiles/main/hypr/.config/omarchy/themed-overrides/hyprland.conf.tpl`
+The Hyprland theme template file ([`omarchy/.config/omarchy/themed/hyprland.lua.tpl`](../../omarchy/.config/omarchy/themed/hyprland.lua.tpl), formerly `hypr/.config/omarchy/themed-overrides/hyprland.conf.tpl`):
 
-Had the following line active at the top (line 1):
+Had a self-referencing `source` line active at the top:
 ```ini
 source = ~/.config/omarchy/current/theme/hyprland.omarchy.conf
 ```
 
 ### What happened in practice:
-1. When applying or updating a theme, Omarchy's manager would read this `.tpl` file to generate the final compiled file:
-   `~/.config/omarchy/current/theme/hyprland.omarchy.conf`
+1. When applying or updating a theme, Omarchy's manager would read this `.tpl` file to generate the final compiled file in `~/.local/state/omarchy/current/theme/` (or `~/.config/omarchy/current/theme/`).
 2. Since the template contained the instruction to import the compiled file itself, the generated file ended up **importing itself**.
 3. When starting Hyprland, it read this `source` line, tried to import the file, which in turn tried to import itself, generating an **infinite recursion**.
 4. This overflowed the stack memory (Stack Overflow), resulting in a **Segmentation Fault (Segfault / Core Dump)**.
@@ -24,33 +22,26 @@ source = ~/.config/omarchy/current/theme/hyprland.omarchy.conf
 ---
 
 ## 2. The Solution
-The definitive solution is to ensure that the `source` line is commented out in both the **template** and the **generated file**:
+The definitive solution is to ensure that the template ([`omarchy/.config/omarchy/themed/hyprland.lua.tpl`](../../omarchy/.config/omarchy/themed/hyprland.lua.tpl)) only defines theme variables (`$activeBorderColor`, `$inactiveBorderColor`) and never sources the generated file itself:
 
 ### In the template file (Fixed):
-`~/.dotfiles/main/hypr/.config/omarchy/themed-overrides/hyprland.conf.tpl`
+[`omarchy/.config/omarchy/themed/hyprland.lua.tpl`](../../omarchy/.config/omarchy/themed/hyprland.lua.tpl)
 ```ini
-# source = ~/.config/omarchy/current/theme/hyprland.omarchy.conf
-```
-
-### In the generated final file (Fixed):
-`~/.config/omarchy/current/theme/hyprland.omarchy.conf`
-```ini
-# source = ~/.config/omarchy/current/theme/hyprland.omarchy.conf
+$activeBorderColor = rgba({{ accent_strip }}ee) rgba({{ yellow_strip }}ee) 45deg
+$inactiveBorderColor = rgba({{ color8_strip }}aa)
 ```
 
 ---
 
 ## 3. How to prevent the issue from returning
-Since you manage your dotfiles via Git (worktree in `~/.dotfiles/main`), if you do not save this fix in your Git history, any command like `git checkout`, `git reset`, or `git pull` will discard the fix and bring the error back.
-
-To save it permanently, run the following commands in the terminal:
+Since you manage your dotfiles via Git (worktree in `~/.dotfiles/main`), keep template changes committed in Git:
 
 ```bash
 # 1. Navigate to the repository folder
 cd ~/.dotfiles/main
 
 # 2. Add the template fix
-git add hypr/.config/omarchy/themed-overrides/hyprland.conf.tpl
+git add omarchy/.config/omarchy/themed/hyprland.lua.tpl
 
 # 3. Commit the changes
 git commit -m "fix: remove circular source from hyprland theme template to prevent crashes"

@@ -121,9 +121,6 @@ awtc {{repo_url}}
 # Open interactive GitHub Pull Request review picker in Tmux popup (Prefix + P)
 ~/.config/tmux/pr-picker.sh
 
-# Open interactive workspace file picker in Tmux popup (Prefix + e legacy alias)
-~/.config/tmux/files-picker.sh
-
 # Open interactive scrollback token and URL extractor in Tmux popup (Prefix + y)
 ~/.config/tmux/scrollback-picker.sh
 
@@ -289,9 +286,6 @@ sudo tailscale up --ssh
 # Expose ACPD JSON-RPC control plane securely on private Tailnet
 tailscale serve --bg 4040
 
-# Query ACPD daemon health and uptime status
-acpd health
-
 # Run automated cockpit health and system drift audit
 ./scripts/drift-doctor.sh
 
@@ -322,11 +316,41 @@ cockpit restore
 # Display saved Cockpit topology snapshot details and age
 cockpit status
 
+# Generate AI-assisted Conventional Commit message (auto-stages all by default)
+gc
+
+# Generate AI-assisted Conventional Commit message for staged changes only
+gc -s
+
+# Split dirty working tree into atomic Conventional Commits using AI
+sgc
+
+# Preview atomic Conventional Commit split plan without committing
+sgc -d
+
 # Run test suite and stamp Test-Status trailer on HEAD commit for TUI badges
 gtest
 
 # Run custom test command and stamp Test-Status trailer on HEAD commit
 gtest {{test_command}}
+
+# Dispatch 360-degree terminal error and git diff context to active AI agent
+ai-fix {{note}}
+
+# Audit and clean stale observations and orphan sessions in ai-memory
+ai-memory-clean --apply
+
+# Interactive ACPD auditory telemetry sound pack switcher
+ai-sound-switcher
+
+# Interactive Hyprland active window border gradient switcher
+hypr-border
+
+# Interactive Hyprland window animation curve switcher
+hypr-anim
+
+# Adopt an existing file or directory into dotfiles and stow it
+stow-it {{path}} {{package}}
 
 # Display personal flow state & deep work evidence telemetry
 flow-telemetry
@@ -376,6 +400,7 @@ $ (awt) pr_number: gh pr list --limit 30 --json number,title --template '{{range
 $ (awtc) repo_url: gh repo list --limit 20 --json nameWithOwner -q '.[].nameWithOwner' 2>/dev/null
 $ (stow.sh) package: find . -maxdepth 1 -mindepth 1 -type d ! -name '.*' ! -name 'scripts' ! -name 'docs' -printf '%f\n' 2>/dev/null
 $ (./stow.sh) package: find . -maxdepth 1 -mindepth 1 -type d ! -name '.*' ! -name 'scripts' ! -name 'docs' -printf '%f\n' 2>/dev/null
+$ (stow-it) package: find . -maxdepth 1 -mindepth 1 -type d ! -name '.*' ! -name 'scripts' ! -name 'docs' -printf '%f\n' 2>/dev/null
 $ (wm) session: wm session list 2>/dev/null
 $ (wm) file: find . -maxdepth 3 -type f \( -name '*.md' -o -name '*.markdown' -o -name '*.mmd' \) 2>/dev/null
 $ (mmdc) mmd_file: find . -maxdepth 4 -type f \( -name '*.mmd' -o -name '*.mermaid' \) 2>/dev/null

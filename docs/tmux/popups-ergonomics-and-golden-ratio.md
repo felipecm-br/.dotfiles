@@ -81,12 +81,15 @@ Whenever the system theme switches (`omarchy theme set <name>`), 100% of termina
 
 | Layer | Tool / Script | Omarchy Dynamic Key | Fallback Hex | Badge (`-T`) | Dimensions | Dismissal |
 | :--- | :--- | :--- | :--- | :---: | :---: | :--- |
-| **1. Ephemeral** | [`cockpit-picker.sh`](../../tmux/.config/tmux/cockpit-picker.sh) | `magenta` / `accent` | `#cba6f7` | ` 󰆍 ` | `85% × 75%` | `Esc` (1 tap) |
-| **1. Ephemeral** | [`session-picker.sh`](../../tmux/.config/tmux/session-picker.sh) | `cyan` / `blue` | `#89dceb` | ` ⚡ ` | `75% × 60%` | `Esc` (1 tap) |
-| **1. Ephemeral** | [`scrollback-picker.sh`](../../tmux/.config/tmux/scrollback-picker.sh) (`scrollback-picker.toml`) | `green` | `#a6e3a1` | ` 󰅍 ` | `75% × 60%` | `Esc` (1 tap) |
-| **1. Ephemeral** | [`workspace-picker.sh`](../../tmux/.config/tmux/workspace-picker.sh) (`workspace.toml`) | `blue` / `cyan` | `#89b4fa` | ` 󰈞 󰄧 󰋩 ` | `75% × 60%` / `95% × 90%` | `Esc` (1 tap) |
+| **1. Ephemeral** | [`cockpit-picker.sh`](../../tmux/.config/tmux/cockpit-picker.sh) | `orange` / `peach` / `yellow` | `#e09d7f` | ` 󱂬 ` | `85% × 75%` | `Esc` (1 tap) |
+| **1. Ephemeral** | [`session-picker.sh`](../../tmux/.config/tmux/session-picker.sh) | `cyan` / `blue` | `#89dceb` | ` ⚡ ` | `85% × 75%` | `Esc` (1 tap) |
+| **1. Ephemeral** | [`scrollback-picker.sh`](../../tmux/.config/tmux/scrollback-picker.sh) (`scrollback-picker.toml`) | `green` | `#a6e3a1` | ` 󰅍 ` | `85% × 75%` | `Esc` (1 tap) |
+| **1. Ephemeral** | [`workspace-picker.sh`](../../tmux/.config/tmux/workspace-picker.sh) (`workspace.toml`) | `blue` / `cyan` | `#89b4fa` | ` 󰈞 ` | `85% × 75%` / `96% × 92%` | `Esc` (1 tap) |
 | **1. Ephemeral** | [`grep-picker.sh`](../../tmux/.config/tmux/grep-picker.sh) | `teal` / `cyan` | `#94e2d5` | ` 󰍉 ` | `85% × 75%` / `96% × 92%` | `Esc` (1 tap) |
+| **1. Ephemeral** | [`keybindings-picker.sh`](../../tmux/.config/tmux/keybindings-picker.sh) | `yellow` / `orange` | `#f9e2af` | ` 󰌌 ` | `85% × 75%` | `Esc` / `q` |
+| **1. Ephemeral** | [`pr-picker.sh`](../../tmux/.config/tmux/pr-picker.sh) | `blue` / `cyan` | `#7aa2f7` | `  ` | `75% × 60%` | `Esc` (1 tap) |
 | **1. Ephemeral** | [`awt-popup.sh`](../../awt/.config/tmux/awt-popup.sh) | `orange` / `peach` | `#e84d31` | `  ` | `85% × 75%` | `Esc` / `q` |
+| **1. Ephemeral** | [`close-window.sh`](../../tmux/.config/tmux/close-window.sh) / [`close-session.sh`](../../tmux/.config/tmux/close-session.sh) | `yellow` / `orange` | `#e0af68` | `  ` | `68 × 11..18` | `y` / `n` / `Esc` |
 | **2. Persistent** | [`lazygitrs-popup.sh`](../../tmux/.config/tmux/lazygitrs-popup.sh)| `orange` / `peach` | `#e84d31` | ` 󰊢 ` | `90% × 88%` | `Esc` (Files) / `q` |
 | **2. Persistent** | [`workmux-dashboard-popup.sh`](../../tmux/.config/tmux/workmux-dashboard-popup.sh) | `accent` / `blue` | `#7aa2f7` | ` 󱙝 ` | `85% × 75%` | `q` / `Esc` |
 | **2. Persistent** | Floating Agent Overlay | `accent` / `blue` | `#b4befe` | ` 󱜻 ` | `85% × 85%` | `Ctrl+C` / `exit` |
@@ -184,7 +187,7 @@ Every interactive popup, picker, and confirmation dialog has been harmonized und
 
 | Scope | Preset / Script | Uniform Footer Contract |
 | :--- | :--- | :--- |
-| **Cockpit HUD** | [`cockpit-picker.toml`](../../tmux/.config/tmux/cockpit-picker.toml) | `{cyan,bold:Enter} Jump │ y/n Ack │ i Input │ v Diff │ g Git │ a Agents │ Tab Worktrees │ ? Help │ Esc Exit` |
+| **Cockpit HUD** | [`cockpit-picker.toml`](../../tmux/.config/tmux/cockpit-picker.toml) | `{cyan,bold:Enter} Jump │ y/n Ack │ r Review │ i Input │ v Diff │ g Git │ a Agents │ Tab Worktrees │ ? Help │ Esc Exit` |
 | **AWT Worktrees** | [`awt.toml`](../../awt/.config/waymaker/presets/awt.toml) | `{cyan,bold:Enter} Connect │ Tab Cockpit │ c New │ S Ship │ m Merge │ R Rebase │ P PR │ d Delete │ p Preview │ Esc Exit` |
 | **AWT PR Review** | [`awt-pr.toml`](../../awt/.config/waymaker/presets/awt-pr.toml) | `{cyan,bold:Enter} Checkout │ Tab Cycle Tab │ C-e Chrome │ C-d Diff │ p Preview │ Esc Exit` |
 | **AWT Sub-Wizards** | `awt-prompt`, `awt-ai`, `awt-base`, `awt-type` | `{cyan,bold:Enter} Confirm/Select │ Esc Back/Cancel` |
@@ -273,8 +276,8 @@ To prevent accidental dismissal while inspecting a diff or composing a commit me
 | :--- | :--- | :--- | :--- |
 | **Open / Close Git** | Type `lazygit` $\rightarrow$ `q` | `Ctrl+G` $\rightarrow$ `Esc` (Modal 90x88%) | **-75% motor effort** |
 | **Inspect Agent Diff** | Open Lazygit / run `git diff` | `v` in Cockpit (Instant 60% side-by-side panel) | **-85% KLM latency ($T_K = 120\text{ ms}$)** |
-| **Sesh Navigation** | `Ctrl+A/T/X` chords | Universal `Tab` / `Shift-Tab` cyclic rotation (All $\rightarrow$ Tmux $\rightarrow$ Dirs) | **-70% motor effort (Zero chord collisions)** |
-| **Window Selection** | `prefix + w` (Native vertical list) | `prefix + s` (Matchmaker 40/60 with AI states)| **-80% cognitive load** |
+| **Session Navigation** | `Ctrl+A/T/X` chords | Universal `Tab` / `Shift-Tab` cyclic rotation (All $\rightarrow$ Tmux $\rightarrow$ Dirs) | **-70% motor effort (Zero chord collisions)** |
+| **Cockpit / Window Selection** | `prefix + w` (Native vertical list) | `prefix + Space` (Waymaker 40/60 with AI states) | **-80% cognitive load** |
 | **Scroll Stutter** | White visual flash | Double Buffering (`delay_clear = true`) | **Zero-Flicker (60 FPS fluid)** |
 | **Empty AI Bell** | 1.5s frozen modal | `display-message` HUD (<1ms) | **-99% latency (Doherty <100ms)** |
 | **Modal Recognition**| Reading verbal title strings | Semantic border color + Pure icon badge | **-90% decoding time (<15ms)** |
@@ -282,7 +285,7 @@ To prevent accidental dismissal while inspecting a diff or composing a commit me
 ---
 
 ## 🔗 Related Repository Files
-* [`tmux/.config/tmux/cockpit-picker.sh`](../../tmux/.config/tmux/cockpit-picker.sh): AI Fleet Cockpit & Window Manager with `󰆍` badge.
+* [`tmux/.config/tmux/cockpit-picker.sh`](../../tmux/.config/tmux/cockpit-picker.sh): AI Fleet Cockpit & Window Manager with `󱂬` badge.
 * [`tmux/.config/tmux/cockpit-picker.toml`](../../tmux/.config/tmux/cockpit-picker.toml): Matchmaker preset with contextual agent triage, bidirectional Lazygitrs toggle (`g`), and window management.
 * [`tmux/.config/tmux/cockpit-picker-preview.sh`](../../tmux/.config/tmux/cockpit-picker-preview.sh): Layout 0 live terminal snapshot and contextual agent metadata card.
 * [`tmux/.config/tmux/cockpit-picker-help.sh`](../../tmux/.config/tmux/cockpit-picker-help.sh): Layout 1 telemetry heatmap and keybindings HUD.

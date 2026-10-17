@@ -15,7 +15,7 @@ Display profiles and hotplug events are automatically handled by [`kanshi`](http
   exec-once = kanshi
   ```
 - **Hotplug Detection**: `kanshi` listens to Wayland output events. When an external monitor (or Ultrawide display) is plugged in or disconnected, it automatically applies matching display profiles without restarting Hyprland.
-- **Profile Layouts**: Managed in the [`kanshi`](../../kanshi) package (target: `~/.config/kanshi/config`). Example configuration from [`kanshi/.config/kanshi/config.ultrawide`](../../kanshi/.config/kanshi/config.ultrawide):
+- **Profile Layouts**: Configured in `~/.config/kanshi/config`:
 
   ```kanshi
   # External Ultrawide connected: disable laptop screen, set HDMI resolution & reserved space

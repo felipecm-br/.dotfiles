@@ -35,63 +35,67 @@ This document provides a comprehensive audit and definitive reference of all key
 
 | Prefix Shortcut | Target Action | Ergonomic Justification & Mnemonic |
 | :--- | :--- | :--- |
-| **`Prefix + Space`** | **AI Fleet Cockpit & Window Manager (`85% × 75%`)** | Space = Instant zero-reach thumb roll ($H=0$). Central unified triage cockpit for windows, AI agents, and Git context with live PR/CI badges & diffstat. Curated 7-item HUD: **Footer** (`Enter` jump, `y/n` ack, `v` diff, `Tab` AWT, `a` agents, `?` help, `Esc` exit); inside modal: `Bksp` last agent, `o`/`O` open PR/checks, `y`/`n` guarded prompt approval/denial, `a` toggle fleet/agents, `i`/`I` live input/prompt, `w`/`c` new worktree, `S` ship, `W` sweep, `R` reap, `g`/`p` Git/Patch, `s` sessions, `d` kill. |
+| **`Prefix + Space`** | **AI Fleet Cockpit & Window Manager (`85% × 75%`)** | Space = Instant zero-reach thumb roll ($H=0$). Central unified triage cockpit (` 󱂬 `) for windows, AI agents, and Git context with live PR/CI badges & diffstat. Uniform 10-item bichromatic **Footer**: `Enter Jump │ y/n Ack │ r Review │ i Input │ v Diff │ g Git │ a Agents │ Tab Worktrees │ ? Help │ Esc Exit`; additional modal actions: `R` clear review notes, `Bksp` last agent, `o`/`O` open PR/checks, `S` ship worktree, `W` sweep, `c`/`t` new window, `s` sessions, `d` delete. |
 | **`Prefix + f`** | **Vimium Window Hints (1-touch Jump)** | `f` = **F**ollow / **F**ind window. In-situ Home-Row hints (`a, s, d, f, j, k, l, ;, g, h`) overlaid directly on tabs ($T_R = 0\text{ ms}$). |
-| **`Prefix + s`** | **Sesh Workspace / Task Picker** | `s` = **S**essions / **S**esh project switcher. Inside: `c` (or `w` / `Ctrl+S`) switches to Cockpit, `Tab` / `Shift+Tab` cycles sources (All $\rightarrow$ Tmux $\rightarrow$ Dirs), `d` (or `Ctrl+D`) kills session. |
-| **`Prefix + T`** | **Reopen Last Closed Window / Tab** | Shift+T mnemonic: uppercase of new tab `Prefix + t`, aligned with browser/IDE tab restore with exact index/position, working directory, and resumed AI agent session (`--continue` / `resume`). |
-| **`Prefix + u`** | **Undo Close Tab (`reopen-window.sh`)** | `u` = **U**ndo close tab. Aligned with Matchmaker file manager undo muscle memory. Restores exact position and AI continuation. Bound also to `Ctrl+Shift+T`. |
-| **`Prefix + i`** | **AI Agent Bell / Alert HUD** | `i` = **I**ntelligence / **I**nspect agent turn or question. Cycles pending alerts via floating modal popup HUD (`80% × 75%`). Focuses split pane if in current window; opens floating modal for any other window or session so `Esc` (or `Prefix + i`) instantly dismisses and restores origin. |
+| **`Prefix + s`** | **Waymaker Session / Project Picker (`85% × 75%`)** | `s` = **S**essions / project switcher (`session-picker.sh` via `wm session`, badge ` ⚡ `). Inside: `c` (or `w` / `Ctrl+S`) switches to Cockpit, `Tab` / `Shift+Tab` cycles sources (All $\rightarrow$ Tmux $\rightarrow$ Dirs), `d` (or `Ctrl+D`) kills session. |
+| **`Prefix + T`** | **Reopen Last Closed Window / Tab** | Shift+T mnemonic: uppercase of new tab `Prefix + t`, aligned with browser/IDE tab restore with exact index/position, working directory, and resumed AI agent session (`agy --conversation`, `claude --continue`, `codex resume --last`, `muse resume --last`, `opencode --continue`). |
+| **`Prefix + u`** | **Undo Close Tab (`reopen-window.sh`)** | `u` = **U**ndo close tab. Aligned with Waymaker file manager undo muscle memory. Restores exact position and AI continuation from `~/.local/state/tmux/closed-windows.json`. Bound also to `Ctrl+Shift+T`. |
+| **`Prefix + i`** | **AI Agent Bell / Alert HUD (`80% × 75%`)** | `i` = **I**ntelligence / **I**nspect agent turn or question (` 󰮯 `). Cycles pending alerts via floating modal popup HUD. Focuses split pane if in current window; opens floating modal for any other window or session so `Esc` (or `Prefix + i`) instantly dismisses and restores origin. |
 | **`Prefix + I`** | **AI Agent Attention Triage Direct Jump** | Shift+I direct focus jump without opening an intermediate popup. Features **Bidirectional Trampoline Stack**: records origin context and automatically returns to starting window/session when alerts are clear. |
 | **`Prefix + t`** | **New Window (Current Path)** | `t` = New **T**ab / Window. Aligned with universal browser tab creation (`Prefix + t` opens, `Prefix + T` reopens). |
-| **`Prefix + w`** | **Close Pane / Window (`close-window.sh`)** | `w` = Close **W**indow. Guarded: confirmation modal (``) is shown if active AI agents are running; otherwise closes immediately (saving to reopen stack). |
-| **`Prefix + W`** | **Smart Kill Session (`close-session.sh`)** | Shift+W symmetry. Guarded: confirmation modal is shown if active AI agents are running or session has >3 windows; closes immediately if <=3 windows and 0 agents. |
+| **`Prefix + c`** | **Interactive Tmux Window Tree (`choose-window`)** | Native Tmux tree selector fallback. |
+| **`Prefix + w` / `x`** | **Close Pane / Window (`close-window.sh`)** | `w` / `x` = Close **W**indow. Smart AI guard: confirmation modal (``, `68 × 11..15`) is shown only if active (non-idle) AI agents are running; windows with idle AI agents or normal shells close immediately (saving to reopen stack). |
+| **`Prefix + W`** | **Smart Kill Session (`close-session.sh`)** | Shift+W symmetry. Smart AI guard: confirmation modal (``, `68 × 11..18`) is shown if active (non-idle) AI agents are running or session has >3 windows; closes immediately if $\le 3$ windows and 0 active agents. |
 | **`Prefix + o`** | **AI Split Pane (35% Right Side)** | `o` = Polymorphic AI side-by-side split (`agy` or `opencode` via `$AI_AGENT`). Toggle closes split if already open. |
-
-| **`Prefix + N`** | **Neovim Floating Scratchpad (`90% × 90%`)** | Quick scratchpad editor over the active workspace. |
+| **`Prefix + N`** | **Neovim Floating Scratchpad (`90% × 90%`)** | Quick scratchpad editor (`  `) over the active workspace. |
 | **`Prefix + \|`** | **Vertical Split Window** | Intuitive visual divider symbol. |
 | **`Prefix + -`** | **Horizontal Split Window** | Intuitive visual divider symbol. |
 | **`Prefix + h` / `l`**| **Previous / Next Window** | Vim standard directional motions. |
 | **`Prefix + Tab`** | **Last Active Window (MRU Toggle)** | Instant toggle between the two most recent windows. |
-| **`Prefix + y`** | **Token Extract / Yank (`75% × 60%`)** | `y` = **Y**ank tokens, URLs, hashes, paths via Matchmaker. Inward chord ($H=0$). Dynamic 60%/95% preview toggle (`Ctrl+P`), direct browser open in Chrome (`Ctrl+B`/`b`/`w`). |
-| **`Prefix + E`** | **Full Scrollback in Neovim** | Captures complete ANSI scrollback history into read-only Neovim buffer. |
-| **`Prefix + e`** / **`C-e`** | **Workspace Files Picker (`75% × 60%`)** | `e` = **E**xplore workspace files via Matchmaker popup (` 󰈞 󰄧 󰋩 `). Data sources cycle via `Tab`/`Shift+Tab` (Local -> Frecency -> Bookmarks), dynamic 60%/100% full preview modal (`Enter`), native Markdown, Mermaid & Photos rendering with Kitty graphics passthrough, diagram zoom (`+`/`-`/`0`), inspector (`s`), AI prompt insert (`Ctrl+V`), `e` / `o` / `Ctrl+E` opens in Golden Ratio split Neovim pane (62% × 38%) on left beside AI session. |
+| **`Prefix + y` / `C-y`** | **Token Extract / Yank (`85% × 75%`)** | `y` = **Y**ank tokens, URLs, hashes, paths via Waymaker (`scrollback-picker.sh`, badge ` 󰅍 `). Inward chord ($H=0$). Direct browser open in Chrome (`Ctrl+B`/`b`/`w`), Neovim open (`Ctrl+E`), prompt insert (`Ctrl+V`). |
+| **`Prefix + E`** | **Full Scrollback in Neovim (`90% × 88%`)** | Captures scrollback history, strips ANSI sequences into `/tmp/tmux_scrollback_${UID}_${PANE}.md`, and opens a floating Neovim Markdown popup (` 󰄧 `) with automatic Mermaid diagram rendering (`image-hover.lua`) and `n`/`N` diagram hopping. |
+| **`Prefix + e` / `C-e`** | **Workspace Files Picker (`85% × 75%` / `96% × 92%`)** | `e` = **E**xplore workspace files via Waymaker popup (` 󰈞 `). Data sources cycle via `Tab`/`Shift+Tab` (Local -> Frecency -> Bookmarks), dynamic 60%/100% full preview modal (`Enter`), native Markdown, Mermaid & Photos rendering with Kitty graphics passthrough, diagram zoom (`+`/`-`/`0`), inspector (`s`), AI prompt insert (`Ctrl+V`), `e` / `o` / `Ctrl+E` opens in Golden Ratio split Neovim pane (62% × 38%) on left beside AI session. |
+| **`Prefix + P`** | **GitHub PR Review Picker (`75% × 60%`)** | `P` = **P**ull Requests (`pr-picker.sh`, badge `  `). Interactive PR list with live metadata/diff preview, worktree checkout (`Enter`), Chrome open (`Ctrl+E`), and diff inspection (`Ctrl+D`). |
+| **`Prefix + G`** | **AWT Worktree Manager Popup (`85% × 75%`)** | Prefix alias for `Ctrl + Shift + G` (`awt-popup.sh`, badge `  `). |
+| **`Prefix + g`** | **Lazygitrs Floating Popup (`90% × 88%`)** | Prefix alias for `Ctrl + G` (`lazygitrs-popup.sh`, badge ` 󰊢 `). |
 | **`Prefix + m`** / **`z`** | **Maximize / Zoom Toggle Pane** | `m` = **M**aximize pane (bi-manual hand alternation: left hand prefix, right index taps `m`). Standard `z` also preserved. |
 | **`Prefix + Ctrl + h / j / k / l`** | **Resize Pane (Asymmetric 10%: 20 cols / 5 lines)** | Repeatable with prefix held (`-r`). Keep holding `Ctrl` after prefix and tap Vim directions: `C-h`/`C-l` shifts 20 columns (~10% width), `C-j`/`C-k` shifts 5 lines (~10% height). |
 | **`Prefix + L`** | **Switch to Last Session** | `L` = **L**ast session (MRU toggle). Instant jump back to the previously active session. |
-| **`Prefix + /`** | **Workspace Full-Text Ripgrep (`85% × 75%`)** | `/` = Universal search mnemonic. Matchmaker live search modal (` 󰍉 `) with 45/55 foveal layout, debounced query reload, line-synced `bat` syntax preview, `Enter` opens in Neovim (`+{line} {file}`), `Ctrl+V` inserts `{file}:{line}` into origin pane. |
-| **`Prefix + D`** / **`C-d`** | **Workmux Agent Fleet Dashboard (`85% × 75%`)** | `D` = **D**ashboard. Floating modal HUD displaying live agent status, git worktrees, diffs, and live output previews across all sessions (`workmux dashboard`). Inside: `q`/`Esc` exits, `Tab` toggles WIP/review diff, `d` opens diff, `s` cycles sort, `/` filters. |
-| **`Prefix + ?`** | **Keybindings & Navigation HUD (`85% × 65%`)** | `?` = Universal help mnemonic. Interactive Waymaker workflow HUD (` 󰌌 `) with category filtering (`Tab`), native Markdown previews, and direct execution (`Enter`). |
+| **`Prefix + /`** | **Workspace Full-Text Ripgrep (`85% × 75%` / `96% × 92%`)** | `/` = Universal search mnemonic. Waymaker live search modal (` 󰍉 `) with 45/55 foveal layout, debounced query reload, line-synced `bat` syntax preview, `Enter` opens in Neovim (`+{line} {file}`), `Ctrl+V` inserts `{file}:{line}` into origin pane. |
+| **`Prefix + D`** / **`C-d`** | **Workmux Agent Fleet Dashboard (`85% × 75%`)** | `D` = **D**ashboard. Floating modal HUD (` 󱙝 `) displaying live agent status, git worktrees, diffs, and live output previews across all sessions (`workmux dashboard`). Inside: `q`/`Esc` exits, `Tab` toggles WIP/review diff, `d` opens diff, `s` cycles sort, `/` filters. |
+| **`Prefix + ?`** | **Keybindings & Navigation HUD (`85% × 75%`)** | `?` = Universal help mnemonic. Interactive Waymaker workflow HUD (` 󰌌 `) with category filtering (`Tab`), native Markdown previews, and direct execution (`Enter`). |
+
 ### 🐚 Layer 2: Smart Shell (`zsh`) & Object-First Navigation Widgets
 
 | Keybinding | Widget / Function | Behavior & Context Awareness |
 | :--- | :--- | :--- |
-| **`<Tab>`** (Empty Prompt) | `_smart_tab` $\rightarrow$ `_jump_widget` | Triggers Matchmaker Jump. If single directory $\rightarrow$ immediate `cd`. If multiple or file $\rightarrow$ Object-First buffer insertion (`BUFFER=" $target"`, `CURSOR=0`). |
-| **`<Tab>`** (Ghost Text at End) | `_smart_tab` $\rightarrow$ `autosuggest-accept` | Accepts autosuggestion immediately ($CURSOR == $#BUFFER). |
-| **`<Tab>`** (Command / Mid-line) | `_smart_tab` $\rightarrow$ `mm-ftb` | Auto-spaces command name (`_auto_space_if_command`) and opens Matchmaker multi-column completion picker. |
-| **`Ctrl + F`** | `_jump_widget` | Manual Matchmaker Jump Widget: fast directory/file picker with Object-First buffer insertion ($H=0$). |
+| **`<Tab>`** (Empty Prompt) | `_smart_tab` $\rightarrow$ `_jump_widget` | Triggers Waymaker Jump (`wm --no-read -o jump`). If single directory $\rightarrow$ immediate `cd`. If multiple or file $\rightarrow$ Object-First buffer insertion (`BUFFER=" $target"`, `CURSOR=0`). |
+| **`<Tab>`** (Ghost Text at End) | `_smart_tab` $\rightarrow$ `autosuggest-accept` | Accepts autosuggestion immediately (`$CURSOR == $#BUFFER`). |
+| **`<Tab>`** (Command / Mid-line) | `_smart_tab` $\rightarrow$ `wm-ftb` | Auto-spaces command name (`_auto_space_if_command`) and opens Waymaker multi-column completion picker (`wm-ftb`, aliased as `mm-ftb`). |
+| **`Ctrl + F`** | `_jump_widget` | Manual Waymaker Jump Widget: fast directory/file picker with Object-First buffer insertion ($H=0$). |
 | **`Ctrl + G`** | `_git_files_widget` | Lazygitrs Floating Popup (`~/.config/tmux/lazygitrs-popup.sh "$PWD"`, or detaches if already inside popup). |
-| **`Ctrl + N`** | `_mm_tab_widget` | Explicitly invokes Matchmaker completion UI. |
+| **`Ctrl + N`** | `_wm_tab_widget` | Explicitly invokes Waymaker completion UI (`_wm_tab_widget`). |
 | **`Ctrl + K`** | `history-beginning-search-backward-end` | Prefix history search backward based on current buffer query. |
 | **`Ctrl + J`** | `history-beginning-search-forward-end` | Prefix history search forward based on current buffer query. |
 | **`Ctrl + Backspace`** | `backward-kill-word` | Deletes preceding word in Insert mode ($T_K = 120\text{ ms}$). |
 | **`Ctrl + R`** | `atuin-search` | Full-text contextual and temporal history search. |
-| **`Ctrl + T`** | `_intelli_search` | IntelliShell Command Templates & TLDR: Interactive fuzzy search across 29k+ curated command snippets with parameter replacement ($H=0$). |
+| **`Ctrl + T`** | `_intelli_search` | IntelliShell Command Templates & TLDR: Interactive fuzzy search across curated command snippets with parameter replacement ($H=0$). |
 
 #### 2.1 Zero-Friction Frecency 2.0 File Transfer & Directory Jump
 > For comprehensive KLM-GOMS benchmarks, speedup tables ($20.5\times$ vs CLI, $32.7\times$ vs AI), and architectural pillars, see [**Zero-Friction File Transfer Benchmark & Architectural Guide**](zero-friction-file-transfer-benchmark.md).
 
 | Command / Alias | Action Executed | Biomechanical Mechanics | KLM Cost ($T$) | Ergonomic Rationale |
 | :--- | :--- | :--- | :---: | :--- |
-| **`j`** / **`z`** | Jump Home / Directory / Frecency | Left Index single tap or query | $100\text{ ms} - 400\text{ ms}$ | $H=0$. Immediate navigation without typing `cd ~` or long paths. |
-| **`ji`** / **`zi`** | Interactive Matchmaker Jump | Left Index inward chord / alias | $200\text{ ms}$ | Full tree navigation, ancestor jump (`Ctrl+U`), and editor launch. |
-| **`pt`** (`pasteto`) | Copy Files & Stay | Home-row chord + MM picker | $750\text{ ms}$ | Transfers files to frecency destination without leaving current context. |
-| **`ptg`** (`pasteto -g`) | Copy Files & Jump to Destination | Home-row chord + MM picker + `cd` | $750\text{ ms}$ | Transfers files and immediately navigates to destination. |
+| **`j`** / **`z`** | Jump Home / Directory / Frecency | Left Index single tap or query | $100\text{ ms} - 400\text{ ms}$ | $H=0$. Immediate navigation without typing `cd ~` or long paths (`wm_smart_chpwd` auto-tracks). |
+| **`ji`** / **`zi`** | Interactive Waymaker Jump | Left Index inward chord / alias | $200\text{ ms}$ | Full tree navigation, ancestor jump (`Ctrl+U`), and editor launch. |
+| **`pt`** (`pasteto`) | Copy Files & Stay | Home-row chord + WM picker | $750\text{ ms}$ | Transfers files to frecency destination without leaving current context. |
+| **`ptg`** (`pasteto -g`) | Copy Files & Jump to Destination | Home-row chord + WM picker + `cd` | $750\text{ ms}$ | Transfers files and immediately navigates to destination. |
 | **`ptl`** (`pasteto -l`) | Copy Files to Last Target | Home-row chord + cached `_MM_LAST_TARGET` | **$220\text{ ms}$** | **Record transfer speed ($20.5\times$ vs CLI):** Bypasses picker entirely. |
 | **`mt`** / **`mtg`** / **`mtl`** | Move Equivalents (`moveto`) | Home-row chords + `moveto` flags | $220\text{ ms} - 750\text{ ms}$ | Move equivalents with zero interactive blocking prompts. |
 
 ---
 
-### 📂 Layer 3: Matchmaker Frecency Directory Jump & File Manager (`jump.toml`)
+### 📂 Layer 3: Waymaker Frecency Directory Jump & File Manager (`jump.toml`)
 
 | Keybinding | Action / Command | Behavior & Context Awareness |
 | :--- | :--- | :--- |
@@ -103,7 +107,8 @@ This document provides a comprehensive audit and definitive reference of all key
 | **`e` / `Ctrl + E`** | `Execute(nvim {+})` | Opens selected file(s) in Neovim with frecency boost. |
 | **`y` / `x`** | `@yank` / `@cut` | Stages file(s) for copy or move in File Manager. |
 | **`p` / `P` (`Ctrl + V`)** | `@paste` / `@paste_into` | Pastes staged files into current directory or selected subfolder. |
-| **`Tab`** | `Toggle`, `Down` | Multi-select items in directory tree. |
+| **`Tab` / `Shift + Tab`** | `@reloadnext` / `@reloadprev` | Cycles data sources: Local Directory $\rightarrow$ Frecency History $\rightarrow$ Bookmarks. |
+| **`Space`** | `Toggle` | Toggles multi-selection on the highlighted file or directory. |
 | **`,`** | `SortMenu` | Opens sort configuration menu. |
 | **`\`** | `ToggleParentPeek` | Toggles split parent-directory preview. |
 | **`Ctrl + P`** | `SwitchPreview` | Toggles or cycles preview window layout. |
@@ -112,11 +117,13 @@ This document provides a comprehensive audit and definitive reference of all key
 
 ### 📦 Layer 4: Lazygitrs Modal Navigation, Commits, Diff Review & AI Notes
 
-#### 4.1 Hierarchical Unwinding & Panel Navigation
+#### 4.1 Hierarchical Unwinding, Dual-Diff & Panel Navigation
 | Keybinding | Scope | Behavior |
 | :--- | :--- | :--- |
-| **`Esc`** | Inside Diff / Submenus | **Desempilha Foco:** Returns focus to the Files list without closing. |
-| **`Esc`** | On Root Files List | **Fecha o Popup:** Closes and destroys the popup overlay in 0ms. |
+| **`Ctrl + G`** (`<c-g>`) | Global / Files / Diff | **Dual-Diff Toggle (`toggleWorkingTreeAndHead`):** Instantly toggles between uncommitted Working Tree changes and `HEAD` commit inspection. |
+| **`g`** | Global / Files | **Return to Cockpit (`returnToCockpit`):** Exits Lazygitrs with code 10, reopening the Cockpit HUD at the exact cursor position. |
+| **`Esc`** | Inside Diff / Submenus | **Unwinds Focus:** Returns focus to the Files list without closing. |
+| **`Esc`** | On Root Files List | **Closes Popup:** Closes the popup (or returns to Cockpit if launched from Cockpit). |
 | **`q`** / **`Ctrl + C`** | Anywhere | Quits Lazygitrs and closes the popup immediately. |
 | **`1` / `2` / `3` / `4` / `5`** | Root Navigation | Instant jump to Status (1), Files (2), Branches (3), Commits (4), Stash (5). |
 | **`:`** (Colon) | Global | Universal shell command runner popup (executes arbitrary shell commands in repo root). |
@@ -163,7 +170,7 @@ This document provides a comprehensive audit and definitive reference of all key
 | **`y`** | Note Selected | **Yank / Copy Note:** Copies full note text to system clipboard with a 500ms Neovim-style flash highlight. |
 | **`S`** (Shift+S) | Note Selected | **Send to AI:** Dispatches note to active AI session via SSE, TUI push, or `notifyCommand`. Marks note as `sent`. |
 | **`r` / `R`** | Note Selected | **Reset Note Status:** Resets note status from `sent`/`addressed` back to `new`. |
-| **`d`** | Note Selected | **Delete Note:** Removes review note from `.lines.json` with fallback selection to adjacent note. |
+| **`d`** | Note Selected | **Delete Note:** Removes review note from `.git/info/lines.json` with fallback selection to adjacent note. |
 | **`Enter` / `o`** | Note Selected | **View Note Details:** Opens modal popup displaying author, timestamp, status, and full markdown text. |
 | *Automated* | Worktree Root | **Worktree Port Isolation (`.lazygitrs.port`):** Each worktree writes its dynamic port to `.lazygitrs.port`, isolating concurrent agent sessions. |
 
@@ -180,24 +187,23 @@ The table below consolidates the definitive keybindings across all layers, audit
 | **`Ctrl + Shift + I`** | Global / Tmux | AI Agent Triage Direct Focus Jump | Inward chord: CapsLock (Pinky) + Shift + I | $140\text{ ms}$ | Home Row, no-Alt, MacBook-ergonomic focus switch to next agent needing attention. |
 | **`Prefix + Space`** | Tmux Multiplexer | AI Fleet Cockpit & Window Manager (`85% × 75%`) | Left Pinky (CapsLock) + Thumb (Space) $\rightarrow$ Space | $200\text{ ms}$ | Immediate double-thumb roll on Spacebar ($H=0$). Central hub for windows, AI agents, and Git. |
 | **`Prefix + f`** | Tmux Multiplexer | Vimium Window Hints (1-touch Jump) | Inward roll: CapsLock + Space $\rightarrow$ `f` | $240\text{ ms}$ | Replaces legacy `find-window` with instant Home-Row hints ($H=0$). |
-| **`Prefix + s`** | Tmux Multiplexer | Sesh Workspace Picker | Left Pinky (CapsLock) + Thumb (Space) $\rightarrow$ `s` | $220\text{ ms}$ | `s` = Session switcher; home-row left-hand inward roll. |
+| **`Prefix + s`** | Tmux Multiplexer | Waymaker Session Picker (`85% × 75%`) | Left Pinky (CapsLock) + Thumb (Space) $\rightarrow$ `s` | $220\text{ ms}$ | `s` = Session switcher (`wm session`); home-row left-hand inward roll. |
 | **`Prefix + i`** | Tmux Multiplexer | AI Agent Bell / Alert HUD | Left Pinky (CapsLock) + Thumb (Space) $\rightarrow$ `i` | $240\text{ ms}$ | `i` = Intelligence; cycles pending questions/permissions in universal floating popup modal (`Esc` returns to origin). Focuses split pane if in current window. |
 | **`Prefix + I`** | Tmux Multiplexer | AI Agent Triage Direct Jump | Left Pinky (CapsLock) + Thumb (Space) $\rightarrow$ `I` | $240\text{ ms}$ | Direct focus jump with Bidirectional Trampoline Stack (returns to starting window/session when alerts clear). |
-
-| **`Prefix + w`** | Tmux Multiplexer | Close Pane / Window (`close-window.sh`) | Left Pinky (CapsLock) + Thumb (Space) $\rightarrow$ `w` | $240\text{ ms}$ | Guarded destruction: prompts confirmation modal (``) if AI agents are running in the window/pane; saves state for `Ctrl+Shift+T` restore. |
-| **`Prefix + W`** | Tmux Multiplexer | Smart Kill Session (`close-session.sh`) | Left Pinky (CapsLock) + Thumb (Space) $\rightarrow$ `W` | $240\text{ ms}$ | Guarded destruction: prompts confirmation modal if AI agents are active or >3 windows. |
-| **`S`** (in `awt`) | Matchmaker AWT | Ship Worktree (Merge & Push) | Shift + S (Left Pinky + Left Ring) | $140\text{ ms}$ | Atomic local merge into base and push to remote origin. |
-| **`P`** (in `awt`) | Matchmaker AWT | Checkout GitHub PR Worktree | Shift + P (Left Pinky + Right Pinky) | $140\text{ ms}$ | Interactive PR list with live preview and dedicated worktree checkout. |
-| **`<Tab>`** (Empty) | Shell / ZLE | Matchmaker Directory Jump | Left Pinky single tap on Tab | $100\text{ ms}$ | **Object-First ergonomics:** Empty prompt immediately surfaces directory jumper. |
+| **`Prefix + w` / `x`** | Tmux Multiplexer | Close Pane / Window (`close-window.sh`) | Left Pinky (CapsLock) + Thumb (Space) $\rightarrow$ `w` / `x` | $240\text{ ms}$ | Guarded destruction: prompts confirmation modal (``) only if active (non-idle) AI agents are running; saves state for `Prefix + u` / `Ctrl+Shift+T` restore. |
+| **`Prefix + W`** | Tmux Multiplexer | Smart Kill Session (`close-session.sh`) | Left Pinky (CapsLock) + Thumb (Space) $\rightarrow$ `W` | $240\text{ ms}$ | Guarded destruction: prompts confirmation modal if non-idle AI agents are active or >3 windows. |
+| **`S`** (in `awt`) | Waymaker AWT | Ship Worktree (Merge & Push) | Shift + S (Left Pinky + Left Ring) | $140\text{ ms}$ | Atomic local merge into base and push to remote origin. |
+| **`P`** (in `awt`) | Waymaker AWT | Checkout GitHub PR Worktree | Shift + P (Left Pinky + Right Pinky) | $140\text{ ms}$ | Interactive PR list with live preview and dedicated worktree checkout. |
+| **`<Tab>`** (Empty) | Shell / ZLE | Waymaker Directory Jump | Left Pinky single tap on Tab | $100\text{ ms}$ | **Object-First ergonomics:** Empty prompt immediately surfaces directory jumper (`wm --no-read -o jump`). |
 | **`<Tab>`** (Ghost) | Shell / ZLE | Accept Inline Autosuggestion | Left Pinky single tap on Tab | $100\text{ ms}$ | Accepted only when `$CURSOR -eq $#BUFFER`, preventing midline ghost-text hijacking. |
-| **`<Tab>`** (Command) | Shell / ZLE | Auto-space & Matchmaker FTB | Left Pinky single tap on Tab | $100\text{ ms}$ | Eliminates manual spacebar typing after aliases/commands. |
-| **`Ctrl + F`** | Shell / ZLE | Matchmaker Jump Widget | Inward chord: CapsLock (Pinky) + F (Index) | $120\text{ ms}$ | $H=0$. Replaces legacy `Ctrl+T` with home-row inward curl. |
-| **`Ctrl + N`** | Shell / ZLE | Matchmaker Completion UI | CapsLock (Pinky) + N (Right Index) | $130\text{ ms}$ | Direct fallback completion invocation without touching arrow keys. |
+| **`<Tab>`** (Command) | Shell / ZLE | Auto-space & Waymaker FTB (`wm-ftb`) | Left Pinky single tap on Tab | $100\text{ ms}$ | Eliminates manual spacebar typing after aliases/commands. |
+| **`Ctrl + F`** | Shell / ZLE | Waymaker Jump Widget | Inward chord: CapsLock (Pinky) + F (Index) | $120\text{ ms}$ | $H=0$. Replaces legacy `Ctrl+T` with home-row inward curl. |
+| **`Ctrl + N`** | Shell / ZLE | Waymaker Completion UI (`_wm_tab_widget`) | CapsLock (Pinky) + N (Right Index) | $130\text{ ms}$ | Direct fallback completion invocation without touching arrow keys. |
 | **`Ctrl + K` / `J`** | Shell / ZLE | Prefix History Search Prev / Next | CapsLock (Pinky) + K / J (Home Row) | $120\text{ ms}$ | Preserves Vim navigation instincts during shell command search. |
-| **`u`** | Matchmaker Jump | Undo File Operation (`@undo`) | Right Index reach up to `u` | $110\text{ ms}$ | Unmodified 1-touch operation for File Manager UndoStack. |
-| **`Ctrl + U`** | Matchmaker Jump | Ancestor Hierarchy Jump | CapsLock (Pinky) + U (Right Index) | $130\text{ ms}$ | Differentiated from `u`; walks up directory tree up to root `/`. |
-| **`h` / `l`** | Matchmaker Jump | Directory Up (`..`) / Down (`{=}`) | Right Index / Ring on Home Row | $100\text{ ms}$ | Flawless Vim horizontal navigation with zero wrist movement. |
-| **`e` / `Ctrl + E`** | Matchmaker Jump | Edit in Neovim (`nvim {+}`) | Left Middle reach up to `e` | $110\text{ ms}$ | Fast handoff from directory search to code editor. |
+| **`u`** | Waymaker Jump | Undo File Operation (`@undo`) | Right Index reach up to `u` | $110\text{ ms}$ | Unmodified 1-touch operation for File Manager UndoStack. |
+| **`Ctrl + U`** | Waymaker Jump | Ancestor Hierarchy Jump | CapsLock (Pinky) + U (Right Index) | $130\text{ ms}$ | Differentiated from `u`; walks up directory tree up to root `/`. |
+| **`h` / `l`** | Waymaker Jump | Directory Up (`..`) / Down (`{=}`) | Right Index / Ring on Home Row | $100\text{ ms}$ | Flawless Vim horizontal navigation with zero wrist movement. |
+| **`e` / `Ctrl + E`** | Waymaker Jump | Edit in Neovim (`nvim {+}`) | Left Middle reach up to `e` | $110\text{ ms}$ | Fast handoff from directory search to code editor. |
 | **`y` / `x` / `p`** | Matchmaker Jump | Yank / Cut / Paste File Operations | Home row & bottom row direct taps | $110\text{ ms}$ | Intuitive file manager clipboard workflow. |
 | **`-`** | Lazygitrs Tree | Fold / Unfold Directory Node | Right Pinky top-row reach to `-` | $120\text{ ms}$ | Dedicated directory collapse toggle for all folders (including root). |
 | **`Enter`** (on dir) | Lazygitrs Tree | Fullscreen Combined Diff | Right Pinky tap on Enter | $100\text{ ms}$ | Instant multi-file diff view without manual traversal. |

@@ -68,7 +68,7 @@ Border colors and titles dynamically synchronize with the current Omarchy system
 │                                             │                                │
 │                                             │ - Move awt-orchestrator skill  │
 │                                             │ - Symlink .agents/skills       │
-╰── [l/Enter] Open  [h] Parent  [u] Undo  [f] Cycle Scope  [Esc] Close ────────╯
+╰── l/Enter Open │ h Parent │ u Undo │ Tab Cycle Scope │ Esc Close ────────────╯
 ```
 
 ---

@@ -31,14 +31,15 @@ Manage the `~/.dotfiles` repository — a GNU Stow-based dotfiles setup on Arch 
 
 ### Stow packages (directories in ~/.dotfiles/ that map to ~/)
 
-Each top-level directory (except `.git`, `.github`, `.shell`, `scripts`) is a stow package.
-Running `stow.sh` creates symlinks from `~/<path>` → `~/.dotfiles/<package>/<path>`.
+Each top-level directory (except `.bare`, `.git`, `.github`, `.shell`, `scripts`, `docs`) is a stow package.
+Running `stow.sh` creates symlinks from `~/<path>` → `~/.dotfiles/main/<package>/<path>`.
 
 Current stow packages:
-`atuin`, `bat`, `duf`, `eza`, `fed`, `figlet`, `fonts`, `gh`, `ghostty`,
-`git`, `hypr`, `kanshi`, `lolcat`, `mako`, `mise`, `nvim`, `omarchy`, `performance-battery-plan.md`,
-`procs`, `sesh`, `starship`, `tmux`, `utils`, `vimium`, `walker`, `waybar`, `workflow.md`,
-`xkb`, `yazi`, `zsh`, `zsh-plugins`
+`acpd`, `agents-skills`, `ai-jail`, `ai-memory`, `antigravity`, `atuin`, `awt`, `bash`, `bat`, `battery`,
+`btop`, `claude`, `codex`, `duf`, `eza`, `fastfetch`, `fed`, `figlet`, `fonts`, `gh`, `ghostty`,
+`git`, `hibiki`, `hypr`, `intelli-shell`, `kitty`, `lazygitrs`, `lolcat`, `mako`, `mise`, `muse`, `nvim`,
+`omarchy`, `opencode`, `posting`, `procs`, `starship`, `systemd`, `tmux`, `utils`, `vimium`, `walker`,
+`waybar`, `waymaker`, `workmux`, `worktrunk`, `xkb`, `yazi`, `zellij`, `zsh`, `zsh-plugins`
 
 ## Install System
 

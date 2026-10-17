@@ -17,26 +17,27 @@
 
 ## Overview
 
-| Feature | `gc` | `sgc` |
-|---|---|---|
-| Scope | Staged diff → one commit | All unstaged changes → N atomic commits |
-| Interaction | Auto-fills readline buffer | Interactive multi-select via `gum` |
-| Provider support | opencode, claude, crush, copilot | same |
-| Commitlint aware | yes | yes |
-| Gitmoji | optional (`-e`) | optional (`-e`) |
-| Multi-language | optional (`-l`) | optional (`-l`) |
-| Result caching | no | yes (content-hash based) |
+| Feature | `gc` | `sgc` | `gtest` |
+|---|---|---|---|
+| Scope | Working tree / staged diff → one commit | All unstaged changes → N atomic commits | Run test suite & append `Test-Status` trailer |
+| Interaction | Auto-fills readline buffer (or outputs via `-o`) | Interactive multi-select via `gum` | Amends `HEAD` with `Test-Status: pass (...)` |
+| Provider support | opencode, claude, crush, copilot | same (`-P / --provider`) | N/A (auto-detects `just check`, `cargo test`, `npm test`, `pytest`, `go test`) |
+| Commitlint aware | yes | yes | N/A |
+| Gitmoji | optional (`-e`) | optional (`-e`) | N/A |
+| Multi-language | optional (`-l`) | optional (`-l`) | N/A |
+| Result caching | no | yes (content-hash based) | N/A |
 
 ---
 
 ## gc — Generate a commit message
 
-Analyses the **staged** diff and outputs a single [Conventional Commit](https://www.conventionalcommits.org/) message. The message is pre-filled into the zsh readline buffer so you can review or edit before pressing Enter.
+Analyses the repository diff and outputs a single [Conventional Commit](https://www.conventionalcommits.org/) message. By default, `gc` automatically stages all changes (`git add --all`) unless `-s / --staged-only` is passed. The generated message is pre-filled into the zsh readline buffer so you can review or edit before pressing Enter.
 
 ### Usage
 
 ```zsh
-gc                          # default provider (opencode), single message
+gc                          # default provider (opencode), stage all & generate single message
+gc -s                       # use only currently staged changes (skip git add --all)
 gc -p claude                # use claude CLI
 gc -p crush                 # use crush CLI
 gc -p copilot               # use gh copilot CLI
@@ -44,6 +45,8 @@ gc -m opencode/minimax-m2.5-free  # override model (opencode only)
 gc -g 3                     # generate 3 candidates, pick one interactively
 gc -l es                    # commit message in Spanish
 gc -e                       # prepend a gitmoji emoji
+gc -o                       # output only the generated commit message (no readline pre-fill)
+gc -q                       # disable loading spinner
 gc hook install             # install prepare-commit-msg hook in the repo
 gc hook uninstall           # remove the gc-managed hook
 gc hook status              # show hook installation status
@@ -58,6 +61,11 @@ gc hook status              # show hook installation status
 | `-g N / --generate N` | Generate N distinct candidates; presents a `gum choose` picker |
 | `-l / --lang` | ISO 639-1 language code for the output message |
 | `-e / --emoji` | Prepend a gitmoji matching the commit type |
+| `-s / --staged-only` | Analyze only currently staged changes (do not run `git add --all`) |
+| `-o / --message-only` | Print only the generated commit message to stdout |
+| `-q / --no-loading` | Disable interactive loading spinner / title output |
+| `-n / --silent-empty` | Exit silently when there are no changes to commit |
+| `-d / --debug` | Enable verbose debug output |
 
 ### Environment overrides
 
@@ -70,11 +78,11 @@ GC_EMOJI=1 gc
 
 ### Workflow
 
-1. If nothing is staged, `gc` detects unstaged/untracked files and prompts via `gum choose`: **Add all files** or **Select files** (fuzzy filter).
+1. Unless `-s / --staged-only` is specified, `gc` stages all modified and untracked files via `git add --all`.
 2. The staged diff is filtered through `.sgcignore` rules (lock files, minified assets, etc.) and compressed to reduce token count without losing signal.
 3. If a `commitlint` config exists in the repo root, its rules (allowed types, scopes, max length, casing) are injected into the prompt.
 4. The AI prompt enforces Conventional Commits format, 72-char subject limit, and optional gitmoji/language rules.
-5. The result is printed and pre-filled into the readline buffer: `git commit -m "feat(scope): ..."`.
+5. The result is printed and pre-filled into the readline buffer: `git commit -m "feat(scope): ..."` (or printed directly when `-o` is used).
 
 ### Git hook integration
 
@@ -95,12 +103,27 @@ Analyses **all unstaged and untracked changes** at once and asks the AI to group
 ### Usage
 
 ```zsh
-sgc                          # default provider
-sgc -p claude                # use claude CLI
+sgc                          # default provider (medium granularity)
+sgc -P claude                # use claude CLI (-P / --provider)
 sgc -m opencode/minimax-m2.5-free  # override model
+sgc -g fine                  # granularity: coarse | medium | fine
+sgc -f                       # force regeneration (bypass content-hash cache)
 sgc -l es                    # messages in Spanish
 sgc -e                       # gitmoji prefixes
+sgc -d                       # debug mode
 ```
+
+### Flags
+
+| Flag | Description |
+|---|---|
+| `-P / --provider` | AI backend: `opencode` (default), `claude`, `crush`, `copilot` |
+| `-m / --model` | Model ID passed to opencode |
+| `-g / --granularity` | Grouping granularity: `coarse`, `medium` (default), or `fine` |
+| `-f / --force` | Ignore cached commit plan and force a fresh AI call |
+| `-l / --lang` | ISO 639-1 language code for output messages |
+| `-e / --emoji` | Prepend a gitmoji matching each commit type |
+| `-d / --debug` | Enable verbose debug output |
 
 ### Workflow
 

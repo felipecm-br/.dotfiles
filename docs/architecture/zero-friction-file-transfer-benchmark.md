@@ -70,14 +70,14 @@ flowchart LR
         A["1. Long Path Typing"] --> F1["Instant SIMD Frecency Matching"]
         B["2. Interactive Prompts"] --> F2["Non-blocking Deterministic I/O"]
         C["3. Picker Re-invocation"] --> F3["Volatile Target Cache (_MM_LAST_TARGET)"]
-        D["4. Ranking Decay"] --> F4["Automatic Feedback Boosting (mm add)"]
+        D["4. Ranking Decay"] --> F4["Automatic Feedback Boosting (wm add)"]
         E["5. Noise & Cache Pollution"] --> F5["Smart chpwd Sanitization"]
     end
 ```
 
 ### Pillar 1: Elimination of Long Path Typing
 * **Problem:** In traditional CLI, transferring files requires recalling the full path hierarchy (e.g., `~/dev/projects/web/src/components/ui/`) and typing 25–60 characters with multiple `<Tab>` completion pauses. Each Tab pause incurs an extra $T_M \approx 300\text{ ms}$ hesitation.
-* **Solution:** Matchmaker calculates directory frecency using multi-threaded SIMD fuzzy matching ($S_{\text{rank}} = F \cdot R$). Typing **1 to 3 characters** (e.g., `ui`, `comp`, `dot`) surfaces the target directory at index `0`. The user presses `Enter` in $<750\text{ ms}$.
+* **Solution:** Waymaker (`wm`, aliased as `mm`) calculates directory frecency using multi-threaded SIMD fuzzy matching ($S_{\text{rank}} = F \cdot R$). Typing **1 to 3 characters** (e.g., `ui`, `comp`, `dot`) surfaces the target directory at index `0`. The user presses `Enter` in $<750\text{ ms}$.
 
 ### Pillar 2: Removal of Interactive Blocking Prompts
 * **Problem:** TUI file managers and traditional utilities frequently prompt with modal confirmation dialogs:
@@ -98,23 +98,23 @@ flowchart LR
 
 ### Pillar 4: Automatic Frecency Feedback Boosting
 * **Problem:** Static bookmarks become stale, and manual directory favoriting introduces administrative friction.
-* **Solution:** Whenever a file is transferred to a directory, `pasteto` and `moveto` immediately boost the destination in Matchmaker's database asynchronously:
+* **Solution:** Whenever a file is transferred to a directory, `pasteto` and `moveto` immediately boost the destination in Waymaker's database asynchronously:
   ```zsh
-  mm add "$target_dir" >/dev/null 2>&1 &!
+  wm add "$target_dir" >/dev/null 2>&1 &!
   ```
   * Running in the background (`&!`) with disowned status guarantees **zero shell lag**.
   * The destination's recency score increases instantaneously, guaranteeing it ranks at the top of subsequent `j`, `pt`, and `mt` pickers.
 
-### Pillar 5: Smart Sanitization in `chpwd` (`mm_smart_chpwd`)
+### Pillar 5: Smart Sanitization in `chpwd` (`wm_smart_chpwd`)
 * **Problem:** Naive shell hooks that track every `cd` pollute the frecency database with ephemeral, build, and noise directories (e.g., `node_modules`, `.git`, `target/debug`, `/tmp`). This pollutes rankings and slows fuzzy matching.
-* **Solution:** The `mm_smart_chpwd` hook filters directory transitions against a strict pattern blacklist before recording:
+* **Solution:** The `wm_smart_chpwd` hook filters directory transitions against a strict pattern blacklist before recording:
   ```zsh
   case "$PWD" in
       /tmp*|/proc*|/sys*|*/.git*|*/node_modules*|*/target/debug*|*/target/release*|*/.direnv*)
           return 0
           ;;
       *)
-          mm add "$PWD" >/dev/null 2>&1 &!
+          wm add "$PWD" >/dev/null 2>&1 &!
           ;;
   esac
   ```
@@ -133,9 +133,9 @@ All functions are implemented in [`zsh/.zsh/utils/functions.zsh`](../../zsh/.zsh
 | **`j`** | Jump Home | Unconditional jump to `$HOME` (`cd ~`). Eliminates `cd ~` typing ($H=0$). |
 | **`j -`** | Jump Previous | Jumps to previous working directory (`cd -`). |
 | **`j <dir>`** | Literal Directory | If argument is an existing path, jumps directly (`cd <dir>`). |
-| **`j <query>`** | Frecency Jump | Queries `mm list --dirs <query>`, takes highest ranked match, jumps instantly. |
-| **`j <query>` (Fallback)** | Interactive Fallback | If no exact single match, automatically launches `mm -o jump query.initial="<query>"`. |
-| **`ji [query]`** | Interactive Jump | Opens Matchmaker Jump Mode TUI with tree preview, ancestors (`Ctrl+U`), and editor handoff (`e`). |
+| **`j <query>`** | Frecency Jump | Queries `wm list --dirs <query>`, takes highest ranked match, jumps instantly. |
+| **`j <query>` (Fallback)** | Interactive Fallback | If no exact single match, automatically launches `wm -o jump query.initial="<query>"`. |
+| **`ji [query]`** | Interactive Jump | Opens Waymaker Jump Mode TUI with tree preview, ancestors (`Ctrl+U`), and editor handoff (`e`). |
 | **`z` / `zi`** | Shell Aliases | Ergonomic 1-letter aliases for `j` and `ji`. |
 
 ### 3.2 File Transfer Commands (`pt`, `ptg`, `ptl`, `mt`, `mtg`, `mtl`)
@@ -144,15 +144,15 @@ All transfer commands support individual files, directories (recursively preserv
 
 | Command / Alias | Full Form | Mode | Interaction Workflow |
 | :--- | :--- | :---: | :--- |
-| **`pt [items...]`** | `pasteto` | **Copy & Stay** | Copies items to selected destination via Matchmaker picker. Leaves working directory unchanged. |
+| **`pt [items...]`** | `pasteto` | **Copy & Stay** | Copies items to selected destination via Waymaker picker. Leaves working directory unchanged. |
 | **`ptg [items...]`** | `pasteto -g` | **Copy & Go** | Copies items to selected destination and immediately navigates (`cd "$target_dir"`). |
 | **`ptl [items...]`** | `pasteto -l` | **Copy to Last** | Copies items directly into `$_MM_LAST_TARGET` without opening any picker (**$220\text{ ms}$**). |
-| **`mt [items...]`** | `moveto` | **Move & Stay** | Moves items to selected destination via Matchmaker picker. Stays in current directory. |
+| **`mt [items...]`** | `moveto` | **Move & Stay** | Moves items to selected destination via Waymaker picker. Stays in current directory. |
 | **`mtg [items...]`** | `moveto -g` | **Move & Go** | Moves items to selected destination and immediately navigates (`cd "$target_dir"`). |
 | **`mtl [items...]`** | `moveto -l` | **Move to Last** | Moves items directly into `$_MM_LAST_TARGET` with zero picker latency (**$220\text{ ms}$**). |
 | **`ptl -g` / `mtl -g`** | Combined Flags | **Last & Go** | Copies or moves items directly into `$_MM_LAST_TARGET` and switches directory in one step. |
 
-> **Visual Selection Fallback:** If `pt`, `ptg`, `mt`, or `mtg` is invoked **without file arguments**, Matchmaker (`mm --no-read`) automatically opens to allow interactive multi-item selection with `Tab` from the current directory.
+> **Visual Selection Fallback:** If `pt`, `ptg`, `mt`, or `mtg` is invoked **without file arguments**, Waymaker (`wm --no-read`) automatically opens to allow interactive multi-item selection with `Space` from the current directory.
 
 ### 3.3 Execution Pipeline & Resiliency Lifecycle
 
@@ -164,14 +164,14 @@ sequenceDiagram
     actor User
     participant Shell as Zsh Shell
     participant Cache as _MM_LAST_TARGET
-    participant MM as Matchmaker TUI
+    participant MM as Waymaker TUI (wm)
     participant POSIX as Kernel I/O (cp/mv)
 
     User->>Shell: pt / mt [flags] [sources...]
     Note over Shell: 1. Parse flags (-g, -l, -gl)
     alt No sources provided
-        Shell->>MM: mm --no-read (Visual multi-select)
-        MM-->>Shell: Selected files via Tab
+        Shell->>MM: wm --no-read (Visual multi-select)
+        MM-->>Shell: Selected files via Space
     end
     Note over Shell: 2. Pre-flight verification (all sources exist)
     alt Any source missing
@@ -183,14 +183,14 @@ sequenceDiagram
             Shell-->>User: Abort (Exit 1) + Invalidate Cache
         end
     else Standard picker
-        Shell->>MM: mm list --dirs | mm -o jump
+        Shell->>MM: wm list --dirs | wm -o jump
         MM-->>Shell: Selected destination path
     end
     Note over Shell: 3. Canonical path resolution (realpath, ~ expansion)
     Shell->>POSIX: Execute cp -a -- or mv --
     POSIX-->>Shell: I/O Result OK
     Shell->>Cache: Update $_MM_LAST_TARGET = "$target_dir"
-    Shell--)MM: Background frecency boost: mm add "$target_dir" &!
+    Shell--)MM: Background frecency boost: wm add "$target_dir" &!
     opt Flag -g (--go) active
         Shell->>Shell: cd "$target_dir"
     end

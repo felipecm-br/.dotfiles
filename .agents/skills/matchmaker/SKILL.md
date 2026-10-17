@@ -10,16 +10,16 @@ description: |
   a new mm workflow even if they don't say "matchmaker" explicitly.
 ---
 
-# Matchmaker (mm) — Expert Builder Skill
+# Waymaker / Matchmaker (`wm` / `mm`) — Expert Builder Skill
 
-Matchmaker (`mm`) is a fast, Rust-based TUI fuzzy finder configured via TOML. Think of it as fzf
+Waymaker (`wm`, with compatibility symlink `mm`) is a fast, Rust-based TUI fuzzy finder configured via TOML. Think of it as fzf
 with structured presets, nav mode, multi-column support, and rich preview layouts. The binary
-lives at `~/.local/bin/mm` (or `~/.cargo/bin/mm`).
+lives at `~/.local/bin/wm` (`~/.local/bin/mm`).
 
 ## Architecture Overview
 
 ```
-~/.config/matchmaker/
+~/.config/waymaker/
 ├── config.toml          # base config (always loaded)
 └── presets/             # overrides layered with -o flag
     ├── jump.toml
@@ -27,8 +27,8 @@ lives at `~/.local/bin/mm` (or `~/.cargo/bin/mm`).
     └── your-tool.toml
 ```
 
-Invoke with a preset: `mm -o your-tool` (no path, no extension — mm resolves from presets/).  
-Layer multiple overrides: `mm -o base -o extra`.
+Invoke with a preset: `wm -o your-tool` (no path, no extension — `wm` resolves from `presets/`).  
+Layer multiple overrides: `wm -o base -o extra`.
 
 ---
 
@@ -36,13 +36,13 @@ Layer multiple overrides: `mm -o base -o extra`.
 
 This is the most important performance decision:
 
-### 🚀 Fastest: Standalone Config Execution (`mm --no-read --config "$preset_file"`)
+### 🚀 Fastest: Standalone Config Execution (`wm --no-read --config "$preset_file"`)
 ```bash
 # Instant load used by Omarchy menus — bypasses base config reading & TOML merging
-(cd ~/.config/hypr/animations && mm --no-read --config ~/.config/matchmaker/presets/animations.toml)
+(cd ~/.config/hypr/animations && wm --no-read --config ~/.config/waymaker/presets/animations.toml)
 ```
-- **`--config` vs `-o`**: `--config` completely **bypasses reading `~/.config/matchmaker/config.toml`** and skips TOML tree merging in Rust. Loads the preset directly as a 1-step standalone config (<1ms).
-- **`--no-read`**: Tells mm to skip reading stdin and immediately run the `[start.command]`.
+- **`--config` vs `-o`**: `--config` completely **bypasses reading `~/.config/waymaker/config.toml`** and skips TOML tree merging in Rust. Loads the preset directly as a 1-step standalone config (<1ms).
+- **`--no-read`**: Tells `wm` to skip reading stdin and immediately run the `[start.command]`.
 - **0 subprocesses, 0 merge latency** — instant TUI initialization.
 
 ### Fast: Native Directory Context (`cd target_dir && mm --nav --sort`)

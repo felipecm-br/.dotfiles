@@ -125,6 +125,7 @@ This symlinks all presets, scripts, hooks, and CLI executables into:
 
 ### 🚩 Flags Reference:
 * `-A <prompt>`, `--auto-name=<prompt>`: Automatically generate conventional branch name slug from task prompt.
+* `-W`, `--with-changes`: Carry uncommitted working tree changes from `main` into the newly created worktree.
 * `--into <branch>`, `--into=<branch>`: Explicitly specify target branch to merge into for `awt merge` or `awt ship`.
 * `--no-hooks`, `-H`: Bypass pre-merge and pre-remove validation lifecycle hooks.
 * `--continue`, `--ai-continue`: Resume the active AI conversation in the newly created worktree session.
@@ -144,11 +145,12 @@ This symlinks all presets, scripts, hooks, and CLI executables into:
 
 ## ⌨️ Interactive Dashboard Keybindings (Nav Mode)
 
-When inside the interactive Matchmaker dashboard (`awt` / `awp`):
+When inside the interactive Waymaker dashboard (`awt` / `awp`):
 
 | Keybinding | Action | Description |
 | :---: | :--- | :--- |
 | **`Enter`** | **Connect / Switch** | Connect to or create the Tmux session for the selected worktree. |
+| **`Tab`** | **Switch to Cockpit** | Jump seamlessly back to the Cockpit HUD (`cockpit-picker.sh`). |
 | **`c`** / **`ctrl-n`** | **New Worktree** | Launch the 5-step Conventional Commits creation wizard. |
 | **`m`** | **Merge Worktree** | Merge active branch into target base locally, execute hooks, and clean up. |
 | **`S`** *(Shift+S)* | **Ship Worktree** | Atomic merge into target base, push to remote origin, and clean up. |
@@ -174,20 +176,29 @@ When inside the interactive Matchmaker dashboard (`awt` / `awp`):
 │   │   │   ├── awt.toml             # Main dashboard preset with 3 live previews
 │   │   │   ├── awt-type.toml        # Step 1: Conventional types selection
 │   │   │   ├── awt-prompt.toml      # Step 2: Dynamic branch name input box
-│   │   │   └── awt-base.toml        # Step 3: Base branch selector
+│   │   │   ├── awt-base.toml        # Step 3: Base branch selector
+│   │   │   ├── awt-ai.toml          # Step 4: Active AI conversation continuity selector
+│   │   │   └── awt-pr.toml          # Interactive GitHub PR checkout selector
 │   │   ├── scripts/
-│   │   │   ├── awt-new.sh           # 4-step wizard orchestration script
-│   │   │   ├── awt-delete.sh        # Worktree deletion, pre-remove hooks & cache cleanup
+│   │   │   ├── awt-new.sh           # 5-step wizard orchestration script
+│   │   │   ├── awt-ai-detect.sh     # Active AI process & conversation detector
+│   │   │   ├── awt-pr.sh            # GitHub PR worktree checkout handler
+│   │   │   ├── awt-delete.sh        # Worktree deletion, pre-remove hooks & async trash cleanup
 │   │   │   ├── awt-merge.sh         # Merge handler with pre-merge validation gate
 │   │   │   ├── awt-rebase.sh        # Rebase handler with safety auto-stash
+│   │   │   ├── awt-ship.sh          # Atomic rebase, merge, push & cleanup handler
+│   │   │   ├── awt-sweep.sh         # Batch merged worktree sweeper
+│   │   │   ├── awt-reap.sh          # Stale AI agent & orphan session reaper
+│   │   │   ├── awt-fetch.sh         # Remote fetch helper
 │   │   │   └── awt-rename.sh        # Branch, folder, and session rename handler
 │   │   └── hooks/
+│   │       ├── awt-config.py        # Declarative .awt.toml / .workmux.yaml parser
 │   │       ├── post-create.sh       # .env copying, declarative files & repo triggers
 │   │       ├── pre-merge.sh         # Pre-merge validation quality gate & docs check
 │   │       ├── post-merge.sh        # Post-merge cleanup & rebuild triggers
 │   │       └── pre-remove.sh        # Pre-remove lifecycle hooks & cleanup validation
 │   └── tmux/
-│       └── awt-popup.sh             # Floating modal wrapper with backdrop protection
+│       └── awt-popup.sh             # Floating modal wrapper (85% x 75%)
 └── .local/
     └── bin/
         ├── awt                      # Global executable CLI entrypoint
@@ -202,12 +213,12 @@ When inside the interactive Matchmaker dashboard (`awt` / `awp`):
 
 | Dimension | `wt` / Worktree CLI | `sesh` | `git-worktree.nvim` | **`awt` (Agent Worktree Manager)** |
 | :--- | :---: | :---: | :---: | :---: |
-| **Interface** | Plain text CLI | Fuzzy picker | Neovim buffer | **Matchmaker TUI + Floating Modal (`Ctrl+Shift+G`)** |
-| **Multiplexer Lifecycle** | ❌ None | ✅ Sessions | ❌ None | ✅ **Full Tmux + Sesh Workspace Isolation** |
-| **Conventional Wizard** | ❌ None | ❌ None | ❌ None | ✅ **4-Step Wizard (``, ``, `󰣪`, `󰓅`, ``)** |
+| **Interface** | Plain text CLI | Fuzzy picker | Neovim buffer | **Waymaker TUI + Floating Modal (`Prefix+g` / `Ctrl+Shift+G`)** |
+| **Multiplexer Lifecycle** | ❌ None | ✅ Sessions | ❌ None | ✅ **Full Tmux + Waymaker Workspace Isolation** |
+| **Conventional Wizard** | ❌ None | ❌ None | ❌ None | ✅ **5-Step Wizard (``, ``, `󰣪`, `󰓅`, `` + AI Continuity)** |
 | **Multi-Tab Live Previews** | ❌ None | ❌ None | ❌ None | ✅ **3 Live Previews (Status, Diff, Stats)** |
-| **Lifecycle Hooks** | ❌ None | ❌ None | ❌ None | ✅ **Automatic `post-create` and `post-merge`** |
-| **Dirty State Safety** | ⚠️ Aborts | ❌ None | ⚠️ Aborts | ✅ **Automatic Auto-Stash on Merge/Rebase** |
+| **Lifecycle Hooks** | ❌ None | ❌ None | ❌ None | ✅ **Automatic `post-create`, `pre-merge`, `post-merge`, `pre-remove`** |
+| **Dirty State Safety** | ⚠️ Aborts | ❌ None | ⚠️ Aborts | ✅ **Dirty Migration (`-W`) & Auto-Stash on Merge/Rebase** |
 | **AI Agent Isolation** | ❌ None | ⚠️ Manual | ❌ None | ✅ **Native 1-Worktree / 1-Agent Contexts** |
 
 ---

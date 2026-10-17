@@ -60,10 +60,10 @@ The control plane spans **4 navigation layers**, each with a distinct scope:
 
 | Prompt State | Trigger | Action Executed | Outcome |
 |---|---|---|---|
-| **Empty Prompt** | `<Tab>` | Nenhuma ação (neutro) | Mantém o prompt limpo e silencioso sem abrir popups acidentais. |
-| **Ghost Text (End of Line)** | `<Tab>` | `autosuggest-accept` | Aceita a sugestão do histórico instantaneamente. |
-| **Active Command** | `<Tab>` (e.g. `ls -la /path`) | `expand-or-complete` (`mm-ftb`) | Realiza autocompletação via Matchmaker sem poluir argumentos. |
-| **Direct Jump** | `Ctrl+F` | `_jump_widget` (`mm -o jump`) | Abre o Matchmaker Jump com frecency e ranking de diretórios em qualquer momento (`viins` & `vicmd`). |
+| **Empty Prompt** | `<Tab>` | `_jump_widget` (`wm -o jump`) | Opens Waymaker Jump with Object-First buffer insertion or direct `cd`. |
+| **Ghost Text (End of Line)** | `<Tab>` | `autosuggest-accept` | Accepts the inline history suggestion immediately. |
+| **Active Command** | `<Tab>` (e.g. `ls -la /path`) | `expand-or-complete` (`wm-ftb`) | Performs Waymaker autocompletion without polluting arguments. |
+| **Direct Jump** | `Ctrl+F` | `_jump_widget` (`wm -o jump`) | Opens Waymaker Jump with frecency and directory ranking at any moment (`viins` & `vicmd`). |
 
 ## Keybinding Reference Map
 
@@ -200,7 +200,7 @@ The **`lazygitrs`** review loop is the primary differentiator of this control pl
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │ 1. HUMAN REVIEWER (in lazygitrs)                                           │
-│    Inspect Git diff ➔ Position cursor on target line ➔ Press 'S'           │
+│    Inspect Git diff ➔ Position cursor on target line ➔ Press 'c' / 'S'     │
 │    Enter note: "Refactor this function to handle empty list gracefully"     │
 └──────────────────────┬──────────────────────────────────────────────────────┘
                        │
@@ -226,8 +226,8 @@ The **`lazygitrs`** review loop is the primary differentiator of this control pl
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
-1. **Human Review**: Highlight diff lines inside `lazygitrs` → press `S` to add an inline review note.
-2. **Delivery Waterfall** ([`src/gui/mod.rs:7957`](file:///home/fecavmi/dev/github/lazygitrs/ai-notes/src/gui/mod.rs#L7957)):
+1. **Human Review**: Highlight diff lines inside `lazygitrs` → press `c` to create an inline review note and `S` to dispatch (`r` from Cockpit preview).
+2. **Delivery Waterfall** (`lazygitrs/src/gui/mod.rs`):
    - **Priority 1 (HTTP Push)**: `POST /tui/append-prompt` + `POST /tui/submit-prompt` directly to OpenCode's TUI API.
    - **Priority 2 (SSE Broadcast)**: Broadcast `note-sent` JSON payload to active SSE listeners.
    - **Priority 3 (Subprocess Fallback)**: Execute `notifyCommand` (`lazygit-tmux-injector.sh` using bracketed paste).
@@ -261,7 +261,7 @@ These bindings eliminate guesswork and decision latency:
 
 ### 5. The Zero-Friction Golden Rule (Git Status & Review)
 - **Inside Neovim** ➔ Use `<leader>gs` (Git Status). It's the LazyVim gold standard (100% native, zero process-switching tax, with real-time diff preview).
-- **Outside Neovim (in pure Zsh shell)** ➔ Use `Alt+g` to open `lazygitrs` directly for full git status and the bidirectional AI code review loop.
+- **Outside Neovim (in pure Zsh shell)** ➔ Use `Ctrl+G` to open `lazygitrs` directly for full git status and the bidirectional AI code review loop.
 
 ---
 
@@ -269,9 +269,9 @@ These bindings eliminate guesswork and decision latency:
 
 | From ↓ / To → | Same-session AI window | Other-session AI | AI float overlay | Desktop app |
 |---|---|---|---|---|
-| **Editing in nvim** | 1 (`Alt+a` or `Ctrl+2`) | 2 (`Alt+s` → pick) | 1 (`Alt+o` toggle) | 2 (`Super+Shift+K`) |
-| **Inside lazygitrs popup** | 1 (`Alt+a`) | 2 (`Alt+s` → pick) | 1 (`Alt+o` overlay) | 2 |
-| **Different tmux session** | 2 (`Alt+s` → pick, `Alt+a`) | 2 (`Alt+s` → pick) | 1 (`Alt+o`) | 2 |
+| **Editing in nvim** | 1 (`Alt+a` or `Ctrl+2`) | 2 (`Prefix+s` → pick) | 1 (`Alt+o` toggle) | 2 (`Super+Shift+K`) |
+| **Inside lazygitrs popup** | 1 (`Alt+a`) | 2 (`Prefix+s` → pick) | 1 (`Alt+o` overlay) | 2 |
+| **Different tmux session** | 2 (`Prefix+s` → pick, `Alt+a`) | 2 (`Prefix+s` → pick) | 1 (`Alt+o`) | 2 |
 | **Desktop (no focus)** | 2 (`Super+Shift+K` → pick) | 2 | 1 (`Super+A`) | 1 |
 | **AI notification bell** | 1 (`prefix+i`) | 1 (`prefix+i`) | 0 (visible) | 1 (click notif) |
 
@@ -282,7 +282,7 @@ These bindings eliminate guesswork and decision latency:
 ```mermaid
 flowchart TB
     subgraph Desktop["🖥️ Desktop Layer (Hyprland)"]
-        D1["Super+Shift+K → Sesh Picker"]
+        D1["Super+Shift+K → Session Picker"]
         D2["Super+A → Global AI Scratchpad"]
         D3["Desktop Notification → Click"]
     end
@@ -296,8 +296,8 @@ flowchart TB
         subgraph Prefix["🔑 Prefix Triggers"]
             P1["prefix+i → AI Notification Bell Jump"]
             P2["prefix+o → AI Sidebar Split Toggle"]
-            P3["prefix+s/S → Matchmaker Window Picker"]
-            P4["prefix+g → lazygitrs Review Popup (90% width)"]
+            P3["prefix+Space → Cockpit HUD / Window Picker"]
+            P4["Ctrl+g → lazygitrs Review Popup (90% width)"]
         end
     end
 
@@ -308,7 +308,7 @@ flowchart TB
     end
 
     subgraph ReviewLoop["🔄 lazygitrs Review Loop"]
-        R1["Inline Note (Key S)"]
+        R1["Inline Note (Keys c / S)"]
         R2["Waterfall: TUI Push → SSE → notifyCommand"]
         R3["AI Annotations → Rendered Inline in Diff"]
     end
@@ -335,4 +335,4 @@ flowchart TB
 - Bind shortcut to `gnome-sesh-picker` script.
 
 ---
-*Document Location: [`/home/fecavmi/.dotfiles/main/docs/tui-ai-workflows.md`](file:///home/fecavmi/.dotfiles/main/docs/tui-ai-workflows.md)*
+*Document Location: [`docs/articles/tui-ai-workflows.md`](tui-ai-workflows.md)*

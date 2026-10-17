@@ -21,9 +21,9 @@ The core principle across this dotfiles setup is **Zero Polling, Maximum Context
 ├───────────────────────────────┬─────────────────────────────────────────────┤
 │ 💊 Workspace Pills            │ Real-time title-aware app rewriting in bar │
 │ 🤖 Tmux AI Agent Status       │ Per-pane lifecycle pills via ACPD daemon    │
-│ 🐚 Smart Tab Completion       │ Context-aware completion & Matchmaker TUI   │
+│ 🐚 Smart Tab Completion       │ Context-aware completion & Waymaker TUI     │
 │ 🎨 Universal Dynamic Theming  │ Live palette sync from colors.toml pipeline │
-│ 🖥️ Kanshi Display Profiles    │ Event-driven multi-monitor hotplug rules    │
+│ 🌿 AWT Worktree Orchestrator  │ Isolated multi-agent Git worktree sandboxes │
 │ ⌨️ Zsh Vi-Mode & Prompt Sync  │ Modal editing with live Starship prompt sync│
 └───────────────────────────────┴─────────────────────────────────────────────┘
 ```
@@ -36,12 +36,12 @@ The core principle across this dotfiles setup is **Zero Polling, Maximum Context
 ### 2. Tmux AI Agent Status & Event-Driven Popups
 * **Location**: [`tmux/.config/tmux/`](../../tmux/.config/tmux/), [`acpd/`](../../acpd/)
 * **Doc**: [Tmux AI Status Bar](../tmux/ai-status-bar.md) & [Popup Isolation & Debounce](../tmux/popup-isolation-and-debounce.md)
-* **How it works**: The ACPD daemon intercepts agent lifecycle hooks (Claude, Antigravity, OpenCode). Status updates are broadcast with a 650ms idle debounce (`idle_debounce_ms`, configurable) to tmux status pills (`status-interval 0`), rendering spinners (`󱚤 󰑮 Running...`), error alerts, and bell popups.
+* **How it works**: The ACPD daemon intercepts agent lifecycle hooks (Antigravity, Claude Code, Codex, Muse, OpenCode). Status updates are broadcast with a 650ms idle debounce (`idle_debounce_ms`, configurable) to tmux status pills (`status-interval 0`), rendering spinners (`󰑮`), question/permission alerts, and bell popups.
 
 ### 3. Smart Tab Completion & On-Demand Preview (`_smart_tab`)
 * **Location**: [`zsh/.zsh/utils/binds.zsh`](../../zsh/.zsh/utils/binds.zsh), [`waymaker/.config/waymaker/presets/ftb.toml`](../../waymaker/.config/waymaker/presets/ftb.toml)
-* **Doc**: [Shell Completion & Matchmaker](../shell/completion.md)
-* **How it works**: Analyzes cursor context on `<Tab>`: auto-spaces single-word aliases (e.g. `gco<Tab>` ──► `gco <Tab>`), opens fast native fzf menus for short paths, or triggers rich Matchmaker TUI pickers (`mm-ftb`) with `Ctrl+P` syntax-highlighted previews for files and directories.
+* **Doc**: [Shell Completion & Waymaker](../shell/completion.md)
+* **How it works**: Analyzes cursor context on `<Tab>`: auto-spaces single-word aliases (e.g. `gco<Tab>` ──► `gco <Tab>`), opens Waymaker Jump (`wm --no-read -o jump`) on an empty prompt, or triggers rich Waymaker TUI completion pickers (`wm-ftb`) with `Ctrl+P` syntax-highlighted previews for files and directories.
 
 ### 4. Zsh Vi-Mode & Live Prompt Mode Sync
 * **Location**: [`zsh/.zshrc`](../../zsh/.zshrc), [`starship/.config/omarchy/themed/starship.toml.tpl`](../../starship/.config/omarchy/themed/starship.toml.tpl)
@@ -49,8 +49,13 @@ The core principle across this dotfiles setup is **Zero Polling, Maximum Context
 * **How it works**: Hooks into `zsh-vi-mode` state changes, immediately exporting `ZVM_MODE` and triggering redraws so the Starship prompt pill transitions dynamically between INSERT (green), NORMAL (blue), and VISUAL (amber) modes.
 
 ### 5. Universal Theming Engine Pipeline
-* **Location**: [`omarchy/.config/omarchy/theme-overrides/`](../../omarchy/.config/omarchy/theme-overrides/), [`docs/theme/system-theme.md`](../theme/system-theme.md)
-* **How it works**: Evaluates a single `colors.toml` source of truth, compiling templates into Hyprland Lua colors, Quickshell `Color.qml` surface tokens, Ghostty themes, Starship palettes, and Neovim color schemes on the fly.
+* **Location**: [`omarchy/.config/omarchy/themed/`](../../omarchy/.config/omarchy/themed/), [`docs/theme/system-theme.md`](../theme/system-theme.md)
+* **How it works**: Evaluates a single `colors.toml` source of truth (`~/.local/state/omarchy/current/theme/colors.toml`), compiling templates into Hyprland Lua colors, Quickshell surface tokens, Ghostty/Kitty themes, Starship palettes, Tmux status bars, ACPD config, and Neovim color schemes on the fly.
+
+### 6. Agent Worktree Orchestrator & Session Switcher (`awt` / `wm -o awt`)
+* **Location**: [`awt/.local/bin/awt`](../../awt/.local/bin/awt), [`awt/.config/waymaker/presets/awt.toml`](../../awt/.config/waymaker/presets/awt.toml)
+* **Doc**: [Agent Worktree Orchestrator (`GIT_WORKTREE_AGENTIC_WORKFLOW.md`)](../GIT_WORKTREE_AGENTIC_WORKFLOW.md)
+* **How it works**: Dedicated Waymaker TUI (`Ctrl+Shift+G` / `Prefix + G`) and CLI (`awt`) for managing bare/standard Git worktrees, showing uncommitted change counts, upstream divergence, active AI agent states, PR checkouts (`P`), linear rebases (`R`), and atomic merge+push shipping (`S`).
 
 ---
 
@@ -123,20 +128,11 @@ The following concepts represent high-leverage ideas scheduled for future implem
   - Record epoch timestamp in Zsh `preexec()`.
   - Compare timestamp in `precmd()`; if `delta > 10` and window is not active, trigger `notify-send` and audio cue.
 
-#### 🔹 G. Matchmaker Git Worktree & Session Switcher (`mm-wt`)
-* **Concept**: A dedicated Matchmaker preset picker for Git worktrees and projects:
-  - Lists bare repo worktrees with branch names, uncommitted change counts, and commit divergence (`ahead/behind`).
-  - Interactive preview showing `git status --short` and recent commits.
-  - Keybinding actions: `<Enter>` switch tmux session, `Ctrl+V` open in Neovim, `Ctrl+D` diff view.
-* **Implementation Plan**:
-  - Create `matchmaker/.config/matchmaker/presets/wt.toml`.
-  - Script helper `utils/.local/bin/mm-wt` querying `git worktree list --porcelain`.
-
 ---
 
 ### 4. Neovim & Code Intelligence
 
-#### 🔹 H. Real-Time LSP & Diagnostic Title Synchronization
+#### 🔹 G. Real-Time LSP & Diagnostic Title Synchronization
 * **Concept**: Neovim dynamically pushes file name, buffer modified status, and LSP diagnostic counts to the Hyprland window title:
   - Clean: `󍯯 nvim: Workspaces.qml [LSP: ✓ OK]`
   - Errors: `󍯯 nvim: bindings.lua [LSP: ✖ 2 • ⚠ 1]`
@@ -151,15 +147,15 @@ The following concepts represent high-leverage ideas scheduled for future implem
 | Feature / Pattern | Subsystem | Status | Key Advantage |
 | :--- | :--- | :---: | :--- |
 | **Workspace App Icon Pills** | Quickshell / Hyprland | 🟢 Live | Real-time semantic webapp & app icon identification |
-| **Tmux AI Status Bar** | Tmux / ACPD | 🟢 Live | Live agent lifecycle monitoring with debounced events |
-| **Smart Tab & MM Preview** | Zsh / Matchmaker | 🟢 Live | Zero-friction contextual completion and instant preview |
+| **Tmux AI Status Bar & Cockpit** | Tmux / ACPD / Waymaker | 🟢 Live | Live agent lifecycle monitoring with debounced events |
+| **Smart Tab & WM Preview** | Zsh / Waymaker | 🟢 Live | Zero-friction contextual completion and instant preview |
 | **Starship Modal Prompt Sync** | Zsh / Starship | 🟢 Live | Dynamic vi-mode visual indicator in terminal prompt |
 | **Universal Theme Pipeline** | Omarchy / Multi | 🟢 Live | Single-point palette management across entire desktop |
+| **AWT Worktree Orchestrator** | Waymaker / Git / Tmux | 🟢 Live | Lightning-fast worktree jumping, PR checkout & agent dispatch |
 | **Semantic Breadcrumbs** | Quickshell / ActiveWindow | 🚀 Roadmap | Project, git branch, and file context in top bar |
 | **Workspace Activity Badges** | Quickshell / Pipewire | 🚀 Roadmap | Audio stream and background task indicators on pills |
 | **Adaptive Media Island** | Quickshell / MPRIS | 🚀 Roadmap | Dynamic media playback capsule in center bar |
 | **Semantic Workspace Routing**| Hyprland | 🚀 Roadmap | Automated window organization by application intent |
 | **Slide-Down Scratchpads** | Hyprland / TUIs | 🚀 Roadmap | Fast dropdown utility access with auto-dismiss |
 | **Long-Running Command Cues** | Zsh / Sounds | 🚀 Roadmap | Ambient notification when background tasks complete |
-| **Matchmaker Worktree Picker** | Matchmaker / Git | 🚀 Roadmap | Lightning-fast worktree jumping with live git stats |
 | **Neovim Live LSP Title Sync** | Neovim / Hyprland | 🚀 Roadmap | Instant code health feedback visible from top bar |

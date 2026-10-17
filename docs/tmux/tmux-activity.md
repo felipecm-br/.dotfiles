@@ -14,21 +14,19 @@ When Tmux detects that a background tab has just received new text characters on
 ### The OpenCode (`oc`) Case
 OpenCode uses a TUI (Text User Interface) framework—similar to `htop`, `lazygit`, or `neovim`. Instead of outputting raw text lines, these applications actively manage screen drawing using alternate screen buffers and typically pause sending raw updates when waiting for user input. Because no continuous raw text is printed to standard terminal output, Tmux does not trigger the activity monitor.
 
-## Configuration (Enable / Disable)
+## Configuration (Disabled by Default in Favor of `acpd`)
 
-If you find this visual notification helpful, you can ensure it stays enabled. If you prefer not to have tabs highlight while the AI runs background commands, you can disable it.
-
-This setting is located in your `~/.config/tmux/tmux.conf` file:
+Because our `acpd` daemon provides structured, per-pane semantic status pills (`@ai_agent_state` and `@ai_agent_state_color`), native Tmux activity monitoring is disabled in [`tmux/.config/tmux/tmux.conf`](../../tmux/.config/tmux/tmux.conf) to prevent noisy stdout tab inversions:
 
 ```tmux
 # Window Activity Monitoring
-setw -g monitor-activity on
+setw -g monitor-activity off
 set -g visual-activity off
 ```
 
-- `setw -g monitor-activity on` -> Enables tab highlighting (visual background highlight when `agy` responds or interacts).
-- `setw -g monitor-activity off` -> Disables activity highlighting completely.
-- `set -g visual-activity off` -> Prevents Tmux from displaying text messages at the bottom status line (e.g., `"Activity in window 0"`), keeping notifications strictly as silent tab highlighting.
+- `setw -g monitor-activity off` -> Disables generic stdout activity highlighting so only semantic `acpd` agent state transitions colorize background tabs.
+- `setw -g monitor-activity on` -> Re-enables generic tab highlighting on any background stdout output.
+- `set -g visual-activity off` -> Prevents Tmux from displaying text messages at the bottom status line (e.g., `"Activity in window 0"`).
 
 > **To reload the configuration:**
 > Press `Ctrl+Space` followed by `r` in Tmux to source `tmux.conf`.

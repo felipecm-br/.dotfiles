@@ -78,7 +78,7 @@ Machines behind residential NAT or CGNAT connect seamlessly via **Tailscale**:
 
 ## 4. The `acpd-cli` Workflow Tool
 
-The `acpd-cli` utility ([`acpd/.local/bin/acpd-cli`](file:///home/fecavmi/.dotfiles/main/acpd/.local/bin/acpd-cli)) provides a unified CLI interface to communicate with the `acpd` daemon:
+The `acpd-cli` utility ([`acpd/.local/bin/acpd-cli`](../../acpd/.local/bin/acpd-cli)) provides a unified CLI interface to communicate with the `acpd` daemon:
 
 ### Available Commands
 
@@ -102,7 +102,7 @@ The `acpd-cli` utility ([`acpd/.local/bin/acpd-cli`](file:///home/fecavmi/.dotfi
 ### Proactive Agent Supervision & Stall Detection
 
 `acpd` includes built-in proactive supervision heuristics:
-1. **Stall Detection (Heurística de Detecção de Agente Travado):**
+1. **Stall Detection (Hung Agent Heuristic):**
    - When an agent is in `working` state, `acpd` samples pane output (scrollback diff and cursor position) and Linux process tree CPU ticks (`utime + stime`) every 5 seconds.
    - If a pane emits **no new text output for > 20 seconds** and CPU delta is **zero**, `acpd` transitions the state to `stalled` (glyph `󱥁`, amber color `#fab387` / `#e09d7f`) and triggers an alert.
    - If output resumes or CPU activity picks up, `acpd` automatically recovers the state back to `working`.
@@ -167,7 +167,7 @@ ssh user@my-desktop "acpd-cli send %0 y Enter"
 
 ## 6. Related References
 
-- [State-of-the-Art Terminal Agent Workflow](file:///home/fecavmi/.dotfiles/main/docs/architecture/state-of-the-art-terminal-agent-workflow.md)
-- [ACPD Tmux Skill](file:///home/fecavmi/.dotfiles/main/.agents/skills/acpd-tmux/SKILL.md)
-- [Terminal Ergonomics & UX Manifesto](file:///home/fecavmi/.dotfiles/main/docs/architecture/terminal-ergonomics-and-ux-manifesto.md)
-- [AWT Worktree Workflow](file:///home/fecavmi/.dotfiles/main/docs/GIT_WORKTREE_AGENTIC_WORKFLOW.md)
+- [State-of-the-Art Terminal Agent Workflow](state-of-the-art-terminal-agent-workflow.md)
+- [ACPD Tmux Skill](../../.agents/skills/acpd-tmux/SKILL.md)
+- [Terminal Ergonomics & UX Manifesto](terminal-ergonomics-and-ux-manifesto.md)
+- [AWT Worktree Workflow](../GIT_WORKTREE_AGENTIC_WORKFLOW.md)

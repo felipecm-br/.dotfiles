@@ -113,22 +113,20 @@ The README and value proposition must lead with the concrete problem solved for 
     - *Remediation:* Add targeted inner `#![allow(clippy::...)]` gates.
   - **Next Release Action:** Ready for tagged release `v0.1.0` on branch `waymaker` to trigger multi-arch static binary packaging.
 
-### 2.4 `tmux` & Backdrop Snapshot Layer
+### 2.4 `tmux` Native Popup & Cockpit Layer
 - **Path:** `/home/fecavmi/.dotfiles/main/tmux/.config/tmux/`
 - **Current State:**
-  - Floating popup isolation via frozen ANSI snapshots rendered into a background pane.
+  - Tmux 3.8+ native floating popup isolation (`display-popup`) eliminating background redraw clobbering during active AI streaming without requiring auxiliary snapshot panes (`tmux-popup-isolate.sh` retired).
   - 100% event-driven status bar (`status-interval 0`) with custom pills (`@ai_agent_state`, `@ai_agent_bell`).
-  - Interactive window switcher with live preview and key actions (`c` create, `d` kill) powered by `window-picker.toml`.
-  - **Popup Isolator Migration Complete (Resolved):**
-    - Unified helper script [`tmux/.config/tmux/tmux-popup-isolate.sh`](file:///home/fecavmi/.dotfiles/main/tmux/.config/tmux/tmux-popup-isolate.sh) is fully deployed with CLI flag parsing, conditional idle bypass, and scoped `/tmp/tmux-backdrop-${UID}-${CURRENT_PANE#%}.ansi` isolation with `0600` permissions.
-    - All 7 popup caller scripts in `tmux/.config/tmux/` and `awt/` have been migrated to delegate directly to `tmux-popup-isolate.sh`:
-      1. [`tmux/.config/tmux/lazygitrs-popup.sh`](file:///home/fecavmi/.dotfiles/main/tmux/.config/tmux/lazygitrs-popup.sh)
-      2. [`tmux/.config/tmux/sesh-picker.sh`](file:///home/fecavmi/.dotfiles/main/tmux/.config/tmux/sesh-picker.sh)
-      3. [`tmux/.config/tmux/window-picker.sh`](file:///home/fecavmi/.dotfiles/main/tmux/.config/tmux/window-picker.sh)
-      4. [`tmux/.config/tmux/scrollback-picker.sh`](file:///home/fecavmi/.dotfiles/main/tmux/.config/tmux/scrollback-picker.sh)
-      5. [`tmux/.config/tmux/files-picker.sh`](file:///home/fecavmi/.dotfiles/main/tmux/.config/tmux/files-picker.sh)
-      6. [`tmux/.config/tmux/grep-picker.sh`](file:///home/fecavmi/.dotfiles/main/tmux/.config/tmux/grep-picker.sh)
-      7. [`awt/.config/tmux/awt-popup.sh`](file:///home/fecavmi/.dotfiles/main/awt/.config/tmux/awt-popup.sh)
+  - Interactive Cockpit HUD (`cockpit-picker.sh` / `cockpit-picker.toml`) and modal pickers with live preview:
+    1. [`tmux/.config/tmux/cockpit-picker.sh`](../../tmux/.config/tmux/cockpit-picker.sh)
+    2. [`tmux/.config/tmux/lazygitrs-popup.sh`](../../tmux/.config/tmux/lazygitrs-popup.sh)
+    3. [`tmux/.config/tmux/session-picker.sh`](../../tmux/.config/tmux/session-picker.sh)
+    4. [`tmux/.config/tmux/window-picker.sh`](../../tmux/.config/tmux/window-picker.sh)
+    5. [`tmux/.config/tmux/scrollback-picker.sh`](../../tmux/.config/tmux/scrollback-picker.sh)
+    6. [`tmux/.config/tmux/workspace-picker.sh`](../../tmux/.config/tmux/workspace-picker.sh)
+    7. [`tmux/.config/tmux/grep-picker.sh`](../../tmux/.config/tmux/grep-picker.sh)
+    8. [`awt/.config/tmux/awt-popup.sh`](../../awt/.config/tmux/awt-popup.sh)
 
 ### 2.5 Agent Client Hooks Layer
 - **Paths:**
@@ -146,7 +144,7 @@ The README and value proposition must lead with the concrete problem solved for 
         `/run/user/1001/acpd/token`,
       ];
       ```
-    - [`hooker.ts:8-15`](file:///home/fecavmi/.dotfiles/main/opencode/.config/opencode/plugins/hooker.ts#L8-L15):
+    - [`opencode/.config/opencode/plugins/hooker.ts`](../../opencode/.config/opencode/plugins/hooker.ts):
       ```typescript
       const uid = process.getuid?.() ?? 1001;
       const candidates = [
@@ -155,6 +153,7 @@ The README and value proposition must lead with the concrete problem solved for 
         join(process.env.HOME || "/home/fecavmi", ".cache", "acpd", "token"),
         `/run/user/1001/acpd/token`,
       ];
+      ```
 ### 2.6 Workspace & Session Layer (`sesh` / `wm session`)
 - **Role:** Session management, project directory discovery, and workspace context switching.
 - **Where Sesh / Waymaker is Used in the Cockpit Stack:**
@@ -685,10 +684,8 @@ To satisfy both the requirement for standalone open-source modularity and the us
 - [x] **Agent Hooks (Path Sanitization):**
   - Removed `/run/user/1001/` and `/home/fecavmi` from `antigravity/.gemini/hooks/hook-lib.mjs`.
   - Removed `/run/user/1001/` and `/home/fecavmi` from `opencode/.config/opencode/plugins/hooker.ts`.
-- [x] **tmux (Backdrop Isolator Creation):**
-  - Created and deployed [`tmux/.config/tmux/tmux-popup-isolate.sh`](file:///home/fecavmi/.dotfiles/main/tmux/.config/tmux/tmux-popup-isolate.sh) with `resize-pane -Z`, conditional idle bypass, CLI flags, and 0600 UID-pane isolation.
-- [x] **tmux (Backdrop Migration & Theming):**
-  - Refactored all 7 popup scripts (`lazygitrs-popup.sh`, `window-picker.sh`, `sesh-picker.sh`, `scrollback-picker.sh`, `files-picker.sh`, `grep-picker.sh`, `awt-popup.sh`) to delegate to `tmux-popup-isolate.sh`.
+- [x] **tmux (Native Popup Migration & Theming):**
+  - Migrated all modal popup scripts (`lazygitrs-popup.sh`, `cockpit-picker.sh`, `window-picker.sh`, `session-picker.sh`, `scrollback-picker.sh`, `workspace-picker.sh`, `grep-picker.sh`, `awt-popup.sh`) to native Tmux 3.8 `display-popup` with Omarchy dynamic theming (retiring the interim `tmux-popup-isolate.sh` backdrop helper).
   - Verified test suite passes 100% with zero failures.
 
 ### Phase 2: Two-Tier CI/CD & Multi-Arch Build Automation

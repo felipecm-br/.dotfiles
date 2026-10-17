@@ -1,87 +1,87 @@
 # Hyprland Visual Aesthetics vs. Performance & Hardware Benchmark
 
-Este documento detalha o impacto de desempenho, consumo de energia, latência de renderização e estabilidade dos principais estilos visuais (*rices*) do Hyprland, com foco especial na arquitetura de hardware do **Apple Silicon M1 Pro (16 GB / Asahi Linux)** e na filosofia de **latência sub-100ms** deste repositório.
+This document details the performance impact, power consumption, rendering latency, and stability of the primary Hyprland visual archetypes (*rices*), with a special focus on the **Apple Silicon M1 Pro (16 GB / Asahi Linux)** hardware architecture and the **sub-100ms latency** philosophy of this repository.
 
 ---
 
-## 1. Filosofia de Ergonomia e Custo Gráfico
+## 1. Ergonomics Philosophy & Graphical Overhead
 
-De acordo com o [Manifesto de Ergonomia de Terminal](file:///home/fecavmi/.dotfiles/main/docs/architecture/terminal-ergonomics-and-ux-manifesto.md), a experiência do desenvolvedor deve respeitar o **Limiar de Doherty (< 100ms de latência total)**.
+According to the [Terminal Ergonomics & UX Manifesto](../architecture/terminal-ergonomics-and-ux-manifesto.md), the developer experience must strictly respect the **Doherty Threshold (< 100ms total latency)**.
 
-Qualquer atraso na renderização de janelas (*frametime jitter*), queda de taxa de quadros (abaixo de 120Hz no painel ProMotion) ou aquecimento desnecessário em modo bateria afeta a agilidade cognitiva e o foco.
+Any window rendering delay (*frametime jitter*), frame rate drop (below 120Hz on the ProMotion panel), or unnecessary thermal throttling on battery directly degrades cognitive agility and deep focus.
 
 ---
 
-## 2. Análise dos 5 Arquétipos Visuais do Hyprland
+## 2. Analysis of the 5 Hyprland Visual Archetypes
 
 ```mermaid
 graph LR
-    subgraph Heavy["🎨 Alto Custo Gráfico (Eyecandy Extremo)"]
-        LG["Liquid Glass / hyprglass<br/>(10 Passos de Shaders + Refração)"]
+    subgraph Heavy["🎨 High Graphical Cost (Extreme Eyecandy)"]
+        LG["Liquid Glass / hyprglass<br/>(10 Shader Passes + Refraction)"]
     end
-    subgraph Balanced["⚡ Custo Balanceado (Sweet Spot)"]
-        TN["Tokyo Night Solar Dawn (Atual)<br/>(Bordas em Loop + HyDE Physics)"]
+    subgraph Balanced["⚡ Balanced Cost (Sweet Spot)"]
+        TN["Tokyo Night Solar Dawn (Current)<br/>(Looping Borders + HyDE Physics)"]
         PI["Pastel Islands / Catppuccin<br/>(Dual Kawase Blur passes=2 + Soft Shadows)"]
-        CP["Cyberpunk Neon Glow<br/>(Bordas RGB + Sombras Coloridas)"]
+        CP["Cyberpunk Neon Glow<br/>(RGB Borders + Colored Shadows)"]
     end
-    subgraph Minimal["🚀 Zero Overhead (Bateria Máxima)"]
-        OLED["OLED Zen / Monocromático<br/>(True Black + 1px Border + Zero Blur)"]
+    subgraph Minimal["🚀 Zero Overhead (Maximum Battery)"]
+        OLED["OLED Zen / Monochromatic<br/>(True Black + 1px Border + Zero Blur)"]
     end
 ```
 
 ---
 
 ### A. 🪟 Liquid Glass / visionOS (`hyprglass`)
-Inspirado no design translúcido do Apple VisionOS e macOS moderno.
-* **Mecanismo Técnico**: Executa um pipeline de **10 passos de shaders por janela** (SDF 3D, refração nas bordas via distorção de UVs, aberração cromática RGB separada, lente dome central, tone mapping adaptativo e Fresnel glow).
-* **Uso de GPU**: **5% a 15%+**.
-* **Frametime**: **3ms a 6ms** por quadro.
-* **Impacto em Bateria**: **Alto**. A GPU é forçada a manter clocks elevados durante rolagem e animações.
-* **Estabilidade**: **Média/Sensível**. Depende de hooks em funções C++ privadas do Hyprland (`renderLayer`).
+Inspired by the translucent design of Apple visionOS and modern macOS.
+* **Technical Mechanism**: Executes a **10-pass shader pipeline per window** (3D SDF, edge refraction via UV distortion, separated RGB chromatic aberration, central dome lens, adaptive tone mapping, and Fresnel glow).
+* **GPU Usage**: **5% to 15%+**.
+* **Frametime**: **3ms to 6ms** per frame.
+* **Battery Impact**: **High**. Forces the GPU to maintain elevated clock states during scrolling and animations.
+* **Stability**: **Medium/Sensitive**. Relies on hooks into private Hyprland C++ symbols (`renderLayer`).
 
 ---
 
-### B. 🌅 Tokyo Night Solar Dawn (*Configuração Ativa Atual*)
-O visual atualmente configurado no seu dotfiles ([`looknfeel.lua`](file:///home/fecavmi/.dotfiles/main/hypr/.config/hypr/looknfeel.lua) e tema Omarchy).
-* **Mecanismo Técnico**: Fundo azul-noite `#1a1b26`, cantos arredondados moderados (`rounding = 8`), bordas gradiente de 45° (Azul `#7aa2f7` + Dourado `#e0af68`) girando continuamente via shader leve de rotação linear (`borderangle` em `loop`), com animações físicas suaves do HyDE (`wind` bezier).
-* **Uso de GPU**: **< 1% a 2%**.
-* **Frametime**: **~0.5ms a 1.2ms** (120 FPS cravados sem oscilação).
-* **Impacto em Bateria**: **Mínimo**. Mantém o chip em estados profundos de economia de energia.
-* **Estabilidade**: **100% Nativa**. Não utiliza plugins binários externos.
+### B. 🌅 Tokyo Night Solar Dawn (*Current Active Configuration*)
+The visual profile currently configured in these dotfiles ([`looknfeel.lua`](../../hypr/.config/hypr/looknfeel.lua) and Omarchy theme).
+* **Technical Mechanism**: Deep night-blue `#1a1b26` backdrop, moderate rounded corners (`rounding = 8`), 45° gradient borders (Blue `#7aa2f7` + Gold `#e0af68`) rotating continuously via a lightweight linear rotation shader (`borderangle` in `loop`), paired with smooth HyDE physics animations (`wind` bezier).
+* **GPU Usage**: **< 1% to 2%**.
+* **Frametime**: **~0.5ms to 1.2ms** (locked 120 FPS with zero jitter).
+* **Battery Impact**: **Minimal**. Allows the SoC to remain in deep power-saving states.
+* **Stability**: **100% Native**. Uses zero external binary plugins.
 
 ---
 
 ### C. 🌸 Pastel Floating Islands (Catppuccin Aesthetic)
-Visual com tons pastéis relaxantes, cápsulas flutuantes na Waybar e sombras suaves.
-* **Mecanismo Técnico**: Cantos bem arredondados (`rounding = 16-20`), Dual Kawase Blur nativo com `passes = 2`, e sombras difusas (`shadow_range = 25-30`, `power = 4`).
-* **Uso de GPU**: **1.5% a 3%**.
-* **Frametime**: **~1ms a 1.5ms**.
-* **Impacto em Bateria**: **Baixo**. Excelente para uso diário contínuo.
-* **Estabilidade**: **100% Nativa**.
+Relaxing pastel tones, floating Waybar pills, and soft diffuse shadows.
+* **Technical Mechanism**: Generous rounded corners (`rounding = 16-20`), native Dual Kawase Blur with `passes = 2`, and diffuse shadows (`shadow_range = 25-30`, `power = 4`).
+* **GPU Usage**: **1.5% to 3%**.
+* **Frametime**: **~1ms to 1.5ms**.
+* **Battery Impact**: **Low**. Excellent for continuous daily use.
+* **Stability**: **100% Native**.
 
 ---
 
 ### D. ⚡ Cyberpunk Neon Glow
-Estilo de alta energia com contraste escuro e luzes neon vibrantes.
-* **Mecanismo Técnico**: Sombras com brilho colorido em ciano/magenta (`col.shadow = rgba(00f0ff33)`), gradientes contrastantes e integração com visualizadores de áudio (Cava).
-* **Uso de GPU**: **2% a 4%** (sobe para 5% se visualizadores de áudio estiverem desenhando a 60 FPS no terminal).
-* **Frametime**: **~1ms a 2ms**.
-* **Impacto em Bateria**: **Moderado**.
+High-energy dark contrast aesthetic with vibrant neon accents.
+* **Technical Mechanism**: Cyan/magenta colored glow shadows (`col.shadow = rgba(00f0ff33)`), high-contrast gradients, and audio visualizer integration (Cava).
+* **GPU Usage**: **2% to 4%** (rises to 5% when terminal audio visualizers draw continuously at 60 FPS).
+* **Frametime**: **~1ms to 2ms**.
+* **Battery Impact**: **Moderate**.
 
 ---
 
 ### E. 🧘 OLED Monochromatic Zen
-Minimalismo cirúrgico voltado exclusivamente para desenvolvimento em terminal.
-* **Mecanismo Técnico**: Fundo preto puro `#000000` (desliga pixels no painel Mini-LED), bordas ultrafinas de 1px, zero blur (`blur.enabled = false`), micro-gaps de 2px a 4px.
-* **Uso de GPU**: **~0% a 0.2%** (overhead quase nulo).
-* **Frametime**: **< 0.3ms** (menor latência de input tecnicamente possível).
-* **Impacto em Bateria**: **Mínimo Absoluto** (máxima autonomia de horas fora da tomada).
+Surgical minimalism tailored exclusively for terminal-first engineering.
+* **Technical Mechanism**: Pure black `#000000` background (powers down Mini-LED zones), ultra-thin 1px borders, zero blur (`blur.enabled = false`), and 2px–4px micro-gaps.
+* **GPU Usage**: **~0% to 0.2%** (near-zero overhead).
+* **Frametime**: **< 0.3ms** (lowest input latency technically achievable).
+* **Battery Impact**: **Absolute Minimum** (maximum unplugged runtime).
 
 ---
 
-## 3. Comportamento no Hardware Apple Silicon M1 Pro (Asahi Linux)
+## 3. Behavior on Apple Silicon M1 Pro Hardware (Asahi Linux)
 
-O MacBook Pro com chip M1 Pro possui características arquiteturais únicas:
+The MacBook Pro with the M1 Pro SoC features unique architectural characteristics:
 
 ```text
 ┌──────────────────────────────────────────────────────────────────┐
@@ -95,33 +95,33 @@ O MacBook Pro com chip M1 Pro possui características arquiteturais únicas:
 └──────────────────────────────────────────────────────────────────┘
 ```
 
-### Por que o M1 Pro se destaca:
-1. **Largura de Banda de Memória (200 GB/s)**: Em PCs convencionais com iGPU, o blur compete com a CPU pelo barramento de memória (40-60 GB/s). No M1 Pro, o barramento de 200 GB/s elimina totalmente os gargalos de textura.
-2. **Desafio da Resolução 3K (Liquid Retina) a 120Hz**:
-   * A tela nativa possui **~6 milhões de pixels**.
-   * A 120Hz, o compositor processa **720 milhões de pixels por segundo**.
-   * O blur nativo do Hyprland (Dual Kawase) lida com isso consumindo menos de 2% da GPU. Já o `hyprglass` realiza múltiplas amostragens por pixel, elevando a carga térmica.
+### Why the M1 Pro Excels:
+1. **Memory Bandwidth (200 GB/s)**: On conventional PCs with integrated GPUs, blur shaders compete with the CPU for memory bus bandwidth (40–60 GB/s). On the M1 Pro, the 200 GB/s unified memory bus completely eliminates texture bandwidth bottlenecks.
+2. **The 3K Resolution (Liquid Retina) @ 120Hz Challenge**:
+   * The native display contains **~6 million pixels**.
+   * At 120Hz, the compositor processes **720 million pixels per second**.
+   * Hyprland's native Dual Kawase blur handles this at under 2% GPU utilization, whereas `hyprglass` performs multiple per-pixel texture samples, increasing thermal load.
 
 ---
 
-## 4. Matriz Comparativa Completa de Performance
+## 4. Complete Comparative Performance Matrix
 
-| Estilo Visual | Uso Médio de GPU (M1 Pro) | Frametime Médio (3K @ 120Hz) | Consumo de Bateria | Fluidez ProMotion 120Hz | Risco de Quebra em Update |
+| Visual Archetype | Avg GPU Usage (M1 Pro) | Avg Frametime (3K @ 120Hz) | Battery Consumption | ProMotion 120Hz Fluidity | Update Breakage Risk |
 | :--- | :---: | :---: | :---: | :---: | :---: |
-| **OLED Zen** | **~0.1%** | **< 0.3 ms** | 🟢 Mínimo Absoluto | ⭐⭐⭐⭐⭐ Perfeita | 🟢 Zero |
-| **Tokyo Night Solar Dawn (Atual)** | **~1.0%** | **~0.8 ms** | 🟢 Mínimo | ⭐⭐⭐⭐⭐ Perfeita | 🟢 Zero |
-| **Pastel Islands (Catppuccin)** | **~2.2%** | **~1.2 ms** | 🟡 Baixo | ⭐⭐⭐⭐⭐ Perfeita | 🟢 Zero |
-| **Cyberpunk Neon Glow** | **~3.5%** | **~1.8 ms** | 🟡 Moderado | ⭐⭐⭐⭐⭐ Perfeita | 🟢 Zero |
-| **Liquid Glass (`hyprglass`)** | **~9.0%** | **~4.5 ms** | 🔴 Alto | ⭐⭐⭐⭐ Boa (na tomada) | 🔴 Alto (Plugin C++) |
+| **OLED Zen** | **~0.1%** | **< 0.3 ms** | 🟢 Absolute Minimum | ⭐⭐⭐⭐⭐ Perfect | 🟢 Zero |
+| **Tokyo Night Solar Dawn (Current)** | **~1.0%** | **~0.8 ms** | 🟢 Minimal | ⭐⭐⭐⭐⭐ Perfect | 🟢 Zero |
+| **Pastel Islands (Catppuccin)** | **~2.2%** | **~1.2 ms** | 🟡 Low | ⭐⭐⭐⭐⭐ Perfect | 🟢 Zero |
+| **Cyberpunk Neon Glow** | **~3.5%** | **~1.8 ms** | 🟡 Moderate | ⭐⭐⭐⭐⭐ Perfect | 🟢 Zero |
+| **Liquid Glass (`hyprglass`)** | **~9.0%** | **~4.5 ms** | 🔴 High | ⭐⭐⭐⭐ Good (Plugged In) | 🔴 High (C++ Plugin) |
 
 ---
 
-## 5. Recomendações e Perfis de Uso
+## 5. Recommendations & Usage Profiles
 
-### Perfil 1: "Dev Máximo / Ergonomia & Bateria" (*Recomendado para o dia a dia*)
-* **Estilo**: **Tokyo Night Solar Dawn (Seu Setup Atual)** ou **OLED Zen**.
-* **Por que**: Entrega estética impecável, cores perfeitamente contrastadas no Neovim/Ghostty, bordas animadas e **100% de estabilidade com zero consumo de bateria**.
+### Profile 1: "Max Dev / Ergonomics & Battery" (*Recommended Daily Driver*)
+* **Style**: **Tokyo Night Solar Dawn (Current Setup)** or **OLED Zen**.
+* **Why**: Delivers crisp aesthetics, high-contrast readability in Neovim/Ghostty, animated borders (switched live via `hypr-border` / `hypr-anim`), and **100% native stability with negligible battery drain**.
 
-### Perfil 2: "Showcase / Eyecandy Noturno" (*Conectado na Tomada*)
-* **Estilo**: **Liquid Glass (`hyprglass`)** ou **Cyberpunk Glow**.
-* **Como usar sem riscos**: Configure o `hyprglass` para aplicar efeitos de refração apenas em janelas multimídia ou popups flutuantes (`+hyprglass_enabled`), mantendo as janelas de terminal do Neovim no blur nativo.
+### Profile 2: "Showcase / Night Eyecandy" (*AC Power*)
+* **Style**: **Liquid Glass (`hyprglass`)** or **Cyberpunk Glow**.
+* **How to use safely**: Configure `hyprglass` to apply refraction effects only to media windows or floating popups (`+hyprglass_enabled`), keeping primary terminal/Neovim windows on native blur.

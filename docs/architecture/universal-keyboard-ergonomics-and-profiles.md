@@ -121,20 +121,20 @@ Instead of `Ctrl + 1..9` (which strains the hand when reaching from corner Ctrl)
 In both profiles, the interface conforms strictly to the **Golden Ratio ($\phi \approx 1.618$)** and **Tufte Data-Ink Semiotics**:
 
 ```text
-╭── 󰌌  Keybindings & Workflow HUD ──────────────────────────────── 46/58 ──╮
-│ > tmux                                             │ 󰈞 Workspace Files (75%×60%) │
+╭── 󰌌 ───────────────────────────────────────────────────────────── 46/58 ──╮
+│ > tmux                                             │ 󰈞 Workspace Files (85%×75%) │
 │                                                    │ Layer: tmux                 │
 │ 󰈞  Prefix + e   Workspace Files (Golden Ratio)  │                             │
 │ 󰅍  Prefix + y   Scrollback Yank & Chrome URL       │ ── Controls ─────────────── │
 │ 󰍉  Prefix + /   Workspace Ripgrep Live Search      │ • Enter: Execute directly   │
-│ 󰓩  Prefix + s   Sesh Workspace / Task Picker       │ • b / w: Open link in Chrome│
+│ 󰓩  Prefix + s   Waymaker Session / Project Picker  │ • b / w: Open link in Chrome│
 │ 󰊢  Ctrl + Shift+G AWT Autonomous Worktree Popup    │ • e / o: Open in Neovim     │
 │ 󰊢  Ctrl + G     Lazygitrs Floating Cockpit         │ • y: Copy key to clipboard  │
 │ 󰙀  Ctrl + Shift+T Reopen Closed Window/Tab         │ • q / Esc: Close modal      │
 │ 󰌌  Prefix + f   Vimium Window Hints (1-touch)      │                             │
 │ 󰌌  Ctrl + 1..9  Direct Window Jump (Zero-Prefix)   │ ── Ergonomic Profile ────── │
 │ 󰌌  Prefix + ?   Keybindings & Workflow HUD         │ [󰌌 Biomechanical]  [󰘳 Univ] │
-╰── [Enter] Run  •  [Tab] Category  •  [b] Chrome  •  [y] Copy  •  [q] Quit ──╯
+╰── Enter Run │ Tab Filter │ y Copy │ J/K Scroll │ Esc Exit ─────────────────╯
 ```
 
 ### Profile Badge Indicator in HUD Footer

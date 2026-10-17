@@ -28,11 +28,8 @@ This document records the identified issues of visual flicker, rendering collisi
 ┌─────────────────────────────────────────────────────────────────────────┐
 │                          TARGET ARCHITECTURE                            │
 ├────────────────────────────────┬────────────────────────────────────────┤
-│ Idle Agent / Static Terminal   │ Direct & Native Display Popup          │
-│                                │ (Immediate popup without backdrop)     │
-├────────────────────────────────┼────────────────────────────────────────┤
-│ Active Streaming Agent         │ Frozen Transparent Snapshot Backdrop   │
-│ (@ai_agent_state_raw = busy)   │ (tmux capture-pane -ep -> _popups)     │
+│ Idle or Streaming Terminal     │ Native Tmux 3.8 Display Popup          │
+│                                │ (Direct zero-overhead floating modal)  │
 ├────────────────────────────────┼────────────────────────────────────────┤
 │ Rapid AI Tool Transitions      │ 650ms Idle Debounce in ACPD            │
 │ (Sequential tool calls)        │ (Cancels intermediate idle state flips)│
@@ -62,40 +59,10 @@ Inside the `acpd` daemon (`adapters.rs`, configured via `idle_debounce_ms = 650`
 
 ---
 
-### 🪄 2. Frozen Transparent Snapshot Backdrop
-Inside the popup launcher scripts (`sesh-picker.sh`, `window-picker.sh`, `lazygitrs-popup.sh`):
+### 🪄 2. Native Tmux 3.8 Display Popup (Historical Snapshot Backdrop Retired)
+In earlier Tmux versions (< 3.8), popup launcher scripts required an interim frozen snapshot backdrop (`tmux-popup-isolate.sh` / `_popups:backdrop`) when `@ai_agent_state_raw` was `busy` or `working` to prevent background scroll escapes from clobbering the popup top border.
 
-```bash
-AI_STATE=$(tmux show-options -pqv -t "$TARGET_PANE" @ai_agent_state_raw)
-if [ "$AI_STATE" = "busy" ] || [ "$AI_STATE" = "working" ]; then
-    CURRENT_PANE=$(tmux display-message -p '#{pane_id}')
-    ORIG_TARGET=$(tmux display-message -p '#{session_name}:#{window_index}')
-    
-    # 1. Capture a frozen visual snapshot of the buffer with ANSI colors (<1ms)
-    tmux capture-pane -ep -t "$CURRENT_PANE" > /tmp/tmux-backdrop.ansi 2>/dev/null || true
-
-    # 2. Render the snapshot into a static background pane in the dedicated _popups session
-    if ! tmux list-windows -t "_popups" -F '#W' 2>/dev/null | grep -q "^backdrop$"; then
-        tmux new-window -d -t "_popups" -n "backdrop" "cat /tmp/tmux-backdrop.ansi; tail -f /dev/null"
-    else
-        tmux respawn-window -k -t "_popups:backdrop" "cat /tmp/tmux-backdrop.ansi; tail -f /dev/null"
-    fi
-
-    # 3. Switch client to clean static backdrop and open popup
-    tmux switch-client -t "_popups:backdrop" 2>/dev/null || true
-    tmux display-popup -b rounded -T " Title " -w 80% -h 35% -y 34 -E "..."
-
-    # 4. Intelligent restore: switch back only if the user cancelled (still inside _popups)
-    CURRENT_SESS=$(tmux display-message -p '#{session_name}')
-    if [ "$CURRENT_SESS" = "_popups" ]; then
-        tmux switch-client -t "$ORIG_TARGET" 2>/dev/null || true
-    fi
-    exit 0
-else
-    # Clean/static terminal: invoke native popup directly without backdrop overhead
-    exec tmux display-popup -b rounded -T " Title " -w 80% -h 35% -y 34 -E "..."
-fi
-```
+In **Tmux 3.8**, `server_client_draw_pane` redraw clobbering over active floating popups was resolved upstream in the Tmux core rendering engine. All popup launcher scripts ([`cockpit-picker.sh`](../../tmux/.config/tmux/cockpit-picker.sh), [`session-picker.sh`](../../tmux/.config/tmux/session-picker.sh), [`window-picker.sh`](../../tmux/.config/tmux/window-picker.sh), [`lazygitrs-popup.sh`](../../tmux/.config/tmux/lazygitrs-popup.sh), [`workspace-picker.sh`](../../tmux/.config/tmux/workspace-picker.sh), [`scrollback-picker.sh`](../../tmux/.config/tmux/scrollback-picker.sh)) now invoke `exec tmux display-popup` directly with zero snapshot overhead and sub-5ms launch latency.
 
 ---
 
@@ -114,8 +81,9 @@ set -g status-interval 0
 
 - `acpd/src/api.rs` (+ `daemon.rs`): authoritative idle-debounce coordinator (`idle_debounce_ms`, default 650ms, set in `~/.config/acpd/config.toml`); `acpd/src/adapters.rs`: pending-idle cancellation and state deduplication.
 - [`tmux/.config/tmux/tmux.conf`](../../tmux/.config/tmux/tmux.conf): Configuration of `status-interval 0` and ergonomic popups.
-- [`tmux/.config/tmux/sesh-picker.sh`](../../tmux/.config/tmux/sesh-picker.sh): Session picker with intelligent backdrop and navigation preservation.
-- [`tmux/.config/tmux/window-picker.sh`](../../tmux/.config/tmux/window-picker.sh): Matchmaker window picker with intelligent backdrop.
+- [`tmux/.config/tmux/cockpit-picker.sh`](../../tmux/.config/tmux/cockpit-picker.sh): AI Fleet Cockpit & Window Manager popup (`Prefix + Space`).
+- [`tmux/.config/tmux/session-picker.sh`](../../tmux/.config/tmux/session-picker.sh): Native Waymaker session picker (`Prefix + s`).
+- [`tmux/.config/tmux/window-picker.sh`](../../tmux/.config/tmux/window-picker.sh): Waymaker window picker popup.
 - [`tmux/.config/tmux/lazygitrs-popup.sh`](../../tmux/.config/tmux/lazygitrs-popup.sh): Lazygitrs popup with smart `--commits` detection, native `display-popup` modal, and dynamic theme styling. The binary is resolved **by capability** (`resolve_lzg` requires `--commits` in `--help`; order: `~/.local/bin`, `PATH`, `~/.cargo/bin`) so a stale install cannot silently close the popup, and the clean-tree check uses `git diff --quiet` / `git diff --cached --quiet` / `git ls-files --others --exclude-standard` (exits on the first dirty file) instead of a full `git status --porcelain`.
 - **Tmux 3.8 Native Redraw Fix**: In tmux 3.8, floating popup pane clobbering during active agent streaming was resolved upstream in the terminal redraw engine, allowing `tmux-popup-isolate.sh` to be retired in favor of zero-friction, native `tmux display-popup` across all modal pickers.
 - [`docs/tmux/ai-status-bar.md`](ai-status-bar.md): Comprehensive guide to AI agent status pills and state animations.

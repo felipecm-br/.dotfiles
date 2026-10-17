@@ -32,29 +32,29 @@ While a selection is active, tmux signals it visually: the active pane border sw
 
 ---
 
-## 2. Scrollback Capture to Neovim (`Prefix + E`)
+## 2. Scrollback Markdown & Mermaid Inspector (`Prefix + E`)
 
-You can capture the full scrollback history of the current tmux pane (with ANSI colors preserved) and open it directly in Neovim for searching, copying, or inspection.
+You can capture the full scrollback history of the current tmux pane and open it directly in a floating Neovim popup (`90% × 88%`) with Treesitter Markdown highlighting, ANSI colorization, and inline Mermaid diagram rendering (`Snacks.image`).
 
 ### Keybinding (`Prefix + E`)
 
-In [`tmux/.config/tmux/tmux.conf`](../../tmux/.config/tmux/tmux.conf), pressing `Prefix` (`Ctrl+Space`) then `Shift+e` (`E`) captures the active pane's scrollback buffer:
+In [`tmux/.config/tmux/tmux.conf`](../../tmux/.config/tmux/tmux.conf), pressing `Prefix` (`Ctrl+Space`) then `Shift+e` (`E`) captures the active pane's scrollback buffer via [`scrollback-view.sh`](../../tmux/.config/tmux/scrollback-view.sh):
 
 ```tmux
-bind-key "E" run-shell "~/.config/tmux/scrollback-view.sh"
+bind-key "E" run-shell "~/.config/tmux/scrollback-view.sh '#{pane_id}'"
 ```
 
 **How it works:**
-1. `tmux capture-pane -epJS -` exports (`-J` rejoins wrapped lines) the full pane scrollback history, retaining ANSI color escape codes.
-2. Drops empty lines (`sed '/^$/d'`), saving to `/tmp/tmux_scrollback.ansi`. (The old prompt-glyph `grep -vE` stage was removed: its non-zero exit status aborted the `&&` chain and silently killed the binding.)
-3. Spawns a new tmux window running Neovim, colorizing ANSI escape sequences with [`baleia.nvim`](../../nvim/.config/nvim/lua/plugins/baleia.lua) via `:BaleiaColorize` (guarded by `silent!`, so a missing/slow plugin can never break the binding), setting the buffer as read-only (`nomodified nomodifiable`), and jumping to the bottom (`G`). Failures are visible by design: a failed capture shows a `display-message` and logs to `/tmp/scrollback-view.err` (the old inline version died silently).
+1. `tmux capture-pane -epJS -` exports (`-J` rejoins wrapped lines) the full pane scrollback history into `/tmp/tmux_scrollback.md`.
+2. Enables Kitty graphics passthrough (`allow-passthrough all`) and opens a `90% × 88%` rounded floating popup (`-T " 󰄧 "`) styled with the active Omarchy `accent` color.
+3. Launches Neovim with `:silent! BaleiaColorize`, `lua require('config.scrollback').setup()` (enabling Markdown/Mermaid diagram rendering, `n`/`N` diagram hopping, `yc` chart yank, and `q`/`Esc` instant exit), and jumps to the bottom (`G`).
 
 ### Shell alias (`scrollback`)
 
 A zsh alias is provided in [`zsh/.zsh/utils/aliases.zsh`](../../zsh/.zsh/utils/aliases.zsh):
 
 ```zsh
-alias scrollback='tmux capture-pane -epS - > /tmp/tmux_scrollback.ansi && nvim -c "BaleiaColorize" -c "normal G" /tmp/tmux_scrollback.ansi'
+alias scrollback='~/.config/tmux/scrollback-view.sh'
 ```
 
 ### History Limit & Vi Mode
@@ -69,26 +69,26 @@ alias scrollback='tmux capture-pane -epS - > /tmp/tmux_scrollback.ansi && nvim -
 
 Fuzzy copy/insert of structured tokens and commands (Linux CLI commands, paths, URLs, git hashes, IPs) from the full scrollback via `wm`, extrakto-style — no editor round-trip.
 
-Bind ([`tmux.conf`](../../tmux/.config/tmux/tmux.conf)): `Prefix` then `y` or `C-y` (scrollback picker / token & link extract) runs [`scrollback-picker.sh`](../../tmux/.config/tmux/scrollback-picker.sh) with the origin pane id. The script opens a themed popup itself (rounded border in theme green, pure icon badge ` 󰅍 `, golden `75% x 60%`). When an agent is streaming (`@ai_agent_state_raw` = busy/working), it opens over a frozen snapshot backdrop instead, per Issue B in `popup-isolation-and-debounce.md`:
+Bind ([`tmux.conf`](../../tmux/.config/tmux/tmux.conf)): `Prefix` then `y` or `C-y` (scrollback picker / token & link extract) runs [`scrollback-picker.sh`](../../tmux/.config/tmux/scrollback-picker.sh) with the origin pane id. The script opens a native themed popup (rounded border in theme green, pure icon badge ` 󰅍 `, `85% × 75%`):
 
 1. `tmux capture-pane -pJS - -t <origin>` exports the origin pane explicitly (never the popup), joining wrapped lines (`-J`) so split commands and URLs survive; full text kept in `/tmp/scrollback-picker-src.txt`.
 2. Token files per filter precomputed (`-all/-cmd/-path/-url/-sha.txt`), bottom-up deduped and recent-first. Commands are extracted from prompt-prefixed lines (`❯`, `$`, `#`, `>`), AI tool execution logs (`● Bash(...)`), and common Linux CLI verbs (`pacman`, `yay`, `rm`, `mv`, `git`, `cargo`, `just`, `systemctl`, etc.). In `all` mode, tokens are interleaved chronologically so the most recent screen outputs (URLs, paths, commands) appear at index 0.
-3. `wm -o scrollback-picker` (canonical preset [`scrollback-picker.toml`](../../waymaker/.config/waymaker/presets/scrollback-picker.toml): nav mode starting in filter, jump-style keymap) with items from `[start] command`. Keys: `Enter` copies, `Ctrl+V` inserts the current token/command directly into the origin pane (`MM_ORIGIN_PANE`), `Ctrl+E` (filter) / `e` (nav) opens a `path[:line[:col]]` token in `$EDITOR` via [`scrollback-open.sh`](../../tmux/.config/tmux/scrollback-open.sh), `Ctrl+B` (filter) / `b` / `w` / `x` (nav) opens URLs directly in Google Chrome via [`scrollback-chrome.sh`](../../tmux/.config/tmux/scrollback-chrome.sh) (also auto-delegated by `scrollback-open.sh` if invoked on URLs), `Tab`/`Shift-Tab` cycle explicit filter modes (all→cmd→path→url→sha→all), `Space` multi-selects, `Esc` cascades filter→nav→quit, `Ctrl+P` / `P` cycles between 60% and 95% full-modal preview.
+3. `wm -o scrollback-picker` (canonical preset [`scrollback-picker.toml`](../../waymaker/.config/waymaker/presets/scrollback-picker.toml): nav mode starting in filter, jump-style keymap) with items from `[start] command`. Keys: `Enter` copies, `Ctrl+V` inserts the current token/command directly into the origin pane (`MM_ORIGIN_PANE`), `Ctrl+E` (filter) / `e` (nav) opens a `path[:line[:col]]` token in `$EDITOR` via [`scrollback-open.sh`](../../tmux/.config/tmux/scrollback-open.sh), `Ctrl+B` (filter) / `b` / `w` / `x` (nav) opens URLs directly in Google Chrome via [`scrollback-chrome.sh`](../../tmux/.config/tmux/scrollback-chrome.sh) (also auto-delegated by `scrollback-open.sh` if invoked on URLs), `Tab`/`Shift-Tab` cycle explicit filter modes (all→cmd→path→url→sha→all), `Space` multi-selects, `Esc` cascades filter→nav→quit.
 4. Copy tail runs detached (`trap '' HUP`, `&`) to `wl-copy` (fallback `xclip`, then tmux buffer) with a `tmux display-message` confirm, so the popup closes the instant `Enter` is pressed; stages are timestamped in `/tmp/scrollback-picker-mm.log`. Covered by `tests/scrollback_picker.test.sh`.
 
-Rule of thumb: `Prefix + E` = **read** (long-form inspection in Neovim), `Prefix + e` / `Prefix + C-e` = **explore** (workspace files popup), `Prefix + y` / `Prefix + C-y` = **scrollback-picker** (tokens, links & shell commands to clipboard or prompt in ~3 keystrokes).
+Rule of thumb: `Prefix + E` = **read** (long-form Markdown & Mermaid inspection in Neovim popup), `Prefix + e` / `Prefix + C-e` = **explore** (workspace files popup), `Prefix + y` / `Prefix + C-y` = **scrollback-picker** (tokens, links & shell commands to clipboard or prompt in ~3 keystrokes).
 
 ---
 
 ## 4. Workspace Files Peek (`Prefix + e` / `Prefix + C-e`)
 
-Browse workspace files and AI-generated code in a popup via `mm -o workspace` (or alias `mm -o files`) — inspect files with syntax-highlighted previews, tree, and native Markdown, Mermaid diagrams & Photos rendering without leaving the AI chat window.
+Browse workspace files and AI-generated code in a popup via `wm -o workspace` — inspect files with syntax-highlighted previews, tree, and native Markdown, Mermaid diagrams & Photos rendering without leaving the AI chat window.
 
 Bind ([`tmux.conf`](../../tmux/.config/tmux/tmux.conf)):
-- `Prefix + e` / `Prefix + C-e`: Opens Golden Ratio popup (`75% × 60%`) via inward roll (`e` = Explorer).
+- `Prefix + e` / `Prefix + C-e`: Opens centered popup (`85% × 75%`, or `96% × 92%` in fullscreen mode) via inward roll (`e` = Explorer).
 
-Architecture ([`workspace-picker.sh`](../../tmux/.config/tmux/workspace-picker.sh) / [`files-picker.sh`](../../tmux/.config/tmux/files-picker.sh) and canonical preset [`workspace.toml`](../../waymaker/.config/waymaker/presets/workspace.toml), with compatibility alias [`files.toml`](../../waymaker/.config/waymaker/presets/files.toml)):
-1. **Themed Popup & Pure Icon Badge**: Uses theme blue/cyan border with pure icon badge ` 󰈞 󰄧 󰋩 ` (Explorer, Mermaid diagrams, and Photos), with frozen backdrop protection when an agent streams.
+Architecture ([`workspace-picker.sh`](../../tmux/.config/tmux/workspace-picker.sh) and canonical preset [`workspace.toml`](../../waymaker/.config/waymaker/presets/workspace.toml)):
+1. **Themed Popup & Pure Icon Badge**: Uses theme blue/cyan border with pure icon badge ` 󰈞 `.
 2. **Native Markdown, Mermaid & Photos Rendering**: Automatically routes `.md`, `.markdown`, `.mmd`, `.png`, `.jpg`, `.webp` through native media and diagram pipelines with Kitty Graphics Protocol passthrough.
 3. **Diagram & Photo Zoom Controls & HUD Icons**:
    - `s`: Toggles diagram inspector modal (`󰄧`).

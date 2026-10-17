@@ -202,7 +202,15 @@ ai-jail agy
 
 ## 7. How to Update ai-jail and ai-memory
 
-To keep both tools updated with the latest security fixes and features:
+To keep both tools updated with the latest security fixes and features, use the unified AI workflow updater:
+
+```bash
+ai-update --only ai-suite
+# or run the full stack audit & updater:
+update-ai-workflow
+```
+
+Alternatively, to update either tool manually:
 
 ### Updating ai-jail
 

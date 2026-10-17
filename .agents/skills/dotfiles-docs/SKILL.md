@@ -22,37 +22,45 @@ docs/
 ├── README.md                      # Central Index & Categorized Sitemap (Must be kept 100% in sync)
 │
 ├── architecture/                  # 🔬 Core Philosophy, Benchmarks & Ergonomic Laws
-│   ├── terminal-ergonomics-and-ux-manifesto.md   # Master HCI manifesto, KLM-GOMS, H=0, sub-100ms
-│   ├── workflow-keybindings-matrix.md            # Living multi-layer keymap table (Global/Tmux/Zsh/Lazygitrs)
-│   ├── zero-friction-file-transfer-benchmark.md  # 6-method KLM-GOMS transfer benchmark & Frecency 2.0
+│   ├── terminal-ergonomics-and-ux-manifesto.md     # Master HCI manifesto, KLM-GOMS, H=0, sub-100ms
+│   ├── workflow-keybindings-matrix.md              # Living multi-layer keymap table (Global/Tmux/Zsh/Waymaker/Lazygitrs)
+│   ├── zero-friction-file-transfer-benchmark.md    # 6-method KLM-GOMS transfer benchmark & Frecency 2.0
+│   ├── neovim-visual-workflow.md                   # Wayland clipboard isolation, Mermaid hover, smart image paste
+│   ├── smart-patterns-roadmap.md                   # Event-driven intelligence roadmap and pattern catalog
+│   ├── universal-keyboard-ergonomics-and-profiles.md # Dual-profile keyboard ergonomics (vanilla vs keyd)
 │   ├── state-of-the-art-terminal-agent-workflow.md # Canonical SOTA architecture, 9.94/10 verdict & benchmarks
-│   └── smart-patterns-roadmap.md                 # Event-driven intelligence roadmap and pattern catalog
+│   ├── cockpit-topology-snapshot-and-restore.md    # Session topology snapshot, post-reboot restore & agent resume
+│   ├── evidence-based-telemetry-and-deep-work.md   # Human response latency metrics & 24h deep work heatmaps
+│   ├── remote-agent-workflow-acpd.md               # Proactive agent supervision, focus auto-dismiss & wait RPCs
+│   └── open-source-ai-tmux-stack-plan.md           # Two-tier umbrella blueprint for waymux / acpd / lazygitrs / wm
 │
-├── shell/                         # 🐚 Shell, ZLE & Matchmaker Pickers
-│   ├── completion.md              # Smart Tab completion (_smart_tab), auto-spacing, mm-ftb
+├── shell/                         # 🐚 Shell, ZLE & Waymaker Pickers
+│   ├── completion.md              # Smart Tab completion (_smart_tab), auto-spacing, wm-ftb
 │   ├── vi-mode.md                 # Zsh vi-mode, Starship live mode sync, surround text objects
-│   └── matchmaker-presets.md      # Matchmaker TOML presets, nav mode, column splitting
+│   └── matchmaker-presets.md      # Waymaker (wm) TOML presets, nav mode, column splitting
 │
 ├── tmux/                          # 🪟 Multiplexer, Popups & Telemetry
-│   ├── popups-ergonomics-and-golden-ratio.md    # Golden Ratio (phi) geometry, pure icon badges
+│   ├── popups-ergonomics-and-golden-ratio.md    # Golden Ratio (phi) geometry, pure icon badges, bichromatic footers
 │   ├── ai-status-bar.md           # Real-time AI agent status pills, animated spinners, ACPD hooks
-│   ├── popup-isolation-and-debounce.md          # Frozen snapshot backdrops and 400ms idle debounce
-│   ├── clipboard-and-scrollback.md              # Drag-to-copy and Neovim scrollback export
+│   ├── popup-isolation-and-debounce.md          # Tmux 3.8 native popup isolation and 650ms idle debounce
+│   ├── clipboard-and-scrollback.md              # Drag-to-copy, Markdown/Mermaid scrollback view, and token yanker
 │   └── tmux-activity.md           # Activity alerts and window monitoring
 │
 ├── desktop/                       # 🖥️ Window Manager, Hardware & Display
 │   ├── hyprland-aesthetics-and-performance.md   # Hyprland themes, shaders, and GPU benchmarks
 │   ├── quickshell-workspace-pills.md            # Reactive Quickshell pills with title-aware webapp icons
-│   ├── system-and-hardware.md     # Kanshi display profiles, Ghostty CSI u, battery limits
+│   ├── system-and-hardware.md     # Ghostty CSI u, custom shaders, and battery limits
 │   ├── hyprland-animations.md     # Active window animation cubic Bézier presets
-│   ├── macbook-notch.md           # Linux kernel GRUB parameters and Waybar split-bar for notch
+│   ├── macbook-notch.md           # Linux kernel GRUB parameters and status bar layout for notch
 │   ├── nerd-fonts.md              # Font glyph configuration and Nerd Font symbols
-│   └── hyprland-crash-fix.md      # Crash triage and stability runbooks
+│   ├── hyprland-crash-fix.md      # Crash triage and stability runbooks
+│   └── hibiki-keystroke-visualizer.md           # Wayland GTK4 Layer Shell keystroke overlay & Mechvibes audio
 │
 ├── theme/                         # 🎨 Theming & Color Engine
-│   └── system-theme.md            # Omarchy dynamic theme pipeline, colors.toml, and live reload hooks
+│   ├── system-theme.md            # Omarchy dynamic theme pipeline, colors.toml, and live reload hooks
+│   └── separator.md               # Powerline dividers and Nerd Font glyph catalog
 │
-├── utils.md                       # ⚡ Repository helper scripts cheat sheet (stow-it, killport, etc.)
+├── utils.md                       # ⚡ Repository helper scripts cheat sheet (ai-update, cockpit, stow-it, etc.)
 │
 ├── GIT_WORKTREE_AGENTIC_WORKFLOW.md # 🤖 Agent Worktree Orchestration (AWT) & Multi-Agent Git
 │
@@ -69,8 +77,7 @@ docs/
 ## 📜 2. Core Governance Rules
 
 ### Rule 1: All Documentation MUST Be in English
-- All files under `docs/`, root `README.md`, `AGENTS.md`, and skill instruction files must be written in English.
-- (Localized translation articles under `docs/articles/*-pt.md` are historical pairs; all canonical documentation is in English).
+- All files under `docs/`, root `README.md`, `AGENTS.md`, and skill instruction files must be written in English with zero duplicate localized copies.
 
 ### Rule 2: Living Documentation Principle (Zero-Divergence)
 - Whenever an agent or developer modifies:

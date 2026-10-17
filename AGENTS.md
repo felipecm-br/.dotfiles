@@ -4,7 +4,7 @@ This repository is a GNU Stow-managed dotfiles worktree. Keep instructions here 
 
 ## Working Model
 
-- Treat each top-level directory as a stow package unless it is `.bare`, `.git`, `.github`, `.shell`, `scripts`, or `docs`.
+- Treat each top-level directory as a stow package unless it is `.agents`, `.bare`, `.git`, `.github`, `.shell`, `assets`, `docs`, `scratch`, `scripts`, or `tests`.
 - Preserve the mirrored home-directory layout inside each package, for example `nvim/.config/nvim/...` maps to `~/.config/nvim/...`.
 - `stow-lock.json` is generated state. Do not edit it manually.
 - The primary worktree is the only tree that should be stowed to `$HOME`. Feature worktrees are sandboxes and should not be stowed.
@@ -50,10 +50,14 @@ See [.shell/install/README.md](.shell/install/README.md) for the current bootstr
 ## Useful References
 
 - [docs/README.md](docs/README.md)
+- [docs/architecture/state-of-the-art-terminal-agent-workflow.md](docs/architecture/state-of-the-art-terminal-agent-workflow.md)
 - [docs/architecture/terminal-ergonomics-and-ux-manifesto.md](docs/architecture/terminal-ergonomics-and-ux-manifesto.md)
 - [docs/architecture/universal-keyboard-ergonomics-and-profiles.md](docs/architecture/universal-keyboard-ergonomics-and-profiles.md)
 - [docs/architecture/workflow-keybindings-matrix.md](docs/architecture/workflow-keybindings-matrix.md)
 - [docs/architecture/zero-friction-file-transfer-benchmark.md](docs/architecture/zero-friction-file-transfer-benchmark.md)
+- [docs/architecture/cockpit-topology-snapshot-and-restore.md](docs/architecture/cockpit-topology-snapshot-and-restore.md)
+- [docs/architecture/evidence-based-telemetry-and-deep-work.md](docs/architecture/evidence-based-telemetry-and-deep-work.md)
+- [docs/architecture/remote-agent-workflow-acpd.md](docs/architecture/remote-agent-workflow-acpd.md)
 - [docs/tmux/popups-ergonomics-and-golden-ratio.md](docs/tmux/popups-ergonomics-and-golden-ratio.md)
 - [docs/GIT_WORKTREE_AGENTIC_WORKFLOW.md](docs/GIT_WORKTREE_AGENTIC_WORKFLOW.md)
 - [.shell/install/README.md](.shell/install/README.md)

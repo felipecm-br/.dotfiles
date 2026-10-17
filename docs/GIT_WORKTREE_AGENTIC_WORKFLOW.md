@@ -251,45 +251,45 @@ Triggered by pressing **`c`** inside Matchmaker or by running **`awt -c`**:
           └──(Enter)────────────────────────┴──(Enter)──────────────────────────┴──(Enter)──► 🚀 Sesh
 ```
 
-#### 5-Step Architecture:
+##### 5-Step Architecture:
 
-1. **Step 1: Conventional Type Selection (`mm -o awt-type`)**:
-   - Uses the modular preset [`awt-type.toml`](file:///home/fecavmi/.dotfiles/main/awt/.config/matchmaker/presets/awt-type.toml).
+1. **Step 1: Conventional Type Selection (`wm -o awt-type`)**:
+   - Uses the modular preset [`awt-type.toml`](../awt/.config/waymaker/presets/awt-type.toml).
    - Presents conventional types in unified single columns with matching ANSI colors and Nerd Font icons:
      ` feat`, ` fix`, `󰣪 refactor`, `󰓅 perf`, ` ci`, ` chore`, `󰧮 docs`, `󰙨 test`, `󰏖 build`, `󰓹 custom`.
    - `Esc`: Aborts and returns directly to the main `awt` dashboard.
 
-2. **Step 2: Branch Name via Native Matchmaker Prompt (`mm -o awt-prompt`)**:
-   - Opens a dedicated Matchmaker prompt with the selected type icon and prefix pre-filled:
+2. **Step 2: Branch Name via Native Waymaker Prompt (`wm -o awt-prompt`)**:
+   - Opens a dedicated Waymaker prompt with the selected type icon and prefix pre-filled:
      ```text
       Branch name: feat/auth-oauth2_
 
-      [Enter] Confirm  •  [Esc] Back
+      Enter Confirm │ Esc Back
      ```
-   - **Full Line Editing**: Native cursor navigation, backspace, and clipboard paste powered by Matchmaker's engine.
+   - **Full Line Editing**: Native cursor navigation, backspace, and clipboard paste powered by Waymaker's engine.
    - **Instant `Esc`**: Returns to Step 1 (`awt-type`).
    - **Instant `Enter`**: Submits the branch name to Step 3 (`awt-base`).
    - **State Memory**: Navigating back from Step 3 preserves the previous slug in the input buffer.
 
-3. **Step 3: Base Branch Selection (`mm -o awt-base`)**:
-   - Uses the modular preset [`awt-base.toml`](file:///home/fecavmi/.dotfiles/main/awt/.config/matchmaker/presets/awt-base.toml).
+3. **Step 3: Base Branch Selection (`wm -o awt-base`)**:
+   - Uses the modular preset [`awt-base.toml`](../awt/.config/waymaker/presets/awt-base.toml).
    - **Dynamic Row 0 Pre-selection**: The currently focused or active branch is automatically highlighted at **Row 0** (` <branch> current base`), followed by ` main (default base)` and all other local branches with commit hashes.
    - **Single Keypress Confirmation**: If you want to branch from the selected branch, simply press **`Enter`** (1 stroke).
    - `Esc`: Returns to Step 2 with the branch name pre-filled.
 
-4. **Step 4: AI Conversation Continuity (`mm -o awt-ai`)**:
-   - Uses [`awt-ai.toml`](file:///home/fecavmi/.dotfiles/main/awt/.config/matchmaker/presets/awt-ai.toml) and [`awt-ai-detect.sh`](file:///home/fecavmi/.dotfiles/main/awt/.config/matchmaker/scripts/awt-ai-detect.sh).
-   - **Auto-Detection**: Scans running Tmux panes in the current session for active AI processes (`agy`, `opencode`, `claude`, etc.).
+4. **Step 4: AI Conversation Continuity (`wm -o awt-ai`)**:
+   - Uses [`awt-ai.toml`](../awt/.config/waymaker/presets/awt-ai.toml) and [`awt-ai-detect.sh`](../awt/.config/waymaker/scripts/awt-ai-detect.sh).
+   - **Auto-Detection**: Scans running Tmux panes in the current session for active AI processes (`agy`, `opencode`, `claude`, `codex`, `muse`).
    - **Row 0**: Highlights the active conversation from the current pane (`󱐋 <ai> (current pane)`).
    - **Multi-Session Selection**: If multiple AI conversations are active across panes/windows, allows selecting which conversation to carry over into the new worktree.
    - **Fresh Option**: Select `󰓹 Fresh Conversation` (or press `Esc`) to launch a brand-new clean AI session.
 
 5. **Step 5: Provisioning, Hooks & Automated Session Switch**:
-   - Creates the sibling worktree via native Git (`git worktree add`).
+   - Creates the sibling worktree via native Git (`git worktree add`), optionally carrying uncommitted changes via `-W / --with-changes`.
    - **Existing Branch Fallback**: Automatically supports both new branches and pre-existing Git branches (e.g. `fecavmi`, `fecavmi-bk`) without erroring.
    - Saves base branch configuration: `git config branch.<name>.base "$base"`.
-   - Executes the [`post-create.sh`](file:///home/fecavmi/.dotfiles/main/awt/.config/matchmaker/hooks/post-create.sh) lifecycle hook (replicating `.env` and triggering repo-level setup).
-   - Connects instantly via `sesh connect "$target_dir"`, resuming the selected AI conversation (or launching default `startup_command`).
+   - Executes the [`post-create.sh`](../awt/.config/waymaker/hooks/post-create.sh) lifecycle hook (replicating `.env` and triggering repo-level setup).
+   - Connects instantly via `wm connect "$target_dir"` / `sesh connect "$target_dir"`, resuming the selected AI conversation (or launching default `startup_command`).
    - Automatically closes the floating popup modal (`tmux display-popup -C`) with clean signal trapping (`trap 'exit 0' HUP INT TERM`).
 
 ---
@@ -303,41 +303,42 @@ The CLI offers two complimentary modes for interacting with worktrees directly f
    - **Missing Worktree**: Auto-creates the folder from current `HEAD` (or binds to the existing local/remote branch of that name) and switches to it in 1 command.
 2. **`awt -c <branch> [base]`** *(Explicit Base Provisioning)*:
    - Allows declaring a specific base branch explicitly (e.g., `awt -c feat/login main`).
-   - Running `awt -c` without arguments invokes the full interactive 5-step Matchmaker wizard.
+   - Supports `-W / --with-changes` to migrate uncommitted changes from `main` into the newly created worktree.
+   - Running `awt -c` without arguments invokes the full interactive 5-step Waymaker wizard.
 
 ---
 
-### C. Smart Tmux Session Connection & Single-Execution Guard
+### D. Smart Tmux Session Connection & Single-Execution Guard
 
-To prevent Sesh from re-triggering `startup_command = "agy"` in sessions that already exist or during worktree provisioning, the [`awt`](file:///home/fecavmi/.dotfiles/main/awt/.local/bin/awt) CLI binary and [`awt-popup.sh`](file:///home/fecavmi/.dotfiles/main/awt/.config/tmux/awt-popup.sh) modal implement **direct session resolution & creation guards**:
+To prevent Sesh/Waymaker from re-triggering `startup_command = "agy"` in sessions that already exist or during worktree provisioning, the [`awt`](../awt/.local/bin/awt) CLI binary and [`awt-popup.sh`](../awt/.config/tmux/awt-popup.sh) modal implement **direct session resolution & creation guards**:
 
 1. **Preset Emits Name and Path**: `awt.toml` outputs `{=session}\t{=path}\t{=raw}` (e.g. `matchmaker/feature-images\t/home/fecavmi/...\tfeature/images`).
-2. **Already in Active Session**: If the selected session is the currently focused terminal, Matchmaker closes cleanly without altering buffer or AI conversation history.
-3. **Background Session**: Sesh connects directly by **session name** (`sesh connect "matchmaker/feature-images"`), switching clients without re-injecting startup commands.
-4. **Provisioning Guard**: `awt-new.sh` manages worktree creation and Sesh connection with a temporary guard file (`/tmp/awt_new_created_$USER`), preventing the parent `awt-popup.sh` from triggering a duplicate `sesh connect` call upon exit.
+2. **Already in Active Session**: If the selected session is the currently focused terminal, Waymaker closes cleanly without altering buffer or AI conversation history.
+3. **Background Session**: Connects directly by **session name** (`wm connect` / `sesh connect "matchmaker/feature-images"`), switching clients without re-injecting startup commands.
+4. **Provisioning Guard**: `awt-new.sh` manages worktree creation and session connection with a temporary guard file (`/tmp/awt_new_created_$USER`), preventing the parent `awt-popup.sh` from triggering a duplicate connection call upon exit.
 
 ---
 
-### D. Safe Deletion Handler with Native Action Box (`d` / `ctrl-d` / `awt-delete.sh`)
+### E. Safe Deletion Handler with Native Action Box (`d` / `ctrl-d` / `awt-delete.sh`)
 
 When pressing **`d`** on any row in `awt`:
 
 1. **Base Protection**: Instantly blocks deletion of the default base branch (`main` or `master`).
 2. **Native Instant Action Box (`Confirm(...)`)**:
-   Opens the native Matchmaker popover drawn directly on the TUI canvas:
+   Opens the native Waymaker popover drawn directly on the TUI canvas:
    ```text
    [ 🗑️ Delete worktree feat/auth? (Enter/Esc) ]
    ```
    - **`Enter`**: Confirms deletion, removes worktree, terminates Tmux session, and reloads the list immediately (`Reload`).
    - **`Esc` or `q`**: Instantly cancels and closes the popover without modifying files.
-3. **Complete Git Cleanup**: Executes `wt remove` / `git worktree remove -f` and deletes the branch (`git branch -D`).
+3. **Complete Git & Async Trash Cleanup**: Renames heavy directories to `.awt_trash_*` for background `rm -rf`, executes `git worktree remove -f`, and deletes the branch (`git branch -D`).
 4. **Redirection and Session Cleanup**:
-   - **Current Active Session**: Runs `sesh last` (or `tmux switch-client -l`) to redirect to the previous session before killing the deleted session (`tmux kill-session`).
-   - **Background Session**: Kills the Tmux session and automatically triggers Matchmaker's `Reload` macro without closing the picker!
+   - **Current Active Session**: Runs `wm last` / `sesh last` (or `tmux switch-client -l`) to redirect to the previous session before killing the deleted session (`tmux kill-session`).
+   - **Background Session**: Kills the Tmux session and automatically triggers Waymaker's `Reload` macro without closing the picker!
 
 ---
 
-### E. Intelligent Worktree Merge Handler (`m` / `awt-merge.sh`)
+### F. Intelligent Worktree Merge Handler (`m` / `awt-merge.sh`)
 
 When pressing **`m`** on any row in `awt`:
 
@@ -349,27 +350,26 @@ When pressing **`m`** on any row in `awt`:
    [ 🔀 Merge into fecavmi? (Enter/Esc) ]
    ```
 3. **Safe Execution and Session Transition**:
-   - Executes merge (`wt merge <target>` or `git merge`).
+   - Executes pre-merge validation hooks (`pre-merge.sh`) and merge (`git merge`).
    - **On Success**:
-     - Removes source worktree directory (`wt remove`).
-     - Deletes merged branch in Git (`git branch -d`).
-     - Switches active Tmux session to target branch (`sesh connect`).
+     - Removes source worktree directory and deletes merged branch in Git (`git branch -d`).
+     - Switches active Tmux session to target branch (`wm connect` / `sesh connect`).
      - Terminates old feature Tmux session.
    - **On Conflict**:
      - Keeps both worktrees intact and alerts the terminal for safe conflict inspection and resolution.
 
 ---
 
-### F. Repository Cloning in Bare Mode (`awtc` / `awt clone`)
+### G. Repository Cloning in Bare Mode (`awtc` / `awt clone`)
 
-Zsh function in [functions.zsh](file:///home/fecavmi/.dotfiles/main/zsh/.zsh/utils/functions.zsh) provisioning new repositories with `.bare` container + worktree architecture:
+Zsh function in [`functions.zsh`](../zsh/.zsh/utils/functions.zsh) and standalone script [`awtc`](../awt/.local/bin/awtc) provisioning new repositories with `.bare` container + worktree architecture:
 
 ```bash
 # Clone from GitHub (user/repo):
-awtc fcmiranda/matchmaker
+awtc fcmiranda/waymaker
 
 # Or via integrated subcommand:
-awt clone fcmiranda/matchmaker
+awt clone fcmiranda/waymaker
 
 # Clone from full URL (HTTPS or SSH):
 awtc https://github.com/astral-sh/uv.git
@@ -381,13 +381,13 @@ awtc git@github.com:joshmedeski/sesh.git
 2. Clones repository in bare mode to `~/dev/github/<repo>/.bare`.
 3. Sets `remote.origin.fetch` refspec to guarantee remote branch tracking.
 4. Identifies default branch (`main`, `master`, etc.) and creates primary worktree `~/dev/github/<repo>/<default_branch>`.
-5. Dispatches `sesh connect`, launching the Tmux session with AI agent environment ready.
+5. Dispatches `wm connect` / `sesh connect`, launching the Tmux session with AI agent environment ready.
 
 ---
 
-### G. Native Action Box & Interactive Prompt System
+### H. Native Action Box & Interactive Prompt System
 
-With the introduction of the native **`Confirm(...)`** and **`Prompt(...)`** actions in Matchmaker's engine, rich inline TUI interactions operate without subprocess overhead:
+With the introduction of the native **`Confirm(...)`** and **`Prompt(...)`** actions in Waymaker's engine, rich inline TUI interactions operate without subprocess overhead:
 
 #### 1. Native `Confirm(...)` & `Prompt(...)` Syntax
 ```toml
@@ -414,20 +414,24 @@ With the introduction of the native **`Confirm(...)`** and **`Prompt(...)`** act
 
 ---
 
-### H. Worktree Lifecycle Hooks Architecture (`post-create` and `post-merge`)
+### I. Worktree Lifecycle Hooks Architecture (`post-create`, `pre-merge`, `post-merge`, `pre-remove`)
 
-The `awt` ecosystem provides automated lifecycle hooks located in `~/.config/matchmaker/hooks/`:
+The `awt` ecosystem provides automated lifecycle hooks located in [`awt/.config/waymaker/hooks/`](../awt/.config/waymaker/hooks/):
 
 1. **`post-create.sh` (`<worktree_path> <branch_name> <base_branch>`)**:
-   - Automatically copies `.env.example` (or `.env` from sibling worktree) to the newly created worktree.
+   - Automatically copies `.env.example` (or `.env` from sibling worktree) and applies `.awt.toml` file rules to the newly created worktree.
    - Executes repository-level hooks (`<worktree>/.hooks/post-create` or `.git/hooks/post-worktree-create`) if present.
-2. **`post-merge.sh` (`<target_worktree_path> <target_branch> <source_branch>`)**:
+2. **`pre-merge.sh` (`<source_worktree_path> <target_branch>`)**:
+   - Runs pre-merge quality gates (`.awt.toml`, `./scripts/docs-lint.sh`, `.hooks/pre-merge`) before allowing `merge` or `ship`.
+3. **`post-merge.sh` (`<target_worktree_path> <target_branch> <source_branch>`)**:
    - Automatically runs `./stow.sh -r` when merging changes into dotfiles `main`.
    - Executes repository-level hooks (`<target_worktree>/.hooks/post-merge` or `.git/hooks/post-worktree-merge`) if present.
+4. **`pre-remove.sh` (`<worktree_path> <branch_name>`)**:
+   - Runs cleanup hooks before removing a worktree directory.
 
 ---
 
-### I. Automatic Stash & Dirty State Protection
+### J. Automatic Stash & Dirty State Protection
 
 To prevent accidental data loss during branch operations:
 - **During Merge (`m`)**: If the current worktree has uncommitted files (`git status --porcelain`), an automatic safety stash (`awt-merge-autostash: <branch>`) is created before running the merge. If merge encounters conflicts, the worktree and stash are preserved for manual inspection.
@@ -441,7 +445,7 @@ To prevent accidental data loss during branch operations:
 Because Git worktrees share the underlying `.bare/` database, each project maintains its own dedicated `review/` directory:
 
 ```text
-~/dev/github/matchmaker/ (Matchmaker Container)
+~/dev/github/waymaker/ (Waymaker Container)
 ├── .bare/
 ├── main/
 ├── feat-preview/
@@ -477,35 +481,37 @@ repoPaths:
 
 ---
 
-## 8. Architectural Comparison: `awt` vs `wt`
+## 9. Architectural Comparison: `awt` vs `wt`
 
 While low-level CLI utilities like `wt` (Worktree CLI) provide direct Git commands, **`awt` (Agent Worktree Manager)** is an end-to-end orchestration platform designed specifically for multi-agent developer workflows:
 
 | Dimension | `wt` (Worktree CLI) | `awt` (Agent Worktree Manager) |
 | :--- | :--- | :--- |
-| **Primary Interface** | Pure text CLI flags (`wt switch -c feat/foo`). | **Golden Ratio Matchmaker TUI** (`mm -o awt`) + **Zero-Prefix Floating Popup** (`Ctrl+Shift+G`). |
-| **Multiplexer & Sesh** | None (only changes shell directory). | **Native Session Lifecycle**: creates named Tmux sessions, connects via Sesh, and isolates agent buffers. |
-| **Branch Creation** | Manual argument typing. | **4-Step Wizard**: Conventional Commits types (``, ``, `󰣪`), prompt box with memory, and base selector. |
+| **Primary Interface** | Pure text CLI flags (`wt switch -c feat/foo`). | **Golden Ratio Waymaker TUI** (`wm -o awt`) + **Floating Popup** (`Prefix + g` / `Tab` from Cockpit / `Ctrl+Shift+G`). |
+| **Multiplexer & Sessions** | None (only changes shell directory). | **Native Session Lifecycle**: creates named Tmux sessions, connects via `wm connect` / `sesh`, and isolates agent buffers. |
+| **Branch Creation** | Manual argument typing. | **5-Step Wizard**: Conventional Commits types (``, ``, `󰣪`), prompt box with memory, base selector, and AI conversation handover. |
 | **Live Previews** | None. | **3 Real-time Preview Tabs** (`p`): Git status/graph, Diff vs Main, and commit statistics. |
 | **Lifecycle Hooks** | None. | **Full Lifecycle Hooks** (`post-create.sh`, `pre-merge.sh`, `post-merge.sh`, `pre-remove.sh`) with declarative TOML syncing (`.awt.toml`) and quality gates. |
-| **Dirty State Safety** | Fails or errors on uncommitted changes. | **Smart Auto-Stash & Fast Cleanup**: automatically stashes dirty worktree files before merge/rebase, cleans heavy caches on deletion, and pops upon completion. |
-| **Ergonomic Aliases** | Basic commands. | **Fast Shell Routing**: `awt new`, `awt switch`, `awt rm`, `awt merge`, `awt rebase`, `awt ship`, `awt popup`, `awc`, `awp`. |
+| **Dirty State Safety** | Fails or errors on uncommitted changes. | **Smart Auto-Stash & Async Trash Cleanup**: migrates dirty changes (`-W`), auto-stashes before merge/rebase, and deletes heavy caches asynchronously. |
+| **Ergonomic Aliases** | Basic commands. | **Fast Shell Routing**: `awt new`, `awt switch`, `awt pr`, `awt rm`, `awt merge`, `awt rebase`, `awt ship`, `awt sweep`, `awt reap`, `awt popup`, `awc`, `awp`. |
 
 ---
 
-## 9. Quick Command Reference (Cheat Sheet)
+## 10. Quick Command Reference (Cheat Sheet)
 
-### Shortcuts Inside the `awt` Dashboard (`mm -o awt`)
+### Shortcuts Inside the `awt` Dashboard (`wm -o awt`)
 
 | Key | Action | Description |
 | :---: | :--- | :--- |
-| **`Enter`** | **Connect Sesh** | Switch to or create the Tmux session for the selected worktree. |
-| **`c`** / **`ctrl-n`** | **New WT Wizard** | Open the 4-step interactive Conventional Commits wizard. |
+| **`Enter`** | **Connect Session** | Switch to or create the Tmux session for the selected worktree. |
+| **`Tab`** | **Switch to Cockpit** | Jump seamlessly back to the Cockpit HUD (`cockpit-picker.sh`). |
+| **`c`** / **`ctrl-n`** | **New WT Wizard** | Open the 5-step interactive Conventional Commits wizard. |
 | **`m`** | **Merge WT** | Merge active branch into selected branch (or base), run pre-merge hooks, and clean up session. |
 | **`S`** *(Shift+S)* | **Ship WT** | Atomic rebase, pre-merge gate, fast-forward merge into base, push to remote origin, and cleanup. |
 | **`R`** *(Shift+R)* | **Rebase WT** | Safely auto-stash and rebase feature branch onto its configured base branch. |
+| **`P`** *(Shift+P)* | **Checkout PR** | Open interactive GitHub PR selector (`awt-pr.toml`) with live description & diff preview. |
 | **`r`** / **`ctrl-r`** | **Rename WT** | Prompt popover to rename branch in Git, sibling directory, and Tmux session. |
-| **`d`** / **`ctrl-d`** | **Delete WT** | Delete worktree, run pre-remove hooks, clean heavy caches, kill Tmux session, and redirect (`sesh last`). |
+| **`d`** / **`ctrl-d`** | **Delete WT** | Delete worktree, run pre-remove hooks, clean heavy caches asynchronously, kill Tmux session, and redirect. |
 | **`p`** / **`ctrl-p`** | **Switch Preview** | Cycle through the 3 preview tabs (Status, Diff vs Main, Log Stats). |
 | **`u`** / **`ctrl-u`** | **Fetch Remotes** | Run `git fetch --all --prune` on the selected worktree. |
 | **`j`** / **`k`** | **Navigation** | Move cursor down / up (Nav Mode). |
@@ -515,26 +521,29 @@ While low-level CLI utilities like `wt` (Worktree CLI) provide direct Git comman
 
 | Action | Command / Shortcut | Description |
 | :--- | :--- | :--- |
-| **Floating Worktree Modal** | **`Ctrl + Shift + G`** / `awp` | Open floating AWT modal (`85% × 75%`) with live previews from anywhere in Tmux. |
-| **Open Interactive Dashboard** | `awt` | Open Matchmaker picker (`mm -o awt`) in current pane. |
-| **Launch Creation Wizard** | `awt -c` / `awt new` / `awc` | Launch interactive Conventional Commits creation wizard. |
+| **Floating Worktree Modal** | **`Prefix + g`** / **`Ctrl + Shift + G`** / `awp` | Open floating AWT modal (`85% × 75%`) with live previews from anywhere in Tmux. |
+| **Open Interactive Dashboard** | `awt` | Open Waymaker picker (`wm -o awt`) in current pane. |
+| **Launch Creation Wizard** | `awt -c` / `awt new` / `awc` | Launch interactive 5-step Conventional Commits creation wizard. |
 | **Auto-Named Worktree** | `awt -c -A <prompt> [base]` | Auto-derive conventional branch name slug from task prompt and provision worktree. |
+| **Migrate Dirty Changes** | `awt -c -W <branch> [base]` | Create worktree and carry uncommitted changes from `main` into the new sandbox. |
 | **Direct CLI Worktree Creation** | `awt -c <branch> [base] [--no-tmux]` | Create branch and attach to Tmux session (or stay with `--no-tmux`). |
 | **Direct CLI Connect / Switch** | `awt <branch>` / `awt switch <branch>` | Jump directly to the Tmux session for specified worktree. |
+| **Checkout GitHub PR** | `awt pr [number]` / `Prefix + P` | Interactive GitHub PR picker or direct PR worktree checkout. |
 | **Direct CLI Delete Worktree** | `awt rm <branch> [-f] [--no-hooks]` | Delete worktree directory, run pre-remove hooks, clean caches, and kill session. |
 | **Direct CLI Rebase** | `awt rebase [base]` | Rebase active worktree onto base branch with auto-stash. |
 | **Direct CLI Merge** | `awt merge [branch] [--into <target>] [--no-hooks]` | Merge with pre-merge validation gate (`--squash`, `--rebase`, `--no-commit`, `--no-remove`, `--no-tmux`). |
 | **Direct CLI Ship** | `awt ship [branch] [--into <target>] [--no-hooks]` | Merge into base, push to remote origin, and clean up worktree. |
-| **PR / Issue Dashboard** | `gh dash` | GitHub TUI dashboard. Press `g` for `lazygitrs` or `s` for `sesh`. |
-| **Switch Tmux Sessions** | `Prefix + s` | Fast session and window switcher via Sesh & Matchmaker. |
+| **Batch Sweep Merged WTs** | `awt sweep [-y] [-n] [--fetch]` | Prune worktrees whose branches are already merged into base or via GitHub PR. |
+| **Reap Stale Agent Sessions** | `awt reap [--hours N] [-y] [-n]` | Garbage-collect idle AI agents (> N hours) and orphan worktree sessions. |
+| **Switch Tmux Sessions** | `Prefix + s` | Fast session and directory switcher via Waymaker (`session-picker.sh`). |
 | **Validate Dotfile Symlinks** | `./stow.sh -n` | Mandatory dry-run check before any merge into `main`. |
 | **Re-stow Updated Package** | `./stow.sh -r <package>` | Refresh symlinks in `$HOME` after merging into `main`. |
 
 ---
 
-## 10. Multi-Repository Workflow with AI (Engine + Dotfiles)
+## 11. Multi-Repository Workflow with AI (Engine + Dotfiles)
 
-When a task spans multiple interdependent repositories (e.g. developing a Rust feature in [`waymaker`](file:///home/fecavmi/dev/github/waymaker) and creating or updating corresponding presets in [dotfiles](file:///home/fecavmi/.dotfiles/main/matchmaker/.config/matchmaker/presets)), the **"Engine First, Config Second"** pattern applies.
+When a task spans multiple interdependent repositories (e.g. developing a Rust feature in `waymaker` (`~/dev/github/waymaker`) and creating or updating corresponding presets in [dotfiles](../waymaker/.config/waymaker/presets)), the **"Engine First, Config Second"** pattern applies.
 
 ```mermaid
 sequenceDiagram
@@ -545,20 +554,20 @@ sequenceDiagram
     participant Dotfiles as Repo 2: .dotfiles (~/.dotfiles/main)
     participant Home as Live Environment ($HOME)
 
-    Dev->>Agent: "Implement vertical split in matchmaker and create preset in dotfiles"
-    Note over Agent: 1. Edits Rust code in matchmaker/src/<br/>2. Creates local test preset and runs cargo test
-    Agent->>Engine: cargo build --release (Builds target/release/mm)
+    Dev->>Agent: "Implement vertical split in waymaker and create preset in dotfiles"
+    Note over Agent: 1. Edits Rust code in waymaker/src/<br/>2. Creates local test preset and runs cargo test
+    Agent->>Engine: cargo build --release (Builds target/release/wm)
     
     Note over Agent: 3. Using newly built Rust engine, creates TOML preset in dotfiles
-    Agent->>Dotfiles: Writes matchmaker/.config/matchmaker/presets/wt-split.toml
-    Agent->>Dotfiles: ./target/release/mm -o ~/.dotfiles/main/.../wt-split.toml (Validates TUI)
+    Agent->>Dotfiles: Writes waymaker/.config/waymaker/presets/wt-split.toml
+    Agent->>Dotfiles: ./target/release/wm -o ~/.dotfiles/main/.../wt-split.toml (Validates TUI)
 
     Note over Agent: 4. Atomic and isolated commits per repository
-    Agent->>Engine: git -C ~/dev/github/matchmaker/fecavmi commit -m "feat(core): add vertical split"
-    Agent->>Engine: git -C ~/dev/github/matchmaker/fecavmi push origin fecavmi
+    Agent->>Engine: git -C ~/dev/github/waymaker/fecavmi commit -m "feat(core): add vertical split"
+    Agent->>Engine: git -C ~/dev/github/waymaker/fecavmi push origin fecavmi
 
-    Agent->>Dotfiles: git -C ~/.dotfiles/main commit -m "feat(matchmaker): add wt-split preset"
-    Dotfiles->>Home: ./stow.sh -r matchmaker (Updates symlinks in $HOME)
+    Agent->>Dotfiles: git -C ~/.dotfiles/main commit -m "feat(waymaker): add wt-split preset"
+    Dotfiles->>Home: ./stow.sh -r waymaker (Updates symlinks in $HOME)
 ```
 
 ### Operational Rules for AI in Multi-Repo Tasks:
@@ -568,5 +577,5 @@ sequenceDiagram
    * AI never assumes Git commands run in the global workspace; it explicitly scopes every `add`, `commit`, and `push` to the intended repository directory.
 3. **Independent Commit Standards**:
    * The engine repository follows its own versioning and PR requirements.
-   * The dotfiles repository strictly follows [`.commitlintrc.json`](file:///home/fecavmi/.dotfiles/main/.commitlintrc.json) and link validation via `./stow.sh -n`.
+   * The dotfiles repository strictly follows [`.commitlintrc.json`](../.commitlintrc.json) and link validation via `./stow.sh -n`.
 4. **Safe Deployment to `$HOME`**: Presets are only stowed to `$HOME` once the newly compiled binary is verified and available on the system.

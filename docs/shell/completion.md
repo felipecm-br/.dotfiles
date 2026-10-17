@@ -1,6 +1,6 @@
-# Smart Tab Completion & Matchmaker Integration
+# Smart Tab Completion & Waymaker Integration
 
-The shell tab completion behavior in [`zsh/.zsh/utils/binds.zsh`](../../zsh/.zsh/utils/binds.zsh) provides context-aware logic (`_smart_tab`), automated command spacing, and full integration with the **Matchmaker** picker library.
+The shell tab completion behavior in [`zsh/.zsh/utils/binds.zsh`](../../zsh/.zsh/utils/binds.zsh) provides context-aware logic (`_smart_tab`), automated command spacing, and full integration with the **Waymaker** (`wm` / `mm`) picker engine.
 
 ---
 
@@ -11,123 +11,123 @@ The `_smart_tab` widget detects command-line state and dynamically routes the ta
 ```mermaid
 flowchart TD
     A["User presses <Tab>"] --> B{"Is command buffer empty?"}
-    B -- "Yes (empty or whitespace)" --> C["Object-First Jump (_jump_widget / mm -o jump)"]
+    B -- "Yes (empty or whitespace)" --> C["Object-First Jump (_jump_widget / wm -o jump)"]
     B -- "No" --> D{"Is ghost text active AND cursor at end of line?"}
     D -- "Yes ($CURSOR == $#BUFFER)" --> E["Accept autosuggestion (autosuggest-accept)"]
-    D -- "No (Mid-command or arguments)" --> F["Auto-space & trigger Matchmaker completion (mm-ftb)"]
+    D -- "No (Mid-command or arguments)" --> F["Auto-space & trigger Waymaker completion (wm-ftb)"]
 ```
 
-- **Empty Line (`<Tab>`)**: Triggers Matchmaker Jump (`_jump_widget`) with **Object-First buffer insertion** (`BUFFER=" $target"`, `CURSOR=0`), or immediate `cd` if a single directory is selected.
+- **Empty Line (`<Tab>`)**: Triggers Waymaker Jump (`_jump_widget`) with **Object-First buffer insertion** (`BUFFER=" $target"`, `CURSOR=0`), or immediate `cd` if a single directory is selected.
 - **Autosuggestions at End of Line**: If ghost text is visible and the cursor is at the end of the line (`$CURSOR -eq $#BUFFER`), `<Tab>` accepts the suggestion immediately (`autosuggest-accept`).
-- **Middle-of-Line / Arguments (`<Tab>` with text)**: When editing in the middle of a command, `<Tab>` bypasses ghost text and opens Matchmaker-powered tab completion (`mm-ftb`) for the specific argument at the cursor.
-- **Direct Hotkey (`Ctrl+F`)**: Opens the Matchmaker Jump directory interface (`mm -o jump`) at any prompt state.
+- **Middle-of-Line / Arguments (`<Tab>` with text)**: When editing in the middle of a command, `<Tab>` bypasses ghost text and opens Waymaker-powered tab completion (`wm-ftb`) for the specific argument at the cursor.
+- **Direct Hotkey (`Ctrl+F`)**: Opens the Waymaker Jump directory interface (`wm -o jump`) at any prompt state.
 
-### 1.1. Deep-Dive: Por que `$CURSOR -eq $#BUFFER` Revoluciona a Edição no Meio da Linha
+### 1.1. Deep-Dive: Why `$CURSOR -eq $#BUFFER` Revolutionizes Mid-Line Editing
 
-A checagem `$CURSOR -eq $#BUFFER` no `_smart_tab` resolve um dos maiores problemas de usabilidade (UX) em terminais que utilizam `zsh-autosuggestions` junto com menu de autocompletação (`fzf-tab` / `mm-ftb`): **o sequestro da linha pelo ghost-text durante a edição no meio do buffer**.
+The `$CURSOR -eq $#BUFFER` check in `_smart_tab` solves one of the most common UX pitfalls in terminals that combine `zsh-autosuggestions` with an interactive completion menu (`fzf-tab` / `wm-ftb`): **line hijacking by ghost text during mid-buffer editing**.
 
-Abaixo estão **5 exemplos reais do dia a dia de desenvolvimento** contrastando o comportamento anterior versus o atual:
+Below are **5 real-world development examples** contrasting the legacy behavior against the current implementation:
 
 ---
 
-#### 📌 Exemplo 1: Corrigir ou Adicionar Flag no Meio de um `git commit`
+#### 📌 Example 1: Adding or Completing a Flag in the Middle of a `git commit`
 
-Você está compondo um commit longo e move o cursor para o meio para adicionar a flag `--amend`:
+You are composing a commit command and move the cursor back into the middle of the line to add `--amend`:
 
 ```text
-Buffer digitado:
-$ git commit --am█ -m "fix(auth): correct token refresh" ░--no-verify░ (sugestão cinza do histórico)
+Typed buffer:
+$ git commit --am█ -m "fix(auth): correct token refresh" ░--no-verify░ (gray history suggestion)
                 ▲
-         $CURSOR está aqui (no meio da linha)
+         $CURSOR is here (middle of the line)
 ```
 
-* **❌ Como era antes (`[[ -n "$POSTDISPLAY" ]]`):**  
-  Ao apertar `<Tab>` em `--am█`, o Zsh detectava texto cinza no final, **aceitava o ghost text**, colava `--no-verify`, jogava o cursor para o fim da linha e **não completava** o `--amend`.
-* **✅ Como ficou agora (`$CURSOR -eq $#BUFFER`):**  
-  Como `$CURSOR < $#BUFFER`, o widget ignora o ghost text e abre o Matchmaker (`mm-ftb`) para autocompletar `--amend` exatamente na posição do cursor sem alterar o restante da linha.
+* **❌ Legacy behavior (`[[ -n "$POSTDISPLAY" ]]`):**  
+  Pressing `<Tab>` on `--am█` detected trailing gray ghost text, **accepted the ghost text**, appended `--no-verify`, jumped the cursor to the end of the line, and **failed to complete** `--amend`.
+* **✅ Current behavior (`$CURSOR -eq $#BUFFER`):**  
+  Because `$CURSOR < $#BUFFER`, the widget ignores ghost text and opens Waymaker (`wm-ftb`) to complete `--amend` right at the cursor position without mutating the rest of the line.
 
 ---
 
-#### 📌 Exemplo 2: Completar Caminhos de Origem em Comandos de Cópia (`cp` / `mv` / `rsync`)
+#### 📌 Example 2: Completing Source Paths in Copy/Move Commands (`cp` / `mv` / `rsync`)
 
-Você está copiando um arquivo específico para uma pasta de backup:
+You are copying a specific file to a backup folder:
 
 ```text
-Buffer digitado:
+Typed buffer:
 $ cp src/comp█/Modal.tsx /tmp/backup/ ░src/components/Button/ /tmp/backup-old/░
             ▲
-     $CURSOR está aqui
+     $CURSOR is here
 ```
 
-* **❌ Como era antes:**  
-  Ao apertar `<Tab>` para autocompletar `src/components/`, o Zsh aceitava a cauda antiga do histórico, misturando os dois caminhos e corrompendo o comando:  
+* **❌ Legacy behavior:**  
+  Pressing `<Tab>` to complete `src/components/` accepted the stale history tail, mixing both paths and corrupting the command:  
   `$ cp src/comp/Modal.tsx /tmp/backup/ src/components/Button/ /tmp/backup-old/`
-* **✅ Como ficou agora:**  
-  O `<Tab>` expande cirurgicamente `src/comp` $\rightarrow$ `src/components/` sem tocar no destino `/tmp/backup/` e sem puxar argumentos antigos.
+* **✅ Current behavior:**  
+  `<Tab>` surgically expands `src/comp` $\rightarrow$ `src/components/` without touching the `/tmp/backup/` destination or pulling stale history arguments.
 
 ---
 
-#### 📌 Exemplo 3: Alterar Volumes, Portas ou Imagens no Meio de um `docker run`
+#### 📌 Example 3: Changing Volumes, Ports, or Images in the Middle of `docker run`
 
-Você reaproveitou um comando de container do histórico e voltou para alterar o volume montado:
+You recalled a container command from history and moved back to change the mounted volume:
 
 ```text
-Buffer digitado:
+Typed buffer:
 $ docker run -it -v $(pwd)/di█:/app -p 3000:3000 node:20 ░--rm nginx:alpine░
                            ▲
-                    $CURSOR está aqui
+                    $CURSOR is here
 ```
 
-* **❌ Como era antes:**  
-  Ao apertar `<Tab>` para completar a pasta `dist/`, o Zsh aceitava a cauda antiga (`--rm nginx:alpine`) e deixava `di` sem completar.
-* **✅ Como ficou agora:**  
-  O `<Tab>` lista e autocompleta os diretórios locais correspondentes a `$(pwd)/dist/` via `mm-ftb`, mantendo as flags posteriores intactas.
+* **❌ Legacy behavior:**  
+  Pressing `<Tab>` to complete `dist/` accepted the old history tail (`--rm nginx:alpine`) and left `di` uncompleted.
+* **✅ Current behavior:**  
+  `<Tab>` lists and completes local directories matching `$(pwd)/dist/` via `wm-ftb`, leaving subsequent flags intact.
 
 ---
 
-#### 📌 Exemplo 4: Editar Nomes de Arquivos Antes de Flags Extras no Editor (`nvim` / `bat` / `cat`)
+#### 📌 Example 4: Editing Filenames Before Extra Editor Flags (`nvim` / `bat` / `cat`)
 
-Você está abrindo um arquivo de configuração passando parâmetros adicionais no final:
+You are opening a configuration file while passing trailing flags:
 
 ```text
-Buffer digitado:
-$ nvim matchmaker/.config/matchmaker/presets/jum█.toml --clean ░presets/backgrounds.toml░
-                                               ▲
-                                        $CURSOR está aqui
+Typed buffer:
+$ nvim waymaker/.config/waymaker/presets/jum█.toml --clean ░presets/backgrounds.toml░
+                                            ▲
+                                     $CURSOR is here
 ```
 
-* **❌ Como era antes:**  
-  O `<Tab>` ignorava `jum` e aceitava `presets/backgrounds.toml`, sobrescrevendo o caminho que você pretendia abrir.
-* **✅ Como ficou agora:**  
-  O `<Tab>` completa `jump.toml` com precisão, mantendo a flag `--clean` intacta.
+* **❌ Legacy behavior:**  
+  `<Tab>` ignored `jum` and accepted `presets/backgrounds.toml`, overwriting the path you intended to open.
+* **✅ Current behavior:**  
+  `<Tab>` completes `jump.toml` accurately while preserving `--clean`.
 
 ---
 
-#### 📌 Exemplo 5: Autocompletação de Pacotes em Monorepos e CLIs (`cargo`, `bun`, `pnpm`, `wt`)
+#### 📌 Example 5: Completing Workspace Packages in Monorepos and CLIs (`cargo`, `bun`, `pnpm`, `awt`)
 
-Ao rodar testes em pacotes específicos de um monorepo:
+When running tests for specific packages in a monorepo:
 
 ```text
-Buffer digitado:
-$ cargo test --package match█ --test integration ░--package matchmaker-lib -- --nocapture░
-                            ▲
-                     $CURSOR está aqui
+Typed buffer:
+$ cargo test --package waym█ --test integration ░--package waymaker-lib -- --nocapture░
+                           ▲
+                    $CURSOR is here
 ```
 
-* **❌ Como era antes:**  
-  O `<Tab>` colava a cauda `-- --nocapture` no final da linha, exigindo apagar o texto indesejado manualmente.
-* **✅ Como ficou agora:**  
-  O `<Tab>` abre o seletor com a lista de pacotes do workspace (`matchmaker-cli`, `matchmaker-lib`, etc.) para seleção instantânea com preview.
+* **❌ Legacy behavior:**  
+  `<Tab>` appended `-- --nocapture` to the end of the line, forcing manual deletion.
+* **✅ Current behavior:**  
+  `<Tab>` opens the selector with workspace packages (`waymaker-cli`, `waymaker-lib`, etc.) for instant selection with live preview.
 
 ---
 
-#### 📊 Resumo da Matriz de Decisão do `_smart_tab`:
+#### 📊 `_smart_tab` Decision Matrix Summary:
 
-| Posição do Cursor | Intenção do Desenvolvedor | Ação Executada |
+| Cursor Position | Developer Intent | Executed Action |
 | :--- | :--- | :--- |
-| **Linha Vazia (`$#BUFFER == 0`)** | Navegação rápida (Object-First) | Dispara o **Matchmaker Jump (`_jump_widget`)** com buffer prepended (`BUFFER=" $target"`, `CURSOR=0`) ou `cd` imediato se pasta única. |
-| **Fim da Linha (`$CURSOR == $#BUFFER`)** | Aceitar a sugestão do histórico | Executa **`autosuggest-accept`** instantaneamente. |
-| **Meio do Comando (`$CURSOR < $#BUFFER`)** | Autocompletar o argumento/pasta sob o cursor | Abre o **`fzf-tab` com Matchmaker (`mm-ftb`)** sem poluir o restante da linha. |
+| **Empty Line (`$#BUFFER == 0`)** | Fast navigation (Object-First) | Launches **Waymaker Jump (`_jump_widget`)** with prepended buffer (`BUFFER=" $target"`, `CURSOR=0`) or immediate `cd` if a single directory is chosen. |
+| **End of Line (`$CURSOR == $#BUFFER`)** | Accept history suggestion | Executes **`autosuggest-accept`** immediately. |
+| **Mid-Command (`$CURSOR < $#BUFFER`)** | Complete argument/path under cursor | Opens **`fzf-tab` with Waymaker (`wm-ftb`)** without polluting the rest of the line. |
 
 
 ---
@@ -145,15 +145,15 @@ Eliminates the friction of having to manually type a trailing space before reque
 
 ---
 
-## 3. Matchmaker Completion Backend (`Ctrl+N` / `<Tab>`)
+## 3. Waymaker Completion Backend (`Ctrl+N` / `<Tab>`)
 
 | Keybinding | Backend | Engine | Architecture & Purpose |
 | :--- | :--- | :--- | :--- |
-| **`Ctrl+N`** / **`<Tab>`** | **Matchmaker** | [`mm-ftb`](../../waymaker/.local/bin/mm-ftb) | **Zero-Fork & Zero-Disk I/O**: Direct in-memory streaming with preset [`ftb.toml`](../../waymaker/.config/waymaker/presets/ftb.toml) (<2ms latency) |
+| **`Ctrl+N`** / **`<Tab>`** | **Waymaker** | [`wm-ftb`](../../waymaker/.local/bin/wm-ftb) | **Zero-Fork & Zero-Disk I/O**: Direct in-memory streaming with preset [`ftb.toml`](../../waymaker/.config/waymaker/presets/ftb.toml) (<2ms latency) |
 
 ---
 
-## 4. Matchmaker FZF-Tab Preset Highlights ([`ftb.toml`](../../waymaker/.config/waymaker/presets/ftb.toml))
+## 4. Waymaker FZF-Tab Preset Highlights ([`ftb.toml`](../../waymaker/.config/waymaker/presets/ftb.toml))
 
 The dedicated completion preset includes key UX optimizations:
 
@@ -169,25 +169,25 @@ The dedicated completion preset includes key UX optimizations:
 
 ---
 
-## 5. Matchmaker Jump Mode ([`jump.toml`](../../waymaker/.config/waymaker/presets/jump.toml))
+## 5. Waymaker Jump Mode ([`jump.toml`](../../waymaker/.config/waymaker/presets/jump.toml))
 
-Triggered directly with `Ctrl+F`. Optimized for directory traversal, frecency ranking, and subfolder navigation:
+Triggered directly with `Ctrl+F` (or `<Tab>` on an empty prompt). Optimized for directory traversal, frecency ranking, and file management:
 
-- **Seamless Traversal (`Ctrl+L` / `Ctrl+H`)**:
-  - **`Ctrl+L`**: Enters the highlighted directory immediately (`ChDir({=})`), clears the filter input (`Cancel`), and reloads the file list (`Reload`) without needing to switch focus to the results pane with `Tab`.
-  - **`Ctrl+H`**: Steps up to the parent directory (`ChDir(..)`), clears the filter query, and reloads.
-- **Ancestor Jump (`Ctrl+U` / `u`)**:
+- **Seamless Traversal (`Ctrl+L` / `Ctrl+H` / `l` / `h`)**:
+  - **`Ctrl+L` / `l`**: Enters the highlighted directory immediately (`ChDir({=})`), clears the filter input (`Cancel`), and reloads the file list (`Reload`).
+  - **`Ctrl+H` / `h`**: Steps up to the parent directory (`ChDir(..)`), clears the filter query, and reloads.
+- **Ancestor Jump (`Ctrl+U`)**:
   - Instantly generates and streams the entire upward directory hierarchy (from the current directory up to `/`).
   - Selecting any ancestor directory and pressing `Enter` or `Ctrl+L` jumps straight to that level in 1 step.
   
   > [!TIP]
-  > #### 🌟 Onde o Ancestor Jump Brilha:
-  > - **Monorepos e Árvores Profundas**: Quando você está 5 ou 6 níveis adentro (ex: `~/dev/github/matchmaker/matchmaker-lib/src/render/widgets/`) e quer voltar para a raiz do repositório (`~/dev/github/matchmaker/`) em 1 único passo, sem apertar `h` ou `cd ..` repetidamente.
-  > - **Troca de Projetos Irmãos**: Permite subir rapidamente até uma pasta mãe comum (ex: `~/dev/github/` ou `~/dev/`) para navegar até outro projeto sem sair da sessão do Matchmaker.
-  > - **Auditoria com Preview**: Enquanto você percorre a lista de pastas ancestrais com `j/k`, o painel de preview da direita exibe a árvore de cada pasta pai, permitindo inspecionar o contexto antes de confirmar o salto.
-  > - **Sem Modificador `Alt`**: O atalho `Ctrl+U` (Input) ou a tecla `u` (Results) proporciona uma experiência ergonômica e imediata associada a **"Upward / Upper Hierarchy"**.
-- **Cycle Mode (`Ctrl+F` / `f`)**: Cycles between local directory entries and global frecency directories (`mm list --dirs`).
-- **Toggle Preview (`Ctrl+P` / `p`)**: Shows/hides directory tree (`mm tree` / `eza`) and file syntax previews.
+  > #### 🌟 Where Ancestor Jump Shines:
+  > - **Monorepos & Deep Trees**: When you are 5 or 6 levels deep (e.g., `~/dev/github/waymaker/waymaker-lib/src/render/widgets/`) and want to jump back to the repository root (`~/dev/github/waymaker/`) in a single step without pressing `h` or `cd ..` repeatedly.
+  > - **Switching Sibling Projects**: Quickly climb to a common parent directory (e.g., `~/dev/github/` or `~/dev/`) to enter another project without leaving Waymaker.
+  > - **Preview Auditing**: While scrolling through ancestor directories with `j/k`, the right preview panel displays the tree of each parent directory so you can inspect context before confirming the jump.
+  > - **Zero `Alt` Modifiers**: `Ctrl+U` provides an immediate ergonomic mnemonic for **"Upward / Upper Hierarchy"**.
+- **Cycle Data Sources (`Tab` / `Shift+Tab`)**: Cycles between Local files (`[start]`), Global Frecency (`wm list`), and Bookmarks (`@bookmarks`).
+- **Toggle Preview (`Ctrl+P` / `P`)**: Switches between the 60% split preview and 95% expanded preview.
 
 ---
 
@@ -207,16 +207,17 @@ Triggered directly with `Ctrl+F`. Optimized for directory traversal, frecency ra
 
 | Shortcut | Mode | Action | Description |
 | :--- | :--- | :--- | :--- |
-| **`Ctrl+L`** | Input & Results | `ChDir + Cancel + Reload` | **Enter selected directory seamlessly** |
-| **`Ctrl+H`** | Input & Results | `ChDir(..) + Cancel + Reload` | **Go to parent directory seamlessly** |
-| **`Ctrl+U`** / **`u`** | Input & Results | `Reload(ancestor hierarchy)` | **Open ancestor directory picker** |
-| **`Ctrl+P`** / **`p`** | Input & Results | `SwitchPreview` | **Toggle directory/file preview pane** |
-| **`Ctrl+F`** / **`f`** | Input & Results | `ReloadNext` | **Cycle between local files & frecency history** |
+| **`Ctrl+L`** / **`l`** | Input & Results | `ChDir + Cancel + Reload` | **Enter selected directory seamlessly** |
+| **`Ctrl+H`** / **`h`** | Input & Results | `ChDir(..) + Cancel + Reload` | **Go to parent directory seamlessly** |
+| **`Ctrl+U`** | Input & Results | `Reload(ancestor hierarchy)` | **Open ancestor directory picker** |
+| **`u`** | Results (Nav) | `@undo` | **Undo last File Manager operation (UndoStack)** |
+| **`Ctrl+P`** / **`P`** | Input & Results | `SwitchPreview` | **Toggle 60% / 95% directory/file preview pane** |
+| **`Tab`** / **`Shift+Tab`** | Input & Results | `ReloadNext` / `ReloadPrev` | **Cycle between Local files, Frecency & Bookmarks** |
+| **`f`** / **`/`** / **`i`** | Results (Nav) | `FocusFilter` | **Focus filter input** |
 | **`Ctrl+E`** / **`e`** | Input & Results | `Execute(nvim {+})` | **Open selected item(s) in Neovim with frecency boost** |
-| **`Tab`** / **`Shift+Tab`** | Input & Results | `ToggleSelect` | **Multi-select multiple files or directories** |
-| **`h` / `l`** | Results (Nav) | `ChDir` | Vim-style directory navigation |
+| **`Space`** | Results (Nav) | `Toggle + Down` | **Multi-select multiple files or directories** |
 | **`j` / `k`** | Results (Nav) | `Down / Up` | Vim-style list navigation |
-| **`Enter`** | All | `Accept` | Change shell working directory to selection |
+| **`Enter`** | All | `Accept` | Change shell working directory or insert selection |
 
 ---
 

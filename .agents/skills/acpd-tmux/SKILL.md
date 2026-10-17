@@ -17,8 +17,8 @@ This means you can orchestrate your workspace:
 
 ## Core Concepts
 
-You control Tmux by sending HTTP POST requests using `curl` to `http://127.0.0.1:4040/rpc`.
-All requests must be valid JSON-RPC 2.0 payloads with the Bearer token header from `/run/user/$UID/acpd/token`.
+You can control Tmux via `acpd-cli` (`acpd-cli status`, `acpd-cli run [-d] [-s sess] [-w win] <cmd>`, `acpd-cli capture <pane>`, `acpd-cli send <pane> <keys>`, `acpd-cli wait <pane> --state idle`, `acpd-cli dismiss <pane>`, `acpd-cli msg <text>`, `acpd-cli bell <pane>`) or by sending HTTP POST requests using `curl` to `http://127.0.0.1:4040/rpc`.
+All raw HTTP requests must be valid JSON-RPC 2.0 payloads with the Bearer token header from `/run/user/$UID/acpd/token`.
 
 **Endpoints Available via RPC `method`:**
 - `tmux.new_window`: Creates a new Tmux window (tab).

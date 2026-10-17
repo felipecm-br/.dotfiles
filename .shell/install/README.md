@@ -1,61 +1,51 @@
-# Workstation Bootstrap
+# Dotfiles Package & Plugin Bootstrap (`.shell/install/`)
 
-## Install zsh
+This directory contains the declarative, idempotent bootstrap engine for installing system packages, custom binaries, and Zsh plugins on Arch Linux + Omarchy.
 
-```sh
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/fcmiranda/.omc/refs/heads/main/omc/sh/zsh.sh)"
+---
+
+## 1. Architecture & Directory Layout
+
+```text
+.shell/install/
+├── install.zsh          # Master orchestrator (packages, custom scripts, zsh plugins)
+├── helpers.zsh          # Shared logging, idempotency checks, and AUR/pacman wrappers
+├── packages/            # Custom per-package installer scripts (<name>.zsh)
+│   ├── tmux.zsh         # Tmux 3.8+ (with sixel & systemd support)
+│   ├── nvim.zsh         # Neovim + LazyVim dependencies
+│   ├── mise.zsh         # Mise runtime manager
+│   └── ...
+└── plugins/             # Zsh plugin installers (<name>.zsh)
 ```
 
-## Install US International locale
+- **Source of Truth**: [install.zsh](install.zsh) defines the canonical `PACKAGES` array and sources custom installers from `packages/*.zsh` and `plugins/*.zsh`.
+- **Sourced Execution Contract**: All scripts under `packages/` and `plugins/` are **sourced** directly by `install.zsh`. Always use `return 0` (or `return 1`) for early exits—**never** `exit`, which would terminate the parent shell session.
 
-```sh
-cd && ./omc/sh/us-intl-locale.sh
+---
+
+## 2. Usage
+
+### Run Full Bootstrap
+```zsh
+zsh ~/.dotfiles/main/.shell/install/install.zsh
 ```
 
-## Install packages (kanshi, atuin)
+### Update AI Workflow & Tooling Ecosystem
+For auditing and updating the AI agent and terminal cockpit ecosystem (`tmux`, `plugins`, `fonts`, `codex`, `agy`, `antigravity-ide`, `claude`, `opencode`, `crush`, `acpd`, `ai-memory`, `ai-jail`, `ai-usagebar`, `worktrunk`, `mise`), use the dedicated parallel updater:
 
-```sh
-chmod +x ~/omc/pkgs/install.zsh
-cd && ~/omc/pkgs/install.zsh
+```bash
+ai-update --check          # Fast dry-run audit across all 15 AI workflow components
+ai-update                  # Update all components in parallel
+ai-update --only acpd,agy  # Target specific components
 ```
 
-## Install zsh plugins
-```sh
-chmod +x ~/omc/pkgs/zsh-plugins.zsh
-cd && ~/omc/pkgs/zsh-plugins.zsh
-```
+---
 
+## 3. Adding a New Package Installer
 
-# Todo
-Create a markdown file 
-
-Setup Section
-
-How to install .zsh and set as default shell using `sh -c "$(curl -fsSL https://raw.githubusercontent.com/fcmiranda/.omc/refs/heads/main/omc/sh/zsh.sh)"`
-How clone omc repo and how checkout using `sh -c "$(curl -fsSL https://raw.githubusercontent.com/fcmiranda/.omc/refs/heads/main/omc/sh/omc.sh)"`
-Why it was create us international locale script, how works and how run it
-
-
-Setup Section
-Installing packages, plugins and setup them
-
-How [install script](install.zsh) works
-How zsh modules import and evaluate the files
-
-
-Setup Section
-Config files
-
-Why and how the configs bellow were created:
-x11 dialogs
-    /home/fecavmi/.config/hypr/x11-dialogs.conf
-workspaces
-    /home/fecavmi/.config/hypr/workspaces.conf
-animations
-    /home/fecavmi/.config/hypr/animations.conf
-
-
-
-
-
-
+1. If the package is a standard Arch / AUR package requiring no custom build steps, add its name to the `PACKAGES` list in [install.zsh](install.zsh).
+2. If it requires custom setup, post-install hooks, or cargo/git builds, create `.shell/install/packages/<name>.zsh` using the helpers in [helpers.zsh](helpers.zsh) (`is_installed`, `log_info`, `log_success`, `log_warn`, `log_error`).
+3. Verify syntax before committing:
+   ```bash
+   zsh -n .shell/install/packages/<name>.zsh
+   ```

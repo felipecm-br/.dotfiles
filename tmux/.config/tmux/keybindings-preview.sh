@@ -25,7 +25,7 @@ printf '\n---\n\n'
 case "$ID" in
   tmux-workspace)
     cat <<'EOF'
-### 󰈞 Workspace Files Explorer (`75% × 60%`)
+### 󰈞 Workspace Files Explorer (`85% × 75%`)
 Inspect workspace files, tree structures, AI code, diagrams, and photos without leaving your active session.
 
 - **Ergonomics**: Inward chord (`e` = Explorer, $H=0$, sub-100ms latency).
@@ -47,22 +47,21 @@ Interactive GitHub PR review workflow and worktree selector powered by Waymaker.
 
 - **Ergonomics**: Prefix + P (Golden Ratio popup modal, sub-100ms latency).
 - **Tabs**:
-  - `Tab` / `Shift + Tab`: Cycle between Review Requested (1/3), My PRs (2/3), and All Open (3/3).
+  - `Tab` / `Shift + Tab`: Cycle between Open (1/3), Mine (2/3), and Review Requested (3/3).
 - **Previews**:
   - Live GitHub PR overview with `gh pr view` (title, author, body, labels, reviewers).
   - Live full syntax diff preview with `gh pr diff`.
-  - `p` / `Ctrl + P`: Toggle between PR Overview and PR Diff preview layouts.
+  - `v` / `Ctrl + D`: Toggle between PR Overview and PR Diff preview layouts.
 - **Controls**:
   - `Enter`: Checkout PR into an isolated worktree via `awt pr <num>` and auto-switch session.
-  - `Ctrl + E` / `e` / `b`: Open PR directly in Google Chrome / browser.
-  - `Ctrl + D` / `d`: View interactive full diff in delta/less pager.
+  - `Ctrl + E` / `o`: Open PR directly in Google Chrome / browser.
   - `q` / `Esc`: Dismiss modal.
 EOF
     ;;
 
   tmux-scrollback|tmux-yank)
     cat <<'EOF'
-### 󰅍 Scrollback Picker (Tokens, Links & Yank) (`75% × 60%`)
+### 󰅍 Scrollback Picker (Tokens, Links & Yank) (`85% × 75%`)
 Fuzzy extract shell commands, file paths, URLs, git SHAs, and IPs directly from terminal scrollback (recent-first).
 
 - **Ergonomics**: Inward chord (`y` = Yank, $H=0$, sub-100ms latency).
@@ -72,14 +71,14 @@ Fuzzy extract shell commands, file paths, URLs, git SHAs, and IPs directly from 
   - `Ctrl + V`: Injects token directly into origin pane prompt.
   - `Ctrl + E` / `e`: Opens file in Neovim (or auto-delegates URLs to Chrome).
   - `Tab` / `Shift + Tab`: Cycles filter modes (all → cmd → path → url → sha).
-  - `Ctrl + P`: Toggles between 60% and 95% full-modal preview.
+  - `Space`: Multi-select tokens.
 EOF
     ;;
 
   tmux-grep)
     cat <<'EOF'
 ### 󰍉 Workspace Ripgrep Live Search (`85% × 75%`)
-Debounced full-text search across the current workspace or project via `ripgrep` + Matchmaker.
+Debounced full-text search across the current workspace or project via `ripgrep` + Waymaker.
 
 - **Ergonomics**: Universal mnemonic `/` with 45/55 foveal layout.
 - **Controls**:
@@ -113,41 +112,46 @@ EOF
 
   tmux-sesh|tmux-session)
     cat <<'EOF'
-### 󰓩 Session Workspace / Task Picker (`75% × 60%`)
+### ⚡ Session Workspace / Task Picker (`85% × 75%`)
 Instant teleportation between project workspaces, git worktrees, and tmux sessions powered by Waymaker.
 
-- **Ergonomics**: `t` = Task/Teleport ($H=0$).
+- **Ergonomics**: `Prefix + s` ($H=0$).
 - **Controls**:
-  - `Enter`: Connects to selected project workspace session.
-  - Integrates with `waymaker`, `frecency`, `git worktrees`, and configured sessions.
+  - `Enter`: Connects to selected project workspace session (`wm connect`).
+  - `c`: Switch to Cockpit HUD (`Prefix + Space`).
+  - `Tab` / `Shift + Tab`: Cycle between All, Tmux Sessions, and Frecency Directories.
+  - `d`: Terminate selected session.
 EOF
     ;;
 
   tmux-cockpit)
     cat <<'EOF'
-### 󱂬 AI Fleet Cockpit & Window Manager (`Prefix + Space`)
-Unified triage cockpit, window manager, and autonomous agent fleet overview powered by Matchmaker.
+### 󱂬 AI Fleet Cockpit & Window Manager (`Prefix + Space`, `85% × 75%`)
+Unified triage cockpit, window manager, and autonomous agent fleet overview powered by Waymaker.
 
 - **Ergonomics**: `Prefix + Space` = Zero-reach thumb roll ($H=0$).
 - **Controls**:
   - `Enter`: Instant jump to selected window / agent session.
-  - `Tab`: Cycle between Fleet View (all windows) and Agent Triage (agents only).
-  - `s`: Flip to Session Picker (`Prefix + t`).
+  - `y` / `n`: Approve / Deny pending agent permission prompts.
+  - `r`: Dispatch pending Lazygitrs code review notes to the agent.
+  - `i`: Open inline prompt to reply directly to an agent question.
+  - `v`: Toggle side-by-side Git diff preview (`Layout 2`).
+  - `g`: Open Lazygitrs popup in the selected window's repository.
+  - `a`: Cycle between All Windows and AI Agents Only filter.
+  - `Tab`: Switch to AWT Worktree Orchestrator (`awt-popup.sh`).
+  - `s`: Flip to Session Picker (`Prefix + s`).
   - `S`: Ship worktree with `awt ship` (pre-merge lint, rebase & push).
-  - `t` / `c`: Create new window in selected session context.
-  - `d`: Terminate selected window (or worktree/session if on session header).
-  - `g` / `Ctrl+G`: Contextual Lazygitrs bridge with Dual-Diff.
-  - `y` / `n`: Quick-respond to agent permission prompts (OpenCode / Antigravity).
-  - `/`: Fuzzy filter / search query.
+  - `d` / `x`: Terminate selected window or session.
+  - `?`: Toggle Deep Work Telemetry Heatmap & Help (`Layout 1`).
 EOF
     ;;
 
   tmux-window|tmux-window-fullscreen)
     cat <<'EOF'
-### 󱂬 Window & Session Tree Picker (`75% × 60%` or `Fullscreen`)
+### 󱂬 Window & Session Tree Picker (`85% × 75%` or `Fullscreen`)
 Visual grouped view of all sessions and their windows with real-time AI agent status badges.
 
-- **Ergonomics**: `s` = Switch/Select window. `Prefix + S` opens full modal.
+- **Ergonomics**: `Prefix + c` (choose-window) or `Prefix + S` (full modal).
 - **Controls**:
   - `Enter`: Focuses selected window immediately.
   - Previews live pane content, running process, and active AI status.
@@ -353,9 +357,9 @@ EOF
 ### 󰈞 Polymorphic Smart Tab (`_smart_tab`)
 Context-aware Tab key widget in Zsh prompt.
 
-- **Empty prompt**: Triggers Matchmaker Jump. Single directory triggers immediate `cd`. Multiple or file triggers Object-First buffer insertion (`BUFFER=" $target"`, `CURSOR=0`).
+- **Empty prompt**: Triggers Waymaker Jump. Single directory triggers immediate `cd`. Multiple or file triggers Object-First buffer insertion (`BUFFER=" $target"`, `CURSOR=0`).
 - **Ghost text at end**: Accepts inline autosuggestion immediately.
-- **Command / Mid-line**: Opens Matchmaker multi-column completion picker (`mm-ftb`).
+- **Command / Mid-line**: Opens Waymaker multi-column completion picker (`wm-ftb`).
 EOF
     ;;
 

@@ -41,19 +41,19 @@ When human-computer interaction latency drops below **100 milliseconds** (Miller
 ## 🎨 2. Visual Semiotics & Dynamic Theme Color Sync
 
 ```text
-╭── 󱂬 ──────────────────────────────────────────────────────────────────────╮  🟣 Mauve / Magenta
-│ 1. EPHEMERAL LAYER (Fast Pickers & Transit Navigation < 5s)               │  Geometry: 75% × 60%
-│ • Window Picker, Sesh Workspace Picker, Matchmaker Jump. Exit: [Esc]       │
+╭── 󱂬 ──────────────────────────────────────────────────────────────────────╮  🟠/🔵 Dynamic Theme (colors.toml)
+│ 1. EPHEMERAL LAYER (Fast Pickers & Transit Navigation < 5s)               │  Geometry: 85% × 75% (PR: 75% × 60%)
+│ • Cockpit HUD, Session Picker (wm session), Waymaker Jump. Exit: Esc      │
 ╰───────────────────────────────────────────────────────────────────────────╯
 
 ╭── 󰊢 ──────────────────────────────────────────────────────────────────────╮  🟠 Git Orange (colors.toml)
 │ 2. PERSISTENT LAYER (High-Density Inspection & Workspaces)                │  Geometry: 90% × 88%
-│ • Lazygitrs, Floating Neovim, OpenCode Agent. Exit: [Esc] on Files / [q]   │
+│ • Lazygitrs, Floating Neovim, Scrollback Markdown View. Exit: Esc / q     │
 ╰───────────────────────────────────────────────────────────────────────────╯
 
 ╭── 󰮯 ──────────────────────────────────────────────────────────────────────╮  🟡 Alert Yellow (colors.toml)
 │ 3. REACTIVE LAYER (AI Agent Attention & Interventions)                    │  Geometry: 80% × 75%
-│ • Permission prompts and background agent alerts. Cycle: [prefix+i] / [Esc]│
+│ • Permission prompts and background agent alerts. Cycle: prefix+i / Esc   │
 ╰───────────────────────────────────────────────────────────────────────────╯
 ```
 
@@ -69,11 +69,11 @@ All popup scripts dynamically query the active system palette in `~/.local/state
                │    ~/.local/state/omarchy/current/theme/colors.toml    │
                └───────────┬──────────────┬──────────────┬──────────────┘
                            │              │              │
-                    magenta/accent       cyan          orange          yellow/alert
+                        orange          cyan          orange          yellow/alert
                            │              │              │                   │
                            ▼              ▼              ▼                   ▼
                      ╭── 󱂬 ──╮      ╭── ⚡ ──╮      ╭── 󰊢 ──╮           ╭── 󰮯 ──╮
-                     │Windows│      │  Sesh │      │Lazygit│           │AI Bell│
+                     │Cockpit│      │Session│      │Lazygit│           │AI Bell│
                      ╰───────╯      ╰───────╯      ╰───────╯           ╰───────╯
 ```
 
@@ -88,26 +88,26 @@ When switching themes via `omarchy theme set <theme>`, **100% of popups instantl
 │                             TERMINAL VIEWPORT                               │
 │                                                                             │
 │        ┌─ 󱂬 ───────────────────────────────────────────────────────┐        │
-│        │  CENTERED MODAL (Width: ~75% │ Height: ~60%)              │        │
+│        │  CENTERED MODAL (Width: ~85% │ Height: ~75%)              │        │
 │        │                                                           │        │
 │        │  ┌───────────────────────┬─────────────────────────────┐  │        │
 │        │  │ Candidate List        │ Live Context Preview        │  │        │
 │        │  │ (38.2% ≈ 40%)         │ (61.8% ≈ 60%)               │  │        │
 │        │  │                       │                             │  │        │
-│        │  │ • 0  nvim     󱥂 idle  │ $ git status -s             │  │        │
-│        │  │ · 1  agent    󰑮 work  │ M tmux/tmux.conf            │  │        │
-│        │  │ · 2  zsh              │ M matchmaker/jump.toml      │  │        │
+│        │  │ 󱥂 0•  nvim     idle   │ $ git status -s             │  │        │
+│        │  │ 󰑮 1·  agent    work   │ M tmux/tmux.conf            │  │        │
+│        │  │ · 2·  zsh             │ M waymaker/jump.toml        │  │        │
 │        │  │                       │                             │  │        │
 │        │  └───────────────────────┴─────────────────────────────┘  │        │
-│        │  [Enter] Switch  •  [c] New  •  [d] Kill  •  [Esc] Exit    │        │
+│        │  Enter Jump │ y/n Ack │ r Review │ v Diff │ g Git │ Esc Exit │     │
 │        └───────────────────────────────────────────────────────────┘        │
 │                                                                             │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
-* **Spatial Stability & Context Preservation (`75% × 60%`):** While human central foveal acuity spans ~2° (with popups parsed through parafoveal vision and rapid saccades), the standard 75% × 60% viewport leverages spatial layout constancy (CommandMaps, Scarr et al. 2012). It provides predictable coordinates for candidate and preview panes while preserving the parent terminal backdrop as a cognitive anchor.
+* **Spatial Stability & Context Preservation (`85% × 75%` / `75% × 60%`):** While human central foveal acuity spans ~2° (with popups parsed through parafoveal vision and rapid saccades), the centered modal viewport leverages spatial layout constancy (CommandMaps, Scarr et al. 2012). It provides predictable coordinates for candidate and preview panes while preserving the parent terminal backdrop as a cognitive anchor.
 * **Column Partitioning (`40% / 60%`):** Divides space according to $\frac{1}{\phi^2} \approx 38.2\%$ (list) and $\frac{1}{\phi} \approx 61.8\%$ (preview), preventing label truncation.
-* **Concurrent Split Editor Architecture (`62% / 38%` LTR):** When opening files from ephemeral pickers (e.g. `wm -o workspace` / `wm -o files` / [`workspace-picker.sh`](../../tmux/.config/tmux/workspace-picker.sh) with `Ctrl+E` or `e`), the modal is immediately dismissed (`display-popup -C`) via [`scrollback-open.sh`](../../tmux/.config/tmux/scrollback-open.sh) to prevent nested modal trapping. The editor (Neovim) is positioned on the left (`split-window -h -b -l 62%`) at $\frac{1}{\phi} \approx 61.8\%$ (62%), preserving the active terminal or AI session on the right at $\frac{1}{\phi^2} \approx 38.2\%$ (38%). This aligns with western Left-to-Right reading hierarchy and modern IDE sidebar architecture (primary workspace left, AI copilot right).
+* **Concurrent Split Editor Architecture (`62% / 38%` LTR):** When opening files from ephemeral pickers (e.g. `wm -o workspace` / [`workspace-picker.sh`](../../tmux/.config/tmux/workspace-picker.sh) with `Ctrl+E` or `e`), the modal is immediately dismissed (`display-popup -C`) via [`scrollback-open.sh`](../../tmux/.config/tmux/scrollback-open.sh) to prevent nested modal trapping. The editor (Neovim) is positioned on the left (`split-window -h -b -l 62%`) at $\frac{1}{\phi} \approx 61.8\%$ (62%), preserving the active terminal or AI session on the right at $\frac{1}{\phi^2} \approx 38.2\%$ (38%). This aligns with western Left-to-Right reading hierarchy and modern IDE sidebar architecture (primary workspace left, AI copilot right).
 * **High-Density Workspaces (`90% × 88%`):** Lazygitrs expands to 90% × 88% to satisfy Miller's Chunking Law ($7 \pm 2$) across 5 control panels and wide diff viewports.
 
 ### 3.1 The Z-Axis vs. X-Axis Law: Ephemeral Overlays vs. Persistent Sidebars
@@ -154,9 +154,9 @@ A critical visual ergonomic discovery emerged from head-to-head empirical testin
    - **Gutter Rule:** Semantic urgency glyphs (`󱅭`, `󱜻`, `󰨄`, `⠋`, `󱥂`, `·`) must reside at column $X=1$, never buried across 45+ columns.
    - **UTF-8 Visual Width Rule:** Character widths in Bash/POSIX formatters must be computed using codepoint length (`${#str}`) in UTF-8 locales and padded via space injection (`printf -v spaces "%*s" "$pad" ""`), avoiding byte-based `printf "%-24s"` which breaks alignment on multibyte Nerd Font glyphs (``, `⎇`, `󰄬`, `…`, `↑`, `↓`).
 3. **Footer Chromatic Discipline, De-Cluttering & Dynamic Theme Sync:**
-   - **Treisman Hue Reservation (1985):** Matiz is reserved exclusively for real-time operational urgency in candidate rows. Footers must adopt a **uniform bichromatic neutral palette** (`cyan,bold` keys, `darkgray` action labels, `{darkgray:│}` hairline separators) with zero "rainbow" clutter.
+   - **Treisman Hue Reservation (1985):** Hue is reserved exclusively for real-time operational urgency in candidate rows. Footers must adopt a **uniform bichromatic neutral palette** (`cyan,bold` keys, `darkgray` action labels, `{darkgray:│}` hairline separators) with zero "rainbow" clutter.
    - **Bouma Visual Crowding Law (1970):** Bracket elimination (`[Enter]` $\to$ `Enter`) removes 14–22 redundant punctuation marks, dramatically accelerating peripheral legibility.
-   - **Chunking Limit ($\le 7$ Pairs):** Limits visible footer shortcuts to $\le 7$ core actions (Miller 1956 / Cowan 2001), offloading tertiary options to `? Help`.
+   - **Chunking Limit:** Limits visible footer shortcuts to core high-frequency actions, offloading tertiary options to `? Help`.
    - **Omarchy Theme Synchronization:** Waymaker footers bind to standard ANSI semantic names (`cyan`, `darkgray`), which the terminal emulator automatically remaps based on the active Omarchy palette (`~/.local/state/omarchy/current/theme/colors.toml`). Switching between dark themes (e.g. `tokyo-night`, `catppuccin`, `everforest`) and light themes (e.g. `flexoki-light`, `catppuccin-latte`) dynamically updates footer hues and preserves WCAG 2.1 AA luminance contrast without requiring preset edits.
 4. **Clean Zero-Background & Cyan Lateral Focus Standard:**
    - **Eliminating Opaque Block Clutter:** Opaque rectangular selection bars (`bg = "darkgray"`, `bg = "black"`) across modal pickers create severe cognitive noise, destroy background transparency, and occlude surrounding rows.
@@ -188,7 +188,7 @@ To eliminate accidental exits during deep inspection:
 
 True zero-friction development minimizes visual polling by offloading non-critical telemetry to the **Auditory Cortex**.
 
-The `acpd` daemon integrates low-latency audio cues via PipeWire (`pw-play`) configured in [`acpd.toml`](file:///home/fecavmi/.dotfiles/main/acpd/.config/acpd/config.toml):
+The `acpd` daemon integrates low-latency audio cues via PipeWire (`pw-play`) configured in [`acpd/.config/acpd/config.toml`](../../acpd/.config/acpd/config.toml):
 
 ```toml
 [sound]

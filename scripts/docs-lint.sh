@@ -80,10 +80,14 @@ for dirpath, _, filenames in os.walk(repo_root):
                         continue
                     if in_code_block:
                         continue
-                    # Remove inline code blocks `...` to avoid matching illustrative markdown syntax
-                    sanitized_line = re.sub(r"`[^`]+`", "", line)
+                    # Remove only inline code spans that wrap an entire markdown link `[text](url)`
+                    sanitized_line = re.sub(r"`[^`\n]*\[[^\]]+\]\([^)]+\)[^`\n]*`", "", line)
                     for match in link_pattern.finditer(sanitized_line):
                         target = match.group(2).strip()
+                        if target.startswith("file:///home/fecavmi/.dotfiles/main/"):
+                            rel_source = os.path.relpath(filepath, repo_root)
+                            broken.append(f"  ✖ {rel_source}:{line_idx} -> '{target}' (use relative markdown path instead of hardcoded file:// URL)")
+                            continue
                         # Ignore external or special protocol links
                         if any(target.startswith(proto) for proto in ["http://", "https://", "mailto:", "#", "file://", "conversation://"]):
                             continue

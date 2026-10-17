@@ -97,27 +97,43 @@ awt merge main --squash
 awt ship main --rebase
 ```
 
-### F. Delete Worktree & Session (`awt rm`)
+### F. Delete, Sweep & Reap Worktrees (`awt rm` / `awt sweep` / `awt reap`)
 ```bash
 # Delete worktree directory, branch ref, and kill tmux session
 awt rm feat/my-feature
 
 # Force remove even if uncommitted changes exist
 awt rm feat/my-feature --force
+
+# Batch sweep worktrees whose branches are already merged into base or via GitHub PR
+awt sweep
+
+# Reap stale AI agents (idle > 4h) and orphan worktree sessions
+awt reap
+```
+
+### G. Auto-Naming & Migrating Uncommitted Changes (`-A` / `-W`)
+```bash
+# Auto-derive conventional branch slug from natural language task prompt
+awt -c -A "fix memory leak in parser"
+
+# Carry uncommitted dirty working tree changes from main into a new sandbox worktree
+awt -c -W feat/dirty-migration
 ```
 
 ---
 
-## 3. Matchmaker TUI Quick Reference (`mm -o awt`)
+## 3. Waymaker TUI Quick Reference (`wm -o awt`)
 
-When inside Tmux, opening the dashboard (`Ctrl+Shift+G` or `awt`):
+When inside Tmux, opening the dashboard (`Prefix + g`, `Tab` from Cockpit, `Ctrl+Shift+G`, or `awt`):
 - `Enter`: Connect / switch to selected worktree session.
+- `Tab`: Switch seamlessly back to the Cockpit HUD (`cockpit-picker.sh`).
 - `c`: Interactive 5-step Conventional Commit worktree creation wizard.
-- `m`: Local merge into target base.
+- `m`: Local merge into target base (runs `.awt.toml` / `pre-merge.sh` gates).
 - `S` (Shift+S): **Ship** — atomic merge into base and push to remote origin.
 - `R` (Shift+R): Rebase selected branch onto its base.
 - `P` (Shift+P): Open GitHub PR selector (`awt-pr.toml`) with live preview.
 - `r`: Rename active branch.
-- `d`: Delete worktree and session with confirmation guard.
+- `d`: Delete worktree and session with confirmation guard and async trash cleanup.
 - `p`: Cycle preview layout (Status & Changes / Diff vs Main / Commit Graph).
 - `q` / `Esc`: Quit dashboard.
