@@ -141,13 +141,17 @@ $$T_{\text{execute}} = \sum T_K + \sum T_P + \sum T_H + \sum T_M + \sum T_R$$
   - **Uniform Key Palette:** All keys must share a single uniform accent (`cyan,bold` or `white,bold`), actions in `darkgray`, and delimiters in dimmed vertical hairlines (`{darkgray:│}`).
   - **Hue Reservation:** Never use a multi-colored "rainbow" footer (`green`, `yellow`, `magenta`, `red`, `blue`). Matiz is strictly reserved for real-time operational alerts in the list and preview.
   - **Chunk Cap ($\le 7$):** Strictly limit visible footer key-action pairs to 7 core items (Miller's $7 \pm 2$ / Cowan's $4 \pm 1$), offloading secondary actions to `? Help`.
+- **Clean Zero-Background & Cyan Lateral Focus Indicator Standard:**
+  - **Eliminating Opaque Block Clutter:** Avoid opaque rectangular selection bars (`bg = "darkgray"`, `bg = "black"`) across modal pickers. High-contrast background strips create cognitive noise, break terminal transparency, and visually crowd surrounding rows.
+  - **Transparency with BOLD Focus:** The active item inherits the terminal's native background transparency and asserts visual hierarchy through `modifier = "BOLD"`.
+  - **Cyan Lateral Indicator (`current_nav_bar_style`):** Anchor focus at the left boundary via a crisp cyan indicator (`fg = "cyan"`, `modifier = "BOLD"`), providing an instantaneous foveal anchor at $X=1$ without visual occlusion or cognitive friction.
 - **Dynamic Semantic Color Palette:** Inherits dynamically from Omarchy system theme (`~/.local/state/omarchy/current/theme/colors.toml`):
   - *Ephemeral Layer* (Fast Pickers < 5s): Mauve / Magenta (`-T " 󱂬 "` or `-T " 󰆍 "`).
   - *Persistent Layer* (Lazygitrs / High-Density Workspaces): Git Orange (`-T " 󰊢 "`).
   - *Reactive Layer* (AI Agent Alerts & Approvals): Alert Yellow (`-T " 󰮯 "`).
 - **Auditory Telemetry:** Low-latency non-blocking PipeWire sound cues via `acpd` daemon, freeing visual attention.
 
-*See layout details in [references/tmux-golden-ratio-popups.md](references/tmux-golden-ratio-popups.md) and canonical audit in [`docs/tmux/cockpit-vs-workmux-visual-ergonomics.md`](../../../docs/tmux/cockpit-vs-workmux-visual-ergonomics.md).*
+*See layout details in [references/tmux-golden-ratio-popups.md](references/tmux-golden-ratio-popups.md) and canonical audit in [`docs/architecture/state-of-the-art-terminal-agent-workflow.md`](../../../docs/architecture/state-of-the-art-terminal-agent-workflow.md).*
 
 ---
 

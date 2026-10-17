@@ -25,6 +25,7 @@ docs/
 │   ├── terminal-ergonomics-and-ux-manifesto.md   # Master HCI manifesto, KLM-GOMS, H=0, sub-100ms
 │   ├── workflow-keybindings-matrix.md            # Living multi-layer keymap table (Global/Tmux/Zsh/Lazygitrs)
 │   ├── zero-friction-file-transfer-benchmark.md  # 6-method KLM-GOMS transfer benchmark & Frecency 2.0
+│   ├── state-of-the-art-terminal-agent-workflow.md # Canonical SOTA architecture, 9.94/10 verdict & benchmarks
 │   └── smart-patterns-roadmap.md                 # Event-driven intelligence roadmap and pattern catalog
 │
 ├── shell/                         # 🐚 Shell, ZLE & Matchmaker Pickers
@@ -60,8 +61,7 @@ docs/
     ├── autonomous-agent-examples-en.md
     ├── ai-jail-memory-guide-en.md
     ├── ai-workflow-definitive-analysis.md
-    ├── ai-memory-multi-repo-guide-en.md
-    └── workflow-vs-herdr-comparison.md
+    └── ai-memory-multi-repo-guide-en.md
 ```
 
 ---

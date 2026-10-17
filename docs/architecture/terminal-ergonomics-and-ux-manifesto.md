@@ -158,8 +158,12 @@ A critical visual ergonomic discovery emerged from head-to-head empirical testin
    - **Bouma Visual Crowding Law (1970):** Bracket elimination (`[Enter]` $\to$ `Enter`) removes 14–22 redundant punctuation marks, dramatically accelerating peripheral legibility.
    - **Chunking Limit ($\le 7$ Pairs):** Limits visible footer shortcuts to $\le 7$ core actions (Miller 1956 / Cowan 2001), offloading tertiary options to `? Help`.
    - **Omarchy Theme Synchronization:** Waymaker footers bind to standard ANSI semantic names (`cyan`, `darkgray`), which the terminal emulator automatically remaps based on the active Omarchy palette (`~/.local/state/omarchy/current/theme/colors.toml`). Switching between dark themes (e.g. `tokyo-night`, `catppuccin`, `everforest`) and light themes (e.g. `flexoki-light`, `catppuccin-latte`) dynamically updates footer hues and preserves WCAG 2.1 AA luminance contrast without requiring preset edits.
+4. **Clean Zero-Background & Cyan Lateral Focus Standard:**
+   - **Eliminating Opaque Block Clutter:** Opaque rectangular selection bars (`bg = "darkgray"`, `bg = "black"`) across modal pickers create severe cognitive noise, destroy background transparency, and occlude surrounding rows.
+   - **Transparency with BOLD Focus:** Active rows inherit the terminal's transparent background, establishing primary hierarchy through `modifier = "BOLD"`.
+   - **Cyan Lateral Indicator (`current_nav_bar_style`):** Focus is anchored at the left boundary via a crisp cyan indicator (`fg = "cyan"`, `modifier = "BOLD"`), delivering an immediate foveal anchor at $X=1$ without visual occlusion or eye fatigue.
 
-*See comprehensive scientific comparison and benchmarks in [Cockpit HUD vs. workmux Dashboard: Visual Semiotics & Eye-Tracking](../tmux/cockpit-vs-workmux-visual-ergonomics.md).*
+*See comprehensive scientific comparison and benchmarks in [State of the Art Terminal Agent Workflow](state-of-the-art-terminal-agent-workflow.md).*
 
 ---
 

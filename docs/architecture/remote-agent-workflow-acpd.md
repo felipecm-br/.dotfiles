@@ -167,7 +167,7 @@ ssh user@my-desktop "acpd-cli send %0 y Enter"
 
 ## 6. Related References
 
-- [Workflow vs. Herdr Comparison](file:///home/fecavmi/.dotfiles/main/docs/articles/workflow-vs-herdr-comparison.md)
+- [State-of-the-Art Terminal Agent Workflow](file:///home/fecavmi/.dotfiles/main/docs/architecture/state-of-the-art-terminal-agent-workflow.md)
 - [ACPD Tmux Skill](file:///home/fecavmi/.dotfiles/main/.agents/skills/acpd-tmux/SKILL.md)
 - [Terminal Ergonomics & UX Manifesto](file:///home/fecavmi/.dotfiles/main/docs/architecture/terminal-ergonomics-and-ux-manifesto.md)
 - [AWT Worktree Workflow](file:///home/fecavmi/.dotfiles/main/docs/GIT_WORKTREE_AGENTIC_WORKFLOW.md)

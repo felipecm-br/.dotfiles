@@ -246,7 +246,7 @@ The answer is **yes, completely and automatically**, through a three-tier synchr
 4. **Light vs. Dark Theme Contrast Compliance:**
    - In light themes (e.g., `catppuccin-latte`, `flexoki-light`, `white`), Omarchy remaps the ANSI palette so that `cyan` translates to a deep, legible teal/cyan on a light canvas, and `darkgray` maps to a crisp medium-dark gray, preserving WCAG 2.1 AA luminance contrast ($\ge 4.5:1$).
 
-*See complete comparative audit and benchmarks in [Cockpit HUD vs. workmux Dashboard: Visual Semiotics & Eye-Tracking](cockpit-vs-workmux-visual-ergonomics.md).*
+*See complete comparative audit and benchmarks in [State of the Art Terminal Agent Workflow](../architecture/state-of-the-art-terminal-agent-workflow.md).*
 
 ---
 
