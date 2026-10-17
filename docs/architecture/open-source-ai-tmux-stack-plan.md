@@ -42,20 +42,20 @@ The README and value proposition must lead with the concrete problem solved for 
 
 ## 2. Technical Audit of the Components
 
-### 2.1 `acpd` (Agent Client Protocol Daemon)
-- **Path:** `/home/fecavmi/dev/github/acpd`
-- **Current State:**
+### 2.1 `acpd` / `waymux` (Unified Agent Control Plane & Orchestrator `v0.2.0`)
+- **Path:** `~/dev/github/acpd` (produces both `acpd` and `waymux` binaries from a single crate)
+- **Current State (`v0.2.0`):**
   - Robust core: Axum 0.8, Tokio 1.52, nix 0.29, sd-notify.
+  - Synchronous CLI fast-path (`src/lib.rs`) intercepts client subcommands (`cockpit`, `cockpit-items`, `cockpit-preview`, `cockpit-diff`, `cockpit-help`, `agent-action`, `review-notes`, `window-create`, `window-delete`, `triage`, `hook`, `inject`, `wt`, `init`, `health`) **before** initializing the multi-threaded Tokio runtime (<1.5ms startup overhead).
+  - Native `/proc/<pid>/stat` and `/proc/<pid>/comm` process tree telemetry scanner (`cockpit-items` completes in ~14ms vs ~140ms in Bash/awk).
+  - Native AI agent hooks (`waymux hook tmux`, `waymux hook lazygit`) and bracketed-paste prompt injector (`waymux inject`), replacing Node.js cold-start latency (~45ms -> ~8ms).
+  - Native Git worktree orchestrator (`waymux wt` / `awt` symlink parity) and bootstrapper (`waymux init --tmux|--systemd|--hooks`).
+  - Embedded Waymaker preset (`cockpit-picker.toml`) materialized dynamically to `$XDG_RUNTIME_DIR/waymux/cockpit-picker.toml`.
   - JSON-RPC 2.0 at `POST /rpc` (`agentState/update`, `agentState/list`, `tmux.*`).
-  - 11 unit tests passing (`cargo test`).
+  - **30 unit tests passing** (`cargo test`), 0 Clippy warnings (`cargo clippy --all-targets --all-features -- -D warnings`), ~5.0 MB release binary.
   - Systemd user service unit (`systemd/acpd.service`).
-  - **Token generation is already dynamic:** [`acpd/src/auth.rs`](file:///home/fecavmi/dev/github/acpd/src/auth.rs#L6-L18) correctly checks `$XDG_RUNTIME_DIR/acpd/token`, then `$HOME/.cache/acpd/token`, then `/tmp/acpd-<uid>/token` with `0600` permissions. It contains **no hardcoded paths**.
-  - **Git Remote Status (Resolved):** Commit `2362508` (`ci: add multi-platform release workflow and local dist recipes`) is merged and pushed to `origin/main`. Service `acpd.service` is actively running via user systemd (`/home/fecavmi/dev/github/acpd/target/release/acpd`).
-- **Gaps & Discrepancies (Resolved):**
-  - **Hardcoded Path Fallbacks (Resolved):** Replaced hardcoded `/home/fecavmi` fallback in `src/adapters.rs:526` with dynamic `std::env::var("HOME").ok()?`.
-  - **Nested Double-Debounce Bug & Architecture Cleanup (Resolved):** Completely eliminated the redundant 400ms idle task in `adapters.rs:361-368`, establishing `api.rs` as the single authoritative debounce coordinator at **300ms** (configured in `daemon.rs:42`), slashing idle flip latency from 1,050ms to 300ms while keeping all status adapters synchronized.
-  - **Clippy & Rustfmt Compliance (Resolved):** `cargo fmt --check` and `cargo clippy --all-targets --all-features -- -D warnings` pass cleanly with **0 warnings**.
-  - **Next Release Action:** Repository is ready for tagged release `v0.1.0` to trigger `.github/workflows/release.yml` multi-arch binary builds (Linux musl/gnu, macOS Darwin).
+  - **Token generation is dynamic:** `acpd/src/auth.rs` checks `$XDG_RUNTIME_DIR/acpd/token`, then `$HOME/.cache/acpd/token`, then `/tmp/acpd-<uid>/token` with `0600` permissions.
+  - **Git Remote Status (Resolved):** Tagged `v0.2.0` and pushed to `origin/main`. Service `acpd.service` is actively running via user systemd (`~/.local/bin/acpd` and `~/.local/bin/waymux`).
 
 ### 2.2 `lazygitrs` (`fecavmi` branch)
 - **Path:** `/home/fecavmi/dev/github/lazygitrs/fecavmi`
@@ -158,8 +158,8 @@ The README and value proposition must lead with the concrete problem solved for 
 - **Role:** Session management, project directory discovery, and workspace context switching.
 - **Where Sesh / Waymaker is Used in the Cockpit Stack:**
   1. **`session-picker.sh` (`Prefix + s`):** Invokes `wm session list --icons` (or `sesh list --icons`) and pipes into Waymaker (`wm -o session-picker.toml`), connecting to chosen workspaces via `wm connect "$chosen"`.
-  2. **`lazygitrs` Worktree Controller:** In [`src/gui/controller/worktrees.rs:40`](file:///home/fecavmi/dev/github/lazygitrs/fecavmi/src/gui/controller/worktrees.rs#L40), pressing Enter on a worktree branch natively triggers `std::process::Command::new("sesh").arg("connect").arg(&target_path)`. If `sesh` (or Waymaker's drop-in `sesh` wrapper) is installed, it switches directly into an isolated project session; otherwise, it cleanly falls back to native `tmux new-session / switch-client`.
-  3. **`awt` (Agent Worktree Orchestrator):** Provisions isolated git worktrees mapped to 1 tmux session each via `sesh connect "$target_dir"`, with redirection on deletion via `sesh last` (or `wm last`).
+  2. **`lazygitrs` Worktree Controller:** In `src/gui/controller/worktrees.rs:40`, pressing Enter on a worktree branch natively triggers `std::process::Command::new("sesh").arg("connect").arg(&target_path)`. If `sesh` (or Waymaker's drop-in `sesh` wrapper) is installed, it switches directly into an isolated project session; otherwise, it cleanly falls back to native `tmux new-session / switch-client`.
+  3. **`awt` / `waymux wt` (Agent Worktree Orchestrator):** Provisions isolated git worktrees mapped to 1 tmux session each via `wm connect "$target_dir"`, with redirection on deletion via `wm last`.
   4. **`gh dash`:** Binds key `s` to `sesh connect {{.RepoPath}}`.
 - **Ecosystem Contract:** Session management is **Bundled natively in Waymaker (`wm session` / `wm connect` / `wm last`)**. The standalone `sesh` Go binary and `zoxide` are no longer required; a zero-overhead `sesh` drop-in wrapper is provided by the stack, backed by Waymaker's embedded high-performance `redb` frecency store.
 
@@ -169,7 +169,7 @@ The Cockpit ecosystem classifies all runtime tools into 3 distinct tiers:
 
 | Component / Tool | Role in Cockpit | Classification | Fallback Behavior if Absent |
 | :--- | :--- | :--- | :--- |
-| **`acpd`** | Async state machine & status broker | **Bundled (Tier 1 Engine)** | Pre-compiled static binary in release bundle |
+| **`waymux` / `acpd`** | Unified AI orchestrator, Cockpit HUD, worktrees, hooks & RPC daemon | **Bundled (Tier 1 Engine)** | Pre-compiled static binary in release bundle |
 | **`lazygitrs`** | Git TUI, worktrees & AI review notes | **Bundled (Tier 1 Engine)** | Pre-compiled static binary in release bundle |
 | **`waymaker` (`wm`)** | Fuzzy nav, popups & native session manager | **Bundled (Tier 1 Engine)** | Pre-compiled static binary in release bundle (includes native `sesh` drop-in) |
 | **`tmux` (>= 3.2)** | Multiplexer, popups & state display | **Host Platform Prerequisite** | Hard requirement (the cockpit runs inside Tmux) |

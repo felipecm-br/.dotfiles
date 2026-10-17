@@ -2,6 +2,12 @@
 # cockpit-picker-preview.sh — render contextual agent card and live terminal pane preview
 set -uo pipefail
 
+if [[ -x "$HOME/.local/bin/waymux" ]]; then
+  exec "$HOME/.local/bin/waymux" cockpit-preview "$@"
+elif command -v waymux >/dev/null 2>&1; then
+  exec waymux cockpit-preview "$@"
+fi
+
 session="${1:-}"
 idx="${2:-}"
 pane_id="${3:-}"

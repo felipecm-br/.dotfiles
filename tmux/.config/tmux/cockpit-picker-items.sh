@@ -2,6 +2,12 @@
 # cockpit-picker-items.sh — emit prioritized agent triage, windows, and fleet overview items
 set -uo pipefail
 
+if [[ -x "$HOME/.local/bin/waymux" ]]; then
+  exec "$HOME/.local/bin/waymux" cockpit-items "$@"
+elif command -v waymux >/dev/null 2>&1; then
+  exec waymux cockpit-items "$@"
+fi
+
 # Helper: read a tmux global option
 _tget() { tmux show-option -gqv "$1" 2>/dev/null; }
 

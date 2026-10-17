@@ -2,6 +2,12 @@
 # cockpit-picker.sh — Fleet & Window Cockpit HUD powered by Matchmaker
 # Displays prioritized agent states, waiting age, git branch/churn, and contextual previews.
 
+if [ -x "$HOME/.local/bin/waymux" ]; then
+  exec "$HOME/.local/bin/waymux" cockpit "$@"
+elif command -v waymux >/dev/null 2>&1; then
+  exec waymux cockpit "$@"
+fi
+
 REAL_SCRIPT=$(readlink -f "$0" 2>/dev/null || realpath "$0")
 
 if [ "$1" = "--fullscreen" ]; then

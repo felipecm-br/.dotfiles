@@ -2,6 +2,12 @@
 # agent-action.sh — Guarded agent actions (approval, denial, prompt dispatch) for Cockpit HUD
 set -euo pipefail
 
+if [[ -x "$HOME/.local/bin/waymux" ]]; then
+  exec "$HOME/.local/bin/waymux" agent-action "$@"
+elif command -v waymux >/dev/null 2>&1; then
+  exec waymux agent-action "$@"
+fi
+
 action="${1:-}"
 state="${2:-}"
 pid="${3:-}"

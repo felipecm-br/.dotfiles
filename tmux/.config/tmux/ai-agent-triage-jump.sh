@@ -2,6 +2,10 @@
 # ai-agent-triage-jump.sh - Direct, zero-modal focus jump to next AI agent requiring attention
 # Cycles through panes in question/permission/error/working state across all Tmux sessions.
 
+if command -v waymux >/dev/null 2>&1; then
+  exec waymux triage --jump "$@"
+fi
+
 set -euo pipefail
 
 # Collect all candidate panes requiring attention

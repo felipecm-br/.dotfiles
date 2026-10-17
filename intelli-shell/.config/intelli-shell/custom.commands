@@ -295,6 +295,24 @@ chime-at-breakpoint {{sound_file}}
 # Open AI Fleet & Window Cockpit HUD in Tmux (85% × 75%)
 cockpit
 
+# Launch Waymux native AI Fleet & Window Cockpit HUD
+waymux cockpit
+
+# Generate Waymux Cockpit TSV items with /proc CPU/RAM telemetry
+waymux cockpit-items
+
+# Cycle AI agent notifications in an isolated Tmux popup overlay
+waymux triage --popup
+
+# Jump directly to the next AI agent requiring attention (zero-modal)
+waymux triage --jump
+
+# Manage Git worktrees natively via Waymux (new, go, ls, rm, ship, reap)
+waymux wt {{subcommand}}
+
+# Generate Tmux, systemd, or AI hook integration snippets
+waymux init --tmux
+
 # Execute guarded agent prompt action (approve, deny, prompt)
 agent-action {{action}} {{state}} {{pid}}
 

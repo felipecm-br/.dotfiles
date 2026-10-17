@@ -115,14 +115,22 @@ The `acpd-cli` utility ([`acpd/.local/bin/acpd-cli`](../../acpd/.local/bin/acpd-
      acpd-cli wait %2 --state idle --timeout 120
      ```
 
-### The `acpd` binary itself
+### The `acpd` / `waymux` Unified Binary (`v0.2.0`)
 
-The daemon binary handles these arguments **before** initializing logging, the PID file or the network listener, so they are safe to call at any time (they never start or disturb a running daemon):
+Starting in `v0.2.0`, the crate builds both `acpd` and `waymux` from a single unified Rust library (`src/lib.rs`). All client subcommands are intercepted synchronously **before** initializing logging, the PID file, or the multi-threaded Tokio runtime (<1.5ms startup overhead):
 
-- `acpd --version` / `acpd -V`: Print the version and exit.
-- `acpd --help` / `acpd -h`: Print usage and exit.
-- `acpd health`: `GET /health` against `127.0.0.1:4040`; prints the JSON (`status`, `uptime_secs`) and exits 0, or exits 1 if the daemon is unreachable.
-- `acpd --config <FILE>` (also `-c <FILE>` and `--config=<FILE>`): Start the daemon with a custom `config.toml`.
+- `waymux --version` / `acpd --version` (`-V`): Print the version and exit.
+- `waymux --help` / `acpd --help` (`-h`): Print usage and exit.
+- `waymux health` / `acpd health`: `GET /health` against `127.0.0.1:4040`; prints the JSON (`status`, `uptime_secs`) and exits 0, or exits 1 if the daemon is unreachable.
+- `waymux daemon [--config <FILE>]` (or running `acpd` with no subcommand): Start the async Axum/Tokio control plane daemon.
+- `waymux cockpit`: Launch the Golden-Ratio (`85% × 75%`) AI Fleet & Window Cockpit HUD via Waymaker (`wm`) with an embedded preset and `@SEGMENT_BG`/`@FG`/`@ACCENT_COLOR` theme synchronization.
+- `waymux cockpit-items`: Generate the 12-column TSV rows for Waymaker using native `/proc/<pid>/stat` and `/proc/<pid>/comm` scanning (~14ms).
+- `waymux cockpit-preview <session> <idx> <pane_id> [path]` / `waymux cockpit-diff <path> [pane_id]` / `waymux cockpit-help`: Render live terminal previews, `delta` side-by-side git diffs, and telemetry help cards.
+- `waymux agent-action <approve|deny|prompt> <state> <pid> [pane_id]` & `waymux review-notes <count|list|send> ...`: Execute guarded agent prompt actions and dispatch `.git/info/lines.json` review notes via bracketed paste.
+- `waymux triage --popup` & `waymux triage --jump`: Cycle notifying AI agent panes in an isolated `_popups` overlay or jump directly with return-origin memory.
+- `waymux hook <tmux|lazygit> [event]` & `waymux inject <workspace_dir> <prompt>`: Native sub-10ms AI lifecycle hooks and bracketed-paste prompt injection.
+- `waymux wt <subcommand>` (or invoked via `awt` symlink): Native Git worktree orchestrator (`new`, `go`, `ls`, `rm`, `ship`, `reap`, `sweep`, `pick`).
+- `waymux init <--tmux|--systemd|--hooks>`: Emit portable integration snippets for `.tmux.conf`, user systemd, and agent hooks.
 
 > Running an already-running daemon's binary again with no arguments still attempts to start a second instance (it is stopped by the PID file guard). A rebuilt binary only takes effect in the running service after `systemctl --user restart acpd`, which clears in-memory agent state until each pane's next hook.
 

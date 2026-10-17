@@ -2,6 +2,12 @@
 # cockpit-picker-diff.sh — live git diff view with syntax highlighting for Cockpit HUD layout 2
 set -uo pipefail
 
+if [[ -x "$HOME/.local/bin/waymux" ]]; then
+  exec "$HOME/.local/bin/waymux" cockpit-diff "$@"
+elif command -v waymux >/dev/null 2>&1; then
+  exec waymux cockpit-diff "$@"
+fi
+
 session="${1:-}"
 idx="${2:-}"
 pane_id="${3:-}"

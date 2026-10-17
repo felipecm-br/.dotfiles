@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+if command -v waymux >/dev/null 2>&1; then
+  exec waymux triage --popup "$@"
+fi
+
 SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
 _tmux_style="$HOME/.local/state/omarchy/current/theme/tmux-style.sh"
 [ -f "$_tmux_style" ] || _tmux_style="$SCRIPT_DIR/tmux-style.sh"

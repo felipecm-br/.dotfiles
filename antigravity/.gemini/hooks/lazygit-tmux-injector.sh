@@ -1,5 +1,9 @@
 #!/bin/bash
 
+if command -v waymux >/dev/null 2>&1; then
+  exec waymux inject "$@"
+fi
+
 echo "$@" >> /tmp/tmux-injector.log
 WORKSPACE_DIR="$1"
 PROMPT="$2"

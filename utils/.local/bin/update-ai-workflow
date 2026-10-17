@@ -788,12 +788,17 @@ update_crush() {
 }
 
 update_acpd() {
-  echo -e "${C_BLUE}${ICON_INFO}${C_RESET} Building and upgrading ${C_BOLD}ACPD (Agent Client Protocol Daemon)${C_RESET} via cargo..."
+  echo -e "${C_BLUE}${ICON_INFO}${C_RESET} Building and upgrading ${C_BOLD}ACPD & Waymux (Unified Orchestrator)${C_RESET} via cargo..."
   if command -v cargo &>/dev/null; then
     if HOME="$TARGET_HOME" cargo install --force --git https://github.com/felipecm-br/acpd acpd; then
       mkdir -p "$TARGET_HOME/.local/bin"
       ln -sf "$TARGET_HOME/.cargo/bin/acpd" "$TARGET_HOME/.local/bin/acpd"
-      echo -e "  ${C_GREEN}${ICON_OK}${C_RESET} ACPD binary updated at ${C_BOLD}~/.local/bin/acpd${C_RESET}"
+      if [[ -x "$TARGET_HOME/.cargo/bin/waymux" ]]; then
+        ln -sf "$TARGET_HOME/.cargo/bin/waymux" "$TARGET_HOME/.local/bin/waymux"
+      else
+        ln -sf "$TARGET_HOME/.cargo/bin/acpd" "$TARGET_HOME/.local/bin/waymux"
+      fi
+      echo -e "  ${C_GREEN}${ICON_OK}${C_RESET} ACPD & Waymux binaries updated at ${C_BOLD}~/.local/bin/{acpd,waymux}${C_RESET}"
 
       echo -e "${C_BLUE}${ICON_INFO}${C_RESET} Restarting ${C_BOLD}acpd.service${C_RESET} systemd daemon..."
       systemctl --user restart acpd 2>/dev/null || true

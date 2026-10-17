@@ -2,6 +2,12 @@
 # cockpit-review-notes.sh — Bridge between Lazygitrs review comments (.lines.json) and AI agents in Cockpit HUD
 set -euo pipefail
 
+if [[ -x "$HOME/.local/bin/waymux" ]]; then
+  exec "$HOME/.local/bin/waymux" review-notes "$@"
+elif command -v waymux >/dev/null 2>&1; then
+  exec waymux review-notes "$@"
+fi
+
 cmd="${1:-}"
 ppath="${2:-}"
 

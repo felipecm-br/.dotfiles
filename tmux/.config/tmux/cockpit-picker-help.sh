@@ -2,6 +2,12 @@
 # cockpit-picker-help.sh — Clean borderless keybindings cheat-sheet for Cockpit HUD preview pane.
 set -euo pipefail
 
+if [[ -x "$HOME/.local/bin/waymux" ]]; then
+  exec "$HOME/.local/bin/waymux" cockpit-help "$@"
+elif command -v waymux >/dev/null 2>&1; then
+  exec waymux cockpit-help "$@"
+fi
+
 _colors_toml="$HOME/.local/state/omarchy/current/theme/colors.toml"
 _color_yellow=$(grep '^yellow' "$_colors_toml" 2>/dev/null | sed 's/.*= *"\(.*\)"/\1/' || echo "#dbbc7f")
 _color_red=$(grep '^red ' "$_colors_toml" 2>/dev/null | sed 's/.*= *"\(.*\)"/\1/' || echo "#e67e80")
