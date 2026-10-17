@@ -68,6 +68,10 @@ FLOW_LOG="$SCRIPT_DIR/flow-log.sh"
 
 [ -x "$FLOW_LOG" ] && "$FLOW_LOG" review_start "$PROJECT_DIR" >/dev/null 2>&1 || true
 
+ORIGIN_SESSION=$(tmux display-message -p '#{session_name}' 2>/dev/null || echo "")
+ORIGIN_WINDOW=$(tmux display-message -p '#{window_index}' 2>/dev/null || echo "")
+ORIGIN_PANE=$(tmux display-message -p '#{pane_id}' 2>/dev/null || echo "")
+
 tmux display-popup \
   -S "fg=$GIT_POPUP_COLOR" \
   -s "fg=${TMUX_POPUP_TEXT_COLOR:-default}" \
@@ -76,7 +80,7 @@ tmux display-popup \
   -d "$PROJECT_DIR" \
   -E \
   -w 90% -h 88% \
-  "$LZG_CMD"
+  "TMUX_ORIGIN_SESSION='$ORIGIN_SESSION' TMUX_ORIGIN_PANE='$ORIGIN_PANE' TMUX_ORIGIN_WINDOW='$ORIGIN_WINDOW' $LZG_CMD"
 rc=$?
 
 [ -x "$FLOW_LOG" ] && "$FLOW_LOG" review_end "$PROJECT_DIR" >/dev/null 2>&1 || true
