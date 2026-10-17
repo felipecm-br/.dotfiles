@@ -45,6 +45,7 @@ enabled = false
 show = false
 
 [footer]
+content = " {cyan,bold:Enter} {darkgray:Jump} {darkgray:│} {cyan,bold:Tab} {darkgray:Cycle} {darkgray:│} {cyan,bold:C-h/l} {darkgray:Dir} {darkgray:│} {cyan,bold:C-u} {darkgray:Ancestors} {darkgray:│} {cyan,bold:*} {darkgray:Bookmark} {darkgray:│} {cyan,bold:C-e} {darkgray:Nvim} {darkgray:│} {cyan,bold:C-p} {darkgray:Preview} {darkgray:│} {cyan,bold:y/p} {darkgray:FM} {darkgray:│} {cyan,bold:Esc} {darkgray:Exit}"
 row_connection = "Full"
 separator = "light"
 match_indent = false
