@@ -59,8 +59,7 @@ printf '    %b[R]%b      Reap Agents       Garbage-collect stale agents\n\n' "$C
 printf '  %b󰓩 Git & Pull Requests%b\n' "$C_BLUE$C_BOLD" "$C_RESET"
 printf '    %b[o]%b      Open PR           Open GitHub pull request in browser\n' "$C_BLUE$C_BOLD" "$C_RESET"
 printf '    %b[O]%b      Open PR Checks    Open PR CI status checks in browser\n' "$C_BLUE$C_BOLD" "$C_RESET"
-printf '    %b[v]%b      Diff View         Toggle side-by-side Git Diff\n' "$C_CYAN$C_BOLD" "$C_RESET"
-printf '    %b[g]%b      Git Cockpit       Toggle Lazygitrs (Dual-Diff, g returns)\n' "$C_MAGENTA$C_BOLD" "$C_RESET"
+printf '    %b[g]%b      Git Cockpit       Toggle Lazygitrs (Dual-Diff, Esc returns)\n' "$C_MAGENTA$C_BOLD" "$C_RESET"
 printf '    %b[p]%b      Patch Mode        Turbo Hunk Staging in Lazygitrs\n\n' "$C_MAGENTA$C_BOLD" "$C_RESET"
 
 printf '  %b󰌌 Navigation & Windows%b\n' "$C_CYAN$C_BOLD" "$C_RESET"
@@ -75,4 +74,4 @@ printf '    %b[/]%b      Filter            Enter fuzzy query filter mode\n' "$C_
 printf '    %b[Esc]%b    Exit              Dismiss Cockpit modal\n\n' "$C_BLUE$C_BOLD" "$C_RESET"
 
 printf '  %b────────────────────────────────────────────────────────────%b\n' "$C_DIM" "$C_RESET"
-printf '  %b?%b %bHUD help%b   %b│%b   %bv%b %bDiff%b   %b│%b   %bg%b %bGit%b   %b│%b   %bp%b %bPatch%b\n' "$C_CYAN$C_BOLD" "$C_RESET" "$C_DIM" "$C_RESET" "$C_DIM" "$C_RESET" "$C_CYAN$C_BOLD" "$C_RESET" "$C_DIM" "$C_RESET" "$C_DIM" "$C_RESET" "$C_CYAN$C_BOLD" "$C_RESET" "$C_DIM" "$C_RESET" "$C_DIM" "$C_RESET" "$C_CYAN$C_BOLD" "$C_RESET" "$C_DIM" "$C_RESET"
+printf '  %b?%b %bHUD help%b   %b│%b   %bg%b %bGit%b   %b│%b   %bp%b %bPatch%b\n' "$C_CYAN$C_BOLD" "$C_RESET" "$C_DIM" "$C_RESET" "$C_DIM" "$C_RESET" "$C_CYAN$C_BOLD" "$C_RESET" "$C_DIM" "$C_RESET" "$C_DIM" "$C_RESET" "$C_CYAN$C_BOLD" "$C_RESET" "$C_DIM" "$C_RESET"

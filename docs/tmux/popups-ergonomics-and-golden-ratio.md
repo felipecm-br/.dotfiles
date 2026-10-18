@@ -149,18 +149,17 @@ The Window Picker (`prefix + s` / [`window-picker.sh`](../../tmux/.config/tmux/w
 7. **Leftmost Telemetry Gutter with Adjacent Index Dot (`0•` vs `1·`)**:
    Process telemetry icons (`󰑮` working spinner, `󱜻` waiting for input, `󰨄` error, `󱥂` idle) are anchored directly to the leftmost column ($X=1$). This eliminates horizontal scanning jitter across variable window name widths, achieving preattentive visual detection in $<15\text{ ms}$. The origin window (the active Tmux window where the modal was invoked) is cleanly encoded via an adjacent bright cyan bullet directly on the window index (`0•`), while non-active windows feature a dimmed middle dot (`1·`, `2·`), maintaining rhythmic typographic alignment across all items without consuming a separate marker column.
 
-8. **Cockpit Tri-Layout Dynamic Preview Switcher (`SwitchPreview(n)`)**:
-   Waymaker supports multiple stacked preview layouts with instant sub-1ms switching via `SwitchPreview(n)`. The Cockpit HUD leverages this to deliver a seamless tri-modal side panel without nested subshells or process restarts:
-   - **Layout 0: Live Terminal & Context Card** ([`cockpit-picker-preview.sh`](../../tmux/.config/tmux/cockpit-picker-preview.sh)): Real-time pane scrollback with bottom tailing, agent status card, and GitHub PR / CI badges.
+8. **Cockpit Dual-Layout Dynamic Preview Switcher (`SwitchPreview(n)`) & In-Place Lazygitrs (`g`)**:
+   Waymaker supports stacked preview layouts with instant sub-1ms switching via `SwitchPreview(n)`. The Cockpit HUD keeps the 60% right panel focused on pure live terminal scrollback and telemetry, while delegating full-width interactive Git diffing/hunk staging to Lazygitrs (`g`, returning via `Esc`):
+   - **Layout 0: Live Terminal Stream** ([`cockpit-picker-preview.sh`](../../tmux/.config/tmux/cockpit-picker-preview.sh)): Real-time pane scrollback with bottom tailing (`scroll.tail = true`), zero redundant metadata cards, and bottom-anchored pending Lazygitrs review notes.
    - **Layout 1: Deep Work Telemetry & Keybindings** ([`cockpit-picker-help.sh`](../../tmux/.config/tmux/cockpit-picker-help.sh)): Triggered via `?`, renders hourly deep work heatmap, focus metrics, and keyboard cheat sheet.
-   - **Layout 2: Live Git Diff View (Side-by-Side)** ([`cockpit-picker-diff.sh`](../../tmux/.config/tmux/cockpit-picker-diff.sh)): Triggered via `v` (`SwitchPreview(2)`), renders the active agent/worktree's live uncommitted changes, untracked files, churn statistics (`insertions(+)` / `deletions(-)`), and side-by-side diff with syntax highlighting via `delta --side-by-side` (or `bat`). Pressing `v` again toggles instantly back to Layout 0. Window deletion remains firmly anchored to `d` / `x`.
 
 ### 3.2 The Hybrid Golden-Grid Architecture (Left 40% Columnar Table Precision)
 
 While standard horizontal splits (e.g. `workmux dashboard`'s 50/50 Top/Bottom split) waste ~35% of the viewport on a central **"Dead Void"** (empty rows when managing $<5$ agents) and vertically crush terminal/code streams into ~14 lines, Cockpit enforces the **Hybrid Golden-Grid Architecture**:
 
 1. **Macro-Spatial Partitioning (40/60 Left-Right $\phi \approx 1.618$ Split):**
-   - Allocates 40% width to candidate selection and 60% width to live inspection, while preserving **100% of the popup's vertical height (~42–48 rows)** for scrollback streams and `delta --side-by-side` diffs.
+   - Allocates 40% width to candidate selection and 60% width to live inspection, while preserving **100% of the popup's vertical height (~42–48 rows)** for scrollback streams.
    - Capitalizes on **saccadic horizontal superiority** (Rayner 1998, Yarbus 1967): horizontal eye movements rely on a single antagonistic muscle pair (medial/lateral rectus) with straight ballistic trajectories and lower fatigue compared to vertical saccades across empty voids.
 2. **Fixed-Width Columnar Candidate Alignment ($O(1)$ Vertical Scanning):**
    - Eliminates ragged, variable-length inline string concatenation ([`cockpit-picker-items.sh`](../../tmux/.config/tmux/cockpit-picker-items.sh)), which forces corrective horizontal micro-saccades ($\approx +140\text{–}210\text{ ms/row}$).
@@ -187,7 +186,7 @@ Every interactive popup, picker, and confirmation dialog has been harmonized und
 
 | Scope | Preset / Script | Uniform Footer Contract |
 | :--- | :--- | :--- |
-| **Cockpit HUD** | [`cockpit-picker.toml`](../../tmux/.config/tmux/cockpit-picker.toml) | `{cyan,bold:Enter} Jump │ y/n Ack │ r Review │ i Input │ v Diff │ g Git │ a Agents │ Tab Worktrees │ ? Help │ Esc Exit` |
+| **Cockpit HUD** | [`cockpit-picker.toml`](../../tmux/.config/tmux/cockpit-picker.toml) | `{cyan,bold:Enter} Jump │ y/n Ack │ r Review │ i Input │ g Git │ a Agents │ Tab Worktrees │ ? Help │ Esc Exit` |
 | **AWT Worktrees** | [`awt.toml`](../../awt/.config/waymaker/presets/awt.toml) | `{cyan,bold:Enter} Connect │ Tab Cockpit │ c New │ S Ship │ m Merge │ R Rebase │ P PR │ d Delete │ p Preview │ Esc Exit` |
 | **AWT PR Review** | [`awt-pr.toml`](../../awt/.config/waymaker/presets/awt-pr.toml) | `{cyan,bold:Enter} Checkout │ Tab Cycle Tab │ C-e Chrome │ C-d Diff │ p Preview │ Esc Exit` |
 | **AWT Sub-Wizards** | `awt-prompt`, `awt-ai`, `awt-base`, `awt-type` | `{cyan,bold:Enter} Confirm/Select │ Esc Back/Cancel` |
@@ -287,7 +286,7 @@ To prevent accidental dismissal while inspecting a diff or composing a commit me
 ## 🔗 Related Repository Files
 * [`tmux/.config/tmux/cockpit-picker.sh`](../../tmux/.config/tmux/cockpit-picker.sh): AI Fleet Cockpit & Window Manager with `󱂬` badge.
 * [`tmux/.config/tmux/cockpit-picker.toml`](../../tmux/.config/tmux/cockpit-picker.toml): Matchmaker preset with contextual agent triage, bidirectional Lazygitrs toggle (`g`), and window management.
-* [`tmux/.config/tmux/cockpit-picker-preview.sh`](../../tmux/.config/tmux/cockpit-picker-preview.sh): Layout 0 live terminal snapshot and contextual agent metadata card.
+* [`tmux/.config/tmux/cockpit-picker-preview.sh`](../../tmux/.config/tmux/cockpit-picker-preview.sh): Layout 0 bottom-anchored live terminal snapshot and pending review notes footer.
 * [`tmux/.config/tmux/cockpit-picker-help.sh`](../../tmux/.config/tmux/cockpit-picker-help.sh): Layout 1 telemetry heatmap and keybindings HUD.
 * [`tmux/.config/tmux/cockpit-picker-diff.sh`](../../tmux/.config/tmux/cockpit-picker-diff.sh): Layout 2 live git diff inspector with syntax highlighting and churn stats.
 * [`tmux/.config/tmux/window-picker.sh`](../../tmux/.config/tmux/window-picker.sh): Golden ratio window picker with `󱂬` badge.

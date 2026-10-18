@@ -89,7 +89,7 @@ keybinding:
     mainPanelFull: ""
     resetSidePanel: ""
     toggleWorkingTreeAndHead: <c-g>
-    returnToCockpit: g
+    returnToCockpit: ""
   status:
     checkForUpdate: u
     recentRepos: <enter>

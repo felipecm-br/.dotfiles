@@ -68,7 +68,7 @@ prompt = " "
 show = true
 
 [footer]
-content = " {cyan,bold:Enter} {darkgray:Jump} {darkgray:│} {cyan,bold:y/n} {darkgray:Ack} {darkgray:│} {cyan,bold:r} {darkgray:Review} {darkgray:│} {cyan,bold:i} {darkgray:Input} {darkgray:│} {cyan,bold:v} {darkgray:Diff} {darkgray:│} {cyan,bold:g} {darkgray:Git} {darkgray:│} {cyan,bold:a} {darkgray:Agents} {darkgray:│} {cyan,bold:Tab} {darkgray:Worktrees} {darkgray:│} {cyan,bold:?} {darkgray:Help} {darkgray:│} {cyan,bold:Esc} {darkgray:Exit}"
+content = " {cyan,bold:Enter} {darkgray:Jump} {darkgray:│} {cyan,bold:y/n} {darkgray:Ack} {darkgray:│} {cyan,bold:r} {darkgray:Review} {darkgray:│} {cyan,bold:i} {darkgray:Input} {darkgray:│} {cyan,bold:g} {darkgray:Git} {darkgray:│} {cyan,bold:a} {darkgray:Agents} {darkgray:│} {cyan,bold:Tab} {darkgray:Worktrees} {darkgray:│} {cyan,bold:?} {darkgray:Help} {darkgray:│} {cyan,bold:Esc} {darkgray:Exit}"
 row_connection = "Full"
 match_indent = false
 separator = "light"
@@ -122,8 +122,6 @@ hints = false
 "Y"             = ["ExecuteAsync($HOME/.config/tmux/agent-action.sh approve '{=state}' '{=pid}')", "Reload($HOME/.config/tmux/cockpit-picker-items.sh)"]
 "n"             = ["ExecuteAsync($HOME/.config/tmux/agent-action.sh deny '{=state}' '{=pid}')", "Reload($HOME/.config/tmux/cockpit-picker-items.sh)"]
 "N"             = ["ExecuteAsync($HOME/.config/tmux/agent-action.sh deny '{=state}' '{=pid}')", "Reload($HOME/.config/tmux/cockpit-picker-items.sh)"]
-"v"             = "SwitchPreview(2)"
-"V"             = "SwitchPreview(2)"
 "d"             = ["ExecuteAsync(printf '%s\n' '{=}' | $HOME/.config/tmux/window-picker-delete.sh; sleep 0.05)", "Reload($HOME/.config/tmux/cockpit-picker-items.sh)"]
 "D"             = ["ExecuteAsync(printf '%s\n' '{=}' | $HOME/.config/tmux/window-picker-delete.sh; sleep 0.05)", "Reload($HOME/.config/tmux/cockpit-picker-items.sh)"]
 "ctrl-d"        = ["ExecuteAsync(printf '%s\n' '{=}' | $HOME/.config/tmux/window-picker-delete.sh; sleep 0.05)", "Reload($HOME/.config/tmux/cockpit-picker-items.sh)"]
@@ -171,11 +169,6 @@ command = '$HOME/.config/tmux/cockpit-picker-help.sh'
 side = "right"
 percentage = 60
 
-[[preview.layout]]
-command = '$HOME/.config/tmux/cockpit-picker-diff.sh "{=session}" "{=idx}" "{=pid}" "{=path}" "{=state}" "{=agent}" "{=age}" "{=branch}" "{=sync}"'
-side = "right"
-percentage = 60
-
 [binds]
 Start    = [
     "ToggleColumn(title)", "ToggleColumn(name)", "ToggleColumn(session)",
@@ -198,7 +191,6 @@ Start    = [
 "ctrl-g"        = ["Print(__LAZYGIT__{=})", "Quit"]
 "ctrl-p"        = ["Print(__PATCH_MODE__{=})", "Quit"]
 "ctrl-t"        = ["Print(__CREATE_WINDOW__{=})", "Quit"]
-"ctrl-v"        = "SwitchPreview(2)"
 "ctrl-d"        = ["ExecuteAsync(printf '%s\n' '{=}' | $HOME/.config/tmux/window-picker-delete.sh; sleep 0.05)", "Reload($HOME/.config/tmux/cockpit-picker-items.sh)"]
 "ctrl-x"        = ["ExecuteAsync(printf '%s\n' '{=}' | $HOME/.config/tmux/window-picker-delete.sh; sleep 0.05)", "Reload($HOME/.config/tmux/cockpit-picker-items.sh)"]
 "ctrl-r"        = "Reload($HOME/.config/tmux/cockpit-picker-items.sh)"
