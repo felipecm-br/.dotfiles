@@ -5,17 +5,22 @@
 set -euo pipefail
 
 ACPD_URL="${ACPD_URL:-http://127.0.0.1:4040}"
-TOKEN_PATH="/run/user/${UID:-1000}/acpd/token"
-FALLBACK_TOKEN_PATH="$HOME/.cache/acpd/token"
+RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/${UID:-1000}}"
 
+# Token lookup: native waymux paths first, legacy acpd paths (mirrored by the daemon) as fallback.
 get_token() {
-  if [[ -f "$TOKEN_PATH" ]]; then
-    cat "$TOKEN_PATH"
-  elif [[ -f "$FALLBACK_TOKEN_PATH" ]]; then
-    cat "$FALLBACK_TOKEN_PATH"
-  else
-    echo ""
-  fi
+  local p
+  for p in \
+    "$RUNTIME_DIR/waymux/token" \
+    "$HOME/.cache/waymux/token" \
+    "$RUNTIME_DIR/acpd/token" \
+    "$HOME/.cache/acpd/token"; do
+    if [[ -f "$p" ]]; then
+      cat "$p"
+      return 0
+    fi
+  done
+  echo ""
 }
 
 rpc_call() {
@@ -26,7 +31,7 @@ rpc_call() {
   token=$(get_token)
 
   if [[ -z "$token" ]]; then
-    echo "Error: ACPD token not found. Is acpd running? (systemctl --user status acpd)" >&2
+    echo "Error: ACPD token not found. Is the waymux daemon running? (systemctl --user status waymux)" >&2
     return 1
   fi
 
@@ -360,7 +365,7 @@ COMMANDS:
 
 ENVIRONMENT:
   ACPD_URL               ACPD HTTP URL (default: http://127.0.0.1:4040)
-  UID                    User ID for token lookup (/run/user/$UID/acpd/token)
+  UID                    User ID for token lookup ($XDG_RUNTIME_DIR/waymux/token, legacy: .../acpd/token)
 
 EXAMPLES:
   # Check system & agent states

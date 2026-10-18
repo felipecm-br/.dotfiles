@@ -39,10 +39,10 @@ SOUND_PATH="${SELECTED_LINE#*$'\t'}"
 [[ -z "$SOUND_PATH" ]] && SOUND_PATH="$SELECTED_LINE"
 
 if [[ "$SOUND_PATH" == "none" || "$SOUND_PATH" == "off" || "$SOUND_PATH" == "disabled" ]]; then
-  mkdir -p "$HOME/.config/omarchy/sounds" "$HOME/.config/acpd/sounds"
+  mkdir -p "$HOME/.config/omarchy/sounds" "$HOME/.config/waymux/sounds"
   echo "none" > "$HOME/.config/omarchy/sounds/ai-response.sound"
-  echo "none" > "$HOME/.config/acpd/sounds/response.sound"
-  rm -f "$HOME/.config/omarchy/sounds/ai-response.wav" "$HOME/.config/acpd/sounds/ai-response.wav"
+  echo "none" > "$HOME/.config/waymux/sounds/response.sound"
+  rm -f "$HOME/.config/omarchy/sounds/ai-response.wav" "$HOME/.config/waymux/sounds/ai-response.wav"
 
   if command -v omarchy-notification-send >/dev/null 2>&1; then
     omarchy-notification-send "AI Sounds Muted" "Sound notifications have been disabled" -g "󰝟" -u normal 2>/dev/null || true
@@ -56,13 +56,13 @@ fi
 
 if [[ -f "$SOUND_PATH" ]]; then
   # 1. Update persistent state pointers
-  mkdir -p "$HOME/.config/omarchy/sounds" "$HOME/.config/acpd/sounds"
+  mkdir -p "$HOME/.config/omarchy/sounds" "$HOME/.config/waymux/sounds"
   echo "$SOUND_PATH" > "$HOME/.config/omarchy/sounds/ai-response.sound"
-  echo "$SOUND_PATH" > "$HOME/.config/acpd/sounds/response.sound"
+  echo "$SOUND_PATH" > "$HOME/.config/waymux/sounds/response.sound"
 
   # Also create symlink for direct consumers
   ln -sf "$SOUND_PATH" "$HOME/.config/omarchy/sounds/ai-response.wav"
-  ln -sf "$SOUND_PATH" "$HOME/.config/acpd/sounds/ai-response.wav"
+  ln -sf "$SOUND_PATH" "$HOME/.config/waymux/sounds/ai-response.wav"
 
   # 2. Extract clean English title
   FILENAME="$(basename "$SOUND_PATH")"

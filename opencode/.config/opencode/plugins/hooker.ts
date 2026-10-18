@@ -9,6 +9,10 @@ function getAcpdToken(): string | null {
   const homeDir = process.env.HOME || (process.env.USER ? `/home/${process.env.USER}` : tmpdir())
   const xdgRuntime = process.env.XDG_RUNTIME_DIR || `/run/user/${uid}`
   const candidates = [
+    join(xdgRuntime, "waymux", "token"),
+    join(tmpdir(), `waymux-${uid}`, "token"),
+    join(homeDir, ".cache", "waymux", "token"),
+    // Legacy (pre-waymux) locations, still mirrored by the daemon for old clients
     join(xdgRuntime, "acpd", "token"),
     join(tmpdir(), `acpd-${uid}`, "token"),
     join(homeDir, ".cache", "acpd", "token"),

@@ -53,8 +53,9 @@ done
 now_ms=$(date +%s000)
 threshold_ms=$(( max_hours * 3600 * 1000 ))
 
-# Query ACPD for registered agent states
-token_file="${XDG_RUNTIME_DIR:-/run/user/$UID}/acpd/token"
+# Query the waymux daemon for registered agent states (legacy acpd token path as fallback)
+token_file="${XDG_RUNTIME_DIR:-/run/user/$UID}/waymux/token"
+[[ -f "$token_file" ]] || token_file="${XDG_RUNTIME_DIR:-/run/user/$UID}/acpd/token"
 acpd_json=""
 if [[ -f "$token_file" ]]; then
   token="$(cat "$token_file" 2>/dev/null || true)"

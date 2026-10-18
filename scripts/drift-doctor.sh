@@ -20,8 +20,8 @@ else
   warn "lazygitrs not found in PATH"
 fi
 
-# 2. Binary Drift Check for waymaker (wm) and acpd
-for bin in wm acpd; do
+# 2. Binary Drift Check for waymaker (wm) and waymux
+for bin in wm waymux; do
   declare -A bin_seen=()
   bin_count=0
   for p in "$HOME/.local/bin/$bin" "$HOME/.cargo/bin/$bin" "$(command -v "$bin" 2>/dev/null)"; do
@@ -57,8 +57,9 @@ else
   warn "tmux: history-limit ($hl) is below recommended 50000 lines (risk of agent log truncation)"
 fi
 
-# 5. acpd Daemon Health & Token Check
-token_path="${XDG_RUNTIME_DIR:-/run/user/$UID}/acpd/token"
+# 5. Waymux Daemon Health & Token Check (native waymux token path, legacy acpd path as fallback)
+token_path="${XDG_RUNTIME_DIR:-/run/user/$UID}/waymux/token"
+[ -f "$token_path" ] || token_path="${XDG_RUNTIME_DIR:-/run/user/$UID}/acpd/token"
 if [ -f "$token_path" ]; then
   token="$(cat "$token_path" 2>/dev/null || true)"
   if [ -n "$token" ]; then
@@ -67,15 +68,15 @@ if [ -f "$token_path" ]; then
       -H "Content-Type: application/json" \
       -d '{"jsonrpc":"2.0","method":"agentState/list","id":1}' 2>/dev/null || echo "000")
     if [ "$code" = "200" ]; then
-      ok "acpd: RPC online and authorized (HTTP 200, port 4040)"
+      ok "waymux: RPC online and authorized (HTTP 200, port 4040)"
     else
-      warn "acpd: RPC returned HTTP $code (daemon down or token mismatch)"
+      warn "waymux: RPC returned HTTP $code (daemon down or token mismatch)"
     fi
   else
-    warn "acpd: token file is empty ($token_path)"
+    warn "waymux: token file is empty ($token_path)"
   fi
 else
-  warn "acpd: token file not found at $token_path"
+  warn "waymux: token file not found at $token_path"
 fi
 
 printf '\n=== [Flow Doctor] Audit Complete (exit code: %d) ===\n' "$rc"

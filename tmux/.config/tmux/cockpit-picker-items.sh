@@ -95,7 +95,8 @@ for arg in "$@"; do
 done
 
 # Step 1: Query ACPD once and extract pane map in a single jq pass
-token_file="${XDG_RUNTIME_DIR:-/run/user/$UID}/acpd/token"
+token_file="${XDG_RUNTIME_DIR:-/run/user/$UID}/waymux/token"
+[ -f "$token_file" ] || token_file="${XDG_RUNTIME_DIR:-/run/user/$UID}/acpd/token"  # legacy fallback
 declare -A acpd_st=()
 declare -A acpd_ts=()
 

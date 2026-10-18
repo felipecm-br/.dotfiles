@@ -67,7 +67,7 @@ install_packages \
     obs-studio \
     tailscale \
     mosh \
-    acpd
+    waymux
 
 install_plugins \
     zsh-plugins \

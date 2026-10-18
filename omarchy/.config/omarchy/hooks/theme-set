@@ -11,14 +11,15 @@ if tmux info &>/dev/null; then
   tmux refresh-client 2>/dev/null || true
 fi
 
-# Sync acpd.toml directly to ~/.config/acpd/config.toml and reload acpd
-if [[ -f "$CURRENT_THEME_DIR/acpd.toml" ]]; then
-  mkdir -p "$HOME/.config/acpd"
-  cp "$CURRENT_THEME_DIR/acpd.toml" "$HOME/.config/acpd/config.toml"
-  if systemctl --user is-active --quiet acpd 2>/dev/null; then
-    systemctl --user restart acpd 2>/dev/null || true
+# Sync waymux.toml directly to ~/.config/waymux/config.toml and reload waymux
+# (waymux reads ~/.config/waymux/config.toml first; legacy ~/.config/acpd/config.toml is only a fallback)
+if [[ -f "$CURRENT_THEME_DIR/waymux.toml" ]]; then
+  mkdir -p "$HOME/.config/waymux"
+  cp "$CURRENT_THEME_DIR/waymux.toml" "$HOME/.config/waymux/config.toml"
+  if systemctl --user is-active --quiet waymux.service 2>/dev/null; then
+    systemctl --user restart waymux.service 2>/dev/null || true
   else
-    pkill -HUP acpd 2>/dev/null || true
+    pkill -HUP -x waymux 2>/dev/null || true
   fi
 fi
 

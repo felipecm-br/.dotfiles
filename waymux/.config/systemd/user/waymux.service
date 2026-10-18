@@ -18,7 +18,9 @@ LimitNOFILE=65536
 MemoryMax=512M
 
 # Runtime directory for PID file, presets, and tokens
-RuntimeDirectory=waymux acpd
+# The auth token lives in $XDG_RUNTIME_DIR/waymux/token. waymux also mirrors it to the legacy
+# $XDG_RUNTIME_DIR/acpd/token on a best-effort basis for old clients (that directory is not managed by systemd).
+RuntimeDirectory=waymux
 
 # Logging
 StandardOutput=journal

@@ -4,7 +4,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DOTFILES_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
-AGENT_NOTE_SCRIPT="$DOTFILES_DIR/acpd/.local/bin/agent-note.sh"
+AGENT_NOTE_SCRIPT="$DOTFILES_DIR/waymux/.local/bin/agent-note.sh"
 LAZYGITRS_POPUP="$DOTFILES_DIR/tmux/.config/tmux/lazygitrs-popup.sh"
 
 echo "=== Running Lazygitrs Review Notes Bridge Tests ==="

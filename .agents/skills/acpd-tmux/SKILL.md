@@ -61,7 +61,7 @@ curl -X POST http://127.0.0.1:4040/rpc \
 ```
 
 ```bash
-TOKEN=$(cat /run/user/$UID/acpd/token 2>/dev/null || cat /run/user/1001/acpd/token)
+TOKEN=$(cat /run/user/$UID/waymux/token 2>/dev/null || cat /run/user/$UID/acpd/token)
 curl -X POST http://127.0.0.1:4040/rpc \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
@@ -79,7 +79,7 @@ curl -X POST http://127.0.0.1:4040/rpc \
 To display a temporary banner message on the Tmux status bar:
 
 ```bash
-TOKEN=$(cat /run/user/$UID/acpd/token 2>/dev/null || cat /run/user/1001/acpd/token)
+TOKEN=$(cat /run/user/$UID/waymux/token 2>/dev/null || cat /run/user/$UID/acpd/token)
 curl -X POST http://127.0.0.1:4040/rpc \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
@@ -97,7 +97,7 @@ curl -X POST http://127.0.0.1:4040/rpc \
 To trigger a bell alert on a target pane:
 
 ```bash
-TOKEN=$(cat /run/user/$UID/acpd/token 2>/dev/null || cat /run/user/1001/acpd/token)
+TOKEN=$(cat /run/user/$UID/waymux/token 2>/dev/null || cat /run/user/$UID/acpd/token)
 curl -X POST http://127.0.0.1:4040/rpc \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
@@ -115,7 +115,7 @@ curl -X POST http://127.0.0.1:4040/rpc \
 To reorganize panes into a preset layout (e.g. `tiled`, `even-horizontal`, `even-vertical`, `main-horizontal`):
 
 ```bash
-TOKEN=$(cat /run/user/$UID/acpd/token 2>/dev/null || cat /run/user/1001/acpd/token)
+TOKEN=$(cat /run/user/$UID/waymux/token 2>/dev/null || cat /run/user/$UID/acpd/token)
 curl -X POST http://127.0.0.1:4040/rpc \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
@@ -134,7 +134,7 @@ curl -X POST http://127.0.0.1:4040/rpc \
 When starting a dev server while keeping prompt free:
 
 ```bash
-TOKEN=$(cat /run/user/$UID/acpd/token 2>/dev/null || cat /run/user/1001/acpd/token)
+TOKEN=$(cat /run/user/$UID/waymux/token 2>/dev/null || cat /run/user/$UID/acpd/token)
 curl -X POST http://127.0.0.1:4040/rpc \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
@@ -153,7 +153,7 @@ curl -X POST http://127.0.0.1:4040/rpc \
 To inject commands into a target pane:
 
 ```bash
-TOKEN=$(cat /run/user/$UID/acpd/token 2>/dev/null || cat /run/user/1001/acpd/token)
+TOKEN=$(cat /run/user/$UID/waymux/token 2>/dev/null || cat /run/user/$UID/acpd/token)
 curl -X POST http://127.0.0.1:4040/rpc \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
@@ -170,5 +170,5 @@ curl -X POST http://127.0.0.1:4040/rpc \
 
 ## Important Notes
 - The daemon always runs on `http://127.0.0.1:4040/rpc`.
-- Local requests require the Bearer token stored in `/run/user/$UID/acpd/token`.
+- Local requests require the Bearer token stored in `/run/user/$UID/waymux/token` (legacy mirror: `/run/user/$UID/acpd/token`).
 - Always prefer using `curl` to interact with ACPD over raw `tmux` shell calls for consistent IPC authorization and state synchronization.

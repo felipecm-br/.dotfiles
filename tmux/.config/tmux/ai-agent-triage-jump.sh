@@ -13,7 +13,7 @@ notifying_panes=()
 
 # 1. Primary: Query acpd daemon RPC (http://127.0.0.1:4040/rpc) for real-time agent states
 acpd_token=""
-for token_path in "/run/user/$UID/acpd/token" "/run/user/$(id -u 2>/dev/null)/acpd/token" "/run/user/1001/acpd/token"; do
+for token_path in "/run/user/$UID/waymux/token" "/run/user/$(id -u 2>/dev/null)/waymux/token" "/run/user/$UID/acpd/token" "/run/user/$(id -u 2>/dev/null)/acpd/token"; do
   if [ -f "$token_path" ]; then
     acpd_token=$(cat "$token_path" 2>/dev/null || true)
     [ -n "$acpd_token" ] && break

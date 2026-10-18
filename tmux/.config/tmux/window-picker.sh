@@ -37,7 +37,7 @@ unset _tmux_style
 
 # Extract the active spinner from acpd if available (tmux option or acpd config)
 ACPD_SPINNER=$(tmux show-option -gqv @ai_agent_spinner 2>/dev/null)
-[ -z "$ACPD_SPINNER" ] && ACPD_SPINNER=$(grep -E '^\s*active_spinner\s*=' "$HOME/.config/acpd/config.toml" 2>/dev/null | sed -E 's/.*=\s*"([^"]+)".*/\1/')
+[ -z "$ACPD_SPINNER" ] && ACPD_SPINNER=$(grep -hE '^\s*active_spinner\s*=' "$HOME/.config/waymux/config.toml" "$HOME/.config/acpd/config.toml" 2>/dev/null | head -n1 | sed -E 's/.*=\s*"([^"]+)".*/\1/')
 [ -n "$ACPD_SPINNER" ] && TMUX_SPINNER_NAME="$ACPD_SPINNER"
 
 # Calculate the index of the current window for the initial selection
