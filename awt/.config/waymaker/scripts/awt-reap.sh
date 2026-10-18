@@ -169,14 +169,14 @@ for i in "${!candidate_targets[@]}"; do
     sess_to_kill="${BASH_REMATCH[1]}"
     tmux kill-session -t "$sess_to_kill" 2>/dev/null || true
     printf "${C_CYAN}✔ session killed${R}\n"
-    ((reaped_count++))
+    reaped_count=$((reaped_count + 1))
   elif [[ "$c_tgt" =~ ^pane:(.*) ]]; then
     pane_target="${BASH_REMATCH[1]}"
     tmux send-keys -t "$pane_target" C-c 2>/dev/null || true
     sleep 0.1
     tmux kill-window -t "$pane_target" 2>/dev/null || tmux kill-pane -t "$pane_target" 2>/dev/null || true
     printf "${C_CYAN}✔ agent terminated${R}\n"
-    ((reaped_count++))
+    reaped_count=$((reaped_count + 1))
   fi
 done
 

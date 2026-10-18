@@ -533,8 +533,9 @@ While low-level CLI utilities like `wt` (Worktree CLI) provide direct Git comman
 | **Direct CLI Rebase** | `awt rebase [base]` | Rebase active worktree onto base branch with auto-stash. |
 | **Direct CLI Merge** | `awt merge [branch] [--into <target>] [--no-hooks]` | Merge with pre-merge validation gate (`--squash`, `--rebase`, `--no-commit`, `--no-remove`, `--no-tmux`). |
 | **Direct CLI Ship** | `awt ship [branch] [--into <target>] [--no-hooks]` | Merge into base, push to remote origin, and clean up worktree. |
-| **Batch Sweep Merged WTs** | `awt sweep [-y] [-n] [--fetch]` | Prune worktrees whose branches are already merged into base or via GitHub PR. |
+| **Batch Sweep Merged WTs** | `awt sweep [-a] [--clean-targets] [-y] [-n]` | Prune merged worktrees (current repo or `--all` repos) and optionally clean secondary Rust `target/` dirs. |
 | **Reap Stale Agent Sessions** | `awt reap [--hours N] [-y] [-n]` | Garbage-collect idle AI agents (> N hours) and orphan worktree sessions. |
+| **Storage & Worktree GC** | `dev-gc [--dry-run \| --yes] [--secondary-targets]` | Inventory or prune stale Rust `target/` (>14d), `~/.cache/yay`, Trash (>30d), and Docker build cache (>30d). |
 | **Switch Tmux Sessions** | `Prefix + s` | Fast session and directory switcher via Waymaker (`session-picker.sh`). |
 | **Validate Dotfile Symlinks** | `./stow.sh -n` | Mandatory dry-run check before any merge into `main`. |
 | **Re-stow Updated Package** | `./stow.sh -r <package>` | Refresh symlinks in `$HOME` after merging into `main`. |

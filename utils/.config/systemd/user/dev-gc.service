@@ -1,0 +1,11 @@
+[Unit]
+Description=Bi-weekly AI Coding Storage & Worktree Housekeeping (dev-gc)
+Documentation=https://akitaonrails.com/2026/10/12/usuarios-linux-sempre-escolham-btrfs-nao-ext4/#a-limpeza-da-casa-na-era-do-ai-coding
+
+[Service]
+Type=oneshot
+Nice=19
+IOSchedulingClass=idle
+ExecStart=%h/.local/bin/dev-gc --yes --secondary-targets
+StandardOutput=journal
+StandardError=journal

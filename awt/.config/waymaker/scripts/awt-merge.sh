@@ -241,10 +241,19 @@ if [[ $merge_success -eq 1 ]]; then
         "$HOME/.config/matchmaker/hooks/post-merge.sh" "$target_wt" "$target_branch" "$source_branch" 2>/dev/null || true
     fi
 
-    # Cleanup source worktree & branch unless --no-remove was specified
+    # Cleanup source worktree & branch unless --no-remove was specified (Atomic 0.1ms Trash-Rename + Async Purge)
     if [[ $no_remove -eq 0 && "$current_wt" != "$target_wt" ]]; then
-        git -C "$target_wt" worktree remove -f "$current_wt" >/dev/null 2>&1 || \
-        git worktree remove -f "$current_wt" >/dev/null 2>&1 || true
+        if [[ -d "$current_wt" ]]; then
+            trash_dir="$(dirname "$current_wt")/.awt_trash_$(basename "$current_wt")_$$_${RANDOM}"
+            if mv "$current_wt" "$trash_dir" 2>/dev/null; then
+                git -C "$target_wt" worktree prune >/dev/null 2>&1 || true
+                (rm -rf "$trash_dir" >/dev/null 2>&1 &)
+            else
+                git -C "$target_wt" worktree remove -f "$current_wt" >/dev/null 2>&1 || \
+                rm -rf "$current_wt" 2>/dev/null || true
+                git -C "$target_wt" worktree prune >/dev/null 2>&1 || true
+            fi
+        fi
         git -C "$target_wt" branch -d "$source_branch" >/dev/null 2>&1 || \
         git -C "$target_wt" branch -D "$source_branch" >/dev/null 2>&1 || true
     fi

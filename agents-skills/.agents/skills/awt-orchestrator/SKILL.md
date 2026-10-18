@@ -97,7 +97,7 @@ awt merge main --squash
 awt ship main --rebase
 ```
 
-### F. Delete, Sweep & Reap Worktrees (`awt rm` / `awt sweep` / `awt reap`)
+### F. Delete, Sweep & Reap Worktrees (`awt rm` / `awt sweep` / `awt reap` / `dev-gc`)
 ```bash
 # Delete worktree directory, branch ref, and kill tmux session
 awt rm feat/my-feature
@@ -108,8 +108,18 @@ awt rm feat/my-feature --force
 # Batch sweep worktrees whose branches are already merged into base or via GitHub PR
 awt sweep
 
+# Batch sweep merged worktrees across ~/.dotfiles and all ~/dev/github/* repositories
+awt sweep --all
+
+# Sweep merged worktrees and clean Rust target/ directories in secondary sibling worktrees
+awt sweep --all --clean-targets
+
 # Reap stale AI agents (idle > 4h) and orphan worktree sessions
 awt reap
+
+# Read-only storage inventory & automated housekeeping (stale Rust target/, yay cache, Trash, Docker build cache >30d)
+dev-gc --dry-run
+dev-gc --yes --secondary-targets
 ```
 
 ### G. Auto-Naming & Migrating Uncommitted Changes (`-A` / `-W`)

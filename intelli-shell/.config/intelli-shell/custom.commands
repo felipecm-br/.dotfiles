@@ -76,8 +76,23 @@ awt rm -f {{branch}}
 # Batch sweep and prune merged Git worktrees and dead sessions
 awt sweep
 
+# Batch sweep merged Git worktrees across ~/.dotfiles and all ~/dev/github/* repositories
+awt sweep --all
+
+# Sweep merged worktrees and clean Rust target/ directories in secondary sibling worktrees
+awt sweep --all --clean-targets
+
 # Preview worktrees eligible for sweep without deleting
 awt sweep --dry-run
+
+# Read-only inventory of Rust target/, AUR cache, Trash, and Docker storage hygiene
+dev-gc --dry-run
+
+# Run automated storage & worktree housekeeping (stale Rust targets, yay cache, Trash, Docker build cache >30d)
+dev-gc --yes
+
+# Run storage housekeeping including secondary sibling worktree Rust target/ folders
+dev-gc --yes --secondary-targets
 
 # Garbage-collect stale AI agents and orphan worktree sessions (default: >4h)
 awt reap

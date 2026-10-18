@@ -111,20 +111,20 @@ if [[ -n "$primary_wt" && -d "$primary_wt" ]]; then
         src="$primary_wt/$env_file"
         dst="$wt_path/$env_file"
         if [[ -f "$src" && ! -f "$dst" ]]; then
-            cp "$src" "$dst" 2>/dev/null || true
+            cp --reflink=auto "$src" "$dst" 2>/dev/null || cp "$src" "$dst" 2>/dev/null || true
         fi
     done
 
     # Fallback to .env.example or .env.local.example if no .env exists
     if [[ ! -f "$wt_path/.env" ]]; then
         if [[ -f "$primary_wt/.env.example" ]]; then
-            cp "$primary_wt/.env.example" "$wt_path/.env" 2>/dev/null || true
+            cp --reflink=auto "$primary_wt/.env.example" "$wt_path/.env" 2>/dev/null || cp "$primary_wt/.env.example" "$wt_path/.env" 2>/dev/null || true
         elif [[ -f "$wt_path/.env.example" ]]; then
-            cp "$wt_path/.env.example" "$wt_path/.env" 2>/dev/null || true
+            cp --reflink=auto "$wt_path/.env.example" "$wt_path/.env" 2>/dev/null || cp "$wt_path/.env.example" "$wt_path/.env" 2>/dev/null || true
         elif [[ -f "$primary_wt/.env.local.example" ]]; then
-            cp "$primary_wt/.env.local.example" "$wt_path/.env" 2>/dev/null || true
+            cp --reflink=auto "$primary_wt/.env.local.example" "$wt_path/.env" 2>/dev/null || cp "$primary_wt/.env.local.example" "$wt_path/.env" 2>/dev/null || true
         elif [[ -f "$wt_path/.env.local.example" ]]; then
-            cp "$wt_path/.env.local.example" "$wt_path/.env" 2>/dev/null || true
+            cp --reflink=auto "$wt_path/.env.local.example" "$wt_path/.env" 2>/dev/null || cp "$wt_path/.env.local.example" "$wt_path/.env" 2>/dev/null || true
         fi
     fi
 
@@ -162,7 +162,7 @@ if [[ -n "$primary_wt" && -d "$primary_wt" ]]; then
         dst="$wt_path/$item"
         if [[ -e "$src" && ! -e "$dst" ]]; then
             mkdir -p "$(dirname "$dst")" 2>/dev/null || true
-            cp -a "$src" "$dst" 2>/dev/null || cp -R "$src" "$dst" 2>/dev/null || true
+            cp -a --reflink=auto "$src" "$dst" 2>/dev/null || cp -a "$src" "$dst" 2>/dev/null || cp -R "$src" "$dst" 2>/dev/null || true
         fi
     done
 

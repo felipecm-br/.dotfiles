@@ -1,0 +1,10 @@
+[Unit]
+Description=Bi-weekly AI Coding Storage & Worktree Housekeeping Timer (1st and 15th at 04:00)
+
+[Timer]
+OnCalendar=*-*-01,15 04:00:00
+Persistent=true
+RandomizedDelaySec=30m
+
+[Install]
+WantedBy=timers.target

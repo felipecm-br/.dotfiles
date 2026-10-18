@@ -1,0 +1,236 @@
+#!/usr/bin/env bash
+# dev-gc — Automated AI Coding Era Storage & Worktree Housekeeping
+# Inspired by AkitaOnRails Btrfs & AI Coding Storage Hygiene workflow.
+#
+# Safely prunes:
+#   1. Stale Rust target/ directories (>N days inactive, via cargo-clean-all or find fallback)
+#   2. Secondary sibling worktree target/ directories (when --secondary-targets is passed)
+#   3. Stale .awt_trash_* directories and git worktree metadata across repos
+#   4. AUR build cache (~/.cache/yay)
+#   5. User Trash (~/.local/share/Trash) items older than 30 days (or all with --purge-trash)
+#   6. Docker build cache older than 30 days (720h) — never touches images or volumes
+
+set -euo pipefail
+
+REAL_HOME="$(getent passwd "$(id -un)" 2>/dev/null | cut -d: -f6 || echo "$HOME")"
+[[ -z "$REAL_HOME" ]] && REAL_HOME="$HOME"
+export PATH="$REAL_HOME/.cargo/bin:$REAL_HOME/.local/bin:$PATH"
+
+R='\033[0m'
+BOLD='\033[1m'
+DIM='\033[2m'
+C_CYAN='\033[38;2;131;192;146m'
+C_YELLOW='\033[38;2;219;188;127m'
+C_RED='\033[38;2;230;126;128m'
+C_BLUE='\033[38;2;127;187;179m'
+C_GRAY='\033[38;2;114;135;152m'
+
+dry_run=0
+auto_yes=0
+keep_days=14
+trash_days=30
+clean_secondary_targets=0
+purge_all_trash=0
+clean_active_targets=0
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -n|--dry-run|--status)
+      dry_run=1
+      ;;
+    -y|--yes|--force)
+      auto_yes=1
+      ;;
+    --keep-days=*)
+      keep_days="${1#*=}"
+      ;;
+    --keep-days)
+      shift
+      keep_days="${1:-14}"
+      ;;
+    --secondary-targets)
+      clean_secondary_targets=1
+      ;;
+    --all-targets)
+      clean_active_targets=1
+      clean_secondary_targets=1
+      ;;
+    --purge-trash)
+      purge_all_trash=1
+      ;;
+    -h|--help)
+      cat << 'HELP'
+dev-gc — Automated AI Coding Era Storage & Worktree Housekeeping
+
+USAGE:
+    dev-gc [flags]
+
+FLAGS:
+    -n, --dry-run, --status   Read-only storage inventory (no files deleted)
+    -y, --yes                 Execute cleanup without interactive confirmation
+    --keep-days <N>           Keep Rust target/ directories modified within N days (default: 14)
+    --secondary-targets       Also clean Rust target/ in all secondary sibling worktrees
+    --all-targets             Clean ALL Rust target/ directories under ~/dev (including main)
+    --purge-trash             Empty entire ~/.local/share/Trash regardless of age
+    -h, --help                Show this help message
+HELP
+      exit 0
+      ;;
+  esac
+  shift
+done
+
+df_before=$(df -h / | awk 'NR==2 {print $3 " used / " $4 " avail (" $5 ")"}')
+
+printf "${BOLD}${C_BLUE}󰃢 dev-gc — AI Coding Storage Hygiene${R}\n"
+printf "${DIM}Root filesystem before: %s${R}\n\n" "$df_before"
+
+# 1. Read-Only Inventory Summary
+printf "${BOLD}1. Storage Inventory:${R}\n"
+
+yay_cache="$REAL_HOME/.cache/yay"
+yay_size="0B"
+if [[ -d "$yay_cache" ]]; then
+  yay_size=$(du -sh "$yay_cache" 2>/dev/null | awk 'NR==1 {print $1}' || true)
+  [[ -z "$yay_size" ]] && yay_size="0B"
+fi
+printf "  • AUR Cache (~/.cache/yay):          ${C_YELLOW}%s${R}\n" "$yay_size"
+
+trash_dir="$REAL_HOME/.local/share/Trash"
+trash_size="0B"
+if [[ -d "$trash_dir" ]]; then
+  trash_size=$(du -sh "$trash_dir" 2>/dev/null | awk 'NR==1 {print $1}' || true)
+  [[ -z "$trash_size" ]] && trash_size="0B"
+fi
+printf "  • User Trash (~/.local/share/Trash): ${C_YELLOW}%s${R}\n" "$trash_size"
+
+pacman_cache="/var/cache/pacman/pkg"
+if [[ -d "$pacman_cache" ]]; then
+  pac_size=$(du -sh "$pacman_cache" 2>/dev/null | awk 'NR==1 {print $1}' || true)
+  [[ -z "$pac_size" ]] && pac_size="0B"
+  printf "  • Pacman Cache (/var/cache/pacman):  ${C_GRAY}%s (system-managed)${R}\n" "$pac_size"
+fi
+
+printf "\n${BOLD}2. Rust target/ Directories (~/dev):${R}\n"
+declare -a stale_targets=()
+declare -a active_debug_targets=()
+if [[ -d "$REAL_HOME/dev" ]]; then
+  while IFS= read -r tdir; do
+    [[ -n "$tdir" && -d "$tdir" ]] || continue
+    proj_dir="$(dirname "$tdir")"
+    [[ -f "$proj_dir/Cargo.toml" ]] || continue
+    tsz=$(du -sh "$tdir" 2>/dev/null | awk 'NR==1 {print $1}' || true)
+    [[ -z "$tsz" ]] && tsz="?"
+    wt_name="$(basename "$proj_dir")"
+    recent_files=$(find "$tdir" -maxdepth 2 -mtime "-${keep_days}" -print -quit 2>/dev/null || true)
+    status_tag="${C_GRAY}active (<${keep_days}d)${R}"
+    should_clean=0
+
+    if [[ $clean_active_targets -eq 1 ]]; then
+      should_clean=1
+      status_tag="${C_RED}will clean (--all-targets)${R}"
+    elif [[ -z "$recent_files" ]]; then
+      should_clean=1
+      status_tag="${C_YELLOW}stale (>${keep_days}d)${R}"
+    elif [[ $clean_secondary_targets -eq 1 && "$wt_name" != "main" && "$wt_name" != "master" && "$wt_name" != "fecavmi" ]]; then
+      if [[ -d "$(dirname "$proj_dir")/.bare" ]]; then
+        should_clean=1
+        status_tag="${C_YELLOW}secondary worktree target${R}"
+      fi
+    fi
+
+    if [[ $should_clean -eq 1 ]]; then
+      stale_targets+=("$tdir")
+    else
+      # Even in active primary worktrees, check if debug/ or llvm-cov-target/ has bloated
+      if [[ -d "$tdir/debug" || -d "$tdir/llvm-cov-target" ]]; then
+        active_debug_targets+=("$tdir")
+        status_tag="${C_CYAN}active (will prune debug/cov artifacts)${R}"
+      fi
+    fi
+    printf "  • %-8s %-52s [%b]\n" "$tsz" "${tdir#"$REAL_HOME"/}" "$status_tag"
+  done < <(find "$REAL_HOME/dev" -maxdepth 4 -type d -name "target" 2>/dev/null | sort || true)
+fi
+
+if command -v docker >/dev/null 2>&1; then
+  printf "\n${BOLD}3. Docker Storage Summary:${R}\n"
+  docker system df 2>/dev/null | sed 's/^/  /' || true
+fi
+
+printf "\n"
+if [[ $dry_run -eq 1 ]]; then
+  printf "${DIM}[Dry-run mode: no files were deleted. Pass -y to execute cleanup.]${R}\n"
+  exit 0
+fi
+
+if [[ $auto_yes -eq 0 ]]; then
+  read -r -p "Execute storage cleanup now? [y/N] " confirm </dev/tty
+  if [[ "$confirm" != [yY]* ]]; then
+    printf "${DIM}Cleanup aborted.${R}\n"
+    exit 0
+  fi
+fi
+
+printf "${BOLD}Executing cleanup...${R}\n"
+
+# Step A: Clean eligible full Rust target/ directories
+if [[ ${#stale_targets[@]} -gt 0 ]]; then
+  for tdir in "${stale_targets[@]}"; do
+    printf "  ${DIM}→ Removing Rust target: %s...${R} " "${tdir#"$REAL_HOME"/}"
+    rm -rf "$tdir" 2>/dev/null || true
+    printf "${C_CYAN}✔${R}\n"
+  done
+elif command -v cargo-clean-all >/dev/null 2>&1 && [[ -d "$REAL_HOME/dev" ]]; then
+  printf "  ${DIM}→ Running cargo clean-all (--keep-days %d)...${R}\n" "$keep_days"
+  cargo clean-all --keep-days "$keep_days" --yes "$REAL_HOME/dev" 2>/dev/null || true
+fi
+
+# Step A2: Prune accumulated debug/ & llvm-cov-target/ test binaries in active workspaces (preserving release/)
+if [[ ${#active_debug_targets[@]} -gt 0 ]]; then
+  for tdir in "${active_debug_targets[@]}"; do
+    printf "  ${DIM}→ Pruning debug/ & llvm-cov test binaries in %s (keeping release/)...${R} " "${tdir#"$REAL_HOME"/}"
+    rm -rf "$tdir/debug" "$tdir/llvm-cov-target" 2>/dev/null || true
+    printf "${C_CYAN}✔${R}\n"
+  done
+fi
+
+# Step B: Clean AUR ~/.cache/yay build artifacts
+if [[ -d "$yay_cache" ]]; then
+  printf "  ${DIM}→ Cleaning ~/.cache/yay build directories & tarballs...${R} "
+  find "$yay_cache" -mindepth 1 -maxdepth 1 -exec rm -rf {} + 2>/dev/null || true
+  printf "${C_CYAN}✔${R}\n"
+fi
+
+# Step C: Clean ~/.local/share/Trash
+if [[ -d "$trash_dir" ]]; then
+  if [[ $purge_all_trash -eq 1 ]]; then
+    printf "  ${DIM}→ Emptying entire ~/.local/share/Trash...${R} "
+    rm -rf "$trash_dir/files"/* "$trash_dir/files"/.[!.]* "$trash_dir/info"/* "$trash_dir/info"/.[!.]* 2>/dev/null || true
+    printf "${C_CYAN}✔${R}\n"
+  else
+    printf "  ${DIM}→ Pruning ~/.local/share/Trash items older than %d days...${R} " "$trash_days"
+    find "$trash_dir/files" "$trash_dir/info" -mindepth 1 -mtime "+${trash_days}" -exec rm -rf {} + 2>/dev/null || true
+    printf "${C_CYAN}✔${R}\n"
+  fi
+fi
+
+# Step D: Prune Docker build cache older than 30 days (720h) — never images or volumes
+if command -v docker >/dev/null 2>&1; then
+  printf "  ${DIM}→ Pruning Docker build cache (>30d / 720h)...${R} "
+  docker builder prune --filter "until=720h" -f >/dev/null 2>&1 || true
+  printf "${C_CYAN}✔${R}\n"
+fi
+
+# Step E: Clean leftover .awt_trash_* folders and prune git worktrees
+printf "  ${DIM}→ Pruning stale .awt_trash_* directories and Git worktree refs...${R} "
+find "$REAL_HOME/.dotfiles" "$REAL_HOME/dev/github" -maxdepth 2 -type d -name ".awt_trash_*" -exec rm -rf {} + 2>/dev/null || true
+for d in "$REAL_HOME/.dotfiles/main" "$REAL_HOME"/dev/github/*/main "$REAL_HOME"/dev/github/*; do
+  if [[ -d "$d" ]] && git -C "$d" rev-parse --git-dir >/dev/null 2>&1; then
+    git -C "$d" worktree prune 2>/dev/null || true
+  fi
+done
+printf "${C_CYAN}✔${R}\n"
+
+df_after=$(df -h / | awk 'NR==2 {print $3 " used / " $4 " avail (" $5 ")"}')
+printf "\n${C_CYAN}${BOLD}✔ Housekeeping complete!${R}\n"
+printf "  Before: %s\n  After:  ${BOLD}%s${R}\n" "$df_before" "$df_after"
