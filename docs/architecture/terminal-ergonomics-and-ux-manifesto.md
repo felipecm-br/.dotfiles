@@ -188,7 +188,7 @@ To eliminate accidental exits during deep inspection:
 
 True zero-friction development minimizes visual polling by offloading non-critical telemetry to the **Auditory Cortex**.
 
-The `acpd` daemon integrates low-latency audio cues via PipeWire (`pw-play`) configured in [`acpd/.config/acpd/config.toml`](../../acpd/.config/acpd/config.toml):
+The `waymux` daemon (formerly `acpd`) integrates low-latency audio cues via PipeWire (`pw-play`) configured in [`waymux/.config/waymux/config.toml`](../../waymux/.config/waymux/config.toml):
 
 ```toml
 [sound]

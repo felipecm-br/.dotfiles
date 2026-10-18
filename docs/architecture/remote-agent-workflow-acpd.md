@@ -78,7 +78,7 @@ Machines behind residential NAT or CGNAT connect seamlessly via **Tailscale**:
 
 ## 4. The `acpd-cli` Workflow Tool
 
-The `acpd-cli` utility ([`acpd/.local/bin/acpd-cli`](../../acpd/.local/bin/acpd-cli)) provides a unified CLI interface to communicate with the `acpd` daemon:
+The `acpd-cli` utility ([`waymux/.local/bin/acpd-cli`](../../waymux/.local/bin/acpd-cli)) provides a unified CLI interface to communicate with the `acpd` daemon:
 
 ### Available Commands
 

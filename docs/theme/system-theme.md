@@ -73,7 +73,7 @@ underlying `sed` pass). See the render logic in
 repo needs:
 
 - Re-sources `~/.config/tmux/tmux.conf` across running tmux servers so tmux immediately picks up the freshly rendered `tmux-colors.conf`.
-- Copies the rendered `~/.local/state/omarchy/current/theme/acpd-config.toml` into `~/.config/acpd/config.toml` and restarts `acpd.service` (`systemctl --user restart acpd.service`) so AI agent status pills and colors match the active theme.
+- Copies the rendered `~/.local/state/omarchy/current/theme/waymux.toml` into `~/.config/waymux/config.toml` and restarts `waymux.service` (`systemctl --user restart waymux.service`) so AI agent status pills and colors match the active theme.
 
 This is also where additional per-app refresh logic should be added when adopting a new tool into
 the dotfiles.

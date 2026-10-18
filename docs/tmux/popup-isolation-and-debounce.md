@@ -42,7 +42,7 @@ This document records the identified issues of visual flicker, rendering collisi
 ---
 
 ### 🛡️ 1. 650ms Debounce & Deduplication in ACPD
-Inside the `acpd` daemon (`adapters.rs`, configured via `idle_debounce_ms = 650` in `acpd.toml`):
+Inside the `waymux` daemon (formerly `acpd`) (`adapters.rs`, configured via `idle_debounce_ms = 650` in `~/.config/waymux/config.toml`):
 - **650ms Debounce for `AgentState::Idle`:**
   ```rust
   // When state transitions to Idle, schedule an async cancellation window (idle_debounce_ms)

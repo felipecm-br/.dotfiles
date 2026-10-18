@@ -181,8 +181,8 @@ The AI agent state management pipeline consists of 6 integrated components:
    - **Dynamic Session Group Headers**: Waymaker dynamically evaluates cursor position relative to session groupings. Headers of inactive sessions are dimmed (`results.inactive_group_header_style`), while the header of the session enclosing the focused window is promoted to bright bold (`results.group_header_style`), visually framing the active cluster.
    - **Bottom-Anchored Live Preview**: Captures pane output up to 100 history lines via [`window-picker-preview.sh`](../../tmux/.config/tmux/window-picker-preview.sh), strips trailing terminal grid blanks, and anchors the viewport to the bottom (`preview.initial.tail = true`) so ongoing conversational context and prompt states are immediately visible without manual scrolling.
 
-5. **Omarchy Theme Template (`acpd.toml.tpl`)**:
-   - Template located in [`acpd/.config/omarchy/themed/acpd.toml.tpl`](../../acpd/.config/omarchy/themed/acpd.toml.tpl) maps `idle` (`{{ color14 }}`), `busy/working` (`{{ color11 }}`), `question` (`{{ color13 }}`), and `error/permission` (`{{ color1 }}`).
+5. **Omarchy Theme Template (`waymux.toml.tpl`)**:
+   - Template located in [`waymux/.config/omarchy/themed/waymux.toml.tpl`](../../waymux/.config/omarchy/themed/waymux.toml.tpl) maps `idle` (`{{ color14 }}`), `busy/working` (`{{ color11 }}`), `question` (`{{ color13 }}`), and `error/permission` (`{{ color1 }}`).
    - Switching system themes (`omarchy-theme-set`) re-compiles `~/.config/acpd/config.toml` and automatically restarts `acpd` via systemd (`systemctl --user restart acpd`) to apply theme colors instantly.
 
 6. **Resilient Ctrl+C Interrupt Watchdog (`tmux-hook.mjs`)**:

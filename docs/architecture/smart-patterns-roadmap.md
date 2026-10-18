@@ -34,7 +34,7 @@ The core principle across this dotfiles setup is **Zero Polling, Maximum Context
 * **How it works**: Uses Quickshell reactive property bindings over Hyprland IPC. When navigating tabs in Chrome/Firefox, it matches web signatures (`YouTube` ──► `󰗃`, `GitHub` ──► `󰊤`, `Google Photos` ──► `󰋩`, `ChatGPT` ──► `󰚩`, `WhatsApp` ──► `󰖣`) and application classes (`ghostty` ──► ``, `antigravity-ide` ──► `󰲇`, `spotify` ──► ``) inside adaptive capsule pills.
 
 ### 2. Tmux AI Agent Status & Event-Driven Popups
-* **Location**: [`tmux/.config/tmux/`](../../tmux/.config/tmux/), [`acpd/`](../../acpd/)
+* **Location**: [`tmux/.config/tmux/`](../../tmux/.config/tmux/), [`waymux/`](../../waymux/)
 * **Doc**: [Tmux AI Status Bar](../tmux/ai-status-bar.md) & [Popup Isolation & Debounce](../tmux/popup-isolation-and-debounce.md)
 * **How it works**: The ACPD daemon intercepts agent lifecycle hooks (Antigravity, Claude Code, Codex, Muse, OpenCode). Status updates are broadcast with a 650ms idle debounce (`idle_debounce_ms`, configurable) to tmux status pills (`status-interval 0`), rendering spinners (`󰑮`), question/permission alerts, and bell popups.
 

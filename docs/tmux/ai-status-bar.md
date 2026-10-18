@@ -44,4 +44,4 @@ To navigate tabs with zero screen occlusion and sub-100ms latency without openin
   - Fallback: Direct numbers `0..9` also work within hint mode.
 - **Single-Key & Cascading Exit**: Pressing any assigned hint key jumps immediately to that window and restores the root keytable ($T_{\text{exec}} \approx 380\text{ ms}$, $T_R = 0\text{ ms}$). Pressing `CapsLock` (emitting `Esc`) or any unmapped key cancels without switching.
 
-See [`tmux/.config/tmux/tmux.conf`](../../tmux/.config/tmux/tmux.conf), [`acpd/.config/acpd/config.toml`](../../acpd/.config/acpd/config.toml), and [`popup-isolation-and-debounce.md`](popup-isolation-and-debounce.md) for debounce, popup isolation, and option wiring details.
+See [`tmux/.config/tmux/tmux.conf`](../../tmux/.config/tmux/tmux.conf), [`waymux/.config/waymux/config.toml`](../../waymux/.config/waymux/config.toml), and [`popup-isolation-and-debounce.md`](popup-isolation-and-debounce.md) for debounce, popup isolation, and option wiring details.
