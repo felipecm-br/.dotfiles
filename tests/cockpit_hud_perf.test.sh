@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+# tests/cockpit_hud_perf.test.sh — reproducible latency contract for the waymux Cockpit HUD data path.
+#
+# Measures wall-clock p50/p95 of the commands that gate the Cockpit popup and fails when p50 exceeds
+# the budget (Doherty threshold margin). Numbers are machine-dependent: run on the target host.
+#
+# Env: N (iterations, default 40), ITEMS_BUDGET_MS (default 50), HEALTH_BUDGET_MS (default 20)
+set -euo pipefail
+
+ok() { echo "ok: $*"; }
+bad() { echo "FAIL: $*" >&2; exit 1; }
+
+N="${N:-40}"
+ITEMS_BUDGET_MS="${ITEMS_BUDGET_MS:-50}"
+HEALTH_BUDGET_MS="${HEALTH_BUDGET_MS:-20}"
+
+command -v waymux >/dev/null 2>&1 || bad "waymux binary not found in PATH"
+waymux health >/dev/null 2>&1 || bad "waymux daemon is not healthy (systemctl --user status waymux)"
+
+# bench <label> <budget_ms> <cmd...> — prints p50/p95 in ms, returns non-zero when p50 > budget.
+bench() {
+  local label="$1" budget="$2"
+  shift 2
+  local -a ts=()
+  local i s e
+  for ((i = 0; i < N; i++)); do
+    s="${EPOCHREALTIME/./}"
+    "$@" >/dev/null 2>&1 || true
+    e="${EPOCHREALTIME/./}"
+    ts+=("$(((e - s) / 1000))")
+  done
+  local sorted p50 p95
+  sorted="$(printf '%s\n' "${ts[@]}" | sort -n)"
+  p50="$(sed -n "$(((N + 1) / 2))p" <<<"$sorted")"
+  p95="$(sed -n "$(((N * 95 + 99) / 100))p" <<<"$sorted")"
+  echo "     $label: p50=${p50}ms p95=${p95}ms (budget p50<=${budget}ms, n=${N})"
+  ((p50 <= budget))
+}
+
+bench "waymux cockpit-items" "$ITEMS_BUDGET_MS" waymux cockpit-items &&
+  ok "cockpit-items p50 within ${ITEMS_BUDGET_MS}ms" || bad "cockpit-items p50 exceeded ${ITEMS_BUDGET_MS}ms"
+
+bench "waymux health" "$HEALTH_BUDGET_MS" waymux health &&
+  ok "health probe p50 within ${HEALTH_BUDGET_MS}ms" || bad "health probe p50 exceeded ${HEALTH_BUDGET_MS}ms"
+
+echo "All cockpit HUD latency checks passed."
