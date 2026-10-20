@@ -439,6 +439,7 @@ waymux() {
             echo "Usage: waymux [status|start|stop|restart|logs|kill]"
             return 1
             ;;
+    esac
 }
 # ─────────────────────────────────────────────────────────────────────────────
 # Zero-Friction File Transfer (PasteTo & MoveTo 2.0)
