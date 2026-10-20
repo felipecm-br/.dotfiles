@@ -88,3 +88,7 @@ omarchy-theme-refresh               # re-render templates for the current theme 
 omarchy-theme-bg-set <path>         # set a custom wallpaper for the current theme
 omarchy-theme-bg-next               # advance to the next built-in wallpaper
 ```
+
+## Non-Omarchy Machines
+
+On systems without Omarchy installed, Tmux and Zsh resolve `colors.toml` via [`theme-helper.sh`](../../tmux/.config/tmux/theme-helper.sh) (checking `$THEME_COLORS_FILE`, `@theme_colors_file`, `~/.config/tmux/theme.path`, and falling back to [`tmux/.config/tmux/colors.toml`](../../tmux/.config/tmux/colors.toml)). See [Non-Omarchy Theme Migration Prompt](non-omarchy-migration-prompt.md) for migrating existing non-Omarchy clones.
