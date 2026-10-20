@@ -31,12 +31,16 @@ readonly LOCK_FILE="$DOTFILES_DIR/stow-lock.json"
 
 # Directories to ignore (not stow packages)
 readonly IGNORE_DIRS=(
-    ".git"
+    ".agents"
     ".bare"
+    ".git"
     ".github"
     ".shell"
-    "scripts"
+    "assets"
     "docs"
+    "scratch"
+    "scripts"
+    "tests"
 )
 
 # Colors for output
