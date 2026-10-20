@@ -1,20 +1,20 @@
 ---
-name: matchmaker
+name: waymaker
 description: |
-  Expert guide for building fast, composable TUI pickers with Matchmaker (mm) — a Rust fuzzy-finder
+  Expert guide for building fast, composable TUI pickers with Waymaker (wm) — a Rust fuzzy-finder
   similar to fzf but with TOML config, nav mode, column splitting, piped input, and preset overrides.
   Use this skill whenever the user wants to build a selector, menu, picker, switcher, or TUI list
-  powered by mm/matchmaker. Also trigger it when the user asks about: preset files (.toml in
-  ~/.config/matchmaker/presets/), nav_mode, piping to mm, preview commands, keybinds, columns,
-  or integrating mm into a shell script. Apply this skill proactively whenever the user is building
-  a new mm workflow even if they don't say "matchmaker" explicitly.
+  powered by wm/waymaker. Also trigger it when the user asks about: preset files (.toml in
+  ~/.config/waymaker/presets/), nav_mode, piping to wm, preview commands, keybinds, columns,
+  or integrating wm into a shell script. Apply this skill proactively whenever the user is building
+  a new wm workflow even if they don't say "waymaker" explicitly.
 ---
 
-# Waymaker / Matchmaker (`wm` / `mm`) — Expert Builder Skill
+# Waymaker (`wm`) — Expert Builder Skill
 
-Waymaker (`wm`, with compatibility symlink `mm`) is a fast, Rust-based TUI fuzzy finder configured via TOML. Think of it as fzf
+Waymaker (`wm`) is a fast, Rust-based TUI fuzzy finder configured via TOML. Think of it as fzf
 with structured presets, nav mode, multi-column support, and rich preview layouts. The binary
-lives at `~/.local/bin/wm` (`~/.local/bin/mm`).
+lives at `~/.local/bin/wm`.
 
 ## Architecture Overview
 
@@ -45,21 +45,21 @@ This is the most important performance decision:
 - **`--no-read`**: Tells `wm` to skip reading stdin and immediately run the `[start.command]`.
 - **0 subprocesses, 0 merge latency** — instant TUI initialization.
 
-### Fast: Native Directory Context (`cd target_dir && mm --nav --sort`)
+### Fast: Native Directory Context (`cd target_dir && wm --nav --sort`)
 ```bash
-# Change directory context and let mm scan natively in Rust
-(cd ~/.config/hypr/animations && mm -o my-preset --nav --sort)
+# Change directory context and let wm scan natively in Rust
+(cd ~/.config/hypr/animations && wm -o my-preset --nav --sort)
 ```
-- Uses mm's native Rust file scanner directly.
+- Uses wm's native Rust file scanner directly.
 - Ideal for pickers operating on a folder of files.
 
 ### Fast: Pipe directly from your script
 ```bash
-# Generate list in bash, pipe to mm
-my_items | mm -o my-preset
+# Generate list in bash, pipe to wm
+my_items | wm -o my-preset
 ```
-- Omit `[start.command]` in the preset so mm reads from stdin directly
-- **No shell subprocess is spawned by mm** — mm reads stdin immediately
+- Omit `[start.command]` in the preset so wm reads from stdin directly
+- **No shell subprocess is spawned by wm** — wm reads stdin immediately
 
 ### Zero-Fork Shell Loop Pattern (No Subprocesses)
 When generating list items inside `[start.command] cmd`, avoid spawning external sub-processes (`head`, `sed`, `awk`) inside loops. Use pure shell built-ins:
@@ -159,8 +159,8 @@ Use `[ui.nav_binds]` when you have many nav-specific binds; `nav^^` is simpler f
 
 ### Preview Panel (Native vs External Command)
 
-Matchmaker features **built-in native Rust renderers** for files, directories, markdown, and media.
-**There is no need to add an external `command = '''...'''` when `mm` supports the content natively**:
+Waymaker features **built-in native Rust renderers** for files, directories, markdown, and media.
+**There is no need to add an external `command = '''...'''` when `wm` supports the content natively**:
 - **Source Code & Text**: Native syntect syntax highlighting with line numbers (replaces `bat` and `cat`).
 - **Directories**: Native directory tree renderer (replaces `eza --tree` and `tree`).
 - **Markdown**: Native Ratatui Markdown parser with headers, tables, task lists, code fences, and Mermaid diagram extraction.
@@ -190,7 +190,7 @@ color = "Cyan"
 title_fg = "Cyan"
 ```
 
-> **When TO use `command = '''...'''`**: ONLY specify `command` for domain-specific, dynamic non-file previews that `mm` cannot produce on its own, such as:
+> **When TO use `command = '''...'''`**: ONLY specify `command` for domain-specific, dynamic non-file previews that `wm` cannot produce on its own, such as:
 > - `git log` / `git diff` / `git status` (e.g. `awt.toml`)
 > - Process & Port details `ps` / `lsof` (e.g. `kill.toml`)
 > - Tmux pane inspection `tmux capture-pane` (e.g. `window-picker.toml`)
@@ -226,10 +226,10 @@ Multiple preview layouts cycle with `ctrl-/`.
 "ctrl-p"       = "SwitchPreview"
 "alt-p"        = "Print({-})"       # print selected without closing
 
-# Execute without closing mm
+# Execute without closing wm
 "ctrl-x"       = "ExecuteSilent(cp {2} ~/target/)"
 
-# Replace mm process with editor
+# Replace wm process with editor
 "ctrl-e"       = "Become($EDITOR {2})"
 
 # ReloadNext cycles through additional_commands
@@ -245,14 +245,14 @@ output_template = "{2}"   # only output column 2 on accept
 output_separator = "\n"   # separator between multi-selected items
 ```
 
-Without `output_template`, mm prints the full matched line.
+Without `output_template`, wm prints the full matched line.
 
 ---
 
 ## Preset Template (Copy-Paste Starter)
 
 ```toml
-# ~/.config/matchmaker/presets/my-tool.toml
+# ~/.config/waymaker/presets/my-tool.toml
 
 [ui]
 nav_mode = true
@@ -280,7 +280,7 @@ type = "Rounded"
 color = "Cyan"
 title_fg = "Cyan"
 
-# Native preview (omits command — mm handles syntax highlighting, markdown & media natively)
+# Native preview (omits command — wm handles syntax highlighting, markdown & media natively)
 [[preview.layout]]
 side = "right"
 percentage = 60
@@ -317,14 +317,14 @@ cmd = ""
 
 ## Shell Script Pattern
 
-This is the canonical pattern for a fast mm-based tool:
+This is the canonical pattern for a fast wm-based tool:
 
 ```bash
 #!/usr/bin/env bash
-# my-picker — TUI picker powered by mm
+# my-picker — TUI picker powered by wm
 
-PRESET="${HOME}/.config/matchmaker/presets/my-tool.toml"
-MM=$(command -v mm) || { echo "mm not found" >&2; exit 1; }
+PRESET="${HOME}/.config/waymaker/presets/my-tool.toml"
+WM=$(command -v wm) || { echo "wm not found" >&2; exit 1; }
 
 # Build tab-separated input: "DISPLAY_LABEL\tACTUAL_PATH"
 build_list() {
@@ -335,8 +335,8 @@ build_list() {
   done
 }
 
-# Pipe list directly — instant startup, no shell subprocess in mm
-SELECTED=$(build_list | "$MM" -o "$PRESET" x="" 2>/dev/null)
+# Pipe list directly — instant startup, no shell subprocess in wm
+SELECTED=$(build_list | "$WM" -o "$PRESET" x="" 2>/dev/null)
 [[ -z "$SELECTED" ]] && exit 0
 
 # Extract second column (the hidden path)
@@ -378,7 +378,7 @@ done
 ### ReloadNext (cycle data sources)
 ```toml
 [start]
-additional_commands = ["", "mm list --dirs 2>/dev/null"]
+additional_commands = ["", "wm list --dirs 2>/dev/null"]
 
 [binds]
 "@reloadnext" = "ReloadNext"   # define semantic alias first
@@ -404,17 +404,17 @@ separator_style.fg = "Cyan"
 ```
 Breadcrumb automatically updates when `ChDir` is triggered.
 
-### Execute action without leaving mm
+### Execute action without leaving wm
 ```toml
 [binds]
 "ctrl-p" = "ExecuteSilent(notify-send 'preview' '{1}')"
-"ctrl-o" = "Execute($EDITOR {2})"    # opens editor, returns to mm after
-"ctrl-b" = "Become($EDITOR {2})"     # replaces mm process with editor
+"ctrl-o" = "Execute($EDITOR {2})"    # opens editor, returns to wm after
+"ctrl-b" = "Become($EDITOR {2})"     # replaces wm process with editor
 ```
 
 ### Null-byte separated input (safe for paths with spaces)
 ```bash
-fd --print0 | mm -o my-preset i="\0"
+fd --print0 | wm -o my-preset i="\0"
 ```
 ```toml
 [start.command]
@@ -432,10 +432,10 @@ separator = "\\0"
 | `{=}` | Full input line |
 | `{=#}` | 0-based row index |
 | `{+1}` | All selected items, column 1 |
-| `MM_QUERY` | Current query string |
-| `MM_POS` | Current cursor position |
-| `MM_MATCH_COUNT` | Number of filtered matches |
-| `MM_TOTAL_COUNT` | Total item count |
+| `WM_QUERY` / `MM_QUERY` | Current query string |
+| `WM_POS` / `MM_POS` | Current cursor position |
+| `WM_MATCH_COUNT` / `MM_MATCH_COUNT` | Number of filtered matches |
+| `WM_TOTAL_COUNT` / `MM_TOTAL_COUNT` | Total item count |
 | `LINES` / `COLUMNS` | Preview area dimensions (preview commands only) |
 
 ---
@@ -445,7 +445,7 @@ separator = "\\0"
 | Symptom | Likely Cause | Fix |
 |---|---|---|
 | Slow to open | `start.command` spawning shell | Pipe input from script, use `x=""` |
-| No items shown | `cmd = ""` but no stdin | Pipe data: `my_cmd \| mm -o preset x=""` |
+| No items shown | `cmd = ""` but no stdin | Pipe data: `my_cmd \| wm -o preset x=""` |
 | Nav mode not working | Missing `[start] mode = "nav"` | Add `mode = "nav"` under `[start]` |
 | Preview shows nothing | Column ref wrong | Check `{1}` vs `{2}` — tab-split |
 | Accept returns full line | No output_template | Add `output_template = "{2}"` or parse with awk |

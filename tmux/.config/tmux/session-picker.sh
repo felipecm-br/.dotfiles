@@ -34,11 +34,20 @@ unset _tmux_style
 
 export PATH="$HOME/.local/bin:$PATH"
 
-MM_BIN="$HOME/.local/bin/wm"
-[ -x "$MM_BIN" ] || MM_BIN="$(command -v wm 2>/dev/null || command -v mm 2>/dev/null || echo "wm")"
+WM_BIN="$HOME/.local/bin/wm"
+[ -x "$WM_BIN" ] || WM_BIN="$(command -v wm 2>/dev/null || command -v mm 2>/dev/null || echo "wm")"
 
-chosen=$("$MM_BIN" \
-  -o "$SCRIPT_DIR/session-picker.toml" \
+PRESET="$HOME/.config/waymaker/presets/session-picker.toml"
+if [ ! -f "$PRESET" ]; then
+  if [ -f "$SCRIPT_DIR/session-picker.toml" ]; then
+    PRESET="$SCRIPT_DIR/session-picker.toml"
+  else
+    PRESET="session-picker"
+  fi
+fi
+
+chosen=$("$WM_BIN" \
+  -o "$PRESET" \
   --color "${TMUX_COLOR_SPEC:-}")
 
 if [ "$chosen" = "__SWITCH_WINDOW__" ] || [ "$chosen" = "__SWITCH_COCKPIT__" ]; then
@@ -48,5 +57,5 @@ if [ "$chosen" = "__SWITCH_WINDOW__" ] || [ "$chosen" = "__SWITCH_COCKPIT__" ]; 
     exec "$SCRIPT_DIR/cockpit-picker.sh"
   fi
 elif [ -n "$chosen" ]; then
-  "$MM_BIN" connect "$chosen"
+  "$WM_BIN" connect "$chosen"
 fi

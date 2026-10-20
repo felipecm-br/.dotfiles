@@ -3,12 +3,12 @@
 
 [mgr]
 prepend_keymap = [
-  # Matchmaker file search → reveal in yazi
-  { on = "<C-t>", run = "shell 'mm | xargs -r ya emit reveal' --block", desc = "Matchmaker file search" },
+  # Waymaker file search → reveal in yazi
+  { on = "<C-t>", run = "shell 'wm | xargs -r ya emit reveal' --block", desc = "Waymaker file search" },
 
-  # Matchmaker directory jump → cd
-  { on = "<C-j>", run = "shell 'mm -o jump | xargs -r ya emit cd' --block", desc = "Matchmaker jump" },
-  { on = "<A-c>", run = "shell 'mm -o jump | xargs -r ya emit cd' --block", desc = "Matchmaker directory search" },
+  # Waymaker directory jump → cd
+  { on = "<C-j>", run = "shell 'wm -o jump | xargs -r ya emit cd' --block", desc = "Waymaker jump" },
+  { on = "<A-c>", run = "shell 'wm -o jump | xargs -r ya emit cd' --block", desc = "Waymaker directory search" },
 
   # Rename filename with cursor at start
   { on = "r", run = "rename --cursor=start", desc = "Rename selected file(s) (cursor at start)" },

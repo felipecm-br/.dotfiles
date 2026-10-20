@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-# window-picker.sh — cross-session window picker with OpenCode state using mm
+# window-picker.sh — cross-session window picker with OpenCode state using wm
 # All sessions and their windows, grouped, with color-coded AI state and live preview.
 
 REAL_SCRIPT=$(readlink -f "$0" 2>/dev/null || realpath "$0")
@@ -48,11 +48,20 @@ ORIG_WIN="${TMUX_ORIGIN_WINDOW:-$(tmux display-message -p '#I')}"
 ITEMS=$("$ITEMS_SCRIPT" "$ORIG_SESS" "$ORIG_WIN")
 START_IDX=$(printf '%s\n' "$ITEMS" | awk '!/^#/ {n++} /•/ {print n-1; exit}')
 [ -z "$START_IDX" ] && START_IDX=0
-MM_BIN="$HOME/.local/bin/wm"
-[ -x "$MM_BIN" ] || MM_BIN="$(command -v wm 2>/dev/null || command -v mm 2>/dev/null || echo "wm")"
+WM_BIN="$HOME/.local/bin/wm"
+[ -x "$WM_BIN" ] || WM_BIN="$(command -v wm 2>/dev/null || command -v mm 2>/dev/null || echo "wm")"
 
-chosen=$(printf '%s\n' "$ITEMS" | "$MM_BIN" \
-  -o "$SCRIPT_DIR/window-picker.toml" \
+PRESET="$HOME/.config/waymaker/presets/window-picker.toml"
+if [ ! -f "$PRESET" ]; then
+  if [ -f "$SCRIPT_DIR/window-picker.toml" ]; then
+    PRESET="$SCRIPT_DIR/window-picker.toml"
+  else
+    PRESET="window-picker"
+  fi
+fi
+
+chosen=$(printf '%s\n' "$ITEMS" | "$WM_BIN" \
+  -o "$PRESET" \
   "start.cmd=$ITEMS_SCRIPT $ORIG_SESS $ORIG_WIN" \
   results.spinner="$TMUX_SPINNER_NAME" \
   --pos "$START_IDX" \

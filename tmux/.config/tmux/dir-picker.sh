@@ -1,1 +1,0 @@
-workspace-picker.sh

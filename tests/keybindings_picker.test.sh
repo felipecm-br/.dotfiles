@@ -34,7 +34,7 @@ HYPR_COUNT="$("$ITEMS" hypr | wc -l)"
 
 # 3. Check preview generation
 PREV_OUT="$("$PREVIEW" "󰈞  Prefix + e" "Workspace Files" "tmux" "tmux-workspace" "~/.config/tmux/workspace-picker.sh")"
-[[ "$PREV_OUT" == *"Workspace Files"* ]] && [[ "$PREV_OUT" == *"75% × 60%"* ]] && ok "preview output" || bad "preview output"
+[[ "$PREV_OUT" == *"Workspace Files"* ]] && [[ "$PREV_OUT" == *"85% × 75%"* ]] && ok "preview output" || bad "preview output"
 
 # 4. Check waymaker preset configuration
 wm --dump-config -o keybindings >/dev/null 2>&1 && ok "wm loads keybindings preset" || bad "wm failed loading keybindings preset"

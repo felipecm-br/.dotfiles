@@ -53,16 +53,18 @@ if [ -z "$ORIGIN" ]; then
 fi
 PROJECT_DIR="${2:-$PWD}"
 
+export WM_ORIGIN_PANE="$ORIGIN"
+export WM_ORIGIN_CWD="$PROJECT_DIR"
 export MM_ORIGIN_PANE="$ORIGIN"
 export MM_ORIGIN_CWD="$PROJECT_DIR"
 
-MM_BIN="$HOME/.local/bin/wm"
-[ -x "$MM_BIN" ] || MM_BIN="$(command -v wm 2>/dev/null || command -v mm 2>/dev/null || echo "wm")"
+WM_BIN="$HOME/.local/bin/wm"
+[ -x "$WM_BIN" ] || WM_BIN="$(command -v wm 2>/dev/null || command -v mm 2>/dev/null || echo "wm")"
 
 # Prefer pr preset, fallback to awt-pr
-if "$MM_BIN" --dump-config -o pr >/dev/null 2>&1; then
+if "$WM_BIN" --dump-config -o pr >/dev/null 2>&1; then
   PRESET="pr"
-elif "$MM_BIN" --dump-config -o awt-pr >/dev/null 2>&1; then
+elif "$WM_BIN" --dump-config -o awt-pr >/dev/null 2>&1; then
   PRESET="awt-pr"
 elif [ -f "$HOME/.config/waymaker/presets/pr.toml" ]; then
   PRESET="$HOME/.config/waymaker/presets/pr.toml"

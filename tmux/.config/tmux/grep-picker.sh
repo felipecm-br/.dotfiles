@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-# grep-picker.sh — live full-text ripgrep in workspace/origin pane's cwd via mm -o rg.
+# grep-picker.sh — live full-text ripgrep in workspace/origin pane's cwd via wm -o rg.
 # Invoke: prefix+/ -> run-shell "grep-picker.sh '#{pane_id}' '#{pane_current_path}'"
 # Live search as you type (debounced ripgrep query reload);
 # Enter opens Neovim directly at the matched line: nvim +{line} {file};
@@ -49,13 +49,15 @@ fi
 CWD="${2:-$HOME}"
 [ -d "$CWD" ] || { tmux display-message "grep-picker: directory not found: $CWD"; exit 1; }
 
+export WM_ORIGIN_PANE="$ORIGIN"
+export WM_ORIGIN_CWD="$CWD"
 export MM_ORIGIN_PANE="$ORIGIN"
 export MM_ORIGIN_CWD="$CWD"
 
-MM_BIN="$HOME/.local/bin/wm"
-[ -x "$MM_BIN" ] || MM_BIN="$(command -v wm 2>/dev/null || command -v mm 2>/dev/null || echo wm)"
+WM_BIN="$HOME/.local/bin/wm"
+[ -x "$WM_BIN" ] || WM_BIN="$(command -v wm 2>/dev/null || command -v mm 2>/dev/null || echo wm)"
 
 tmux set -p allow-passthrough all 2>/dev/null || true
 tmux set -g allow-passthrough all 2>/dev/null || true
 
-cd "$CWD" && exec "$MM_BIN" --no-read -o rg
+cd "$CWD" && exec "$WM_BIN" --no-read -o rg

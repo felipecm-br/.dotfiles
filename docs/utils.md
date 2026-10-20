@@ -68,12 +68,12 @@ Specialized TUI pickers configured in [`waymaker/.config/waymaker/presets/`](../
 * `wm -o backgrounds` — Interactive Omarchy wallpaper switcher.
 * `wm -o starship-presets` — Interactive Starship prompt preset switcher.
 
-See [matchmaker-presets.md](shell/matchmaker-presets.md) for full documentation.
+See [waymaker-presets.md](shell/waymaker-presets.md) for full documentation.
 
 ## Hardware & Keyboard Ergonomics (Home Row Optimization)
 
 * **Caps Lock Mapping**: Dual-function key — **`Esc` on tap** (instant Normal Mode in Neovim/Zsh) and **`Ctrl` on hold** (Home Row anchor at position `(0, 0)`).
-* **Biomechanics / KLM Cost ($H = 0$)**: Because the left pinky rests on the Home Row, chords like `Ctrl+Space` (Tmux Prefix), `Ctrl+G` (Lazygitrs), `Ctrl+F` (Matchmaker Jump), and `Ctrl+N` (Matchmaker Branch Completion) execute in under 50ms with zero wrist abduction.
+* **Biomechanics / KLM Cost ($H = 0$)**: Because the left pinky rests on the Home Row, chords like `Ctrl+Space` (Tmux Prefix), `Ctrl+G` (Lazygitrs), `Ctrl+F` (Waymaker Jump), and `Ctrl+N` (Waymaker Branch Completion) execute in under 50ms with zero wrist abduction.
 
 ## Stow management
 

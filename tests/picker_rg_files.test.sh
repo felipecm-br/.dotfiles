@@ -95,7 +95,7 @@ assert m.groups() == ("path/to a space/app.rs", "42", "fn main() {"), f"Unexpect
 # Test regex split against real stripped ripgrep output
 repo_root = sys.argv[1].split("/waymaker/")[0] if "/waymaker/" in sys.argv[1] else sys.argv[1].split("/matchmaker/")[0]
 rg_raw = subprocess.check_output(
-    ["rg", "--hidden", "--glob", "!.git", "--line-number", "--no-heading", "--color=always", "--ignore-case", "--", "files-picker"],
+    ["rg", "--hidden", "--glob", "!.git", "--line-number", "--no-heading", "--color=always", "--ignore-case", "--", "workspace-picker"],
     cwd=repo_root,
     stdin=subprocess.DEVNULL,
     stderr=subprocess.STDOUT
@@ -204,14 +204,14 @@ if [ -n "${TMUX:-}" ] && command -v tmux >/dev/null 2>&1; then
   WIN="test-rg-live-$$"
   if tmux new-window -n "$WIN" "$TEST_BIN --no-read -o rg" 2>/dev/null; then
     sleep 1.0
-    for c in f i l e s - p i c k e r; do
+    for c in w o r k s p a c e - p i c k e r; do
       tmux send-keys -t "$WIN" -l "$c" 2>/dev/null || true
       sleep 0.05
     done
     sleep 1.0
     CAPTURED=$(tmux capture-pane -t "$WIN" -p 2>/dev/null || true)
     tmux kill-window -t "$WIN" 2>/dev/null || true
-    if echo "$CAPTURED" | grep -q "files-picker"; then
+    if echo "$CAPTURED" | grep -q "workspace-picker"; then
       ok "live wm/mm -o rg streams ripgrep matches and splits columns"
     else
       bad "live wm/mm -o rg failed to display ripgrep matches"
@@ -248,26 +248,20 @@ fi
 
 
 # ── 3. Script Executability & Syntax ──
-echo -e "\n[3/6] Validating Popup Scripts & Symlinks..."
+echo -e "\n[3/6] Validating Popup Scripts..."
 FILES_SCRIPT="$ROOT/tmux/.config/tmux/workspace-picker.sh"
-[[ -f "$FILES_SCRIPT" ]] || FILES_SCRIPT="$ROOT/tmux/.config/tmux/files-picker.sh"
 GREP_SCRIPT="$ROOT/tmux/.config/tmux/grep-picker.sh"
 
 [ -x "$FILES_SCRIPT" ] && sh -n "$FILES_SCRIPT" && ok "workspace-picker.sh syntax and executable" || bad "workspace-picker.sh syntax/executable"
 [ -x "$GREP_SCRIPT" ] && sh -n "$GREP_SCRIPT" && ok "grep-picker.sh syntax and executable" || bad "grep-picker.sh syntax/executable"
 
-# Check backward compatibility symlinks
-[ -L "$ROOT/tmux/.config/tmux/files-picker.sh" ] && [ "$(readlink "$ROOT/tmux/.config/tmux/files-picker.sh")" = "workspace-picker.sh" ] \
-  && ok "files-picker.sh -> workspace-picker.sh compatibility symlink" || bad "files-picker.sh symlink"
-
-[ -L "$ROOT/tmux/.config/tmux/dir-peek.sh" ] && { [ "$(readlink "$ROOT/tmux/.config/tmux/dir-peek.sh")" = "workspace-picker.sh" ] || [ "$(readlink "$ROOT/tmux/.config/tmux/dir-peek.sh")" = "files-picker.sh" ]; } \
-  && ok "dir-peek.sh -> workspace-picker.sh symlink" || bad "dir-peek.sh symlink"
-
-[ -L "$ROOT/tmux/.config/tmux/dir-picker.sh" ] && { [ "$(readlink "$ROOT/tmux/.config/tmux/dir-picker.sh")" = "workspace-picker.sh" ] || [ "$(readlink "$ROOT/tmux/.config/tmux/dir-picker.sh")" = "files-picker.sh" ]; } \
-  && ok "dir-picker.sh -> workspace-picker.sh symlink" || bad "dir-picker.sh symlink"
-
-[ -L "$ROOT/tmux/.config/tmux/rg-picker.sh" ] && [ "$(readlink "$ROOT/tmux/.config/tmux/rg-picker.sh")" = "grep-picker.sh" ] \
-  && ok "rg-picker.sh -> grep-picker.sh symlink" || bad "rg-picker.sh symlink"
+# Verify obsolete symlinks are removed
+[ ! -e "$ROOT/tmux/.config/tmux/files-picker.sh" ] && \
+[ ! -e "$ROOT/tmux/.config/tmux/dir-peek.sh" ] && \
+[ ! -e "$ROOT/tmux/.config/tmux/dir-picker.sh" ] && \
+[ ! -e "$ROOT/tmux/.config/tmux/rg-picker.sh" ] && \
+[ ! -e "$ROOT/tmux/.config/tmux/sesh-picker.sh" ] \
+  && ok "obsolete symlinks cleanly removed from tmux config" || bad "obsolete symlinks still present"
 
 # Popup launcher validation (native tmux display-popup)
 grep -q 'display-popup' "$FILES_SCRIPT" \
@@ -280,10 +274,10 @@ grep -q 'display-popup' "$GREP_SCRIPT" \
 echo -e "\n[4/6] Validating tmux.conf Bindings..."
 CONF="$ROOT/tmux/.config/tmux/tmux.conf"
 
-grep -qE "bind-key \"e\" run-shell \".*(workspace-picker|files-picker)\.sh '#{pane_id}' '#{pane_current_path}'\"" "$CONF" \
+grep -qE "bind-key \"e\" run-shell \".*workspace-picker\.sh '#{pane_id}' '#{pane_current_path}'\"" "$CONF" \
   && ok "tmux.conf: prefix + e -> workspace-picker.sh" || bad "tmux.conf prefix+e"
 
-grep -qE "bind-key C-e run-shell \".*(workspace-picker|files-picker)\.sh '#{pane_id}' '#{pane_current_path}'\"" "$CONF" \
+grep -qE "bind-key C-e run-shell \".*workspace-picker\.sh '#{pane_id}' '#{pane_current_path}'\"" "$CONF" \
   && ok "tmux.conf: prefix + C-e -> workspace-picker.sh" || bad "tmux.conf prefix+C-e"
 
 grep -q "bind-key \"/\" run-shell \".*grep-picker.sh '#{pane_id}' '#{pane_current_path}'\"" "$CONF" \

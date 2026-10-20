@@ -28,10 +28,12 @@ ORIGIN="${1:-}"
 if [ -z "$ORIGIN" ]; then
   ORIGIN="$(tmux display-message -p -t '{last}' '#{pane_id}' 2>/dev/null || true)"
 fi
+export WM_ORIGIN_PANE="$ORIGIN"
+export WM_ORIGIN_CWD="${2:-$PWD}"
 export MM_ORIGIN_PANE="$ORIGIN"
 export MM_ORIGIN_CWD="${2:-$PWD}"
 
-MM_BIN="$HOME/.local/bin/wm"
-[ -x "$MM_BIN" ] || MM_BIN="$(command -v wm 2>/dev/null || command -v mm 2>/dev/null || echo wm)"
+WM_BIN="$HOME/.local/bin/wm"
+[ -x "$WM_BIN" ] || WM_BIN="$(command -v wm 2>/dev/null || command -v mm 2>/dev/null || echo wm)"
 
-exec "$MM_BIN" -o keybindings
+exec "$WM_BIN" -o keybindings

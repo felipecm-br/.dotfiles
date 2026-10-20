@@ -12,7 +12,7 @@ TOK_CMD=/tmp/scrollback-picker-cmd.txt
 TOK_PATH=/tmp/scrollback-picker-path.txt
 TOK_URL=/tmp/scrollback-picker-url.txt
 TOK_SHA=/tmp/scrollback-picker-sha.txt
-LOG=/tmp/scrollback-picker-mm.log
+LOG=/tmp/scrollback-picker-wm.log
 
 if [ -z "${TMUX_POPUP:-}" ]; then
   ORIGIN_ARG="${1:-}"
@@ -36,11 +36,13 @@ ORIGIN="${1:-}"
 if [ -z "$ORIGIN" ]; then
   ORIGIN="$(tmux display-message -p -t '{last}' '#{pane_id}' 2>/dev/null || true)"
 fi
+export WM_ORIGIN_PANE="$ORIGIN"
+export WM_ORIGIN_CWD="${2:-}"
 export MM_ORIGIN_PANE="$ORIGIN"
 export MM_ORIGIN_CWD="${2:-}"
 
-MM_BIN="$HOME/.local/bin/wm"
-[ -x "$MM_BIN" ] || MM_BIN="$(command -v wm 2>/dev/null || command -v mm 2>/dev/null || echo mm)"
+WM_BIN="$HOME/.local/bin/wm"
+[ -x "$WM_BIN" ] || WM_BIN="$(command -v wm 2>/dev/null || command -v mm 2>/dev/null || echo wm)"
 
 if ! tmux capture-pane -pJS - -t "$ORIGIN" 2>/dev/null | sed '/^$/d' > "$SRC"; then
   tmux display-message "scrollback: capture-pane falhou ($ORIGIN)"
@@ -158,13 +160,13 @@ if [ ! -s "$TOK_ALL" ]; then
 fi
 
 # Items come from [start] command (file), never from a pipe
-chosen="$("$MM_BIN" -o scrollback-picker)" || exit 0
+chosen="$("$WM_BIN" -o scrollback-picker)" || exit 0
 [ -n "$chosen" ] || exit 0
 
 # Clipboard + confirm run detached from the popup: the popup closes immediately
 trap '' HUP
 {
-  echo "$(date '+%T') mm exited, copying $(printf '%s' "$chosen" | wc -c) bytes"
+  echo "$(date '+%T') wm exited, copying $(printf '%s' "$chosen" | wc -c) bytes"
   if command -v wl-copy >/dev/null 2>&1; then
     printf '%s' "$chosen" | wl-copy
   elif command -v xclip >/dev/null 2>&1; then

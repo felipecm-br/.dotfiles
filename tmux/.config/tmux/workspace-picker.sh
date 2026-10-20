@@ -51,11 +51,13 @@ fi
 CWD="${2:-$HOME}"
 [ -d "$CWD" ] || { tmux display-message "workspace-picker: directory not found: $CWD"; exit 1; }
 
+export WM_ORIGIN_PANE="$ORIGIN"
+export WM_ORIGIN_CWD="$CWD"
 export MM_ORIGIN_PANE="$ORIGIN"
 export MM_ORIGIN_CWD="$CWD"
 
-MM_BIN="$HOME/.local/bin/wm"
-[ -x "$MM_BIN" ] || MM_BIN="$(command -v wm 2>/dev/null || command -v mm 2>/dev/null || echo wm)"
+WM_BIN="$HOME/.local/bin/wm"
+[ -x "$WM_BIN" ] || WM_BIN="$(command -v wm 2>/dev/null || command -v mm 2>/dev/null || echo wm)"
 
 # Prefer dedicated workspace preset (with 60%/100% layouts and ctrl-v insert), fallback to jump
 if [ -f "$HOME/.config/waymaker/presets/workspace.toml" ]; then
@@ -67,12 +69,12 @@ fi
 tmux set -p allow-passthrough all 2>/dev/null || true
 tmux set -g allow-passthrough all 2>/dev/null || true
 
-chosen="$(cd "$CWD" && "$MM_BIN" -o "$PRESET")" || exit 0
+chosen="$(cd "$CWD" && "$WM_BIN" -o "$PRESET")" || exit 0
 [ -n "$chosen" ] || exit 0
 
 trap '' HUP
 {
-  echo "$(date '+%T') mm files exited, copying paths"
+  echo "$(date '+%T') wm files exited, copying paths"
   if command -v wl-copy >/dev/null 2>&1; then
     printf '%s' "$chosen" | wl-copy
   elif command -v xclip >/dev/null 2>&1; then

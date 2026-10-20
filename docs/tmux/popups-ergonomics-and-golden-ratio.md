@@ -132,7 +132,7 @@ The **Golden Ratio** ($\phi = \frac{1 + \sqrt{5}}{2} \approx 1.618$) provides th
 
 ### 3.1 Dynamic Visual Hierarchy & Contrast Model (Window Picker)
 
-The Window Picker (`prefix + s` / [`window-picker.sh`](../../tmux/.config/tmux/window-picker.sh) backed by [`window-picker.toml`](../../tmux/.config/tmux/window-picker.toml)) implements a zero-background-fill contrast hierarchy designed to eliminate cognitive noise across multi-session, multi-window navigation:
+The Window Picker (`prefix + s` / [`window-picker.sh`](../../tmux/.config/tmux/window-picker.sh) backed by [`window-picker.toml`](../../waymaker/.config/waymaker/presets/window-picker.toml)) implements a zero-background-fill contrast hierarchy designed to eliminate cognitive noise across multi-session, multi-window navigation:
 
 1. **Zero Background Clutter (`bg = ""` / Transparent)**:
    The focused candidate retains transparent background continuity, avoiding heavy solid-color cursor bars that clash with custom terminal color schemes or obscure syntax highlights in dense TUIs.
@@ -186,12 +186,12 @@ Every interactive popup, picker, and confirmation dialog has been harmonized und
 
 | Scope | Preset / Script | Uniform Footer Contract |
 | :--- | :--- | :--- |
-| **Cockpit HUD** | [`cockpit-picker.toml`](../../tmux/.config/tmux/cockpit-picker.toml) | `{cyan,bold:Enter} Jump │ y/n Ack │ r Review │ i Input │ g Git │ a Agents │ Tab Worktrees │ ? Help │ Esc Exit` |
+| **Cockpit HUD** | [`cockpit-picker.toml`](../../waymaker/.config/waymaker/presets/cockpit-picker.toml) | `{cyan,bold:Enter} Jump │ y/n Ack │ r Review │ i Input │ g Git │ a Agents │ Tab Worktrees │ ? Help │ Esc Exit` |
 | **AWT Worktrees** | [`awt.toml`](../../awt/.config/waymaker/presets/awt.toml) | `{cyan,bold:Enter} Connect │ Tab Cockpit │ c New │ S Ship │ m Merge │ R Rebase │ P PR │ d Delete │ p Preview │ Esc Exit` |
 | **AWT PR Review** | [`awt-pr.toml`](../../awt/.config/waymaker/presets/awt-pr.toml) | `{cyan,bold:Enter} Checkout │ Tab Cycle Tab │ C-e Chrome │ C-d Diff │ p Preview │ Esc Exit` |
 | **AWT Sub-Wizards** | `awt-prompt`, `awt-ai`, `awt-base`, `awt-type` | `{cyan,bold:Enter} Confirm/Select │ Esc Back/Cancel` |
-| **Tmux Windows** | [`window-picker.toml`](../../tmux/.config/tmux/window-picker.toml) | `{cyan,bold:Enter} Switch │ t Sessions │ / Filter │ n New │ d Kill │ ? Help │ Esc Exit` |
-| **Tmux Sessions** | [`session-picker.toml`](../../tmux/.config/tmux/session-picker.toml) | `{cyan,bold:Enter} Connect │ c Cockpit │ Tab Cycle │ / Filter │ d Kill │ Esc Exit` |
+| **Tmux Windows** | [`window-picker.toml`](../../waymaker/.config/waymaker/presets/window-picker.toml) | `{cyan,bold:Enter} Switch │ t Sessions │ / Filter │ n New │ d Kill │ ? Help │ Esc Exit` |
+| **Tmux Sessions** | [`session-picker.toml`](../../waymaker/.config/waymaker/presets/session-picker.toml) | `{cyan,bold:Enter} Connect │ c Cockpit │ Tab Cycle │ / Filter │ d Kill │ Esc Exit` |
 | **Live Ripgrep** | [`rg.toml`](../../waymaker/.config/waymaker/presets/rg.toml) | `{cyan,bold:Enter} Nvim │ C-v Insert │ y Copy │ J/K Scroll │ C-/ Layout │ C-s Case │ C-w Word │ Esc Exit` |
 | **Workspace / Files** | [`workspace.toml`](../../waymaker/.config/waymaker/presets/workspace.toml) | `{cyan,bold:Enter} Full │ Tab Cycle │ C-h/l Dir │ C-j/k Move │ C-d/u Scroll │ C-v Insert │ C-e Edit │ C-y Copy │ Esc Exit` |
 | **Keybindings HUD** | [`keybindings.toml`](../../waymaker/.config/waymaker/presets/keybindings.toml) | `{cyan,bold:Enter} Run │ Tab Filter │ y Copy │ J/K Scroll │ Esc Exit` |
@@ -285,16 +285,16 @@ To prevent accidental dismissal while inspecting a diff or composing a commit me
 
 ## 🔗 Related Repository Files
 * [`tmux/.config/tmux/cockpit-picker.sh`](../../tmux/.config/tmux/cockpit-picker.sh): AI Fleet Cockpit & Window Manager with `󱂬` badge.
-* [`tmux/.config/tmux/cockpit-picker.toml`](../../tmux/.config/tmux/cockpit-picker.toml): Matchmaker preset with contextual agent triage, bidirectional Lazygitrs toggle (`g`), and window management.
+* [`waymaker/.config/waymaker/presets/cockpit-picker.toml`](../../waymaker/.config/waymaker/presets/cockpit-picker.toml): Matchmaker preset with contextual agent triage, bidirectional Lazygitrs toggle (`g`), and window management.
 * [`tmux/.config/tmux/cockpit-picker-preview.sh`](../../tmux/.config/tmux/cockpit-picker-preview.sh): Layout 0 bottom-anchored live terminal snapshot and pending review notes footer.
 * [`tmux/.config/tmux/cockpit-picker-help.sh`](../../tmux/.config/tmux/cockpit-picker-help.sh): Layout 1 telemetry heatmap and keybindings HUD.
 * [`tmux/.config/tmux/cockpit-picker-diff.sh`](../../tmux/.config/tmux/cockpit-picker-diff.sh): Layout 2 live git diff inspector with syntax highlighting and churn stats.
 * [`tmux/.config/tmux/window-picker.sh`](../../tmux/.config/tmux/window-picker.sh): Golden ratio window picker with `󱂬` badge.
-* [`tmux/.config/tmux/window-picker.toml`](../../tmux/.config/tmux/window-picker.toml): Matchmaker preset with dynamic group header and row styling.
+* [`waymaker/.config/waymaker/presets/window-picker.toml`](../../waymaker/.config/waymaker/presets/window-picker.toml): Matchmaker preset with dynamic group header and row styling.
 * [`tmux/.config/tmux/window-picker-items.sh`](../../tmux/.config/tmux/window-picker-items.sh): Session and window item generator with ANSI color mapping.
 * [`tmux/.config/tmux/window-picker-preview.sh`](../../tmux/.config/tmux/window-picker-preview.sh): Bottom-anchored pane preview generator with trailing whitespace trimming.
 * [`tmux/.config/tmux/session-picker.sh`](../../tmux/.config/tmux/session-picker.sh): Session picker with `⚡` badge and cyclic `Tab` source rotation.
-* [`tmux/.config/tmux/session-picker.toml`](../../tmux/.config/tmux/session-picker.toml): Matchmaker preset with multi-mode prompt icons and cyclic reload binds.
+* [`waymaker/.config/waymaker/presets/session-picker.toml`](../../waymaker/.config/waymaker/presets/session-picker.toml): Matchmaker preset with multi-mode prompt icons and cyclic reload binds.
 * [`tmux/.config/tmux/lazygitrs-popup.sh`](../../tmux/.config/tmux/lazygitrs-popup.sh): Lazygitrs popup with `󰊢` badge and Git orange theme.
 * [`tmux/.config/tmux/ai-agent-bell-popup.sh`](../../tmux/.config/tmux/ai-agent-bell-popup.sh): Reactive notification dispatcher with `󰮯` badge.
 * [`waymaker/.config/waymaker/presets/jump.toml`](../../waymaker/.config/waymaker/presets/jump.toml): Waymaker Jump preset.

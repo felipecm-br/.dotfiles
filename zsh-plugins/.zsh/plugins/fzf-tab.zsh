@@ -2,8 +2,8 @@
 if [ -f "${HOME}/.zsh-plugins/fzf-tab/fzf-tab.plugin.zsh" ]; then
     source "${HOME}/.zsh-plugins/fzf-tab/fzf-tab.plugin.zsh"
 
-    # Use Matchmaker (mm-ftb) as the exclusive completion UI engine
-    zstyle ':fzf-tab:*' fzf-command mm-ftb
+    # Use Waymaker (wm-ftb) as the exclusive completion UI engine
+    zstyle ':fzf-tab:*' fzf-command wm-ftb
 
     # Switch between tab groups with < and >
     zstyle ':fzf-tab:*' switch-group '<' '>'

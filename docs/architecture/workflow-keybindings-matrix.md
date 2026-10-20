@@ -296,6 +296,6 @@ The table below consolidates the definitive keybindings across all layers, audit
 * [`docs/architecture/zero-friction-file-transfer-benchmark.md`](zero-friction-file-transfer-benchmark.md): Quantitative KLM-GOMS benchmark and architectural guide for Zero-Friction Frecency 2.0 file transfer and navigation.
 * [`docs/tmux/popups-ergonomics-and-golden-ratio.md`](../tmux/popups-ergonomics-and-golden-ratio.md): Golden Ratio geometry and visual semiotics.
 * [`docs/GIT_WORKTREE_AGENTIC_WORKFLOW.md`](../GIT_WORKTREE_AGENTIC_WORKFLOW.md): Agent worktree orchestrator and multi-agent Git workflow.
-* [`docs/shell/completion.md`](../shell/completion.md): Matchmaker completion architecture.
-* [`docs/shell/matchmaker-presets.md`](../shell/matchmaker-presets.md): Matchmaker presets reference.
+* [`docs/shell/completion.md`](../shell/completion.md): Waymaker completion architecture.
+* [`docs/shell/waymaker-presets.md`](../shell/waymaker-presets.md): Waymaker presets reference.
 

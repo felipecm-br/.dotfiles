@@ -4,7 +4,7 @@
 set -e
 
 # Buffer candidates in RAM disk (/dev/shm) for instant, zero-disk I/O access
-tmp_candidates=$(mktemp -p /dev/shm "/dev/shm/mm-ftb-XXXXXX" 2>/dev/null || mktemp "/tmp/mm-ftb-XXXXXX")
+tmp_candidates=$(mktemp -p /dev/shm "/dev/shm/wm-ftb-XXXXXX" 2>/dev/null || mktemp "/tmp/wm-ftb-XXXXXX")
 cat > "$tmp_candidates"
 
 # Exit silently if no candidates were emitted by Zsh completion

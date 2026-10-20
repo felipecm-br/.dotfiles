@@ -3,12 +3,12 @@
 -- Add any additional keymaps here
 
 -- =============================================================================
--- Matchmaker (mm) Native Float Picker for Neovim
+-- Waymaker (wm) Native Float Picker for Neovim
 -- =============================================================================
-local function mm_picker(preset)
+local function wm_picker(preset)
   preset = preset or "nvim"
   local tmp = vim.fn.tempname()
-  local cmd = string.format("mm -o %s > %s", preset, vim.fn.fnameescape(tmp))
+  local cmd = string.format("wm -o %s > %s", preset, vim.fn.fnameescape(tmp))
 
   local buf = vim.api.nvim_create_buf(false, true)
   local width = math.floor(vim.o.columns * 0.85)
@@ -48,8 +48,11 @@ local function mm_picker(preset)
   vim.cmd("startinsert")
 end
 
-vim.keymap.set("n", "<leader>mm", function() mm_picker("nvim") end, { desc = "Matchmaker File Picker" })
-vim.keymap.set("n", "<leader>mj", function() mm_picker("jump") end, { desc = "Matchmaker Jump Picker" })
+vim.keymap.set("n", "<leader>wm", function() wm_picker("nvim") end, { desc = "Waymaker File Picker" })
+vim.keymap.set("n", "<leader>wj", function() wm_picker("jump") end, { desc = "Waymaker Jump Picker" })
+-- Backward compatibility aliases
+vim.keymap.set("n", "<leader>mm", function() wm_picker("nvim") end, { desc = "Waymaker File Picker" })
+vim.keymap.set("n", "<leader>mj", function() wm_picker("jump") end, { desc = "Waymaker Jump Picker" })
 
 -- =============================================================================
 -- Reopen Last Closed Buffer (<leader>br / <C-S-t>)

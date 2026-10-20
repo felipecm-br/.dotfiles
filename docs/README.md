@@ -22,7 +22,7 @@ Welcome to the central documentation index for this Arch Linux + Omarchy dotfile
 ### 🐚 1. Shell & Navigation (`docs/shell/`)
 - [**Smart Tab Completion & Waymaker**](shell/completion.md): Context-aware `<Tab>`, auto-spacing on aliases (`gco<Tab>`), dual backends (`Ctrl+N` vs `Ctrl+F`), and the [`ftb.toml`](../waymaker/.config/waymaker/presets/ftb.toml) preset with on-demand preview (`Ctrl+P`).
 - [**Zsh Vi Mode & Custom Surrounds**](shell/vi-mode.md): `zsh-vi-mode` integration, dynamic Starship prompt sync (`ZVM_MODE`), and unified surround text objects (`ib`, `ab`, `iq`, `aq`).
-- [**Waymaker (`wm`) Presets Reference**](shell/matchmaker-presets.md): Presets configuration guide for fuzzy finder layouts, preview commands, and navigation modes in `~/.config/waymaker/presets/`.
+- [**Waymaker (`wm`) Presets Reference**](shell/waymaker-presets.md): Presets configuration guide for fuzzy finder layouts, preview commands, and navigation modes in `~/.config/waymaker/presets/`.
 
 ### 🪟 2. Tmux & Multiplexer (`docs/tmux/`)
 - [**Popups Ergonomics, Biomechanics & Golden Ratio**](tmux/popups-ergonomics-and-golden-ratio.md): Golden Ratio ($\phi$) popup architecture, 40/60 column split, 1-touch Home Row navigation, uniform bichromatic footers, and sub-100ms non-blocking HUDs.

@@ -37,7 +37,7 @@ docs/
 ├── shell/                         # 🐚 Shell, ZLE & Waymaker Pickers
 │   ├── completion.md              # Smart Tab completion (_smart_tab), auto-spacing, wm-ftb
 │   ├── vi-mode.md                 # Zsh vi-mode, Starship live mode sync, surround text objects
-│   └── matchmaker-presets.md      # Waymaker (wm) TOML presets, nav mode, column splitting
+│   └── waymaker-presets.md        # Waymaker (wm) TOML presets, nav mode, column splitting
 │
 ├── tmux/                          # 🪟 Multiplexer, Popups & Telemetry
 │   ├── popups-ergonomics-and-golden-ratio.md    # Golden Ratio (phi) geometry, pure icon badges, bichromatic footers

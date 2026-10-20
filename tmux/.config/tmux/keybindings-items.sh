@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-# keybindings-items.sh — emit structured keybindings for Matchmaker/Waymaker HUD.
+# keybindings-items.sh — emit structured keybindings for Waymaker HUD.
 # Usage: keybindings-items.sh [all|tmux|shell|frecency|hypr]
 set -u
 
@@ -48,8 +48,8 @@ emit_shell() {
   cat <<'EOF'
 󰈞  <Tab>	Smart Tab: Directory Jump or Buffer Insert	shell	shell-smart-tab	info
 󰛨  <Tab>	Inline Ghost Text Autosuggest Accept	shell	shell-autosuggest	info
-󱁐  <Tab>	Matchmaker Multi-Column Command Completion	shell	shell-ftb	info
-󰌌  Ctrl + F	Matchmaker Directory/File Jump Widget	shell	shell-jump	info
+󱁐  <Tab>	Waymaker Multi-Column Command Completion	shell	shell-ftb	info
+󰌌  Ctrl + F	Waymaker Directory/File Jump Widget	shell	shell-jump	info
 󰊢  Ctrl + G	Lazygitrs Floating Popup & Dual-Diff	shell	shell-lazygitrs	~/.config/tmux/lazygitrs-popup.sh
 󰘳  Ctrl + T	IntelliShell Fuzzy Command Catalog (29k+)	shell	shell-intelli	info
 󰋚  Ctrl + R	Atuin Temporal & Contextual History Search	shell	shell-atuin	info
@@ -68,7 +68,7 @@ emit_frecency() {
 󰪹  mt	Move Files & Stay in Current Directory	frecency	frecency-mt	info
 󰒭  mtg	Move Files & Jump Immediately to Destination	frecency	frecency-mtg	info
 󰌌  j / z	Direct Home/Frecency Jump (Single Left Index)	frecency	frecency-jump	info
-󰍉  ji / zi	Interactive Matchmaker Tree Jump & Ancestor	frecency	frecency-jump-interactive	info
+󰍉  ji / zi	Interactive Waymaker Tree Jump & Ancestor	frecency	frecency-jump-interactive	info
 EOF
 }
 

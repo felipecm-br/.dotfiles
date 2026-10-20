@@ -372,5 +372,5 @@ pasteto: Arquivo não encontrado: missing_file.txt
 
 * [`docs/architecture/terminal-ergonomics-and-ux-manifesto.md`](terminal-ergonomics-and-ux-manifesto.md): Core HCI principles, KLM/GOMS model, and Doherty threshold.
 * [`docs/architecture/workflow-keybindings-matrix.md`](workflow-keybindings-matrix.md): Master keybinding matrix, biomechanical audit, and Layer 2.1 integration.
-* [`docs/shell/completion.md`](../shell/completion.md): Matchmaker completion architecture and `_smart_tab` integration.
-* [`docs/shell/matchmaker-presets.md`](../shell/matchmaker-presets.md): Reference for `jump.toml` and other Matchmaker presets.
+* [`docs/shell/completion.md`](../shell/completion.md): Waymaker completion architecture and `_smart_tab` integration.
+* [`docs/shell/waymaker-presets.md`](../shell/waymaker-presets.md): Reference for `jump.toml` and other Waymaker presets.

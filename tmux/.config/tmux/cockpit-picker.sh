@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-# cockpit-picker.sh — Fleet & Window Cockpit HUD powered by Matchmaker
+# cockpit-picker.sh — Fleet & Window Cockpit HUD powered by Waymaker
 # Displays prioritized agent states, waiting age, git branch/churn, and contextual previews.
 
 if [ -x "$HOME/.local/bin/waymux" ]; then
@@ -131,11 +131,20 @@ while true; do
     esac
   fi
 
-  MM_BIN="$HOME/.local/bin/wm"
-  [ -x "$MM_BIN" ] || MM_BIN="$(command -v wm 2>/dev/null || command -v mm 2>/dev/null || echo "wm")"
+  WM_BIN="$HOME/.local/bin/wm"
+  [ -x "$WM_BIN" ] || WM_BIN="$(command -v wm 2>/dev/null || command -v mm 2>/dev/null || echo "wm")"
 
-  chosen=$(printf '%s\n' "$ITEMS" | "$MM_BIN" \
-    --config "$SCRIPT_DIR/cockpit-picker.toml" \
+  PRESET="$HOME/.config/waymaker/presets/cockpit-picker.toml"
+  if [ -f "$PRESET" ]; then
+    CONFIG_OPT=(--config "$PRESET")
+  elif [ -f "$SCRIPT_DIR/cockpit-picker.toml" ]; then
+    CONFIG_OPT=(--config "$SCRIPT_DIR/cockpit-picker.toml")
+  else
+    CONFIG_OPT=(-o cockpit-picker)
+  fi
+
+  chosen=$(printf '%s\n' "$ITEMS" | "$WM_BIN" \
+    "${CONFIG_OPT[@]}" \
     results.spinner="$TMUX_SPINNER_NAME" \
     --pos "$START_IDX" \
     --color "spinner:$TMUX_SPINNER_COLOR" \

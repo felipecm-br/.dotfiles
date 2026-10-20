@@ -13,7 +13,7 @@ function tmux-sessions() {
     local wm_bin="$HOME/.local/bin/wm"
     [ -x "$wm_bin" ] || wm_bin="$(command -v wm 2>/dev/null || command -v mm 2>/dev/null || echo "wm")"
     local preset="$HOME/.config/waymaker/presets/session-picker.toml"
-    [ -f "$preset" ] || preset="$HOME/.config/tmux/session-picker.toml"
+    [ -f "$preset" ] || preset="session-picker"
     local chosen
     chosen=$("$wm_bin" session list --icons | grep -Ev '(_lazygitrs|_popups|[[:space:]]+\.)' | "$wm_bin" -o "$preset")
     zle reset-prompt > /dev/null 2>&1 || true
