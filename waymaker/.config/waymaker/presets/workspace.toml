@@ -1,4 +1,4 @@
-# Matchmaker / Waymaker Workspace Inspector Preset (`wm -o workspace` / `wm -o files`)
+# Waymaker Workspace Inspector Preset (`wm -o workspace` / `wm -o files`)
 # Optimized for quick inspection of workspace files, markdown diagrams, and AI-generated content.
 # Supports 60% Golden Ratio split and 100% Full-Modal preview toggle via Ctrl+P / Enter.
 # Supports Ctrl+V to insert the file path directly into the origin pane/AI prompt.

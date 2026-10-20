@@ -223,7 +223,7 @@ Triggered directly with `Ctrl+F` (or `<Tab>` on an empty prompt). Optimized for 
 
 ## 7. Zero-Friction & Object-First Buffer Ergonomics
 
-When you exit Matchmaker (`_jump_widget`), the widget handles output using **Context-Aware Buffer Placement** and **Canonical Path Resolution**:
+When you exit Waymaker (`_jump_widget`), the widget handles output using **Context-Aware Buffer Placement** and **Canonical Path Resolution**:
 
 ```mermaid
 flowchart TD
@@ -237,7 +237,7 @@ flowchart TD
 
 ### 1. Object-First Command Composition (`CURSOR=0` on Empty Buffer)
 When starting from an empty prompt (e.g. hitting `Ctrl+F`), the mental model is **"Object First, Verb Second"**:
-1. You open Matchmaker and pick `completion.md` (or multiple files).
+1. You open Waymaker and pick `completion.md` (or multiple files).
 2. The widget places the cursor at index `0` with a leading space:
    ```zsh
    ❯ █ ~/.dotfiles/main/docs/shell/completion.md

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Matchmaker Agent Worktree Lifecycle Hook: post-create
+# Waymaker Agent Worktree Lifecycle Hook: post-create
 # Args: <worktree_path> <branch_name> <base_branch>
 
 wt_path="$1"

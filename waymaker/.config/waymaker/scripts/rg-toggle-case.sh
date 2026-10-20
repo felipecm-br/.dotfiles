@@ -1,11 +1,11 @@
 #!/bin/sh
-# rg-toggle-case.sh — Toggles match-case mode for the mm rg preset.
-# Reads MM_STORE (ic / cs / ww / cs+ww), flips case-sensitivity,
-# then emits Store / SetStyledPrompt / Reload actions to mm Transform.
+# rg-toggle-case.sh — Toggles match-case mode for the wm rg preset.
+# Reads WM_STORE / MM_STORE (ic / cs / ww / cs+ww), flips case-sensitivity,
+# then emits Store / SetStyledPrompt / Reload actions to wm Transform.
 #
 # Called by: ctrl-s bind in rg.toml  (`Transform(sh ~/.config/waymaker/scripts/rg-toggle-case.sh)`)
 
-MODE="${MM_STORE:-ic}"
+MODE="${WM_STORE:-${MM_STORE:-ic}}"
 case "$MODE" in
   cs)    NEW="ic";    PROMPT="{cyan: rg> }" ;;
   ww)    NEW="cs+ww"; PROMPT="{yellow,bold: rg [Aa][W]> }" ;;

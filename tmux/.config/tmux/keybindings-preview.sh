@@ -365,7 +365,7 @@ EOF
 
   shell-jump)
     cat <<'EOF'
-### 󰌌 Matchmaker Jump Widget (`Ctrl + F`)
+### 󰌌 Waymaker Jump Widget (`Ctrl + F`)
 Direct fuzzy picker for files and directories with Object-First insertion.
 
 - **Ergonomics**: Left index inward roll ($H=0$).
@@ -409,7 +409,7 @@ EOF
 World-class benchmarked file transfer system ($20.5\times$ faster than CLI, $32.7\times$ faster than AI).
 
 - **`ptl`**: Paste files to **Last Target** ($220\text{ ms}$) — zero interactive prompts!
-- **`pt`**: Paste files to target picked via Matchmaker & stay in current directory.
+- **`pt`**: Paste files to target picked via Waymaker & stay in current directory.
 - **`ptg`**: Paste files and `cd` directly to the destination.
 - **`mtl` / `mt` / `mtg`**: Equivalent ultra-fast Move commands.
 EOF

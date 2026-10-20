@@ -1,6 +1,6 @@
 # TUI Popup Architecture, Biomechanical Ergonomics & The Golden Ratio
 
-This document formalizes the state-of-the-art architecture for floating terminal interfaces (Popups, Pickers, Modals, and HUDs) engineered across the dotfiles ecosystem (`tmux`, `matchmaker`, `lazygitrs`, `sesh`).
+This document formalizes the state-of-the-art architecture for floating terminal interfaces (Popups, Pickers, Modals, and HUDs) engineered across the dotfiles ecosystem (`tmux`, `waymaker`, `lazygitrs`, `sesh`).
 
 The primary objective of this architecture is to achieve **Zero Cognitive and Motor Friction**, **sub-perceptual latency (<100ms)**, **maximal Signal-to-Noise ratio via pure preattentive glyph badges**, and **universal dynamic color synchronization with the Omarchy theme engine**.
 
@@ -25,12 +25,12 @@ flowchart TD
 $$T_{\text{execute}} = \sum T_K + \sum T_P + \sum T_H + \sum T_M + \sum T_R$$
 * **$T_H$ (Hand Homing):** **$0\text{ ms}$**. Hands remain anchored on the Home Row ($ASDF / JKL;$).
 * **$T_M$ (Mental Preparation / Hesitation):** Reduced toward **$0\text{ ms}$** through preattentive color signifiers on borders and universal mnemonic muscle pathways (`Esc` unwinds/cancels, `Ctrl+G` opens Git, `prefix+s` switches windows).
-* **$T_K$ (Keystroke Cost):** Reduced from $240\text{ ms}$ (compound chords) to **$120\text{ ms}$** via direct single keys in navigation mode (`nav` in Matchmaker).
+* **$T_K$ (Keystroke Cost):** Reduced from $240\text{ ms}$ (compound chords) to **$120\text{ ms}$** via direct single keys in navigation mode (`nav` in Waymaker).
 
 ### 1.2 Doherty Threshold & Temporal Perception (<100ms)
 When computer response occurs under **100 milliseconds**, the human brain experiences the biological illusion of *"human-computer symbiosis"* and uninterrupted cognitive flow.
 * **Zero-Fork Execution:** `lazygitrs` (native Rust) initializes in **~3ms** and exits in **0ms** via Tmux's `-E` flag.
-* **Zero-Flicker Double Buffering:** `delay_clear = true` and `debounce_ms = 20` in `matchmaker` eliminate terminal redraw flash during rapid vertical list scrolling.
+* **Zero-Flicker Double Buffering:** `delay_clear = true` and `debounce_ms = 20` in `waymaker` eliminate terminal redraw flash during rapid vertical list scrolling.
 * **Non-Blocking HUDs:** Ephemeral status feedback utilizes `tmux display-message` (<1ms), eliminating synchronous blocking modals.
 
 ---
@@ -40,7 +40,7 @@ When computer response occurs under **100 milliseconds**, the human brain experi
 ```text
 ╭── 󱂬 ──────────────────────────────────────────────────────────────────────╮  🟣 Mauve / Magenta
 │ 1. EPHEMERAL LAYER (Fast Pickers / Quick Selection < 5s)                  │  Dimensions: 75% × 60%
-│ • Window Picker, Sesh Picker, Matchmaker Jump. Dismissal: immediate [Esc] │
+│ • Window Picker, Sesh Picker, Waymaker Jump. Dismissal: immediate [Esc]   │
 ╰───────────────────────────────────────────────────────────────────────────╯
 
 ╭── 󰊢 ──────────────────────────────────────────────────────────────────────╮  🟠 Git Orange (colors.toml)
@@ -114,7 +114,7 @@ Whenever the system theme switches (`omarchy theme set <name>`), 100% of termina
 │        │  │                       │                             │  │        │
 │        │  │ 󱥂 0•  nvim    idle    │ $ git status -s             │  │        │
 │        │  │ 󰑮 1·  agent   work    │ M tmux/tmux.conf            │  │        │
-│        │  │   2·  zsh             │ M matchmaker/jump.toml      │  │        │
+│        │  │   2·  zsh             │ M waymaker/jump.toml        │  │        │
 │        │  │                       │                             │  │        │
 │        │  └───────────────────────┴─────────────────────────────┘  │        │
 │        │  [Enter] Switch  •  [t] Sessions  •  [/] Filter  •  [n] New  •  [d] Kill  •  [Esc] Exit │        │
@@ -224,13 +224,13 @@ The answer is **yes, completely and automatically**, through a three-tier synchr
             │                                   │
             ▼                                   ▼
  ┌─────────────────────────┐       ┌─────────────────────────┐
- │ Waymaker / Matchmaker   │       │ Popup Window Frames     │
+ │ Waymaker                │       │ Popup Window Frames     │
  │ {cyan,bold:Key}         │       │ display-popup -s bg=... │
  │ {darkgray:Action}       │       │ display-popup -b fg=... │
  └─────────────────────────┘       └─────────────────────────┘
 ```
 
-1. **Terminal ANSI Color Pipeline (Waymaker / Matchmaker Presets):**
+1. **Terminal ANSI Color Pipeline (Waymaker Presets):**
    - Waymaker presets specify colors using standard ANSI/Crossterm semantic names (`cyan`, `darkgray`).
    - The terminal emulator (Ghostty, Alacritty, Kitty, Foot) receives its active 16-color ANSI palette dynamically from Omarchy (`colors.toml`).
    - When switching themes (e.g. `omarchy theme set tokyo-night` $\to$ `everforest` $\to$ `rose-pine`), the terminal updates its ANSI color table:
@@ -285,16 +285,16 @@ To prevent accidental dismissal while inspecting a diff or composing a commit me
 
 ## 🔗 Related Repository Files
 * [`tmux/.config/tmux/cockpit-picker.sh`](../../tmux/.config/tmux/cockpit-picker.sh): AI Fleet Cockpit & Window Manager with `󱂬` badge.
-* [`waymaker/.config/waymaker/presets/cockpit-picker.toml`](../../waymaker/.config/waymaker/presets/cockpit-picker.toml): Matchmaker preset with contextual agent triage, bidirectional Lazygitrs toggle (`g`), and window management.
+* [`waymaker/.config/waymaker/presets/cockpit-picker.toml`](../../waymaker/.config/waymaker/presets/cockpit-picker.toml): Waymaker preset with contextual agent triage, bidirectional Lazygitrs toggle (`g`), and window management.
 * [`tmux/.config/tmux/cockpit-picker-preview.sh`](../../tmux/.config/tmux/cockpit-picker-preview.sh): Layout 0 bottom-anchored live terminal snapshot and pending review notes footer.
 * [`tmux/.config/tmux/cockpit-picker-help.sh`](../../tmux/.config/tmux/cockpit-picker-help.sh): Layout 1 telemetry heatmap and keybindings HUD.
 * [`tmux/.config/tmux/cockpit-picker-diff.sh`](../../tmux/.config/tmux/cockpit-picker-diff.sh): Layout 2 live git diff inspector with syntax highlighting and churn stats.
 * [`tmux/.config/tmux/window-picker.sh`](../../tmux/.config/tmux/window-picker.sh): Golden ratio window picker with `󱂬` badge.
-* [`waymaker/.config/waymaker/presets/window-picker.toml`](../../waymaker/.config/waymaker/presets/window-picker.toml): Matchmaker preset with dynamic group header and row styling.
+* [`waymaker/.config/waymaker/presets/window-picker.toml`](../../waymaker/.config/waymaker/presets/window-picker.toml): Waymaker preset with dynamic group header and row styling.
 * [`tmux/.config/tmux/window-picker-items.sh`](../../tmux/.config/tmux/window-picker-items.sh): Session and window item generator with ANSI color mapping.
 * [`tmux/.config/tmux/window-picker-preview.sh`](../../tmux/.config/tmux/window-picker-preview.sh): Bottom-anchored pane preview generator with trailing whitespace trimming.
 * [`tmux/.config/tmux/session-picker.sh`](../../tmux/.config/tmux/session-picker.sh): Session picker with `⚡` badge and cyclic `Tab` source rotation.
-* [`waymaker/.config/waymaker/presets/session-picker.toml`](../../waymaker/.config/waymaker/presets/session-picker.toml): Matchmaker preset with multi-mode prompt icons and cyclic reload binds.
+* [`waymaker/.config/waymaker/presets/session-picker.toml`](../../waymaker/.config/waymaker/presets/session-picker.toml): Waymaker preset with multi-mode prompt icons and cyclic reload binds.
 * [`tmux/.config/tmux/lazygitrs-popup.sh`](../../tmux/.config/tmux/lazygitrs-popup.sh): Lazygitrs popup with `󰊢` badge and Git orange theme.
 * [`tmux/.config/tmux/ai-agent-bell-popup.sh`](../../tmux/.config/tmux/ai-agent-bell-popup.sh): Reactive notification dispatcher with `󰮯` badge.
 * [`waymaker/.config/waymaker/presets/jump.toml`](../../waymaker/.config/waymaker/presets/jump.toml): Waymaker Jump preset.

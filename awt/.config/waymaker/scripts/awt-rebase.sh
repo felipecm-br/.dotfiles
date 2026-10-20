@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Matchmaker Agent Worktree Rebase Handler
+# Waymaker Agent Worktree Rebase Handler
 # Usage: awt-rebase.sh <branch> <worktree_path> <base_branch>
 
 branch_raw="$1"

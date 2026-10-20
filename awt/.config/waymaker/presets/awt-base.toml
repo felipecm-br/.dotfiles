@@ -1,4 +1,4 @@
-# Matchmaker Agent Worktree Base Branch Preset (`mm -o awt-base`)
+# Waymaker Agent Worktree Base Branch Preset (`wm -o awt-base`)
 
 [tui]
 mouse = true

@@ -1,4 +1,4 @@
-# Matchmaker Agent Worktree Preset (`mm -o awt`)
+# Waymaker Agent Worktree Preset (`wm -o awt`)
 # Interactive worktree switcher with Nav Mode, BASE branch column, ANSI colors, and multi-tab previews.
 
 [tui]

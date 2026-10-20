@@ -21,7 +21,7 @@ Where standard benchmark parameters in modern high-performance terminal environm
 | :--- | :--- | :--- | :---: | :---: | :---: |
 | **`ptl` (Frecency 2.0 Last)** | `ptl` + `Enter` direct on Home Row | $3K + M$ | **$220\text{ ms}$** | **$19.3\times$** | $0$ (Mechanized) |
 | **`ptg` (Frecency 2.0 Go)** | `ptg` + 2 chars fuzzy + `Enter` | $5K + 2M + R$ | **$750\text{ ms}$** | **$5.7\times$** | Low ($H \le 2$ bits) |
-| **Matchmaker `fm.rs`** | `v` (select), `y` (yank), `p` (paste) | $4K + 2M + R$ | **$850\text{ ms}$** | **$5.0\times$** | Low (Pure Vim) |
+| **Waymaker `fm.rs`** | `v` (select), `y` (yank), `p` (paste) | $4K + 2M + R$ | **$850\text{ ms}$** | **$5.0\times$** | Low (Pure Vim) |
 | **Traditional TUI (Yazi)** | Split pane, 8x `j/k`, space, `p` | $16K + 5M + 2R$ | **$3,800\text{ ms}$** | **$1.1\times$** | Medium (Divided focus) |
 | **Traditional CLI (`cp/mv`)** | Manual typing of long paths | $22K + 4M + 2R$ | **$4,500\text{ ms}$** | **$1.0\times$ (Baseline)** | High (Typo hazard) |
 | **AI Agent Natural Language** | Prompt typing in natural language | $45K + 2M + T_{\text{LLM}}$ | **$7,200\text{ ms}$** | **$0.6\times$** | High (Async waiting) |
@@ -32,7 +32,7 @@ Where standard benchmark parameters in modern high-performance terminal environm
 
 ### 3.1 Doherty Threshold (<100ms)
 When a system responds in under 100 milliseconds, human-computer interaction registers as real-time feedback without breaking the user's continuous train of thought.
-- **Speculative Cache:** Matchmaker loads directory contents into RAM ahead of cursor arrival, making `l` entry instantaneous (0ms perceived I/O).
+- **Speculative Cache:** Waymaker loads directory contents into RAM ahead of cursor arrival, making `l` entry instantaneous (0ms perceived I/O).
 - **Double-Buffering:** Setting `delay_clear = true` and `debounce_ms = 20` avoids flicker and partial terminal redraws.
 
 ### 3.2 Hick-Hyman Law & Entropy Reduction

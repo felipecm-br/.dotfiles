@@ -49,9 +49,9 @@ assert "title" in [col["name"] for col in pr["columns"]["names"]], "missing titl
 EOF
 
 if [ $? -eq 0 ]; then
-    pass "Matchmaker TOML presets have valid syntax, Ship [S], and PR [P] bindings"
+    pass "Waymaker TOML presets have valid syntax, Ship [S], and PR [P] bindings"
 else
-    fail "Matchmaker TOML preset contract violation"
+    fail "Waymaker TOML preset contract violation"
 fi
 
 # ── 2. Validate CLI Argument Parsing & Inline Dispatch ──

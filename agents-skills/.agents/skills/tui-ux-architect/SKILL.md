@@ -6,8 +6,8 @@ description: >-
   pickers, popups, modals, file managers, ZLE shell widgets, HUDs, keybindings, or keyboard workflows.
   Triggers on: terminal ergonomics, Home Row anchoring (H=0), MacBook hand physiology, avoiding
   Alt/Option chords, keyd dual-function CapsLock (Esc tap / Ctrl hold), inward rolls, sacred muscle
-  memory (j + Enter), Matchmaker TUI (mm -o jump, fm.rs, tri-modal sources), Polymorphic Zsh ZLE &
-  Frecency 2.0 (ptl, ptg, pt, mtl, mtg, mt, _smart_tab, mm_smart_chpwd), Lazygitrs Dual-Diff toggle
+  memory (j + Enter), Waymaker TUI (wm -o jump, fm.rs, tri-modal sources), Polymorphic Zsh ZLE &
+  Frecency 2.0 (ptl, ptg, pt, mtl, mtg, mt, _smart_tab, wm_smart_chpwd), Lazygitrs Dual-Diff toggle
   (Ctrl+G between Files and HEAD), Tmux Golden Ratio popups (75%x60%, 40/60 split), Omarchy dynamic
   theme color sync, auditory telemetry via waymux, KLM-GOMS modeling, Doherty threshold (<100ms),
   cognitive load reduction (Hick-Hyman, Miller, Sweller), triadic cold-color architecture
@@ -128,7 +128,7 @@ flowchart TD
   - Executed via bilateral inward rolling (right index `j` + right pinky `Enter` in $<100\text{ ms}$).
   - **NEVER alter, break, or intercept this reflex.**
 
-### 2.2 Core TUI & File Navigation Engine: Waymaker / Matchmaker (`wm -o jump` & `fm.rs`)
+### 2.2 Core TUI & File Navigation Engine: Waymaker (`wm -o jump` & `fm.rs`)
 - High-performance Rust binary (`wm` / `waymaker`, aliased to `mm`, `nucleo` SIMD, `fm.rs`).
 - **Flagship `jump` Mode (`wm -o jump` / `jump.toml`):** Multi-threaded SIMD fuzzy matching, adaptive frecency ranking, depth penalty (`depth_penalty = 15`), directory-first (`dir_first = true`), and typo tolerance.
 - **Tri-Modal Data Source Cycle (`@reloadnext` / `f` / `Ctrl+F` / `b`):**
@@ -137,7 +137,7 @@ flowchart TD
   - **Source 2 (Bookmarks):** `wm list --bookmarks` $\rightarrow$ Curated starred favorites (prompt ` `).
 - **Integrated File Manager Overlays (`fm.rs`):** In-place file manipulation with zero friction (`a` create, `r` rename, `d` trash, `y`/`x`/`p`/`P` clipboard & paste-into with directory traversal, `z`/`Z` compression).
 - **Semantic Disambiguation:**
-  - `u` in Waymaker/Matchmaker is **strictly reserved for `@undo`** (File Manager `UndoStack`) and clipboard restoration.
+  - `u` in Waymaker is **strictly reserved for `@undo`** (File Manager `UndoStack`) and clipboard restoration.
   - `Ctrl+U` is the **Ancestor Jump** (ascend multiple directory levels to root in 1 step).
 - **Speculative Directory Scanning:** Asynchronous Tokio background thread loads LRU cache of directory under cursor, delivering **0ms perceived I/O** when descending with `l`.
 - **Off-Thread Media Decoding:** Terminal preview pipeline (`ratatui_image`) isolated in `tokio::task::spawn_blocking`, guaranteeing sustained 60 FPS and 0ms render-thread hitching.
@@ -237,7 +237,7 @@ Whenever asked to **audit**, **design**, **refactor**, or **generate code** for 
 
 ### 5. Production-Ready Implementation Code
 - Complete, tested, low-latency implementation:
-  - Matchmaker TOML presets (`jump.toml`, `config.toml`, custom presets).
+  - Waymaker TOML presets (`jump.toml`, `config.toml`, custom presets).
   - Zero-fork shell scripts (Zsh/Bash) relying strictly on built-ins.
   - ZLE widgets (`_smart_tab`, `_jump_widget`) with Object-First ergonomics.
   - Multi-threaded Rust / Ratatui snippets with non-blocking event loops where applicable.
@@ -253,18 +253,18 @@ Whenever asked to **audit**, **design**, **refactor**, or **generate code** for 
 | :--- | :---: | :--- | :--- | :---: | :--- |
 | **`CapsLock` (Tap)** | Global | `Esc` / Unwind state | Single tap left pinky | $120\text{ ms}$ | $H=0$, zero wrist deviation |
 | **`j + Enter`** | Shell (Zsh) | Jump to `$HOME` (`cd ~`) | Inward bilateral roll (`j` $\to$ `Enter`) | $100\text{ ms}$ | Sacred immutable muscle memory |
-| **`j <query>`** | Shell (Zsh) | Frecency Jump with Fallback | Direct Home Row typing | $250\text{ ms}$ | Instant resolution via `mm list --dirs` |
+| **`j <query>`** | Shell (Zsh) | Frecency Jump with Fallback | Direct Home Row typing | $250\text{ ms}$ | Instant resolution via `wm list --dirs` |
 | **`ptl` / `mtl`** | Shell (Zsh) | Paste/Move to Last Target | Home Row mnemonic sequence | $220\text{ ms}$ | Eliminates repeated picker selection |
 | **`ptg` / `mtg`** | Shell (Zsh) | Paste/Move & Go (`cd`) | Home Row mnemonic + fast query | $750\text{ ms}$ | Eliminates subsequent `cd` command |
 | **`pt` / `mt`** | Shell (Zsh) | Paste/Move in Place | Home Row mnemonic + fast query | $750\text{ ms}$ | Retains current working directory |
-| **`Tab` (Empty)** | Shell (Zsh) | Trigger `mm -o jump` | Single tap left pinky | $120\text{ ms}$ | Object-First workflow without typing verbs |
+| **`Tab` (Empty)** | Shell (Zsh) | Trigger `wm -o jump` | Single tap left pinky | $120\text{ ms}$ | Object-First workflow without typing verbs |
 | **`Ctrl+G`** | Tmux / Shell | Launch Lazygitrs Popup | Inward roll (`CapsLock + G`) | $120\text{ ms}$ | Natural pinky $\to$ index inward roll |
 | **`Ctrl+G`** | Lazygitrs | Toggle Dual-Diff (`Files` $\leftrightarrow$ `HEAD`) | Inward roll (`CapsLock + G`) | $120\text{ ms}$ | 1-touch toggle between uncommitted & commit |
-| **`Ctrl+L` / `l`** | Matchmaker | Enter Directory (`ChDir`) | Direct key / Inward roll | $120\text{ ms}$ | Seamless traversal without Tab mode-switch |
-| **`Ctrl+H` / `h`** | Matchmaker | Ascend to Parent (`ChDir ..`) | Direct key / Inward roll | $120\text{ ms}$ | Seamless traversal without Tab mode-switch |
-| **`Ctrl+U`** | Matchmaker | Ancestor Jump (Ascend to root) | Inward roll (`CapsLock + U`) | $130\text{ ms}$ | Multi-level hierarchy ascent in 1 step |
-| **`u`** | Matchmaker `fm.rs` | `@undo` (File Manager UndoStack) | Direct key right index | $120\text{ ms}$ | Safe atomic rollback of file operations |
-| **`f` / `Ctrl+F`** | Matchmaker | Cycle Source (Local/Frec/Book) | Direct key / Inward roll | $120\text{ ms}$ | Instant preattentive source toggling |
+| **`Ctrl+L` / `l`** | Waymaker | Enter Directory (`ChDir`) | Direct key / Inward roll | $120\text{ ms}$ | Seamless traversal without Tab mode-switch |
+| **`Ctrl+H` / `h`** | Waymaker | Ascend to Parent (`ChDir ..`) | Direct key / Inward roll | $120\text{ ms}$ | Seamless traversal without Tab mode-switch |
+| **`Ctrl+U`** | Waymaker | Ancestor Jump (Ascend to root) | Inward roll (`CapsLock + U`) | $130\text{ ms}$ | Multi-level hierarchy ascent in 1 step |
+| **`u`** | Waymaker `fm.rs` | `@undo` (File Manager UndoStack) | Direct key right index | $120\text{ ms}$ | Safe atomic rollback of file operations |
+| **`f` / `Ctrl+F`** | Waymaker | Cycle Source (Local/Frec/Book) | Direct key / Inward roll | $120\text{ ms}$ | Instant preattentive source toggling |
 | **`Ctrl+S`** | Lazygitrs (Commits) | Open Log / Filter Menu | Inward roll (`CapsLock + S`) | $120\text{ ms}$ | Left hand home row chord without twist |
 | **`Ctrl+F`** | Lazygitrs (Commits) | Mark Commit as Fixup | Inward roll (`CapsLock + F`) | $120\text{ ms}$ | Left hand home row chord without twist |
 | **`-`** | Lazygitrs (Files) | Fold / Unfold Directory Node | Direct key index/middle | $120\text{ ms}$ | Rapid tree hierarchy collapse |

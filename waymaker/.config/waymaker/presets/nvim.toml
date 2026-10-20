@@ -1,4 +1,4 @@
-# Matchmaker Neovim File Picker Preset (`mm -o nvim`)
+# Waymaker Neovim File Picker Preset (`wm -o nvim`)
 # Optimized for high-performance file searching, frecency scoring, and live preview inside Neovim float windows.
 
 [tui]

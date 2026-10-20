@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# omarchy:summary=Pick a theme background using matchmaker TUI
+# omarchy:summary=Pick a theme background using waymaker TUI
 # omarchy:group=menu
 # omarchy:name=backgrounds
 
@@ -146,14 +146,14 @@ layout_slots() {
   prev_y=$(( my + mh * 14 / 100 ))
 }
 
-run_matchmaker_picker() {
-  local mm_bin="$HOME/.local/bin/wm"
-  [[ -x $mm_bin ]] || mm_bin="$(command -v wm 2>/dev/null || command -v mm 2>/dev/null || echo "wm")"
+run_waymaker_picker() {
+  local wm_bin="$HOME/.local/bin/wm"
+  [[ -x $wm_bin ]] || wm_bin="$(command -v wm 2>/dev/null || command -v mm 2>/dev/null || echo "wm")"
   local config_file="$HOME/.config/waymaker/presets/backgrounds.toml"
   [[ -f $config_file ]] || config_file="$HOME/.config/matchmaker/presets/backgrounds.toml"
 
-  if [[ ! -x $mm_bin ]]; then
-    notify-send "Background selector" "waymaker binary not found or not executable at $mm_bin"
+  if [[ ! -x $wm_bin ]]; then
+    notify-send "Background selector" "waymaker binary not found or not executable at $wm_bin"
     exit 1
   fi
 
@@ -229,7 +229,7 @@ run_matchmaker_picker() {
 
 main() {
   if [[ ${1:-} == "--in-terminal" ]]; then
-    run_matchmaker_picker
+    run_waymaker_picker
     exit 0
   fi
 
@@ -256,7 +256,7 @@ main() {
     exit 1
   fi
 
-  run_matchmaker_picker
+  run_waymaker_picker
 }
 
 main "$@"

@@ -30,9 +30,9 @@ The benchmark evaluates transferring 2 files (`app.css`, `logo.svg`) from the cu
 
 | Method | Description & Interaction Paradigm | $T_K$ | $T_H$ | $T_P$ | $T_M$ | $T_R$ | Total $T_{\text{exec}}$ | Relative Speedup vs Baseline | Latency Reduction |
 | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| 🚀 **`ptl` (Frecency 2.0 Last-Target)** | Shell command + cached volatile target (`_MM_LAST_TARGET`) | $100\text{ ms}$ | $0\text{ ms}$ | $0\text{ ms}$ | $100\text{ ms}$ | $20\text{ ms}$ | **$220\text{ ms}$** | **$20.5\times$ vs CLI**<br/>**$32.7\times$ vs AI** | **$-95.1\%$ vs CLI**<br/>**$-96.9\%$ vs AI** |
-| ⚡ **`ptg` (Frecency 2.0 Copy & Go)** | Shell command + 1-2 char Matchmaker frecency picker + auto-cd | $240\text{ ms}$ | $0\text{ ms}$ | $0\text{ ms}$ | $450\text{ ms}$ | $60\text{ ms}$ | **$750\text{ ms}$** | **$6.0\times$ vs CLI**<br/>**$9.6\times$ vs AI** | **$-83.3\%$ vs CLI**<br/>**$-89.6\%$ vs AI** |
-| 🦀 **Matchmaker `fm.rs`** | Native Rust TUI `@yank` $\rightarrow$ fuzzy nav $\rightarrow$ `@paste_into` | $350\text{ ms}$ | $0\text{ ms}$ | $0\text{ ms}$ | $400\text{ ms}$ | $100\text{ ms}$ | **$850\text{ ms}$** | **$5.3\times$ vs CLI**<br/>**$8.5\times$ vs AI** | **$-81.1\%$ vs CLI**<br/>**$-88.2\%$ vs AI** |
+| 🚀 **`ptl` (Frecency 2.0 Last-Target)** | Shell command + cached volatile target (`_WM_LAST_TARGET`) | $100\text{ ms}$ | $0\text{ ms}$ | $0\text{ ms}$ | $100\text{ ms}$ | $20\text{ ms}$ | **$220\text{ ms}$** | **$20.5\times$ vs CLI**<br/>**$32.7\times$ vs AI** | **$-95.1\%$ vs CLI**<br/>**$-96.9\%$ vs AI** |
+| ⚡ **`ptg` (Frecency 2.0 Copy & Go)** | Shell command + 1-2 char Waymaker frecency picker + auto-cd | $240\text{ ms}$ | $0\text{ ms}$ | $0\text{ ms}$ | $450\text{ ms}$ | $60\text{ ms}$ | **$750\text{ ms}$** | **$6.0\times$ vs CLI**<br/>**$9.6\times$ vs AI** | **$-83.3\%$ vs CLI**<br/>**$-89.6\%$ vs AI** |
+| 🦀 **Waymaker `fm.rs`** | Native Rust TUI `@yank` $\rightarrow$ fuzzy nav $\rightarrow$ `@paste_into` | $350\text{ ms}$ | $0\text{ ms}$ | $0\text{ ms}$ | $400\text{ ms}$ | $100\text{ ms}$ | **$850\text{ ms}$** | **$5.3\times$ vs CLI**<br/>**$8.5\times$ vs AI** | **$-81.1\%$ vs CLI**<br/>**$-88.2\%$ vs AI** |
 | 📁 **Yazi / Ranger** | Miller columns / dual-pane TUI file manager (`y`, tree browse, `p`) | $1200\text{ ms}$ | $0\text{ ms}$ | $0\text{ ms}$ | $2000\text{ ms}$ | $600\text{ ms}$ | **$3800\text{ ms}$** | **$1.18\times$ vs CLI**<br/>**$1.89\times$ vs AI** | **$-15.6\%$ vs CLI**<br/>**$-47.2\%$ vs AI** |
 | ⌨️ **Traditional CLI (`cp`/`mv`)** | Manual typing `cp -a -- ... /path/to/target/` with Tab completions | $2200\text{ ms}$ | $0\text{ ms}$ | $0\text{ ms}$ | $2000\text{ ms}$ | $300\text{ ms}$ | **$4500\text{ ms}$** | **$1.0\times$ (Baseline)** | **$0.0\%$** |
 | 🤖 **AI Agents (NL Prompt)** | Natural Language instruction to LLM agent (`"copy these files..."`) | $1500\text{ ms}$ | $0\text{ ms}$ | $0\text{ ms}$ | $1200\text{ ms}$ | $4500\text{ ms}$ | **$7200\text{ ms}$** | **$0.62\times$ (Slower)** | **$+60.0\%$ (Overhead)** |
@@ -52,7 +52,7 @@ The benchmark evaluates transferring 2 files (`app.css`, `logo.svg`) from the cu
 │ AI Agents (7200ms)     │ 32.7x faster      │ 9.6x faster                    │
 │ Traditional CLI (4500ms)│ 20.5x faster     │ 6.0x faster                    │
 │ Yazi / Ranger (3800ms) │ 17.3x faster      │ 5.1x faster                    │
-│ Matchmaker fm.rs (850ms)│ 3.9x faster      │ 1.13x faster                   │
+│ Waymaker fm.rs (850ms) │ 3.9x faster       │ 1.13x faster                   │
 │ ptg (750ms)            │ 3.4x faster       │ Baseline (1.0x)                │
 │ ptl (220ms)            │ Baseline (1.0x)   │ 0.29x of ptg time              │
 └────────────────────────┴───────────────────┴────────────────────────────────┘
@@ -223,7 +223,7 @@ Jump directly to a high-ranking project or documentation folder using a fuzzy fr
 When the query matches multiple candidates or no exact match exists:
 ```zsh
 ~ $ j arch
-# Matchmaker Jump Mode TUI automatically launches with pre-filled query 'arch':
+# Waymaker Jump Mode TUI automatically launches with pre-filled query 'arch':
 # > arch
 #   ~/.dotfiles/main/docs/architecture/
 #   ~/dev/projects/systems-arch/
@@ -234,7 +234,7 @@ When the query matches multiple candidates or no exact match exists:
 When visually exploring the directory structure or inspecting ancestor trees:
 ```zsh
 ~ $ ji
-# Opens Matchmaker Jump Mode TUI:
+# Opens Waymaker Jump Mode TUI:
 # - 'h' / 'l' to navigate parent / child directories
 # - 'Ctrl+U' to jump through directory ancestors up to root
 # - 'e' / 'Ctrl+E' to hand off directly to Neovim (Execute(nvim {+}))
@@ -255,7 +255,7 @@ Toggle back to the previous location without typing `cd -`:
 Transferring configuration files or assets to another project without losing your place:
 ```zsh
 ~/dev/github/project $ pt styles.css assets/
-# 1. Matchmaker opens listing frecency directories:
+# 1. Waymaker opens listing frecency directories:
 #    PASTE TO (Escolha o Destino)
 # 2. Type 'lazy' -> Enter (selects ~/dev/github/lazygitrs/)
 # Output:
@@ -267,7 +267,7 @@ Transferring configuration files or assets to another project without losing you
 Transferring a file and immediately following it to continue editing at the destination:
 ```zsh
 ~/Downloads $ ptg theme.json
-# 1. Matchmaker opens -> select ~/.config/omarchy/
+# 1. Waymaker opens -> select ~/.config/omarchy/
 # Output:
 ✓ 1 item(ns) copiado(s) para /home/fecavmi/.config/omarchy
 ~/.config/omarchy $
@@ -287,9 +287,9 @@ Consecutive transfers to the same destination bypass the picker entirely:
 Invoking `pt` without arguments allows interactive selection from the local directory:
 ```zsh
 ~/Downloads $ pt
-# 1. Matchmaker opens listing local files:
+# 1. Waymaker opens listing local files:
 #    Select item 1 with <Tab>, item 2 with <Tab>, press <Enter>
-# 2. Matchmaker opens destination picker:
+# 2. Waymaker opens destination picker:
 #    Select destination directory -> press <Enter>
 # Output:
 ✓ 2 item(ns) copiado(s) para /home/fecavmi/.dotfiles/main/docs
@@ -311,7 +311,7 @@ Combine volatile cache memory with automatic navigation:
 Moving files cleanly without modal overwrite prompts:
 ```zsh
 ~/dev/work $ mt script.sh helper.py
-# Select target via Matchmaker -> Enter
+# Select target via Waymaker -> Enter
 ✓ 2 item(ns) movido(s) para /home/fecavmi/dev/github/lazygitrs
 ```
 
@@ -319,7 +319,7 @@ Moving files cleanly without modal overwrite prompts:
 Extracting a component or refactored module into a new feature worktree and switching focus immediately:
 ```zsh
 ~/dev/github/matchmaker $ mtg src/gui/auth.rs
-# Matchmaker opens -> type 'worktree-auth' -> Enter
+# Waymaker opens -> type 'worktree-auth' -> Enter
 ✓ 1 item(ns) movido(s) para /home/fecavmi/dev/github/matchmaker-worktrees/auth
 /home/fecavmi/dev/github/matchmaker-worktrees/auth $
 ```
@@ -335,7 +335,7 @@ Fast move into the previously used destination:
 Moving multiple unknown or newly downloaded files interactively:
 ```zsh
 ~/Downloads $ mt
-# Select files via local Matchmaker picker -> Choose destination -> Moved!
+# Select files via local Waymaker picker -> Choose destination -> Moved!
 ```
 
 ---

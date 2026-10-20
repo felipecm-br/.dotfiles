@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# awt-ai-list.sh - Formats AI conversations list for Matchmaker (`mm -o awt-ai`)
+# awt-ai-list.sh - Formats AI conversations list for Waymaker (`wm -o awt-ai`)
 
 SCRIPT_DIR=$(dirname "$(readlink -f "$0" 2>/dev/null || realpath "$0")")
 # shellcheck source=/dev/null

@@ -1,4 +1,4 @@
-# Matchmaker / Waymaker Pull Request Preset (`wm -o pr`)
+# Waymaker Pull Request Preset (`wm -o pr`)
 # Interactive GitHub PR browser, review manager, and worktree provisioner with live preview.
 
 [tui]

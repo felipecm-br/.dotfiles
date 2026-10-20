@@ -107,7 +107,7 @@ m_real = re.match(pattern, first_line)
 assert m_real is not None, f"Regex {pattern} failed to match real rg line: {first_line}"
 
 # Verify rg cmd and command include hidden flag and exclude .git, and start.ansi is true
-assert cfg.get("start", {}).get("ansi") is True, "start.ansi must be true for matchmaker live stream ANSI handling"
+assert cfg.get("start", {}).get("ansi") is True, "start.ansi must be true for waymaker live stream ANSI handling"
 assert cfg.get("preview", {}).get("media", {}).get("active") is False, "preview.media.active must be false to prevent hanging on graphics probe in tmux"
 cmd_str = cfg["start"]["command"].get("cmd") or ""
 command_str = cfg["start"]["command"].get("command") or ""

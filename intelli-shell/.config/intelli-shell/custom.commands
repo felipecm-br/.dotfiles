@@ -1,4 +1,4 @@
-# Open interactive Matchmaker worktree dashboard
+# Open interactive Waymaker worktree dashboard
 awt
 
 # Open floating AWT modal in Tmux (85% × 75%)
@@ -157,7 +157,7 @@ awtc {{repo_url}}
 # Open Workmux agent fleet dashboard directly in terminal
 workmux dashboard
 
-# Paste files or clipboard into last visited Matchmaker target directory
+# Paste files or clipboard into last visited Waymaker target directory
 ptl {{files}}
 
 # Paste files or clipboard into target directory and navigate there
@@ -166,7 +166,7 @@ ptg {{files}}
 # Paste files or clipboard into selected directory without changing directory
 pt {{files}}
 
-# Move files into last visited Matchmaker target directory
+# Move files into last visited Waymaker target directory
 mtl {{files}}
 
 # Move files into target directory and navigate there
@@ -175,7 +175,7 @@ mtg {{files}}
 # Move files into selected directory without changing directory
 mt {{files}}
 
-# Jump to directory matching frecency query with fallback to Matchmaker
+# Jump to directory matching frecency query with fallback to Waymaker
 j {{query}}
 
 # Interactive frecency jump picker with Waymaker

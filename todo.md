@@ -40,7 +40,7 @@ prefix tab
 
 arrumar hypr boder animacao nao mostrando
 alterar notificao para ingles, para de mudar de wallpaper
-testar o copypaste mm 
+testar o copypaste wm (waymaker) 
 ajustar arquivos toml para padronizar
 ajustar documentacao
 implementar context awering SMART_PATTERNS_ROADMAP.md

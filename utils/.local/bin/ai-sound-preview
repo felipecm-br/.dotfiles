@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# ai-sound-preview — Ultra-fast audio previewer & metadata inspector for Matchmaker (mm)
+# ai-sound-preview — Ultra-fast audio previewer & metadata inspector for Waymaker (wm)
 set -eo pipefail
 
 QUIET=0

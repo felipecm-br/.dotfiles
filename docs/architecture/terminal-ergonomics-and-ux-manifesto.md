@@ -2,7 +2,7 @@
 
 ## 📖 Overview & Purpose
 
-This document formalizes the engineering principles, human-computer interaction (HCI) models, neurocognitive theories, and biomechanical standards that govern the **state-of-the-art terminal and TUI workflow** in this repository (`tmux`, `matchmaker`, `lazygitrs`, `keyd`, `sesh`, `zsh`).
+This document formalizes the engineering principles, human-computer interaction (HCI) models, neurocognitive theories, and biomechanical standards that govern the **state-of-the-art terminal and TUI workflow** in this repository (`tmux`, `waymaker`, `lazygitrs`, `keyd`, `sesh`, `zsh`).
 
 The overarching goal is to achieve **Zero Cognitive Friction**, **sub-perceptual latency (<100ms)**, **pure Home Row hand anchoring**, and **immutable muscle memory stability**.
 
@@ -28,12 +28,12 @@ flowchart TD
 $$T_{\text{execute}} = \sum T_K + \sum T_P + \sum T_H + \sum T_M + \sum T_R$$
 * **$T_H$ (Hand Homing):** **$0\text{ ms}$**. Hands remain permanently anchored to the Home Row ($ASDF / JKL;$). Reaching for function keys (`F1-F12`), arrow clusters, or mouse pointing devices is strictly eliminated ($T_P = 0, T_H = 0$).
 * **$T_M$ (Mental Preparation / Hesitation):** Minimized to **$\approx 0\text{ ms}$** via immediate visual semiotics (semantic border colors and glyphs) and universal mnemonics (`Esc` cancels/unwinds, `Ctrl+G` opens Git, `s` switches windows).
-* **$T_K$ (Keystroke Cost):** Reduced from $240\text{ ms}$ (complex chords) to **$120\text{ ms}$** through 1-touch direct navigation (`nav^^` keys in Matchmaker) and dual-function kernel modifiers.
+* **$T_K$ (Keystroke Cost):** Reduced from $240\text{ ms}$ (complex chords) to **$120\text{ ms}$** through 1-touch direct navigation (`nav^^` keys in Waymaker) and dual-function kernel modifiers.
 
 ### 1.2 The 100ms Instantaneity Limit & The Doherty Threshold
 When human-computer interaction latency drops below **100 milliseconds** (Miller 1968; Card, Robertson & Mackinlay 1991), human perception registers the system as instantaneous, preserving cognitive flow without interruption. Furthermore, empirical response time studies (Doherty & Thadhani 1982, IBM) demonstrate that productivity rises super-linearly as system response drops below **~400 milliseconds**.
 * **Subprocess Latency:** `lazygitrs` (native Rust binary) starts in **~3ms** and exits in **0ms** via Tmux's `-E` flag.
-* **Zero-Flicker Double Buffering:** `delay_clear = true` and `debounce_ms = 20` in `matchmaker` eliminates screen tearing during rapid vertical scrolling.
+* **Zero-Flicker Double Buffering:** `delay_clear = true` and `debounce_ms = 20` in `waymaker` eliminates screen tearing during rapid vertical scrolling.
 * **Non-Blocking Telemetry:** Notifications utilize asynchronous `tmux display-message` (<1ms), eliminating synchronous blocking popups.
 
 ---
@@ -221,5 +221,5 @@ error      = "~/.local/share/sounds/ai/10-arcade-blip.wav"    # Execution error 
 * [`docs/architecture/zero-friction-file-transfer-benchmark.md`](zero-friction-file-transfer-benchmark.md): Quantitative KLM-GOMS benchmark and architectural guide for Zero-Friction Frecency 2.0 file transfer and navigation.
 * [`docs/tmux/popups-ergonomics-and-golden-ratio.md`](../tmux/popups-ergonomics-and-golden-ratio.md): Detailed reference, formulas, and benchmarks.
 * [`docs/tmux/popup-isolation-and-debounce.md`](../tmux/popup-isolation-and-debounce.md): Backdrop snapshots and event-driven architecture.
-* [`docs/shell/completion.md`](../shell/completion.md): Matchmaker smart completions.
+* [`docs/shell/completion.md`](../shell/completion.md): Waymaker smart completions.
 * [`docs/theme/system-theme.md`](../theme/system-theme.md): Omarchy theme pipeline.

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Matchmaker Agent Worktree Merge Handler: merges current branch into target branch with native Git
+# Waymaker Agent Worktree Merge Handler: merges current branch into target branch with native Git
 # Args: <selected_raw> <selected_path> <selected_session> <selected_base> [flags...]
 
 selected_raw="$1"

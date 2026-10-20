@@ -1,6 +1,6 @@
 # Workflow Keybindings, Biomechanical Audit & Ergonomic Reference Matrix
 
-This document provides a comprehensive audit and definitive reference of all keyboard shortcuts across the terminal workflow (`tmux`, `zsh`, `matchmaker`, `lazygitrs`, `keyd`, and AI agent tools).
+This document provides a comprehensive audit and definitive reference of all keyboard shortcuts across the terminal workflow (`tmux`, `zsh`, `waymaker`, `lazygitrs`, `keyd`, and AI agent tools).
 
 ---
 
@@ -204,7 +204,7 @@ The table below consolidates the definitive keybindings across all layers, audit
 | **`Ctrl + U`** | Waymaker Jump | Ancestor Hierarchy Jump | CapsLock (Pinky) + U (Right Index) | $130\text{ ms}$ | Differentiated from `u`; walks up directory tree up to root `/`. |
 | **`h` / `l`** | Waymaker Jump | Directory Up (`..`) / Down (`{=}`) | Right Index / Ring on Home Row | $100\text{ ms}$ | Flawless Vim horizontal navigation with zero wrist movement. |
 | **`e` / `Ctrl + E`** | Waymaker Jump | Edit in Neovim (`nvim {+}`) | Left Middle reach up to `e` | $110\text{ ms}$ | Fast handoff from directory search to code editor. |
-| **`y` / `x` / `p`** | Matchmaker Jump | Yank / Cut / Paste File Operations | Home row & bottom row direct taps | $110\text{ ms}$ | Intuitive file manager clipboard workflow. |
+| **`y` / `x` / `p`** | Waymaker Jump | Yank / Cut / Paste File Operations | Home row & bottom row direct taps | $110\text{ ms}$ | Intuitive file manager clipboard workflow. |
 | **`-`** | Lazygitrs Tree | Fold / Unfold Directory Node | Right Pinky top-row reach to `-` | $120\text{ ms}$ | Dedicated directory collapse toggle for all folders (including root). |
 | **`Enter`** (on dir) | Lazygitrs Tree | Fullscreen Combined Diff | Right Pinky tap on Enter | $100\text{ ms}$ | Instant multi-file diff view without manual traversal. |
 | **`,` / `.`** | Lazygitrs Tree | Navigate to Parent / Child Node | Right Middle / Ring reach to bottom row | $110\text{ ms}$ | Hierarchical tree traversal without lateral hand shift. |

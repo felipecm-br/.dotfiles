@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 100% Matchmaker Presets Worktree Creation Wizard with AI Conversation Continuation
+# 100% Waymaker Presets Worktree Creation Wizard with AI Conversation Continuation
 trap 'exit 0' HUP INT TERM
 
 SCRIPT_DIR=$(dirname "$(readlink -f "$0" 2>/dev/null || realpath "$0")")
@@ -55,7 +55,7 @@ done
 while true; do
     case "$step" in
         1)
-            # ── Step 1: Conventional Type Selection via Waymaker / Matchmaker Preset (`wm -o awt-type`) ──
+            # ── Step 1: Conventional Type Selection via Waymaker Preset (`wm -o awt-type`) ──
             type_output=$($WM_BIN -o awt-type "${MM_TUI_ARGS[@]}")
 
             # If Esc / canceled in Step 1 -> exit completely back to main awt list
@@ -68,7 +68,7 @@ while true; do
             ;;
 
         2)
-            # ── Step 2: Worktree Branch Name via Waymaker / Matchmaker Prompt Box (`wm -o awt-prompt`) ──
+            # ── Step 2: Worktree Branch Name via Waymaker Prompt Box (`wm -o awt-prompt`) ──
             initial_val="${prefix}${slug}"
             prompt_str="${icon}"
 
@@ -86,7 +86,7 @@ while true; do
             ;;
 
         3)
-            # ── Step 3: Base Branch Selection via Waymaker / Matchmaker Preset (`wm -o awt-base`) ──
+            # ── Step 3: Base Branch Selection via Waymaker Preset (`wm -o awt-base`) ──
             bbase=$($WM_BIN -o awt-base "${MM_TUI_ARGS[@]}" -- "$selected_base")
 
             # If Esc was pressed in Step 3 -> step back to Step 2 with previous slug preserved!
@@ -122,7 +122,7 @@ while true; do
             ;;
 
         4)
-            # ── Step 4: AI Conversation Selection via Waymaker / Matchmaker Preset (`wm -o awt-ai`) ──
+            # ── Step 4: AI Conversation Selection via Waymaker Preset (`wm -o awt-ai`) ──
             ai_output=$($WM_BIN -o awt-ai "${MM_TUI_ARGS[@]}")
 
             # If Esc was pressed in Step 4 -> step back to Step 3 (base selection)

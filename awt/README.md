@@ -1,6 +1,6 @@
 # 🌿 AWT — Agent Worktree Manager & Multi-Agent Git Orchestrator
 
-> **Next-generation Git worktree manager powered by [Matchmaker (`mm`)](https://github.com/fcmiranda/matchmaker), [Sesh](https://github.com/joshmedeski/sesh), Tmux floating modals, and Autonomous AI Agent session isolation.**
+> **Next-generation Git worktree manager powered by [Waymaker (`wm`)](https://github.com/fcmiranda/waymaker), [Sesh](https://github.com/joshmedeski/sesh), Tmux floating modals, and Autonomous AI Agent session isolation.**
 
 ---
 
@@ -13,7 +13,7 @@
 │                            THE AWT ARCHITECTURE                             │
 ├───────────────────────────────┬─────────────────────────────────────────────┤
 │ 1. Git Engine (.bare layout)  │ Sibling worktree directories (0 file locks) │
-│ 2. Matchmaker TUI (Rust)      │ Nav Mode, Live 3-Tab Previews, Golden Ratio │
+│ 2. Waymaker TUI (Rust)        │ Nav Mode, Live 3-Tab Previews, Golden Ratio │
 │ 3. Multiplexer (Tmux + Sesh)  │ Floating modal (Ctrl+Shift+G) & Sesh links  │
 │ 4. Autonomous AI Agents (agy) │ 1 Agent per worktree, 0 context bleeding    │
 │ 5. Lifecycle Automation       │ Automated .env replication, stash & hooks   │
@@ -32,7 +32,7 @@
 ### 2. 🧙 5-Step Conventional Commits Creation Wizard (`c` / `awt -c` / `awc`)
 * **Step 1 — Conventional Type Selection**: Pick conventional prefixes with unified Nerd Font icons:
   ` feat`, ` fix`, `󰣪 refactor`, `󰓅 perf`, ` ci`, ` chore`, `󰧮 docs`, `󰙨 test`, `󰏖 build`, `󰓹 custom`.
-* **Step 2 — In-Place Branch Prompt**: Fast Matchmaker prompt box with memory of previous inputs; press `Esc` to step back to Step 1 without losing context.
+* **Step 2 — In-Place Branch Prompt**: Fast Waymaker prompt box with memory of previous inputs; press `Esc` to step back to Step 1 without losing context.
 * **Step 3 — Base Branch Selector**: Dynamically highlights the currently selected/active branch at **Row 0** (` <branch> current base`), followed by ` main (default base)` and all other local branches.
 * **Step 4 — AI Conversation Continuity**: If active AI coding sessions are detected in the origin Tmux session (`agy`, `opencode`, `claude`, etc.):
   - **Row 0**: Pre-selects the active AI conversation from the current pane (`󱐋 <ai> (current pane)`).
@@ -71,8 +71,8 @@ Toggle instantly between 3 live preview panes in Nav Mode:
 ### Requirements
 * **Git** ($\ge 2.30$)
 * **[Tmux](https://github.com/tmux/tmux)** ($\ge 3.2$)
-* **[Matchmaker (`mm`)](https://github.com/fcmiranda/matchmaker)** (Rust picker engine)
-* **[Waymaker (`wm`)](https://github.com/fcmiranda/matchmaker)** / **[Sesh](https://github.com/joshmedeski/sesh)** (Terminal session manager)
+* **[Waymaker (`wm`)](https://github.com/fcmiranda/waymaker)** (Rust picker engine)
+* **[Sesh](https://github.com/joshmedeski/sesh)** (Terminal session manager)
 
 ### Installation via GNU Stow
 Inside your `.dotfiles` directory:
@@ -94,7 +94,7 @@ This symlinks all presets, scripts, hooks, and CLI executables into:
 
 | Command | Shortcut / Alias | Description |
 | :--- | :---: | :--- |
-| `awt` | — | Open interactive Matchmaker TUI dashboard in current pane (30% height). |
+| `awt` | — | Open interactive Waymaker TUI dashboard in current pane (30% height). |
 | `awt popup` | **`awp`** / `Ctrl+Shift+G` | Open full floating AWT modal ($85\% \times 75\%$) in Tmux. |
 | `awt -c` / `awt new` / `awt add` | **`awc`** | Launch the interactive 5-step Conventional Commits wizard. |
 | `awt -c -A <prompt> [base]` | — | Auto-derive conventional branch slug from task prompt and provision worktree. |

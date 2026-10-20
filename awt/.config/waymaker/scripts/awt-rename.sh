@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Matchmaker Agent Worktree Rename Handler
+# Waymaker Agent Worktree Rename Handler
 # Usage: awt-rename.sh <old_branch> <worktree_path> <new_branch>
 
 old_branch_raw="$1"

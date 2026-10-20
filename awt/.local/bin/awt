@@ -93,7 +93,7 @@ show_help() {
 awt - Agent Worktree Manager & Multi-Agent Git Orchestrator
 
 USAGE:
-    awt                                     Open interactive Matchmaker TUI dashboard
+    awt                                     Open interactive Waymaker TUI dashboard
     awt -c | new | add [flags]              Launch interactive 5-step Conventional Commits wizard (awc)
     awt -c -A <prompt> [base] [flags]       Auto-derive conventional branch name from prompt & provision
     awt -c <branch> [base] [flags] [-- cmd] Create/provision worktree, run inline command & connect
@@ -442,7 +442,7 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-# 4. Interactive Matchmaker wizard when called as `awt -c` or `awt new` without branch name
+# 4. Interactive Waymaker wizard when called as `awt -c` or `awt new` without branch name
 if [[ "$create" -eq 1 && -z "$branch" ]]; then
     new_script="$HOME/.config/waymaker/scripts/awt-new.sh"
     [ -x "$new_script" ] || new_script="$HOME/.config/matchmaker/scripts/awt-new.sh"

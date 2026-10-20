@@ -1,11 +1,11 @@
 #!/bin/sh
-# rg-toggle-word.sh — Toggles whole-word mode for the mm rg preset.
-# Reads MM_STORE (ic / cs / ww / cs+ww), flips word-regexp,
-# then emits Store / SetStyledPrompt / Reload actions to mm Transform.
+# rg-toggle-word.sh — Toggles whole-word mode for the wm rg preset.
+# Reads WM_STORE / MM_STORE (ic / cs / ww / cs+ww), flips word-regexp,
+# then emits Store / SetStyledPrompt / Reload actions to wm Transform.
 #
 # Called by: ctrl-w bind in rg.toml  (`Transform(sh ~/.config/waymaker/scripts/rg-toggle-word.sh)`)
 
-MODE="${MM_STORE:-ic}"
+MODE="${WM_STORE:-${MM_STORE:-ic}}"
 case "$MODE" in
   ww)    NEW="ic";    PROMPT="{cyan: rg> }" ;;
   cs)    NEW="cs+ww"; PROMPT="{yellow,bold: rg [Aa][W]> }" ;;

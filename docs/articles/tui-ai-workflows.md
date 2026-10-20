@@ -34,8 +34,8 @@ The control plane spans **4 navigation layers**, each with a distinct scope:
 |---|---|---|---|
 | **Desktop** | Hyprland + Fuzzel/Walker | Any desktop app or session | `Super+Shift+K` (sesh picker) |
 | **Global Overlay** | Ghostty + Hyprland Float | Global omniscient AI scratchpad | `Super+A` |
-| **Terminal / Session** | sesh + tmux + Matchmaker | Switch between project sessions | `Alt+s` (Universal Terminal: Zsh & Tmux popup) |
-| **Shell & Directory** | Zsh + Matchmaker (`mm`) | Zero-friction directory jumping & completion | `Ctrl+F`, `<Tab>` (completion) |
+| **Terminal / Session** | sesh + tmux + Waymaker | Switch between project sessions | `Alt+s` (Universal Terminal: Zsh & Tmux popup) |
+| **Shell & Directory** | Zsh + Waymaker (`wm`) | Zero-friction directory jumping & completion | `Ctrl+F`, `<Tab>` (completion) |
 
 ---
 
@@ -44,17 +44,17 @@ The control plane spans **4 navigation layers**, each with a distinct scope:
 > **Philosophy**: Zero-Friction Directory Navigation — Eliminating prefix commands (like typing `j` or `cd`) when changing working directories while preserving standard completion context during active command construction.
 
 ### The Stack & Tools Used:
-1. **Matchmaker (`mm`)**: High-performance Rust TUI fuzzy picker configured with preset `-o jump` (`~/.config/matchmaker/presets/jump.toml`). It uses its native frecency engine (`frecency = true`) to rank directories by access frequency and recency.
+1. **Waymaker (`wm`)**: High-performance Rust TUI fuzzy picker configured with preset `-o jump` (`~/.config/waymaker/presets/jump.toml`). It uses its native frecency engine (`frecency = true`) to rank directories by access frequency and recency.
 2. **Zsh Smart Tab (`_smart_tab`)**: Custom Zsh widget ([`zsh/.zsh/utils/binds.zsh`](../../zsh/.zsh/utils/binds.zsh)) attached to `<Tab>` (`^I`) in `zsh-vi-mode`.
 
 ### Why This Pattern is the Fastest, Smartest Way to Navigate:
 
 1. **Focused & Predictable Tab Completion**:
-   - `<Tab>` is 100% predictable: accepts ghost text autosuggestions when at the end of the line, triggers argument completion (`mm-ftb`) when typing a command, and stays completely neutral on an empty line without intrusive popups.
-2. **Native Frecency Ranking (`mm frecency`)**:
-   - Selecting any directory via Matchmaker Jump or navigating via `j` continuously updates Matchmaker's internal frecency database, ensuring your most frequented projects always float to the top.
+   - `<Tab>` is 100% predictable: accepts ghost text autosuggestions when at the end of the line, triggers argument completion (`wm-ftb`) when typing a command, and stays completely neutral on an empty line without intrusive popups.
+2. **Native Frecency Ranking (`wm frecency`)**:
+   - Selecting any directory via Waymaker Jump or navigating via `j` continuously updates Waymaker's internal frecency database, ensuring your most frequented projects always float to the top.
 3. **Modal Intelligence & Dedicated Jump (`Ctrl+F`)**:
-   - Following Vim and terminal ergonomics ($H=0$ Home Row index finger), `Ctrl+F` is mapped in both `viins` and `vicmd` modes to open the Matchmaker Jump picker unconditionally at any moment, regardless of current line content.
+   - Following Vim and terminal ergonomics ($H=0$ Home Row index finger), `Ctrl+F` is mapped in both `viins` and `vicmd` modes to open the Waymaker Jump picker unconditionally at any moment, regardless of current line content.
 
 ### Interactive Trigger Matrix:
 
@@ -92,15 +92,15 @@ The control plane spans **4 navigation layers**, each with a distinct scope:
 │ TMUX POPUPS & PANES                                             │
 │  prefix+i ............ AI Agent bell jump (attach notifying pane│
 │  prefix+o ............ AI Sidebar split toggle (35% width)      │
-│  prefix+s / S ........ Window picker (Matchmaker + waymux state) │
+│  prefix+s / S ........ Window picker (Waymaker + waymux state)  │
 │  prefix+g ............ lazygitrs popup (review loop)            │
 │  prefix+B / Y / N .... btop / yazi / nvim popups (90x90%)       │
 ├─────────────────────────────────────────────────────────────────┤
 │ ZSH SHELL & DIRECTORY JUMP LAYER                                │
 │  <Tab> (empty line) .. Neutral (clean prompt, no popup)          │
-│  <Tab> (active line) . Standard autocompletion (expand/mm-ftb)  │
-│  Ctrl+F .............. Direct Matchmaker jump picker            │
-│  Ctrl+G .............. Matchmaker Git Status Jump + Nvim edit   │
+│  <Tab> (active line) . Standard autocompletion (expand/wm-ftb)  │
+│  Ctrl+F .............. Direct Waymaker jump picker              │
+│  Ctrl+G .............. Waymaker Git Status Jump + Nvim edit     │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -139,7 +139,7 @@ State management is centralized by **`waymux`** (Agent Client Protocol Daemon), 
 
 **Binding**: `prefix+s` (popup 80×35%) / `prefix+S` (fullscreen split) → `window-picker.sh`
 
-Powered by **Matchmaker** (`mm`), the window picker lists **all sessions and windows** grouped by session, displaying real-time AI state icons, theme colors, and active AI session titles (`@ai_agent_state`, `@ai_agent_state_color`, `@ai_agent_state_raw`, `@ai_agent_title`):
+Powered by **Waymaker** (`wm`), the window picker lists **all sessions and windows** grouped by session, displaying real-time AI state icons, theme colors, and active AI session titles (`@ai_agent_state`, `@ai_agent_state_color`, `@ai_agent_state_raw`, `@ai_agent_title`):
 
 ```
 ┌─ 󰧞  windows ────────────────────────────────────────────────────────┐
@@ -163,14 +163,14 @@ The AI agent state management pipeline consists of 6 integrated components:
    - `@ai_agent_state`: Pure icon or animated spinner frame (e.g. `⠋`, `󱜻`, `󱅭`, `󰨄`, `󱥂`) without embedded ANSI escape sequences.
    - `@ai_agent_state_color`: Hex color string (`#89b482`, `#d8a657`, `#d3869b`, `#ea6962`) compiled from Omarchy theme templates.
    - `@ai_agent_state_raw`: Raw state string (`busy`, `working`, `question`, `awaiting_input`, `permission`, `error`, `idle`, `closed`).
-   - `@ai_agent_title`: Clean active session title or initial prompt (e.g. `Fix memory leak in parser`), rendered in the window picker and indexed for instant Matchmaker fuzzy search.
+   - `@ai_agent_title`: Clean active session title or initial prompt (e.g. `Fix memory leak in parser`), rendered in the window picker and indexed for instant Waymaker fuzzy search.
 
 2. **Dynamic Pill Layout (`window-status-current-format`)**:
    - The active window is rendered as a rounded pill (`` ... ``) whose background recolors dynamically to `@ai_agent_state_color` (Yellow for `working`, Purple for `question`, Red for `error/permission`, Cyan for `idle` or normal non-AI windows).
    - High-contrast dark text (`fg=#{@SESSION_ACTIVE_FG}`) inside the filled pill guarantees 100% legibility on top of filled backgrounds.
    - Background tabs in `window-status-format` render `@ai_agent_state` in `#[fg=#{@ai_agent_state_color}]` so status icons light up on inactive windows.
 
-3. **Matchmaker Sync (`window-picker-items.sh`)**:
+3. **Waymaker Sync (`window-picker-items.sh`)**:
    - Queries `@ai_agent_state`, `@ai_agent_state_color`, and `@ai_agent_title` in real time.
    - Animates `@SPIN@` during `working`/`busy` states and renders matching Nerdfont state icons (`󱥂`, `󱜻`, `󱅭`, `󰨄`) colored with the active Omarchy theme palette.
    - Formats the AI session title dynamically (truncated to 28 characters for ergonomic layout preservation), matching the focused window's vibrant active color while keeping inactive windows cleanly readable in foreground text, and injects the full title into the search index so users can jump to any agent window by typing keywords from its current task.

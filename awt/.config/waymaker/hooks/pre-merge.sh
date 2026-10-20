@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Matchmaker / Waymaker Agent Worktree Lifecycle Hook: pre-merge
+# Waymaker Agent Worktree Lifecycle Hook: pre-merge
 # Args: <worktree_path> <source_branch> <target_branch>
 
 wt_path="$1"

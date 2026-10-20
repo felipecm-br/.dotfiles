@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Real-time interactive control for Hyprland border speed & angle in Matchmaker
+# Real-time interactive control for Hyprland border speed & angle in Waymaker
 set -e
 
 ACTION="$1"
@@ -75,5 +75,5 @@ if [ -n "$TPL_FILE" ] && [ -f "$TPL_FILE" ] && [ -f "$COLORS_FILE" ]; then
     hyprctl eval 'dofile(os.getenv("HOME") .. "/.local/state/omarchy/current/theme/hyprland.lua")' >/dev/null 2>&1 || true
 fi
 
-# Emit a dynamic RunPreview with unique timestamp to bypass Matchmaker preview command deduplication
+# Emit a dynamic RunPreview with unique timestamp to bypass Waymaker preview command deduplication
 printf 'RunPreview(hypr-border-preview %s %s)\n' "$TPL_FILE" "$(date +%s%N)"

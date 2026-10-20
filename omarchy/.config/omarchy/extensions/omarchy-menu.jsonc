@@ -62,6 +62,6 @@
     "label": "AI Notification Sound",
     "action": "omarchy-launch-tui ~/.local/bin/ai-sound-switcher",
     "aliases": ["sounds", "ai-sounds", "notification-sounds"],
-    "description": "Select AI response notification sound with Matchmaker"
+    "description": "Select AI response notification sound with Waymaker"
   }
 }

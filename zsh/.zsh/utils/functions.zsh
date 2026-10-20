@@ -393,7 +393,7 @@ wtj() {
 
 # bd - Jump directly back to an ancestor directory by name
 # Usage: bd <parent-dir-name>
-# Example: in /a/b/matchmaker/src/foo, run 'bd matchmaker' -> jumps directly to /a/b/matchmaker
+# Example: in /a/b/waymaker/src/foo, run 'bd waymaker' -> jumps directly to /a/b/waymaker
 bd() {
     local target="$1"
     if [[ -z "$target" ]]; then
@@ -445,14 +445,15 @@ waymux() {
 # Zero-Friction File Transfer (PasteTo & MoveTo 2.0)
 # ─────────────────────────────────────────────────────────────────────────────
 
+typeset -g _WM_LAST_TARGET=""
 typeset -g _MM_LAST_TARGET=""
 
 # pasteto - Copy files to any frecency/project directory without leaving current context
 # Usage: pasteto [-g|--go] [-l|--last] [files...] or pt [files...]
 # Options:
 #   -g, --go    Navigate directly to destination directory after copying
-#   -l, --last  Paste directly into last target (_MM_LAST_TARGET) without opening picker
-# If no files are passed, opens Matchmaker to visually select files in current directory.
+#   -l, --last  Paste directly into last target (_WM_LAST_TARGET) without opening picker
+# If no files are passed, opens Waymaker to visually select files in current directory.
 pasteto() {
     local go=0
     local use_last=0
@@ -518,11 +519,11 @@ pasteto() {
     # 3. Resolve destination directory (picker or cached last target)
     local target_dir=""
     if (( use_last )); then
-        if [[ -z "$_MM_LAST_TARGET" ]]; then
-            echo "pasteto: Nenhum destino anterior gravado (_MM_LAST_TARGET está vazio)."
+        target_dir="${_WM_LAST_TARGET:-$_MM_LAST_TARGET}"
+        if [[ -z "$target_dir" ]]; then
+            echo "pasteto: Nenhum destino anterior gravado (_WM_LAST_TARGET está vazio)."
             return 1
         fi
-        target_dir="$_MM_LAST_TARGET"
     else
         target_dir=$(wm list --dirs 2>/dev/null | wm -o jump header.content="PASTE TO (Escolha o Destino)")
         [[ -z "$target_dir" ]] && return 0
@@ -537,6 +538,7 @@ pasteto() {
 
     if [[ ! -d "$target_dir" ]]; then
         echo "pasteto: Diretório de destino inválido: $target_dir"
+        _WM_LAST_TARGET=""
         _MM_LAST_TARGET=""
         return 1
     fi
@@ -546,6 +548,7 @@ pasteto() {
     echo "✓ ${#sources[@]} item(ns) copiado(s) para $target_dir"
 
     # Cache last target
+    _WM_LAST_TARGET="$target_dir"
     _MM_LAST_TARGET="$target_dir"
 
     # 5. Automatically boost destination in frecency
@@ -628,11 +631,11 @@ moveto() {
     # 3. Resolve destination directory (picker or cached last target)
     local target_dir=""
     if (( use_last )); then
-        if [[ -z "$_MM_LAST_TARGET" ]]; then
-            echo "moveto: Nenhum destino anterior gravado (_MM_LAST_TARGET está vazio)."
+        target_dir="${_WM_LAST_TARGET:-$_MM_LAST_TARGET}"
+        if [[ -z "$target_dir" ]]; then
+            echo "moveto: Nenhum destino anterior gravado (_WM_LAST_TARGET está vazio)."
             return 1
         fi
-        target_dir="$_MM_LAST_TARGET"
     else
         target_dir=$(wm list --dirs 2>/dev/null | wm -o jump header.content="MOVE TO (Escolha o Destino)")
         [[ -z "$target_dir" ]] && return 0
@@ -647,6 +650,7 @@ moveto() {
 
     if [[ ! -d "$target_dir" ]]; then
         echo "moveto: Diretório de destino inválido: $target_dir"
+        _WM_LAST_TARGET=""
         _MM_LAST_TARGET=""
         return 1
     fi
@@ -656,6 +660,7 @@ moveto() {
     echo "✓ ${#sources[@]} item(ns) movido(s) para $target_dir"
 
     # Cache last target
+    _WM_LAST_TARGET="$target_dir"
     _MM_LAST_TARGET="$target_dir"
 
     # 5. Automatically boost destination in frecency

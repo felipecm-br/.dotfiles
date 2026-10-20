@@ -27,8 +27,8 @@
 | :--- | :---: | :--- | :--- | :--- |
 | **`j + Enter`** | Zsh Buffer | Jump to `$HOME` (`cd ~`) | Inward bilateral roll | Sacred muscle memory (<100ms) |
 | **`j <query>`** | Zsh Buffer | Smart Frecency Jump | Home row typing | Instant match resolution |
-| **`Tab` (Empty Prompt)** | ZLE | Matchmaker `jump` Picker | Left pinky tap | Object-First workflow |
-| **`ptl` / `mtl`** | Zsh Buffer | Paste/Move to Last Target | 3 direct home-row keystrokes | Reuses `_MM_LAST_TARGET` |
+| **`Tab` (Empty Prompt)** | ZLE | Waymaker `jump` Picker | Left pinky tap | Object-First workflow |
+| **`ptl` / `mtl`** | Zsh Buffer | Paste/Move to Last Target | 3 direct home-row keystrokes | Reuses `_WM_LAST_TARGET` |
 | **`ptg` / `mtg`** | Zsh Buffer | Paste/Move & Change Directory | 3 keystrokes + fuzzy query | Eliminates separate `cd` |
 | **`pt` / `mt`** | Zsh Buffer | Paste/Move in Current Working Dir | 2 keystrokes + fuzzy query | Preserves working directory |
 
@@ -40,14 +40,14 @@
 | **`Ctrl+G`** | Tmux / Zsh | Lazygitrs Dedicated Popup | Left pinky (`CapsLock`) + Left index | Rapid inward chord |
 | **`Esc` / `q`** | Tmux Popup | Close / Dismiss Popup | Left pinky tap | Instant modal unwinding |
 
-### D. Matchmaker & File Manager (`fm.rs`)
+### D. Waymaker & File Manager (`fm.rs`)
 | Key / Chord | Target Layer | Executed Action | Kinetic Mechanics | Ergonomic Rationale |
 | :--- | :---: | :--- | :--- | :--- |
-| **`Ctrl+L` / `l`** | Matchmaker | Enter Directory (`ChDir`) | Right index or Left pinky+Right ring | Seamless traversal |
-| **`Ctrl+H` / `h`** | Matchmaker | Ascend to Parent (`ChDir ..`) | Right index or Left pinky+Right index| Seamless traversal |
-| **`Ctrl+U`** | Matchmaker | Ancestor Jump (Multi-level ascent)| Inward roll (`CapsLock + U`) | Multi-level root jump |
+| **`Ctrl+L` / `l`** | Waymaker | Enter Directory (`ChDir`) | Right index or Left pinky+Right ring | Seamless traversal |
+| **`Ctrl+H` / `h`** | Waymaker | Ascend to Parent (`ChDir ..`) | Right index or Left pinky+Right index| Seamless traversal |
+| **`Ctrl+U`** | Waymaker | Ancestor Jump (Multi-level ascent)| Inward roll (`CapsLock + U`) | Multi-level root jump |
 | **`u`** | `fm.rs` | Undo Last File Operation | Right index tap | File Manager UndoStack rollback |
-| **`f` / `Ctrl+F`** | Matchmaker | Cycle Source (Local/Frec/Bookmark)| Left index tap | Instant dataset switching |
+| **`f` / `Ctrl+F`** | Waymaker | Cycle Source (Local/Frec/Bookmark)| Left index tap | Instant dataset switching |
 | **`y` / `x` / `p`** | `fm.rs` | Yank / Cut / Paste Files | Pure Vim standard verbs | Zero cognitive load |
 | **`a` / `r` / `d`** | `fm.rs` | Add / Rename / Delete (Trash) | Pure Vim standard verbs | Direct in-place file operations |
 

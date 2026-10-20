@@ -1,4 +1,4 @@
-# Matchmaker Starship Preset Selector (`mm -o starship-presets`)
+# Waymaker Starship Preset Selector (`wm -o starship-presets`)
 # Interactive picker to browse, preview, and apply starship prompt presets
 
 [ui.nav]

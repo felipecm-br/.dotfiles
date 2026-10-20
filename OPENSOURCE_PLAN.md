@@ -25,7 +25,7 @@ Rather than forcing users to assemble disparate repositories or compile 13 C tre
 ┌────────────────────────────────────────────────────────────────────────────────────────┐
 │                        TIER 1: UPSTREAM SUB-REPO ENGINES                               │
 ├──────────────────────────┬───────────────────────────┬─────────────────────────────────┤
-│ fcmiranda/waymux         │ fcmiranda/lazygitrs       │ fcmiranda/matchmaker (waymaker) │
+│ fcmiranda/waymux         │ fcmiranda/lazygitrs       │ fcmiranda/waymaker              │
 │ (Axum 0.8, Tokio 1.52)   │ (branch: fecavmi)         │ (binary: wm / waymaker)         │
 │ Native Rust Toolchain    │ cross-rs / cargo-zigbuild │ Native Rust Toolchain           │
 │ (musl + Darwin static)   │ (13 C parsers + musl)     │ (musl + Darwin static)          │
@@ -62,7 +62,7 @@ Rather than forcing users to assemble disparate repositories or compile 13 C tre
 - **Status:** Tagged and released as `v0.1.0-cockpit`. Notes relocated to `.git/info/lines.json` (eliminating working tree pollution) with full worktree resolution, XDG state fallback, and automatic migration. Compiles cleanly with all 168 unit tests passing and multi-arch release CI active with sha256 checksums.
 - **Next:** Reference in Tier 2 `waymux-manifest.json`.
 
-### C. `fcmiranda/matchmaker` / `waymaker` (The Nav, Frecency & Session Layer)
+### C. `fcmiranda/waymaker` (The Nav, Frecency & Session Layer)
 - **Role:** Sub-millisecond fuzzy finder with live-reload inotify watch (`-w`), Kitty graphics caching, Mermaid diagram rendering, ACID `redb` frecency store, and **native workspace & session engine** (`wm session`, `wm connect`, `wm last`, `wm preview`).
 - **Status:** Tagged and released as `v0.1.0`. Branch `main` synchronized with `waymaker` as default branch; upstream history preserved in `upstream-main`. Sesh and frecency completely incorporated into Waymaker (`session.rs`). External `sesh-bin` (Go) and `zoxide` dependencies **100% eliminated**. Over 228 tests passing with 0 failures (`cargo test`). Multi-arch release CI active with sha256 checksums.
 - **Next:** Reference in Tier 2 `waymux-manifest.json`.

@@ -1,4 +1,4 @@
-# Matchmaker Live Ripgrep Search Preset (`mm -o rg`)
+# Waymaker Live Ripgrep Search Preset (`wm -o rg`)
 # Fast live full-text search with ripgrep, debounced query reload, 45/55 foveal layout,
 # line-synced bat syntax preview, Enter opening nvim at +{line} {file}, and Ctrl+V inserting {file}:{line}.
 # Search mode toggles: Ctrl+S = Match Case (Aa), Ctrl+W = Whole Word (W). Default: ignore-case.

@@ -68,7 +68,7 @@ tmux (Server)
 
 ### Why 1 Session per Worktree?
 - **CWD Isolation**: Each session operates at the root of its respective worktree.
-- **Fluid Transition**: Instant switching via `Prefix + s` or the Matchmaker picker (`mm -o awt`).
+- **Fluid Transition**: Instant switching via `Prefix + s` or the Waymaker picker (`wm -o awt`).
 - **Automated Hooks**: `sesh.toml` configurations launch sandboxes (`ai-jail agy`) automatically upon attaching to the session.
 
 ---
@@ -191,13 +191,13 @@ graph TD
 
 ---
 
-## 7. The `awt` (Agent Worktree) Ecosystem with Matchmaker & Sesh
+## 7. The `awt` (Agent Worktree) Ecosystem with Waymaker & Sesh
 
-`awt` is the unified worktree and AI agent orchestrator, built natively on top of **Matchmaker (`mm`)**, **Sesh**, **Tmux**, and **Worktrunk (`wt`)**.
+`awt` is the unified worktree and AI agent orchestrator, built natively on top of **Waymaker (`wm`)**, **Sesh**, **Tmux**, and **Worktrunk (`wt`)**.
 
 ```mermaid
 graph LR
-    A["awt"] -->|No arguments| B["Matchmaker Dashboard (mm -o awt)"]
+    A["awt"] -->|No arguments| B["Waymaker Dashboard (wm -o awt)"]
     A -->|c or awt -c| C["Interactive Creation Wizard (awt-new.sh)"]
     A -->|d| D["Deletion & Tmux Cleanup (awt-delete.sh)"]
     A -->|m| E["Intelligent Merge Handler (awt-merge.sh)"]
@@ -210,7 +210,7 @@ graph LR
 
 ---
 
-### A. Interactive Matchmaker Dashboard (`awt.toml` / `mm -o awt`)
+### A. Interactive Waymaker Dashboard (`awt.toml` / `wm -o awt`)
 
 Executed by running `awt` without arguments in the terminal:
 
@@ -243,10 +243,10 @@ Executed by running `awt` without arguments in the terminal:
 
 ### B. Interactive Branch Creation Wizard (`c` / `ctrl-n` / `awt-new.sh`)
 
-Triggered by pressing **`c`** inside Matchmaker or by running **`awt -c`**:
+Triggered by pressing **`c`** inside Waymaker or by running **`awt -c`**:
 
 ```text
-[Step 1: Type via mm]  ◄──(Esc)──  [Step 2: Branch Name]  ◄──(Esc)──  [Step 3: Base via mm]
+[Step 1: Type via wm]  ◄──(Esc)──  [Step 2: Branch Name]  ◄──(Esc)──  [Step 3: Base via wm]
           │                                 │                                   │
           └──(Enter)────────────────────────┴──(Enter)──────────────────────────┴──(Enter)──► 🚀 Sesh
 ```

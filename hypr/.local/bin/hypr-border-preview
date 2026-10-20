@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Live preview & Interactive HUD renderer for Matchmaker hypr-border
+# Live preview & Interactive HUD renderer for Waymaker hypr-border
 set -e
 
 TPL_FILE="$1"

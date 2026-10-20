@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Matchmaker Agent Worktree Delete Handler: deletes worktree, kills Tmux session, and switches to last session if active
+# Waymaker Agent Worktree Delete Handler: deletes worktree, kills Tmux session, and switches to last session if active
 # Args: <session_name> <wt_path> <branch_raw> [flags...]
 
 session_name="$1"

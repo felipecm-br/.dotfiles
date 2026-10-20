@@ -1,4 +1,4 @@
-# Matchmaker / Waymaker Scrollback Extractor (`wm -o scrollback-picker`)
+# Waymaker Scrollback Extractor (`wm -o scrollback-picker`)
 # Extrakto-style: stdin = all-list (recent-first); Tab cycles explicit filter
 # modes (all -> cmd -> path -> url -> sha -> all) via mode-specific binds + SetMode.
 # (Deliberately NOT @reloadnext/additional_commands: cycle state lives in the

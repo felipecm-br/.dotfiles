@@ -69,7 +69,7 @@ Inspect and test pull requests in dedicated worktrees without polluting your loc
 # Checkout PR #42 directly into isolated worktree `../pr-42`
 awt pr 42
 
-# Interactive Matchmaker PR picker with live description preview
+# Interactive Waymaker PR picker with live description preview
 awt pr
 ```
 

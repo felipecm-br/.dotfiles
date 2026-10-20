@@ -73,8 +73,8 @@ Bind ([`tmux.conf`](../../tmux/.config/tmux/tmux.conf)): `Prefix` then `y` or `C
 
 1. `tmux capture-pane -pJS - -t <origin>` exports the origin pane explicitly (never the popup), joining wrapped lines (`-J`) so split commands and URLs survive; full text kept in `/tmp/scrollback-picker-src.txt`.
 2. Token files per filter precomputed (`-all/-cmd/-path/-url/-sha.txt`), bottom-up deduped and recent-first. Commands are extracted from prompt-prefixed lines (`❯`, `$`, `#`, `>`), AI tool execution logs (`● Bash(...)`), and common Linux CLI verbs (`pacman`, `yay`, `rm`, `mv`, `git`, `cargo`, `just`, `systemctl`, etc.). In `all` mode, tokens are interleaved chronologically so the most recent screen outputs (URLs, paths, commands) appear at index 0.
-3. `wm -o scrollback-picker` (canonical preset [`scrollback-picker.toml`](../../waymaker/.config/waymaker/presets/scrollback-picker.toml): nav mode starting in filter, jump-style keymap) with items from `[start] command`. Keys: `Enter` copies, `Ctrl+V` inserts the current token/command directly into the origin pane (`MM_ORIGIN_PANE`), `Ctrl+E` (filter) / `e` (nav) opens a `path[:line[:col]]` token in `$EDITOR` via [`scrollback-open.sh`](../../tmux/.config/tmux/scrollback-open.sh), `Ctrl+B` (filter) / `b` / `w` / `x` (nav) opens URLs directly in Google Chrome via [`scrollback-chrome.sh`](../../tmux/.config/tmux/scrollback-chrome.sh) (also auto-delegated by `scrollback-open.sh` if invoked on URLs), `Tab`/`Shift-Tab` cycle explicit filter modes (all→cmd→path→url→sha→all), `Space` multi-selects, `Esc` cascades filter→nav→quit.
-4. Copy tail runs detached (`trap '' HUP`, `&`) to `wl-copy` (fallback `xclip`, then tmux buffer) with a `tmux display-message` confirm, so the popup closes the instant `Enter` is pressed; stages are timestamped in `/tmp/scrollback-picker-mm.log`. Covered by `tests/scrollback_picker.test.sh`.
+3. `wm -o scrollback-picker` (canonical preset [`scrollback-picker.toml`](../../waymaker/.config/waymaker/presets/scrollback-picker.toml): nav mode starting in filter, jump-style keymap) with items from `[start] command`. Keys: `Enter` copies, `Ctrl+V` inserts the current token/command directly into the origin pane (`WM_ORIGIN_PANE` / `MM_ORIGIN_PANE`), `Ctrl+E` (filter) / `e` (nav) opens a `path[:line[:col]]` token in `$EDITOR` via [`scrollback-open.sh`](../../tmux/.config/tmux/scrollback-open.sh), `Ctrl+B` (filter) / `b` / `w` / `x` (nav) opens URLs directly in Google Chrome via [`scrollback-chrome.sh`](../../tmux/.config/tmux/scrollback-chrome.sh) (also auto-delegated by `scrollback-open.sh` if invoked on URLs), `Tab`/`Shift-Tab` cycle explicit filter modes (all→cmd→path→url→sha→all), `Space` multi-selects, `Esc` cascades filter→nav→quit.
+4. Copy tail runs detached (`trap '' HUP`, `&`) to `wl-copy` (fallback `xclip`, then tmux buffer) with a `tmux display-message` confirm, so the popup closes the instant `Enter` is pressed; stages are timestamped in `/tmp/scrollback-picker-wm.log`. Covered by `tests/scrollback_picker.test.sh`.
 
 Rule of thumb: `Prefix + E` = **read** (long-form Markdown & Mermaid inspection in Neovim popup), `Prefix + e` / `Prefix + C-e` = **explore** (workspace files popup), `Prefix + y` / `Prefix + C-y` = **scrollback-picker** (tokens, links & shell commands to clipboard or prompt in ~3 keystrokes).
 
@@ -112,7 +112,7 @@ Architecture ([`workspace-picker.sh`](../../tmux/.config/tmux/workspace-picker.s
 
 ## 🔍 Live Ripgrep Full-Text Search (`grep-picker.sh`)
 
-Instant full-text workspace search using Matchmaker and ripgrep, featuring debounced query reloads, line-synced `bat` preview, and 1-touch navigation into Neovim.
+Instant full-text workspace search using Waymaker and ripgrep, featuring debounced query reloads, line-synced `bat` preview, and 1-touch navigation into Neovim.
 
 Bind ([`tmux.conf`](../../tmux/.config/tmux/tmux.conf)):
 - `Prefix + /`: Opens centered modal (`85% × 75%`) via universal `/` search mnemonic.
@@ -122,4 +122,4 @@ Architecture ([`grep-picker.sh`](../../tmux/.config/tmux/grep-picker.sh) and pre
 2. **45/55 Foveal Layout**: 45% candidate match column on the left and 55% syntax-highlighted code preview on the right.
 3. **Line-Synced `bat` Preview**: Automatically centers and highlights the matched line number using `bat --highlight-line`.
 4. **Direct Navigation (`Enter`)**: Opens Neovim directly at the matched line (`nvim +{line} {file}`).
-5. **AI Prompt Injection (`Ctrl+V`)**: Injects `{file}:{line}` directly into the active terminal pane (`MM_ORIGIN_PANE`).
+5. **AI Prompt Injection (`Ctrl+V`)**: Injects `{file}:{line}` directly into the active terminal pane (`WM_ORIGIN_PANE` / `MM_ORIGIN_PANE`).

@@ -1,4 +1,4 @@
-# Matchmaker Agent Worktree Conventional Type Preset (`mm -o awt-type`)
+# Waymaker Agent Worktree Conventional Type Preset (`wm -o awt-type`)
 
 [tui]
 mouse = true

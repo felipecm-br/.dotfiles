@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Matchmaker Agent Worktree PR Handler: interactive PR selector & worktree provisioner
+# Waymaker Agent Worktree PR Handler: interactive PR selector & worktree provisioner
 # Usage: awt-pr.sh [pr_number_or_url]
 
 set -e

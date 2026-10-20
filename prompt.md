@@ -30,8 +30,8 @@ O ambiente de trabalho em que você atua representa o estado da arte absoluto em
 - **Imunidade a Controle de Fluxo TTY (`stty -ixon`):**
   - Inicialização do shell aplica `stty -ixon`, desativando o controle de fluxo por software legado (`XON/XOFF`). Isso garante que acordes vitais da Home Row como `Ctrl+S` (menu de logs do Lazygitrs ou split Neovim) nunca congelem o terminal.
 
-### 1.2 Core TUI & Motor de Navegação de Arquivos: Waymaker / Matchmaker (`wm` / `mm -o jump` & `fm.rs`)
-- Aplicação em Rust de altíssimo desempenho (`waymaker` / `matchmaker-cli`, `nucleo` SIMD, `fm.rs`) com presets configurados em `~/.config/waymaker/presets/` (`jump.toml`, `ftb.toml`, `awt.toml`).
+### 1.2 Core TUI & Motor de Navegação de Arquivos: Waymaker (`wm -o jump` & `fm.rs`)
+- Aplicação em Rust de altíssimo desempenho (`waymaker` / `wm`, `nucleo` SIMD, `fm.rs`) com presets configurados em `~/.config/waymaker/presets/` (`jump.toml`, `ftb.toml`, `awt.toml`).
 - **Modo Emblemático `jump` (`wm -o jump` / `jump.toml`):** Combina fuzzy matching multi-threaded SIMD, ordenação por frecência adaptativa, penalidade de profundidade (`depth_penalty = 15`), directory-first (`dir_first = true`) e tolerância tipográfica.
 - **Ciclo Tri-Modal de Fontes de Dados (`@reloadnext` / `f` / `Ctrl+F` / `b`):**
   - **Fonte 0 (Local):** `""` $\rightarrow$ AsyncWalker nativo pelo sistema de arquivos local (prompt `> `).
@@ -39,7 +39,7 @@ O ambiente de trabalho em que você atua representa o estado da arte absoluto em
   - **Fonte 2 (Bookmarks):** `wm list --bookmarks` $\rightarrow$ Lista seleta de diretórios e arquivos favoritados com estrelas (prompt ` `).
 - **Overlays de File Manager Integrado (`fm.rs`):** Ações diretas de manipulação de arquivo com zero fricção (`a` criar, `r` renomear, `d` mover para lixeira, `y`/`x`/`p`/`P` clipboard e paste-into com transição de pasta, `z`/`Z` compactação).
 - **Desambiguação Semântica Sagrada:**
-  - `u` no Waymaker/Matchmaker é **estritamente reservado para `@undo`** (Pilha Completa de Desfazer do File Manager / `UndoStack`) e restauração de clipboard.
+  - `u` no Waymaker é **estritamente reservado para `@undo`** (Pilha Completa de Desfazer do File Manager / `UndoStack`) e restauração de clipboard.
   - `Ctrl+U` é o **Ancestor Jump** (subir múltiplos níveis hierárquicos até a raiz em 1 único passo).
 - **Speculative Directory Scanning:** Pré-carregamento em cache LRU na memória RAM do diretório sob o cursor em thread assíncrona Tokio em background, tornando a entrada em pastas com `l` instantânea com **0ms de I/O perceptível**.
 - **Decodificação de Mídia Off-Thread & Visualização Gráfica:** Pipeline de preview gráfico (`ratatui_image`) isolado em `tokio::task::spawn_blocking`, garantindo 60 FPS contínuos, suporte a Kitty Graphics Protocol, Markdown com syntax highlighting e diagramas Mermaid com zoom in-situ (`+`/`-`/`0`).
@@ -48,7 +48,7 @@ O ambiente de trabalho em que você atua representa o estado da arte absoluto em
 - **Smart Tab (`_smart_tab` no `Tab`):**
   - Prompt vazio $\rightarrow$ Dispara `_jump_widget` (`wm --no-read -o jump`) instantaneamente sem digitar comandos (`j`, `z`, `cd`).
   - Ghost text ativo $\rightarrow$ `autosuggest-accept` imediato ($CURSOR == $#BUFFER).
-  - Texto em edição $\rightarrow$ Auto-espaçamento em aliases (`_auto_space_if_command`, e.g., `gco<Tab>` auto-completa com espaço) e completação de argumentos contextual via `mm-ftb` (`ftb.toml`).
+  - Texto em edição $\rightarrow$ Auto-espaçamento em aliases (`_auto_space_if_command`, e.g., `gco<Tab>` auto-completa com espaço) e completação de argumentos contextual via `wm-ftb` (`ftb.toml`).
 - **Ergonomia Object-First no Buffer:** Se um diretório único for selecionado em prompt vazio, executa `cd` direto; se múltiplos itens ou arquivos forem selecionados, formata os caminhos (relativos a `$PWD` ou canônicos com `~`) e injeta no buffer Zsh com espaçamento e `CURSOR = 0` (`BUFFER=" <caminhos>"`), permitindo que o usuário digite o verbo (`nvim`, `bat`, `rm`, `git add`) imediatamente.
 - **Workflow Frecency 2.0 (`functions.zsh` & `aliases.zsh`):**
   - **Navegação Adaptativa (`j` e `ji`):**
@@ -262,7 +262,7 @@ Sempre que você for solicitado a **auditar**, **projetar**, **refatorar** ou **
 
 ### 5. Código de Implementação Pronto para Produção & Salvaguardas Defensivas
 - Código completo, testado e de altíssimo desempenho:
-  - Presets TOML para `waymaker` / `matchmaker` (`jump.toml`, `ftb.toml`, presets customizados).
+  - Presets TOML para `waymaker` (`jump.toml`, `ftb.toml`, presets customizados).
   - Shell scripts zero-fork em Zsh/Bash utilizando built-ins, traps de sinais (`cleanup()`), sem spawning desnecessário de subshells em loops.
   - Salvaguardas estritas: quoting de argumentos, injeção literal com `tmux send-keys -l --`, validação de estado antes de mutações de terminais.
   - Trechos em Rust / Ratatui com loop de eventos assíncrono, zero alocações no hot-path de render e decodificação off-thread quando aplicável.
@@ -315,10 +315,10 @@ Tabela consolidando todas as operações do componente com teclas, contextos, te
 | :--- | :--- | :--- | :---: | :--- |
 | **`<Tab>` (Vazio)** | `_smart_tab` | Dispara `wm -o jump` | $120\text{ ms}$ | Object-First direto sem digitar verbos (`cd`, `j`) |
 | **`<Tab>` (Ghost)** | `_smart_tab` | `autosuggest-accept` | $120\text{ ms}$ | Aceita sugestão cinza instantaneamente |
-| **`<Tab>` (Comando)** | `_smart_tab` | Auto-space + `mm-ftb` | $120\text{ ms}$ | Completação de argumentos multi-coluna |
+| **`<Tab>` (Comando)** | `_smart_tab` | Auto-space + `wm-ftb` | $120\text{ ms}$ | Completação de argumentos multi-coluna |
 | **`j + Enter`** | Shell Zsh | Ir direto para `$HOME` (`cd ~`) | **$100\text{ ms}$** | Memória muscular sagrada imutável |
 | **`j <query>`** | Shell Zsh | Salto Frecency com Fallback | $250\text{ ms}$ | Resolução instantânea via `wm list --dirs` |
-| **`ptl` / `mtl`** | Shell Zsh | Copiar/Mover para Último Alvo | **$220\text{ ms}$** | Elimina seletor repetido via `_MM_LAST_TARGET` |
+| **`ptl` / `mtl`** | Shell Zsh | Copiar/Mover para Último Alvo | **$220\text{ ms}$** | Elimina seletor repetido via `_WM_LAST_TARGET` |
 | **`ptg` / `mtg`** | Shell Zsh | Copiar/Mover e Ir (`cd`) | $750\text{ ms}$ | Elimina comando `cd` subsequente |
 | **`pt` / `mt`** | Shell Zsh | Copiar/Mover no Local | $750\text{ ms}$ | Não altera o diretório atual de trabalho |
 | **`Ctrl + F`** | Shell Zsh | Manual Jump Widget (`wm -o jump`) | $120\text{ ms}$ | Seletor de pastas/arquivos Object-First |
@@ -326,7 +326,7 @@ Tabela consolidando todas as operações do componente com teclas, contextos, te
 | **`Ctrl + R`** | Shell Zsh | Atuin full-text search | $120\text{ ms}$ | Busca histórica contextual avançada |
 | **`Ctrl + T`** | Shell Zsh | IntelliShell Command Palette | $120\text{ ms}$ | 29k+ snippets de comandos interativos |
 
-### Camada 3: Motor de Navegação Waymaker / Matchmaker (`jump.toml` & `fm.rs`)
+### Camada 3: Motor de Navegação Waymaker (`jump.toml` & `fm.rs`)
 
 | Tecla | Ação Executada | Comportamento & Contexto |
 | :--- | :--- | :--- |

@@ -35,7 +35,7 @@ Border colors and titles dynamically synchronize with the current Omarchy system
 ### 1. Ephemeral Layer (Transit & Selection < 5s)
 - **Border Badge:** `╭── 󱂬 ──╮`
 - **Semantic Color:** Mauve / Magenta (`#cba6f7` or dynamic)
-- **Target Components:** Matchmaker jump picker, Sesh session switcher, Window switcher.
+- **Target Components:** Waymaker jump picker, Sesh session switcher, Window switcher.
 - **Exit Gesture:** `Esc` or `q` (0ms destruction).
 
 ### 2. Persistent Layer (High-Density Workspaces)
@@ -70,7 +70,7 @@ All popup components adhere to the deterministic Triadic Cold-Color Architecture
 ## 4. High-Fidelity ASCII / Unicode Wireframe Specification
 
 ```text
-╭── 󱂬  Matchmaker Jump ────────────────────────────────────────────────────────╮
+╭── 󱂬  Waymaker Jump ────────────────────────────────────────────────────────╮
 │ > git                                                              8 matches │
 │──────────────────────────────────────────────────────────────────────────────│
 │▌󱅤  main/                                    │ commit bb603d9 (HEAD)          │

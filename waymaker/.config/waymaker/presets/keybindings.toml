@@ -1,4 +1,4 @@
-# Matchmaker / Waymaker Keybindings & Workflow HUD (`wm -o keybindings`)
+# Waymaker Keybindings & Workflow HUD (`wm -o keybindings`)
 # Comprehensive interactive catalog of Tmux, Shell, Frecency, and Desktop workflows.
 # Tab cycles explicit filter modes: all -> tmux -> shell -> frecency -> hypr -> all.
 # Enter executes the selected workflow (if runnable) or copies/notifies.

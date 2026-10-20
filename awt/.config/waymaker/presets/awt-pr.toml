@@ -1,4 +1,4 @@
-# Matchmaker Agent Worktree PR Preset (`mm -o awt-pr` / `wm -o awt-pr`)
+# Waymaker Agent Worktree PR Preset (`wm -o awt-pr`)
 # Interactive GitHub PR browser, review manager, and worktree provisioner with live preview.
 
 [tui]

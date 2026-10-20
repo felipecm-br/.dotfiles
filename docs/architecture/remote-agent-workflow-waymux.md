@@ -6,7 +6,7 @@ This document specifies the remote agent execution architecture using **Waymux**
 
 ## 1. Executive Summary
 
-Instead of relying on monolithic terminal multiplexers like Herdr that replace your entire environment and break Neovim navigation, code review loops (`lazygitrs`), and Matchmaker pickers, this setup uses a **modular Unix-philosophy Control Plane**:
+Instead of relying on monolithic terminal multiplexers like Herdr that replace your entire environment and break Neovim navigation, code review loops (`lazygitrs`), and Waymaker pickers, this setup uses a **modular Unix-philosophy Control Plane**:
 
 ```mermaid
 flowchart LR

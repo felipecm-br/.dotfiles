@@ -32,7 +32,7 @@ The README and value proposition must lead with the concrete problem solved for 
 │ • Frozen Snapshot Backdrop Popups (`display-popup` never flickers or drops borders).     │
 │ • Per-pane UID-isolated backdrop buffers (`/tmp/tmux-backdrop-${UID}-${PANE}.ansi`).    │
 │ • 1-Key Inline Diff Review to AI via bracketed paste (`lazygitrs` -> `antigravity`).     │
-│ • Sub-millisecond fuzzy navigation & live preview (`matchmaker` with inotify reload).   │
+│ • Sub-millisecond fuzzy navigation & live preview (`waymaker` with inotify reload).     │
 │ • Zero-configuration 1-command install (`curl -fsSL ... | bash`) in under 30 seconds.  │
 │ • Zero compilation: Pre-built static musl & Darwin binaries bundled in a single repo.   │
 └─────────────────────────────────────────────────────────────────────────────────────────┘
@@ -285,7 +285,7 @@ jobs:
 A critical flaw in naive stack packaging is attempting to build every component in a single monolithic CI workflow. As revealed in the technical audit:
 1. `lazygitrs` depends on 13 tree-sitter C/C++ grammar parsers requiring specialized cross-compilers (`musl-gcc`, `aarch64-linux-gnu-gcc` via `cross` or `cargo-zigbuild`).
 2. `waymux` is a pure Tokio/Axum asynchronous daemon and orchestrator.
-3. `matchmaker` is a standalone workspace with Nucleo fuzzy matching and terminal graphics.
+3. `waymaker` is a standalone workspace with Nucleo fuzzy matching and terminal graphics.
 
 Compiling all three engines in a single monolithic GitHub Actions runner causes massive CI timeouts (15+ minutes), cross-compilation toolchain collisions, and destroys the modular independence of the underlying open-source projects.
 
@@ -295,13 +295,13 @@ To satisfy Akita's principles of maintainability and zero-friction delivery, the
 ┌────────────────────────────────────────────────────────────────────────────────────────┐
 │                        TIER 1: SUB-REPO ENGINE RELEASES                                │
 ├──────────────────────────┬───────────────────────────┬─────────────────────────────────┤
-│ fcmiranda/waymux         │ fcmiranda/lazygitrs       │ fcmiranda/matchmaker            │
+│ fcmiranda/waymux         │ fcmiranda/lazygitrs       │ fcmiranda/waymaker              │
 │ (v*.*.* release tag)     │ (v*.*.* release tag)      │ (v*.*.* release tag)            │
 │ Native Rust Toolchain    │ cross-rs / cargo-zigbuild │ Native Rust Toolchain           │
 │ (musl + Darwin static)   │ (13 C parsers + musl)     │ (musl + Darwin static)          │
 └────────────┬─────────────┴─────────────┬─────────────┴────────────────┬────────────────┘
              ▼                           ▼                              ▼
-     waymux-<target>.tar.gz      lazygitrs-<target>.tar.gz       mm-<target>.tar.gz
+     waymux-<target>.tar.gz      lazygitrs-<target>.tar.gz        wm-<target>.tar.gz
              │                           │                              │
              └───────────────────────────┼──────────────────────────────┘
                                          ▼
@@ -319,7 +319,7 @@ To satisfy Akita's principles of maintainability and zero-friction delivery, the
 ```
 
 ##### Tier 1: Sub-Repository Engine Cross-Compilation Pipeline
-For `lazygitrs` (and similarly for `waymux` and `matchmaker`), cross-compilation handles C grammar sources via `cross`:
+For `lazygitrs` (and similarly for `waymux` and `waymaker`), cross-compilation handles C grammar sources via `cross`:
 
 ```yaml
 # In fcmiranda/lazygitrs: .github/workflows/release.yml
@@ -630,8 +630,8 @@ To satisfy both the requirement for standalone open-source modularity and the us
 │                             TIER 1 UPSTREAM CORE ENGINES                                │
 ├──────────────────────────────┬───────────────────────────┬──────────────────────────────┤
 │ 1. Daemon Engine:            │ 2. Git & Review TUI:      │ 3. Navigation & Finder:      │
-│    fcmiranda/waymux          │    fcmiranda/lazygitrs    │    fcmiranda/matchmaker      │
-│    (Axum 0.8, Tokio 1.52)    │    (branch: fecavmi)      │    (branch: fecavmi)         │
+│    fcmiranda/waymux          │    fcmiranda/lazygitrs    │    fcmiranda/waymaker        │
+│    (Axum 0.8, Tokio 1.52)    │    (branch: fecavmi)      │    (branch: waymaker)         │
 │    • Standalone CI & Releases│    • Standalone CI & cross│    • Standalone CI & Releases│
 │    • musl + Darwin binaries  │      tree-sitter C builds │    • musl + Darwin binaries  │
 └──────────────────────────────┴───────────────────────────┴──────────────────────────────┘

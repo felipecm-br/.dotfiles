@@ -1,4 +1,4 @@
-# Matchmaker Downloads Preset (`mm -o downloads`)
+# Waymaker Downloads Preset (`wm -o downloads`)
 # Optimized for browsing ~/Downloads with native terminal image previews
 
 [tui]
