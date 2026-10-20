@@ -13,6 +13,43 @@
 --   },
 -- })
 
+local function read_file(path)
+  local f = io.open(path, "r")
+  if not f then return "" end
+  local content = f:read("*a") or ""
+  f:close()
+  return content:gsub("%z", ""):gsub("^%s+", ""):gsub("%s+$", "")
+end
+
+local function is_apple_machine()
+  -- Apple Silicon MacBooks (M1/M2/M3) have devicetree model (e.g. Apple MacBook Air (M1, 2020))
+  local dt_model = read_file("/proc/device-tree/model"):lower()
+  if dt_model:find("macbook") or dt_model:find("apple") then
+    return true
+  end
+
+  -- Intel MacBooks have DMI product_name or sys_vendor
+  local dmi_product = read_file("/sys/class/dmi/id/product_name"):lower()
+  local dmi_vendor = read_file("/sys/class/dmi/id/sys_vendor"):lower()
+  if dmi_product:find("macbook") or dmi_vendor:find("apple") then
+    return true
+  end
+
+  return false
+end
+
+-- Automatic gap adjustment per machine:
+-- MacBook (Retina / HiDPI) -> standard 10px top gap
+-- Dell Inspiron (1366x768 / standard display) -> 0px top gap under the status bar
+local top_gap = is_apple_machine() and 10 or 0
+
+-- https://wiki.hypr.land/Configuring/Basics/Variables/#general
+hl.config({
+  general = {
+    gaps_out = { top = top_gap, right = 10, bottom = 10, left = 10 },
+  },
+})
+
 -- https://wiki.hypr.land/Configuring/Basics/Variables/#decoration
 hl.config({
   decoration = {

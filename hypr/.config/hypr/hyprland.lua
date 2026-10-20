@@ -28,3 +28,6 @@ require("default.hypr.toggles")
 
 -- Add any other personal Hyprland configuration below.
 -- o.window("qemu", { workspace = "5" })
+
+-- Machine-local override (untracked in dotfiles git repository)
+require("default.hypr.require_optional").module("hypr.local")
