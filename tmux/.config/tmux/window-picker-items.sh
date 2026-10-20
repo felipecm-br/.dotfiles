@@ -27,12 +27,12 @@ DIM='\033[2m'
 # @CURRENT_COLOR  → color14 (teal)       — idle AI state
 # @PREFIX_COLOR   → color13 (mauve/pink) — question AI state
 # @FG             → foreground           — window name text
-# color11 (yellow) and color1 (red) not in @options: read colors.toml directly
-_colors_toml="$HOME/.local/state/omarchy/current/theme/colors.toml"
-_color11=$(grep '^color11' "$_colors_toml" 2>/dev/null | sed 's/.*= *"\(.*\)"/\1/')
-_color1=$(grep '^color1 ' "$_colors_toml" 2>/dev/null | sed 's/.*= *"\(.*\)"/\1/')
-[ -z "$_color11" ] && _color11="#f9e2af"  # catppuccin yellow fallback
-[ -z "$_color1"  ] && _color1="#f38ba8"   # catppuccin red fallback
+# color11 (yellow) and color1 (red) not in @options: read via theme-helper.sh
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=/dev/null
+. "$SCRIPT_DIR/theme-helper.sh"
+_color11=$(get_theme_color color11 "#f9e2af")  # catppuccin yellow fallback
+_color1=$(get_theme_color color1 "#f38ba8")    # catppuccin red fallback
 
 C_SESSION=$(printf '\033[1m'; _hex_esc "$(_tget @SESSION_COLOR)")
 C_CURMARK=$(_hex_esc "$(_tget @CURRENT_COLOR)")
@@ -46,7 +46,7 @@ C_IDX=$(_hex_esc "$(_tget @SEGMENT_BG)")
 C_NAME=$(_hex_esc "$(_tget @FG)")
 
 unset -f _tget
-unset _colors_toml _color11 _color1
+unset _color11 _color1
 # ─────────────────────────────────────────────────────────────────────────────
 
 cur_session="${1:-${TMUX_ORIGIN_SESSION:-$(tmux display-message -p '#S')}}"

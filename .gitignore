@@ -8,3 +8,5 @@ apm_modules/
 .lazygitrs*
 .lines.json
 hypr/.config/hypr/local.lua
+tmux/.config/tmux/theme.path
+tmux/.config/tmux/theme.conf

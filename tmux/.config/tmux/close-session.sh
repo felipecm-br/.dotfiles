@@ -16,30 +16,19 @@ REAL_SCRIPT=$(readlink -f "$0" 2>/dev/null || realpath "$0")
 SCRIPT_DIR=$(dirname "$REAL_SCRIPT")
 
 # -----------------------------------------------------------------------------
-# 1. Omarchy Dynamic Color Palette
+# 1. Dynamic Color Palette (resolved via theme-helper.sh)
 # -----------------------------------------------------------------------------
-_colors_toml="$HOME/.local/state/omarchy/current/theme/colors.toml"
+# shellcheck source=/dev/null
+. "$SCRIPT_DIR/theme-helper.sh"
 
-_get_color() {
-  local key="$1"
-  local fallback="$2"
-  local val
-  val=$(grep -E "^\s*${key}\s*=" "$_colors_toml" 2>/dev/null | sed -E 's/.*=\s*"([^"]+)".*/\1/' || true)
-  if [ -n "$val" ]; then
-    printf '%s' "$val"
-  else
-    printf '%s' "$fallback"
-  fi
-}
-
-COLOR_YELLOW=$(_get_color "yellow" "#e0af68")
-COLOR_RED=$(_get_color "red" "#f7768e")
-COLOR_ORANGE=$(_get_color "orange" "#eb927b")
-COLOR_ACCENT=$(_get_color "accent" "#7aa2f7")
-COLOR_MAGENTA=$(_get_color "magenta" "#ad8ee6")
-COLOR_MUTED=$(_get_color "dark_foreground" "#565f89")
-COLOR_FG=$(_get_color "foreground" "#a9b1d6")
-COLOR_BG=$(_get_color "background" "#1a1b26")
+COLOR_YELLOW=$(get_theme_color "yellow" "#e0af68")
+COLOR_RED=$(get_theme_color "red" "#f7768e")
+COLOR_ORANGE=$(get_theme_color "orange" "#eb927b")
+COLOR_ACCENT=$(get_theme_color "accent" "#7aa2f7")
+COLOR_MAGENTA=$(get_theme_color "magenta" "#ad8ee6")
+COLOR_MUTED=$(get_theme_color "dark_foreground" "#565f89")
+COLOR_FG=$(get_theme_color "foreground" "#a9b1d6")
+COLOR_BG=$(get_theme_color "background" "#1a1b26")
 
 _hex_to_ansi() {
   local h="${1#\#}"

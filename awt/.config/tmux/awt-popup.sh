@@ -4,13 +4,9 @@ trap 'exit 0' HUP INT TERM
 
 REAL_SCRIPT=$(readlink -f "$0" 2>/dev/null || realpath "$0")
 SCRIPT_DIR=$(dirname "$REAL_SCRIPT")
-PROJECT_DIR="${1:-$PWD}"
-
-_tmux_style="$HOME/.local/state/omarchy/current/theme/tmux-style.sh"
-[ -f "$_tmux_style" ] || _tmux_style="$SCRIPT_DIR/tmux-style.sh"
 # shellcheck source=/dev/null
-. "$_tmux_style" 2>/dev/null || true
-unset _tmux_style
+. "$SCRIPT_DIR/theme-helper.sh"
+PROJECT_DIR="${1:-$PWD}"
 
 if [ -z "${TMUX_POPUP:-}" ]; then
     if ! git -C "$PROJECT_DIR" rev-parse --is-inside-work-tree >/dev/null 2>&1 && ! git -C "$PROJECT_DIR" rev-parse --is-bare-repository >/dev/null 2>&1; then
@@ -18,8 +14,7 @@ if [ -z "${TMUX_POPUP:-}" ]; then
         exit 0
     fi
 
-    AWT_POPUP_COLOR=$(grep -E '^\s*orange\s*=' "$HOME/.local/state/omarchy/current/theme/colors.toml" 2>/dev/null | sed -E 's/.*=\s*"([^"]+)".*/\1/')
-    [ -z "$AWT_POPUP_COLOR" ] && AWT_POPUP_COLOR="#e84d31"
+    AWT_POPUP_COLOR=$(get_theme_color orange "#e84d31")
 
     CURRENT_PANE=$(tmux display-message -p '#{pane_id}')
     exec tmux display-popup \

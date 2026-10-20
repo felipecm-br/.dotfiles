@@ -22,32 +22,18 @@ R='\033[0m'
 BOLD='\033[1m'
 DIM='\033[2m'
 
-_colors_toml="$HOME/.local/state/omarchy/current/theme/colors.toml"
-_color_orange="#e09d7f"
-_color_yellow="#dbbc7f"
-_color_red="#e67e80"
-_color_magenta="#d699b6"
-_color_cyan="#83c092"
-_color_blue="#7fbbb3"
-_color_fg="#d3c6aa"
-_color_muted="#475258"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=/dev/null
+. "$SCRIPT_DIR/theme-helper.sh"
 
-if [[ -f "$_colors_toml" ]]; then
-  while IFS='=' read -r key val; do
-    key="${key//[[:space:]]/}"
-    val="${val//[[:space:]\"\'\n]/}"
-    case "$key" in
-      orange) _color_orange="$val" ;;
-      yellow) _color_yellow="$val" ;;
-      red) _color_red="$val" ;;
-      magenta) _color_magenta="$val" ;;
-      cyan) _color_cyan="$val" ;;
-      blue) _color_blue="$val" ;;
-      foreground) _color_fg="$val" ;;
-      muted) _color_muted="$val" ;;
-    esac
-  done < "$_colors_toml"
-fi
+_color_orange=$(get_theme_color orange "#e09d7f")
+_color_yellow=$(get_theme_color yellow "#dbbc7f")
+_color_red=$(get_theme_color red "#e67e80")
+_color_magenta=$(get_theme_color magenta "#d699b6")
+_color_cyan=$(get_theme_color cyan "#83c092")
+_color_blue=$(get_theme_color blue "#7fbbb3")
+_color_fg=$(get_theme_color foreground "#d3c6aa")
+_color_muted=$(get_theme_color muted "#475258")
 
 _set_hex C_PERM "${_color_orange:-#e09d7f}"
 _set_hex C_QUESTION "${_color_magenta:-#d699b6}"

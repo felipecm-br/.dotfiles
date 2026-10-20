@@ -9,6 +9,9 @@ elif command -v waymux >/dev/null 2>&1; then
 fi
 
 REAL_SCRIPT=$(readlink -f "$0" 2>/dev/null || realpath "$0")
+SCRIPT_DIR=$(dirname "$REAL_SCRIPT")
+# shellcheck source=/dev/null
+. "$SCRIPT_DIR/theme-helper.sh"
 
 if [ "$1" = "--fullscreen" ]; then
   if ! [ -t 1 ]; then
@@ -20,8 +23,7 @@ elif [ -z "${TMUX_POPUP:-}" ]; then
   export TMUX_ORIGIN_SESSION="$ORIG_SESS"
   export TMUX_ORIGIN_WINDOW="$ORIG_WIN"
 
-  COCKPIT_POPUP_COLOR=$(grep -E '^\s*orange\s*=' "$HOME/.local/state/omarchy/current/theme/colors.toml" 2>/dev/null | sed -E 's/.*=\s*"([^"]+)".*/\1/')
-  [ -z "$COCKPIT_POPUP_COLOR" ] && COCKPIT_POPUP_COLOR="#e09d7f"
+  COCKPIT_POPUP_COLOR=$(get_theme_color "orange" "${TMUX_POPUP_BORDER_COLOR:-#e09d7f}")
 
   exec tmux display-popup \
     -S "fg=$COCKPIT_POPUP_COLOR" \
@@ -33,13 +35,7 @@ elif [ -z "${TMUX_POPUP:-}" ]; then
     "TMUX_POPUP=1 TMUX_ORIGIN_SESSION='$ORIG_SESS' TMUX_ORIGIN_WINDOW='$ORIG_WIN' '$REAL_SCRIPT'"
 fi
 
-SCRIPT_DIR=$(dirname "$REAL_SCRIPT")
 ITEMS_SCRIPT="${SCRIPT_DIR}/cockpit-picker-items.sh"
-_tmux_style="$HOME/.local/state/omarchy/current/theme/tmux-style.sh"
-[ -f "$_tmux_style" ] || _tmux_style="${SCRIPT_DIR}/tmux-style.sh"
-# shellcheck source=/dev/null
-. "$_tmux_style" 2>/dev/null || true
-unset _tmux_style
 
 WAYMUX_SPINNER=$(tmux show-option -gqv @ai_agent_spinner 2>/dev/null)
 [ -z "$WAYMUX_SPINNER" ] && WAYMUX_SPINNER="minidot"

@@ -29,8 +29,11 @@ if [ ! -s "$OUT" ]; then
   exit 1
 fi
 
-ACCENT=$(grep -E '^\s*accent\s*=' "$HOME/.local/state/omarchy/current/theme/colors.toml" 2>/dev/null | sed -E 's/.*=\s*"([^"]+)".*/\1/')
-[ -n "$ACCENT" ] || ACCENT="#7aa2f7"
+SCRIPT_DIR=$(dirname "$(readlink -f "$0" 2>/dev/null || realpath "$0")")
+# shellcheck source=/dev/null
+. "$SCRIPT_DIR/theme-helper.sh"
+
+ACCENT=$(get_theme_color accent "#7aa2f7")
 
 tmux set -p allow-passthrough all 2>/dev/null || true
 tmux set -g allow-passthrough all 2>/dev/null || true

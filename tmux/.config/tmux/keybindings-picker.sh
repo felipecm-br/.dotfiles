@@ -4,13 +4,15 @@
 set -u
 
 REAL_SCRIPT=$(readlink -f "$0" 2>/dev/null || realpath "$0")
+SCRIPT_DIR=$(dirname "$REAL_SCRIPT")
+# shellcheck source=/dev/null
+. "$SCRIPT_DIR/theme-helper.sh"
 
 if [ -z "${TMUX_POPUP:-}" ]; then
   ORIGIN_ARG="${1:-}"
   CWD_ARG="${2:-$PWD}"
 
-  YELLOW_COLOR=$(grep -E '^\s*yellow\s*=' "$HOME/.local/state/omarchy/current/theme/colors.toml" 2>/dev/null | head -n1 | sed -E 's/.*=\s*"([^"]+)".*/\1/')
-  [ -n "$YELLOW_COLOR" ] || YELLOW_COLOR="#f9e2af"
+  YELLOW_COLOR=$(get_theme_color yellow "#f9e2af")
 
   tmux display-popup \
     -S "fg=$YELLOW_COLOR" \

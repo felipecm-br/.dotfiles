@@ -32,11 +32,8 @@ if [ "$OPEN_COMMITS" -eq 0 ]; then
 fi
 
 SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
-_tmux_style="$HOME/.local/state/omarchy/current/theme/tmux-style.sh"
-[ -f "$_tmux_style" ] || _tmux_style="$SCRIPT_DIR/tmux-style.sh"
 # shellcheck source=/dev/null
-. "$_tmux_style" 2>/dev/null || true
-unset _tmux_style
+. "$SCRIPT_DIR/theme-helper.sh"
 
 resolve_lzg() {
     local candidate
@@ -60,8 +57,7 @@ if [ "$OPEN_COMMITS" -eq 1 ]; then
     LZG_CMD="$LZG_CMD --commits"
 fi
 
-GIT_POPUP_COLOR=$(grep -E '^\s*orange\s*=' "$HOME/.local/state/omarchy/current/theme/colors.toml" 2>/dev/null | sed -E 's/.*=\s*"([^"]+)".*/\1/')
-[ -z "$GIT_POPUP_COLOR" ] && GIT_POPUP_COLOR="#e84d31"
+GIT_POPUP_COLOR=$(get_theme_color orange "#e84d31")
 
 FLOW_LOG="$SCRIPT_DIR/flow-log.sh"
 [ -x "$FLOW_LOG" ] || FLOW_LOG="$(command -v flow-log 2>/dev/null || echo "$HOME/.config/tmux/flow-log.sh")"

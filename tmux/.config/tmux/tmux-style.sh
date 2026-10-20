@@ -1,18 +1,4 @@
 #!/usr/bin/env sh
-# tmux-style.sh — fallback style config (hardcoded defaults).
-# The theme-aware version is generated at:
-#   ~/.config/omarchy/current/theme/tmux-style.sh
-# This file is only used when no theme has been applied yet.
-
-# ── Popup appearance ──────────────────────────────────────────────────────────
-TMUX_POPUP_BORDER_COLOR="magenta"
-TMUX_POPUP_TEXT_COLOR="#89b482"
-TMUX_POPUP_WIDTH="80%"
-TMUX_POPUP_HEIGHT="80%"
-
-# ── Picker color spec (window-picker / sesh-picker) ──────────────────────────
-TMUX_COLOR_SPEC="list-border:239,group-header:245,selected-prefix:214,selected-fg:223"
-
-# ── Spinner ───────────────────────────────────────────────────────────────────
-TMUX_SPINNER_NAME="minidot"
-TMUX_SPINNER_COLOR="214"
+# tmux-style.sh — delegates to theme-helper.sh (single source of truth for theme & popup styles)
+# shellcheck source=/dev/null
+. "$HOME/.config/tmux/theme-helper.sh"

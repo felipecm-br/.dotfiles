@@ -5,11 +5,8 @@ if command -v waymux >/dev/null 2>&1; then
 fi
 
 SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
-_tmux_style="$HOME/.local/state/omarchy/current/theme/tmux-style.sh"
-[ -f "$_tmux_style" ] || _tmux_style="$SCRIPT_DIR/tmux-style.sh"
 # shellcheck source=/dev/null
-. "$_tmux_style"
-unset _tmux_style
+. "$SCRIPT_DIR/theme-helper.sh"
 
 # Collect all panes that require attention or have AI agent activity
 notifying_panes=()
@@ -169,8 +166,7 @@ tmux select-pane -t "$pane" 2>/dev/null || true
 tmux set-option -t "$POPUP_SESS" status off 2>/dev/null || true
 tmux set-option -t "$POPUP_SESS" key-table popup 2>/dev/null || true
 
-ALERT_POPUP_COLOR=$(grep -E '^\s*yellow\s*=' "$HOME/.local/state/omarchy/current/theme/colors.toml" 2>/dev/null | sed -E 's/.*=\s*"([^"]+)".*/\1/')
-[ -z "$ALERT_POPUP_COLOR" ] && ALERT_POPUP_COLOR="${TMUX_POPUP_ALERT_BORDER_COLOR:-#f9e2af}"
+ALERT_POPUP_COLOR=$(get_theme_color yellow "${TMUX_POPUP_ALERT_BORDER_COLOR:-#f9e2af}")
 
 exec tmux display-popup \
   -S "fg=$ALERT_POPUP_COLOR" \

@@ -59,12 +59,13 @@ When computer response occurs under **100 milliseconds**, the human brain experi
 2. **Preattentive Glyph Recognition (15ms vs 200ms):** The visual cortex identifies recognized pictograms (`󰊢`, `⚡`, `󱂬`, `󱜻`) in **$\approx 15\text{ ms}$**, whereas reading textual titles requires over $180\text{ ms}$.
 3. **Geometric Elegance:** Thin rounded borders (`╭─╮`) remain balanced and visually anchored.
 
-### 2.2 Universal Dynamic Synchronization with the Omarchy Theme
-All popup scripts resolve their border and accent colors directly from Omarchy's active theme cache (`~/.local/state/omarchy/current/theme/colors.toml`):
+### 2.2 Universal Dynamic Synchronization & Configurable Theme Resolution
+All popup scripts resolve their border and accent colors via [`theme-helper.sh`](../../tmux/.config/tmux/theme-helper.sh), supporting Omarchy theme caches, custom machine overrides, and static dotfiles fallbacks:
 
 ```text
                ┌────────────────────────────────────────────────────────┐
-               │    ~/.local/state/omarchy/current/theme/colors.toml    │
+               │    Theme Resolution: $TMUX_THEME_COLORS_FILE /        │
+               │    ~/.config/tmux/theme.path / Omarchy / Fallback      │
                └───────────┬──────────────┬──────────────┬──────────────┘
                            │              │              │
                     magenta/accent       cyan          orange          yellow/alert
@@ -75,7 +76,7 @@ All popup scripts resolve their border and accent colors directly from Omarchy's
                      ╰───────╯      ╰───────╯      ╰───────╯           ╰───────╯
 ```
 
-Whenever the system theme switches (`omarchy theme set <name>`), 100% of terminal popups immediately adapt their border palettes harmoniously (e.g. Catppuccin Mocha, Gruvbox Dark, Tokyo Night, Nord).
+Whenever the system theme switches (`omarchy theme set <name>`), 100% of terminal popups immediately adapt their border palettes harmoniously (e.g. Catppuccin Mocha, Gruvbox Dark, Tokyo Night, Nord). On systems without Omarchy, [`theme-helper.sh`](../../tmux/.config/tmux/theme-helper.sh) seamlessly resolves custom themes via environment variables or `~/.config/tmux/theme.path` (falling back to `~/.config/tmux/colors.toml`), and `--apply-tmux` derives all Tmux statusbar and border styles directly from the active `colors.toml`.
 
 ### Universal Semiotics Specification Table
 
@@ -239,11 +240,11 @@ The answer is **yes, completely and automatically**, through a three-tier synchr
    - No presets require manual edits; the visual hue shifts dynamically across all TUI elements.
 
 2. **Shell Script Runtime Integration (TrueColor 24-bit):**
-   - Dynamic Tmux scripts ([`cockpit-picker-items.sh`](../../tmux/.config/tmux/cockpit-picker-items.sh), [`close-session.sh`](../../tmux/.config/tmux/close-session.sh), [`close-window.sh`](../../tmux/.config/tmux/close-window.sh), [`cockpit-picker-help.sh`](../../tmux/.config/tmux/cockpit-picker-help.sh)) parse `~/.local/state/omarchy/current/theme/colors.toml` on every invocation.
+   - Dynamic Tmux scripts ([`cockpit-picker-items.sh`](../../tmux/.config/tmux/cockpit-picker-items.sh), [`close-session.sh`](../../tmux/.config/tmux/close-session.sh), [`close-window.sh`](../../tmux/.config/tmux/close-window.sh), [`cockpit-picker-help.sh`](../../tmux/.config/tmux/cockpit-picker-help.sh)) parse `colors.toml` (resolved via [`theme-helper.sh`](../../tmux/.config/tmux/theme-helper.sh)) on every invocation.
    - Hex values (`cyan`, `yellow`, `red`, `magenta`, `muted`, `accent`) are converted to TrueColor ANSI escape sequences (`\033[38;2;R;G;Bm`), providing pixel-perfect fidelity with the window manager, status bar, and Neovim themes.
 
 3. **Popup Frame & Border Styling (`display-popup`):**
-   - Launcher scripts ([`cockpit-picker.sh`](../../tmux/.config/tmux/cockpit-picker.sh), [`session-picker.sh`](../../tmux/.config/tmux/session-picker.sh), [`workspace-picker.sh`](../../tmux/.config/tmux/workspace-picker.sh), [`pr-picker.sh`](../../tmux/.config/tmux/pr-picker.sh)) query `colors.toml` to dynamically inject the active accent color into the Tmux modal border (`display-popup -s "bg=$BG,fg=$FG" -b "rounded"`).
+   - Launcher scripts ([`cockpit-picker.sh`](../../tmux/.config/tmux/cockpit-picker.sh), [`session-picker.sh`](../../tmux/.config/tmux/session-picker.sh), [`workspace-picker.sh`](../../tmux/.config/tmux/workspace-picker.sh), [`pr-picker.sh`](../../tmux/.config/tmux/pr-picker.sh)) query the resolved `colors.toml` to dynamically inject the active accent color into the Tmux modal border (`display-popup -s "bg=$BG,fg=$FG" -b "rounded"`).
 
 4. **Light vs. Dark Theme Contrast Compliance:**
    - In light themes (e.g., `catppuccin-latte`, `flexoki-light`, `white`), Omarchy remaps the ANSI palette so that `cyan` translates to a deep, legible teal/cyan on a light canvas, and `darkgray` maps to a crisp medium-dark gray, preserving WCAG 2.1 AA luminance contrast ($\ge 4.5:1$).

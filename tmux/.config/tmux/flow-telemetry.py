@@ -12,6 +12,16 @@ import datetime
 import math
 from typing import List, Tuple, Dict, Any, Optional
 
+def resolve_colors_toml() -> str:
+    helper = os.path.join(os.path.dirname(os.path.abspath(__file__)), "theme-helper.sh")
+    try:
+        res = subprocess.run([helper, "--path"], capture_output=True, text=True, timeout=1)
+        if res.returncode == 0 and res.stdout.strip():
+            return res.stdout.strip()
+    except Exception:
+        pass
+    return os.path.expanduser("~/.config/tmux/colors.toml")
+
 def load_theme_colors() -> Dict[str, str]:
     colors = {
         "cyan": "#83c092",
@@ -24,7 +34,7 @@ def load_theme_colors() -> Dict[str, str]:
         "gray": "#7a8478",
         "fg": "#d3c6aa",
     }
-    colors_toml = os.path.expanduser("~/.local/state/omarchy/current/theme/colors.toml")
+    colors_toml = resolve_colors_toml()
     if os.path.exists(colors_toml):
         try:
             with open(colors_toml, "r") as f:

@@ -10,11 +10,8 @@ if [ $# -gt 0 ] && [ -d "$1" ]; then
 fi
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-_tmux_style="$HOME/.local/state/omarchy/current/theme/tmux-style.sh"
-[ -f "$_tmux_style" ] || _tmux_style="$SCRIPT_DIR/tmux-style.sh"
 # shellcheck source=/dev/null
-. "$_tmux_style" 2>/dev/null || true
-unset _tmux_style
+. "$SCRIPT_DIR/theme-helper.sh"
 
 WORKMUX_BIN="$HOME/.local/bin/workmux"
 [ -x "$WORKMUX_BIN" ] || WORKMUX_BIN="$(command -v workmux 2>/dev/null || echo "workmux")"
@@ -24,10 +21,8 @@ if ! command -v "$WORKMUX_BIN" >/dev/null 2>&1 && [ ! -x "$WORKMUX_BIN" ]; then
     exit 0
 fi
 
-# Dynamic Omarchy Theme Inheritance (Primary Accent Palette)
-POPUP_COLOR=$(grep -E '^\s*accent\s*=' "$HOME/.local/state/omarchy/current/theme/colors.toml" 2>/dev/null | sed -E 's/.*=\s*"([^"]+)".*/\1/')
-[ -z "$POPUP_COLOR" ] && POPUP_COLOR=$(grep -E '^\s*blue\s*=' "$HOME/.local/state/omarchy/current/theme/colors.toml" 2>/dev/null | sed -E 's/.*=\s*"([^"]+)".*/\1/')
-[ -z "$POPUP_COLOR" ] && POPUP_COLOR="#7aa2f7"
+# Dynamic Theme Inheritance (Primary Accent Palette)
+POPUP_COLOR=$(get_theme_color accent "$(get_theme_color blue "#7aa2f7")")
 
 if [ -n "$TMUX" ]; then
     exec tmux display-popup \

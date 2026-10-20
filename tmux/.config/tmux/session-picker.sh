@@ -3,6 +3,9 @@
 trap 'exit 0' HUP INT TERM
 
 REAL_SCRIPT=$(readlink -f "$0" 2>/dev/null || realpath "$0")
+SCRIPT_DIR=$(dirname "$REAL_SCRIPT")
+# shellcheck source=/dev/null
+. "$SCRIPT_DIR/theme-helper.sh"
 
 if [ "$1" = "--fullscreen" ]; then
   if ! [ -t 1 ]; then
@@ -10,8 +13,7 @@ if [ "$1" = "--fullscreen" ]; then
     exec tmux split-window -Z "$REAL_SCRIPT" --fullscreen
   fi
 elif [ -z "${TMUX_POPUP:-}" ]; then
-  SESSION_POPUP_COLOR=$(grep -E '^\s*cyan\s*=' "$HOME/.local/state/omarchy/current/theme/colors.toml" 2>/dev/null | sed -E 's/.*=\s*"([^"]+)".*/\1/')
-  [ -z "$SESSION_POPUP_COLOR" ] && SESSION_POPUP_COLOR="${TMUX_POPUP_BORDER_COLOR:-#89dceb}"
+  SESSION_POPUP_COLOR=$(get_theme_color "cyan" "${TMUX_POPUP_BORDER_COLOR:-#89dceb}")
 
   tmux display-popup \
     -S "fg=$SESSION_POPUP_COLOR" \
@@ -23,14 +25,6 @@ elif [ -z "${TMUX_POPUP:-}" ]; then
     "TMUX_POPUP=1 '$REAL_SCRIPT' || true" || true
   exit 0
 fi
-
-SCRIPT_DIR=$(dirname "$REAL_SCRIPT")
-
-_tmux_style="$HOME/.local/state/omarchy/current/theme/tmux-style.sh"
-[ -f "$_tmux_style" ] || _tmux_style="${SCRIPT_DIR}/tmux-style.sh"
-# shellcheck source=/dev/null
-. "$_tmux_style" 2>/dev/null || true
-unset _tmux_style
 
 export PATH="$HOME/.local/bin:$PATH"
 

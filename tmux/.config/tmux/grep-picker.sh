@@ -8,6 +8,10 @@
 trap 'exit 0' HUP INT TERM
 set -u
 
+SCRIPT_DIR=$(dirname "$(readlink -f "$0" 2>/dev/null || realpath "$0")")
+# shellcheck source=/dev/null
+. "$SCRIPT_DIR/theme-helper.sh"
+
 if [ -z "${TMUX_POPUP:-}" ]; then
   # Parse arguments with backwards compatibility
   if [ -n "${1:-}" ] && [ "${1#%}" != "$1" ]; then
@@ -20,8 +24,7 @@ if [ -z "${TMUX_POPUP:-}" ]; then
     FULLSCREEN_ARG="${2:-}"
   fi
 
-  BORDER_COLOR=$(grep -E '^\s*(teal|cyan|green)\s*=' "$HOME/.local/state/omarchy/current/theme/colors.toml" 2>/dev/null | head -n1 | sed -E 's/.*=\s*"([^"]+)".*/\1/')
-  [ -n "$BORDER_COLOR" ] || BORDER_COLOR="#94e2d5"
+  BORDER_COLOR=$(get_theme_color teal "$(get_theme_color cyan "$(get_theme_color green "#94e2d5")")")
 
   WIDTH="85%"
   HEIGHT="75%"

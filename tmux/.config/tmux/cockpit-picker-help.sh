@@ -8,12 +8,15 @@ elif command -v waymux >/dev/null 2>&1; then
   exec waymux cockpit-help "$@"
 fi
 
-_colors_toml="$HOME/.local/state/omarchy/current/theme/colors.toml"
-_color_yellow=$(grep '^yellow' "$_colors_toml" 2>/dev/null | sed 's/.*= *"\(.*\)"/\1/' || echo "#dbbc7f")
-_color_red=$(grep '^red ' "$_colors_toml" 2>/dev/null | sed 's/.*= *"\(.*\)"/\1/' || echo "#e67e80")
-_color_magenta=$(grep '^magenta' "$_colors_toml" 2>/dev/null | sed 's/.*= *"\(.*\)"/\1/' || echo "#d699b6")
-_color_cyan=$(grep '^cyan' "$_colors_toml" 2>/dev/null | sed 's/.*= *"\(.*\)"/\1/' || echo "#83c092")
-_color_blue=$(grep '^blue' "$_colors_toml" 2>/dev/null | sed 's/.*= *"\(.*\)"/\1/' || echo "#7fbbb3")
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=/dev/null
+. "$SCRIPT_DIR/theme-helper.sh"
+
+_color_yellow=$(get_theme_color yellow "#dbbc7f")
+_color_red=$(get_theme_color red "#e67e80")
+_color_magenta=$(get_theme_color magenta "#d699b6")
+_color_cyan=$(get_theme_color cyan "#83c092")
+_color_blue=$(get_theme_color blue "#7fbbb3")
 
 _hex_esc() {
   local h="${1#\#}"

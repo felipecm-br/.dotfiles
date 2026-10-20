@@ -25,14 +25,11 @@ if [ -z "${TMUX_POPUP:-}" ]; then
   fi
 
   SCRIPT_DIR=$(dirname "$REAL_SCRIPT")
-  _tmux_style="$HOME/.local/state/omarchy/current/theme/tmux-style.sh"
-  [ -f "$_tmux_style" ] || _tmux_style="$SCRIPT_DIR/tmux-style.sh"
+  # Dynamic theme colors from colors.toml via theme-helper.sh
   # shellcheck source=/dev/null
-  . "$_tmux_style" 2>/dev/null || true
-  unset _tmux_style
+  . "$SCRIPT_DIR/theme-helper.sh"
 
-  PR_POPUP_COLOR=$(grep -E '^\s*blue\s*=' "$HOME/.local/state/omarchy/current/theme/colors.toml" 2>/dev/null | sed -E 's/.*=\s*"([^"]+)".*/\1/')
-  [ -z "$PR_POPUP_COLOR" ] && PR_POPUP_COLOR="${TMUX_POPUP_BORDER_COLOR:-#7aa2f7}"
+  PR_POPUP_COLOR=$(get_theme_color blue "${TMUX_POPUP_BORDER_COLOR:-#7aa2f7}")
 
   exec tmux display-popup \
     -S "fg=$PR_POPUP_COLOR" \

@@ -13,12 +13,14 @@ TOK_PATH=/tmp/scrollback-picker-path.txt
 TOK_URL=/tmp/scrollback-picker-url.txt
 TOK_SHA=/tmp/scrollback-picker-sha.txt
 LOG=/tmp/scrollback-picker-wm.log
+SCRIPT_DIR=$(dirname "$(readlink -f "$0" 2>/dev/null || realpath "$0")")
+# shellcheck source=/dev/null
+. "$SCRIPT_DIR/theme-helper.sh"
 
 if [ -z "${TMUX_POPUP:-}" ]; then
   ORIGIN_ARG="${1:-}"
   CWD_ARG="${2:-}"
-  GREEN=$(grep -E '^\s*green\s*=' "$HOME/.local/state/omarchy/current/theme/colors.toml" 2>/dev/null | sed -E 's/.*=\s*"([^"]+)".*/\1/')
-  [ -n "$GREEN" ] || GREEN="#a6e3a1"
+  GREEN=$(get_theme_color green "#a6e3a1")
 
   tmux display-popup \
     -S "fg=$GREEN" \
