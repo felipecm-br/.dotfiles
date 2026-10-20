@@ -128,7 +128,7 @@ import { readFileSync, existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-export function getAcpdToken() {
+export function getWaymuxToken() {
   const uid = typeof process.getuid === 'function' ? process.getuid() : (process.env.UID || '1000');
   const homeDir = process.env.HOME || (process.env.USER ? `/home/${process.env.USER}` : tmpdir());
   const xdgRuntime = process.env.XDG_RUNTIME_DIR || `/run/user/${uid}`;
@@ -136,10 +136,6 @@ export function getAcpdToken() {
     join(xdgRuntime, 'waymux', 'token'),
     join(tmpdir(), `waymux-${uid}`, 'token'),
     join(homeDir, '.cache', 'waymux', 'token'),
-    // Legacy (pre-waymux) locations, still mirrored by the daemon for old clients
-    join(xdgRuntime, 'acpd', 'token'),
-    join(tmpdir(), `acpd-${uid}`, 'token'),
-    join(homeDir, '.cache', 'acpd', 'token'),
   ];
   for (const tokenPath of candidates) {
     try {
@@ -151,9 +147,9 @@ export function getAcpdToken() {
   return null;
 }
 
-export function getAcpdHeaders() {
+export function getWaymuxHeaders() {
   const headers = { 'Content-Type': 'application/json' };
-  const token = getAcpdToken();
+  const token = getWaymuxToken();
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
   }

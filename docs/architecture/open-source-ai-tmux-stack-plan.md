@@ -1,6 +1,6 @@
 # Open-Source Strategy & Architecture Plan: The Terminal AI Cockpit Stack
 
-> **Canonical Blueprint for Packaging & Distributing the `acpd` + `lazygitrs` + `mm` + `tmux` Ecosystem**  
+> **Canonical Blueprint for Packaging & Distributing the `waymux` + `lazygitrs` + `wm` + `tmux` Ecosystem**  
 > Based on open-source production engineering principles from [*Fabio Akita's "Boas práticas de projetos de código aberto com LLM - O Mínimo" (2026)*](https://akitaonrails.com/2026/05/30/boas-praticas-projetos-codigo-aberto-llm-o-minimo/).
 
 ---
@@ -43,7 +43,7 @@ The README and value proposition must lead with the concrete problem solved for 
 ## 2. Technical Audit of the Components
 
 ### 2.1 `waymux` (Unified Agent Control Plane & Orchestrator `v0.2.0`)
-- **Path:** `~/dev/github/waymux` (`https://github.com/felipecm-br/waymux`, produces `waymux` and `acpd` binaries from a single crate)
+- **Path:** `~/dev/github/waymux` (`https://github.com/felipecm-br/waymux`, produces the unified `waymux` binary)
 - **Current State (`v0.2.0`):**
   - Robust core: Axum 0.8, Tokio 1.52, nix 0.29, sd-notify.
   - Synchronous CLI fast-path (`src/lib.rs`) intercepts client subcommands (`cockpit`, `cockpit-items`, `cockpit-preview`, `cockpit-diff`, `cockpit-help`, `agent-action`, `review-notes`, `window-create`, `window-delete`, `triage`, `hook`, `inject`, `wt`, `init`, `health`, `status`, `list`, `dismiss`) **before** initializing the multi-threaded Tokio runtime (<1.5ms startup overhead).
@@ -54,7 +54,7 @@ The README and value proposition must lead with the concrete problem solved for 
   - JSON-RPC 2.0 at `POST /rpc` (`agentState/update`, `agentState/list`, `agentState/dismiss`, `agentState/wait`, `tmux.*`).
   - **30 unit tests passing** (`cargo test`), 0 Clippy warnings (`cargo clippy --all-targets --all-features -- -D warnings`), ~5.0 MB release binary.
   - Systemd user service unit (`systemd/waymux.service`).
-  - **Token generation is dynamic:** `src/auth.rs` writes `$XDG_RUNTIME_DIR/waymux/token` (mirrored to `acpd/token`) with `0600` permissions.
+  - **Token generation is dynamic:** `src/auth.rs` writes `$XDG_RUNTIME_DIR/waymux/token` with `0600` permissions.
   - **Git Remote Status (Resolved):** Tagged `v0.2.0` and pushed to `origin/main` (`felipecm-br/waymux`). Service `waymux.service` is actively running via user systemd (`~/.local/bin/waymux`).
 
 ### 2.2 `lazygitrs` (`fecavmi` branch)
@@ -134,24 +134,22 @@ The README and value proposition must lead with the concrete problem solved for 
   - `opencode/.config/opencode/plugins/hooker.ts`
 - **Path Sanitization (Resolved):**
   - Removed all hardcoded `/home/fecavmi` and `/run/user/1001/` paths from client hooks.
-  - Dynamically discovers token and socket via `$XDG_RUNTIME_DIR/acpd/`, `$HOME/.cache/acpd/`, or `/tmp/acpd-<uid>/`.
+  - Dynamically discovers token and socket via `$XDG_RUNTIME_DIR/waymux/`, `$HOME/.cache/waymux/`, or `/tmp/waymux-<uid>/`.
       ```javascript
       const uid = process.getuid?.() || 1001;
       const candidates = [
-        join(xdgRuntime, 'acpd', 'token'),
-        join(tmpdir(), `acpd-${uid}`, 'token'),
-        join(process.env.HOME || '/home/fecavmi', '.cache', 'acpd', 'token'),
-        `/run/user/1001/acpd/token`,
+        join(xdgRuntime, 'waymux', 'token'),
+        join(tmpdir(), `waymux-${uid}`, 'token'),
+        join(homeDir, '.cache', 'waymux', 'token'),
       ];
       ```
     - [`opencode/.config/opencode/plugins/hooker.ts`](../../opencode/.config/opencode/plugins/hooker.ts):
       ```typescript
       const uid = process.getuid?.() ?? 1001;
       const candidates = [
-        join(xdgRuntime, "acpd", "token"),
-        join(tmpdir(), `acpd-${uid}`, "token"),
-        join(process.env.HOME || "/home/fecavmi", ".cache", "acpd", "token"),
-        `/run/user/1001/acpd/token`,
+        join(xdgRuntime, "waymux", "token"),
+        join(tmpdir(), `waymux-${uid}`, "token"),
+        join(homeDir, ".cache", "waymux", "token"),
       ];
       ```
 ### 2.6 Workspace & Session Layer (`sesh` / `wm session`)
@@ -169,7 +167,7 @@ The Cockpit ecosystem classifies all runtime tools into 3 distinct tiers:
 
 | Component / Tool | Role in Cockpit | Classification | Fallback Behavior if Absent |
 | :--- | :--- | :--- | :--- |
-| **`waymux` / `acpd`** | Unified AI orchestrator, Cockpit HUD, worktrees, hooks & RPC daemon | **Bundled (Tier 1 Engine)** | Pre-compiled static binary in release bundle |
+| **`waymux`** | Unified AI orchestrator, Cockpit HUD, worktrees, hooks & RPC daemon | **Bundled (Tier 1 Engine)** | Pre-compiled static binary in release bundle |
 | **`lazygitrs`** | Git TUI, worktrees & AI review notes | **Bundled (Tier 1 Engine)** | Pre-compiled static binary in release bundle |
 | **`waymaker` (`wm`)** | Fuzzy nav, popups & native session manager | **Bundled (Tier 1 Engine)** | Pre-compiled static binary in release bundle (includes native `sesh` drop-in) |
 | **`tmux` (>= 3.2)** | Multiplexer, popups & state display | **Host Platform Prerequisite** | Hard requirement (the cockpit runs inside Tmux) |
@@ -226,15 +224,15 @@ curl -fsSL https://raw.githubusercontent.com/fcmiranda/terminal-ai-cockpit/main/
 **Installer Logic (Strict Zero-Compile Guarantee):**
 1. **Never compile:** Never invoke `cargo install` or `cargo build`.
 2. **Arch & OS Detection:** Detects `linux` / `macos` and `x86_64` / `aarch64`.
-3. **Bundle Download:** Fetches the unified archive containing pre-built `acpd`, `lazygitrs`, and `wm` (Waymaker).
+3. **Bundle Download:** Fetches the unified archive containing pre-built `waymux`, `lazygitrs`, and `wm` (Waymaker).
 4. **Integrity Check:** Validates `sha256sum` before extraction to `~/.local/bin/` (or `--prefix`).
 5. **Prerequisites Verification:** Verifies presence of `tmux` and `git` (prompting user or suggesting package install if absent).
-6. **Binary & Wrapper Installation:** Extracts `acpd`, `lazygitrs`, `wm`, and the drop-in `sesh` executable wrapper to `~/.local/bin/`.
+6. **Binary & Wrapper Installation:** Extracts `waymux`, `lazygitrs`, `wm`, and the drop-in `sesh` executable wrapper to `~/.local/bin/`.
 7. **Backdrop Isolation Helper:** Installs `tmux-popup-isolate.sh` to `~/.local/bin/`.
 8. **Tmux Plugin Registration:**
    - Appends `run-shell "~/.tmux/plugins/terminal-ai-cockpit/cockpit.tmux"` to `~/.tmux.conf` or TPM config.
 9. **Systemd User Service:**
-   - Enables `acpd.service` via `systemctl --user enable --now acpd`.
+   - Enables `waymux.service` via `systemctl --user enable --now waymux`.
 10. **Agent Hook Linking:**
    - Detects installed AI agents (`antigravity`, `opencode`, `claude`) and links portable hooks.
 
@@ -286,7 +284,7 @@ jobs:
 
 A critical flaw in naive stack packaging is attempting to build every component in a single monolithic CI workflow. As revealed in the technical audit:
 1. `lazygitrs` depends on 13 tree-sitter C/C++ grammar parsers requiring specialized cross-compilers (`musl-gcc`, `aarch64-linux-gnu-gcc` via `cross` or `cargo-zigbuild`).
-2. `acpd` is a pure Tokio/Axum asynchronous daemon.
+2. `waymux` is a pure Tokio/Axum asynchronous daemon and orchestrator.
 3. `matchmaker` is a standalone workspace with Nucleo fuzzy matching and terminal graphics.
 
 Compiling all three engines in a single monolithic GitHub Actions runner causes massive CI timeouts (15+ minutes), cross-compilation toolchain collisions, and destroys the modular independence of the underlying open-source projects.
@@ -297,13 +295,13 @@ To satisfy Akita's principles of maintainability and zero-friction delivery, the
 ┌────────────────────────────────────────────────────────────────────────────────────────┐
 │                        TIER 1: SUB-REPO ENGINE RELEASES                                │
 ├──────────────────────────┬───────────────────────────┬─────────────────────────────────┤
-│ fcmiranda/acpd           │ fcmiranda/lazygitrs       │ fcmiranda/matchmaker            │
+│ fcmiranda/waymux         │ fcmiranda/lazygitrs       │ fcmiranda/matchmaker            │
 │ (v*.*.* release tag)     │ (v*.*.* release tag)      │ (v*.*.* release tag)            │
 │ Native Rust Toolchain    │ cross-rs / cargo-zigbuild │ Native Rust Toolchain           │
 │ (musl + Darwin static)   │ (13 C parsers + musl)     │ (musl + Darwin static)          │
 └────────────┬─────────────┴─────────────┬─────────────┴────────────────┬────────────────┘
              ▼                           ▼                              ▼
-     acpd-<target>.tar.gz       lazygitrs-<target>.tar.gz       mm-<target>.tar.gz
+     waymux-<target>.tar.gz      lazygitrs-<target>.tar.gz       mm-<target>.tar.gz
              │                           │                              │
              └───────────────────────────┼──────────────────────────────┘
                                          ▼
@@ -321,7 +319,7 @@ To satisfy Akita's principles of maintainability and zero-friction delivery, the
 ```
 
 ##### Tier 1: Sub-Repository Engine Cross-Compilation Pipeline
-For `lazygitrs` (and similarly for `acpd` and `matchmaker`), cross-compilation handles C grammar sources via `cross`:
+For `lazygitrs` (and similarly for `waymux` and `matchmaker`), cross-compilation handles C grammar sources via `cross`:
 
 ```yaml
 # In fcmiranda/lazygitrs: .github/workflows/release.yml
@@ -425,16 +423,16 @@ jobs:
           mkdir -p bundle/bin bundle/tmux bundle/hooks bundle/systemd
           
           # Read pinned versions from manifest
-          ACPD_VER=$(jq -r .acpd cockpit-manifest.json)
+          WAYMUX_VER=$(jq -r .waymux cockpit-manifest.json)
           LZG_VER=$(jq -r .lazygitrs cockpit-manifest.json)
           MM_VER=$(jq -r .matchmaker cockpit-manifest.json)
           
           # Fetch pre-built Tier 1 artifacts
-          gh release download "$ACPD_VER" --repo fcmiranda/acpd --pattern "*${TARGET}*.tar.gz" -O acpd.tar.gz
+          gh release download "$WAYMUX_VER" --repo fcmiranda/waymux --pattern "*${TARGET}*.tar.gz" -O waymux.tar.gz
           gh release download "$LZG_VER" --repo fcmiranda/lazygitrs --pattern "*${TARGET}*.tar.gz" -O lazygitrs.tar.gz
           gh release download "$MM_VER" --repo fcmiranda/matchmaker --pattern "*${TARGET}*.tar.gz" -O mm.tar.gz
           
-          tar -xzf acpd.tar.gz -C bundle/bin/
+          tar -xzf waymux.tar.gz -C bundle/bin/
           tar -xzf lazygitrs.tar.gz -C bundle/bin/
           tar -xzf mm.tar.gz -C bundle/bin/
           
@@ -444,7 +442,7 @@ jobs:
           chmod +x bundle/bin/*
           cp -r tmux/* bundle/tmux/
           cp -r hooks/* bundle/hooks/
-          cp systemd/acpd.service bundle/systemd/
+          cp systemd/waymux.service bundle/systemd/
           
           # Package final bundle and sha256
           BUNDLE_NAME="terminal-ai-cockpit-${TAG}-${TARGET}.tar.gz"
@@ -618,12 +616,12 @@ To satisfy both the requirement for standalone open-source modularity and the us
 │              TIER 2 UMBRELLA DISTRIBUTION: fcmiranda/terminal-ai-cockpit                │
 ├─────────────────────────────────────────────────────────────────────────────────────────┤
 │ • install.sh               -> 1-line zero-compile curl installer (< 30s execution)      │
-│ • cockpit-manifest.json    -> Pinned upstream release versions of acpd, lazygitrs, mm  │
+│ • cockpit-manifest.json    -> Pinned upstream release versions of waymux, lazygitrs, mm│
 │ • binaries/release assets  -> Pre-assembled bundles: terminal-ai-cockpit-v*.*.*-<arch>  │
 │ • tmux/                    -> complete cockpit.tmux plugin (isolated popups, pills)     │
 │ • hooks/                   -> generic AI agent hooks (antigravity, opencode, claude)    │
 │ • scripts/                 -> tmux-popup-isolate.sh, lazygit-tmux-injector.sh           │
-│ • systemd/                 -> acpd.service user unit                                    │
+│ • systemd/                 -> waymux.service user unit                                  │
 │ • docs/                    -> problem-first README, architecture manifesto, demos       │
 └─────────────────────────────────────────────────────────────────────────────────────────┘
                                        ▲
@@ -632,7 +630,7 @@ To satisfy both the requirement for standalone open-source modularity and the us
 │                             TIER 1 UPSTREAM CORE ENGINES                                │
 ├──────────────────────────────┬───────────────────────────┬──────────────────────────────┤
 │ 1. Daemon Engine:            │ 2. Git & Review TUI:      │ 3. Navigation & Finder:      │
-│    fcmiranda/acpd            │    fcmiranda/lazygitrs    │    fcmiranda/matchmaker      │
+│    fcmiranda/waymux          │    fcmiranda/lazygitrs    │    fcmiranda/matchmaker      │
 │    (Axum 0.8, Tokio 1.52)    │    (branch: fecavmi)      │    (branch: fecavmi)         │
 │    • Standalone CI & Releases│    • Standalone CI & cross│    • Standalone CI & Releases│
 │    • musl + Darwin binaries  │      tree-sitter C builds │    • musl + Darwin binaries  │
@@ -640,9 +638,9 @@ To satisfy both the requirement for standalone open-source modularity and the us
 ```
 
 ### 4.1 Why the Two-Tier Model Wins:
-1. **Isolation of C Cross-Compilation Complexity:** The 13 C tree-sitter grammars in `lazygitrs` require specialized `cross` or `cargo-zigbuild` environments. Isolating this to Tier 1 ensures that packaging failures in one tool never break or block the release of `acpd` or the overall cockpit distribution.
+1. **Isolation of C Cross-Compilation Complexity:** The 13 C tree-sitter grammars in `lazygitrs` require specialized `cross` or `cargo-zigbuild` environments. Isolating this to Tier 1 ensures that packaging failures in one tool never break or block the release of `waymux` or the overall cockpit distribution.
 2. **Zero-Compile Assembly in Tier 2:** The umbrella distribution repository builds **nothing from source**. Its release workflow simply pulls verified, pre-built binary assets from Tier 1, validates SHA256 hashes, bundles them with scripts and tmux plugins, and publishes in under 2 minutes.
-3. **Open-Source Modular Independence:** Community members who only want `lazygitrs` (with `--commits` and AI review notes) or `acpd` (for custom Tmux or Waybar integrations) can consume them independently without downloading the full cockpit.
+3. **Open-Source Modular Independence:** Community members who only want `lazygitrs` (with `--commits` and AI review notes) or `waymux` (for custom Tmux or Waybar integrations) can consume them independently without downloading the full cockpit.
 4. **1-Command Zero-Friction User Experience:** End-users running `curl -fsSL ... | bash` receive a single unified archive containing all pre-built binaries, configs, systemd units, and tmux plugins ready to run immediately.
 
 ---
@@ -650,15 +648,15 @@ To satisfy both the requirement for standalone open-source modularity and the us
 ## 5. Step-by-Step Implementation Checklist
 
 ### Phase 1: Decoupling, Sanitization & Bug Fixing
-- [x] **acpd (Debounce Bug & Architecture Cleanup):**
+- [x] **waymux (Debounce Bug & Architecture Cleanup):**
   - Completely eliminated the redundant 400ms idle task in `adapters.rs:361-368`.
   - Centralized debouncing in `api.rs:290-309` and tuned default idle delay to **300ms** in `daemon.rs:42`.
-- [x] **acpd (Clippy & Rustfmt Remediation):**
+- [x] **waymux (Clippy & Rustfmt Remediation):**
   - Fixed the 4 `clippy::collapsible_if` errors and formatting in `src/adapters.rs` and `src/api.rs`.
   - Replaced hardcoded `/home/fecavmi` fallback in `src/adapters.rs:526` with dynamic `std::env::var("HOME").ok()?`.
-  - Passing `cargo clippy --all-targets --all-features -- -D warnings` and all 11 unit tests cleanly.
-- [x] **acpd (Remote Status & Systemd):**
-  - Commit `2362508` pushed to `origin/main` with release workflow.
+  - Passing `cargo clippy --all-targets --all-features -- -D warnings` and all unit tests cleanly.
+- [x] **waymux (Remote Status & Systemd):**
+  - Pushed to `origin/main` with release workflow.
   - Active user systemd service running.
 - [x] **lazygitrs (Remote Tracking & Worktree Setup):**
   - Branch `fecavmi` pushed to `origin/fecavmi` (commit `27bce0347`).
@@ -690,11 +688,11 @@ To satisfy both the requirement for standalone open-source modularity and the us
 
 ### Phase 2: Two-Tier CI/CD & Multi-Arch Build Automation
 - [x] **Tier 1 Engine Tagged Releases:**
-  - Published `v0.1.0` tag on `fcmiranda/acpd` triggering `.github/workflows/release.yml` with sha256 checksums.
+  - Published `v0.1.0` tag on `fcmiranda/waymux` triggering `.github/workflows/release.yml` with sha256 checksums.
   - Published `v0.1.0` tag on `fcmiranda/waymaker` triggering `.github/workflows/release.yml` with sha256 checksums.
   - Published `v0.1.0-cockpit` tag on `fcmiranda/lazygitrs` triggering `.github/workflows/release.yml` with musl-tools and sha256 checksums.
 - [x] **Tier 2 Umbrella CI/CD (`waymux`):**
-  - Created `waymux-manifest.json` tracking pinned upstream engine release tags (`acpd: v0.1.0`, `lazygitrs: v0.1.0-cockpit`, `waymaker: v0.1.0`).
+  - Created `waymux-manifest.json` tracking pinned upstream engine release tags (`waymux: v0.1.0`, `lazygitrs: v0.1.0-cockpit`, `waymaker: v0.1.0`).
   - Created `.github/workflows/release.yml` downloading Tier 1 assets, computing SHA256 hashes, bundling scripts/plugins, and releasing multi-arch distribution tarballs.
   - Added `CHANGELOG.md` following Keep a Changelog and SemVer.
 
@@ -709,7 +707,7 @@ To satisfy both the requirement for standalone open-source modularity and the us
   - Downloads latest Tier 1 pre-compiled engines with SHA-256 verification.
   - Installs binaries to `~/.local/bin/` with `sesh -> wm` symlink.
   - Automatically configures global gitignore for `.lines.json`.
-  - Configures and enables `acpd.service` on Linux via systemd user unit.
+  - Configures and enables `waymux.service` on Linux via systemd user unit.
 
 ### Phase 5: Documentation & Community Launch
 - [x] Problem-First `README.md`:

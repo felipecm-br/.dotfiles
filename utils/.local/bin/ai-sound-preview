@@ -94,8 +94,6 @@ if [[ -f "$HOME/.config/omarchy/sounds/ai-response.sound" ]]; then
   ACTIVE_SOUND="$(< "$HOME/.config/omarchy/sounds/ai-response.sound" 2>/dev/null || true)"
 elif [[ -f "$HOME/.config/waymux/sounds/response.sound" ]]; then
   ACTIVE_SOUND="$(< "$HOME/.config/waymux/sounds/response.sound" 2>/dev/null || true)"
-elif [[ -f "$HOME/.config/acpd/sounds/response.sound" ]]; then
-  ACTIVE_SOUND="$(< "$HOME/.config/acpd/sounds/response.sound" 2>/dev/null || true)"
 fi
 
 IS_ACTIVE=0

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { readCtx, getActiveTmuxPane, getAcpdHeaders, log, setAiAgentTitle, extractSessionTitle } from './hook-lib.mjs';
+import { readCtx, getActiveTmuxPane, getWaymuxHeaders, log, setAiAgentTitle, extractSessionTitle } from './hook-lib.mjs';
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
@@ -11,7 +11,7 @@ const __filename = fileURLToPath(import.meta.url);
 
 function getParamFile(paneId) {
   const safePane = (paneId || 'default').replace(/[^a-zA-Z0-9]/g, '_');
-  return join(tmpdir(), `acpd-pane-state-${safePane}.json`);
+  return join(tmpdir(), `waymux-pane-state-${safePane}.json`);
 }
 
 function readPaneState(paneId) {
@@ -32,7 +32,7 @@ function writePaneState(paneId, state, message = null) {
   } catch (e) {}
 }
 
-async function sendAcpState(paneId, state, message = null) {
+async function sendWaymuxState(paneId, state, message = null) {
   if (!paneId) return;
 
   writePaneState(paneId, state, message);
@@ -40,7 +40,7 @@ async function sendAcpState(paneId, state, message = null) {
   try {
     const res = await fetch('http://127.0.0.1:4040/api/status', {
       method: 'POST',
-      headers: getAcpdHeaders(),
+      headers: getWaymuxHeaders(),
       body: JSON.stringify({
         pane_id: paneId,
         state,
@@ -48,10 +48,10 @@ async function sendAcpState(paneId, state, message = null) {
         timestamp: Date.now()
       }),
     });
-    log(LOG_FILE, `sendAcpState(${paneId}, ${state}) → HTTP ${res.status}`);
+    log(LOG_FILE, `sendWaymuxState(${paneId}, ${state}) → HTTP ${res.status}`);
   } catch (e) {
-    log(LOG_FILE, `sendAcpState(${paneId}, ${state}) error: ${e.message}`);
-    // Fallback: trigger sound notification directly if ACPD is unreachable
+    log(LOG_FILE, `sendWaymuxState(${paneId}, ${state}) error: ${e.message}`);
+    // Fallback: trigger sound notification directly if Waymux is unreachable
     if (state === 'idle') {
       try {
         const soundChild = spawn('ai-sound-notify', ['response'], {
@@ -83,23 +83,23 @@ async function main() {
     if (title) {
       setAiAgentTitle(tmuxPane, title);
     }
-    await sendAcpState(tmuxPane, 'working');
+    await sendWaymuxState(tmuxPane, 'working');
   }
   else if (eventType === 'PreToolUse') {
     const toolCall = ctx.toolCall || {};
     const toolName = (toolCall.name || ctx.tool_name || ctx.tool || '').toLowerCase();
 
     if (toolName.includes('question') || /(^|_)ask(_|$)/.test(toolName)) {
-      await sendAcpState(tmuxPane, 'awaiting_input');
+      await sendWaymuxState(tmuxPane, 'awaiting_input');
     } else if (toolName.includes('permission')) {
-      await sendAcpState(tmuxPane, 'permission');
+      await sendWaymuxState(tmuxPane, 'permission');
     } else {
-      await sendAcpState(tmuxPane, 'working');
+      await sendWaymuxState(tmuxPane, 'working');
     }
   }
   else if (eventType === 'Stop') {
     // Only transition to idle when the entire agent turn terminates (Stop event)
-    await sendAcpState(tmuxPane, 'idle');
+    await sendWaymuxState(tmuxPane, 'idle');
   }
   else if (['SessionEnd', 'Exit'].includes(eventType)) {
     setAiAgentTitle(tmuxPane, null);
@@ -108,7 +108,7 @@ async function main() {
         execSync(`tmux set-window-option -t "${tmuxPane}" automatic-rename on 2>/dev/null || true`);
       } catch (_) {}
     }
-    await sendAcpState(tmuxPane, 'closed');
+    await sendWaymuxState(tmuxPane, 'closed');
   }
 
   // Output a clean minimal JSON response so CLI protojson unmarshaler doesn't fail on extra fields

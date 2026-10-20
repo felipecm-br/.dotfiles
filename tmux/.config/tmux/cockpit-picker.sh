@@ -41,9 +41,9 @@ _tmux_style="$HOME/.local/state/omarchy/current/theme/tmux-style.sh"
 . "$_tmux_style" 2>/dev/null || true
 unset _tmux_style
 
-ACPD_SPINNER=$(tmux show-option -gqv @ai_agent_spinner 2>/dev/null)
-[ -z "$ACPD_SPINNER" ] && ACPD_SPINNER="minidot"
-TMUX_SPINNER_NAME="$ACPD_SPINNER"
+WAYMUX_SPINNER=$(tmux show-option -gqv @ai_agent_spinner 2>/dev/null)
+[ -z "$WAYMUX_SPINNER" ] && WAYMUX_SPINNER="minidot"
+TMUX_SPINNER_NAME="$WAYMUX_SPINNER"
 
 ORIG_SESS="${TMUX_ORIGIN_SESSION:-$(tmux display-message -p '#S')}"
 ORIG_WIN="${TMUX_ORIGIN_WINDOW:-$(tmux display-message -p '#I')}"

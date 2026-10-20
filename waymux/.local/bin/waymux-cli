@@ -296,7 +296,7 @@ cmd_wait() {
   fi
 
   if [[ -z "$pane" ]]; then
-    echo "Usage: acpd-cli wait <pane_id> [--state <state>] [--timeout <secs>]" >&2
+    echo "Usage: waymux-cli wait <pane_id> [--state <state>] [--timeout <secs>]" >&2
     return 1
   fi
 
@@ -334,14 +334,14 @@ cmd_wait() {
 
 cmd_help() {
   cat <<'EOF'
-acpd-cli — Agent Client Protocol Daemon CLI & Workflow Orchestrator
+waymux-cli — Waymux Daemon CLI & Workflow Orchestrator
 
 USAGE:
-  acpd-cli <command> [arguments]
+  waymux-cli <command> [arguments]
 
 COMMANDS:
   status, info           Check daemon health, active agent states, and Tmux sessions
-  run [opts] <cmd...>    Dispatch agent or command into Tmux via ACPD
+  run [opts] <cmd...>    Dispatch agent or command into Tmux via Waymux
                          Options:
                            -s, --session <name>   Target session (default: "agents")
                            -w, --window <name>    Target window name
@@ -358,30 +358,30 @@ COMMANDS:
   msg <message>          Display banner message on Tmux status line
   bell [pane]            Trigger visual/audible alert bell
   kill <target>          Kill target pane (%X), window (@X / :X), or session (name)
-  health                 Quick healthcheck probe of ACPD daemon
+  health                 Quick healthcheck probe of Waymux daemon
 
 ENVIRONMENT:
-  ACPD_URL               ACPD HTTP URL (default: http://127.0.0.1:4040)
-  UID                    User ID for token lookup ($XDG_RUNTIME_DIR/waymux/token, legacy: .../acpd/token)
+  WAYMUX_URL             Waymux HTTP URL (default: http://127.0.0.1:4040)
+  UID                    User ID for token lookup ($XDG_RUNTIME_DIR/waymux/token)
 
 EXAMPLES:
   # Check system & agent states
-  acpd-cli status
+  waymux-cli status
 
   # Wait synchronously for background subagent to finish
-  acpd-cli wait %2 --state idle --timeout 60
+  waymux-cli wait %2 --state idle --timeout 60
 
   # Dismiss attention badge on focus
-  acpd-cli dismiss %2
+  waymux-cli dismiss %2
 
   # Run Antigravity CLI detached in background session
-  acpd-cli run -d -s work -w agy agy
+  waymux-cli run -d -s work -w agy agy
 
   # Capture output from agent pane %0
-  acpd-cli capture %0 50
+  waymux-cli capture %0 50
 
   # Send prompt or confirmation to agent
-  acpd-cli send %0 "y" Enter
+  waymux-cli send %0 "y" Enter
 EOF
 }
 
@@ -400,7 +400,7 @@ case "${1:-}" in
   capture)
     shift
     if [[ $# -lt 1 ]]; then
-      echo "Usage: acpd-cli capture <pane_id> [lines]" >&2
+      echo "Usage: waymux-cli capture <pane_id> [lines]" >&2
       exit 1
     fi
     cmd_capture "$@"
@@ -428,7 +428,7 @@ case "${1:-}" in
   kill)
     shift
     if [[ $# -lt 1 ]]; then
-      echo "Usage: acpd-cli kill <target>" >&2
+      echo "Usage: waymux-cli kill <target>" >&2
       exit 1
     fi
     cmd_kill "$@"
@@ -441,7 +441,7 @@ case "${1:-}" in
     ;;
   *)
     echo "Unknown command: $1" >&2
-    echo "Run 'acpd-cli help' for usage." >&2
+    echo "Run 'waymux-cli help' for usage." >&2
     exit 1
     ;;
 esac

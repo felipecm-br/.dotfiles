@@ -16,17 +16,12 @@ alias ..='cd ..'
 alias ...='cd ../..'
 alias ....='cd ../../..'
 
-# Waymux Daemon helpers (with acpd-* aliases preserved)
+# Waymux Daemon helpers
 alias waymux-restart='systemctl --user restart waymux.service'
 alias waymux-stop='systemctl --user stop waymux.service'
 alias waymux-start='systemctl --user start waymux.service'
 alias waymux-status='systemctl --user status waymux.service'
 alias waymux-logs='journalctl --user -u waymux.service -f'
-alias acpd-restart='systemctl --user restart waymux.service'
-alias acpd-stop='systemctl --user stop waymux.service'
-alias acpd-start='systemctl --user start waymux.service'
-alias acpd-status='systemctl --user status waymux.service'
-alias acpd-logs='journalctl --user -u waymux.service -f'
 
 # Zero-Friction File Transfer (pt, ptg, ptl, mt, mtg, mtl) and Frecency Jump (z, zi)
 # aliases are defined canonically alongside their implementations in functions.zsh.

@@ -8,7 +8,7 @@
 
 - [Overview & Navigation Layers](#overview--navigation-layers)
 - [Keybinding Reference Map](#keybinding-reference-map)
-- [AI Agent Bell Notification & ACPD Architecture](#ai-agent-bell-notification--acpd-architecture)
+- [AI Agent Bell Notification & Waymux Architecture](#ai-agent-bell-notification--waymux-architecture)
 - [Window Picker & Live AI State Icons](#window-picker--live-ai-state-icons)
 - [Bidirectional Code Review Loop (lazygitrs)](#bidirectional-code-review-loop-lazygitrs)
   - [How the Loop Works Step-by-Step](#how-the-loop-works-step-by-step)
@@ -92,7 +92,7 @@ The control plane spans **4 navigation layers**, each with a distinct scope:
 │ TMUX POPUPS & PANES                                             │
 │  prefix+i ............ AI Agent bell jump (attach notifying pane│
 │  prefix+o ............ AI Sidebar split toggle (35% width)      │
-│  prefix+s / S ........ Window picker (Matchmaker + acpd state)  │
+│  prefix+s / S ........ Window picker (Matchmaker + waymux state) │
 │  prefix+g ............ lazygitrs popup (review loop)            │
 │  prefix+B / Y / N .... btop / yazi / nvim popups (90x90%)       │
 ├─────────────────────────────────────────────────────────────────┤
@@ -106,13 +106,13 @@ The control plane spans **4 navigation layers**, each with a distinct scope:
 
 ---
 
-## AI Agent Bell Notification & ACPD Architecture
+## AI Agent Bell Notification & Waymux Architecture
 
-State management is centralized by **`acpd`** (Agent Client Protocol Daemon), a headless Rust daemon listening at `127.0.0.1:4040` protected by session-token authentication (`$XDG_RUNTIME_DIR/acpd/token` with `0600` permissions). Thin client hooks (`hooker.ts` for OpenCode, `tmux-hook.mjs` for Antigravity / Gemini CLI) send state events (`working`, `idle`, `awaiting_input`, `permission`, `error`, `closed`) to `acpd`.
+State management is centralized by **`waymux`** (Agent Client Protocol Daemon), a headless Rust daemon listening at `127.0.0.1:4040` protected by session-token authentication (`$XDG_RUNTIME_DIR/waymux/token` with `0600` permissions). Thin client hooks (`hooker.ts` for OpenCode, `tmux-hook.mjs` for Antigravity / Gemini CLI) send state events (`working`, `idle`, `awaiting_input`, `permission`, `error`, `closed`) to `waymux`.
 
 ### Event Flow:
 1. Agent emits state event → Hook POSTs to `http://127.0.0.1:4040/api/status` or `/rpc` with `Authorization: Bearer <token>`.
-2. `acpd`'s `TmuxAdapter` sets `@ai_agent_last_bell` to the target pane and updates `@ai_agent_bell` in status-right (auto-clears after 7 seconds).
+2. `waymux`'s `TmuxAdapter` sets `@ai_agent_last_bell` to the target pane and updates `@ai_agent_bell` in status-right (auto-clears after 7 seconds).
 3. User presses `prefix+i` → `ai-agent-bell-popup.sh`:
    - Same session: directly selects the notifying window.
    - Different session: opens a 90×90% popup attaching directly to the notifying window.
@@ -159,7 +159,7 @@ Powered by **Matchmaker** (`mm`), the window picker lists **all sessions and win
 
 The AI agent state management pipeline consists of 6 integrated components:
 
-1. **Orthogonal State Options (`acpd` & Agent Hooks)**:
+1. **Orthogonal State Options (`waymux` & Agent Hooks)**:
    - `@ai_agent_state`: Pure icon or animated spinner frame (e.g. `⠋`, `󱜻`, `󱅭`, `󰨄`, `󱥂`) without embedded ANSI escape sequences.
    - `@ai_agent_state_color`: Hex color string (`#89b482`, `#d8a657`, `#d3869b`, `#ea6962`) compiled from Omarchy theme templates.
    - `@ai_agent_state_raw`: Raw state string (`busy`, `working`, `question`, `awaiting_input`, `permission`, `error`, `idle`, `closed`).
@@ -183,7 +183,7 @@ The AI agent state management pipeline consists of 6 integrated components:
 
 5. **Omarchy Theme Template (`waymux.toml.tpl`)**:
    - Template located in [`waymux/.config/omarchy/themed/waymux.toml.tpl`](../../waymux/.config/omarchy/themed/waymux.toml.tpl) maps `idle` (`{{ color14 }}`), `busy/working` (`{{ color11 }}`), `question` (`{{ color13 }}`), and `error/permission` (`{{ color1 }}`).
-   - Switching system themes (`omarchy-theme-set`) re-compiles `~/.config/acpd/config.toml` and automatically restarts `acpd` via systemd (`systemctl --user restart acpd`) to apply theme colors instantly.
+   - Switching system themes (`omarchy-theme-set`) re-compiles `~/.config/waymux/config.toml` and automatically restarts `waymux` via systemd (`systemctl --user restart waymux.service`) to apply theme colors instantly.
 
 6. **Resilient Ctrl+C Interrupt Watchdog (`tmux-hook.mjs`)**:
    - When users press `<Ctrl+C>` during agent execution, normal exit hooks are bypassed by `SIGINT`.
@@ -301,9 +301,9 @@ flowchart TB
         end
     end
 
-    subgraph Daemon["⚙️ acpd Daemon (127.0.0.1:4040, Session-Token Auth)"]
+    subgraph Daemon["⚙️ Waymux Daemon (127.0.0.1:4040, Session-Token Auth)"]
         A1["TmuxAdapter → Tab Spinners & @ai_agent_state"]
-        A2["WaybarAdapter → acpd-waybar-state.json"]
+        A2["WaybarAdapter → waymux-waybar-state.json"]
         A3["RPC Inspection: capture_pane / list_panes / list_windows / list_sessions / agentState/list / send_keys"]
     end
 

@@ -1,7 +1,7 @@
 # Per-Pane AI Agent Status in Tmux Status Bar
 
 The tmux status bar displays real-time, dynamic state for AI agents (Antigravity / Claude Code / Codex / Muse / OpenCode) running in each pane.
-State is pushed into tmux options `@ai_agent_state`, `@ai_agent_state_color`, `@ai_agent_state_raw`, `@ai_agent_title`, and `@ai_agent_bell` by the centralized `acpd` daemon (`127.0.0.1:4040`) and client hooks (`tmux-hook.mjs` / `hooker.ts`).
+State is pushed into tmux options `@ai_agent_state`, `@ai_agent_state_color`, `@ai_agent_state_raw`, `@ai_agent_title`, and `@ai_agent_bell` by the centralized `waymux` daemon (`127.0.0.1:4040`) and client hooks (`tmux-hook.mjs` / `hooker.ts`).
 
 ---
 
@@ -24,7 +24,7 @@ For inactive background tabs, `@ai_agent_state` is rendered in `#[fg=#{@ai_agent
 
 ---
 
-## 3. Orthogonal Tmux Options Pushed by `acpd` & Agent Hooks
+## 3. Orthogonal Tmux Options Pushed by `waymux` & Agent Hooks
 
 - `@ai_agent_state`: Pure icon or animated spinner frame string without embedded ANSI color tags (e.g. `⠋`, `󱜻`, `󱅭`, `󰨄`).
 - `@ai_agent_state_color`: Hex color string configured in `config.toml` (e.g. `#f9e2af`, `#cba6f7`, `#f38ba8`, `#94e2d5`).

@@ -106,7 +106,7 @@ awt clone {{repo_url}} {{target_dir}}
 # Clone repository into .bare container layout and provision worktree
 awtc {{repo_url}}
 
-# Jump to next agent needing attention (permission/question) via ACPD
+# Jump to next agent needing attention (permission/question) via Waymux
 ~/.config/tmux/ai-agent-triage-jump.sh
 
 # Open AI agent bell notification queue ring popup
@@ -295,37 +295,34 @@ wm session list --icons
 # Launch Lazygitrs floating git cockpit and dual-diff view
 lazygitrs
 
-# Inspect ACPD control plane health, active AI agent states, and Tmux sessions
-acpd-cli status
-
-# Dispatch AI agent or command into Tmux via ACPD control plane
-acpd-cli run {{command}}
+# Dispatch AI agent or command into Tmux via Waymux control plane
+waymux-cli run {{command}}
 
 # Dispatch AI agent or command into dedicated session and window detached
-acpd-cli run -d -s {{session}} -w {{window}} {{command}}
+waymux-cli run -d -s {{session}} -w {{window}} {{command}}
 
-# Capture terminal scrollback text from target pane via ACPD
-acpd-cli capture {{pane}}
+# Capture terminal scrollback text from target pane via Waymux
+waymux-cli capture {{pane}}
 
-# Send keystrokes or confirmation into target pane via ACPD
-acpd-cli send {{pane}} {{keys}}
+# Send keystrokes or confirmation into target pane via Waymux
+waymux-cli send {{pane}} {{keys}}
 
-# Display banner message on Tmux status line via ACPD
-acpd-cli msg {{message}}
+# Display banner message on Tmux status line via Waymux
+waymux-cli msg {{message}}
 
-# Trigger visual or audible alert bell on target pane via ACPD
-acpd-cli bell {{pane}}
+# Trigger visual or audible alert bell on target pane via Waymux
+waymux-cli bell {{pane}}
 
 # Wait synchronously for agent pane to reach target state (e.g. idle)
-acpd-cli wait {{pane}} --state {{state}} --timeout {{timeout}}
+waymux-cli wait {{pane}} --state {{state}} --timeout {{timeout}}
 
 # Dismiss agent attention, question, or permission badge on target pane
-acpd-cli dismiss {{pane}}
+waymux-cli dismiss {{pane}}
 
 # Authenticate and connect to Tailscale network with SSH enabled
 sudo tailscale up --ssh
 
-# Expose ACPD JSON-RPC control plane securely on private Tailnet
+# Expose Waymux JSON-RPC control plane securely on private Tailnet
 tailscale serve --bg 4040
 
 # Run automated cockpit health and system drift audit
@@ -409,7 +406,7 @@ ai-fix {{note}}
 # Audit and clean stale observations and orphan sessions in ai-memory
 ai-memory-clean --apply
 
-# Interactive ACPD auditory telemetry sound pack switcher
+# Interactive Waymux auditory telemetry sound pack switcher
 ai-sound-switcher
 
 # Interactive Hyprland active window border gradient switcher

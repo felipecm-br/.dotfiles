@@ -31,8 +31,8 @@ docs/
 │   ├── state-of-the-art-terminal-agent-workflow.md # Canonical SOTA architecture, 9.94/10 verdict & benchmarks
 │   ├── cockpit-topology-snapshot-and-restore.md    # Session topology snapshot, post-reboot restore & agent resume
 │   ├── evidence-based-telemetry-and-deep-work.md   # Human response latency metrics & 24h deep work heatmaps
-│   ├── remote-agent-workflow-acpd.md               # Proactive agent supervision, focus auto-dismiss & wait RPCs
-│   └── open-source-ai-tmux-stack-plan.md           # Two-tier umbrella blueprint for waymux / acpd / lazygitrs / wm
+│   ├── remote-agent-workflow-waymux.md             # Proactive agent supervision, focus auto-dismiss & wait RPCs
+│   └── open-source-ai-tmux-stack-plan.md           # Two-tier umbrella blueprint for waymux / lazygitrs / wm
 │
 ├── shell/                         # 🐚 Shell, ZLE & Waymaker Pickers
 │   ├── completion.md              # Smart Tab completion (_smart_tab), auto-spacing, wm-ftb
@@ -41,7 +41,7 @@ docs/
 │
 ├── tmux/                          # 🪟 Multiplexer, Popups & Telemetry
 │   ├── popups-ergonomics-and-golden-ratio.md    # Golden Ratio (phi) geometry, pure icon badges, bichromatic footers
-│   ├── ai-status-bar.md           # Real-time AI agent status pills, animated spinners, ACPD hooks
+│   ├── ai-status-bar.md           # Real-time AI agent status pills, animated spinners, Waymux hooks
 │   ├── popup-isolation-and-debounce.md          # Tmux 3.8 native popup isolation and 650ms idle debounce
 │   ├── clipboard-and-scrollback.md              # Drag-to-copy, Markdown/Mermaid scrollback view, and token yanker
 │   └── tmux-activity.md           # Activity alerts and window monitoring

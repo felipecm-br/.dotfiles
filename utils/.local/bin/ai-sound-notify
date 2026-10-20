@@ -10,7 +10,7 @@ resolve_sound() {
   local home="$HOME"
   
   # Check explicit mute markers
-  if [[ -f "$home/.config/omarchy/sounds/muted" || -f "$home/.config/waymux/sounds/muted" || -f "$home/.config/acpd/sounds/muted" ]]; then
+  if [[ -f "$home/.config/omarchy/sounds/muted" || -f "$home/.config/waymux/sounds/muted" ]]; then
     return 1
   fi
 
@@ -18,13 +18,11 @@ resolve_sound() {
   local pointers=(
     "$home/.config/omarchy/sounds/ai-${evt}.sound"
     "$home/.config/waymux/sounds/${evt}.sound"
-    "$home/.config/acpd/sounds/${evt}.sound"
   )
   if [[ "$evt" == "response" ]]; then
     pointers+=(
       "$home/.config/omarchy/sounds/ai-response.sound"
       "$home/.config/waymux/sounds/response.sound"
-      "$home/.config/acpd/sounds/response.sound"
     )
   fi
   for ptr in "${pointers[@]}"; do
@@ -46,13 +44,11 @@ resolve_sound() {
   local direct=(
     "$home/.config/omarchy/sounds/ai-${evt}.wav"
     "$home/.config/waymux/sounds/${evt}.wav"
-    "$home/.config/acpd/sounds/${evt}.wav"
   )
   if [[ "$evt" == "response" ]]; then
     direct+=(
       "$home/.config/omarchy/sounds/ai-response.wav"
       "$home/.config/waymux/sounds/ai-response.wav"
-      "$home/.config/acpd/sounds/ai-response.wav"
     )
   fi
 

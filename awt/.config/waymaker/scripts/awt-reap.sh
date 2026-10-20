@@ -53,14 +53,13 @@ done
 now_ms=$(date +%s000)
 threshold_ms=$(( max_hours * 3600 * 1000 ))
 
-# Query the waymux daemon for registered agent states (legacy acpd token path as fallback)
+# Query the waymux daemon for registered agent states
 token_file="${XDG_RUNTIME_DIR:-/run/user/$UID}/waymux/token"
-[[ -f "$token_file" ]] || token_file="${XDG_RUNTIME_DIR:-/run/user/$UID}/acpd/token"
-acpd_json=""
+waymux_json=""
 if [[ -f "$token_file" ]]; then
   token="$(cat "$token_file" 2>/dev/null || true)"
   if [[ -n "$token" ]]; then
-    acpd_json=$(curl -s -m 0.25 -X POST http://127.0.0.1:4040/rpc \
+    waymux_json=$(curl -s -m 0.25 -X POST http://127.0.0.1:4040/rpc \
       -H "Authorization: Bearer $token" \
       -H "Content-Type: application/json" \
       -d '{"jsonrpc":"2.0","method":"agentState/list","id":1}' 2>/dev/null || true)
@@ -100,9 +99,9 @@ while IFS='|' read -r sess idx pid pane_os_pid ppath pcmd; do
   if [[ -n "$agent_found" ]]; then
     st=""
     ts=0
-    if [[ -n "$acpd_json" ]]; then
-      st=$(echo "$acpd_json" | jq -r ".result[\"$pid\"].state // empty" 2>/dev/null || true)
-      ts=$(echo "$acpd_json" | jq -r ".result[\"$pid\"].last_timestamp // 0" 2>/dev/null || echo 0)
+    if [[ -n "$waymux_json" ]]; then
+      st=$(echo "$waymux_json" | jq -r ".result[\"$pid\"].state // empty" 2>/dev/null || true)
+      ts=$(echo "$waymux_json" | jq -r ".result[\"$pid\"].last_timestamp // 0" 2>/dev/null || echo 0)
     fi
 
     if (( ts > 0 )); then

@@ -88,8 +88,8 @@ All popup components adhere to the deterministic Triadic Cold-Color Architecture
 
 ---
 
-## 5. Auditory Telemetry via `acpd`
+## 5. Auditory Telemetry via `waymux`
 
-Visual popups can be accompanied or replaced by non-blocking auditory cues managed by the `acpd` daemon:
+Visual popups can be accompanied or replaced by non-blocking auditory cues managed by the `waymux` daemon:
 - PipeWire low-latency sound cues (<10ms).
 - Signals completion of long builds, worktree merges, or agent task completions without stealing terminal focus.

@@ -439,12 +439,6 @@ waymux() {
             echo "Usage: waymux [status|start|stop|restart|logs|kill]"
             return 1
             ;;
-    esac
-}
-
-# Backward compatibility: acpd delegates to waymux
-acpd() {
-    waymux "$@"
 }
 # ─────────────────────────────────────────────────────────────────────────────
 # Zero-Friction File Transfer (PasteTo & MoveTo 2.0)

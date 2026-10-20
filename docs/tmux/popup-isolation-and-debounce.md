@@ -1,6 +1,6 @@
-# Tmux Popup Isolation, ACPD Debounce & Event-Driven Architecture
+# Tmux Popup Isolation, Waymux Debounce & Event-Driven Architecture
 
-This document records the identified issues of visual flicker, rendering collisions in floating popups during active AI streaming, and the definitive architectural solutions implemented in `tmux` and the `acpd` daemon.
+This document records the identified issues of visual flicker, rendering collisions in floating popups during active AI streaming, and the definitive architectural solutions implemented in `tmux` and the `waymux` daemon.
 
 ---
 
@@ -31,18 +31,18 @@ This document records the identified issues of visual flicker, rendering collisi
 │ Idle or Streaming Terminal     │ Native Tmux 3.8 Display Popup          │
 │                                │ (Direct zero-overhead floating modal)  │
 ├────────────────────────────────┼────────────────────────────────────────┤
-│ Rapid AI Tool Transitions      │ 650ms Idle Debounce in ACPD            │
+│ Rapid AI Tool Transitions      │ 650ms Idle Debounce in Waymux          │
 │ (Sequential tool calls)        │ (Cancels intermediate idle state flips)│
 ├────────────────────────────────┼────────────────────────────────────────┤
 │ CPU & Battery Consumption      │ status-interval 0 (100% Event-Driven)  │
-│                                │ (Reactive updates via ACPD IPC events) │
+│                                │ (Reactive updates via Waymux IPC events) │
 └────────────────────────────────┴────────────────────────────────────────┘
 ```
 
 ---
 
-### 🛡️ 1. 650ms Debounce & Deduplication in ACPD
-Inside the `waymux` daemon (formerly `acpd`) (`adapters.rs`, configured via `idle_debounce_ms = 650` in `~/.config/waymux/config.toml`):
+### 🛡️ 1. 650ms Debounce & Deduplication in Waymux
+Inside the `waymux` daemon (`adapters.rs`, configured via `idle_debounce_ms = 650` in `~/.config/waymux/config.toml`):
 - **650ms Debounce for `AgentState::Idle`:**
   ```rust
   // When state transitions to Idle, schedule an async cancellation window (idle_debounce_ms)
@@ -69,17 +69,17 @@ In **Tmux 3.8**, `server_client_draw_pane` redraw clobbering over active floatin
 ### ⚡ 3. 100% Event-Driven Status Bar (`status-interval 0`)
 In `tmux.conf`:
 ```tmux
-# Event-driven status bar (zero background clock polling; driven exclusively by events and acpd)
+# Event-driven status bar (zero background clock polling; driven exclusively by events and waymux)
 set -g status-interval 0
 ```
 - **Advantages:** 0.0% background idle CPU usage, zero shell fork overhead.
-- **Spinner Animation:** Maintained at 12 FPS (83ms) by the `acpd` daemon via `refresh_tmux_client()` exclusively when an agent is actively running.
+- **Spinner Animation:** Maintained at 12 FPS (83ms) by the `waymux` daemon via `refresh_tmux_client()` exclusively when an agent is actively running.
 
 ---
 
 ## 3. Related Files & Documentation
 
-- `acpd/src/api.rs` (+ `daemon.rs`): authoritative idle-debounce coordinator (`idle_debounce_ms`, default 650ms, set in `~/.config/acpd/config.toml`); `acpd/src/adapters.rs`: pending-idle cancellation and state deduplication.
+- `waymux/src/api.rs` (+ `daemon.rs`): authoritative idle-debounce coordinator (`idle_debounce_ms`, default 650ms, set in `~/.config/waymux/config.toml`); `waymux/src/adapters.rs`: pending-idle cancellation and state deduplication.
 - [`tmux/.config/tmux/tmux.conf`](../../tmux/.config/tmux/tmux.conf): Configuration of `status-interval 0` and ergonomic popups.
 - [`tmux/.config/tmux/cockpit-picker.sh`](../../tmux/.config/tmux/cockpit-picker.sh): AI Fleet Cockpit & Window Manager popup (`Prefix + Space`).
 - [`tmux/.config/tmux/session-picker.sh`](../../tmux/.config/tmux/session-picker.sh): Native Waymaker session picker (`Prefix + s`).

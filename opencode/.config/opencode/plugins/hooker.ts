@@ -4,7 +4,7 @@ import { existsSync, readFileSync } from "fs"
 import { tmpdir } from "os"
 import { join } from "path"
 
-function getAcpdToken(): string | null {
+function getWaymuxToken(): string | null {
   const uid = typeof process.getuid === "function" ? process.getuid() : (process.env.UID || "1000")
   const homeDir = process.env.HOME || (process.env.USER ? `/home/${process.env.USER}` : tmpdir())
   const xdgRuntime = process.env.XDG_RUNTIME_DIR || `/run/user/${uid}`
@@ -12,10 +12,6 @@ function getAcpdToken(): string | null {
     join(xdgRuntime, "waymux", "token"),
     join(tmpdir(), `waymux-${uid}`, "token"),
     join(homeDir, ".cache", "waymux", "token"),
-    // Legacy (pre-waymux) locations, still mirrored by the daemon for old clients
-    join(xdgRuntime, "acpd", "token"),
-    join(tmpdir(), `acpd-${uid}`, "token"),
-    join(homeDir, ".cache", "acpd", "token"),
   ]
   for (const tokenPath of candidates) {
     try {
@@ -27,9 +23,9 @@ function getAcpdToken(): string | null {
   return null
 }
 
-function getAcpdHeaders(): Record<string, string> {
+function getWaymuxHeaders(): Record<string, string> {
   const headers: Record<string, string> = { "Content-Type": "application/json" }
-  const token = getAcpdToken()
+  const token = getWaymuxToken()
   if (token) {
     headers["Authorization"] = `Bearer ${token}`
   }
@@ -48,20 +44,20 @@ function getActiveTmuxPane(): string {
 
 /**
  * Thin Client Plugin that:
- * - Forwards OpenCode state events to the ACP daemon (acpd) running on port 4040.
+ * - Forwards OpenCode state events to the Waymux daemon running on port 4040.
  */
 export const NotifyIdlePlugin: Plugin = async ({ $ }) => {
-  const sendAcpState = async (state: string, message: string | null = null) => {
+  const sendWaymuxState = async (state: string, message: string | null = null) => {
     const pane = getActiveTmuxPane()
     if (!pane) return
     try {
       await fetch("http://127.0.0.1:4040/api/status", {
         method: "POST",
-        headers: getAcpdHeaders(),
+        headers: getWaymuxHeaders(),
         body: JSON.stringify({ pane_id: pane, state, message }),
       })
     } catch {
-      // Ignore failures if the acpd daemon is not running
+      // Ignore failures if the waymux daemon is not running
     }
   }
 
@@ -83,7 +79,7 @@ export const NotifyIdlePlugin: Plugin = async ({ $ }) => {
       setAiAgentTitle(null)
       const pane = getActiveTmuxPane()
       if (!pane) return
-      const token = getAcpdToken()
+      const token = getWaymuxToken()
       const authHeader = token ? `-H "Authorization: Bearer ${token}"` : ""
       execSync(`curl -s -X POST http://127.0.0.1:4040/api/status ${authHeader} -H "Content-Type: application/json" -d '{"pane_id":"${pane}","state":"closed"}'`);
     } catch {
@@ -117,7 +113,7 @@ export const NotifyIdlePlugin: Plugin = async ({ $ }) => {
 
       if (evtType === "permission.asked") {
         waitingPermission = true
-        await sendAcpState("permission")
+        await sendWaymuxState("permission")
         return
       }
 
@@ -136,29 +132,29 @@ export const NotifyIdlePlugin: Plugin = async ({ $ }) => {
       if (waitingPermission && statusType === "busy") return
       
       if (statusType === "idle") {
-        await sendAcpState("idle")
+        await sendWaymuxState("idle")
       } else if (statusType === "busy") {
-        await sendAcpState("working")
+        await sendWaymuxState("working")
       } else if (statusType === "retry") {
-        await sendAcpState("error")
+        await sendWaymuxState("error")
       }
     },
 
     "tool.execute.before": async (input) => {
       const toolName = (input as Record<string, any>)?.tool ?? "tool"
       if (toolName === "question") {
-        await sendAcpState("awaiting_input")
+        await sendWaymuxState("awaiting_input")
       } else {
-        await sendAcpState("working")
+        await sendWaymuxState("working")
       }
     },
 
     "permission.ask": async (input) => {
-      await sendAcpState("permission")
+      await sendWaymuxState("permission")
     },
 
     "permission.asked": async (input) => {
-      await sendAcpState("permission")
+      await sendWaymuxState("permission")
     },
   }
 }

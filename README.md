@@ -28,11 +28,11 @@ scripts in `.shell/install/packages/` and plugin scripts in `.shell/install/plug
 
 ## Stow packages
 
-`acpd`, `agents-skills`, `ai-memory`, `ai_usagebar`, `alacritty`, `antigravity`, `atuin`, `awt`,
+`agents-skills`, `ai-memory`, `ai_usagebar`, `alacritty`, `antigravity`, `atuin`, `awt`,
 `bat`, `battery`, `bluetui`, `cargo`, `claude`, `desktop`, `duf`, `eza`, `fcitx5`, `fed`, `figlet`,
 `fonts`, `foot`, `gh`, `ghostty`, `git`, `herdr`, `hibiki`, `hypr`, `intelli-shell`, `kitty`,
 `lazycommit`, `lazygitrs`, `lolcat`, `mise`, `nvim`, `omarchy`, `omarchy-antigravity`, `opencode`,
-`procs`, `sounds`, `starship`, `tmux`, `tuikit`, `upscayl`, `utils`, `vimium`, `waymaker`,
+`procs`, `sounds`, `starship`, `tmux`, `tuikit`, `upscayl`, `utils`, `vimium`, `waymaker`, `waymux`,
 `workmux`, `worktrunk`, `xcompose`, `xkb`, `yazi`, `zsh`, `zsh-plugins`.
 
 Non-stow directories: `.agents`, `.bare`, `.git`, `.github`, `.shell`, `assets`, `docs`, `scratch`, `scripts`, `tests`.
@@ -41,7 +41,7 @@ Non-stow directories: `.agents`, `.bare`, `.git`, `.github`, `.shell`, `assets`,
 
 - **Shell:** zsh (with `zsh-vi-mode` and Smart Tab `wm-ftb`)
 - **Terminal:** [Ghostty](https://ghostty.org/)
-- **Multiplexer:** [tmux](https://github.com/tmux/tmux) 3.8+ (AI Fleet Cockpit HUD + `acpd` telemetry daemon)
+- **Multiplexer:** [tmux](https://github.com/tmux/tmux) 3.8+ (AI Fleet Cockpit HUD + `waymux` telemetry daemon)
 - **TUI Picker & Session Engine:** `waymaker` (`wm` / `mm`)
 - **Git TUI & AI Review Engine:** `lazygitrs` + `awt` (Agent Worktree Orchestrator)
 - **AI Agents & Memory:** Antigravity (`agy` / `agyy`), Claude Code (`claude`), Codex (`codex`), Muse (`muse`), OpenCode (`opencode`), `ai-memory`, `ai-jail`
@@ -53,11 +53,11 @@ Non-stow directories: `.agents`, `.bare`, `.git`, `.github`, `.shell`, `assets`,
 
 See the [**Documentation Index (`docs/README.md`)**](docs/README.md) for the complete sitemap:
 
-- 🏆 [**State-of-the-Art Terminal Agent Workflow (`docs/architecture/state-of-the-art-terminal-agent-workflow.md`)**](docs/architecture/state-of-the-art-terminal-agent-workflow.md) — Canonical 9.94/10 SOTA architecture (`awt` + `waymaker` + `tmux` + `acpd` + `lazygitrs`), competitor benchmarks (`workmux`, `herdr`, `zellij`), and empirical latency metrics.
+- 🏆 [**State-of-the-Art Terminal Agent Workflow (`docs/architecture/state-of-the-art-terminal-agent-workflow.md`)**](docs/architecture/state-of-the-art-terminal-agent-workflow.md) — Canonical 9.94/10 SOTA architecture (`awt` + `waymaker` + `tmux` + `waymux` + `lazygitrs`), competitor benchmarks (`workmux`, `herdr`, `zellij`), and empirical latency metrics.
 - 🔬 [**Terminal Ergonomics & UX Manifesto (`docs/architecture/terminal-ergonomics-and-ux-manifesto.md`)**](docs/architecture/terminal-ergonomics-and-ux-manifesto.md) — Core HCI principles, KLM/GOMS ($H=0$), Doherty threshold (<100ms), pure icon badges, and dynamic Omarchy theme synchronization.
 - ⌨️ [**Workflow Keybindings Matrix (`docs/architecture/workflow-keybindings-matrix.md`)**](docs/architecture/workflow-keybindings-matrix.md) — Comprehensive KLM biomechanical audit and 5-layer interaction matrix (Global, Tmux, Zsh, Waymaker, Lazygitrs).
 - 🪟 [**Tmux Popups & Golden Ratio (`docs/tmux/popups-ergonomics-and-golden-ratio.md`)**](docs/tmux/popups-ergonomics-and-golden-ratio.md) — Hybrid Golden-Grid ($\phi$) popup geometry, 40/60 split, uniform bichromatic footers, and tri-layout Cockpit previews.
-- 🤖 [**Tmux AI Status Bar (`docs/tmux/ai-status-bar.md`)**](docs/tmux/ai-status-bar.md) — Per-pane AI agent state pills, animated spinners, Vimium window hints (`Prefix + f`), and `acpd` daemon hooks.
+- 🤖 [**Tmux AI Status Bar (`docs/tmux/ai-status-bar.md`)**](docs/tmux/ai-status-bar.md) — Per-pane AI agent state pills, animated spinners, Vimium window hints (`Prefix + f`), and `waymux` daemon hooks.
 - 📸 [**Cockpit Snapshot & Restore (`docs/architecture/cockpit-topology-snapshot-and-restore.md`)**](docs/architecture/cockpit-topology-snapshot-and-restore.md) — Automated session topology snapshots (`cockpit snapshot`), post-reboot restore (`cockpit restore`), and AI agent conversation resume.
 - 📊 [**Flow Telemetry & Deep Work (`docs/architecture/evidence-based-telemetry-and-deep-work.md`)**](docs/architecture/evidence-based-telemetry-and-deep-work.md) — Evidence-based human response latency tracking, 24h deep work heatmaps, and `flow-telemetry`.
 - 🐚 [**Shell & Completion (`docs/shell/completion.md`)**](docs/shell/completion.md) — Smart Tab completion (`_smart_tab`), Waymaker integration (`wm-ftb`), alias auto-spacing (`gco<Tab>`), and on-demand preview (`Ctrl+P`).

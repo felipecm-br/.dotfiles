@@ -1,6 +1,6 @@
-# Remote AI Agent Execution & Waymux / ACPD Orchestration Workflow
+# Remote AI Agent Execution & Waymux Orchestration Workflow
 
-This document specifies the remote agent execution architecture using **Waymux** (`waymux`, unified control plane daemon replacing legacy `acpd`), **Tmux**, and **Tailscale** within the dotfiles ecosystem. Legacy `acpd` commands and paths are preserved as compatibility aliases.
+This document specifies the remote agent execution architecture using **Waymux** (unified control plane daemon and CLI), **Tmux**, and **Tailscale** within the dotfiles ecosystem.
 
 ---
 
@@ -19,29 +19,29 @@ flowchart LR
     end
 
     subgraph Host["Local Workstation"]
-        ACPD["acpd Daemon (127.0.0.1:4040/rpc)"]
+        WAYMUX["Waymux Daemon (127.0.0.1:4040/rpc)"]
         TMUX["Tmux Multiplexer & Popups"]
-        CLI["acpd-cli (Ergonomic Wrapper)"]
+        CLI["waymux-cli / waymux (Ergonomic Wrapper)"]
         AGENTS["AI Agents (agy, opencode, claude)"]
         GIT["Git Worktrees (awt) & lazygitrs"]
     end
 
     RC -->|Secure Ingress| TS
     TS -->|Tailscale SSH| CLI
-    TS -->|Tailscale Serve (Optional HTTPS)| ACPD
-    CLI -->|JSON-RPC 2.0| ACPD
-    ACPD -->|State & Windows| TMUX
+    TS -->|Tailscale Serve (Optional HTTPS)| WAYMUX
+    CLI -->|JSON-RPC 2.0| WAYMUX
+    WAYMUX -->|State & Windows| TMUX
     TMUX --> AGENTS
     AGENTS --> GIT
 ```
 
 ---
 
-## 2. Architectural Comparison: ACPD vs. Herdr
+## 2. Architectural Comparison: Waymux vs. Herdr
 
-| Capability | Current Stack (`acpd` + Tmux) | Herdr |
+| Capability | Current Stack (`waymux` + Tmux) | Herdr |
 | :--- | :--- | :--- |
-| **Control Plane** | Lightweight Rust daemon (`acpd` @ `127.0.0.1:4040`) | Monolithic terminal emulator & multiplexer |
+| **Control Plane** | Lightweight Rust daemon (`waymux` @ `127.0.0.1:4040`) | Monolithic terminal emulator & multiplexer |
 | **Multiplexer Freedom** | Native Tmux, Golden-Ratio Popups, Neovim navigation | Proprietary terminal backend |
 | **Code Review Loop** | Bidirectional inline diff reviews via `lazygitrs` | No git diff or review integration |
 | **Agent State Detection** | Structured hooks (`api/status`, Bearer token auth) | Screen scraping / PTY heuristics |
@@ -69,59 +69,59 @@ Machines behind residential NAT or CGNAT connect seamlessly via **Tailscale**:
    *Benefit:* Tailscale SSH handles cryptographic authentication automatically via your Tailnet identity without needing manual `authorized_keys` deployment or open public ports.
 
 4. **Optional: Private Tailnet HTTPS Endpoint:**
-   If you want to invoke `acpd` directly over HTTP JSON-RPC from another machine on your tailnet:
+   If you want to invoke `waymux` directly over HTTP JSON-RPC from another machine on your tailnet:
    ```bash
    tailscale serve --bg 4040
    ```
 
 ---
 
-## 4. The `acpd-cli` Workflow Tool
+## 4. The `waymux-cli` Workflow Tool
 
-The `acpd-cli` utility ([`waymux/.local/bin/acpd-cli`](../../waymux/.local/bin/acpd-cli)) provides a unified CLI interface to communicate with the `acpd` daemon:
+The `waymux-cli` utility ([`waymux/.local/bin/waymux-cli`](../../waymux/.local/bin/waymux-cli)) provides a unified CLI interface to communicate with the `waymux` daemon:
 
 ### Available Commands
 
-- `acpd-cli status`: Check daemon health, active AI agent states (`working`, `idle`, `waiting`, `permission`, `stalled`, `error`), and active Tmux sessions.
-- `acpd-cli run [options] <cmd...>`: Run an agent or command inside a managed Tmux session.
+- `waymux-cli status`: Check daemon health, active AI agent states (`working`, `idle`, `waiting`, `permission`, `stalled`, `error`), and active Tmux sessions.
+- `waymux-cli run [options] <cmd...>`: Run an agent or command inside a managed Tmux session.
   - `-s, --session <name>`: Target session (default: `agents`).
   - `-w, --window <name>`: Target window name.
   - `-d, --detach`: Launch detached in background without attaching.
   - `-p, --split`: Split active pane instead of creating a new window.
-- `acpd-cli wait <pane_id> [options]`: Wait synchronously for an agent pane to reach a target state.
+- `waymux-cli wait <pane_id> [options]`: Wait synchronously for an agent pane to reach a target state.
   - `-s, --state <state>`: Target state (default: `idle`).
   - `-t, --timeout <secs>`: Timeout in seconds (default: `300`).
-- `acpd-cli dismiss [pane_id]`: Dismiss attention/question/permission badge and notification (automatically called by Tmux `pane-focus-in` hook).
-- `acpd-cli list [agents|sessions|windows|panes]`: List active resources.
-- `acpd-cli capture <pane_id> [lines]`: Capture scrollback output from a target pane.
-- `acpd-cli send <pane_id> <keys...>`: Send keystrokes or prompts to an agent pane.
-- `acpd-cli msg <text>`: Display banner notification on the Tmux status bar.
-- `acpd-cli bell [pane_id]`: Trigger visual and audible bell notification.
-- `acpd-cli kill <target>`: Terminate pane, window, or session.
+- `waymux-cli dismiss [pane_id]`: Dismiss attention/question/permission badge and notification (automatically called by Tmux `pane-focus-in` hook).
+- `waymux-cli list [agents|sessions|windows|panes]`: List active resources.
+- `waymux-cli capture <pane_id> [lines]`: Capture scrollback output from a target pane.
+- `waymux-cli send <pane_id> <keys...>`: Send keystrokes or prompts to an agent pane.
+- `waymux-cli msg <text>`: Display banner notification on the Tmux status bar.
+- `waymux-cli bell [pane_id]`: Trigger visual and audible bell notification.
+- `waymux-cli kill <target>`: Terminate pane, window, or session.
 
 ### Proactive Agent Supervision & Stall Detection
 
-`acpd` includes built-in proactive supervision heuristics:
+`waymux` includes built-in proactive supervision heuristics:
 1. **Stall Detection (Hung Agent Heuristic):**
-   - When an agent is in `working` state, `acpd` samples pane output (scrollback diff and cursor position) and Linux process tree CPU ticks (`utime + stime`) every 5 seconds.
-   - If a pane emits **no new text output for > 20 seconds** and CPU delta is **zero**, `acpd` transitions the state to `stalled` (glyph `󱥁`, amber color `#fab387` / `#e09d7f`) and triggers an alert.
-   - If output resumes or CPU activity picks up, `acpd` automatically recovers the state back to `working`.
+   - When an agent is in `working` state, `waymux` samples pane output (scrollback diff and cursor position) and Linux process tree CPU ticks (`utime + stime`) every 5 seconds.
+   - If a pane emits **no new text output for > 20 seconds** and CPU delta is **zero**, `waymux` transitions the state to `stalled` (glyph `󱥁`, amber color `#fab387` / `#e09d7f`) and triggers an alert.
+   - If output resumes or CPU activity picks up, `waymux` automatically recovers the state back to `working`.
 2. **Auto-Dismiss on Pane Focus:**
    - When an agent requests attention (`question` or `permission`), switching to that window/pane immediately triggers Tmux's `pane-focus-in` hook.
-   - The hook invokes `acpd-cli dismiss #{pane_id}`, which clears the notification bell banner and transitions the badge to `idle` without requiring any manual clicks or reset chords.
+   - The hook invokes `waymux-cli dismiss #{pane_id}`, which clears the notification bell banner and transitions the badge to `idle` without requiring any manual clicks or reset chords.
 3. **Synchronous Synchronization (`agentState/wait`):**
    - Sub-agents, orchestrators, and shell scripts can wait for another agent to complete:
      ```bash
-     acpd-cli wait %2 --state idle --timeout 120
+     waymux-cli wait %2 --state idle --timeout 120
      ```
 
-### The `acpd` / `waymux` Unified Binary (`v0.2.0`)
+### The `waymux` Unified Binary (`v0.2.0+`)
 
-Starting in `v0.2.0`, the crate builds both `acpd` and `waymux` from a single unified Rust library (`src/lib.rs`). All client subcommands are intercepted synchronously **before** initializing logging, the PID file, or the multi-threaded Tokio runtime (<1.5ms startup overhead):
+The crate builds `waymux` from a unified Rust library (`src/lib.rs`). All client subcommands are intercepted synchronously **before** initializing logging, the PID file, or the multi-threaded Tokio runtime (<1.5ms startup overhead):
 
-- `waymux --version` / `acpd --version` (`-V`): Print the version and exit.
-- `waymux --help` / `acpd --help` (`-h`): Print usage and exit.
-- `waymux health` / `acpd health`: `GET /health` against `127.0.0.1:4040`; prints the JSON (`status`, `uptime_secs`) and exits 0, or exits 1 if the daemon is unreachable.
+- `waymux --version` (`-V`): Print the version and exit.
+- `waymux --help` (`-h`): Print usage and exit.
+- `waymux health`: `GET /health` against `127.0.0.1:4040`; prints the JSON (`status`, `uptime_secs`) and exits 0, or exits 1 if the daemon is unreachable.
 - `waymux status`: Print daemon health and active AI agent states across Tmux panes.
 - `waymux list`: List active AI agent pane states in TSV format (`pane_id`, `state`, `last_timestamp`).
 - `waymux dismiss [pane_id]`: Dismiss attention/question/permission badge for a pane (invoked directly by Tmux `pane-focus-in` hook).
@@ -158,20 +158,20 @@ mosh user@my-desktop -- tmux new -A -s agents
 
 Dispatch a long-running agent command without keeping the remote connection open:
 ```bash
-ssh user@my-desktop "acpd-cli run -d -s background -w refactor 'awt -c refactor/auth main -- agy'"
+ssh user@my-desktop "waymux-cli run -d -s background -w refactor 'awt -c refactor/auth main -- agy'"
 ```
 
 ### Recipe 3: Checking Progress and Capturing Output Remotely
 
 ```bash
 # 1. Check which agents are active and their status
-ssh user@my-desktop "acpd-cli status"
+ssh user@my-desktop "waymux-cli status"
 
 # 2. Capture the last 40 lines of pane %0
-ssh user@my-desktop "acpd-cli capture %0 40"
+ssh user@my-desktop "waymux-cli capture %0 40"
 
 # 3. Send approval confirmation ("y") to an agent waiting for input
-ssh user@my-desktop "acpd-cli send %0 y Enter"
+ssh user@my-desktop "waymux-cli send %0 y Enter"
 ```
 
 ---
@@ -179,6 +179,6 @@ ssh user@my-desktop "acpd-cli send %0 y Enter"
 ## 6. Related References
 
 - [State-of-the-Art Terminal Agent Workflow](state-of-the-art-terminal-agent-workflow.md)
-- [ACPD Tmux Skill](../../.agents/skills/acpd-tmux/SKILL.md)
+- [Waymux Skill](../../.agents/skills/waymux/SKILL.md)
 - [Terminal Ergonomics & UX Manifesto](terminal-ergonomics-and-ux-manifesto.md)
 - [AWT Worktree Workflow](../GIT_WORKTREE_AGENTIC_WORKFLOW.md)

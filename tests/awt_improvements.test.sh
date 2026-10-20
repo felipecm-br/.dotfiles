@@ -253,8 +253,8 @@ else
     fail "awt-pr.sh failed to extract PR number from URL"
 fi
 
-# ── 6. Validate Attention Triage Script & ACPD Parsing ──
-echo -e "\n[6/6] Validating ai-agent-triage-jump.sh and ACPD parsing..."
+# ── 6. Validate Attention Triage Script & Waymux Parsing ──
+echo -e "\n[6/6] Validating ai-agent-triage-jump.sh and Waymux parsing..."
 TRIAGE_SCRIPT="$ROOT/tmux/.config/tmux/ai-agent-triage-jump.sh"
 bash -n "$TRIAGE_SCRIPT" || fail "ai-agent-triage-jump.sh syntax error"
 
@@ -264,9 +264,9 @@ else
     fail "ai-agent-triage-jump.sh is not executable"
 fi
 
-# Validate ACPD agentState/list JSON triage parsing & prioritization
-acpd_mock='{"jsonrpc":"2.0","result":{"%10":{"last_timestamp":100,"state":"working"},"%11":{"last_timestamp":200,"state":"permission"},"%12":{"last_timestamp":300,"state":"awaiting_input"}}}'
-triage_priority=$(echo "$acpd_mock" | jq -r '
+# Validate Waymux agentState/list JSON triage parsing & prioritization
+waymux_mock='{"jsonrpc":"2.0","result":{"%10":{"last_timestamp":100,"state":"working"},"%11":{"last_timestamp":200,"state":"permission"},"%12":{"last_timestamp":300,"state":"awaiting_input"}}}'
+triage_priority=$(echo "$waymux_mock" | jq -r '
   .result // {} | to_entries |
   map(select(.value.state as $s | ["permission", "awaiting_input", "question", "error"] | index($s))) |
   sort_by(-.value.last_timestamp) |
@@ -276,7 +276,7 @@ triage_priority=$(echo "$acpd_mock" | jq -r '
 if [[ "$triage_priority" =~ "%12 %11" ]]; then
     pass "ai-agent-triage-jump correctly prioritizes urgent attention states (%12 awaiting_input, %11 permission) over working"
 else
-    fail "ai-agent-triage-jump failed ACPD JSON priority extraction"
+    fail "ai-agent-triage-jump failed Waymux JSON priority extraction"
 fi
 
 echo -e "\n=== Test Summary ==="

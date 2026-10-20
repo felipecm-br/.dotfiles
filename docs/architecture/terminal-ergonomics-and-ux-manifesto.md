@@ -138,7 +138,7 @@ $$\text{Ideal Line Length (80–100 cols)} \times 2 + \text{gutters/LSP diagnost
    * **Attentional Taxation:** Positioned in the peripheral field ($30^\circ\text{–}60^\circ$), every agent stream, background spinner, or port update triggers the involuntary **orienting reflex** via the *superior colliculus*, breaking deep focus.
 
 #### 3. Architectural Scope: 1 Worktree = 1 Isolated Session vs. Window-Based Multi-Worktrees
-* **Worktree Multi-Window Isolation:** While tools like `workmux` default to 1 worktree = 1 Tmux window (though supporting an optional `--session` mode and sidebar), `awt` adopts an **entire, hermetically isolated Tmux session per worktree as its native foundation**. Worktrees scale naturally to multiple dedicated windows and internal splits without polluting other workspaces. The floating modal (`Ctrl+Shift+G` / `awp`) and ACPD sonic telemetry provide instantaneous cross-session switching without sacrificing a single column of horizontal workspace to a persistent sidebar.
+* **Worktree Multi-Window Isolation:** While tools like `workmux` default to 1 worktree = 1 Tmux window (though supporting an optional `--session` mode and sidebar), `awt` adopts an **entire, hermetically isolated Tmux session per worktree as its native foundation**. Worktrees scale naturally to multiple dedicated windows and internal splits without polluting other workspaces. The floating modal (`Ctrl+Shift+G` / `awp`) and Waymux sonic telemetry provide instantaneous cross-session switching without sacrificing a single column of horizontal workspace to a persistent sidebar.
 
 ### 3.2 The Hybrid Golden-Grid & Bichromatic Typographic Discipline
 
@@ -188,7 +188,7 @@ To eliminate accidental exits during deep inspection:
 
 True zero-friction development minimizes visual polling by offloading non-critical telemetry to the **Auditory Cortex**.
 
-The `waymux` daemon (formerly `acpd`) integrates low-latency audio cues via PipeWire (`pw-play`) configured in [`waymux/.config/waymux/config.toml`](../../waymux/.config/waymux/config.toml):
+The `waymux` daemon integrates low-latency audio cues via PipeWire (`pw-play`) configured in [`waymux/.config/waymux/config.toml`](../../waymux/.config/waymux/config.toml):
 
 ```toml
 [sound]

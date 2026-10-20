@@ -20,7 +20,7 @@ The core principle across this dotfiles setup is **Zero Polling, Maximum Context
 │                            ACTIVE SYSTEM PATTERNS                           │
 ├───────────────────────────────┬─────────────────────────────────────────────┤
 │ 💊 Workspace Pills            │ Real-time title-aware app rewriting in bar │
-│ 🤖 Tmux AI Agent Status       │ Per-pane lifecycle pills via ACPD daemon    │
+│ 🤖 Tmux AI Agent Status       │ Per-pane lifecycle pills via Waymux daemon  │
 │ 🐚 Smart Tab Completion       │ Context-aware completion & Waymaker TUI     │
 │ 🎨 Universal Dynamic Theming  │ Live palette sync from colors.toml pipeline │
 │ 🌿 AWT Worktree Orchestrator  │ Isolated multi-agent Git worktree sandboxes │
@@ -36,7 +36,7 @@ The core principle across this dotfiles setup is **Zero Polling, Maximum Context
 ### 2. Tmux AI Agent Status & Event-Driven Popups
 * **Location**: [`tmux/.config/tmux/`](../../tmux/.config/tmux/), [`waymux/`](../../waymux/)
 * **Doc**: [Tmux AI Status Bar](../tmux/ai-status-bar.md) & [Popup Isolation & Debounce](../tmux/popup-isolation-and-debounce.md)
-* **How it works**: The ACPD daemon intercepts agent lifecycle hooks (Antigravity, Claude Code, Codex, Muse, OpenCode). Status updates are broadcast with a 650ms idle debounce (`idle_debounce_ms`, configurable) to tmux status pills (`status-interval 0`), rendering spinners (`󰑮`), question/permission alerts, and bell popups.
+* **How it works**: The Waymux daemon intercepts agent lifecycle hooks (Antigravity, Claude Code, Codex, Muse, OpenCode). Status updates are broadcast with a 650ms idle debounce (`idle_debounce_ms`, configurable) to tmux status pills (`status-interval 0`), rendering spinners (`󰑮`), question/permission alerts, and bell popups.
 
 ### 3. Smart Tab Completion & On-Demand Preview (`_smart_tab`)
 * **Location**: [`zsh/.zsh/utils/binds.zsh`](../../zsh/.zsh/utils/binds.zsh), [`waymaker/.config/waymaker/presets/ftb.toml`](../../waymaker/.config/waymaker/presets/ftb.toml)
@@ -50,7 +50,7 @@ The core principle across this dotfiles setup is **Zero Polling, Maximum Context
 
 ### 5. Universal Theming Engine Pipeline
 * **Location**: [`omarchy/.config/omarchy/themed/`](../../omarchy/.config/omarchy/themed/), [`docs/theme/system-theme.md`](../theme/system-theme.md)
-* **How it works**: Evaluates a single `colors.toml` source of truth (`~/.local/state/omarchy/current/theme/colors.toml`), compiling templates into Hyprland Lua colors, Quickshell surface tokens, Ghostty/Kitty themes, Starship palettes, Tmux status bars, ACPD config, and Neovim color schemes on the fly.
+* **How it works**: Evaluates a single `colors.toml` source of truth (`~/.local/state/omarchy/current/theme/colors.toml`), compiling templates into Hyprland Lua colors, Quickshell surface tokens, Ghostty/Kitty themes, Starship palettes, Tmux status bars, Waymux config, and Neovim color schemes on the fly.
 
 ### 6. Agent Worktree Orchestrator & Session Switcher (`awt` / `wm -o awt`)
 * **Location**: [`awt/.local/bin/awt`](../../awt/.local/bin/awt), [`awt/.config/waymaker/presets/awt.toml`](../../awt/.config/waymaker/presets/awt.toml)
@@ -147,7 +147,7 @@ The following concepts represent high-leverage ideas scheduled for future implem
 | Feature / Pattern | Subsystem | Status | Key Advantage |
 | :--- | :--- | :---: | :--- |
 | **Workspace App Icon Pills** | Quickshell / Hyprland | 🟢 Live | Real-time semantic webapp & app icon identification |
-| **Tmux AI Status Bar & Cockpit** | Tmux / ACPD / Waymaker | 🟢 Live | Live agent lifecycle monitoring with debounced events |
+| **Tmux AI Status Bar & Cockpit** | Tmux / Waymux / Waymaker | 🟢 Live | Live agent lifecycle monitoring with debounced events |
 | **Smart Tab & WM Preview** | Zsh / Waymaker | 🟢 Live | Zero-friction contextual completion and instant preview |
 | **Starship Modal Prompt Sync** | Zsh / Starship | 🟢 Live | Dynamic vi-mode visual indicator in terminal prompt |
 | **Universal Theme Pipeline** | Omarchy / Multi | 🟢 Live | Single-point palette management across entire desktop |

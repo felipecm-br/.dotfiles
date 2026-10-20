@@ -91,11 +91,11 @@ analyze_target() {
 
   [ -z "$WIN_ID" ] && return 0
 
-  declare -A acpd_panes=()
+  declare -A waymux_panes=()
   if command -v waymux >/dev/null 2>&1; then
     while IFS=$'\t' read -r apid astate atime; do
       if [ -n "$apid" ] && [ "$astate" != "closed" ]; then
-        acpd_panes["$apid"]="$astate"
+        waymux_panes["$apid"]="$astate"
       fi
     done < <(waymux list 2>/dev/null || true)
   fi
@@ -114,10 +114,10 @@ analyze_target() {
     local agent_desc=""
     local st=""
 
-    # 1. ACPD registration check
-    if [ -n "${acpd_panes["$pid"]:-}" ]; then
+    # 1. Waymux registration check
+    if [ -n "${waymux_panes["$pid"]:-}" ]; then
       is_agent=1
-      st="${acpd_panes["$pid"]}"
+      st="${waymux_panes["$pid"]}"
     fi
 
     # 2. Tmux window/pane options check

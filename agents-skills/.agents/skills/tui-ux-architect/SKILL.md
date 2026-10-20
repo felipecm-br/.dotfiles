@@ -9,7 +9,7 @@ description: >-
   memory (j + Enter), Matchmaker TUI (mm -o jump, fm.rs, tri-modal sources), Polymorphic Zsh ZLE &
   Frecency 2.0 (ptl, ptg, pt, mtl, mtg, mt, _smart_tab, mm_smart_chpwd), Lazygitrs Dual-Diff toggle
   (Ctrl+G between Files and HEAD), Tmux Golden Ratio popups (75%x60%, 40/60 split), Omarchy dynamic
-  theme color sync, auditory telemetry via acpd, KLM-GOMS modeling, Doherty threshold (<100ms),
+  theme color sync, auditory telemetry via waymux, KLM-GOMS modeling, Doherty threshold (<100ms),
   cognitive load reduction (Hick-Hyman, Miller, Sweller), triadic cold-color architecture
   (blue passive architecture, cyan control trigger, darkgray metadata), Treisman preattentive
   hue reservation, CIE 1931 foveal photobiology, clean zero-background, Gestalt figure-ground contrast,
@@ -196,7 +196,7 @@ flowchart TD
   - *Ephemeral Layer* (Fast Pickers < 5s): Mauve / Magenta (`-T " 󱂬 "` or `-T " 󰆍 "`).
   - *Persistent Layer* (Lazygitrs / High-Density Workspaces): Git Orange (`-T " 󰊢 "`).
   - *Reactive Layer* (AI Agent Alerts & Approvals): Alert Yellow (`-T " 󰮯 "`).
-- **Auditory Telemetry:** Low-latency non-blocking PipeWire sound cues via `acpd` daemon, freeing visual attention.
+- **Auditory Telemetry:** Low-latency non-blocking PipeWire sound cues via `waymux` daemon, freeing visual attention.
 
 *See layout details in [references/tmux-golden-ratio-popups.md](references/tmux-golden-ratio-popups.md) and canonical audit in [`docs/architecture/state-of-the-art-terminal-agent-workflow.md`](../../../../docs/architecture/state-of-the-art-terminal-agent-workflow.md).*
 

@@ -1,6 +1,6 @@
 # Autonomous AI Agent & Terminal Multiplexer Integration Guide
 
-> **Scope**: Practical guide and real-world demonstrations of how `acpd` JSON-RPC methods (`tmux.list_sessions`, `tmux.list_windows`, `tmux.list_panes`, `tmux.capture_pane`, `tmux.send_keys`, `agentState/list`) empower AI coding agents to interact with terminal multiplexers as full-stack pair programming partners.
+> **Scope**: Practical guide and real-world demonstrations of how `waymux` JSON-RPC methods (`tmux.list_sessions`, `tmux.list_windows`, `tmux.list_panes`, `tmux.capture_pane`, `tmux.send_keys`, `agentState/list`) empower AI coding agents to interact with terminal multiplexers as full-stack pair programming partners.
 > **File**: [`docs/articles/autonomous-agent-examples-en.md`](autonomous-agent-examples-en.md)
 
 ---
@@ -11,9 +11,9 @@
 - `herdr` implements a native JSON-RPC Unix socket (`herdr.sock`) built directly inside its own Rust-based terminal emulator/multiplexer.
 - It allows agents to list panes, send keystrokes, and capture output buffers from panes created inside `herdr`.
 
-### Why the `acpd` + `tmux` architecture is superior:
-1. **Full Ecosystem Preservation**: `herdr` requires abandoning `tmux` completely. With `acpd`, the same JSON-RPC control plane is layered on top of native `tmux`, retaining your entire toolset (`vim-tmux-navigator`, `tmux-resurrect`, `tmux-thumbs`, `sesh`, Waymaker `wm` pickers, and Waybar widgets).
-2. **Git Review Loop Integration**: `herdr` lacks a bi-directional code review annotation server (`lazygitrs`). The `acpd` stack integrates terminal-wide navigation with inline Git diff reviews.
+### Why the `waymux` + `tmux` architecture is superior:
+1. **Full Ecosystem Preservation**: `herdr` requires abandoning `tmux` completely. With `waymux`, the same JSON-RPC control plane is layered on top of native `tmux`, retaining your entire toolset (`vim-tmux-navigator`, `tmux-resurrect`, `tmux-thumbs`, `sesh`, Waymaker `wm` pickers, and Waybar widgets).
+2. **Git Review Loop Integration**: `herdr` lacks a bi-directional code review annotation server (`lazygitrs`). The `waymux` stack integrates terminal-wide navigation with inline Git diff reviews.
 
 ---
 
@@ -54,7 +54,7 @@ Two parallel AI agents are active in separate windows:
 
 #### 🤖 AI Action via RPC:
 1. Agent B needs to run integration tests but must avoid file conflicts while Agent A is modifying code.
-2. Agent B queries `agentState/list` via `acpd`:
+2. Agent B queries `agentState/list` via `waymux`:
    ```json
    {
      "jsonrpc": "2.0",
@@ -96,7 +96,7 @@ User prompt in floating window (`Alt+o`): *"Workspace summary."*
    📊 WORKSPACE REPORT:
    ─────────────────────────────────────────────────────────────
    • Session 'dotfiles':
-     - acpd daemon: 6/6 unit tests ok (127.0.0.1:4040).
+     - waymux daemon: unit tests ok (127.0.0.1:4040).
    • Session 'webapp':
      - Window 'ai-refactor': Completed (Idle 5m ago).
      - Window 'ai-docs': Awaiting user permission.
@@ -133,7 +133,7 @@ You are running load benchmarks and want to monitor resource spikes.
 
 ---
 
-## 4. `acpd` JSON-RPC 2.0 API Method Reference
+## 4. `waymux` JSON-RPC 2.0 API Method Reference
 
 | Method | Type | Parameters | Use Case |
 |---|---|---|---|

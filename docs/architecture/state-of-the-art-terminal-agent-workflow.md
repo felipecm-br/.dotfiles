@@ -4,7 +4,7 @@
 > **Status:** Production Standard (re-audited Oct 2026) · **Comparative Score:** **7.7 / 10** (profile-weighted, see §1) · **Zero-Churn Verified**
 
 > [!NOTE]
-> This document was re-audited in Oct 2026. The previous revision claimed a self-assigned **9.94/10**, cited competitor latencies without a reproducible method, referenced tests that did not exist, and described the retired standalone `acpd` daemon. Every number below is either **measured on this host** (aarch64 Linux, see §5) or explicitly marked as **unmeasured / reported by the vendor**.
+> This document was re-audited in Oct 2026. The previous revision claimed a self-assigned **9.94/10**, cited competitor latencies without a reproducible method, and referenced unverified benchmarks. Every number below is either **measured on this host** (aarch64 Linux, see §5) or explicitly marked as **unmeasured / reported by the vendor**.
 
 ---
 
@@ -14,7 +14,7 @@ Modern agentic engineering demands orchestrating multiple concurrent AI coding s
 
 This repository implements a terminal-native agent orchestration stack:
 
-1. **`waymux`** ([felipecm-br/waymux](https://github.com/felipecm-br/waymux), v0.2.1): single Rust binary that replaced the standalone `acpd` daemon. It provides the async JSON-RPC 2.0 control plane (`agentState/wait`, `tmux.*`), zero-latency lifecycle hooks (`waymux hook tmux|lazygit`), the Cockpit HUD data path (`cockpit-items|preview|diff`), review-note dispatch (`review-notes`, `inject`), triage (`triage`), and a native worktree orchestrator (`waymux wt`, mirrored by the `awt` entrypoint).
+1. **`waymux`** ([felipecm-br/waymux](https://github.com/felipecm-br/waymux), v0.2.3): single Rust binary providing the async JSON-RPC 2.0 control plane (`agentState/wait`, `tmux.*`), zero-latency lifecycle hooks (`waymux hook tmux|lazygit`), the Cockpit HUD data path (`cockpit-items|preview|diff`), review-note dispatch (`review-notes`, `inject`), triage (`triage`), and a native worktree orchestrator (`waymux wt`, mirrored by the `awt` entrypoint).
 2. **`awt`** (Agent Worktree Orchestrator): worktree lifecycle management, hermetic environment provisioning, dirty-state migration (`-W`), quarantine-safe deletion, `rebase`/`ship`/`sweep`/`reap`.
 3. **`waymaker` / `wm`**: SIMD-accelerated (Nucleo) Ratatui fuzzy selector used as the Cockpit renderer.
 4. **`tmux`**: Golden Ratio ($\phi$) floating HUDs, event-driven status bars (`status-interval 0`), safe confirmation modals, and transaction-safe Undo Close Tab (`Prefix + u`).
@@ -141,7 +141,7 @@ The Cockpit HUD is the central control plane, bound to `Prefix + Space` (`85% ×
 
 ### 3.3 Daemon Telemetry & Urgency Aggregation (`waymux daemon`)
 
-The Waymux daemon (`waymux daemon`, formerly `acpd`) is an asynchronous Rust daemon communicating over HTTP JSON-RPC 2.0 (`127.0.0.1:4040/rpc`) with `0600` Bearer token authentication (`$XDG_RUNTIME_DIR/acpd/token`) and the `acpd-cli` wrapper (legacy name, still shipped in the `waymux` stow package).
+The Waymux daemon (`waymux daemon`) is an asynchronous Rust daemon communicating over HTTP JSON-RPC 2.0 (`127.0.0.1:4040/rpc`) with `0600` Bearer token authentication (`$XDG_RUNTIME_DIR/waymux/token`) and the `waymux-cli` wrapper.
 
 - **Multi-Pane Window Urgency Aggregation:** When a Tmux window contains multiple split panes (e.g., editor in pane `%1`, test runner in pane `%2`, AI agent in pane `%3`), `waymux` evaluates urgency across **all** child panes. If *any* pane enters `question`, `permission`, or `error`, the parent window's urgency reflects that highest-priority state, guaranteeing that background agent prompts are never missed.
 - **650ms Biomechanical Idle Debounce:** Protects against false idle/waiting states triggered during rapid tool-call chaining or streaming LLM output chunks.
@@ -212,10 +212,10 @@ Engineered strictly in accordance with [Terminal Ergonomics & UX Architecture Ma
 | **Popup Audit** (P2) | Rainbow bracketed footers caused visual crowding | Uniform bichromatic footers (`cyan,bold` + `darkgray` + `│`) with `? Help` | Visual verification |
 | **Waymux Audit** (W1) | Missing upstream commit tracking in dashboard | `Branch + Sync` column with `↑N` / `↓N` / `✓` glyphs | `waymux cockpit-items` |
 | **Waymux Audit** (W2) | Inconsistent keybindings between Cockpit and Lazygitrs | Navigation aligned to Vim standard | Workflow Keybindings Matrix |
-| **Re-audit Oct 2026** (R1) | `acpd` replaced by `waymux`; docs, installer, updater, drift-doctor and theme hook still referenced `acpd` | Stow package `acpd/` renamed to `waymux/`; installer `packages/waymux.zsh`; updater component `waymux`; theme hook reloads `waymux.service` | `scripts/drift-doctor.sh` |
+| **Re-audit Oct 2026** (R1) | Legacy `acpd` replaced by `waymux`; dotfiles, docs, installer, scripts, and hooks fully migrated | Stow package `waymux/`; installer `packages/waymux.zsh`; `waymux-cli` wrapper; active `waymux.service` | `scripts/drift-doctor.sh` |
 
 > [!NOTE]
-> **Remaining `acpd` names (compatibility only):** the daemon writes its auth token to `$XDG_RUNTIME_DIR/waymux/token` and mirrors it to the legacy `$XDG_RUNTIME_DIR/acpd/token` for old clients; every consumer in this repo (hooks, `acpd-cli`, Cockpit/triage scripts, `drift-doctor`) reads the `waymux` path first and falls back to `acpd`. Config is read from `~/.config/waymux/config.toml`, and sound overrides from `~/.config/waymux/sounds/` (legacy `~/.config/acpd/sounds/` is a lower-priority fallback; requires waymux v0.2.1 plus commit `dd7568a` (`refactor(paths)`) or a later release). The `acpd-cli` wrapper, the `acpd*` shell aliases, and `Alias=acpd.service` keep their legacy names.
+> **Waymux Migration:** all consumers (hooks, `waymux-cli`, Cockpit/triage scripts, `drift-doctor`) use native `waymux` paths (`$XDG_RUNTIME_DIR/waymux/token`), configuration is loaded from `~/.config/waymux/config.toml`, sounds are located in `~/.config/waymux/sounds/`, and the systemd unit runs under `waymux.service`.
 
 ---
 

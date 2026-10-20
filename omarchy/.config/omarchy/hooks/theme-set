@@ -12,7 +12,6 @@ if tmux info &>/dev/null; then
 fi
 
 # Sync waymux.toml directly to ~/.config/waymux/config.toml and reload waymux
-# (waymux reads ~/.config/waymux/config.toml first; legacy ~/.config/acpd/config.toml is only a fallback)
 if [[ -f "$CURRENT_THEME_DIR/waymux.toml" ]]; then
   mkdir -p "$HOME/.config/waymux"
   cp "$CURRENT_THEME_DIR/waymux.toml" "$HOME/.config/waymux/config.toml"

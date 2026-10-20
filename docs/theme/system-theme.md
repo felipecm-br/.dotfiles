@@ -43,7 +43,7 @@ Switching is triggered by the `omarchy-theme-set <name>` command
      `alacritty.toml.tpl`, `btop.theme.tpl`, `hyprlock.conf.tpl`, `walker.css.tpl`,
      `chromium.theme.tpl`, `obsidian.css.tpl`, `swayosd.css.tpl`, `keyboard.rgb.tpl`)
    - User (this repo): [`omarchy/.config/omarchy/themed/*.tpl`](../../omarchy/.config/omarchy/themed/)
-     (`acpd-config.toml.tpl`, `ghostty.conf.tpl`, `hyprland.lua.tpl`, `kitty.conf.tpl`, `tmux-colors.conf.tpl`, `waybar.css.tpl`)
+     (`hyprland.lua.tpl`, `kitty.conf.tpl`)
 3. Atomically swap the *next* dir into `~/.local/state/omarchy/current/theme` and write the theme
    name to `theme.name`.
 4. Restart components: `omarchy-restart-waybar`, `omarchy-restart-fuzzel`, `omarchy-restart-swayosd`,

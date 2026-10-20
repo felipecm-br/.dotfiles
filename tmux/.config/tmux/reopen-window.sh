@@ -131,5 +131,5 @@ fi
 
 tmux display-message -d 2000 "󰁯 Reopened ${idx_str}${label} (${path})"
 
-# Optional ACPD bell sound notification
-curl -s -X POST http://localhost:4040/rpc -H "Content-Type: application/json" -d '{"jsonrpc":"2.0","method":"bell","params":{},"id":1}' >/dev/null 2>&1 || true
+# Optional Waymux bell sound notification
+waymux-cli bell >/dev/null 2>&1 || true

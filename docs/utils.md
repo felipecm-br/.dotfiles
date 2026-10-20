@@ -5,23 +5,23 @@ much larger set provided by Omarchy under `~/.local/share/omarchy/bin/`. The mos
 
 ## Repo helpers (`~/.local/bin/`)
 
-These come from the [`utils`](../utils), [`awt`](../awt), [`acpd`](../acpd), [`waymaker`](../waymaker), [`git`](../git), and [`battery`](../battery) stow packages.
+These come from the [`utils`](../utils), [`awt`](../awt), [`waymux`](../waymux), [`waymaker`](../waymaker), [`git`](../git), and [`battery`](../battery) stow packages.
 
 | Command | Purpose |
 |---------|---------|
 | `cockpit` | Open the AI Fleet & Tmux Window Cockpit HUD (`cockpit-picker.sh`) from any terminal pane. |
 | `cockpit-snapshot [--quiet]` | Capture active Tmux sessions, windows, panes, CWDs, and running AI agent commands to `~/.local/state/cockpit/snapshot.json`. |
 | `cockpit-restore [--dry-run] [--resurrect-agents]` | Reconstruct Tmux session/window/pane topology from the latest Cockpit snapshot. |
-| `flow-telemetry` | Query `~/.local/state/acpd/telemetry.jsonl` to display deep work blocks, interruption heatmaps, and agent triage metrics. |
-| `acpd-cli <subcommand>` | CLI client for the `acpd` daemon (`health`, `list`, `approve`, `deny`, `input`, `kill`, `window-new`, `pane-split`, `pane-capture`, `pane-send`, `popup`, `status`). |
+| `flow-telemetry` | Query `~/.local/state/waymux/telemetry.jsonl` to display deep work blocks, interruption heatmaps, and agent triage metrics. |
+| `waymux-cli <subcommand>` | CLI client for the `waymux` daemon (`health`, `list`, `approve`, `deny`, `input`, `kill`, `window-new`, `pane-split`, `pane-capture`, `pane-send`, `popup`, `status`). |
 | `awt` / `awc` / `awp` / `awtc` | Agent Worktree Orchestrator (`awt`), 5-step creation wizard (`awc`), floating worktree popup (`awp`), and `.bare` repository cloner (`awtc`). |
 | `wm` / `mm` / `wm-ftb` | Waymaker Rust TUI picker engine (`wm`), compatibility alias (`mm`), and zero-fork `fzf-tab` completion binary (`wm-ftb`). |
 | `sesh` | Drop-in compatibility wrapper delegating `sesh connect`, `sesh list`, and `sesh last` to native `wm session`. |
 | `gc` / `sgc` / `gtest` | AI-assisted conventional commit generator (`gc`), smart multi-commit splitter (`sgc`), and automated pre-commit test/lint runner (`gtest`). |
 | `agy` / `agyy` | Antigravity CLI wrapper (`agy`, cleans up Tmux/Lazygitrs icons on exit) and secondary isolated profile/account launcher (`agyy`). |
-| `update-ai-workflow` / `ai-update` | Comprehensive CLI manager to audit and update all AI workflow dependencies (`tmux`, Nerd Fonts, `codex`, `agy`, `antigravity-ide`, `claude`, `opencode`, `acpd`, `ai-suite`, `worktrunk`, `mise`). Supports `--check`, `--update`, `--all`, and `--only <comp>`. |
+| `update-ai-workflow` / `ai-update` | Comprehensive CLI manager to audit and update all AI workflow dependencies (`tmux`, Nerd Fonts, `codex`, `agy`, `antigravity-ide`, `claude`, `opencode`, `waymux`, `ai-suite`, `worktrunk`, `mise`). Supports `--check`, `--update`, `--all`, and `--only <comp>`. |
 | `ai-memory-clean [--apply]` | Audit and prune stale observations, orphan sessions, and duplicate entries in `ai-memory`. |
-| `ai-sound-switcher` / `ai-sound-pack-install` / `ai-sound-generate` | Interactive TUI switcher (`wm -o sounds`), pack installer, and synthesizer for ACPD auditory telemetry alerts. |
+| `ai-sound-switcher` / `ai-sound-pack-install` / `ai-sound-generate` | Interactive TUI switcher (`wm -o sounds`), pack installer, and synthesizer for Waymux auditory telemetry alerts. |
 | `chime-at-breakpoint` | Emit an auditory chime when a debugger or background pipeline hits a breakpoint. |
 | `hypr-border` / `hypr-anim` | Live interactive Hyprland border gradient (`wm -o borders`) and window animation curve (`wm -o animations`) switchers. |
 | `stow-it <path> [package]` | Adopt an existing file or dir into the dotfiles repo and stow it. Resolves the real path, moves it under `~/.dotfiles/main/<package>/...`, and runs `stow.sh -a <package>`. |
@@ -64,7 +64,7 @@ Specialized TUI pickers configured in [`waymaker/.config/waymaker/presets/`](../
 * `wm -o memory` — AI memory, `AGENTS.md`, and project rules explorer.
 * `wm -o borders` / `hypr-border` — Interactive Hyprland border gradient switcher with real-time live preview (`SUPER + ALT + B`).
 * `wm -o animations` / `hypr-anim` — Interactive Hyprland window animation switcher (`SUPER + SHIFT + A`).
-* `wm -o sounds` / `ai-sound-switcher` — Interactive ACPD audio pack & sound alert switcher.
+* `wm -o sounds` / `ai-sound-switcher` — Interactive Waymux audio pack & sound alert switcher.
 * `wm -o backgrounds` — Interactive Omarchy wallpaper switcher.
 * `wm -o starship-presets` — Interactive Starship prompt preset switcher.
 

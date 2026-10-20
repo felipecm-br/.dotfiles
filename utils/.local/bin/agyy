@@ -18,7 +18,7 @@ mkdir -p "$PROFILE_DIR/.local/bin"
 [ -d "$REAL_HOME/.gnupg" ] && [ ! -e "$PROFILE_DIR/.gnupg" ] && ln -sf "$REAL_HOME/.gnupg" "$PROFILE_DIR/.gnupg"
 [ -d "$REAL_HOME/.agents" ] && [ ! -e "$PROFILE_DIR/.agents" ] && ln -sf "$REAL_HOME/.agents" "$PROFILE_DIR/.agents"
 
-# Symlink hooks, skills, and configuration so lifecycle telemetry (ACPD/tmux) and workmux tracking work
+# Symlink hooks, skills, and configuration so lifecycle telemetry (Waymux/tmux) and workmux tracking work
 mkdir -p "$PROFILE_DIR/.gemini/config"
 [ -f "$REAL_HOME/.gemini/config/hooks.json" ] && [ ! -e "$PROFILE_DIR/.gemini/config/hooks.json" ] && ln -sf "$REAL_HOME/.gemini/config/hooks.json" "$PROFILE_DIR/.gemini/config/hooks.json"
 [ -f "$REAL_HOME/.gemini/config/skills.json" ] && [ ! -e "$PROFILE_DIR/.gemini/config/skills.json" ] && ln -sf "$REAL_HOME/.gemini/config/skills.json" "$PROFILE_DIR/.gemini/config/skills.json"

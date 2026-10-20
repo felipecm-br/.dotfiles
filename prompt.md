@@ -127,7 +127,7 @@ O ambiente de trabalho em que você atua representa o estado da arte absoluto em
   - *Camada Efêmera* (Seletores rápidos < 5s): Mauve / Magenta (`-T " 󱂬 "`).
   - *Camada Persistente* (Lazygitrs / Neovim flutuante): Git Orange (`-T " 󰊢 "`).
   - *Camada Reativa* (Alertas de Agentes / Triage): Alert Yellow (`-T " 󰮯 "`).
-- **Telemetria Auditiva Assíncrona:** Daemon `acpd` emitindo feedbacks sonoros de baixa latência (PipeWire), liberando a atenção foveal visual para o código.
+- **Telemetria Auditiva Assíncrona:** Daemon `waymux` emitindo feedbacks sonoros de baixa latência (PipeWire), liberando a atenção foveal visual para o código.
 
 ---
 
@@ -227,7 +227,7 @@ $$MT = a + b \log_2\left(2\frac{D}{W}\right)$$
 
 ### 2.11 Golfos de Execução e Avaliação de Norman & Fechamento Sensorial
 - **Golfo de Execução:** Reduzido a zero através de affordances claras e comandos com mapeamento mnemônico direto na Home Row.
-- **Golfo de Avaliação:** Fechado instantaneamente através de feedback multimodal (<100ms): pills reativos na barra do Tmux, spinners de progresso minidot e telemetria auditiva via `acpd`.
+- **Golfo de Avaliação:** Fechado instantaneamente através de feedback multimodal (<100ms): pills reativos na barra do Tmux, spinners de progresso minidot e telemetria auditiva via `waymux`.
 
 ---
 

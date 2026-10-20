@@ -35,11 +35,11 @@ Each top-level directory (except `.bare`, `.git`, `.github`, `.shell`, `scripts`
 Running `stow.sh` creates symlinks from `~/<path>` → `~/.dotfiles/main/<package>/<path>`.
 
 Current stow packages:
-`acpd`, `agents-skills`, `ai-jail`, `ai-memory`, `antigravity`, `atuin`, `awt`, `bash`, `bat`, `battery`,
+`agents-skills`, `ai-jail`, `ai-memory`, `antigravity`, `atuin`, `awt`, `bash`, `bat`, `battery`,
 `btop`, `claude`, `codex`, `duf`, `eza`, `fastfetch`, `fed`, `figlet`, `fonts`, `gh`, `ghostty`,
 `git`, `hibiki`, `hypr`, `intelli-shell`, `kitty`, `lazygitrs`, `lolcat`, `mako`, `mise`, `muse`, `nvim`,
 `omarchy`, `opencode`, `posting`, `procs`, `starship`, `systemd`, `tmux`, `utils`, `vimium`, `walker`,
-`waybar`, `waymaker`, `workmux`, `worktrunk`, `xkb`, `yazi`, `zellij`, `zsh`, `zsh-plugins`
+`waybar`, `waymaker`, `waymux`, `workmux`, `worktrunk`, `xkb`, `yazi`, `zellij`, `zsh`, `zsh-plugins`
 
 ## Install System
 

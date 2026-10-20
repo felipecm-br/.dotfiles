@@ -32,9 +32,9 @@ Events are written to `${XDG_STATE_HOME:-~/.local/state}/flow/events.tsv` with t
 |:---|:---|:---|:---|:---|
 | `session` | Tmux hook `client-session-changed` | Session Name | — | Context switch between workspaces |
 | `window` | Tmux hook `after-select-window` | `session:win` | — | Focus transition between windows |
-| `agent_question` | `acpd` daemon state update | Pane ID (`%X`) | Context message | AI agent transitioned to `AwaitingInput` / `Permission` |
-| `human_reply` | `acpd` daemon state update / focus dismiss | Pane ID (`%X`) | Latency (e.g. `8s`) | Human responded to agent prompt or dismissed attention badge |
-| `agent_finished` | `acpd` daemon debounce completion | Pane ID (`%X`) | Task / prompt ID | AI agent completed task (`Working` $\rightarrow$ `Idle`) |
+| `agent_question` | `waymux` daemon state update | Pane ID (`%X`) | Context message | AI agent transitioned to `AwaitingInput` / `Permission` |
+| `human_reply` | `waymux` daemon state update / focus dismiss | Pane ID (`%X`) | Latency (e.g. `8s`) | Human responded to agent prompt or dismissed attention badge |
+| `agent_finished` | `waymux` daemon debounce completion | Pane ID (`%X`) | Task / prompt ID | AI agent completed task (`Working` $\rightarrow$ `Idle`) |
 | `review_start` | `lazygitrs-popup.sh` launch | Project Directory | Lag (e.g. `1s`) | Elapsed seconds between agent completion and review modal opening |
 | `review_end` | `lazygitrs-popup.sh` exit | Project Directory | Duration (e.g. `92s`) | Elapsed seconds inside the code review modal |
 
@@ -49,8 +49,8 @@ Calculates elapsed durations directly via Bash arithmetic and file descriptors w
 - Computes latency: `latency=$(( now - prev_time ))`.
 - Appends atomically to `events.tsv`.
 
-### 4.2. ACPD Daemon Telemetry Hooks
-Integrated in [`acpd/src/api.rs`](https://github.com/felipecm-br/acpd):
+### 4.2. Waymux Daemon Telemetry Hooks
+Integrated in [`waymux/src/api.rs`](https://github.com/felipecm-br/waymux):
 - In `dispatch_update()`, detects attention state entry (`AwaitingInput` / `Permission`) $\rightarrow$ emits `agent_question`.
 - On human reply or focus dismiss (`agentState/dismiss`) $\rightarrow$ emits `human_reply`.
 - On confirmed debounced transition from `Working` to `Idle` $\rightarrow$ emits `agent_finished`.

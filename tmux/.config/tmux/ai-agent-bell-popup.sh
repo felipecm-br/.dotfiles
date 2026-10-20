@@ -14,28 +14,28 @@ unset _tmux_style
 # Collect all panes that require attention or have AI agent activity
 notifying_panes=()
 
-# 0. Primary: Query acpd daemon RPC (http://127.0.0.1:4040/rpc) for real-time agent states
-acpd_token=""
-for token_path in "/run/user/$UID/waymux/token" "/run/user/$(id -u 2>/dev/null)/waymux/token" "/run/user/$UID/acpd/token" "/run/user/$(id -u 2>/dev/null)/acpd/token"; do
+# 0. Primary: Query waymux daemon RPC (http://127.0.0.1:4040/rpc) for real-time agent states
+waymux_token=""
+for token_path in "/run/user/$UID/waymux/token" "/run/user/$(id -u 2>/dev/null)/waymux/token"; do
   if [ -f "$token_path" ]; then
-    acpd_token=$(cat "$token_path" 2>/dev/null || true)
-    [ -n "$acpd_token" ] && break
+    waymux_token=$(cat "$token_path" 2>/dev/null || true)
+    [ -n "$waymux_token" ] && break
   fi
 done
 
-if [ -n "$acpd_token" ] && command -v curl >/dev/null 2>&1 && command -v jq >/dev/null 2>&1; then
-  acpd_res=$(curl -s -m 0.25 -X POST http://127.0.0.1:4040/rpc \
-    -H "Authorization: Bearer $acpd_token" \
+if [ -n "$waymux_token" ] && command -v curl >/dev/null 2>&1 && command -v jq >/dev/null 2>&1; then
+  waymux_res=$(curl -s -m 0.25 -X POST http://127.0.0.1:4040/rpc \
+    -H "Authorization: Bearer $waymux_token" \
     -H "Content-Type: application/json" \
     -d '{"jsonrpc":"2.0","method":"agentState/list","id":1}' 2>/dev/null || true)
 
-  if [ -n "$acpd_res" ]; then
+  if [ -n "$waymux_res" ]; then
     # Urgent: permission, awaiting_input, question, error, stalled
     while IFS= read -r p; do
       if [[ -n "$p" && "$p" =~ ^%[0-9]+$ ]] && tmux display-message -t "$p" -p '#{pane_id}' >/dev/null 2>&1; then
         notifying_panes+=("$p")
       fi
-    done < <(echo "$acpd_res" | jq -r '
+    done < <(echo "$waymux_res" | jq -r '
       .result // {} | to_entries |
       map(select(.value.state as $s | ["permission", "awaiting_input", "question", "error", "stalled"] | index($s))) |
       sort_by(-.value.last_timestamp) |
@@ -48,7 +48,7 @@ if [ -n "$acpd_token" ] && command -v curl >/dev/null 2>&1 && command -v jq >/de
         if [[ -n "$p" && "$p" =~ ^%[0-9]+$ ]] && tmux display-message -t "$p" -p '#{pane_id}' >/dev/null 2>&1; then
           notifying_panes+=("$p")
         fi
-      done < <(echo "$acpd_res" | jq -r '
+      done < <(echo "$waymux_res" | jq -r '
         .result // {} | to_entries |
         map(select(.value.state as $s | ["working", "busy"] | index($s))) |
         sort_by(-.value.last_timestamp) |

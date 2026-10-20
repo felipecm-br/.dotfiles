@@ -57,9 +57,8 @@ else
   warn "tmux: history-limit ($hl) is below recommended 50000 lines (risk of agent log truncation)"
 fi
 
-# 5. Waymux Daemon Health & Token Check (native waymux token path, legacy acpd path as fallback)
+# 5. Waymux Daemon Health & Token Check
 token_path="${XDG_RUNTIME_DIR:-/run/user/$UID}/waymux/token"
-[ -f "$token_path" ] || token_path="${XDG_RUNTIME_DIR:-/run/user/$UID}/acpd/token"
 if [ -f "$token_path" ]; then
   token="$(cat "$token_path" 2>/dev/null || true)"
   if [ -n "$token" ]; then

@@ -1,6 +1,5 @@
 #!/usr/bin/env zsh
 # Install waymux (single-binary terminal AI cockpit, orchestrator and control-plane daemon).
-# Replaces the legacy standalone `acpd` daemon.
 # https://github.com/felipecm-br/waymux
 
 if command -v waymux &>/dev/null; then

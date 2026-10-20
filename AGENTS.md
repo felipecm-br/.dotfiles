@@ -61,7 +61,7 @@ See [.shell/install/README.md](.shell/install/README.md) for the current bootstr
 - [docs/architecture/zero-friction-file-transfer-benchmark.md](docs/architecture/zero-friction-file-transfer-benchmark.md)
 - [docs/architecture/cockpit-topology-snapshot-and-restore.md](docs/architecture/cockpit-topology-snapshot-and-restore.md)
 - [docs/architecture/evidence-based-telemetry-and-deep-work.md](docs/architecture/evidence-based-telemetry-and-deep-work.md)
-- [docs/architecture/remote-agent-workflow-acpd.md](docs/architecture/remote-agent-workflow-acpd.md)
+- [docs/architecture/remote-agent-workflow-waymux.md](docs/architecture/remote-agent-workflow-waymux.md)
 - [docs/tmux/popups-ergonomics-and-golden-ratio.md](docs/tmux/popups-ergonomics-and-golden-ratio.md)
 - [docs/GIT_WORKTREE_AGENTIC_WORKFLOW.md](docs/GIT_WORKTREE_AGENTIC_WORKFLOW.md)
 - [.shell/install/README.md](.shell/install/README.md)

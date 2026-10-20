@@ -16,7 +16,7 @@ Welcome to the central documentation index for this Arch Linux + Omarchy dotfile
 - [**State-of-the-Art Terminal Agent Workflow: Architecture, Ergonomics & Competitor Benchmark**](architecture/state-of-the-art-terminal-agent-workflow.md): The definitive canonical architecture document: 9.94/10 verdict, head-to-head competitor matrix (`workmux`, `herdr`, `zellij`), 6 engineered SOTA pillars, sub-50ms empirical benchmarks, and historical resolution ledger.
 - [**Cockpit Topology Snapshot & Post-Reboot Restore**](architecture/cockpit-topology-snapshot-and-restore.md): Event-driven 30s debounced Tmux topology snapshots (`cockpit snapshot`), post-reboot workspace restoration (`cockpit restore`), and multi-agent continuation (`agy`, `claude`, `codex`, `muse`, `opencode`).
 - [**Evidence-Based Flow Telemetry & Deep Work Analytics**](architecture/evidence-based-telemetry-and-deep-work.md): Zero-latency TSV event logging (`flow-log.sh`), human-agent response latency metrics, 24h ASCII activity heatmaps, and `flow-telemetry` CLI.
-- [**Proactive Agent Supervision & Remote Orchestration (`waymux` / `acpd`)**](architecture/remote-agent-workflow-acpd.md): JSON-RPC 2.0 remote agent supervision via Waymux daemon (`waymux` / `acpd-cli`), auto-dismiss on focus (`pane-focus-in`), blocking `agentState/wait` barriers, and multi-agent handoff loops.
+- [**Proactive Agent Supervision & Remote Orchestration (`waymux`)**](architecture/remote-agent-workflow-waymux.md): JSON-RPC 2.0 remote agent supervision via Waymux daemon (`waymux` / `waymux-cli`), auto-dismiss on focus (`pane-focus-in`), blocking `agentState/wait` barriers, and multi-agent handoff loops.
 - [**Open-Source AI Cockpit Stack Blueprint**](architecture/open-source-ai-tmux-stack-plan.md): Architecture and distribution strategy for the open-source `waymux` + `lazygitrs` + `waymaker` (`wm`) + `tmux` terminal AI cockpit stack.
 
 ### 🐚 1. Shell & Navigation (`docs/shell/`)
@@ -26,10 +26,10 @@ Welcome to the central documentation index for this Arch Linux + Omarchy dotfile
 
 ### 🪟 2. Tmux & Multiplexer (`docs/tmux/`)
 - [**Popups Ergonomics, Biomechanics & Golden Ratio**](tmux/popups-ergonomics-and-golden-ratio.md): Golden Ratio ($\phi$) popup architecture, 40/60 column split, 1-touch Home Row navigation, uniform bichromatic footers, and sub-100ms non-blocking HUDs.
-- [**AI Agent Status in Status Bar**](tmux/ai-status-bar.md): Real-time per-pane AI agent state pills, animated spinners, color alerts, Vimium window hints (`Prefix + f`), and `acpd` daemon options.
-- [**Popup Isolation, Debounce & Event-Driven Architecture**](tmux/popup-isolation-and-debounce.md): Tmux 3.8 native floating popup isolation, 650ms idle debounce in ACPD, and 100% event-driven `status-interval 0`.
+- [**AI Agent Status in Status Bar**](tmux/ai-status-bar.md): Real-time per-pane AI agent state pills, animated spinners, color alerts, Vimium window hints (`Prefix + f`), and `waymux` daemon options.
+- [**Popup Isolation, Debounce & Event-Driven Architecture**](tmux/popup-isolation-and-debounce.md): Tmux 3.8 native floating popup isolation, 650ms idle debounce in Waymux, and 100% event-driven `status-interval 0`.
 - [**Clipboard & Scrollback Capture**](tmux/clipboard-and-scrollback.md): Click-and-hold drag-to-copy to system clipboard, `Prefix + E` Markdown/Mermaid scrollback view popup, and `Prefix + y` fuzzy scrollback token yanker.
-- [**Tmux Activity Monitoring**](tmux/tmux-activity.md): Activity alert and notification behavior (`monitor-activity off` in favor of `acpd` status pills).
+- [**Tmux Activity Monitoring**](tmux/tmux-activity.md): Activity alert and notification behavior (`monitor-activity off` in favor of `waymux` status pills).
 
 ### 🖥️ 3. Desktop, Terminal & Hardware (`docs/desktop/`)
 - [**Hyprland Aesthetics vs. Performance Benchmark**](desktop/hyprland-aesthetics-and-performance.md): Deep-dive comparing Liquid Glass (`hyprglass`), Tokyo Night Solar Dawn (current), Catppuccin Pastel, Cyberpunk Neon, and OLED Zen with GPU/battery benchmarks on Apple Silicon M1 Pro.

@@ -94,21 +94,20 @@ for arg in "$@"; do
   esac
 done
 
-# Step 1: Query ACPD once and extract pane map in a single jq pass
+# Step 1: Query Waymux once and extract pane map in a single jq pass
 token_file="${XDG_RUNTIME_DIR:-/run/user/$UID}/waymux/token"
-[ -f "$token_file" ] || token_file="${XDG_RUNTIME_DIR:-/run/user/$UID}/acpd/token"  # legacy fallback
-declare -A acpd_st=()
-declare -A acpd_ts=()
+declare -A waymux_st=()
+declare -A waymux_ts=()
 
 if [ -f "$token_file" ]; then
   IFS= read -r token < "$token_file" 2>/dev/null || token=""
   if [ -n "$token" ]; then
-    acpd_json=$(curl -s -m 0.15 -X POST http://127.0.0.1:4040/rpc \
+    waymux_json=$(curl -s -m 0.15 -X POST http://127.0.0.1:4040/rpc \
       -H "Authorization: Bearer $token" \
       -H "Content-Type: application/json" \
       -d '{"jsonrpc":"2.0","method":"agentState/list","id":1}' 2>/dev/null || true)
-    if [ -n "$acpd_json" ]; then
-      remainder="$acpd_json"
+    if [ -n "$waymux_json" ]; then
+      remainder="$waymux_json"
       while [[ "$remainder" =~ \"(%[0-9]+)\":\{([^}]+)\} ]]; do
         apid="${BASH_REMATCH[1]}"
         inner="${BASH_REMATCH[2]}"
@@ -116,8 +115,8 @@ if [ -f "$token_file" ]; then
         ats=0
         [[ "$inner" =~ \"state\":\"([^\"]+)\" ]] && ast="${BASH_REMATCH[1]}"
         [[ "$inner" =~ \"last_timestamp\":([0-9]+) ]] && ats="${BASH_REMATCH[1]}"
-        acpd_st["$apid"]="$ast"
-        acpd_ts["$apid"]="$ats"
+        waymux_st["$apid"]="$ast"
+        waymux_ts["$apid"]="$ats"
         remainder="${remainder#*\"$apid\":}"
       done
     fi
@@ -162,9 +161,9 @@ while IFS=$'\x1f' read -r sess idx wname pid pane_os_pid ppath pcmd ptitle raw_s
     detected_agent="${sess_agent["$pane_os_pid"]:-}"
   fi
 
-  # Extract ACPD state & timestamp from pre-parsed hash map
-  st="${acpd_st["$pid"]:-}"
-  ts=${acpd_ts["$pid"]:-0}
+  # Extract Waymux state & timestamp from pre-parsed hash map
+  st="${waymux_st["$pid"]:-}"
+  ts=${waymux_ts["$pid"]:-0}
 
   [ -z "$st" ] && st="$raw_state"
   if [ -z "$st" ]; then
