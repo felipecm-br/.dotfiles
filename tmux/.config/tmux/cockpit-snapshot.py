@@ -62,7 +62,7 @@ def inspect_pane_foreground_cmd(pid: str) -> Optional[str]:
             if os.path.isfile(comm_file):
                 with open(comm_file, "r") as f:
                     comm = f.read().strip()
-                if comm in {"nvim", "vim", "lazygit", "lazygitrs", "opencode", "yazi", "btop", "htop"}:
+                if comm in {"nvim", "vim", "lazygit", "lazygitrs", "opencode", "devin", "claude", "codex", "agy", "agy-bin", "yazi", "btop", "htop"}:
                     if os.path.isfile(cmdline_file):
                         with open(cmdline_file, "rb") as f:
                             raw = f.read().decode("utf-8", errors="ignore").replace("\0", " ").strip()

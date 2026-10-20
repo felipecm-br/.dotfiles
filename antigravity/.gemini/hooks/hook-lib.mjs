@@ -54,7 +54,7 @@ export function getActiveTmuxPane() {
   if (!tmuxPane) {
     try {
       const panes = execSync('tmux list-panes -a -F "#{pane_id} #{pane_current_command}"', { stdio: 'pipe' }).toString();
-      const agyPaneLine = panes.split('\n').find(line => line.includes('agy') || line.includes('node'));
+      const agyPaneLine = panes.split('\n').find(line => line.includes('agy') || line.includes('devin') || line.includes('claude') || line.includes('codex') || line.includes('opencode') || line.includes('node'));
       if (agyPaneLine) {
         tmuxPane = agyPaneLine.split(' ')[0];
       }

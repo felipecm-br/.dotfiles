@@ -5,7 +5,7 @@
 # Audits, checks, and updates the core dependencies of the AI workflow stack:
 #   - Terminal Multiplexer & Plugins: tmux (custom 3.8+ build), TPM plugins
 #   - Typography & Icons: Nerd Fonts (Cascadia Mono, JetBrains Mono, Symbols)
-#   - AI Coding Agents & Models: Codex, Antigravity (agy), Claude Code, OpenCode, Crush
+#   - AI Coding Agents & Models: Codex, Antigravity (agy), Claude Code, Devin, OpenCode, Crush
 #   - Daemons & Control Plane: Waymux (control-plane daemon), systemd service
 #   - AI Tooling & Sandboxes: ai-memory, ai-jail, ai-usagebar
 #   - Worktree & Runtime Ecosystem: worktrunk (awt), mise runtime manager
@@ -63,6 +63,7 @@ ICON_CODEX=""
 ICON_AGY=""
 ICON_IDE="󰨞"
 ICON_CLAUDE="󰚩"
+ICON_DEVIN="󰚩"
 ICON_OPENCODE="󰘦"
 ICON_CRUSH="󰻿"
 ICON_WAYMUX="󱐋"
@@ -108,6 +109,7 @@ usage() {
   echo -e "  antigravity-ide, ide  Google Antigravity IDE (via AUR/yay)"
   echo -e "  antigravity           Both Antigravity CLI and IDE"
   echo -e "  claude                Anthropic Claude Code CLI (via mise)"
+  echo -e "  devin                 Cognition Devin CLI (devin self-update)"
   echo -e "  opencode              OpenCode CLI (via mise)"
   echo -e "  crush                 Charm Crush CLI (via mise)"
   echo -e "  waymux                Waymux control-plane daemon & systemd service"
@@ -184,6 +186,7 @@ normalize_target() {
     antigravity) echo "antigravity" ;;
     codex) echo "codex" ;;
     claude|claudecode) echo "claude" ;;
+    devin) echo "devin" ;;
     opencode) echo "opencode" ;;
     crush) echo "crush" ;;
     waymux) echo "waymux" ;;
@@ -436,6 +439,32 @@ inspect_antigravity_ide() {
   record_status "antigravity-ide" "antigravity-ide (gui)" "$ICON_IDE" "$cur" "$lat" "$status"
 }
 
+# 6b. Devin CLI (devin)
+inspect_devin() {
+  local cur="missing"
+  if [[ -x "$TARGET_HOME/.local/bin/devin" ]]; then
+    cur=$("$TARGET_HOME/.local/bin/devin" --version 2>/dev/null | awk '{print $2}' || echo "missing")
+  elif command -v devin &>/dev/null; then
+    cur=$(devin --version 2>/dev/null | awk '{print $2}' || echo "missing")
+  fi
+
+  local lat="$cur"
+  local remote_ver
+  remote_ver=$(curl -fsSL --max-time 4 "https://static.devin.ai/cli/current/manifest.json" 2>/dev/null | grep -o '"version"[[:space:]]*:[[:space:]]*"[^"]*"' | head -1 | sed 's/.*"\([^"]*\)"$/\1/' || true)
+  if [[ -n "$remote_ver" ]]; then
+    lat="$remote_ver"
+  fi
+
+  local status="OK"
+  if [[ "$cur" == "missing" ]]; then
+    status="MISSING"
+  elif [[ "$cur" != "$lat" && "$lat" != "missing" ]]; then
+    status="UPDATE"
+  fi
+
+  record_status "devin" "devin (cognition cli)" "$ICON_DEVIN" "$cur" "$lat" "$status"
+}
+
 # 7. Waymux Daemon
 inspect_waymux() {
   local cur="missing"
@@ -566,6 +595,10 @@ run_parallel_audit() {
     inspect_antigravity_ide & pids+=($!)
   fi
 
+  if should_run "devin"; then
+    inspect_devin & pids+=($!)
+  fi
+
   if should_run "waymux"; then
     inspect_waymux & pids+=($!)
   fi
@@ -611,7 +644,7 @@ display_report() {
   printf "${C_BOLD}%-3s %-28s %-15s %-15s %-18s${C_RESET}\n" " " "Component" "Current" "Latest" "Status"
   echo -e "${C_GRAY}────────────────────────────────────────────────────────────────────────────${C_RESET}"
 
-  local order=("tmux" "plugins" "fonts" "codex" "agy" "antigravity-ide" "claude" "opencode" "crush" "waymux" "ai-memory" "ai-jail" "ai-usagebar" "worktrunk" "mise")
+  local order=("tmux" "plugins" "fonts" "codex" "agy" "antigravity-ide" "claude" "devin" "opencode" "crush" "waymux" "ai-memory" "ai-jail" "ai-usagebar" "worktrunk" "mise")
 
   for key in "${order[@]}"; do
     should_run "$key" || continue
@@ -767,6 +800,18 @@ update_claude() {
   local new_ver
   new_ver=$(HOME="$TARGET_HOME" mise current claude 2>/dev/null || true)
   echo -e "  ${C_GREEN}${ICON_OK}${C_RESET} Claude Code active version: ${C_GREEN}v${new_ver}${C_RESET}"
+}
+
+update_devin() {
+  echo -e "${C_BLUE}${ICON_INFO}${C_RESET} Checking and upgrading ${C_BOLD}Devin CLI (devin)${C_RESET}..."
+  if [[ -x "$TARGET_HOME/.local/bin/devin" ]]; then
+    HOME="$TARGET_HOME" "$TARGET_HOME/.local/bin/devin" update || true
+  else
+    curl -fsSL https://cli.devin.ai/install.sh | sed '/"\$VERSION_DIR\/bin\/\$COMPILED_BIN_NAME" setup/d' | HOME="$TARGET_HOME" bash || true
+  fi
+  local new_ver
+  new_ver=$("$TARGET_HOME/.local/bin/devin" --version 2>/dev/null | awk '{print $2}' || true)
+  echo -e "  ${C_GREEN}${ICON_OK}${C_RESET} Devin CLI active version: ${C_GREEN}v${new_ver}${C_RESET}"
 }
 
 update_opencode() {
@@ -953,6 +998,10 @@ main() {
 
   if should_run "claude" && needs_update "claude"; then
     update_claude
+  fi
+
+  if should_run "devin" && needs_update "devin"; then
+    update_devin
   fi
 
   if should_run "opencode" && needs_update "opencode"; then

@@ -84,11 +84,11 @@ if [ "${#notifying_panes[@]}" -eq 0 ]; then
   done < <(tmux list-panes -a -F '#{pane_id} #{@ai_agent_state_raw}' 2>/dev/null | awk '$2 ~ /^(idle|working|busy|question|permission|error|awaiting_input|stalled)$/ {print $1}')
 fi
 
-# 6. Fallback: Search for any pane running agy, antigravity, or opencode CLI
+# 6. Fallback: Search for any pane running agy, antigravity, devin, or opencode CLI
 if [ "${#notifying_panes[@]}" -eq 0 ]; then
   while IFS= read -r line; do
     [ -n "$line" ] && notifying_panes+=("$line")
-  done < <(tmux list-panes -a -F '#{pane_id} #{pane_current_command} #{pane_title}' 2>/dev/null | awk '$2 ~ /^(agy|antigravity|opencode|claude|codex|muse)$/ || $3 ~ /^(agy|antigravity|opencode|claude|codex|muse)$/ {print $1}')
+  done < <(tmux list-panes -a -F '#{pane_id} #{pane_current_command} #{pane_title}' 2>/dev/null | awk '$2 ~ /^(agy|antigravity|opencode|claude|devin|codex|muse)$/ || $3 ~ /^(agy|antigravity|opencode|claude|devin|codex|muse)$/ {print $1}')
 fi
 
 current_pane=$(tmux display-message -p '#{pane_id}' 2>/dev/null || echo "")

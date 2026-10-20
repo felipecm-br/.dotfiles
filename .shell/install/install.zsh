@@ -68,6 +68,7 @@ install_packages \
     obs-studio \
     tailscale \
     mosh \
+    devin \
     waymux
 
 install_plugins \

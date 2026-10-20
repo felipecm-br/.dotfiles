@@ -31,10 +31,10 @@ zsh ~/.dotfiles/main/.shell/install/install.zsh
 ```
 
 ### Update AI Workflow & Tooling Ecosystem
-For auditing and updating the AI agent and terminal cockpit ecosystem (`tmux`, `plugins`, `fonts`, `codex`, `agy`, `antigravity-ide`, `claude`, `opencode`, `crush`, `waymux`, `ai-memory`, `ai-jail`, `ai-usagebar`, `worktrunk`, `mise`), use the dedicated parallel updater:
+For auditing and updating the AI agent and terminal cockpit ecosystem (`tmux`, `plugins`, `fonts`, `codex`, `agy`, `antigravity-ide`, `claude`, `devin`, `opencode`, `crush`, `waymux`, `ai-memory`, `ai-jail`, `ai-usagebar`, `worktrunk`, `mise`), use the dedicated parallel updater:
 
 ```bash
-ai-update --check          # Fast dry-run audit across all 15 AI workflow components
+ai-update --check          # Fast dry-run audit across all 16 AI workflow components
 ai-update                  # Update all components in parallel
 ai-update --only waymux,agy  # Target specific components
 ```

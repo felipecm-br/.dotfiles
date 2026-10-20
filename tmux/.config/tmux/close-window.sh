@@ -137,6 +137,11 @@ analyze_target() {
         agent_label="claude"
         [ -z "$st" ] && st="running"
         ;;
+      devin)
+        is_agent=1
+        agent_label="devin"
+        [ -z "$st" ] && st="running"
+        ;;
       codex)
         is_agent=1
         agent_label="codex"
@@ -162,7 +167,7 @@ analyze_target() {
     # 4. Process tree inspection (descendants of pane PID)
     if [ "$is_agent" -eq 0 ] && [ -n "$pid" ]; then
       local matched_cmd
-      matched_cmd=$(ps -s "$pid" -o comm= 2>/dev/null | grep -m1 -E "^(agy|agy-bin|antigravity|opencode|claude|codex|muse|gemini|aider)$" || true)
+      matched_cmd=$(ps -s "$pid" -o comm= 2>/dev/null | grep -m1 -E "^(agy|agy-bin|antigravity|opencode|claude|devin|codex|muse|gemini|aider)$" || true)
       if [ -n "$matched_cmd" ]; then
         is_agent=1
         agent_label="$matched_cmd"

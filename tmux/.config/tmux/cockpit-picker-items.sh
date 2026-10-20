@@ -114,12 +114,12 @@ declare -A sess_agent=()
 declare -A sess_etimes=()
 while read -r p_sess p_etimes p_comm; do
   case "$p_comm" in
-    agy|agy-bin|antigravity|opencode|claude|codex)
+    agy|agy-bin|antigravity|opencode|claude|devin|codex)
       sess_agent["$p_sess"]="${p_comm%-bin}"
       sess_etimes["$p_sess"]="$p_etimes"
       ;;
   esac
-done < <(ps -C agy,agy-bin,antigravity,opencode,claude,codex,muse -o sess=,etimes=,comm= 2>/dev/null || true)
+done < <(ps -C agy,agy-bin,antigravity,opencode,claude,devin,codex,muse -o sess=,etimes=,comm= 2>/dev/null || true)
 
 now_ms="${EPOCHSECONDS}000"
 
@@ -194,7 +194,7 @@ while IFS=$'\x1f' read -r sess idx wname pid pane_os_pid ppath pcmd ptitle raw_s
       ;;
     *)
       # Check if command, process tree or title is an AI agent
-      if [ -n "$detected_agent" ] || [[ "$pcmd" =~ ^(agy|antigravity|opencode|claude|codex|muse)$ ]] || [[ "$ptitle" =~ (agy|antigravity|opencode|claude|codex|muse) ]]; then
+      if [ -n "$detected_agent" ] || [[ "$pcmd" =~ ^(agy|antigravity|opencode|claude|devin|codex|muse)$ ]] || [[ "$ptitle" =~ (agy|antigravity|opencode|claude|devin|codex|muse) ]]; then
         prio=5
         ico="󰑮"
         c_ico="$C_BUSY"
@@ -336,7 +336,7 @@ while IFS=$'\x1f' read -r sess idx wname pid pane_os_pid ppath pcmd ptitle raw_s
   fi
 
   is_agent=0
-  if [ -n "$detected_agent" ] || [[ "$pcmd" =~ ^(agy|antigravity|opencode|claude|codex|muse)$ ]] || [ -n "$ai_title" ]; then
+  if [ -n "$detected_agent" ] || [[ "$pcmd" =~ ^(agy|antigravity|opencode|claude|devin|codex|muse)$ ]] || [ -n "$ai_title" ]; then
     is_agent=1
   elif [ "$st" != "normal" ] && [ "$st" != "" ]; then
     is_agent=1
@@ -348,7 +348,7 @@ while IFS=$'\x1f' read -r sess idx wname pid pane_os_pid ppath pcmd ptitle raw_s
     agent_label="$ai_title"
   elif [ -n "$detected_agent" ]; then
     agent_label="$detected_agent"
-  elif [[ "$pcmd" =~ ^(agy|antigravity|opencode|claude|codex|muse)$ ]]; then
+  elif [[ "$pcmd" =~ ^(agy|antigravity|opencode|claude|devin|codex|muse)$ ]]; then
     agent_label="$pcmd"
   fi
 

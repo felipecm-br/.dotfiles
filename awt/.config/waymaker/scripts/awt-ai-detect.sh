@@ -75,6 +75,29 @@ detect_claude_conv_id() {
     echo "$conv_id"
 }
 
+detect_devin_conv_id() {
+    local pid="$1"
+    local cmdline
+    cmdline=$(cat /proc/"$pid"/cmdline 2>/dev/null | tr '\0' ' ')
+    local conv_id=""
+    if [[ "$cmdline" =~ (-r|--resume)[[:space:]]+([^-[:space:]][^[:space:]]*) ]]; then
+        conv_id="${BASH_REMATCH[2]}"
+    fi
+    if [ -z "$conv_id" ] && command -v devin >/dev/null 2>&1; then
+        conv_id=$(devin list --format json 2>/dev/null | jq -r '.[0].id // .[0].session_id // empty' 2>/dev/null || true)
+    fi
+    echo "$conv_id"
+}
+
+get_devin_title() {
+    local conv_id="$1"
+    local title=""
+    if [ -n "$conv_id" ] && command -v devin >/dev/null 2>&1; then
+        title=$(devin list --format json 2>/dev/null | jq -r --arg id "$conv_id" '.[] | select((.id // .session_id) == $id) | .title // empty' 2>/dev/null | head -n 1 || true)
+    fi
+    echo "$title"
+}
+
 find_descendants() {
     local pid="$1"
     local children
@@ -151,6 +174,18 @@ awt_ai_detect_all() {
                         resume_cmd="claude --resume $conv_id"
                     else
                         resume_cmd="claude"
+                    fi
+                fi
+            # Driver 4: Devin CLI
+            elif [[ "$comm" == "devin" ]]; then
+                if [[ "$cmdline" != *"grep"* && "$cmdline" != *"awt-ai"* ]]; then
+                    conv_id=$(detect_devin_conv_id "$p")
+                    ai_tool="devin"
+                    if [ -n "$conv_id" ]; then
+                        conv_title=$(get_devin_title "$conv_id")
+                        resume_cmd="devin --resume $conv_id"
+                    else
+                        resume_cmd="devin --continue"
                     fi
                 fi
             fi

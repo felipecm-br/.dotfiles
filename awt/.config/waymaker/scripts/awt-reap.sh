@@ -92,9 +92,9 @@ while IFS='|' read -r sess idx pid pane_os_pid ppath pcmd; do
 
   agent_found=""
   if [[ -n "$pane_os_pid" ]]; then
-    agent_found=$(ps -s "$pane_os_pid" -o comm= 2>/dev/null | grep -E '^(agy|agy-bin|antigravity|opencode|claude|codex)$' | head -n 1 || true)
+    agent_found=$(ps -s "$pane_os_pid" -o comm= 2>/dev/null | grep -E '^(agy|agy-bin|antigravity|opencode|claude|devin|codex)$' | head -n 1 || true)
   fi
-  [[ -z "$agent_found" && "$pcmd" =~ ^(agy|antigravity|opencode|claude|codex)$ ]] && agent_found="$pcmd"
+  [[ -z "$agent_found" && "$pcmd" =~ ^(agy|antigravity|opencode|claude|devin|codex)$ ]] && agent_found="$pcmd"
 
   if [[ -n "$agent_found" ]]; then
     st=""

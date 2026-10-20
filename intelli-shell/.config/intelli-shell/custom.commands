@@ -454,7 +454,7 @@ update-ai-workflow -y
 # Force reinstallation or rebuild of all AI workflow dependencies
 update-ai-workflow --all
 
-# Update only a specific AI workflow component (tmux, fonts, codex, agy, claude, opencode)
+# Update only a specific AI workflow component (tmux, fonts, codex, agy, claude, devin, opencode)
 update-ai-workflow --only {{component}}
 
 # Convenient shortcut to update AI workflow dependencies
@@ -470,4 +470,4 @@ $ (stow-it) package: find . -maxdepth 1 -mindepth 1 -type d ! -name '.*' ! -name
 $ (wm) session: wm session list 2>/dev/null
 $ (wm) file: find . -maxdepth 3 -type f \( -name '*.md' -o -name '*.markdown' -o -name '*.mmd' \) 2>/dev/null
 $ (mmdc) mmd_file: find . -maxdepth 4 -type f \( -name '*.mmd' -o -name '*.mermaid' \) 2>/dev/null
-$ (update-ai-workflow) component: echo -e "tmux\nfonts\ncodex\nagy\nantigravity-ide\nclaude\nopencode\ncrush\nwaymux\nai-suite\nworktrunk\nmise"
+$ (update-ai-workflow) component: echo -e "tmux\nfonts\ncodex\nagy\nantigravity-ide\nclaude\ndevin\nopencode\ncrush\nwaymux\nai-suite\nworktrunk\nmise"

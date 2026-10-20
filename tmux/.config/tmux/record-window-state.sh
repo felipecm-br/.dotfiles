@@ -101,12 +101,13 @@ inspect_pane() {
     fi
 
     # AI Agents (smart resume & continuation)
-    if [[ "$pname" =~ ^(opencode|agy|agy-bin|antigravity|claude|codex|muse|gemini|aider)$ ]]; then
+    if [[ "$pname" =~ ^(opencode|agy|agy-bin|antigravity|claude|devin|codex|muse|gemini|aider)$ ]]; then
       local canonical_bin="$pname"
       case "$pname" in
         agy|agy-bin|antigravity) canonical_bin="agy" ;;
         opencode) canonical_bin="opencode" ;;
         claude) canonical_bin="claude" ;;
+        devin) canonical_bin="devin" ;;
         codex) canonical_bin="codex" ;;
         muse) canonical_bin="muse" ;;
         gemini) canonical_bin="gemini" ;;
@@ -143,7 +144,7 @@ inspect_pane() {
             resume_cmd="${resume_cmd} --continue"
           fi
           ;;
-        claude)
+        claude|devin)
           if [[ ! "$resume_cmd" =~ (^|[[:space:]])(-c|--continue|-r|--resume)($|[[:space:]]) ]]; then
             resume_cmd="${resume_cmd} --continue"
           fi
@@ -184,6 +185,7 @@ inspect_pane() {
       opencode) found_cmd="opencode --continue" ;;
       agy|agy-bin|antigravity) found_cmd="agy --continue" ;;
       claude) found_cmd="claude --continue" ;;
+      devin) found_cmd="devin --continue" ;;
       codex) found_cmd="codex resume --last" ;;
       muse) found_cmd="muse resume --last" ;;
     esac
