@@ -412,9 +412,9 @@ bd() {
     return 1
 }
 
-# acpd - Manage the Waymux daemon service
-# Usage: acpd [status|start|stop|restart|logs|kill]
-acpd() {
+# waymux - Manage the Waymux daemon service
+# Usage: waymux [status|start|stop|restart|logs|kill]
+waymux() {
     local action="${1:-status}"
     case "$action" in
         start)
@@ -436,10 +436,15 @@ acpd() {
             pkill -9 -x waymux 2>/dev/null && echo "waymux killed" || systemctl --user stop waymux.service
             ;;
         *)
-            echo "Usage: acpd [status|start|stop|restart|logs|kill]"
+            echo "Usage: waymux [status|start|stop|restart|logs|kill]"
             return 1
             ;;
     esac
+}
+
+# Backward compatibility: acpd delegates to waymux
+acpd() {
+    waymux "$@"
 }
 # ─────────────────────────────────────────────────────────────────────────────
 # Zero-Friction File Transfer (PasteTo & MoveTo 2.0)

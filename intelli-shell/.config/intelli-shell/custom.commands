@@ -268,6 +268,33 @@ obs
 # Launch OBS Studio and start recording immediately
 obs --startrecording
 
+# Inspect Waymux control plane health, active AI agent states, and Tmux sessions
+waymux status
+
+# Check health of Waymux control plane daemon
+waymux health
+
+# List active AI agent pane states in TSV format
+waymux list
+
+# Dismiss attention/question/permission badge on target pane
+waymux dismiss {{pane}}
+
+# Cycle AI agent alerts and jump focus directly to pane requiring attention
+waymux triage --jump
+
+# Cycle AI agent alerts and open floating triage popup
+waymux triage --popup
+
+# Launch interactive TUI picker or session manager via Waymaker
+wm
+
+# List tmux sessions via Waymaker with nerd font icons
+wm session list --icons
+
+# Launch Lazygitrs floating git cockpit and dual-diff view
+lazygitrs
+
 # Inspect ACPD control plane health, active AI agent states, and Tmux sessions
 acpd-cli status
 

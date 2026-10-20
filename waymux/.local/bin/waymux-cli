@@ -1,20 +1,17 @@
 #!/usr/bin/env bash
-# acpd-cli — Ergonomic CLI and Workflow Orchestrator for ACPD & Tmux Agents
-# Integrates with ACPD (Agent Client Protocol Daemon) at 127.0.0.1:4040.
+# waymux-cli — Ergonomic CLI and Workflow Orchestrator for Waymux & Tmux Agents
+# Integrates with Waymux at 127.0.0.1:4040.
 
 set -euo pipefail
 
-ACPD_URL="${ACPD_URL:-http://127.0.0.1:4040}"
+WAYMUX_URL="${WAYMUX_URL:-http://127.0.0.1:4040}"
 RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/${UID:-1000}}"
 
-# Token lookup: native waymux paths first, legacy acpd paths (mirrored by the daemon) as fallback.
 get_token() {
   local p
   for p in \
     "$RUNTIME_DIR/waymux/token" \
-    "$HOME/.cache/waymux/token" \
-    "$RUNTIME_DIR/acpd/token" \
-    "$HOME/.cache/acpd/token"; do
+    "$HOME/.cache/waymux/token"; do
     if [[ -f "$p" ]]; then
       cat "$p"
       return 0
@@ -31,7 +28,7 @@ rpc_call() {
   token=$(get_token)
 
   if [[ -z "$token" ]]; then
-    echo "Error: ACPD token not found. Is the waymux daemon running? (systemctl --user status waymux)" >&2
+    echo "Error: Waymux token not found. Is the waymux daemon running? (systemctl --user status waymux)" >&2
     return 1
   fi
 
@@ -41,7 +38,7 @@ rpc_call() {
     --argjson params "$params" \
     '{jsonrpc: "2.0", method: $method, params: $params, id: 1}')
 
-  curl -s -m 5 -X POST "${ACPD_URL}/rpc" \
+  curl -s -m 5 -X POST "${WAYMUX_URL}/rpc" \
     -H "Authorization: Bearer $token" \
     -H "Content-Type: application/json" \
     -d "$payload"
@@ -49,18 +46,18 @@ rpc_call() {
 
 cmd_health() {
   local res
-  res=$(curl -s -m 2 "${ACPD_URL}/health" 2>/dev/null || true)
+  res=$(curl -s -m 2 "${WAYMUX_URL}/health" 2>/dev/null || true)
   if [[ -n "$res" ]]; then
     echo "$res"
     return 0
   else
-    echo "Error: ACPD daemon not reachable at ${ACPD_URL}" >&2
+    echo "Error: Waymux daemon not reachable at ${WAYMUX_URL}" >&2
     return 1
   fi
 }
 
 cmd_status() {
-  echo "━━━ ⚙️  ACPD Control Plane Status ━━━"
+  echo "━━━ ⚙️  Waymux Control Plane Status ━━━"
   local health
   health=$(cmd_health) || return 1
   echo "Daemon: $health"
@@ -103,7 +100,7 @@ cmd_list() {
       rpc_call "tmux.list_panes" '{"all": true}' | jq -r '.result // [] | .[] | "\(.pane_id)\t\(.current_path)\t\(.current_command)"'
       ;;
     *)
-      echo "Usage: acpd-cli list [agents|sessions|windows|panes]" >&2
+      echo "Usage: waymux-cli list [agents|sessions|windows|panes]" >&2
       return 1
       ;;
   esac
@@ -144,14 +141,14 @@ cmd_run() {
   done
 
   if [[ $# -eq 0 ]]; then
-    echo "Usage: acpd-cli run [-s <session>] [-w <window>] [-d] [-p] <command...>" >&2
+    echo "Usage: waymux-cli run [-s <session>] [-w <window>] [-d] [-p] <command...>" >&2
     return 1
   fi
 
   local cmd="$*"
   [[ -z "$window_name" ]] && window_name="$(echo "$cmd" | awk '{print $1}')"
 
-  # If tmux session doesn't exist, create it via ACPD RPC
+  # If tmux session doesn't exist, create it via Waymux RPC
   local sessions
   sessions=$(rpc_call "tmux.list_sessions" "{}" | jq -r '.result // [] | .[].session_name')
 
@@ -204,7 +201,7 @@ cmd_capture() {
 
 cmd_send() {
   if [[ $# -lt 2 ]]; then
-    echo "Usage: acpd-cli send <target_pane> <keys...>" >&2
+    echo "Usage: waymux-cli send <target_pane> <keys...>" >&2
     return 1
   fi
   local target="$1"

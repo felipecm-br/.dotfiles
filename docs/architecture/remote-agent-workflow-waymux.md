@@ -1,6 +1,6 @@
-# Remote AI Agent Execution & ACPD Orchestration Workflow
+# Remote AI Agent Execution & Waymux / ACPD Orchestration Workflow
 
-This document specifies the remote agent execution architecture using **ACPD** (Agent Client Protocol Daemon), **Tmux**, and **Tailscale** within the dotfiles ecosystem.
+This document specifies the remote agent execution architecture using **Waymux** (`waymux`, unified control plane daemon replacing legacy `acpd`), **Tmux**, and **Tailscale** within the dotfiles ecosystem. Legacy `acpd` commands and paths are preserved as compatibility aliases.
 
 ---
 
