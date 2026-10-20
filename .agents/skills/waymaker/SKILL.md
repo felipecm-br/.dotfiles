@@ -194,7 +194,7 @@ title_fg = "Cyan"
 > - `git log` / `git diff` / `git status` (e.g. `awt.toml`)
 > - Process & Port details `ps` / `lsof` (e.g. `kill.toml`)
 > - Tmux pane inspection `tmux capture-pane` (e.g. `window-picker.toml`)
-> - External previewers like `sesh preview` (e.g. `sesh-picker.toml`)
+> - External previewers like `wm session preview` / `sesh preview` (e.g. `session-picker.toml`)
 > - Live configuration triggers (e.g. `animations.toml` reloading Hyprland)
 
 Multiple preview layouts cycle with `ctrl-/`.
