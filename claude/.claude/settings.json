@@ -1,30 +1,31 @@
 {
+  "model": "haiku",
   "hooks": {
     "Notification": [
       {
+        "matcher": "permission_prompt|elicitation_dialog",
         "hooks": [
           {
-            "command": "workmux set-window-status waiting",
-            "type": "command"
+            "type": "command",
+            "command": "workmux set-window-status waiting"
           },
           {
-            "command": "waymux hook tmux Notification claude",
-            "type": "command"
+            "type": "command",
+            "command": "waymux hook tmux Notification claude"
           }
-        ],
-        "matcher": "permission_prompt|elicitation_dialog"
+        ]
       }
     ],
     "PostToolUse": [
       {
         "hooks": [
           {
-            "command": "workmux set-window-status working",
-            "type": "command"
+            "type": "command",
+            "command": "workmux set-window-status working"
           },
           {
-            "command": "waymux hook tmux PostToolUse",
-            "type": "command"
+            "type": "command",
+            "command": "waymux hook tmux PostToolUse"
           }
         ]
       }
@@ -33,41 +34,41 @@
       {
         "hooks": [
           {
-            "command": "waymux hook tmux PreToolUse",
-            "type": "command"
+            "type": "command",
+            "command": "waymux hook tmux PreToolUse"
           }
         ]
       }
     ],
     "SessionStart": [
       {
+        "matcher": "startup|resume|clear|fork",
         "hooks": [
           {
-            "command": "workmux register-agent",
-            "type": "command"
+            "type": "command",
+            "command": "workmux register-agent"
           },
           {
-            "command": "waymux hook tmux SessionStart claude",
-            "type": "command"
+            "type": "command",
+            "command": "waymux hook tmux SessionStart claude"
           },
           {
-            "command": "waymux hook lazygit SessionStart",
-            "type": "command"
+            "type": "command",
+            "command": "waymux hook lazygit SessionStart"
           }
-        ],
-        "matcher": "startup|resume|clear|fork"
+        ]
       }
     ],
     "Stop": [
       {
         "hooks": [
           {
-            "command": "workmux set-window-status done",
-            "type": "command"
+            "type": "command",
+            "command": "workmux set-window-status done"
           },
           {
-            "command": "waymux hook tmux Stop",
-            "type": "command"
+            "type": "command",
+            "command": "waymux hook tmux Stop"
           }
         ]
       }
@@ -76,16 +77,16 @@
       {
         "hooks": [
           {
-            "command": "workmux set-window-status working",
-            "type": "command"
+            "type": "command",
+            "command": "workmux set-window-status working"
           },
           {
-            "command": "waymux hook tmux UserPromptSubmit claude",
-            "type": "command"
+            "type": "command",
+            "command": "waymux hook tmux UserPromptSubmit claude"
           },
           {
-            "command": "waymux hook lazygit UserPromptSubmit",
-            "type": "command"
+            "type": "command",
+            "command": "waymux hook lazygit UserPromptSubmit"
           }
         ]
       }
@@ -94,15 +95,26 @@
       {
         "hooks": [
           {
-            "command": "waymux hook tmux SessionEnd",
-            "type": "command"
+            "type": "command",
+            "command": "waymux hook tmux SessionEnd"
           },
           {
-            "command": "waymux hook lazygit SessionEnd",
-            "type": "command"
+            "type": "command",
+            "command": "waymux hook lazygit SessionEnd"
           }
         ]
       }
     ]
+  },
+  "enabledPlugins": {
+    "ux-ui-agent-skills@ux-ui-agent-skills": true
+  },
+  "extraKnownMarketplaces": {
+    "ux-ui-agent-skills": {
+      "source": {
+        "source": "github",
+        "repo": "plugin87/ux-ui-agent-skills"
+      }
+    }
   }
 }
