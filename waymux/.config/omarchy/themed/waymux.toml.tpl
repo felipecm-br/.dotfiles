@@ -20,33 +20,39 @@ error = "~/.local/share/sounds/ai/10-arcade-blip.wav"
 [theme]
 active_spinner = "minidot"
 
+# State colors are semantic, not themed: waymux picks them from a built-in light/dark palette
+# that keeps permission, question, stalled and error distinguishable on every theme. Theme
+# slots collapse them (lumon: all blue; tokyo-night: permission == stalled).
+# An empty `color` means "use the built-in palette"; set `#rrggbb` to override a state.
+# (Kept as an empty key so waymux <= 0.2.3, where `color` is required, still parses this.)
+
 [theme.states.idle]
 icon = "󱥂"
-color = "{{ color14 }}"
+color = ""
 
 [theme.states.busy]
 icon = "󰑮"
-color = "{{ color11 }}"
+color = ""
 
 [theme.states.working]
 icon = "󰑮"
-color = "{{ color11 }}"
+color = ""
 
 [theme.states.question]
 icon = "󱜻"
-color = "{{ color13 }}"
+color = ""
 
 [theme.states.permission]
 icon = "󱅭"
-color = "{{ orange }}"
+color = ""
 
 [theme.states.stalled]
 icon = "󱥁"
-color = "{{ orange }}"
+color = ""
 
 [theme.states.error]
 icon = "󰨄"
-color = "{{ color1 }}"
+color = ""
 
 [spinners]
 minidot = { interval = 83, frames = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"] }

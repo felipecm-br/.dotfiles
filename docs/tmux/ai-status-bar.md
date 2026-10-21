@@ -7,12 +7,20 @@ State is pushed into tmux options `@ai_agent_state`, `@ai_agent_state_color`, `@
 
 ## 1. Dynamic Pill Layout & Color States (`window-status-current-format`)
 
-The active window tab is rendered as a rounded pill (`` ... ``) whose background color changes dynamically based on the AI agent state (`@ai_agent_state_color`):
+The active window tab is rendered as a rounded pill (`` ... ``) whose background color changes dynamically based on the AI agent state (`@ai_agent_state_color`).
 
-- 🟡 **Yellow (`#f9e2af` / `@COPY_COLOR`)**: Agent is actively working / executing tools (`busy` / `working`) with an animated spinner (`⠋`).
-- 🟣 **Purple (`#cba6f7` / `@PREFIX_COLOR`)**: Agent has asked a question and is awaiting user input (`question` / `awaiting_input`) with the `󱜻` icon.
-- 🔴 **Red (`#f38ba8`)**: Agent requires permission or encountered an execution error (`permission` / `error`) with the `󱅭` or `󰨄` icon.
-- 🟢 **Cyan/Teal (`#94e2d5` / `@CURRENT_COLOR`)**: Agent is idle or normal terminal window without an active AI agent session.
+State colors are **semantic constants**, not theme slots: `waymux` picks them from a built-in palette for the theme's mode (`mode` in Omarchy's `colors.toml`, else background luminance), shared by the status bar, Waybar and the Cockpit. Theme slots collapse on many themes (`lumon` maps every slot to blue; `tokyo-night` gives permission and stalled the same orange). Values are dark / light:
+
+| State | Glyph | Dark | Light |
+| :--- | :---: | :---: | :---: |
+| `busy` / `working` (animated spinner `⠋`) | `󰑮` | `#89b4fa` blue | `#2563eb` |
+| `question` / `awaiting_input` | `󱜻` | `#f9e2af` gold | `#7c6a00` |
+| `permission` | `󱅭` | `#ff9e57` orange | `#c2410c` |
+| `stalled` | `󱥁` | `#f5c2e7` pink | `#a21caf` |
+| `error` | `󰨄` | `#ff6b7a` red | `#be123c` |
+| `idle` (done, waiting for your next prompt) | `󱥂` | `#8aa4b8` slate | `#4f6b5f` |
+
+Windows without an agent use `@CURRENT_COLOR`. Every pair stays apart by at least 10.8 CIEDE2000 on the dark palette, including simulated deuteranopia and protanopia; on the light palette, question and permission converge for red-green color deficiency, so the glyph carries that difference. All values reach 4.5:1 contrast on every built-in Omarchy background. To pin a color, set `color = "#rrggbb"` for that state in [`waymux.toml.tpl`](../../waymux/.config/omarchy/themed/waymux.toml.tpl); an empty `color` means the built-in palette.
 
 Inside the active filled pill, the window title `#W` and state icon `@ai_agent_state` are forced to high-contrast dark text (`fg=#{@SESSION_ACTIVE_FG}`) for clean legibility on top of filled backgrounds.
 
@@ -20,14 +28,14 @@ Inside the active filled pill, the window title `#W` and state icon `@ai_agent_s
 
 ## 2. Background Tab Notifications (`window-status-format`)
 
-For inactive background tabs, `@ai_agent_state` is rendered in `#[fg=#{@ai_agent_state_color}]`. Status icons light up in their respective state colors (Yellow, Purple, Red) in the background so you can monitor agent progress and input requests across windows at a glance.
+For inactive background tabs, `@ai_agent_state` is rendered in `#[fg=#{@ai_agent_state_color}]`. Status icons light up in their state colors in the background so you can monitor agent progress and input requests across windows at a glance.
 
 ---
 
 ## 3. Orthogonal Tmux Options Pushed by `waymux` & Agent Hooks
 
 - `@ai_agent_state`: Pure icon or animated spinner frame string without embedded ANSI color tags (e.g. `⠋`, `󱜻`, `󱅭`, `󰨄`).
-- `@ai_agent_state_color`: Hex color string configured in `config.toml` (e.g. `#f9e2af`, `#cba6f7`, `#f38ba8`, `#94e2d5`).
+- `@ai_agent_state_color`: Hex color resolved by `waymux`: the state's `color` override from `config.toml` when set, else the built-in semantic palette above (e.g. `#89b4fa`, `#ff9e57`).
 - `@ai_agent_title`: Clean active session title or initial prompt (e.g. `Fix memory leak in parser`), rendered in the Cockpit & Window Pickers (`Prefix + Space` / [`cockpit-picker.sh`](../../tmux/.config/tmux/cockpit-picker.sh) and [`window-picker.sh`](../../tmux/.config/tmux/window-picker.sh)) matching the window item color and indexed for instant Waymaker fuzzy search.
 
 ---

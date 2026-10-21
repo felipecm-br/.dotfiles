@@ -135,9 +135,9 @@ The Cockpit HUD is the central control plane, bound to `Prefix + Space` (`85% ×
   5. `[Diffstat / PR]` (11 chars: uncommitted `+N -M` churn and GitHub PR badge `#N`)
   6. `[Elapsed Age]` (6 chars right-aligned: urgency-colored age since last state transition)
 - **Visual Semiotics & Human Factors:**
-  - **Treisman Hue Reservation:** Colors are strictly reserved for urgency (Cyan = active, Yellow = working/attention, Red = permission/error, Dark Gray = neutral).
-  - **Bouma Visual Crowding Reduction:** Eliminates noisy brackets (`[Enter]` $\to$ `Enter`) and uses `{darkgray:│}` hairline separators across the uniform 10-item footer.
-  - **Dynamic Theme Sync:** TrueColor escape sequences are generated from `~/.local/state/omarchy/current/theme/colors.toml`, maintaining WCAG 2.1 AA contrast across light and dark palettes.
+  - **Semantic State Colors:** Agent-state glyphs use waymux's built-in light/dark palette (blue working, gold question, orange permission, pink stalled, red error, slate idle), shared with the status bar; see [AI Agent Status in Status Bar](../tmux/ai-status-bar.md). They used to come from theme slots, which collapsed under `lumon` (permission, question and stalled were the same blue, CIEDE2000 0–4 between working and the waiting states) and `tokyo-night` (permission = stalled).
+  - **Bouma Visual Crowding Reduction:** Eliminates noisy brackets (`[Enter]` $\to$ `Enter`) and uses `{darkgray:│}` hairline separators across the footer.
+  - **Dynamic Theme Sync (chrome only):** Branch, diffstat and PR colors are generated from `~/.local/state/omarchy/current/theme/colors.toml`. Theme-derived metadata can fall below WCAG contrast (`lumon` `darkgray` is 1.68:1); state colors are guaranteed ≥ 4.5:1 on every built-in theme.
 
 ### 3.3 Daemon Telemetry & Urgency Aggregation (`waymux daemon`)
 
