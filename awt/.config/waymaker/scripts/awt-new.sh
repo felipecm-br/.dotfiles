@@ -149,6 +149,10 @@ while true; do
                 exit 1
             }
             git -C "$target_dir" config "branch.${branch_name}.base" "$bbase" 2>/dev/null || true
+            if git -C "$target_dir" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+                timeout 3s git -C "$target_dir" pull --ff-only 2>/dev/null || \
+                timeout 3s git -C "$target_dir" pull --ff-only origin "$branch_name" 2>/dev/null || true
+            fi
 
             # Run post-create hook if present
             if [[ -x "$HOME/.config/waymaker/hooks/post-create.sh" ]]; then

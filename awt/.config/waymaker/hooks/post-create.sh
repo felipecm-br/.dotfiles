@@ -223,3 +223,9 @@ elif [[ -x "$wt_path/.awt/hooks/post-create" ]]; then
 elif [[ -x "$wt_path/.git/hooks/post-worktree-create" ]]; then
     "$wt_path/.git/hooks/post-worktree-create" "$wt_path" "$branch_name" "$base_branch"
 fi
+
+# 5. Fast pull latest commits if branch exists on remote
+if [[ -d "$wt_path" ]] && git -C "$wt_path" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    timeout 3s git -C "$wt_path" pull --ff-only 2>/dev/null || \
+    timeout 3s git -C "$wt_path" pull --ff-only origin "$branch_name" 2>/dev/null || true
+fi

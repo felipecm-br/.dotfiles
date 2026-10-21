@@ -59,6 +59,11 @@ IFS=$'\t' read -r session target <<< "$output"
 cur_session=$(tmux display-message -p '#{session_name}' 2>/dev/null || echo "")
 
 if [ -n "$session" ] && [ "$cur_session" != "$session" ]; then
+    if [ -d "$target" ] && git -C "$target" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+        b="$(git -C "$target" rev-parse --abbrev-ref HEAD 2>/dev/null)"
+        timeout 3s git -C "$target" pull --ff-only 2>/dev/null || \
+        timeout 3s git -C "$target" pull --ff-only origin "$b" 2>/dev/null || true
+    fi
     if command -v wm >/dev/null 2>&1; then
         if tmux has-session -t "$session" 2>/dev/null; then
             exec wm connect "$session"

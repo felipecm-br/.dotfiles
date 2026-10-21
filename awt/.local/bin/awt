@@ -88,6 +88,17 @@ awt_spawn_session_and_send() {
     fi
 }
 
+awt_sync_pull() {
+    local dir="$1"
+    [[ -d "$dir" ]] || return 0
+    git -C "$dir" rev-parse --is-inside-work-tree >/dev/null 2>&1 || return 0
+    local b
+    b="$(git -C "$dir" rev-parse --abbrev-ref HEAD 2>/dev/null)"
+    [[ -n "$b" && "$b" != "HEAD" ]] || return 0
+    timeout 3s git -C "$dir" pull --ff-only 2>/dev/null || \
+    timeout 3s git -C "$dir" pull --ff-only origin "$b" 2>/dev/null || true
+}
+
 show_help() {
     cat << 'HELP'
 awt - Agent Worktree Manager & Multi-Agent Git Orchestrator
@@ -470,8 +481,9 @@ else
     sess="${repo_parent}/${branch_clean}"
 fi
 
-# If the worktree directory already exists, dispatch command (if provided) and connect
+# If the worktree directory already exists, pull latest remote changes, dispatch command (if provided) and connect
 if [[ -d "$target_dir" ]]; then
+    awt_sync_pull "$target_dir"
     if [ -n "$custom_ai_cmd" ] && [ "$custom_ai_cmd" != "__FRESH__" ]; then
         awt_spawn_session_and_send "$sess" "$target_dir" "$custom_ai_cmd"
         if [[ $no_connect -eq 1 ]]; then
@@ -518,6 +530,7 @@ if [[ ! -d "$target_dir" ]]; then
         exit 1
     }
     git -C "$target_dir" config "branch.${branch}.base" "$base" 2>/dev/null || true
+    awt_sync_pull "$target_dir"
 
     if [[ "$stashed_changes" -eq 1 ]]; then
         if ! git -C "$target_dir" stash pop >/dev/null 2>&1; then
