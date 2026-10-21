@@ -3,6 +3,8 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# Private tmux server + sandboxed HOME: never the live session or ~/.local/state.
+. "$ROOT/tests/lib/private_tmux.sh"
 ok() { echo "ok: $*"; }
 bad() { echo "FAIL: $*" >&2; exit 1; }
 
@@ -72,7 +74,8 @@ tmux kill-session -t "_test_win_force" 2>/dev/null || true
 
 # 9. Check tmux.conf bindings
 grep -qE 'bind-key x run-shell ".*close-window\.sh' "$CONF" && ok "tmux.conf binds x to close-window.sh" || bad "tmux.conf missing x bind"
-grep -qE 'bind -r w run-shell ".*close-window\.sh' "$CONF" && ok "tmux.conf binds w to close-window.sh" || bad "tmux.conf missing w bind"
+grep -qE '^bind w run-shell ".*close-window\.sh' "$CONF" && ok "tmux.conf binds w to close-window.sh" || bad "tmux.conf missing w bind"
+! grep -qE '^bind(-key)? -r w ' "$CONF" && ok "Prefix+w does not auto-repeat" || bad "Prefix+w is repeatable (a following w closes another window)"
 
 # 10. Check keybindings catalog items
 grep -qE 'Prefix \+ w / x.*close-window\.sh' "$KEY_ITEMS" && ok "keybindings-items.sh references close-window.sh" || bad "keybindings-items.sh missing close-window.sh"
