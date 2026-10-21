@@ -299,7 +299,7 @@ Triggered by pressing **`c`** inside Waymaker or by running **`awt -c`**:
 The CLI offers two complimentary modes for interacting with worktrees directly from the command line:
 
 1. **`awt <branch>`** *(Fast Jump & Auto-Provision)*:
-   - **Existing Worktree**: Switches the active Tmux client straight into that session.
+   - **Existing Worktree**: Switches the active Tmux client straight into that session. It starts a background `git fetch` instead of pulling, so switching never waits on the network and never moves a tree an agent may be editing; the Cockpit's sync column shows `↓N` when there is more to pull.
    - **Missing Worktree**: Auto-creates the folder from current `HEAD` (or binds to the existing local/remote branch of that name) and switches to it in 1 command.
 2. **`awt -c <branch> [base]`** *(Explicit Base Provisioning)*:
    - Allows declaring a specific base branch explicitly (e.g., `awt -c feat/login main`).
@@ -314,7 +314,7 @@ To prevent Sesh/Waymaker from re-triggering `startup_command = "agy"` in session
 
 1. **Preset Emits Name and Path**: `awt.toml` outputs `{=session}\t{=path}\t{=raw}` (e.g. `matchmaker/feature-images\t/home/fecavmi/...\tfeature/images`).
 2. **Already in Active Session**: If the selected session is the currently focused terminal, Waymaker closes cleanly without altering buffer or AI conversation history.
-3. **Background Session**: Connects directly by **session name** (`wm connect` / `sesh connect "matchmaker/feature-images"`), switching clients without re-injecting startup commands.
+3. **Background Session**: Connects directly by **session name** (`wm connect` / `sesh connect "matchmaker/feature-images"`), switching clients without re-injecting startup commands. The target worktree is fetched in the background (`setsid -f git fetch`), never pulled, before connecting; a blocking pull here used to cost 0.5 s per switch and up to 6 s on a slow network.
 4. **Provisioning Guard**: `awt-new.sh` manages worktree creation and session connection with a temporary guard file (`/tmp/awt_new_created_$USER`), preventing the parent `awt-popup.sh` from triggering a duplicate connection call upon exit.
 
 ---
