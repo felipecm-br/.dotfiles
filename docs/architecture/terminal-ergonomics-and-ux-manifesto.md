@@ -200,7 +200,7 @@ permission = "~/.local/share/sounds/ai/06-cyber-pulse.wav"    # High-priority ap
 error      = "~/.local/share/sounds/ai/10-arcade-blip.wav"    # Execution error / conflict alert
 ```
 
-* **Zero-Gaze Monitoring:** Developers can switch to other workspaces or read documentation without constantly polling the terminal. A distinct sonic frequency immediately communicates agent state transitions without breaking cognitive focus.
+* **Zero-Gaze Monitoring:** Developers can switch to other workspaces or read documentation without constantly polling the terminal. A distinct sound communicates agent state transitions: blocking states (permission, question, stalled, error) at once; completion chimes only for panes you are not looking at, deferred to a typing pause.
 * **Perceptual Complementarity:** Audio signals trigger reflex orientation, while the status bar pills (`󱥂 idle`, `󰑮 work`, `󱅭 permission`) and popups provide precise contextual detail on demand.
 
 ---
