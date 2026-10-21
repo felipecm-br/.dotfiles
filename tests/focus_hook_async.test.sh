@@ -37,6 +37,8 @@ SOCK="focus-hook-test-$$"
 SANDBOX="$(mktemp -d)"
 cleanup() {
   tmux -L "$SOCK" kill-server 2>/dev/null || true
+  # kill-server leaves the socket file behind in /tmp/tmux-$UID
+  rm -f "${SOCKET_PATH:-}"
   rm -rf "$SANDBOX"
 }
 trap cleanup EXIT
