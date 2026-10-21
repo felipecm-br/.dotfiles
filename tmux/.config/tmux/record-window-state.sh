@@ -228,13 +228,16 @@ push_entry() {
 
 case "${1:-}" in
   --track)
-    entry=$(inspect_pane "" || true)
-    if [ -n "$entry" ]; then
+    # Runs in the background from pane-focus-in, so focus can move on mid-scan: inspect the
+    # pane that gained focus and drop the result if a newer focus change already happened.
+    focus_pane="${2:-$(tmux display-message -p '#{pane_id}' 2>/dev/null || true)}"
+    entry=$(inspect_pane "$focus_pane" || true)
+    if [ -n "$entry" ] && [ "$(tmux display-message -p '#{pane_id}' 2>/dev/null || true)" = "$focus_pane" ]; then
       echo "$entry" > "$ACTIVE_FILE"
     fi
     # Debounced periodic topology snapshot (zero-fork check, max once per 30s)
     printf -v _now '%(%s)T' -1
-    _snap_lock="/tmp/cockpit-snap-debounce-${UID:-$(id -u)}.lock"
+    _snap_lock="$STATE_DIR/cockpit-snap-debounce.lock"
     _last_snap=0
     [ -f "$_snap_lock" ] && read -r _last_snap < "$_snap_lock" || true
     if [ $((_now - _last_snap)) -ge 30 ]; then

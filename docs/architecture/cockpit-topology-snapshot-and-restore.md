@@ -68,8 +68,8 @@ The canonical topology manifest is stored at:
 ## 3. Capture & Restore Lifecycle
 
 ### 3.1. Automatic Background Snapshotting
-- Hooked in [`record-window-state.sh`](../../tmux/.config/tmux/record-window-state.sh) on `pane-focus-in`.
-- Protected by a **zero-fork timestamp debounce** (`/tmp/cockpit-snap-debounce-<UID>.lock`), ensuring detached capture runs at most once every 30 seconds.
+- Hooked in [`record-window-state.sh`](../../tmux/.config/tmux/record-window-state.sh) on `pane-focus-in` (`--track #{pane_id}`, run in the background with `run-shell -b` so focus changes never wait on it; a run whose pane already lost focus discards its result).
+- Protected by a **zero-fork timestamp debounce** (`~/.local/state/tmux/cockpit-snap-debounce.lock`), ensuring detached capture runs at most once every 30 seconds.
 - Internal sessions (such as `_popups`) are filtered out automatically.
 
 ### 3.2. Forensic Reconstruction (`cockpit restore`)
