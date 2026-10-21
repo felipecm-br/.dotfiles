@@ -25,6 +25,9 @@ awt -c {{branch}} {{base}}
 # Create worktree with base branch and dispatch inline agent command
 awt -c {{branch}} {{base}} -- {{command}}
 
+# Create worktree keeping Claude Code's default edit prompts (skip the acceptEdits policy)
+AWT_CLAUDE_ACCEPT_EDITS=0 awt -c {{branch}} {{base}}
+
 # Switch to existing worktree (or auto-create) and dispatch inline agent command
 awt {{branch}} -- {{command}}
 

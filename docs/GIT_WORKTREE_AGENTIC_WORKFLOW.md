@@ -420,6 +420,7 @@ The `awt` ecosystem provides automated lifecycle hooks located in [`awt/.config/
 
 1. **`post-create.sh` (`<worktree_path> <branch_name> <base_branch>`)**:
    - Automatically copies `.env.example` (or `.env` from sibling worktree) and applies `.awt.toml` file rules to the newly created worktree.
+   - Writes a Claude Code `.claude/settings.local.json` with `defaultMode: acceptEdits` and `ask` rules for `git push`, `gh pr create` and `gh pr merge`: edits inside the worktree are accepted without a prompt (they are reviewed in lazygitrs before merge), but nothing leaves the machine unasked. Edits outside the worktree, such as the stowed files in `main`, still prompt. The file is added to the repository's `info/exclude` so it never shows in `git status`. An existing file is left alone; `AWT_CLAUDE_ACCEPT_EDITS=0` skips it. The primary worktree keeps the default prompts.
    - Executes repository-level hooks (`<worktree>/.hooks/post-create` or `.git/hooks/post-worktree-create`) if present.
 2. **`pre-merge.sh` (`<source_worktree_path> <target_branch>`)**:
    - Runs pre-merge quality gates (`.awt.toml`, `./scripts/docs-lint.sh`, `.hooks/pre-merge`) before allowing `merge` or `ship`.

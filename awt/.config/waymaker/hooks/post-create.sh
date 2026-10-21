@@ -194,6 +194,29 @@ if [[ -n "$primary_wt" && -d "$primary_wt" ]]; then
     done
 fi
 
+# 2c. Claude Code: accept edits in this disposable worktree (lazygitrs reviews them before
+#     merge) but keep asking before pushing or opening/merging PRs. Opt out with
+#     AWT_CLAUDE_ACCEPT_EDITS=0; an existing settings.local.json is left alone.
+claude_local="$wt_path/.claude/settings.local.json"
+if [[ "${AWT_CLAUDE_ACCEPT_EDITS:-1}" != "0" && ! -e "$claude_local" ]]; then
+    mkdir -p "$wt_path/.claude"
+    cat > "$claude_local" <<'JSON'
+{
+  "permissions": {
+    "defaultMode": "acceptEdits",
+    "ask": ["Bash(git push *)", "Bash(gh pr create *)", "Bash(gh pr merge *)"]
+  }
+}
+JSON
+    # Keep it out of `git status`, and so out of the Cockpit's dirty and review signals.
+    common_dir=$(git -C "$wt_path" rev-parse --path-format=absolute --git-common-dir 2>/dev/null)
+    if [[ -n "$common_dir" ]]; then
+        mkdir -p "$common_dir/info"
+        grep -qxF '.claude/settings.local.json' "$common_dir/info/exclude" 2>/dev/null \
+            || echo '.claude/settings.local.json' >> "$common_dir/info/exclude"
+    fi
+fi
+
 # 3. Declarative Post-Create Lifecycle Hook Commands (.awt.toml / .workmux.yaml)
 config_file=""
 for cf in "$wt_path/.awt.toml" "$wt_path/.awt/config.toml" \

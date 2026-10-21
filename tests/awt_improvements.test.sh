@@ -143,6 +143,38 @@ else
     fail "Existing .env.local was overwritten"
 fi
 
+# Claude Code policy for disposable worktrees: accept edits, still ask before pushing.
+CONTAINER="$TEST_TMP/container"
+for wt in feat-claude feat-optout feat-keep; do
+    git -C "$CONTAINER/main" worktree add -q "$CONTAINER/$wt" -b "$wt"
+done
+"$AWT_WM_DIR/hooks/post-create.sh" "$CONTAINER/feat-claude" "feat-claude" "main"
+CLAUDE_LOCAL="$CONTAINER/feat-claude/.claude/settings.local.json"
+if python3 -c 'import json, sys; p = json.load(open(sys.argv[1]))["permissions"]; assert p["defaultMode"] == "acceptEdits"; assert "Bash(git push *)" in p["ask"]' "$CLAUDE_LOCAL" 2>/dev/null; then
+    pass "post-create.sh writes acceptEdits with an ask rule for git push"
+else
+    fail "post-create.sh did not write the worktree Claude Code policy"
+fi
+# The fixture's .env copies are untracked here (no .gitignore), so look only at .claude/.
+if [ -z "$(git -C "$CONTAINER/feat-claude" status --porcelain --untracked-files=all -- .claude)" ]; then
+    pass "settings.local.json is excluded from git status"
+else
+    fail "settings.local.json makes the worktree dirty"
+fi
+AWT_CLAUDE_ACCEPT_EDITS=0 "$AWT_WM_DIR/hooks/post-create.sh" "$CONTAINER/feat-optout" "feat-optout" "main"
+if [ ! -e "$CONTAINER/feat-optout/.claude/settings.local.json" ]; then
+    pass "AWT_CLAUDE_ACCEPT_EDITS=0 opts out"
+else
+    fail "opt-out still wrote settings.local.json"
+fi
+mkdir -p "$CONTAINER/feat-keep/.claude" && echo '{"permissions": {}}' > "$CONTAINER/feat-keep/.claude/settings.local.json"
+"$AWT_WM_DIR/hooks/post-create.sh" "$CONTAINER/feat-keep" "feat-keep" "main"
+if grep -qF '{"permissions": {}}' "$CONTAINER/feat-keep/.claude/settings.local.json"; then
+    pass "An existing settings.local.json is left alone"
+else
+    fail "An existing settings.local.json was overwritten"
+fi
+
 # ── 4. Validate awt-merge.sh with --rebase, --push, and Atomic Rollback ──
 echo -e "\n[4/6] Validating awt-merge.sh rebase, push, and conflict recovery..."
 MERGE_TMP=$(mktemp -d /tmp/awt-test-merge-XXXXXX)
