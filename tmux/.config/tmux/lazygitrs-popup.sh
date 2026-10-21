@@ -64,6 +64,19 @@ FLOW_LOG="$SCRIPT_DIR/flow-log.sh"
 
 [ -x "$FLOW_LOG" ] && "$FLOW_LOG" review_start "$PROJECT_DIR" >/dev/null 2>&1 || true
 
+# Lines under review (uncommitted changes, or the HEAD commit when the tree is clean), so
+# flow-telemetry can report a review rate in lines per minute.
+if [ "$OPEN_COMMITS" -eq 1 ]; then
+    REVIEW_STAT=$(git -C "$PROJECT_DIR" show --shortstat --format= HEAD 2>/dev/null)
+else
+    REVIEW_STAT=$(git -C "$PROJECT_DIR" diff --shortstat HEAD 2>/dev/null)
+fi
+REVIEW_LINES=$(printf '%s\n' "$REVIEW_STAT" | awk '{for (i = 1; i < NF; i++) if ($(i + 1) ~ /^(insertion|deletion)/) n += $i} END {print n + 0}')
+[ -x "$FLOW_LOG" ] && "$FLOW_LOG" review_size "$PROJECT_DIR" "$REVIEW_LINES" >/dev/null 2>&1 || true
+
+# Opening the review clears the Cockpit's "done, not reviewed" state for this worktree.
+REVIEW_GIT_DIR=$(git -C "$PROJECT_DIR" rev-parse --absolute-git-dir 2>/dev/null) && : > "$REVIEW_GIT_DIR/waymux-reviewed"
+
 ORIGIN_SESSION=$(tmux display-message -p '#{session_name}' 2>/dev/null || echo "")
 ORIGIN_WINDOW=$(tmux display-message -p '#{window_index}' 2>/dev/null || echo "")
 ORIGIN_PANE=$(tmux display-message -p '#{pane_id}' 2>/dev/null || echo "")

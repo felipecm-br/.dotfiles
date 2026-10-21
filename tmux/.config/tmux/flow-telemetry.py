@@ -10,7 +10,13 @@ import os
 import argparse
 import datetime
 import math
+import statistics
 from typing import List, Tuple, Dict, Any, Optional
+
+
+def fmt_secs(value: Optional[float]) -> str:
+    """Seconds for display, or an em dash when there is no data (never a made-up number)."""
+    return "—" if value is None else f"{value:.0f}s"
 
 def resolve_colors_toml() -> str:
     helper = os.path.join(os.path.dirname(os.path.abspath(__file__)), "theme-helper.sh")
@@ -121,29 +127,30 @@ class TelemetryEngine:
             if dur > longest_flow_seconds:
                 longest_flow_seconds = dur
 
-        # Human reply latencies
-        reply_latencies = []
-        for _, ev, _, extra in self.events:
-            if ev == "human_reply" and extra.endswith("s"):
-                try:
-                    reply_latencies.append(int(extra[:-1]))
-                except ValueError:
-                    pass
+        def seconds(extra: str) -> Optional[int]:
+            try:
+                return int(extra[:-1]) if extra.endswith("s") else None
+            except ValueError:
+                return None
 
-        # Time to review start (task finished -> review start)
-        review_latencies = []
-        review_durations = []
-        for _, ev, _, extra in self.events:
-            if ev == "review_start" and extra.endswith("s"):
-                try:
-                    review_latencies.append(int(extra[:-1]))
-                except ValueError:
-                    pass
-            elif ev == "review_end" and extra.endswith("s"):
-                try:
-                    review_durations.append(int(extra[:-1]))
-                except ValueError:
-                    pass
+        reply_latencies: List[int] = []   # agent question -> human reply
+        review_latencies: List[int] = []  # task finished -> review opened
+        review_durations: List[int] = []
+        review_rates: List[float] = []    # lines reviewed per minute
+        review_size: Dict[str, int] = {}
+        for _, ev, target, extra in self.events:
+            if ev == "human_reply" and (s := seconds(extra)) is not None:
+                reply_latencies.append(s)
+            elif ev == "review_start" and (s := seconds(extra)) is not None:
+                review_latencies.append(s)
+            elif ev == "review_size" and extra.isdigit():
+                review_size[target] = int(extra)
+            elif ev == "review_end" and (s := seconds(extra)) is not None:
+                review_durations.append(s)
+                # Pair with the diff size logged when this review opened.
+                lines = review_size.pop(target, 0)
+                if s > 0 and lines > 0:
+                    review_rates.append(lines * 60 / s)
 
         # Hourly distribution (08h - 23h)
         hourly_counts = [0] * 24
@@ -151,56 +158,53 @@ class TelemetryEngine:
             dt = datetime.datetime.fromtimestamp(ts)
             hourly_counts[dt.hour] += 1
 
-        # Calculate review stats
         review_count = len(review_durations)
-        if review_count > 0:
-            avg_review_dur = sum(review_durations) / review_count
-        else:
-            avg_review_dur = 92.0 # Target benchmark
-
-        # Max idle time across all responses
-        all_idles = reply_latencies + review_latencies
-        max_idle = max(all_idles) if all_idles else 8
-
-        # Fallback to canonical values if canonical=True or if early/sparse
-        # Target phrasing: "Hoje você teve 4h12min de fluxo ininterrupto, revisou 8 PRs com média de 92s por revisão e nenhum agente ficou ocioso > 2 min"
-        flow_hours = total_flow_seconds // 3600
-        flow_mins = (total_flow_seconds % 3600) // 60
-
-        if canonical or total_flow_seconds < 3600:
-            flow_str = "4h12min"
-        else:
-            flow_str = f"{flow_hours}h{flow_mins:02d}min"
-
-        if canonical or review_count == 0:
-            prs_str = "8 PRs com média de 92s por revisão"
-        else:
-            prs_str = f"{review_count} PRs com média de {int(round(avg_review_dur))}s por revisão"
-
-        if canonical or max_idle <= 120:
-            idle_str = "nenhum agente ficou ocioso > 2 min"
-        else:
-            idle_str = f"tempo máx de espera de agente foi {int(round(max_idle / 60))} min"
-
-        summary_text = (
-            f"Hoje você teve {flow_str} de fluxo ininterrupto, "
-            f"revisou {prs_str} e {idle_str}"
-        )
-
-        return {
-            "summary_text": summary_text,
+        metrics: Dict[str, Any] = {
             "total_flow_seconds": total_flow_seconds,
-            "flow_str": flow_str,
+            "flow_str": f"{total_flow_seconds // 3600}h{(total_flow_seconds % 3600) // 60:02d}min",
             "longest_flow_seconds": longest_flow_seconds,
             "clusters_count": len(clusters),
             "review_count": review_count,
-            "avg_review_duration": avg_review_dur,
+            "avg_review_duration": sum(review_durations) / review_count if review_count else None,
+            "median_review_latency": statistics.median(review_latencies) if review_latencies else None,
+            "median_review_rate": statistics.median(review_rates) if review_rates else None,
             "reply_latencies": reply_latencies,
             "review_latencies": review_latencies,
             "review_durations": review_durations,
-            "max_idle_seconds": max_idle,
+            "review_lines_per_minute": review_rates,
+            "max_idle_seconds": max(reply_latencies + review_latencies, default=None),
             "hourly_counts": hourly_counts,
         }
+        if canonical:
+            # Demo values for screenshots (--canonical only); real runs never show them.
+            metrics.update(
+                flow_str="4h12min",
+                review_count=8,
+                avg_review_duration=92.0,
+                median_review_latency=1.0,
+                reply_latencies=[4, 5],
+                max_idle_seconds=8,
+            )
+
+        if metrics["review_count"]:
+            reviews_str = (
+                f"{metrics['review_count']} revisões com média de "
+                f"{round(metrics['avg_review_duration'])}s"
+            )
+        else:
+            reviews_str = "nenhuma revisão registrada"
+        max_idle = metrics["max_idle_seconds"]
+        if max_idle is None:
+            idle_str = "sem dados de espera de agente"
+        elif max_idle <= 120:
+            idle_str = "nenhum agente ficou ocioso > 2 min"
+        else:
+            idle_str = f"tempo máx de espera de agente foi {round(max_idle / 60)} min"
+        metrics["summary_text"] = (
+            f"Hoje você teve {metrics['flow_str']} de fluxo ininterrupto, "
+            f"{reviews_str} e {idle_str}"
+        )
+        return metrics
 
     def render_summary(self, canonical: bool = False) -> str:
         metrics = self.get_metrics(canonical=canonical)
@@ -243,19 +247,14 @@ class TelemetryEngine:
         line2_blocks = "  " + "".join(block_chars)
 
         summary = metrics["summary_text"]
-        # Format metrics table
-        avg_reply = (
-            f"{sum(metrics['reply_latencies']) / len(metrics['reply_latencies']):.1f}s"
-            if metrics["reply_latencies"]
-            else "4.5s"
-        )
-        max_reply = (
-            f"{max(metrics['reply_latencies'])}s"
-            if metrics["reply_latencies"]
-            else "8s"
-        )
-        avg_rev = f"{int(round(metrics['avg_review_duration']))}s"
-        rev_count = metrics["review_count"] if metrics["review_count"] > 0 else 8
+        replies = metrics["reply_latencies"]
+        avg_reply = fmt_secs(sum(replies) / len(replies) if replies else None)
+        max_reply = fmt_secs(max(replies) if replies else None)
+        avg_rev = fmt_secs(metrics["avg_review_duration"])
+        rev_count = metrics["review_count"]
+        review_lag = fmt_secs(metrics["median_review_latency"])
+        rate = metrics["median_review_rate"]
+        rate_str = "—" if rate is None else f"{rate:.0f} linhas/min"
 
         out = []
         out.append(f"\n  {c_cyan}{c_bold}📊 Telemetria de Fluxo & Deep Work{c_reset}")
@@ -268,8 +267,9 @@ class TelemetryEngine:
         out.append(f"  {c_dim}Legenda: {c_dark}· Vazio  {c_cyan}░ Leve  {c_green}▒ Foco  {c_yellow}▓ Intenso  {c_magenta}█ Deep Work{c_reset}\n")
         out.append(f"  {c_blue}{c_bold}󰊢 Evidência Matemática & Latências{c_reset}")
         out.append(f"    • {c_yellow}Pergunta → Resposta (Humano):{c_reset}    méd {c_bold}{avg_reply}{c_reset} (máx {max_reply})")
-        out.append(f"    • {c_cyan}Tarefa Concluída → Revisão:{c_reset}      méd {c_bold}1.0s{c_reset} (gatilho imediato)")
-        out.append(f"    • {c_magenta}Duração Média de Revisão:{c_reset}       {c_bold}{avg_rev}{c_reset} ({rev_count} PRs revisados)")
+        out.append(f"    • {c_cyan}Tarefa Concluída → Revisão:{c_reset}      mediana {c_bold}{review_lag}{c_reset}")
+        out.append(f"    • {c_magenta}Duração Média de Revisão:{c_reset}       {c_bold}{avg_rev}{c_reset} ({rev_count} revisões)")
+        out.append(f"    • {c_blue}Ritmo de Revisão:{c_reset}               mediana {c_bold}{rate_str}{c_reset}")
         out.append(f"    • {c_green}Sessões Ininterruptas de Fluxo:{c_reset} {c_bold}{metrics['flow_str']}{c_reset} ({max(metrics['clusters_count'], 1)} blocos)")
         out.append("")
 
@@ -298,18 +298,21 @@ class TelemetryEngine:
 
         heatmap_str = " | ".join(blocks[:8]) + "\n" + " | ".join(blocks[8:])
 
-        avg_reply = (
-            f"{sum(metrics['reply_latencies']) / len(metrics['reply_latencies']):.1f}s"
-            if metrics["reply_latencies"]
-            else "4.5s"
-        )
-        max_reply = (
-            f"{max(metrics['reply_latencies'])}s"
-            if metrics["reply_latencies"]
-            else "8s"
-        )
-        avg_rev = f"{int(round(metrics['avg_review_duration']))}s"
-        rev_count = metrics["review_count"] if metrics["review_count"] > 0 else 8
+        replies = metrics["reply_latencies"]
+        avg_reply_v = sum(replies) / len(replies) if replies else None
+        max_reply_v = max(replies) if replies else None
+        lag_v = metrics["median_review_latency"]
+        review_lags = metrics["review_latencies"]
+        max_lag_v = max(review_lags) if review_lags else None
+        avg_rev_v = metrics["avg_review_duration"]
+        max_rev_v = max(metrics["review_durations"]) if metrics["review_durations"] else None
+        idle_v = metrics["max_idle_seconds"]
+
+        def status(value: Optional[float], limit: float) -> str:
+            # Measured against the target; no data is reported as such, never as a pass.
+            if value is None:
+                return "— sem dados"
+            return "✅ dentro da meta" if value < limit else "⚠️ acima da meta"
 
         cells = []
         for h in range(8, 24):
@@ -344,11 +347,11 @@ class TelemetryEngine:
 
 | Métrica de Interação | Valor Médio | Limite Máximo | Meta Ergonomia | Status |
 |:---|:---:|:---:|:---:|:---:|
-| **Pergunta do Agente → Resposta do Operador** | **{avg_reply}** | {max_reply} | `< 15s` | ✅ Concluído |
-| **Término de Tarefa → Abertura do Lazygitrs** | **1.0s** | 2.0s | `< 30s` | ✅ Concluído |
-| **Duração por Revisão de PR** | **{avg_rev}** | 120s | `< 100s` | ✅ Concluído |
-| **Tempo Ininterrupto em Estado de Fluxo** | **{metrics['flow_str']}** | {metrics['flow_str']} | `> 4h00min` | ✅ Concluído |
-| **Ociosidade Máxima de Agente** | **< 2 min** | 8s | `< 2 min` | ✅ Zero Desperdício |
+| **Pergunta do Agente → Resposta do Operador** | **{fmt_secs(avg_reply_v)}** | {fmt_secs(max_reply_v)} | `< 15s` | {status(avg_reply_v, 15)} |
+| **Término de Tarefa → Abertura do Lazygitrs** (mediana) | **{fmt_secs(lag_v)}** | {fmt_secs(max_lag_v)} | `< 30s` | {status(lag_v, 30)} |
+| **Duração por Revisão** | **{fmt_secs(avg_rev_v)}** | {fmt_secs(max_rev_v)} | `< 100s` | {status(avg_rev_v, 100)} |
+| **Tempo Ininterrupto em Estado de Fluxo** | **{metrics['flow_str']}** | — | `> 4h00min` | {"✅ dentro da meta" if metrics["total_flow_seconds"] > 4 * 3600 else "⚠️ abaixo da meta"} |
+| **Ociosidade Máxima de Agente** | **{fmt_secs(idle_v)}** | — | `< 2 min` | {status(idle_v, 120)} |
 """
         return md
 

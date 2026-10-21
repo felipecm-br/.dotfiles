@@ -12,6 +12,11 @@ extra="${3:-}"
 
 [ -z "$event" ] && exit 0
 
+# Test suites and popup plumbing switch sessions too; they are not the operator's context switches.
+case "$event:$target" in
+  session:_test_*|window:_test_*|session:_popups*|window:_popups*) exit 0 ;;
+esac
+
 printf -v now '%(%s)T' -1
 
 safe_target="${target//\//_}"

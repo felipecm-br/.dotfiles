@@ -10,9 +10,9 @@ Instead of subjective impressions, the stack captures exact sub-millisecond time
 
 ## 2. Theoretical & Ergonomic Foundations
 
-1. **Flow Theory & Interruption Cost (Csikszentmihalyi 1990; Mark et al. 2008)**:
-   - Resuming deep cognitive focus after an unexpected interruption takes an average of $23\text{ minutes and }15\text{ seconds}$.
-   - Grouping activity into contiguous clusters ($\Delta t \le 20\text{ min}$) yields mathematically sound uninterrupted flow session durations.
+1. **Flow Theory & Interruption Cost (Csikszentmihalyi 1990; Mark, Gudith & Klocke 2008)**:
+   - Interrupted work is resumed later and costs stress: people compensate by working faster under more pressure (Mark et al. 2008). The often-quoted "23 minutes and 15 seconds" comes from Gloria Mark's interviews about an earlier field study and includes time spent on other tasks before returning; it is not a constant for regaining focus.
+   - Grouping activity into contiguous clusters ($\Delta t \le 20\text{ min}$) gives an operational estimate of uninterrupted work blocks.
 2. **Attentive Interaction & Breakpoint Scheduling (Iqbal & Bailey 2008)**:
    - Measuring human reply latency ($\Delta t_{\text{reply}} = t_{\text{reply}} - t_{\text{question}}$) and idle lag between task completion and code review ($\Delta t_{\text{review\_start}} = t_{\text{review\_start}} - t_{\text{task\_done}}$) provides evidence of minimal friction.
 3. **Zero-Fork Telemetry ($H=0$, sub-1ms overhead)**:
@@ -30,13 +30,14 @@ Events are written to `${XDG_STATE_HOME:-~/.local/state}/flow/events.tsv` with t
 
 | Event Type | Trigger Origin | Target Parameter | Extra Field | Description |
 |:---|:---|:---|:---|:---|
-| `session` | Tmux hook `client-session-changed` | Session Name | — | Context switch between workspaces |
-| `window` | Tmux hook `after-select-window` | `session:win` | — | Focus transition between windows |
+| `session` | Tmux hook `client-session-changed` | Session Name | — | Context switch between workspaces (test `_test_*` and `_popups` sessions are skipped) |
+| `window` | Tmux hook `after-select-window` | `session:win` | — | Focus transition between windows (same filter) |
 | `agent_question` | `waymux` daemon state update | Pane ID (`%X`) | Context message | AI agent transitioned to `AwaitingInput` / `Permission` |
 | `human_reply` | `waymux` daemon state update / focus dismiss | Pane ID (`%X`) | Latency (e.g. `8s`) | Human responded to agent prompt or dismissed attention badge |
 | `agent_finished` | `waymux` daemon debounce completion | Pane ID (`%X`) | Task / prompt ID | AI agent completed task (`Working` $\rightarrow$ `Idle`) |
 | `review_start` | `lazygitrs-popup.sh` launch | Project Directory | Lag (e.g. `1s`) | Elapsed seconds between agent completion and review modal opening |
-| `review_end` | `lazygitrs-popup.sh` exit | Project Directory | Duration (e.g. `92s`) | Elapsed seconds inside the code review modal |
+| `review_size` | `lazygitrs-popup.sh` launch | Project Directory | Lines (e.g. `120`) | Insertions + deletions under review (uncommitted diff, or the HEAD commit when the tree is clean) |
+| `review_end` | `lazygitrs-popup.sh` exit | Project Directory | Duration (e.g. `92s`) | Elapsed seconds inside the code review modal; paired with `review_size` it gives lines reviewed per minute |
 
 ---
 
@@ -58,7 +59,7 @@ Integrated in [`waymux/src/api.rs`](https://github.com/felipecm-br/waymux):
 
 ### 4.3. Lazygitrs Floating Review Popup
 Integrated in [`tmux/.config/tmux/lazygitrs-popup.sh`](../../tmux/.config/tmux/lazygitrs-popup.sh):
-- Emits `review_start "$PROJECT_DIR"` before popup display.
+- Emits `review_start "$PROJECT_DIR"` and `review_size "$PROJECT_DIR" <lines>` before popup display, and touches `<git-dir>/waymux-reviewed`, which clears the Cockpit's "done, not reviewed" state for that worktree.
 - Blocks synchronously while isolator and Lazygitrs run.
 - Emits `review_end "$PROJECT_DIR"` upon dismissal with exact review duration.
 
@@ -69,10 +70,11 @@ Integrated in [`tmux/.config/tmux/lazygitrs-popup.sh`](../../tmux/.config/tmux/l
 Located at [`tmux/.config/tmux/flow-telemetry.py`](../../tmux/.config/tmux/flow-telemetry.py) and exposed globally via `utils/.local/bin/flow-telemetry`.
 
 ### 5.1. Daily Evidence Summary Banner
-Dynamically formatted from today's real events matching the target ergonomic formula:
+Formatted from today's events only. Missing data is shown as `—` or "nenhuma revisão registrada", never as a target value; statuses in the markdown table are computed against each target (`✅` / `⚠️` / `— sem dados`). The demo values below appear only with `--canonical`:
 ```
-Hoje você teve 4h12min de fluxo ininterrupto, revisou 8 PRs com média de 92s por revisão e nenhum agente ficou ocioso > 2 min
+Hoje você teve 4h12min de fluxo ininterrupto, 8 revisões com média de 92s e nenhum agente ficou ocioso > 2 min
 ```
+The HUD and markdown views also report the median time from a finished task to opening its review and the median review rate in lines per minute.
 
 ### 5.2. Hourly Focus Heatmap
 Renders an ASCII/ANSI block density chart from 08h to 23h:
