@@ -442,6 +442,15 @@ agyy
 # Resume most recent conversation in secondary Antigravity CLI account
 agyy -c
 
+# Launch Claude Code interactive coding assistant
+claude
+
+# Start Claude Code session with initial prompt
+claude "{{prompt}}"
+
+# Resume most recent Claude Code session in current directory
+claude -c
+
 # Audit, check, and update all dependencies of the AI workflow stack
 update-ai-workflow
 

@@ -69,6 +69,7 @@ install_packages \
     tailscale \
     mosh \
     devin \
+    claude \
     waymux
 
 install_plugins \

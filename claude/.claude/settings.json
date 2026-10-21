@@ -1,0 +1,108 @@
+{
+  "hooks": {
+    "Notification": [
+      {
+        "hooks": [
+          {
+            "command": "workmux set-window-status waiting",
+            "type": "command"
+          },
+          {
+            "command": "waymux hook tmux Notification claude",
+            "type": "command"
+          }
+        ],
+        "matcher": "permission_prompt|elicitation_dialog"
+      }
+    ],
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "command": "workmux set-window-status working",
+            "type": "command"
+          },
+          {
+            "command": "waymux hook tmux PostToolUse",
+            "type": "command"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "hooks": [
+          {
+            "command": "waymux hook tmux PreToolUse",
+            "type": "command"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "command": "workmux register-agent",
+            "type": "command"
+          },
+          {
+            "command": "waymux hook tmux SessionStart claude",
+            "type": "command"
+          },
+          {
+            "command": "waymux hook lazygit SessionStart",
+            "type": "command"
+          }
+        ],
+        "matcher": "startup|resume|clear|fork"
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "command": "workmux set-window-status done",
+            "type": "command"
+          },
+          {
+            "command": "waymux hook tmux Stop",
+            "type": "command"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "command": "workmux set-window-status working",
+            "type": "command"
+          },
+          {
+            "command": "waymux hook tmux UserPromptSubmit claude",
+            "type": "command"
+          },
+          {
+            "command": "waymux hook lazygit UserPromptSubmit",
+            "type": "command"
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "command": "waymux hook tmux SessionEnd",
+            "type": "command"
+          },
+          {
+            "command": "waymux hook lazygit SessionEnd",
+            "type": "command"
+          }
+        ]
+      }
+    ]
+  }
+}
