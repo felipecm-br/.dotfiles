@@ -137,7 +137,9 @@ The Cockpit HUD is the central control plane, bound to `Prefix + Space` (`85% ×
 - **Visual Semiotics & Human Factors:**
   - **Semantic State Colors:** Agent-state glyphs use waymux's built-in light/dark palette (blue working, gold question, orange permission, pink stalled, red error, slate idle), shared with the status bar; see [AI Agent Status in Status Bar](../tmux/ai-status-bar.md). They used to come from theme slots, which collapsed under `lumon` (permission, question and stalled were the same blue, CIEDE2000 0–4 between working and the waiting states) and `tokyo-night` (permission = stalled).
   - **Bouma Visual Crowding Reduction:** Eliminates noisy brackets (`[Enter]` $\to$ `Enter`) and uses `{darkgray:│}` hairline separators across the footer.
-  - **Dynamic Theme Sync (chrome only):** Branch, diffstat and PR colors are generated from `~/.local/state/omarchy/current/theme/colors.toml`. Theme-derived metadata can fall below WCAG contrast (`lumon` `darkgray` is 1.68:1); state colors are guaranteed ≥ 4.5:1 on every built-in theme.
+  - **Dynamic Theme Sync (chrome only):** Branch, diffstat and PR colors are generated from `~/.local/state/omarchy/current/theme/colors.toml`. Theme `muted` is lifted toward the foreground until metadata text reaches 4.5:1 and separators/borders 3:1 (under `lumon` it was 1.68:1), only where the theme falls short. Rows are no longer dimmed; the selection keeps BOLD and the cyan bar.
+  - **Why an Agent Waits:** waiting rows show the tool behind the prompt (`Bash: cargo test -p auth`, `Edit: main.rs`, the question text) in place of the task title, from the summary the waymux hook records at `PreToolUse` (ParallelPilot, 2026: a one-line reason per attention flag).
+  - **Done, Not Reviewed (`󰈈`):** an idle agent that finished after its worktree was last opened in lazygitrs, and left uncommitted changes or new commits, is marked for review. Opening lazygitrs (`g` in the Cockpit, `Ctrl + G`) touches `<git-dir>/waymux-reviewed` and clears it. These rows sort right after waiting agents and get the cursor when nothing is waiting: completion is not acceptance.
 
 ### 3.3 Daemon Telemetry & Urgency Aggregation (`waymux daemon`)
 
@@ -221,6 +223,9 @@ Engineered strictly in accordance with [Terminal Ergonomics & UX Architecture Ma
 | **Supervision Audit Oct 2026** (S3) | Triage served newest-first with a stored index that skipped agents after one was serviced | Stateless queue by service class, oldest first; Cockpit sorts and opens on the same head | `cargo test` (`test_next_in_queue_never_skips_after_service`, `test_start_idx_prefers_first_waiting_agent`) |
 | **Supervision Audit Oct 2026** (S4) | State colors from theme slots collapsed (`lumon`: one blue; `tokyo-night`: permission = stalled) | Built-in semantic palette per light/dark mode in `waymux`; template leaves `color` empty | `cargo test` (`status_palette` contrast and distinctness tests) |
 | **Supervision Audit Oct 2026** (S5) | `pane-focus-in` ran `record-window-state.sh --track` synchronously (p50 193 ms) before `waymux dismiss` | Both backgrounded; stale runs drop their result | `tests/focus_hook_async.test.sh` |
+| **Supervision Audit Oct 2026** (S6) | The Cockpit showed that an agent waited, not why; finished work looked the same reviewed or not | Tool summary as wait reason; `󰈈` done-not-reviewed state cleared by opening lazygitrs | `cargo test` (`test_tool_summary_shapes`, `test_needs_review`), sandboxed-daemon e2e runs |
+| **Supervision Audit Oct 2026** (S7) | Rows rendered DIM over 1.68:1 metadata; `Prefix + w` repeated within 500 ms | No DIM; metadata ≥ 4.5:1, lines ≥ 3:1; `bind w` without `-r` | `cargo test` (`test_ensure_contrast_lifts_only_what_falls_short`), `tests/close_window.test.sh` |
+| **Supervision Audit Oct 2026** (S8) | Test suites ran on the live tmux server (18% of logged context switches were artifacts); the telemetry report showed fixed demo numbers as evidence | `tests/lib/private_tmux.sh`; `flow-log.sh` skips `_test_*`/`_popups`; real values or `—`, demo values only with `--canonical`; review rate from `review_size` | Converted suites pass on private servers |
 
 > [!NOTE]
 > **Waymux Migration:** all consumers (hooks, `waymux-cli`, Cockpit/triage scripts, `drift-doctor`) use native `waymux` paths (`$XDG_RUNTIME_DIR/waymux/token`), configuration is loaded from `~/.config/waymux/config.toml`, sounds are located in `~/.config/waymux/sounds/`, and the systemd unit runs under `waymux.service`.
@@ -248,12 +253,14 @@ Not yet measured: end-to-end Cockpit popup render, worktree creation, `Ctrl+G` D
 
 Automated checks live in `tests/`:
 
+Suites that drive tmux source [`tests/lib/private_tmux.sh`](../../tests/lib/private_tmux.sh): a private tmux server, a sandboxed `HOME` linking this checkout's packages, and an unreachable `WAYMUX_PORT`, so tests never touch the live session, its hooks, telemetry or `~/.local/state`.
+
 1. **`tests/cockpit_hud_perf.test.sh`**: latency budget for `waymux cockpit-items` (p50 ≤ 50 ms) and `waymux health` (p50 ≤ 20 ms); requires a healthy daemon.
 2. **`tests/cockpit_review_notes.test.sh`** and **`tests/lazygitrs_review_notes.test.sh`**: review-note indexing, pending counts, and batch dispatch to agent panes in an isolated detached Tmux session.
 3. **`tests/close_window.test.sh`**, **`tests/close_session.test.sh`**: guarded termination (clean/idle bypass, confirmation on active agents).
 4. **`tests/reopen_window.test.sh`**: Undo Close Tab transaction stack and state restoration.
 5. **`tests/awt_improvements.test.sh`**: worktree creation, dirty-state migration, async trash deletion.
-6. **Other:** `tests/keybindings_picker.test.sh`, `tests/picker_rg_files.test.sh`, `tests/scrollback_picker.test.sh`, `tests/pr_workflow.test.sh`.
+6. **Other:** `tests/keybindings_picker.test.sh`, `tests/picker_rg_files.test.sh`, `tests/scrollback_picker.test.sh`, `tests/pr_workflow.test.sh`, `tests/focus_hook_async.test.sh`, `tests/awt_switch_latency.test.sh`.
 7. **System validation:** `./scripts/docs-lint.sh` (link integrity, English, root cleanliness), `./scripts/drift-doctor.sh` (binary drift, `waymux` RPC health, symlinks), `./stow.sh -n` (symlink health).
 
 ---

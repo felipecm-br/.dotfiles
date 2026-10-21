@@ -20,7 +20,7 @@ State colors are **semantic constants**, not theme slots: `waymux` picks them fr
 | `error` | `󰨄` | `#ff6b7a` red | `#be123c` |
 | `idle` (done, waiting for your next prompt) | `󱥂` | `#8aa4b8` slate | `#4f6b5f` |
 
-Windows without an agent use `@CURRENT_COLOR`. Every pair stays apart by at least 10.8 CIEDE2000 on the dark palette, including simulated deuteranopia and protanopia; on the light palette, question and permission converge for red-green color deficiency, so the glyph carries that difference. All values reach 4.5:1 contrast on every built-in Omarchy background. To pin a color, set `color = "#rrggbb"` for that state in [`waymux.toml.tpl`](../../waymux/.config/omarchy/themed/waymux.toml.tpl); an empty `color` means the built-in palette.
+The Cockpit adds `review` (`󰈈`, done but not reviewed): `#7ee0b5` dark / `#166534` light. Windows without an agent use `@CURRENT_COLOR`. Every pair stays apart by at least 10.8 CIEDE2000 on the dark palette, including simulated deuteranopia and protanopia; on the light palette, question and permission converge for red-green color deficiency, so the glyph carries that difference. All values reach 4.5:1 contrast on every built-in Omarchy background. To pin a color, set `color = "#rrggbb"` for that state in [`waymux.toml.tpl`](../../waymux/.config/omarchy/themed/waymux.toml.tpl); an empty `color` means the built-in palette.
 
 Inside the active filled pill, the window title `#W` and state icon `@ai_agent_state` are forced to high-contrast dark text (`fg=#{@SESSION_ACTIVE_FG}`) for clean legibility on top of filled backgrounds.
 
