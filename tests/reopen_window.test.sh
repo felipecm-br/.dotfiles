@@ -3,6 +3,8 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# Private tmux server + sandboxed HOME: never the live session or ~/.local/state.
+. "$ROOT/tests/lib/private_tmux.sh"
 ok() { echo "ok: $*"; }
 bad() { echo "FAIL: $*" >&2; exit 1; }
 
@@ -28,7 +30,7 @@ restore_backup() {
     rm -f "$STACK_FILE"
   fi
 }
-trap restore_backup EXIT
+trap 'restore_backup; private_tmux_cleanup' EXIT
 
 # 1. Script existence and bash syntax
 [ -x "$RECORD_SCRIPT" ] && bash -n "$RECORD_SCRIPT" && ok "record-window-state.sh syntax and executable" || bad "record-window-state.sh syntax error"

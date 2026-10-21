@@ -10,6 +10,8 @@
 set -u
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+# Private tmux server + sandboxed HOME: never the live session or ~/.local/state.
+. "$ROOT/tests/lib/private_tmux.sh"
 FAILURES=0
 
 ok() { echo "  ✔ PASS: $1"; }

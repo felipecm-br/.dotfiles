@@ -3,6 +3,8 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# Private tmux server + sandboxed HOME: never the live session or ~/.local/state.
+. "$ROOT/tests/lib/private_tmux.sh"
 ok() { echo "ok: $*"; }
 bad() { echo "FAIL: $*" >&2; exit 1; }
 

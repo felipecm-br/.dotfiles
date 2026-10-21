@@ -4,6 +4,8 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DOTFILES_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+# Private tmux server + sandboxed HOME: never the live session or ~/.local/state.
+. "$DOTFILES_DIR/tests/lib/private_tmux.sh"
 REVIEW_SCRIPT="$DOTFILES_DIR/tmux/.config/tmux/cockpit-review-notes.sh"
 
 echo "=== Running Cockpit Review Notes Bridge Tests ==="
@@ -16,7 +18,7 @@ echo "PASS: Syntax checks"
 
 # Test 2: Temporary test repository setup
 TMP_REPO=$(mktemp -d /tmp/test-review-repo-XXXXXX)
-trap 'rm -rf "$TMP_REPO"' EXIT
+trap 'rm -rf "$TMP_REPO"; private_tmux_cleanup' EXIT
 
 git -C "$TMP_REPO" init --quiet
 git_dir=$(git -C "$TMP_REPO" rev-parse --git-dir)

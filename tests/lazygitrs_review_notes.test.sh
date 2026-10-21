@@ -4,6 +4,8 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DOTFILES_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+# Private tmux server + sandboxed HOME: never the live session or ~/.local/state.
+. "$DOTFILES_DIR/tests/lib/private_tmux.sh"
 AGENT_NOTE_SCRIPT="$DOTFILES_DIR/waymux/.local/bin/agent-note.sh"
 LAZYGITRS_POPUP="$DOTFILES_DIR/tmux/.config/tmux/lazygitrs-popup.sh"
 
@@ -16,7 +18,7 @@ echo "PASS: Bash syntax check"
 
 # Test 2: Argument parsing & quote stripping verification
 TMP_DIR=$(mktemp -d /tmp/test-lzg-review-XXXXXX)
-trap 'rm -rf "$TMP_DIR"' EXIT
+trap 'rm -rf "$TMP_DIR"; private_tmux_cleanup' EXIT
 
 if [[ -z $("$AGENT_NOTE_SCRIPT" --help 2>&1 | grep "Usage:") ]]; then
   echo "FAIL: Expected Usage message on missing prompt" >&2

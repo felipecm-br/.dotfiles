@@ -10,6 +10,8 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+# Private tmux server + sandboxed HOME: never the live session or ~/.local/state.
+. "$ROOT/tests/lib/private_tmux.sh"
 AWT_WM_DIR="$ROOT/awt/.config/waymaker"
 [ -d "$AWT_WM_DIR" ] || AWT_WM_DIR="$ROOT/awt/.config/matchmaker"
 FAILURES=0
@@ -96,7 +98,7 @@ rm -rf "$DISPATCH_TMP" /tmp/feat-disp 2>/dev/null || true
 # ── 3. Validate Hermetic Environment Propagation in post-create.sh ──
 echo -e "\n[3/6] Validating hermetic secret propagation in post-create.sh..."
 TEST_TMP=$(mktemp -d /tmp/awt-test-env-XXXXXX)
-trap 'rm -rf "$TEST_TMP"' EXIT
+trap 'rm -rf "$TEST_TMP"; private_tmux_cleanup' EXIT
 
 # Set up fake repo container layout
 mkdir -p "$TEST_TMP/container/main"
@@ -144,7 +146,7 @@ fi
 # ── 4. Validate awt-merge.sh with --rebase, --push, and Atomic Rollback ──
 echo -e "\n[4/6] Validating awt-merge.sh rebase, push, and conflict recovery..."
 MERGE_TMP=$(mktemp -d /tmp/awt-test-merge-XXXXXX)
-trap 'rm -rf "$TEST_TMP" "$MERGE_TMP"' EXIT
+trap 'rm -rf "$TEST_TMP" "$MERGE_TMP"; private_tmux_cleanup' EXIT
 
 # Set up upstream bare container and worktrees
 mkdir -p "$MERGE_TMP/origin.git"
