@@ -123,10 +123,8 @@ hints = false
 "n"             = ["ExecuteAsync($HOME/.config/tmux/agent-action.sh deny '{=state}' '{=pid}')", "Reload($HOME/.config/tmux/cockpit-picker-items.sh)"]
 "N"             = ["ExecuteAsync($HOME/.config/tmux/agent-action.sh deny '{=state}' '{=pid}')", "Reload($HOME/.config/tmux/cockpit-picker-items.sh)"]
 "d"             = ["ExecuteAsync(printf '%s\n' '{=}' | $HOME/.config/tmux/window-picker-delete.sh; sleep 0.05)", "Reload($HOME/.config/tmux/cockpit-picker-items.sh)"]
-"D"             = ["ExecuteAsync(printf '%s\n' '{=}' | $HOME/.config/tmux/window-picker-delete.sh; sleep 0.05)", "Reload($HOME/.config/tmux/cockpit-picker-items.sh)"]
 "ctrl-d"        = ["ExecuteAsync(printf '%s\n' '{=}' | $HOME/.config/tmux/window-picker-delete.sh; sleep 0.05)", "Reload($HOME/.config/tmux/cockpit-picker-items.sh)"]
 "x"             = ["ExecuteAsync(printf '%s\n' '{=}' | $HOME/.config/tmux/window-picker-delete.sh; sleep 0.05)", "Reload($HOME/.config/tmux/cockpit-picker-items.sh)"]
-"X"             = ["ExecuteAsync(printf '%s\n' '{=}' | $HOME/.config/tmux/window-picker-delete.sh; sleep 0.05)", "Reload($HOME/.config/tmux/cockpit-picker-items.sh)"]
 "J"             = "PreviewDown(5)"
 "K"             = "PreviewUp(5)"
 "+"             = "ExpandPreview(5)"
@@ -192,7 +190,6 @@ Start    = [
 "ctrl-p"        = ["Print(__PATCH_MODE__{=})", "Quit"]
 "ctrl-t"        = ["Print(__CREATE_WINDOW__{=})", "Quit"]
 "ctrl-d"        = ["ExecuteAsync(printf '%s\n' '{=}' | $HOME/.config/tmux/window-picker-delete.sh; sleep 0.05)", "Reload($HOME/.config/tmux/cockpit-picker-items.sh)"]
-"ctrl-x"        = ["ExecuteAsync(printf '%s\n' '{=}' | $HOME/.config/tmux/window-picker-delete.sh; sleep 0.05)", "Reload($HOME/.config/tmux/cockpit-picker-items.sh)"]
 "ctrl-r"        = "Reload($HOME/.config/tmux/cockpit-picker-items.sh)"
 "?"             = "SwitchPreview(1)"
 "shift-?"       = "SwitchPreview(1)"

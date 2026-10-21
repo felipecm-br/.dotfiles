@@ -117,18 +117,18 @@ The Cockpit HUD is the central control plane, bound to `Prefix + Space` (`85% ×
 ┌────────────────────────────────────────────────────────────────────────────────────────┐
 │ 󱂬  Fleet (All Windows) ❯                                        ? Help · Esc Close     │
 ├────────────────────────────────────────────────────────────────────────────────────────┤
-│ 󰂚  1•  dotfiles · agy: Audit docs   main ↑2         +14 -3      2m                     │
+│ 󱅭  1•  dotfiles · agy: Audit docs   main ↑2         +14 -3      2m                     │
 │ 󰑮  2   api · claude: Fix auth       feat/auth ✓     +42 -8  #12 35s                   │
 │ 󱥁  3   web · codex: Add tests       fix/tests ↑1    +5 -1       4m                     │
 │ ·  4   nvim                         main ✓          clean       12m                    │
 ├────────────────────────────────────────────────────────────────────────────────────────┤
-│ Enter Jump │ y/n Ack │ r Review │ i Input │ v Diff │ g Git │ a Agents │ Tab Worktrees │ ? Help │ Esc Exit │
+│ Enter Jump │ y/n Ack │ r Review │ i Input │ g Git │ a Agents │ Tab Worktrees │ ? Help │ Esc Exit │
 └────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 - **Sub-50ms Data-Path Latency (`waymux cockpit-items` $P_{50} \approx 19\text{ms}$ measured; see §5):** Streams pre-formatted candidate lines into `wm --config cockpit-picker.toml` with zero intermediate disk scans.
 - **Fixed 6-Column Golden Grid (`cockpit-picker-items.sh`):** Monospace columns provide dedicated vertical tracks in the left 40% candidate pane:
-  1. `[State Icon]` (2 chars anchored at $X=1$: `󰂚` permission, `󰄬` question, `󰑮` working, `󱥁` stalled, `󰅚` error, `·` idle)
+  1. `[State Icon]` (2 chars anchored at $X=1$: `󱅭` permission, `󱜻` question, spinner working, `󱥁` stalled, `󰨄` error, `󱥂` idle, `·` no agent). Rows sort by the triage service class (permission → question → error/stalled → working → idle), waiting rows oldest first, and the cursor opens on the first waiting agent.
   2. `[Win Idx + Dot]` (3 chars: e.g. `1•` for active window, `2 ` for background)
   3. `[Win + Agent Title]` (24 chars: window name + active agent prompt/task title)
   4. `[Branch + Sync]` (14 chars: Git branch + upstream `↑N`/`↓N`/`✓`)
@@ -146,7 +146,8 @@ The Waymux daemon (`waymux daemon`) is an asynchronous Rust daemon communicating
 - **Multi-Pane Window Urgency Aggregation:** When a Tmux window contains multiple split panes (e.g., editor in pane `%1`, test runner in pane `%2`, AI agent in pane `%3`), `waymux` evaluates urgency across **all** child panes. If *any* pane enters `question`, `permission`, or `error`, the parent window's urgency reflects that highest-priority state, guaranteeing that background agent prompts are never missed.
 - **650ms Biomechanical Idle Debounce:** Protects against false idle/waiting states triggered during rapid tool-call chaining or streaming LLM output chunks.
 - **Proactive Stall Detection & Focus Auto-Dismiss:** Detects hung `working` agents (>20s zero output and zero CPU delta $\to$ `stalled` `󱥁`) and automatically dismisses question/permission alerts via Tmux's `pane-focus-in` hook (`waymux dismiss`).
-- **Spatial PipeWire Audio Telemetry:** Non-blocking auditory feedback (`pw-play`) and cognitive-breakpoint chime deferral (`chime-at-breakpoint`) trigger distinct audio cues when tasks complete or require interactive feedback.
+- **Triage Queue (`Prefix + I` / `Prefix + i`):** Waiting agents are served by class (permission → question → error/stalled, quick decisions first), longest-waiting first within a class. The next target is the entry after the current pane (or after the last peeked pane for the popup), else the head, so servicing an agent never makes the next jump skip one.
+- **Spatial PipeWire Audio Telemetry:** Non-blocking auditory feedback (`pw-play`) with distinct cues when tasks complete or require interactive feedback. Every cue currently plays immediately, including for the pane in view: `chime-at-breakpoint` (deferral until a typing pause) exists in `utils/` but is not wired into `waymux` yet.
 - **100% Event-Driven Status Bar:** Tmux runs with `status-interval 0`. State updates are pushed instantly via `tmux set-option -w` and `refresh-client -S`, consuming 0.0% CPU when idle.
 
 ### 3.4 Bidirectional AI Code-Review Loop (`lazygitrs`)
@@ -171,7 +172,7 @@ Closing the gap between agent diff production and human verification:
 - **Fast Startup (~2 ms `--version`):** Instant Rust binary startup with zero Electron or Node overhead.
 - **Dual-Diff Toggle (`Ctrl+G`):** Instantly toggles between viewing uncommitted working tree diffs and reviewing commits against `HEAD` or target base branch.
 - **Inline Review Notes (`.git/info/lines.json`):** Pressing `c` on any diff line (or visual range `v`) opens an inline comment prompt. Notes are stored cleanly inside `.git/info/lines.json` (with XDG fallback) with file path, line range, and instruction text.
-- **Direct & Cockpit Review Dispatch (`S` in `lazygitrs` / `r` in Cockpit):** Pressing `S` inside `lazygitrs` dispatches notes directly to the active AI agent pane via HTTP TUI push, SSE, or bracketed paste. Furthermore, the Cockpit HUD preview pane surfaces `󰆈 Pending AI Review Notes (N)` and allows batch-dispatching all pending notes directly from Cockpit via `r` (or clearing via `R`).
+- **Direct & Cockpit Review Dispatch (`S` in `lazygitrs` / `r` in Cockpit):** Pressing `S` inside `lazygitrs` dispatches notes directly to the active AI agent pane via HTTP TUI push, SSE, or bracketed paste. Furthermore, the Cockpit HUD preview pane surfaces `󰆈 Pending AI Review Notes (N)` and allows batch-dispatching all pending notes directly from Cockpit via `r` (`R` in the Cockpit reaps stale agents; it does not clear notes).
 
 ### 3.5 Smart Window Lifecycle, Topology Snapshot & Safe Pruning
 
@@ -179,6 +180,8 @@ Window and session management incorporates transactional safety to eliminate acc
 
 - **Bypass for Clean Tabs & Idle Agents:** Pressing `Prefix + w` or `Prefix + x` (`close-window.sh`) on a regular shell window or a window whose AI agents are `idle` closes it instantly (near-instant) with zero friction. Similarly, `Prefix + W` (`close-session.sh`) closes sessions with $\le 3$ windows and zero active (non-idle) agents immediately.
 - **Modal Confirmation on Active Agents (``):** If the target window or session has an AI subagent actively working, awaiting input, or stalled, `close-window.sh` / `close-session.sh` intercepts the action and presents a themed `68 × 11..18` confirmation modal (`y` Kill │ `n / Esc` Keep).
+- **Cockpit Kill Guard (`d` / `x` / `Ctrl+D`):** The Cockpit opens in command mode, so `waymux window-delete` applies the same rule as `close-window.sh` to every pane of the target window or session: idle targets close on one press (restorable with `Prefix + u`), a target with an agent still working arms on the first press (status-line notice) and closes on a second press within 2 s. Undo restores the window and conversation, not an interrupted run, hence the guard.
+- **Ship Confirmation (`S`):** `S` in the Cockpit merges, pushes to origin and deletes the branch; like `S` in the awt popup, it now asks first (`awt ship --confirm`).
 - **Undo Close Tab (`Prefix + u` / `Prefix + T` / `Ctrl + Shift + T`):** Every closed window writes its state (session, exact window index, title, working directory, git branch, and normalized AI resume command: `agy --conversation <uuid>`, `claude --continue`, `codex resume --last`, `muse resume --last`, `opencode --continue`) to `~/.local/state/tmux/closed-windows.json` (max 25 entries). Pressing `Prefix + u` immediately recreates the window at its exact previous index with the AI conversation resumed (`reopen-window.sh`).
 - **Automated Topology Snapshot & Reboot Restore (`cockpit snapshot` / `cockpit restore`):** Event-driven hooks snapshot all sessions, windows, CWDs, and active agent conversations to `~/.local/state/cockpit/session-topology.json` (30s debounced).
 
@@ -213,6 +216,11 @@ Engineered strictly in accordance with [Terminal Ergonomics & UX Architecture Ma
 | **Waymux Audit** (W1) | Missing upstream commit tracking in dashboard | `Branch + Sync` column with `↑N` / `↓N` / `✓` glyphs | `waymux cockpit-items` |
 | **Waymux Audit** (W2) | Inconsistent keybindings between Cockpit and Lazygitrs | Navigation aligned to Vim standard | Workflow Keybindings Matrix |
 | **Re-audit Oct 2026** (R1) | Legacy `acpd` replaced by `waymux`; dotfiles, docs, installer, scripts, and hooks fully migrated | Stow package `waymux/`; installer `packages/waymux.zsh`; `waymux-cli` wrapper; active `waymux.service` | `scripts/drift-doctor.sh` |
+| **Supervision Audit Oct 2026** (S1) | Cockpit `S` merged, pushed and deleted the branch without asking | `--confirm`, matching the awt popup | `cargo test` (`test_ship_asks_for_confirmation`, `test_split_merge_args_forwards_confirm_and_push`) |
+| **Supervision Audit Oct 2026** (S2) | Cockpit `d`/`x` killed windows with working agents on one press; six aliases | Active-agent guard (second press within 2 s); `D`, `X`, `ctrl-x` removed | `cargo test` (`test_kill_decision_guards_only_active_agents`), isolated tmux smoke test |
+| **Supervision Audit Oct 2026** (S3) | Triage served newest-first with a stored index that skipped agents after one was serviced | Stateless queue by service class, oldest first; Cockpit sorts and opens on the same head | `cargo test` (`test_next_in_queue_never_skips_after_service`, `test_start_idx_prefers_first_waiting_agent`) |
+| **Supervision Audit Oct 2026** (S4) | State colors from theme slots collapsed (`lumon`: one blue; `tokyo-night`: permission = stalled) | Built-in semantic palette per light/dark mode in `waymux`; template leaves `color` empty | `cargo test` (`status_palette` contrast and distinctness tests) |
+| **Supervision Audit Oct 2026** (S5) | `pane-focus-in` ran `record-window-state.sh --track` synchronously (p50 193 ms) before `waymux dismiss` | Both backgrounded; stale runs drop their result | `tests/focus_hook_async.test.sh` |
 
 > [!NOTE]
 > **Waymux Migration:** all consumers (hooks, `waymux-cli`, Cockpit/triage scripts, `drift-doctor`) use native `waymux` paths (`$XDG_RUNTIME_DIR/waymux/token`), configuration is loaded from `~/.config/waymux/config.toml`, sounds are located in `~/.config/waymux/sounds/`, and the systemd unit runs under `waymux.service`.

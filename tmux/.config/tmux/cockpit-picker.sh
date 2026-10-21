@@ -186,7 +186,7 @@ while true; do
 
       AWT_BIN=$(command -v awt 2>/dev/null || echo "$HOME/.local/bin/awt")
       cd "$target_path" || true
-      exec "$AWT_BIN" ship "$branch"
+      exec "$AWT_BIN" ship "$branch" --confirm
       ;;
     __SWEEP_WORKTREES__*)
       raw_item="${chosen#__SWEEP_WORKTREES__}"
