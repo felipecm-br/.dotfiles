@@ -1,5 +1,5 @@
-# Waymaker Starship Preset Selector (`wm -o starship-presets`)
-# Interactive picker to browse, preview, and apply starship prompt presets
+# Waymaker Starship Preset & Theme Selector (`wm -o starship-presets`)
+# Interactive picker to browse, preview, and apply starship prompt presets & Omarchy themes
 
 [ui.nav]
 active = true
@@ -12,7 +12,7 @@ min = 15
 max = 95
 
 [query]
-prompt = " Starship Preset > "
+prompt = " Starship > "
 status_inline = true
 
 [matcher.sort]
@@ -28,11 +28,12 @@ color = "Darkgray"
 title_fg = "Cyan"
 
 [previewer]
-debounce_ms = 15
-delay_clear = true
+debounce_ms = 10
+delay_clear = false
 
+# Layout 1: Starship live prompt + TOML configuration preview
 [[preview.layout]]
-command = 'omarchy-starship-preset --render-preview "{2}" "{1}"'
+command = 'omarchy-starship-preset --render-preview {path} {label}'
 side = "right"
 percentage = 65
 
@@ -43,14 +44,32 @@ names = [
   { name = "path", hidden = true }
 ]
 
+[start.command]
+command = 'omarchy-starship-preset --list "${OMARCHY_STARSHIP_FILTER:-all}"'
+additional = [
+  "omarchy-starship-preset --list themes",
+  "omarchy-starship-preset --list presets",
+  "omarchy-starship-preset --list all"
+]
+
 [footer]
-content = " {cyan,bold:Enter} {darkgray:Selecionar} {darkgray:│} {cyan,bold:j/k} {darkgray:Navegar} {darkgray:│} {cyan,bold:C-l/h} {darkgray:Modo Vim} {darkgray:│} {cyan,bold:Esc} {darkgray:Cancelar}"
+content = " {cyan,bold:Enter} {darkgray:Selecionar} {darkgray:│} {cyan,bold:Tab} {darkgray:Filtro (Todos ↔ Temas ↔ Presets)} {darkgray:│} {cyan,bold:j/k} {darkgray:Navegar} {darkgray:│} {cyan,bold:C-l/h} {darkgray:Modo Vim} {darkgray:│} {cyan,bold:Esc} {darkgray:Cancelar}"
 row_connection = "Full"
 match_indent = false
 separator = "light"
 
 [binds]
+"tab" = "@next"
+"shift-tab" = "@next"
 "ctrl-j" = "Down"
 "ctrl-k" = "Up"
-"ctrl-l" = ["ExecuteSilent($OMARCHY_STARSHIP_CYCLE_SCRIPT $OMARCHY_MODE_FILE fwd)", '''RunPreview(omarchy-starship-preset --render-preview "{2}" "{1}")''']
-"ctrl-h" = ["ExecuteSilent($OMARCHY_STARSHIP_CYCLE_SCRIPT $OMARCHY_MODE_FILE bwd)", '''RunPreview(omarchy-starship-preset --render-preview "{2}" "{1}")''']
+"ctrl-l" = ["ExecuteSilent($OMARCHY_STARSHIP_CYCLE_SCRIPT $OMARCHY_MODE_FILE fwd)", '''Preview(omarchy-starship-preset --render-preview {path} {label})''']
+"ctrl-h" = ["ExecuteSilent($OMARCHY_STARSHIP_CYCLE_SCRIPT $OMARCHY_MODE_FILE bwd)", '''Preview(omarchy-starship-preset --render-preview {path} {label})''']
+
+[ui.nav.binds]
+"tab" = "@next"
+"shift-tab" = "@next"
+"j" = "Down"
+"k" = "Up"
+"ctrl-l" = ["ExecuteSilent($OMARCHY_STARSHIP_CYCLE_SCRIPT $OMARCHY_MODE_FILE fwd)", '''Preview(omarchy-starship-preset --render-preview {path} {label})''']
+"ctrl-h" = ["ExecuteSilent($OMARCHY_STARSHIP_CYCLE_SCRIPT $OMARCHY_MODE_FILE bwd)", '''Preview(omarchy-starship-preset --render-preview {path} {label})''']

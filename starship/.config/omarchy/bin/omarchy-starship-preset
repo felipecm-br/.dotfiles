@@ -1,22 +1,31 @@
 #!/usr/bin/env bash
 # omarchy-starship-preset
-# Interactive Waymaker (wm) picker to browse, preview, and apply starship.toml presets.
+# Interactive Waymaker (wm) picker to browse, preview, and apply starship.toml presets & themes.
 #
 # Sources:
-#   Custom presets from ~/.config/omarchy/starship-presets/
+#   [current] Currently active theme prompt (from ~/.local/state/omarchy/current/theme/starship.toml)
+#   [theme]   Omarchy system themes rendered dynamically from colors.toml + starship.toml.tpl
+#   [preset]  Custom presets from ~/.config/omarchy/starship-presets/
 #
 # Usage:
-#   omarchy-starship-preset                  # interactive Waymaker picker
-#   omarchy-starship-preset --preview-only <name>   # print preset TOML to stdout
+#   omarchy-starship-preset                         # interactive picker (all items)
+#   omarchy-starship-preset -t, --themes            # filter: only Omarchy themes
+#   omarchy-starship-preset -p, --presets           # filter: only custom presets
+#   omarchy-starship-preset -a, --all               # filter: both themes and presets (default)
+#   omarchy-starship-preset --list [mode]           # print items for Waymaker (all|themes|presets)
+#   omarchy-starship-preset --preview-only <name>   # print preset or theme TOML to stdout
 #
 # Interactive controls inside the picker:
-#   ↑↓      navigate presets
-#   Ctrl-L  cycle vim mode mock forward  (insert → normal → visual → insert)
-#   Ctrl-H  cycle vim mode mock backward
-#   Enter   select / open action menu
-#   Esc     quit
+#   ↑↓ / j/k  navigate presets / themes
+#   Tab       cycle view filter (Todos ↔ Temas ↔ Presets)
+#   Shift-Tab cycle view filter backwards
+#   Ctrl-L    cycle vim mode mock forward  (insert → normal → visual → insert)
+#   Ctrl-H    cycle vim mode mock backward
+#   Enter     select / open action menu
+#   Esc       quit
 #
 # Environment overrides (for scripting / one-shot previews):
+#   OMARCHY_STARSHIP_FILTER             initial filter (all|themes|presets)
 #   OMARCHY_STARSHIP_PREVIEW_STATUS     exit code mocked in the prompt (default 0)
 #   OMARCHY_STARSHIP_PREVIEW_ZVM_MODE   vim mode to force, ignoring the state file
 
@@ -26,6 +35,10 @@ set -euo pipefail
 
 LIVE_CONFIG="${OMARCHY_LIVE_CONFIG:-$HOME/.local/state/omarchy/current/theme/starship.toml}"
 CUSTOM_PRESETS="${OMARCHY_CUSTOM_PRESETS:-$HOME/.config/omarchy/starship-presets}"
+USER_THEMES="${OMARCHY_USER_THEMES:-$HOME/.config/omarchy/themes}"
+OMARCHY_THEMES="${OMARCHY_THEMES_PATH:-${OMARCHY_PATH:-/usr/share/omarchy}/themes}"
+TEMPLATE="${OMARCHY_STARSHIP_TEMPLATE:-$HOME/.config/omarchy/themed/starship.toml.tpl}"
+THEME_OVERRIDES="${OMARCHY_THEME_OVERRIDES:-$HOME/.config/omarchy/theme-overrides}"
 
 # ─── helpers ──────────────────────────────────────────────────────────────────
 
@@ -50,28 +63,195 @@ _mode_display() {
   esac
 }
 
-# Render a pretty preview for a Waymaker panel: simulated prompt + highlighted TOML.
-#
-# Mock env vars that `eval "$(starship init <shell>)"` would normally set so
-# custom modules gated on them (zvm_insert_* / zvm_normal_* / zvm_visual_*)
-# render:
-#
-#   STARSHIP_CMD_STATUS  exit code of the last command line. The init script
-#                        captures `$?` and passes it via `--status`, but
-#                        `--status` alone is NOT propagated to custom module
-#                        subshells, so we set the var explicitly.
-#   ZVM_MODE             vim mode (i / n / v / r). Read from the shared state
-#                        file written by the cycle-mode helper below, unless
-#                        OMARCHY_STARSHIP_PREVIEW_ZVM_MODE forces an override.
-#
-# STARSHIP_SHELL must NOT be fish: preset `when` scripts are sh/bash syntax
-# and starship runs them via $STARSHIP_SHELL when the module omits `shell`.
-# Fish can't parse them and silently skips the module. Bash wraps ANSI in
-# \[...\]; we strip those wrappers so Waymaker gets clean ANSI.
-render_preview() {
-  local label="$1" file="$2"
+find_theme_dir() {
+  local name="$1"
+  if [[ -d "$USER_THEMES/$name" ]]; then
+    printf '%s' "$USER_THEMES/$name"
+    return 0
+  fi
+  if [[ -d "$OMARCHY_THEMES/$name" ]]; then
+    printf '%s' "$OMARCHY_THEMES/$name"
+    return 0
+  fi
+  # Case-insensitive / hyphenated fallback (e.g. "Tokyo Night" -> "tokyo-night")
+  local normalized
+  normalized=$(echo "$name" | sed -E 's/<[^>]+>//g' | tr '[:upper:]' '[:lower:]' | tr ' ' '-')
+  if [[ -d "$USER_THEMES/$normalized" ]]; then
+    printf '%s' "$USER_THEMES/$normalized"
+    return 0
+  fi
+  if [[ -d "$OMARCHY_THEMES/$normalized" ]]; then
+    printf '%s' "$OMARCHY_THEMES/$normalized"
+    return 0
+  fi
+  return 1
+}
 
-  # Resolve the mocked vim mode: explicit env override > shared state file > "i".
+# Render an Omarchy theme on demand into $outfile using starship.toml.tpl + colors.toml
+render_theme_file() {
+  local theme_name="$1" outfile="$2"
+  local theme_dir
+  theme_dir="$(find_theme_dir "$theme_name")" || return 1
+
+  # If the theme ships its own complete starship.toml, use it directly
+  if [[ -f "$theme_dir/starship.toml" ]]; then
+    mkdir -p "$(dirname "$outfile")"
+    cp "$theme_dir/starship.toml" "$outfile"
+    return 0
+  fi
+
+  local colors_file="$theme_dir/colors.toml"
+  [[ -f "$colors_file" ]] || return 1
+  [[ -f "$TEMPLATE" ]] || return 1
+
+  mkdir -p "$(dirname "$outfile")"
+  local sed_script
+  sed_script="$(mktemp)"
+
+  hex_to_rgb() {
+    local hex="${1#\#}"
+    printf "%d,%d,%d" "0x${hex:0:2}" "0x${hex:2:2}" "0x${hex:4:2}"
+  }
+
+  add_color_to_sed() {
+    local k="$1" v="$2"
+    [[ -z "$k" || -z "$v" ]] && return
+    printf 's|{{ %s }}|%s|g\n' "$k" "$v" >>"$sed_script"
+    printf 's|{{ %s_strip }}|%s|g\n' "$k" "${v#\#}" >>"$sed_script"
+    if [[ $v =~ ^#[0-9A-Fa-f]{6}$ ]]; then
+      local rgb
+      rgb=$(hex_to_rgb "$v")
+      printf 's|{{ %s_rgb }}|%s|g\n' "$k" "$rgb" >>"$sed_script"
+    fi
+  }
+
+  if has omarchy-theme-color; then
+    while IFS=$'\t' read -r key value; do
+      add_color_to_sed "$key" "$value"
+    done < <(omarchy-theme-color --file "$colors_file" --all 2>/dev/null)
+  else
+    while IFS='=' read -r key value || [[ -n "$key" ]]; do
+      key="${key//[\"\' ]/}"
+      [[ $key && $key != \#* ]] || continue
+      value="${value#*[\"\']}"
+      value="${value%%[\"\']*}"
+      add_color_to_sed "$key" "$value"
+    done <"$colors_file"
+  fi
+
+  # Apply theme overrides if present (e.g. ~/.config/omarchy/theme-overrides/<theme>/starship/colors.toml)
+  local override_file="$THEME_OVERRIDES/$theme_name/starship/colors.toml"
+  if [[ -f "$override_file" ]]; then
+    while IFS='=' read -r key value || [[ -n "$key" ]]; do
+      key="${key//[\"\' ]/}"
+      [[ $key && $key != \#* ]] || continue
+      value="${value#*[\"\']}"
+      value="${value%%[\"\']*}"
+      add_color_to_sed "$key" "$value"
+      case "$key" in
+        color_os)         add_color_to_sed "lighter_background" "$value" ;;
+        color_dir)        add_color_to_sed "blue" "$value" ;;
+        color_git)        add_color_to_sed "bright_magenta" "$value" ;;
+        color_lang)       add_color_to_sed "green" "$value" ;;
+        color_comment)    add_color_to_sed "muted" "$value" ;;
+        color_vim_visual) add_color_to_sed "magenta" "$value" ;;
+      esac
+    done <"$override_file"
+  fi
+
+  sed -f "$sed_script" "$TEMPLATE" >"$outfile"
+  rm -f "$sed_script"
+}
+
+# ─── item listing (used by Waymaker start.command and cycling) ────────────────
+
+list_entries() {
+  local mode="${1:-all}"
+  local tmpdir="${TMPDIR_PRESETS:-/tmp}"
+
+  # Source 1 ── Current active theme prompt
+  if [[ "$mode" == "all" || "$mode" == "themes" || "$mode" == "theme" ]]; then
+    local current_theme_name=""
+    if [[ -f "$HOME/.local/state/omarchy/current/theme.name" ]]; then
+      current_theme_name="$(cat "$HOME/.local/state/omarchy/current/theme.name" 2>/dev/null || true)"
+    fi
+    if [[ -f "$LIVE_CONFIG" ]]; then
+      printf '%s\t%s\n' "[current] ${current_theme_name:-active theme}" "${LIVE_CONFIG}"
+    fi
+  fi
+
+  # Source 2 ── Omarchy themes rendered via starship.toml.tpl
+  if [[ "$mode" == "all" || "$mode" == "themes" || "$mode" == "theme" ]]; then
+    if [[ -f "$TEMPLATE" ]]; then
+      declare -A seen_themes=()
+      local raw_themes=()
+      for theme_dir in "$USER_THEMES"/*/ "$OMARCHY_THEMES"/*/; do
+        [[ -d "$theme_dir" ]] || continue
+        local t_name="$(basename "$theme_dir")"
+        [[ -n "${seen_themes[$t_name]:-}" ]] && continue
+        seen_themes[$t_name]=1
+        raw_themes+=("$t_name")
+      done
+
+      if [[ ${#raw_themes[@]} -gt 0 ]]; then
+        IFS=$'\n' sorted_themes=($(sort <<<"${raw_themes[*]}"))
+        unset IFS
+        for t_name in "${sorted_themes[@]}"; do
+          local t_dir
+          t_dir="$(find_theme_dir "$t_name")" || continue
+          if [[ -f "$t_dir/starship.toml" ]]; then
+            printf '%s\t%s\n' "[theme]   ${t_name}" "${t_dir}/starship.toml"
+          elif [[ -f "$t_dir/colors.toml" ]]; then
+            local outfile="$tmpdir/theme-${t_name}.toml"
+            printf '%s\t%s\n' "[theme]   ${t_name}" "${outfile}"
+          fi
+        done
+      fi
+    fi
+  fi
+
+  # Source 3 ── Custom presets from ~/.config/omarchy/starship-presets/
+  if [[ "$mode" == "all" || "$mode" == "presets" || "$mode" == "preset" ]]; then
+    if [[ -d "$CUSTOM_PRESETS" ]]; then
+      for preset_file in "$CUSTOM_PRESETS"/*.toml; do
+        [[ -f "$preset_file" ]] || continue
+        local preset_name="$(basename "$preset_file" .toml)"
+        printf '%s\t%s\n' "[preset]  ${preset_name}" "${preset_file}"
+      done
+    fi
+  fi
+}
+
+# ─── --render-preview (self-invoked by Waymaker preview panel) ────────────────
+
+render_preview() {
+  local arg1="${1:-}" arg2="${2:-}"
+  local label file
+
+  # Strip any surrounding single or double quotes passed by shell/picker interpolation
+  while [[ "$arg1" == \'*\' || "$arg1" == \"*\" ]]; do arg1="${arg1:1:-1}"; done
+  while [[ "$arg2" == \'*\' || "$arg2" == \"*\" ]]; do arg2="${arg2:1:-1}"; done
+
+  # Auto-detect which argument is the path and which is the label
+  if [[ "$arg1" == *.toml* || "$arg1" == *"/"* || -f "$arg1" ]]; then
+    file="$arg1"
+    label="$arg2"
+  else
+    label="$arg1"
+    file="$arg2"
+  fi
+
+  # On-demand theme generation for lazy loading
+  if [[ ! -f "$file" && "$file" == *"/theme-"* ]]; then
+    local t_name
+    t_name="$(basename "$file" .toml)"
+    t_name="${t_name#theme-}"
+    render_theme_file "$t_name" "$file" || true
+  fi
+
+  [[ -n "$file" && -f "$file" ]] || { echo "Preset / theme file not found: '$file'" >&2; return 1; }
+
+  # Resolve mocked vim mode: explicit env override > shared state file > "i".
   local mock_zvm="${OMARCHY_STARSHIP_PREVIEW_ZVM_MODE:-}"
   if [[ -z "$mock_zvm" && -n "${OMARCHY_MODE_FILE:-}" && -f "${OMARCHY_MODE_FILE}" ]]; then
     mock_zvm="$(cat "${OMARCHY_MODE_FILE}" 2>/dev/null || printf 'i')"
@@ -79,12 +259,15 @@ render_preview() {
   mock_zvm="${mock_zvm:-i}"
 
   local mock_status="${OMARCHY_STARSHIP_PREVIEW_STATUS:-0}"
+  local term_val="${TERM:-xterm-256color}"
+  [[ "$term_val" == "dumb" ]] && term_val="xterm-256color"
 
   printf '\033[1;36m━━━ %s \033[38;5;240m·\033[0m \033[1;35m%s\033[0m\n\n' \
-    "$label" "$(_mode_display "$mock_zvm")"
+    "${label:-$(basename "$file" .toml)}" "$(_mode_display "$mock_zvm")"
 
   local rendered
-  if rendered="$(STARSHIP_CONFIG="$file" \
+  if rendered="$(TERM="$term_val" \
+                  STARSHIP_CONFIG="$file" \
                   STARSHIP_SHELL=bash \
                   STARSHIP_CMD_STATUS="$mock_status" \
                   ZVM_MODE="$mock_zvm" \
@@ -93,6 +276,7 @@ render_preview() {
                     --terminal-width "${COLUMNS:-${WM_COLUMNS:-${MM_COLUMNS:-80}}}" 2>/dev/null)"; then
     rendered="${rendered//\\[/}"
     rendered="${rendered//\\]/}"
+    rendered="${rendered//\\$/$}"
     printf '%s\n' "$rendered"
     printf '\n\033[38;5;240m──────────────────────────────────────────────────\033[0m\n\n'
   fi
@@ -100,54 +284,116 @@ render_preview() {
   _bat_toml "$file"
 }
 
-# ─── --render-preview (self-invoked by Waymaker preview) ─────────────────────
-# Handled BEFORE the temp-dir allocation below: when Waymaker fires the preview,
-# this branch runs in a fresh shell and reads shared state via the exported
-# OMARCHY_*  env vars. The temp dir must NOT be re-created here, otherwise
-# each preview render would point at a fresh empty state file and Ctrl-L/Ctrl-H
-# could never persist a mode change across renders.
-
-if [[ "${1:-}" == "--render-preview" ]]; then
-  render_preview "$3" "$2"
-  exit 0
-fi
-
 # ─── --preview-only <name> (non-interactive / scripting mode) ─────────────────
 
-if [[ "${1:-}" == "--preview-only" ]]; then
-  [[ -z "${2:-}" ]] && { echo "Usage: omarchy-starship-preset --preview-only <name>" >&2; exit 1; }
-  name="$2"
-  preset_file="$CUSTOM_PRESETS/$name.toml"
+preview_only() {
+  local name="$1"
+  [[ -z "$name" ]] && { echo "Usage: omarchy-starship-preset --preview-only <name>" >&2; exit 1; }
+
+  # 1. Custom preset
+  local preset_file="$CUSTOM_PRESETS/$name.toml"
   if [[ -f "$preset_file" ]]; then
     cat "$preset_file"
-    exit 0
+    return 0
   fi
-  printf 'Custom preset "%s" not found.\nAvailable custom presets:\n' "$name" >&2
+
+  # 2. Omarchy Theme
+  local theme_dir
+  if theme_dir="$(find_theme_dir "$name")"; then
+    if [[ -f "$theme_dir/starship.toml" ]]; then
+      cat "$theme_dir/starship.toml"
+      return 0
+    elif [[ -f "$theme_dir/colors.toml" && -f "$TEMPLATE" ]]; then
+      local tmp_out
+      tmp_out="$(mktemp)"
+      render_theme_file "$name" "$tmp_out"
+      cat "$tmp_out"
+      rm -f "$tmp_out"
+      return 0
+    fi
+  fi
+
+  printf 'Preset or theme "%s" not found.\nAvailable custom presets:\n' "$name" >&2
   for f in "$CUSTOM_PRESETS"/*.toml; do
     [[ -f "$f" ]] && basename "$f" .toml
   done >&2
-  exit 1
-fi
+  return 1
+}
+
+# ─── argument parsing ─────────────────────────────────────────────────────────
+
+FILTER_MODE="all"
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --render-preview)
+      render_preview "${2:-}" "${3:-}"
+      exit 0
+      ;;
+    --preview-only)
+      preview_only "${2:-}"
+      exit 0
+      ;;
+    --list)
+      list_entries "${2:-all}"
+      exit 0
+      ;;
+    -t|--theme|--themes)
+      FILTER_MODE="themes"
+      shift
+      ;;
+    -p|--preset|--presets)
+      FILTER_MODE="presets"
+      shift
+      ;;
+    -a|--all)
+      FILTER_MODE="all"
+      shift
+      ;;
+    -h|--help)
+      echo "Usage: omarchy-starship-preset [options]"
+      echo ""
+      echo "Options:"
+      echo "  -t, --themes     Filter and show only Omarchy themes"
+      echo "  -p, --presets    Filter and show only Starship presets"
+      echo "  -a, --all        Show both themes and presets (default)"
+      echo "  --preview-only <name>   Print rendered preset/theme TOML to stdout"
+      echo "  --list [mode]           Print entries for Waymaker (all|themes|presets)"
+      echo "  -h, --help              Show this help message"
+      exit 0
+      ;;
+    *)
+      # Fallback for single-arg usage: omarchy-starship-preset <name> prints TOML
+      if [[ $# -eq 1 ]]; then
+        preview_only "$1"
+        exit 0
+      fi
+      shift
+      ;;
+  esac
+done
 
 # ─── main flow: temp dirs, state file, cycle helper ──────────────────────────
 
+export OMARCHY_STARSHIP_FILTER="$FILTER_MODE"
 export TMPDIR_PRESETS
 TMPDIR_PRESETS="$(mktemp -d /tmp/omarchy-starship-preset.XXXXXX)"
 trap 'rm -rf "$TMPDIR_PRESETS"' EXIT
 
-# Re-export paths so --render-preview self-invocations see the same values.
+# Re-export paths so Waymaker subprocesses see the same state
 export OMARCHY_LIVE_CONFIG="$LIVE_CONFIG"
 export OMARCHY_CUSTOM_PRESETS="$CUSTOM_PRESETS"
+export OMARCHY_USER_THEMES="$USER_THEMES"
+export OMARCHY_THEMES="$OMARCHY_THEMES"
+export OMARCHY_STARSHIP_TEMPLATE="$TEMPLATE"
+export OMARCHY_THEME_OVERRIDES="$THEME_OVERRIDES"
 
-# Shared vim-mode state file. Initial mode = insert (matches a freshly opened
-# shell). The cycle-mode helper rewrites this file atomically; render_preview
-# reads it on every preview render.
+# Shared vim-mode state file. Initial mode = insert.
 MODE_FILE="$TMPDIR_PRESETS/mode"
 printf 'i' > "$MODE_FILE"
 export OMARCHY_MODE_FILE="$MODE_FILE"
 
-# Small standalone helper invoked by Waymaker keybinds. Updates
-# $MODE_FILE in place (so the subsequent change-preview re-render picks it up).
+# Small standalone helper invoked by Waymaker keybinds. Updates $MODE_FILE in place.
 CYCLE_SCRIPT="$TMPDIR_PRESETS/cycle-mode.sh"
 cat > "$CYCLE_SCRIPT" <<'EOF'
 #!/usr/bin/env bash
@@ -170,27 +416,6 @@ EOF
 chmod +x "$CYCLE_SCRIPT"
 export OMARCHY_STARSHIP_CYCLE_SCRIPT="$CYCLE_SCRIPT"
 
-# ─── build item list ──────────────────────────────────────────────────────────
-# Each entry is:  "<display-label>\t<toml-file-path>"
-
-entries=()
-
-# Source ── custom presets from ~/.config/omarchy/starship-presets/
-if [[ -d "$CUSTOM_PRESETS" ]]; then
-  for preset_file in "$CUSTOM_PRESETS"/*.toml; do
-    [[ -f "$preset_file" ]] || continue
-    preset_name="$(basename "$preset_file" .toml)"
-    outfile="$TMPDIR_PRESETS/custom-${preset_name}.toml"
-    cp "$preset_file" "$outfile"
-    entries+=("${preset_name}"$'\t'"${outfile}")
-  done
-fi
-
-if [[ ${#entries[@]} -eq 0 ]]; then
-  echo "No presets found." >&2
-  exit 1
-fi
-
 # ─── Waymaker picker ──────────────────────────────────────────────────────────
 
 if ! has wm && ! has mm; then
@@ -200,17 +425,21 @@ fi
 
 WM_BIN="$(has wm && echo "wm" || echo "mm")"
 
-SCRIPT_PATH="$(realpath "$0")"
-
 selection="$(
-  printf '%s\n' "${entries[@]}" \
-  | "$WM_BIN" -o starship-presets
+  "$WM_BIN" -o starship-presets
 )" || exit 0
 
 [[ -z "$selection" ]] && exit 0
 
 label="${selection%%$'\t'*}"
 file="${selection##*$'\t'}"
+
+# Ensure selected theme is rendered if user accepted before previewing
+if [[ ! -f "$file" && "$file" == *"/theme-"* ]]; then
+  t_name="$(basename "$file" .toml)"
+  t_name="${t_name#theme-}"
+  render_theme_file "$t_name" "$file" || true
+fi
 
 # ─── post-selection action menu ───────────────────────────────────────────────
 
@@ -226,30 +455,32 @@ while true; do
 
   case "$choice" in
     s|S)
+      mkdir -p "$(dirname "$LIVE_CONFIG")"
       backup="${LIVE_CONFIG}.bak.$(date +%Y%m%d%H%M%S)"
-      cp "$LIVE_CONFIG" "$backup"
+      [[ -f "$LIVE_CONFIG" ]] && cp "$LIVE_CONFIG" "$backup"
       cp "$file" "$LIVE_CONFIG"
       printf '\n  \033[1;32m✓ Saved.\033[0m Backup → %s\n\n' "$backup"
       break
       ;;
     t|T)
       printf '\n  \033[1;36m→ Opening test shell\033[0m (type "exit" to return)...\n\n'
-      # starship.zsh in zsh init always re-exports STARSHIP_CONFIG to the live
-      # path, so passing the env var is silently overwritten. Instead, swap the
-      # preset into the live file for the duration of the test shell, then
-      # restore.  Backup lives in TMPDIR_PRESETS so it's cleaned up on EXIT.
+      mkdir -p "$(dirname "$LIVE_CONFIG")"
       live_backup="$TMPDIR_PRESETS/live.bak"
-      cp "$LIVE_CONFIG" "$live_backup"
+      [[ -f "$LIVE_CONFIG" ]] && cp "$LIVE_CONFIG" "$live_backup"
       cp "$file" "$LIVE_CONFIG"
       zsh
-      cp "$live_backup" "$LIVE_CONFIG"
+      [[ -f "$live_backup" ]] && cp "$live_backup" "$LIVE_CONFIG"
       printf '\n  \033[38;5;240m(restored original starship.toml)\033[0m\n\n'
       ;;
     d|D)
       printf '\n'
-      diff --color=always "$LIVE_CONFIG" "$file" \
-        && printf '  \033[38;5;240m(no differences)\033[0m\n' \
-        || true
+      if [[ -f "$LIVE_CONFIG" ]]; then
+        diff --color=always "$LIVE_CONFIG" "$file" \
+          && printf '  \033[38;5;240m(no differences)\033[0m\n' \
+          || true
+      else
+        printf '  \033[38;5;240m(no current live config to compare against)\033[0m\n'
+      fi
       printf '\n'
       ;;
     q|Q|$'\x1b'|'')
