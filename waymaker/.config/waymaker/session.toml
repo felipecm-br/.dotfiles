@@ -1,4 +1,9 @@
 [[wildcard]]
+pattern = "~/dev/github/starship-studio/**"
+startup_command = "agy"
+windows = ["server"]
+
+[[wildcard]]
 pattern = "~/dev/github/**"
 startup_command = "agy"
 
@@ -10,3 +15,7 @@ startup_command = "agy"
 name = " Downloads"
 path = "~/Downloads"
 startup_command = "wm -o jump"
+
+[[window]]
+name = "server"
+startup_script = "npx -y live-server --port=5500"
