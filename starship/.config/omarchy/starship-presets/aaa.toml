@@ -28,9 +28,9 @@ $wave2_crest_shadow\
 [](fg:color_wet_sand bg:color_time)\
 
 $time\
-[](fg:color_time)\
-$wave3crestshadow\
-[](fg:color_wet_sand bg:transparent)\
+[](fg:color_white bg:color_time)\
+[](fg:color_lang bg:color_dark)\
+[](fg:color_dark bg:transparent)\
 
 
 \n$character"""
@@ -47,7 +47,7 @@ color_time = '#c7ad7f' # Warm Ochre Sand (Rowboats & warm sky horizon)
 color_fuji = '#58636d' # Stormy Grey (Mist behind Mount Fuji)
 color_rose = '#3a2c2c' # Stormy Grey (Mist behind Mount Fuji)
 color_wet_sand = '#887656' #s
-color_dark = '#3a2c2c' # Stormy Grey (Mist behind Mount Fuji)
+color_dark = '#130e0e' # Stormy Grey (Mist behind Mount Fuji)
 color_sky = '#87b5e0' # Stormy Grey (Mist behind Mount Fuji)
 color_white = '#ffffff'
 
@@ -79,21 +79,25 @@ symbol = ""
 style = "bg:color_lang fg:color_os bold"
 format = '[ $symbol($version) ]($style)'
 
-
-[wave3crestshadow]
+[wave3_crest]
 symbol = ""
-style = "bg:color_wet_sand fg:color_os bold"
-format = ' [$symbol]($style) '
+style = "bg:color_sky fg:color_os bold"
+format = '[ $symbol($version) ]($style)'
 
-[wave2_crest_shadow]
-symbol = ""
-style = "bg:color_wet_sand fg:color_os bold"
-format = '[$symbol]($style)'
+# [wave3crestshadow]
+# symbol = ""
+# style = "bg:color_wet_sand fg:color_os bold"
+# format = ' [$symbol]($style) '
 
-[wave1_crest_shadow]
-symbol = ""
-style = "bg:color_wet_sand fg:color_os bold"
-format = '[$symbol]($style)'
+# [wave2_crest_shadow]
+# symbol = ""
+# style = "bg:color_wet_sand fg:color_os bold"
+# format = '[$symbol]($style)'
+
+# [wave1_crest_shadow]
+# symbol = ""
+# style = "bg:color_wet_sand fg:color_os bold"
+# format = '[$symbol]($style)'
 
 [bubbles]
 symbol = ""
