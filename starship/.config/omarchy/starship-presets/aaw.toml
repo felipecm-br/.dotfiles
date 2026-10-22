@@ -17,8 +17,8 @@ $git_branch$git_status\
 [](fg:color_git bg:color_lang)\
 $empty\
 [](fg:color_lang bg:color_rose)\
-$rust$nodejs$deno$python\
-[](fg:color_rose bg:color_time)\
+$deno\
+[ ](fg:color_rose bg:color_time)\
 $time\
 [](fg:color_time)\
 \n$character"""
@@ -73,7 +73,7 @@ format = '[$symbol]($style)'
 disabled = false
 time_format = "%R"
 style = "bg:color_time fg:color_bg bold"
-format = '[  $time ]($style)'
+format = '[ $time ]($style)'
 
 # THE SWELL PROMPT
 [character]
