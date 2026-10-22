@@ -16,8 +16,14 @@ $os\
 $git_branch$git_status\
 
 [](fg:color_white bg:color_git)\
+[](fg:color_lang bg:color_dark_bubbles)\
+[](fg:color_dark_bubbles bg:color_dir)\
+$directory\
+
+[](fg:color_white bg:color_git)\
 [](fg:color_lang bg:color_wet_sand)\
 [](fg:color_wet_sand bg:color_time)\
+$deno\
 
 $time\
 [](fg:color_white bg:color_time)\
@@ -39,9 +45,15 @@ color_time = '#c7ad7f' # Warm Ochre Sand (Rowboats & warm sky horizon)
 color_fuji = '#58636d' # Stormy Grey (Mist behind Mount Fuji)
 color_rose = '#3a2c2c' # Stormy Grey (Mist behind Mount Fuji)
 color_wet_sand = '#887656' #s
+color_dark_bubbles = '#4590c6' #s
 color_dark = '#130e0e' # Stormy Grey (Mist behind Mount Fuji)
 color_sky = '#87b5e0' # Stormy Grey (Mist behind Mount Fuji)
 color_white = '#ffffff'
+
+[deno]
+symbol = "o"
+style = "bg:color_lang fg:color_os bold"
+format = '[$symbol]($style)'
 
 # 1. THE DEEP ABYSS
 [os]
