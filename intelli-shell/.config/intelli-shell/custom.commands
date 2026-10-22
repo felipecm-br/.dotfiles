@@ -472,7 +472,7 @@ update-ai-workflow --only {{component}}
 # Convenient shortcut to update AI workflow dependencies
 ai-update
 
-# Browse, preview, and apply Starship prompt presets and Omarchy themes interactively
+# Browse, hot-reload preview, and apply Starship prompt presets (listed first) and Omarchy themes interactively
 omarchy-starship-preset
 
 # Browse and preview only Omarchy themes for Starship prompt

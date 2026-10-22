@@ -33,7 +33,7 @@ color_git  = '#6d94a6' # Seafoam Slate (Curling wave claws)
 color_lang = '#f2f5f7' # Crisp White Foam (Breaking crest & Mt. Fuji snow)
 color_time = '#c7ad7f' # Warm Ochre Sand (Rowboats & warm sky horizon)
 color_fuji = '#58636d' # Stormy Grey (Mist behind Mount Fuji)
-color_rose = '#a3a3a3' # Stormy Grey (Mist behind Mount Fuji)
+color_rose = '#150202' # Stormy Grey (Mist behind Mount Fuji)
 
 # 1. THE DEEP ABYSS
 [os]

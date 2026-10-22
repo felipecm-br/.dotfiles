@@ -66,7 +66,7 @@ Specialized TUI pickers configured in [`waymaker/.config/waymaker/presets/`](../
 * `wm -o animations` / `hypr-anim` — Interactive Hyprland window animation switcher (`SUPER + SHIFT + A`).
 * `wm -o sounds` / `ai-sound-switcher` — Interactive Waymux audio pack & sound alert switcher.
 * `wm -o backgrounds` — Interactive Omarchy wallpaper switcher.
-* `wm -o starship-presets` — Interactive Starship prompt preset switcher.
+* `wm -o starship-presets` / `omarchy-starship-preset` — Interactive Starship prompt preset & Omarchy theme switcher (presets listed first, hot-reloading preview).
 
 See [waymaker-presets.md](shell/waymaker-presets.md) for full documentation.
 

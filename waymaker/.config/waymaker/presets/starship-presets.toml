@@ -32,10 +32,13 @@ debounce_ms = 10
 delay_clear = false
 
 # Layout 1: Starship live prompt + TOML configuration preview
+# poll_ms = hot reload: the preview re-runs every 500 ms, so edits to the previewed preset or
+# theme show up without moving the cursor (scroll position is kept). Remove to disable.
 [[preview.layout]]
 command = 'omarchy-starship-preset --render-preview {path} {label}'
 side = "right"
 percentage = 65
+poll_ms = 500
 
 [columns]
 split = "\t"

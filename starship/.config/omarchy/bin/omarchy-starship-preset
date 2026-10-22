@@ -2,10 +2,16 @@
 # omarchy-starship-preset
 # Interactive Waymaker (wm) picker to browse, preview, and apply starship.toml presets & themes.
 #
-# Sources:
+# Sources (listed in this order: presets first, then themes):
+#   [preset]  Custom presets from ~/.config/omarchy/starship-presets/
 #   [current] Currently active theme prompt (from ~/.local/state/omarchy/current/theme/starship.toml)
 #   [theme]   Omarchy system themes rendered dynamically from colors.toml + starship.toml.tpl
-#   [preset]  Custom presets from ~/.config/omarchy/starship-presets/
+#
+# Hot reload:
+#   Waymaker re-runs the preview every `poll_ms` (see starship-presets.toml), so saving a preset,
+#   a theme's colors.toml or starship.toml.tpl redraws the prompt in place.
+#   A config that fails to parse is reported in place of the prompt (starship would silently
+#   fall back to its default prompt).
 #
 # Usage:
 #   omarchy-starship-preset                         # interactive picker (all items)
@@ -159,8 +165,36 @@ render_theme_file() {
     done <"$override_file"
   fi
 
-  sed -f "$sed_script" "$TEMPLATE" >"$outfile"
+  # Write atomically: the polling preview may be killed mid-render (fast navigation),
+  # and a truncated cache file would otherwise look up to date.
+  sed -f "$sed_script" "$TEMPLATE" >"$outfile.tmp.$$"
+  mv -f "$outfile.tmp.$$" "$outfile"
   rm -f "$sed_script"
+}
+
+# True when the cached render of a theme is missing or older than any of its inputs
+# (colors.toml, the template, a per-theme override).
+theme_is_stale() {
+  local theme_name="$1" outfile="$2" theme_dir input
+  [[ -f "$outfile" ]] || return 0
+  theme_dir="$(find_theme_dir "$theme_name")" || return 1
+  for input in "$theme_dir/colors.toml" "$TEMPLATE" "$THEME_OVERRIDES/$theme_name/starship/colors.toml"; do
+    [[ -f "$input" && "$input" -nt "$outfile" ]] && return 0
+  done
+  return 1
+}
+
+# Render a theme into the picker's cache dir on demand, and again whenever one of its
+# inputs changed (hot reload). Anything outside that cache dir, such as a custom preset
+# that happens to be named theme-*.toml, is never touched.
+ensure_theme_rendered() {
+  local file="$1" t_name
+  [[ "$file" == "${TMPDIR_PRESETS:-/tmp}/theme-"*.toml ]] || return 0
+  t_name="$(basename "$file" .toml)"
+  t_name="${t_name#theme-}"
+  if theme_is_stale "$t_name" "$file"; then
+    render_theme_file "$t_name" "$file" || true
+  fi
 }
 
 # ─── item listing (used by Waymaker start.command and cycling) ────────────────
@@ -169,7 +203,18 @@ list_entries() {
   local mode="${1:-all}"
   local tmpdir="${TMPDIR_PRESETS:-/tmp}"
 
-  # Source 1 ── Current active theme prompt
+  # Source 1 ── Custom presets from ~/.config/omarchy/starship-presets/ (listed first)
+  if [[ "$mode" == "all" || "$mode" == "presets" || "$mode" == "preset" ]]; then
+    if [[ -d "$CUSTOM_PRESETS" ]]; then
+      for preset_file in "$CUSTOM_PRESETS"/*.toml; do
+        [[ -f "$preset_file" ]] || continue
+        local preset_name="$(basename "$preset_file" .toml)"
+        printf '%s\t%s\n' "[preset]  ${preset_name}" "${preset_file}"
+      done
+    fi
+  fi
+
+  # Source 2 ── Current active theme prompt (heads the theme group)
   if [[ "$mode" == "all" || "$mode" == "themes" || "$mode" == "theme" ]]; then
     local current_theme_name=""
     if [[ -f "$HOME/.local/state/omarchy/current/theme.name" ]]; then
@@ -180,7 +225,7 @@ list_entries() {
     fi
   fi
 
-  # Source 2 ── Omarchy themes rendered via starship.toml.tpl
+  # Source 3 ── Omarchy themes rendered via starship.toml.tpl
   if [[ "$mode" == "all" || "$mode" == "themes" || "$mode" == "theme" ]]; then
     if [[ -f "$TEMPLATE" ]]; then
       declare -A seen_themes=()
@@ -209,17 +254,6 @@ list_entries() {
       fi
     fi
   fi
-
-  # Source 3 ── Custom presets from ~/.config/omarchy/starship-presets/
-  if [[ "$mode" == "all" || "$mode" == "presets" || "$mode" == "preset" ]]; then
-    if [[ -d "$CUSTOM_PRESETS" ]]; then
-      for preset_file in "$CUSTOM_PRESETS"/*.toml; do
-        [[ -f "$preset_file" ]] || continue
-        local preset_name="$(basename "$preset_file" .toml)"
-        printf '%s\t%s\n' "[preset]  ${preset_name}" "${preset_file}"
-      done
-    fi
-  fi
 }
 
 # ─── --render-preview (self-invoked by Waymaker preview panel) ────────────────
@@ -241,13 +275,8 @@ render_preview() {
     file="$arg2"
   fi
 
-  # On-demand theme generation for lazy loading
-  if [[ ! -f "$file" && "$file" == *"/theme-"* ]]; then
-    local t_name
-    t_name="$(basename "$file" .toml)"
-    t_name="${t_name#theme-}"
-    render_theme_file "$t_name" "$file" || true
-  fi
+  # On-demand theme generation for lazy loading (refreshed when its inputs change)
+  ensure_theme_rendered "$file"
 
   [[ -n "$file" && -f "$file" ]] || { echo "Preset / theme file not found: '$file'" >&2; return 1; }
 
@@ -265,19 +294,40 @@ render_preview() {
   printf '\033[1;36m━━━ %s \033[38;5;240m·\033[0m \033[1;35m%s\033[0m\n\n' \
     "${label:-$(basename "$file" .toml)}" "$(_mode_display "$mock_zvm")"
 
-  local rendered
-  if rendered="$(TERM="$term_val" \
-                  STARSHIP_CONFIG="$file" \
-                  STARSHIP_SHELL=bash \
-                  STARSHIP_CMD_STATUS="$mock_status" \
-                  ZVM_MODE="$mock_zvm" \
-                  starship prompt \
-                    --status "$mock_status" --jobs 0 \
-                    --terminal-width "${COLUMNS:-${WM_COLUMNS:-${MM_COLUMNS:-80}}}" 2>/dev/null)"; then
+  # One starship run with stdout and stderr kept apart, without temp files: the group's
+  # stderr reaches the outer substitution first, then a separator, then the captured prompt.
+  # A config that fails to parse is reported only on stderr while starship silently renders
+  # its default prompt, which would pass for this preset's render mid-edit (hot reload).
+  # Only that case is surfaced: starship prints each warning once per session, so those would
+  # flash for a single poll and vanish.
+  local sep=$'\x1f' out rendered diag config_error=0
+  out="$({ prompt="$(TERM="$term_val" \
+                      STARSHIP_CONFIG="$file" \
+                      STARSHIP_SHELL=bash \
+                      STARSHIP_CMD_STATUS="$mock_status" \
+                      ZVM_MODE="$mock_zvm" \
+                      starship prompt \
+                        --status "$mock_status" --jobs 0 \
+                        --terminal-width "${COLUMNS:-${WM_COLUMNS:-${MM_COLUMNS:-80}}}")"; } 2>&1
+         printf '%s%s' "$sep" "$prompt")"
+  diag="${out%%"$sep"*}"
+  rendered="${out#*"$sep"}"
+  [[ "$diag" == *"Unable to parse the config file"* ]] && config_error=1
+
+  if (( config_error )); then
+    local diag_lines
+    mapfile -t -n 12 diag_lines <<<"$diag"
+    printf '\033[1;31m ⚠ starship cannot parse this config\033[0m\n\n'
+    printf '%s\n' "${diag_lines[@]}"
+    printf '\033[0m'
+  elif [[ -n "$rendered" ]]; then
     rendered="${rendered//\\[/}"
     rendered="${rendered//\\]/}"
     rendered="${rendered//\\$/$}"
     printf '%s\n' "$rendered"
+  fi
+
+  if (( config_error )) || [[ -n "$rendered" ]]; then
     printf '\n\033[38;5;240m──────────────────────────────────────────────────\033[0m\n\n'
   fi
 
@@ -434,12 +484,8 @@ selection="$(
 label="${selection%%$'\t'*}"
 file="${selection##*$'\t'}"
 
-# Ensure selected theme is rendered if user accepted before previewing
-if [[ ! -f "$file" && "$file" == *"/theme-"* ]]; then
-  t_name="$(basename "$file" .toml)"
-  t_name="${t_name#theme-}"
-  render_theme_file "$t_name" "$file" || true
-fi
+# Ensure the selected theme is rendered, and current, even if accepted before previewing
+ensure_theme_rendered "$file"
 
 # ─── post-selection action menu ───────────────────────────────────────────────
 

@@ -26,7 +26,7 @@ Waymaker (`wm`) uses TOML configuration presets located in `~/.config/waymaker/p
 | **animations** | `wm -o animations` / `hypr-anim` | Interactive live Hyprland window animation switcher with instant visual preview. | `j` / `k`: Live-apply animation curve<br>`Enter`: Persist animation style |
 | **backgrounds** | `wm -o backgrounds` | Interactive Omarchy desktop wallpaper switcher with Kitty Graphics preview. | `Enter`: Set active desktop background |
 | **sounds** | `wm -o sounds` / `ai-sound-switcher` | Interactive Waymux auditory telemetry sound pack & event previewer. | `Enter`: Set sound<br>`p` / `Space`: Replay audio sample |
-| **starship-presets** | `wm -o starship-presets` | Interactive Starship prompt theme switcher with live prompt preview. | `Enter`: Apply Starship preset |
+| **starship-presets** | `wm -o starship-presets` / `omarchy-starship-preset` | Interactive Starship prompt preset & Omarchy theme switcher. Custom presets are listed first, then the current theme and the Omarchy themes. The preview hot-reloads every 500 ms (`poll_ms`): saving the previewed preset, a theme's `colors.toml` or `starship.toml.tpl` redraws the prompt in place, and a config that fails to parse is reported in place of the prompt instead of Starship silently falling back to its default prompt. | `Enter`: Apply Starship preset |
 
 ## Headless Filter Mode (`wm -f <query>` / `wm --filter <query>`)
 
