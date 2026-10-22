@@ -1,0 +1,119 @@
+# ==============================================================================
+#  Preset: Chroma Cool
+#  Inspired by: notMyShell Chroma treatment, preset 'cool' (src/chroma/treatment.ts PRESET_STOPS)
+#  Stops: #2ec4b6 #3a86ff #5e60ce #48bfe3
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+# glyph-stacking: gradient
+# Segments sample the stops at t = 0, 0.25, 0.5, 0.75, 1 in OKLab; each transition chain steps
+# through two more OKLab samples, so the bar reads as a per-cell gradient like notMyShell's.
+# Regenerate colors with .agents/skills/starship-glyph-stacking/scripts/gradient.py.
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# Glyph chain: three ice waveforms U+E0C8: frost crystallising across cool water
+format = """
+[](fg:color_s0)\
+$os\
+[](fg:color_s0 bg:color_s01a)\
+[](fg:color_s01a bg:color_s01b)\
+[](fg:color_s01b bg:color_s1)\
+
+$directory\
+[](fg:color_s1 bg:color_s12a)\
+[](fg:color_s12a bg:color_s12b)\
+[](fg:color_s12b bg:color_s2)\
+
+$git_branch$git_status\
+[](fg:color_s2 bg:color_s23a)\
+[](fg:color_s23a bg:color_s23b)\
+[](fg:color_s23b bg:color_s3)\
+
+$c$rust$golang$nodejs$deno$python\
+[](fg:color_s3 bg:color_s34a)\
+[](fg:color_s34a bg:color_s34b)\
+[](fg:color_s34b bg:color_s4)\
+
+$time\
+[](fg:color_s4 bg:transparent)\
+\n$character"""
+
+palette = 'chroma_cool'
+
+[palettes.chroma_cool]
+color_s0       = '#2ec4b6' # t=0.00 segment fill
+color_s1       = '#3398ee' # t=0.25 segment fill
+color_s2       = '#5173e6' # t=0.50 segment fill
+color_s3       = '#5c79d4' # t=0.75 segment fill
+color_s4       = '#48bfe3' # t=1.00 segment fill
+color_s01a     = '#2cb6ca' # t=0.083 transition step
+color_s01b     = '#2ea8dd' # t=0.167 transition step
+color_s12a     = '#3a86ff' # t=0.333 transition step
+color_s12b     = '#487df3' # t=0.417 transition step
+color_s23a     = '#596ada' # t=0.583 transition step
+color_s23b     = '#5e60ce' # t=0.667 transition step
+color_s34a     = '#5991d9' # t=0.833 transition step
+color_s34b     = '#52a8de' # t=0.917 transition step
+color_ink      = '#15131a' # Ink (text on light fills)
+color_ink_deep = '#000000' # Contrast-corrected ink (fill below 4.5:1 with standard ink)
+color_error    = '#ff3355' # Error (paired with the ✗ shape)
+
+[os]
+disabled = false
+style = "bg:color_s0 fg:color_ink bold"
+format = '[ 󰏘 ]($style)'
+
+[directory]
+style = "bg:color_s1 fg:color_ink bold"
+format = "[ 󰲋 $path ]($style)"
+truncation_length = 3
+
+[git_branch]
+symbol = " "
+style = "bg:color_s2 fg:color_ink_deep bold"
+format = '[ $symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_s2 fg:color_ink_deep bold"
+format = '([$all_status$ahead_behind ]($style))'
+
+[c]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[rust]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[golang]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[deno]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[python]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_s4 fg:color_ink bold"
+format = '[ $time ]($style)'
+
+# A three-step gradient chevron (starting at the first fill visible on a dark terminal); errors swap to a single-hue ✗ so they never blend into the gradient.
+[character]
+success_symbol = "[❯](bold color_s0)[❯](bold color_s2)[❯](bold color_s4)"
+error_symbol = "[✗❯](bold color_error)"

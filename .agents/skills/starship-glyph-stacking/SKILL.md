@@ -142,6 +142,20 @@ Geometric is partial (no `◢◣◤◥◖◗◠◡`). Legacy Computing (U+1FB00,
 Reference set: `1-kanagawa-v5` (shades), `v6` (blocks and quadrants), `v7` (Braille), `v8` (box drawing
 with a flame closing each chain), and `v9` (all families, one per layer).
 
+#### Gradient presets
+
+For a palette-driven gradient instead of an artwork (for example the `chroma-*` presets, see
+[docs/theme/starship-chroma-presets.md](../../../docs/theme/starship-chroma-presets.md)):
+
+- Sample the stops with `scripts/gradient.py <count> <#hex>...`, which interpolates in OKLab (RGB muddies the
+  midpoints). Fill the segments at `t = k/(n-1)`, and step each transition chain through extra samples
+  between its two segments, handing the colors off from glyph to glyph.
+- Pick dark or light text per fill. Where neither reaches 4.5:1, correct the text to pure black or white
+  rather than moving the gradient.
+- Add the line `# glyph-stacking: gradient` to the file. The validator then skips chain-layer contrast
+  warnings (smooth steps are the intent) but still checks text contrast.
+- Never draw a full-width gradient with a `[custom]` module: it forks on every prompt.
+
 ### Step 4: Write the TOML
 
 Use this skeleton and keep the header comment format of the existing presets:

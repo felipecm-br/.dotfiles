@@ -169,7 +169,9 @@ def main():
     if cur:
         chains.append(cur)
 
-    print("-- glyph chains")
+    # Gradient presets opt out of chain-layer contrast warnings with this marker.
+    gradient = "# glyph-stacking: gradient" in open(path, encoding="utf-8").read()
+    print("-- glyph chains" + (" (gradient mode: layer contrast not checked)" if gradient else ""))
     signatures = set()
     for i, chain in enumerate(chains, 1):
         sig = " ".join(f"U+{ord(t[0][0]):04X}" for t in chain)
@@ -179,6 +181,8 @@ def main():
             if fg and bg:
                 r = contrast(fg, bg)
                 note = f"{r:.2f}:1"
+                if gradient:
+                    continue  # smooth steps are the intent; text contrast still applies
                 if r < 1.15:
                     warn(f"chain {i} layer {text} ({style}) {note}: glyph is invisible")
                 elif r < 1.3:
