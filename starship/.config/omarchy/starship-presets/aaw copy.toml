@@ -10,10 +10,24 @@
 format = """
 [](fg:color_os)\
 $os\
-[](fg:color_os bg:color_dir)\
+[](fg:color_white bg:color_os)\
+$bubbles\
+$wave_crest\
+[](fg:color_lang bg:color_dark)\
+$wave_crest_shadow\
+[](fg:color_dark bg:color_dir)\
+[](fg:color_os bg:color_dir)\
 $directory\
-[](fg:color_dir bg:color_git)\
+
+[](fg:color_white bg:color_dir)\
+$bubbles\
+$wave_crest\
+[](fg:color_lang bg:color_dark)\
+$wave_crest_shadow\
+[](fg:color_dark bg:color_git)\
+[](fg:color_dir bg:color_git)\
 $git_branch$git_status\
+
 [](fg:color_white bg:color_git)\
 $bubbles\
 $wave_crest\
@@ -21,6 +35,7 @@ $wave_crest\
 $wave_crest_shadow\
 [](fg:color_rose bg:color_time)\
 $time\
+
 [](fg:color_time)\
 \n$character"""
 
@@ -34,7 +49,8 @@ color_git  = '#6d94a6' # Seafoam Slate (Curling wave claws)
 color_lang = '#f2f5f7' # Crisp White Foam (Breaking crest & Mt. Fuji snow)
 color_time = '#c7ad7f' # Warm Ochre Sand (Rowboats & warm sky horizon)
 color_fuji = '#58636d' # Stormy Grey (Mist behind Mount Fuji)
-color_rose = '#6c4545' # Stormy Grey (Mist behind Mount Fuji)
+color_rose = '#3a2c2c' # Stormy Grey (Mist behind Mount Fuji)
+color_dark = '#3a2c2c' # Stormy Grey (Mist behind Mount Fuji)
 color_sky = '#87b5e0' # Stormy Grey (Mist behind Mount Fuji)
 color_white = '#ffffff'
 
@@ -47,7 +63,7 @@ format = '[ 󰣇 ]($style)'
 # 2. THE RISING SWELL
 [directory]
 style = "bg:color_dir fg:color_lang bold"
-format = "[ 󰲋 $path ]($style)"
+format = "[󰲋 $path ]($style)"
 truncation_length = 3
 truncation_symbol = "≈/" # Wave tilde truncation!
 
@@ -55,7 +71,7 @@ truncation_symbol = "≈/" # Wave tilde truncation!
 [git_branch]
 symbol = " "
 style = "bg:color_git fg:color_bg bold"
-format = '[ $symbol$branch ]($style)'
+format = '[$symbol$branch ]($style)'
 
 [git_status]
 style = "bg:color_git fg:color_bg bold"
