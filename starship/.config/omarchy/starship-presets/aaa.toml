@@ -11,20 +11,12 @@ format = """
 [](fg:color_os)\
 $os\
 [](fg:color_white bg:color_os)\
-$bubbles\
-$wave_crest\
-
 [](fg:color_white bg:color_dir)\
-$bubbles\
-$wave_crest\
 [](fg:color_lang bg:color_git)\
 $git_branch$git_status\
 
 [](fg:color_white bg:color_git)\
-$bubbles\
-$wave_crest\
 [](fg:color_lang bg:color_wet_sand)\
-$wave2_crest_shadow\
 [](fg:color_wet_sand bg:color_time)\
 
 $time\
