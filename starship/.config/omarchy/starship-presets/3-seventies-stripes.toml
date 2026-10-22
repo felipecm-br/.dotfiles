@@ -1,0 +1,119 @@
+# ==============================================================================
+#  Preset: Seventies Stripes (Sunset Van Edition)
+#  Inspired by: 1970s racing stripes and supergraphics - brown, rust, tangerine and harvest gold on cream
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# Glyph chain: a triangle strip of upper-left triangles U+E0BC, each fg = the previous bg, lays
+# diagonal bands one cell wide: the full 70s stripe set (brown, rust, tangerine, mustard) runs
+# between every pair of segments, like the stripes down the side of a van.
+# The modules cascade through: Chocolate -> Rust -> Tangerine -> Mustard -> Cream
+format = """
+[](fg:color_brown bg:transparent)\
+$os\
+[](fg:color_brown bg:color_mustard)\
+[](fg:color_mustard bg:color_orange)\
+[](fg:color_orange bg:color_rust)\
+
+$directory\
+[](fg:color_rust bg:color_brown)\
+[](fg:color_brown bg:color_mustard)\
+[](fg:color_mustard bg:color_orange)\
+
+$git_branch$git_status\
+[](fg:color_orange bg:color_brown)\
+[](fg:color_brown bg:color_rust)\
+[](fg:color_rust bg:color_cream)\
+[](fg:color_cream bg:color_mustard)\
+
+$c$rust$golang$nodejs$deno$python\
+[](fg:color_mustard bg:color_avocado)\
+[](fg:color_avocado bg:color_rust)\
+[](fg:color_rust bg:color_orange)\
+[](fg:color_orange bg:color_cream)\
+
+$time\
+[](fg:color_cream bg:color_brown)\
+[](fg:color_brown bg:color_rust)\
+[](fg:color_rust bg:color_orange)\
+[](fg:color_orange bg:color_mustard)\
+[](fg:color_mustard bg:transparent)\
+\n$character"""
+
+palette = 'art_seventies_stripes'
+
+[palettes.art_seventies_stripes]
+color_brown   = '#4a2b1c' # Chocolate brown
+color_rust    = '#a83f18' # Burnt rust
+color_orange  = '#e8742a' # Tangerine
+color_mustard = '#e9b44c' # Harvest gold mustard
+color_avocado = '#7c8a2e' # Avocado green
+color_ink     = '#2a170e' # Ink (text on light stripes)
+color_cream   = '#f6e7c8' # Cream (the van body)
+
+# 1. CHOCOLATE (the dashboard)
+[os]
+disabled = false
+style = "bg:color_brown fg:color_cream bold"
+format = '[ 󰟺 ]($style)'
+
+# 2. RUST (the road you are on)
+[directory]
+style = "bg:color_rust fg:color_cream bold"
+format = "[ 󰲋 $path ]($style)"
+truncation_length = 3
+
+# 3. TANGERINE (the branches of the highway)
+[git_branch]
+symbol = " "
+style = "bg:color_orange fg:color_ink bold"
+format = '[ $symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_orange fg:color_ink bold"
+format = '([$all_status$ahead_behind ]($style))'
+
+# 4. HARVEST GOLD (the engine)
+[c]
+symbol = " "
+style = "bg:color_mustard fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[rust]
+symbol = " "
+style = "bg:color_mustard fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[golang]
+symbol = " "
+style = "bg:color_mustard fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_mustard fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[deno]
+symbol = " "
+style = "bg:color_mustard fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[python]
+symbol = " "
+style = "bg:color_mustard fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+# 5. CREAM (the van body, and the clock)
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_cream fg:color_ink bold"
+format = '[ $time ]($style)'
+
+# 6. THE STRIPE (the stripe set at the cursor; errors rust it over)
+[character]
+success_symbol = "[▌](bold color_brown)[▌](bold color_rust)[▌](bold color_orange)[▌](bold color_mustard)[ ❯](bold color_orange)"
+error_symbol = "[▌▌▌▌](bold color_rust)[ ✗](bold color_rust)"

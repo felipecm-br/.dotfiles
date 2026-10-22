@@ -1,0 +1,137 @@
+# ==============================================================================
+#  Preset: Spectrum Analyzer (Hi-Fi Rack Edition)
+#  Inspired by: Hi-fi spectrum analyzers and LED VU meters (1980s) - bars that turn red as they peak
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# Glyph chain: between segments the bars of a spectrum analyzer rise in eighth blocks
+# (U+2581-U+2587), and each bar takes its color from its own height: green at low levels,
+# yellow in the mids, red at the peak, sampled in OKLab. Segments are the LED zones.
+# The modules cascade through: Green Zone -> Lime Zone -> Amber Zone -> Orange Zone -> Clip Red
+format = """
+[](fg:color_led1 bg:transparent)\
+$os\
+[](fg:color_led1 bg:color_panel)\
+[▂](fg:color_led2 bg:color_panel)\
+[▄](fg:color_led4 bg:color_panel)\
+[▆](fg:color_led6 bg:color_panel)\
+[▃](fg:color_led3 bg:color_panel)\
+[▅](fg:color_led5 bg:color_panel)\
+[](fg:color_led3 bg:color_panel)\
+
+$directory\
+[](fg:color_led3 bg:color_panel)\
+[▃](fg:color_led3 bg:color_panel)\
+[▇](fg:color_led7 bg:color_panel)\
+[▄](fg:color_led4 bg:color_panel)\
+[▆](fg:color_led6 bg:color_panel)\
+[▂](fg:color_led2 bg:color_panel)\
+[](fg:color_led4 bg:color_panel)\
+
+$git_branch$git_status\
+[](fg:color_led4 bg:color_panel)\
+[▅](fg:color_led5 bg:color_panel)\
+[▃](fg:color_led3 bg:color_panel)\
+[▇](fg:color_led7 bg:color_panel)\
+[▄](fg:color_led4 bg:color_panel)\
+[▆](fg:color_led6 bg:color_panel)\
+[](fg:color_led5 bg:color_panel)\
+
+$c$rust$golang$nodejs$deno$python\
+[](fg:color_led5 bg:color_panel)\
+[▄](fg:color_led4 bg:color_panel)\
+[▆](fg:color_led6 bg:color_panel)\
+[▂](fg:color_led2 bg:color_panel)\
+[▇](fg:color_led7 bg:color_panel)\
+[▃](fg:color_led3 bg:color_panel)\
+[](fg:color_led7 bg:color_panel)\
+
+$time\
+[](fg:color_led7 bg:color_panel)\
+[▆](fg:color_led6 bg:color_panel)\
+[▄](fg:color_led4 bg:color_panel)\
+[▅](fg:color_led5 bg:color_panel)\
+[▂](fg:color_led2 bg:color_panel)\
+[▁](fg:color_led1 bg:color_panel)\
+[](fg:color_panel bg:transparent)\
+\n$character"""
+
+palette = 'art_spectrum_analyzer'
+
+[palettes.art_spectrum_analyzer]
+color_panel = '#0b0e12' # Rack panel (anodized black)
+color_ink   = '#0b0e12' # Ink (text on lit LEDs)
+color_led1  = '#2ee66b' # LED meter (signal level) step 1/7 (OKLab)
+color_led2  = '#a2ed50' # LED meter (signal level) step 2/7 (OKLab)
+color_led3  = '#dbe93b' # LED meter (signal level) step 3/7 (OKLab)
+color_led4  = '#ffd93d' # LED meter (signal level) step 4/7 (OKLab)
+color_led5  = '#ffa53e' # LED meter (signal level) step 5/7 (OKLab)
+color_led6  = '#ff7443' # LED meter (signal level) step 6/7 (OKLab)
+color_led7  = '#ff3d4a' # LED meter (signal level) step 7/7 (OKLab)
+
+# 1. GREEN ZONE (signal present)
+[os]
+disabled = false
+style = "bg:color_led1 fg:color_ink bold"
+format = '[ 󰝚 ]($style)'
+
+# 2. LIME ZONE (the working level)
+[directory]
+style = "bg:color_led3 fg:color_ink bold"
+format = "[ 󰲋 $path ]($style)"
+truncation_length = 3
+
+# 3. AMBER ZONE (branches getting loud)
+[git_branch]
+symbol = " "
+style = "bg:color_led4 fg:color_ink bold"
+format = '[ $symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_led4 fg:color_ink bold"
+format = '([$all_status$ahead_behind ]($style))'
+
+# 4. ORANGE ZONE (the toolchain pushing)
+[c]
+symbol = " "
+style = "bg:color_led5 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[rust]
+symbol = " "
+style = "bg:color_led5 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[golang]
+symbol = " "
+style = "bg:color_led5 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_led5 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[deno]
+symbol = " "
+style = "bg:color_led5 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[python]
+symbol = " "
+style = "bg:color_led5 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+# 5. CLIP RED (the peak hold)
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_led7 fg:color_ink bold"
+format = '[ $time ]($style)'
+
+# 6. THE METER (rising bars at the cursor; errors clip the meter red)
+[character]
+success_symbol = "[▂](bold color_led2)[▄](bold color_led4)[▆](bold color_led6)[ ❯](bold color_led1)"
+error_symbol = "[▇▇▇](bold color_led7)[ ✗](bold color_led7)"

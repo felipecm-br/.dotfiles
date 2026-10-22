@@ -1,0 +1,126 @@
+# ==============================================================================
+#  Preset: Ocean Depths (Mariana Descent Edition)
+#  Inspired by: The pelagic zones of the ocean - a dive from sunlit turquoise to the bioluminescent abyss
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# Glyph chain: each zone dissolves into the next with a Braille dither ramp (braille.py dither:
+# U+28FF U+2877 U+2875 U+2815 U+2802), fg = the upper zone over bg = the deeper one, so the light
+# thins out dot by dot as you sink. In the abyss only living light remains: an anglerfish lure.
+# The modules cascade through: Sunlit -> Shallow -> Twilight -> Midnight -> Abyss
+format = """
+[](fg:color_z1 bg:transparent)\
+$os\
+[⣿](fg:color_z1 bg:color_z2)\
+[⡷](fg:color_z1 bg:color_z2)\
+[⡵](fg:color_z1 bg:color_z2)\
+[⠕](fg:color_z1 bg:color_z2)\
+[⠂](fg:color_z1 bg:color_z2)\
+
+$directory\
+[⣿](fg:color_z2 bg:color_z3)\
+[⡷](fg:color_z2 bg:color_z3)\
+[⡵](fg:color_z2 bg:color_z3)\
+[⠕](fg:color_z2 bg:color_z3)\
+[⠂](fg:color_z2 bg:color_z3)\
+
+$git_branch$git_status\
+[⣿](fg:color_z3 bg:color_z4)\
+[⡷](fg:color_z3 bg:color_z4)\
+[⡵](fg:color_z3 bg:color_z4)\
+[⠕](fg:color_z3 bg:color_z4)\
+[⠂](fg:color_z3 bg:color_z4)\
+
+$c$rust$golang$nodejs$deno$python\
+[⣿](fg:color_z4 bg:color_z5)\
+[⡷](fg:color_z4 bg:color_z5)\
+[⡵](fg:color_z4 bg:color_z5)\
+[⠕](fg:color_z4 bg:color_z5)\
+[⠂](fg:color_z4 bg:color_z5)\
+
+$time\
+[⠂](fg:color_glow bg:color_z5)\
+[╮](fg:color_paper bg:color_z5)\
+[●](fg:color_lure bg:color_z5)\
+[](fg:color_z5 bg:transparent)\
+\n$character"""
+
+palette = 'art_ocean_depths'
+
+[palettes.art_ocean_depths]
+color_z1    = '#56d6dc' # Epipelagic turquoise (sunlit zone, 0-200 m)
+color_z2    = '#1f9bbf' # Shallow blue (light fading, 200 m)
+color_z3    = '#16609f' # Mesopelagic blue (twilight zone, 200-1000 m)
+color_z4    = '#0c2f66' # Bathypelagic navy (midnight zone, 1000-4000 m)
+color_z5    = '#050d24' # Abyssal black (the abyss, 4000 m and below)
+color_lure  = '#d8ff5a' # Anglerfish lure (bacterial bioluminescence)
+color_glow  = '#5af0ff' # Bioluminescent cyan (jellyfish glow)
+color_ink   = '#04122a' # Ink (text in the sunlit zones)
+color_paper = '#e6fbff' # Paper (text in the dark zones)
+
+# 1. SUNLIT ZONE (light on the surface)
+[os]
+disabled = false
+style = "bg:color_z1 fg:color_ink bold"
+format = '[ 󰼁 ]($style)'
+
+# 2. SHALLOW BLUE (where you dive in)
+[directory]
+style = "bg:color_z2 fg:color_ink bold"
+format = "[ 󰲋 $path ]($style)"
+truncation_length = 3
+
+# 3. TWILIGHT ZONE (branches of the reef wall)
+[git_branch]
+symbol = " "
+style = "bg:color_z3 fg:color_paper bold"
+format = '[ $symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_z3 fg:color_paper bold"
+format = '([$all_status$ahead_behind ]($style))'
+
+# 4. MIDNIGHT ZONE (creatures making their own light)
+[c]
+symbol = " "
+style = "bg:color_z4 fg:color_paper bold"
+format = '[ $symbol($version) ]($style)'
+
+[rust]
+symbol = " "
+style = "bg:color_z4 fg:color_paper bold"
+format = '[ $symbol($version) ]($style)'
+
+[golang]
+symbol = " "
+style = "bg:color_z4 fg:color_paper bold"
+format = '[ $symbol($version) ]($style)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_z4 fg:color_paper bold"
+format = '[ $symbol($version) ]($style)'
+
+[deno]
+symbol = " "
+style = "bg:color_z4 fg:color_paper bold"
+format = '[ $symbol($version) ]($style)'
+
+[python]
+symbol = " "
+style = "bg:color_z4 fg:color_paper bold"
+format = '[ $symbol($version) ]($style)'
+
+# 5. ABYSS (the time where no sun reaches)
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_z5 fg:color_glow bold"
+format = '[ $time ]($style)'
+
+# 6. THE DIVE (bubbles at the cursor; errors summon the anglerfish)
+[character]
+success_symbol = "[⠂⠕⡷](bold color_glow)[ ❯](bold color_z1)"
+error_symbol = "[╮](color_paper)[●](bold color_lure)[ ✗](bold color_lure)"

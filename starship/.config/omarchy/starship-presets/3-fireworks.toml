@@ -1,0 +1,128 @@
+# ==============================================================================
+#  Preset: Fireworks (Sumidagawa Edition)
+#  Inspired by: Sumida River fireworks festival, Tokyo - shells rising in trails and bursting into chrysanthemums
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# Glyph chain: from each segment a smoky trail climbs diagonally in Braille (U+2860 U+280A), then
+# bursts into a ring (U+288E U+2871, the two halves of a Braille circle) with a falling spark
+# (U+2801). Burst colors follow pyrotechnic chemistry: strontium red, sodium gold, barium green,
+# copper blue, magnesium white.
+# The modules cascade through: Red Shell -> Gold Shell -> Green Shell -> Blue Shell -> White Finale
+format = """
+[](fg:color_red bg:transparent)\
+$os\
+[](fg:color_red bg:color_sky)\
+[⡠⠊](fg:color_trail bg:color_sky)\
+[⢎⡱](fg:color_violet bg:color_sky)\
+[⠁](fg:color_violet bg:color_sky)\
+[](fg:color_gold bg:color_sky)\
+
+$directory\
+[](fg:color_gold bg:color_sky)\
+[⡠⠊](fg:color_trail bg:color_sky)\
+[⢎⡱](fg:color_red bg:color_sky)\
+[⠁](fg:color_red bg:color_sky)\
+[](fg:color_green bg:color_sky)\
+
+$git_branch$git_status\
+[](fg:color_green bg:color_sky)\
+[⡠⠊](fg:color_trail bg:color_sky)\
+[⢎⡱](fg:color_gold bg:color_sky)\
+[⠁](fg:color_gold bg:color_sky)\
+[](fg:color_blue bg:color_sky)\
+
+$c$rust$golang$nodejs$deno$python\
+[](fg:color_blue bg:color_sky)\
+[⡠⠊](fg:color_trail bg:color_sky)\
+[⢎⡱](fg:color_green bg:color_sky)\
+[⠁](fg:color_green bg:color_sky)\
+[](fg:color_white bg:color_sky)\
+
+$time\
+[](fg:color_white bg:color_sky)\
+[⡠⠊](fg:color_trail bg:color_sky)\
+[⢎⡱](fg:color_gold bg:color_sky)\
+[⠁⠄](fg:color_gold bg:color_sky)\
+[](fg:color_sky bg:transparent)\
+\n$character"""
+
+palette = 'art_fireworks'
+
+[palettes.art_fireworks]
+color_sky    = '#0a0618' # Festival night
+color_trail  = '#6b5a7a' # Rising trail (smoke and sparks)
+color_red    = '#ff3b5c' # Strontium red
+color_gold   = '#ffc23d' # Sodium gold
+color_green  = '#3dff8b' # Barium green
+color_blue   = '#4d8bff' # Copper blue
+color_violet = '#c56bff' # Strontium + copper violet
+color_white  = '#f7f3ff' # Magnesium white
+color_ink    = '#0a0618' # Ink (text on the bursts)
+
+# 1. RED SHELL (strontium, the opener)
+[os]
+disabled = false
+style = "bg:color_red fg:color_ink bold"
+format = '[ 󰸰 ]($style)'
+
+# 2. GOLD SHELL (sodium, where you are)
+[directory]
+style = "bg:color_gold fg:color_ink bold"
+format = "[ 󰲋 $path ]($style)"
+truncation_length = 3
+
+# 3. GREEN SHELL (barium, the branches spreading)
+[git_branch]
+symbol = " "
+style = "bg:color_green fg:color_ink bold"
+format = '[ $symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_green fg:color_ink bold"
+format = '([$all_status$ahead_behind ]($style))'
+
+# 4. BLUE SHELL (copper, the hardest color to make)
+[c]
+symbol = " "
+style = "bg:color_blue fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[rust]
+symbol = " "
+style = "bg:color_blue fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[golang]
+symbol = " "
+style = "bg:color_blue fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_blue fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[deno]
+symbol = " "
+style = "bg:color_blue fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[python]
+symbol = " "
+style = "bg:color_blue fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+# 5. WHITE FINALE (magnesium, the closing salute)
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_white fg:color_ink bold"
+format = '[ $time ]($style)'
+
+# 6. THE BURST (a shell at the cursor; errors are a dud that fizzles)
+[character]
+success_symbol = "[⢎⡱](bold color_gold)[ ❯](bold color_white)"
+error_symbol = "[⠊⠁](color_trail)[ ✗](bold color_red)"

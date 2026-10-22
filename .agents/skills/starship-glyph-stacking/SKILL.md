@@ -142,6 +142,29 @@ Geometric is partial (no `◢◣◤◥◖◗◠◡`). Legacy Computing (U+1FB00,
 Reference set: `1-kanagawa-v5` (shades), `v6` (blocks and quadrants), `v7` (Braille), `v8` (box drawing
 with a flame closing each chain), and `v9` (all families, one per layer).
 
+#### Drawings: Braille plotting and per-cell color
+
+A divider can be a picture, not a texture. The `3-*` presets are the reference set.
+
+- **Braille plotting.** Each Braille cell is a 2x4 dot grid, so a row of cells is a tiny bitmap. Use
+  `scripts/braille.py`:
+  - `line(ys)` draws a connected trace (ECG beat, wave crest);
+  - `area(ys, hang=True)` fills a curtain hanging from the top (aurora);
+  - `area(ys)` fills a swell from the bottom;
+  - `dither(n)` makes a dense-to-sparse ramp (`⣿⣷⡷⡵⠕⠅⠂`) that dissolves one color into the next.
+  Never hand-type the dot patterns.
+- **Per-cell color.** Give every glyph of a drawing its own `fg`, sampled from `gradient.py` (aurora
+  curtains, a sun dome, spectrum bars colored by height). This is where the "state of the art" look comes from.
+- **Shape vocabulary.**
+  - A peak is `E0BA` + `E0B8`.
+  - A dome is `▂▄▆▇▇▆▄▂`.
+  - A tetromino is two rows of half blocks (`▀█▀`).
+  - A black piano key is `▐▌` straddling a cell seam.
+  - A firework burst is `⢎⡱`.
+  - A lit window is a quadrant on a full-block background.
+- **Semantic error prompts.** Make the error state part of the drawing (ECG flatline, short circuit
+  `━╳`, the Tetris Z piece), not just a recolor.
+
 #### Gradient presets
 
 For a palette-driven gradient instead of an artwork (for example the `chroma-*` presets, see

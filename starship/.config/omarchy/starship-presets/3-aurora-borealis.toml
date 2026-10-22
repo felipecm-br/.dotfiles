@@ -1,0 +1,160 @@
+# ==============================================================================
+#  Preset: Aurora Borealis (Tromso Kp7 Edition)
+#  Inspired by: Aurora photography over northern Norway - the green oxygen curtain with violet hem and red crown
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# Glyph chain: between segments the curtain is Braille filled from the top down to a sine
+# (braille.py area(wave, hang=True)), so the rays hang and ripple. Every cell has its own fg,
+# sampled in OKLab between the two neighbor segments, so the color drifts across the curtain
+# the way emission lines blend. The ripple phase shifts each time, so no two curtains match.
+# The modules cascade through: Blue Hour -> Oxygen Green -> Teal Fringe -> Nitrogen Violet -> Crimson Crown
+format = """
+[](fg:color_dusk bg:transparent)\
+$os\
+[](fg:color_dusk bg:color_night)\
+[⠏](fg:color_c1_1 bg:color_night)\
+[⠙](fg:color_c1_2 bg:color_night)\
+[⣿](fg:color_c1_3 bg:color_night)\
+[⠏](fg:color_c1_4 bg:color_night)\
+[⠙](fg:color_c1_5 bg:color_night)\
+[](fg:color_oxygen bg:color_night)\
+
+$directory\
+[](fg:color_oxygen bg:color_night)\
+[⠙](fg:color_c2_1 bg:color_night)\
+[⢿](fg:color_c2_2 bg:color_night)\
+[⠟](fg:color_c2_3 bg:color_night)\
+[⠙](fg:color_c2_4 bg:color_night)\
+[⢿](fg:color_c2_5 bg:color_night)\
+[](fg:color_teal bg:color_night)\
+
+$git_branch$git_status\
+[](fg:color_teal bg:color_night)\
+[⢻](fg:color_c3_1 bg:color_night)\
+[⡿](fg:color_c3_2 bg:color_night)\
+[⠉](fg:color_c3_3 bg:color_night)\
+[⢻](fg:color_c3_4 bg:color_night)\
+[⡿](fg:color_c3_5 bg:color_night)\
+[](fg:color_nitrogen bg:color_night)\
+
+$c$rust$golang$nodejs$deno$python\
+[](fg:color_nitrogen bg:color_night)\
+[⡿](fg:color_c4_1 bg:color_night)\
+[⠋](fg:color_c4_2 bg:color_night)\
+[⠻](fg:color_c4_3 bg:color_night)\
+[⡿](fg:color_c4_4 bg:color_night)\
+[⠋](fg:color_c4_5 bg:color_night)\
+[](fg:color_crimson bg:color_night)\
+
+$time\
+[](fg:color_crimson bg:color_night)\
+[⠉](fg:color_fade1 bg:color_night)\
+[⢻](fg:color_fade2 bg:color_night)\
+[⡿](fg:color_fade3 bg:color_night)\
+[⠉](fg:color_fade4 bg:color_night)\
+[](fg:color_night bg:transparent)\
+\n$character"""
+
+palette = 'art_aurora_borealis'
+
+[palettes.art_aurora_borealis]
+color_night    = '#060a1c' # Polar night (the sky behind the curtains)
+color_dusk     = '#1b2a5c' # Arctic blue hour (the horizon glow)
+color_oxygen   = '#3ee8a0' # Oxygen green (557.7 nm, the main curtain)
+color_teal     = '#2fc4d4' # Teal fringe (green and blue emission overlapping)
+color_nitrogen = '#a58bff' # Nitrogen violet (427.8 nm, the lower hem)
+color_crimson  = '#ff6fa8' # High-altitude oxygen red (630 nm, the crown)
+color_snow     = '#eef6ff' # Snowfield (text on the dark sky)
+color_ink      = '#060a1c' # Ink (text on the glowing curtains)
+color_c1_1     = '#1b2a5c' # Curtain dusk to oxygen step 1/5 (OKLab)
+color_c1_2     = '#235770' # Curtain dusk to oxygen step 2/5 (OKLab)
+color_c1_3     = '#2b8682' # Curtain dusk to oxygen step 3/5 (OKLab)
+color_c1_4     = '#34b692' # Curtain dusk to oxygen step 4/5 (OKLab)
+color_c1_5     = '#3ee8a0' # Curtain dusk to oxygen step 5/5 (OKLab)
+color_c2_1     = '#3ee8a0' # Curtain oxygen to teal step 1/5 (OKLab)
+color_c2_2     = '#39dfaf' # Curtain oxygen to teal step 2/5 (OKLab)
+color_c2_3     = '#34d6bc' # Curtain oxygen to teal step 3/5 (OKLab)
+color_c2_4     = '#31cdc8' # Curtain oxygen to teal step 4/5 (OKLab)
+color_c2_5     = '#2fc4d4' # Curtain oxygen to teal step 5/5 (OKLab)
+color_c3_1     = '#2fc4d4' # Curtain teal to nitrogen step 1/5 (OKLab)
+color_c3_2     = '#61b7df' # Curtain teal to nitrogen step 2/5 (OKLab)
+color_c3_3     = '#7eaaea' # Curtain teal to nitrogen step 3/5 (OKLab)
+color_c3_4     = '#939bf5' # Curtain teal to nitrogen step 4/5 (OKLab)
+color_c3_5     = '#a58bff' # Curtain teal to nitrogen step 5/5 (OKLab)
+color_c4_1     = '#a58bff' # Curtain nitrogen to crimson step 1/5 (OKLab)
+color_c4_2     = '#bd87ea' # Curtain nitrogen to crimson step 2/5 (OKLab)
+color_c4_3     = '#d482d5' # Curtain nitrogen to crimson step 3/5 (OKLab)
+color_c4_4     = '#ea7abf' # Curtain nitrogen to crimson step 4/5 (OKLab)
+color_c4_5     = '#ff6fa8' # Curtain nitrogen to crimson step 5/5 (OKLab)
+color_fade1    = '#ff6fa8' # Crown fading into the night step 1/4 (OKLab)
+color_fade2    = '#b05c8f' # Crown fading into the night step 2/4 (OKLab)
+color_fade3    = '#654576' # Crown fading into the night step 3/4 (OKLab)
+color_fade4    = '#1b2a5c' # Crown fading into the night step 4/4 (OKLab)
+
+# 1. BLUE HOUR (the horizon before the show)
+[os]
+disabled = false
+style = "bg:color_dusk fg:color_snow bold"
+format = '[ 󰜗 ]($style)'
+
+# 2. OXYGEN GREEN (557.7 nm, where you stand under it)
+[directory]
+style = "bg:color_oxygen fg:color_ink bold"
+format = "[ 󰲋 $path ]($style)"
+truncation_length = 3
+
+# 3. TEAL FRINGE (the curtain branching)
+[git_branch]
+symbol = " "
+style = "bg:color_teal fg:color_ink bold"
+format = '[ $symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_teal fg:color_ink bold"
+format = '([$all_status$ahead_behind ]($style))'
+
+# 4. NITROGEN VIOLET (the lower hem)
+[c]
+symbol = " "
+style = "bg:color_nitrogen fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[rust]
+symbol = " "
+style = "bg:color_nitrogen fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[golang]
+symbol = " "
+style = "bg:color_nitrogen fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_nitrogen fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[deno]
+symbol = " "
+style = "bg:color_nitrogen fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[python]
+symbol = " "
+style = "bg:color_nitrogen fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+# 5. CRIMSON CROWN (630 nm, the highest light)
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_crimson fg:color_ink bold"
+format = '[ $time ]($style)'
+
+# 6. THE CURTAIN (a small aurora at the cursor; errors turn it storm red)
+[character]
+success_symbol = "[⡿](bold color_c1_3)[⢿](bold color_c2_3)[⠿](bold color_c3_3)[⠛](bold color_c4_3)[ ❯](bold color_oxygen)"
+error_symbol = "[⡿⢿⠿⠛](bold color_crimson)[ ✗](bold color_crimson)"

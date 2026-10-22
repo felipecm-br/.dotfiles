@@ -1,0 +1,132 @@
+# ==============================================================================
+#  Preset: Nebula Starfield (Cosmic Cliffs Edition)
+#  Inspired by: JWST NIRCam, "Cosmic Cliffs" in the Carina Nebula (2022) - glowing gas walls and a field of stars
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# Glyph chain: segments are walls of gas sampled in OKLab from ionized hydrogen blue to sulfur
+# orange. Between them the void is scattered with Braille dust (single dots U+2801 U+2840 U+2820)
+# in real stellar colors by spectral class (O blue, A white, G gold, M red) and one bright
+# six-point star U+2736, like the diffraction spikes JWST draws around bright stars.
+# The modules cascade through: Hydrogen Blue -> Oxygen Teal -> Hydrogen-Alpha Violet -> Ionized Rose -> Sulfur Gold
+format = """
+[](fg:color_gas1 bg:transparent)\
+$os\
+[](fg:color_gas1 bg:color_space)\
+[⠁](fg:color_star_red bg:color_space)\
+[✶](fg:color_star_blue bg:color_space)\
+[⡀](fg:color_star_white bg:color_space)\
+[](fg:color_gas2 bg:color_space)\
+
+$directory\
+[](fg:color_gas2 bg:color_space)\
+[⠠](fg:color_star_gold bg:color_space)\
+[⢀](fg:color_star_white bg:color_space)\
+[✶](fg:color_star_gold bg:color_space)\
+[⠂](fg:color_star_red bg:color_space)\
+[](fg:color_gas3 bg:color_space)\
+
+$git_branch$git_status\
+[](fg:color_gas3 bg:color_space)\
+[⡀](fg:color_star_blue bg:color_space)\
+[⠈](fg:color_star_white bg:color_space)\
+[✶](fg:color_star_white bg:color_space)\
+[](fg:color_gas4 bg:color_space)\
+
+$c$rust$golang$nodejs$deno$python\
+[](fg:color_gas4 bg:color_space)\
+[✶](fg:color_star_red bg:color_space)\
+[⠄](fg:color_star_blue bg:color_space)\
+[⠁](fg:color_star_gold bg:color_space)\
+[](fg:color_gas5 bg:color_space)\
+
+$time\
+[](fg:color_gas5 bg:color_space)\
+[⠂](fg:color_star_white bg:color_space)\
+[✶](fg:color_star_blue bg:color_space)\
+[⡀](fg:color_star_gold bg:color_space)\
+[](fg:color_space bg:transparent)\
+\n$character"""
+
+palette = 'art_nebula_starfield'
+
+[palettes.art_nebula_starfield]
+color_space      = '#03030c' # Deep space
+color_star_blue  = '#9fc8ff' # O-type star (blue-white, 30,000 K)
+color_star_white = '#f4f6ff' # A-type star (white)
+color_star_gold  = '#ffd37a' # G-type star (yellow, like the Sun)
+color_star_red   = '#ff8a6b' # M-type star (red dwarf)
+color_ink        = '#03030c' # Ink (text on bright gas)
+color_paper      = '#f4f6ff' # Paper (text on dark gas)
+color_gas1       = '#132a6b' # Carina gas (hydrogen to sulfur) step 1/5 (OKLab)
+color_gas2       = '#2f5fb8' # Carina gas (hydrogen to sulfur) step 2/5 (OKLab)
+color_gas3       = '#8f3fa8' # Carina gas (hydrogen to sulfur) step 3/5 (OKLab)
+color_gas4       = '#e0517f' # Carina gas (hydrogen to sulfur) step 4/5 (OKLab)
+color_gas5       = '#ffb070' # Carina gas (hydrogen to sulfur) step 5/5 (OKLab)
+
+# 1. HYDROGEN BLUE (the cold cloud)
+[os]
+disabled = false
+style = "bg:color_gas1 fg:color_paper bold"
+format = '[ 󰭎 ]($style)'
+
+# 2. OXYGEN BLUE (the cliff face, where you are)
+[directory]
+style = "bg:color_gas2 fg:color_paper bold"
+format = "[ 󰲋 $path ]($style)"
+truncation_length = 3
+
+# 3. H-ALPHA VIOLET (pillars branching off the wall)
+[git_branch]
+symbol = " "
+style = "bg:color_gas3 fg:color_paper bold"
+format = '[ $symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_gas3 fg:color_paper bold"
+format = '([$all_status$ahead_behind ]($style))'
+
+# 4. IONIZED ROSE (the stellar nursery at work)
+[c]
+symbol = " "
+style = "bg:color_gas4 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[rust]
+symbol = " "
+style = "bg:color_gas4 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[golang]
+symbol = " "
+style = "bg:color_gas4 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_gas4 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[deno]
+symbol = " "
+style = "bg:color_gas4 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[python]
+symbol = " "
+style = "bg:color_gas4 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+# 5. SULFUR GOLD (the rim lit by young stars)
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_gas5 fg:color_ink bold"
+format = '[ $time ]($style)'
+
+# 6. THE GUIDE STAR (a bright star at the cursor; errors redshift it)
+[character]
+success_symbol = "[✶](bold color_star_gold)[⋆](color_star_blue)[ ❯](bold color_gas4)"
+error_symbol = "[✶](bold color_star_red)[⋆](color_star_red)[ ✗](bold color_star_red)"

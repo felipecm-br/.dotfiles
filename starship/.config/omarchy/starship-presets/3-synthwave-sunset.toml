@@ -1,0 +1,134 @@
+# ==============================================================================
+#  Preset: Synthwave Sunset (Outrun 1986 Edition)
+#  Inspired by: OutRun (Sega, 1986) and synthwave cover art - neon sunset, laser grid and a dome sun
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# Glyph chain: neon sunset bands are the segments; between them a cyan wireframe range
+# (U+2571 U+2572 zigzags) cuts across the dark. The bar ends on the sun itself: a dome of eighth
+# blocks (U+2582 U+2584 U+2586 U+2587) sinking into the horizon, each cell its own OKLab hue.
+# The modules cascade through: Sun Yellow -> Sun Orange -> Hot Pink -> Neon Magenta -> Electric Violet -> Dome Sun
+format = """
+[](fg:color_sun1 bg:transparent)\
+$os\
+[](fg:color_sun1 bg:color_void)\
+[╱╲╱╲](fg:color_grid bg:color_void)\
+[](fg:color_sun2 bg:color_void)\
+
+$directory\
+[](fg:color_sun2 bg:color_void)\
+[╱╲╱╱╲](fg:color_grid bg:color_void)\
+[](fg:color_sun3 bg:color_void)\
+
+$git_branch$git_status\
+[](fg:color_sun3 bg:color_void)\
+[╱╱╲╱╲](fg:color_grid bg:color_void)\
+[](fg:color_sun4 bg:color_void)\
+
+$c$rust$golang$nodejs$deno$python\
+[](fg:color_sun4 bg:color_void)\
+[╱╲╱╲](fg:color_grid bg:color_void)\
+[](fg:color_sun5 bg:color_void)\
+
+$time\
+[](fg:color_sun5 bg:color_void)\
+[ ](bg:color_void)\
+[▂](fg:color_dome1 bg:color_void)\
+[▄](fg:color_dome2 bg:color_void)\
+[▆](fg:color_dome3 bg:color_void)\
+[▇](fg:color_dome4 bg:color_void)\
+[▇](fg:color_dome5 bg:color_void)\
+[▆](fg:color_dome6 bg:color_void)\
+[▄](fg:color_dome7 bg:color_void)\
+[▂](fg:color_dome8 bg:color_void)\
+[ ](bg:color_void)\
+[](fg:color_void bg:transparent)\
+\n$character"""
+
+palette = 'art_synthwave_sunset'
+
+[palettes.art_synthwave_sunset]
+color_void  = '#14062e' # Outrun night (deep indigo)
+color_grid  = '#2de2e6' # Laser grid cyan
+color_ink   = '#14062e' # Ink (text on neon)
+color_sun1  = '#ffe45e' # Sun yellow (the retro sunset band)
+color_sun2  = '#ffa53d' # Sun orange (the retro sunset band)
+color_sun3  = '#ff5e8a' # Hot pink (the retro sunset band)
+color_sun4  = '#d63cf0' # Neon magenta (the retro sunset band)
+color_sun5  = '#7b3cff' # Electric violet (the retro sunset band)
+color_paper = '#fff2fb' # Paper (text on violet)
+color_dome1 = '#ffe45e' # Setting sun dome step 1/8 (OKLab)
+color_dome2 = '#ffc172' # Setting sun dome step 2/8 (OKLab)
+color_dome3 = '#ff9d7f' # Setting sun dome step 3/8 (OKLab)
+color_dome4 = '#ff7587' # Setting sun dome step 4/8 (OKLab)
+color_dome5 = '#f95c9a' # Setting sun dome step 5/8 (OKLab)
+color_dome6 = '#ec56b8' # Setting sun dome step 6/8 (OKLab)
+color_dome7 = '#e14cd5' # Setting sun dome step 7/8 (OKLab)
+color_dome8 = '#d63cf0' # Setting sun dome step 8/8 (OKLab)
+
+# 1. SUN YELLOW (the top of the sky)
+[os]
+disabled = false
+style = "bg:color_sun1 fg:color_ink bold"
+format = '[ 󰞬 ]($style)'
+
+# 2. SUN ORANGE (the highway you are on)
+[directory]
+style = "bg:color_sun2 fg:color_ink bold"
+format = "[ 󰲋 $path ]($style)"
+truncation_length = 3
+
+# 3. HOT PINK (the branch on the horizon)
+[git_branch]
+symbol = " "
+style = "bg:color_sun3 fg:color_ink bold"
+format = '[ $symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_sun3 fg:color_ink bold"
+format = '([$all_status$ahead_behind ]($style))'
+
+# 4. NEON MAGENTA (the engine under the hood)
+[c]
+symbol = " "
+style = "bg:color_sun4 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[rust]
+symbol = " "
+style = "bg:color_sun4 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[golang]
+symbol = " "
+style = "bg:color_sun4 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_sun4 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[deno]
+symbol = " "
+style = "bg:color_sun4 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[python]
+symbol = " "
+style = "bg:color_sun4 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+# 5. ELECTRIC VIOLET (the last band before night)
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_sun5 fg:color_paper bold"
+format = '[ $time ]($style)'
+
+# 6. THE SUN (a dome sun at the cursor; errors burn it hot pink)
+[character]
+success_symbol = "[▂](bold color_dome1)[▄](bold color_dome3)[▆](bold color_dome5)[▄](bold color_dome7)[▂](bold color_dome8)[ ❯](bold color_grid)"
+error_symbol = "[▂▄▆▄▂](bold color_sun3)[ ✗](bold color_sun3)"
