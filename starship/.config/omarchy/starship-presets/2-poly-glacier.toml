@@ -1,0 +1,131 @@
+# ==============================================================================
+#  Preset: Low-Poly Glacier (Cool Facet Edition)
+#  Inspired by: low-poly triangulated gradient (~/Downloads/poly.jpg), colors sampled from its facets
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# Glyph chain: triangle strip, alternating U+E0B8 (lower-left) and U+E0BC (upper-left) with each fg equal
+# to the previous bg, so every color spans two cells as a ▼ or ▲ facet; U+E0BA opens the first facet.
+# The modules cascade through: Sapphire -> Cerulean -> Cobalt -> Ice -> Violet
+format = """
+[](fg:color_sapphire)\
+$os\
+[](fg:color_sapphire bg:color_azure_lit)\
+[](fg:color_azure_lit bg:color_royal)\
+[](fg:color_royal bg:color_steel_azure)\
+[](fg:color_steel_azure bg:color_cerulean)\
+
+$directory\
+[](fg:color_cerulean bg:color_royal)\
+[](fg:color_royal bg:color_ice)\
+[](fg:color_ice bg:color_azure)\
+[](fg:color_azure bg:color_cobalt_lit)\
+
+$git_branch$git_status\
+[](fg:color_cobalt_lit bg:color_cyan_lit)\
+[](fg:color_cyan_lit bg:color_indigo)\
+[](fg:color_indigo bg:color_azure_lit)\
+[](fg:color_azure_lit bg:color_ice)\
+
+$c$rust$golang$nodejs$deno$python\
+[](fg:color_ice bg:color_cobalt_lit)\
+[](fg:color_cobalt_lit bg:color_lavender_blue)\
+[](fg:color_lavender_blue bg:color_ultramarine)\
+[](fg:color_ultramarine bg:color_violet)\
+
+$time\
+[](fg:color_violet bg:color_ultramarine_deep)\
+[](fg:color_ultramarine_deep bg:color_amethyst)\
+[](fg:color_amethyst bg:color_midnight)\
+[](fg:color_midnight bg:transparent)\
+\n$character"""
+
+palette = 'poly_glacier'
+
+[palettes.poly_glacier]
+color_sapphire         = '#2632a8' # Sapphire facet
+color_frost            = '#e8f4ff' # Frost white (text on dark facets)
+color_cerulean         = '#34c7fa' # Cerulean facet
+color_ink_navy         = '#0a1a4a' # Navy ink (text on light facets)
+color_cobalt_lit       = '#3b4ecf' # Lit cobalt facet
+color_ice              = '#85c4ed' # Ice-blue facet (the cool side of the core)
+color_violet           = '#5538af' # Violet facet
+color_azure_lit        = '#4ca7f8' # Lit azure facet
+color_royal            = '#2965d5' # Royal blue facet
+color_steel_azure      = '#589de0' # Steel azure facet
+color_azure            = '#239efc' # Azure facet
+color_cyan_lit         = '#4cc9f7' # Lit cyan facet (upper-left highlight)
+color_indigo           = '#3431be' # Indigo facet
+color_lavender_blue    = '#849ce2' # Lavender-blue facet
+color_ultramarine      = '#2b20aa' # Ultramarine facet
+color_ultramarine_deep = '#21138e' # Deep ultramarine facet (lower-left shadow)
+color_amethyst         = '#593fc7' # Amethyst facet
+color_midnight         = '#220f83' # Midnight facet (bottom-left corner)
+color_hot_pink         = '#fe2f89' # Hot-pink facet
+
+# 1. SAPPHIRE (deep ice at the base)
+[os]
+disabled = false
+style = "bg:color_sapphire fg:color_frost bold"
+format = '[ 󰇈 ]($style)'
+
+# 2. CERULEAN (the bright cyan face)
+[directory]
+style = "bg:color_cerulean fg:color_ink_navy bold"
+format = "[ 󰲋 $path ]($style)"
+truncation_length = 3
+
+# 3. COBALT (the shadowed planes)
+[git_branch]
+symbol = " "
+style = "bg:color_cobalt_lit fg:color_frost bold"
+format = '[ $symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_cobalt_lit fg:color_frost bold"
+format = '([$all_status$ahead_behind ]($style))'
+
+# 4. ICE (pale facets catching the light)
+[c]
+symbol = " "
+style = "bg:color_ice fg:color_ink_navy bold"
+format = '[ $symbol($version) ]($style)'
+
+[rust]
+symbol = " "
+style = "bg:color_ice fg:color_ink_navy bold"
+format = '[ $symbol($version) ]($style)'
+
+[golang]
+symbol = " "
+style = "bg:color_ice fg:color_ink_navy bold"
+format = '[ $symbol($version) ]($style)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_ice fg:color_ink_navy bold"
+format = '[ $symbol($version) ]($style)'
+
+[deno]
+symbol = " "
+style = "bg:color_ice fg:color_ink_navy bold"
+format = '[ $symbol($version) ]($style)'
+
+[python]
+symbol = " "
+style = "bg:color_ice fg:color_ink_navy bold"
+format = '[ $symbol($version) ]($style)'
+
+# 5. VIOLET (where the cold field meets the night)
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_violet fg:color_frost bold"
+format = '[ $time ]($style)'
+
+# 6. THE CUT GEM
+[character]
+success_symbol = "[◆❯](bold color_cyan_lit)"
+error_symbol = "[◆❯](bold color_hot_pink)"

@@ -1,0 +1,133 @@
+# ==============================================================================
+#  Preset: Low-Poly Nocturne (Night Facet Edition)
+#  Inspired by: low-poly triangulated gradient (~/Downloads/poly.jpg), colors sampled from its facets
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# Glyph chain: triangle strip, alternating U+E0B8 (lower-left) and U+E0BC (upper-left) with each fg equal
+# to the previous bg, so every color spans two cells as a ▼ or ▲ facet; U+E0BA opens the first facet.
+# The modules cascade through: Midnight -> Indigo -> Grape -> Mulberry -> Byzantium
+format = """
+[](fg:color_midnight)\
+$os\
+[](fg:color_midnight bg:color_amethyst)\
+[](fg:color_amethyst bg:color_ultramarine_deep)\
+[](fg:color_ultramarine_deep bg:color_cobalt)\
+[](fg:color_cobalt bg:color_indigo)\
+
+$directory\
+[](fg:color_indigo bg:color_hydrangea)\
+[](fg:color_hydrangea bg:color_ultramarine)\
+[](fg:color_ultramarine bg:color_lavender_blue)\
+[](fg:color_lavender_blue bg:color_grape)\
+
+$git_branch$git_status\
+[](fg:color_grape bg:color_night_violet)\
+[](fg:color_night_violet bg:color_mulberry)\
+[](fg:color_mulberry bg:color_ember)\
+[](fg:color_ember bg:color_mulberry)\
+
+$c$rust$golang$nodejs$deno$python\
+[](fg:color_mulberry bg:color_deep_violet)\
+[](fg:color_deep_violet bg:color_raspberry)\
+[](fg:color_raspberry bg:color_eggplant)\
+[](fg:color_eggplant bg:color_byzantium)\
+
+$time\
+[](fg:color_byzantium bg:color_aubergine)\
+[](fg:color_aubergine bg:color_mulberry)\
+[](fg:color_mulberry bg:color_night_violet)\
+[](fg:color_night_violet bg:transparent)\
+\n$character"""
+
+palette = 'poly_nocturne'
+
+[palettes.poly_nocturne]
+color_midnight         = '#220f83' # Midnight facet (bottom-left corner)
+color_ice              = '#85c4ed' # Ice-blue facet (the cool side of the core)
+color_indigo           = '#3431be' # Indigo facet
+color_frost            = '#e8f4ff' # Frost white (text on dark facets)
+color_grape            = '#603496' # Grape facet
+color_peach            = '#fdcfbf' # Peach facet
+color_mulberry         = '#9b2d6c' # Mulberry facet
+color_byzantium        = '#681d6f' # Byzantium facet
+color_amethyst         = '#593fc7' # Amethyst facet
+color_ultramarine_deep = '#21138e' # Deep ultramarine facet (lower-left shadow)
+color_cobalt           = '#4451d1' # Cobalt facet
+color_hydrangea        = '#6d85dd' # Hydrangea facet
+color_ultramarine      = '#2b20aa' # Ultramarine facet
+color_lavender_blue    = '#849ce2' # Lavender-blue facet
+color_night_violet     = '#300c66' # Night-violet facet
+color_ember            = '#fd6d55' # Ember facet
+color_deep_violet      = '#3b0d6f' # Deep-violet facet
+color_raspberry        = '#b30354' # Raspberry facet
+color_eggplant         = '#43054e' # Eggplant facet
+color_aubergine        = '#3a084d' # Aubergine facet (bottom-right corner)
+color_alarm            = '#fa0047' # Alarm red (the error facet)
+
+# 1. MIDNIGHT (the bottom-left corner)
+[os]
+disabled = false
+style = "bg:color_midnight fg:color_ice bold"
+format = '[ 󰇈 ]($style)'
+
+# 2. INDIGO (deep blue planes)
+[directory]
+style = "bg:color_indigo fg:color_frost bold"
+format = "[ 󰲋 $path ]($style)"
+truncation_length = 3
+
+# 3. GRAPE (violet facets, one ember glinting)
+[git_branch]
+symbol = " "
+style = "bg:color_grape fg:color_peach bold"
+format = '[ $symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_grape fg:color_peach bold"
+format = '([$all_status$ahead_behind ]($style))'
+
+# 4. MULBERRY (the warm dark of the lower right)
+[c]
+symbol = " "
+style = "bg:color_mulberry fg:color_peach bold"
+format = '[ $symbol($version) ]($style)'
+
+[rust]
+symbol = " "
+style = "bg:color_mulberry fg:color_peach bold"
+format = '[ $symbol($version) ]($style)'
+
+[golang]
+symbol = " "
+style = "bg:color_mulberry fg:color_peach bold"
+format = '[ $symbol($version) ]($style)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_mulberry fg:color_peach bold"
+format = '[ $symbol($version) ]($style)'
+
+[deno]
+symbol = " "
+style = "bg:color_mulberry fg:color_peach bold"
+format = '[ $symbol($version) ]($style)'
+
+[python]
+symbol = " "
+style = "bg:color_mulberry fg:color_peach bold"
+format = '[ $symbol($version) ]($style)'
+
+# 5. BYZANTIUM (fading into the night)
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_byzantium fg:color_peach bold"
+format = '[ $time ]($style)'
+
+# 6. THE CUT GEM
+[character]
+success_symbol = "[◆❯](bold color_lavender_blue)"
+error_symbol = "[◆❯](bold color_alarm)"

@@ -1,0 +1,137 @@
+# ==============================================================================
+#  Preset: Low-Poly Prism (Full Spectrum Facet Edition)
+#  Inspired by: low-poly triangulated gradient (~/Downloads/poly.jpg), colors sampled from its facets
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# Glyph chain: triangle strip, alternating U+E0B8 (lower-left) and U+E0BC (upper-left) with each fg equal
+# to the previous bg, so every color spans two cells as a ▼ or ▲ facet; U+E0BA opens the first facet.
+# The modules cascade through: Ultramarine Shadow -> Azure -> Orchid -> Gold Core -> Raspberry -> Aubergine
+format = """
+[](fg:color_ultramarine_deep)\
+$os\
+[](fg:color_ultramarine_deep bg:color_cornflower)\
+[](fg:color_cornflower bg:color_indigo)\
+[](fg:color_indigo bg:color_cyan)\
+[](fg:color_cyan bg:color_azure)\
+
+$directory\
+[](fg:color_azure bg:color_ice)\
+[](fg:color_ice bg:color_periwinkle)\
+[](fg:color_periwinkle bg:color_blush)\
+[](fg:color_blush bg:color_orchid)\
+
+$git_branch$git_status\
+[](fg:color_orchid bg:color_apricot)\
+[](fg:color_apricot bg:color_hot_pink)\
+[](fg:color_hot_pink bg:color_tangerine_lit)\
+[](fg:color_tangerine_lit bg:color_gold)\
+
+$c$rust$golang$nodejs$deno$python\
+[](fg:color_gold bg:color_tangerine)\
+[](fg:color_tangerine bg:color_coral_red)\
+[](fg:color_coral_red bg:color_melon)\
+[](fg:color_melon bg:color_raspberry)\
+
+$time\
+[](fg:color_raspberry bg:color_wine)\
+[](fg:color_wine bg:color_fuchsia)\
+[](fg:color_fuchsia bg:color_aubergine)\
+[](fg:color_aubergine bg:transparent)\
+\n$character"""
+
+palette = 'poly_prism'
+
+[palettes.poly_prism]
+color_ultramarine_deep = '#21138e' # Deep ultramarine facet (lower-left shadow)
+color_frost            = '#e8f4ff' # Frost white (text on dark facets)
+color_azure            = '#239efc' # Azure facet
+color_ink_navy         = '#0a1a4a' # Navy ink (text on light facets)
+color_orchid           = '#df8ac5' # Orchid facet
+color_gold             = '#fcd884' # Gold facet (the warm core)
+color_ink_wine         = '#2a0a14' # Wine ink (text on warm facets)
+color_raspberry        = '#b30354' # Raspberry facet
+color_cornflower       = '#5485d1' # Cornflower facet in shadow
+color_indigo           = '#3431be' # Indigo facet
+color_cyan             = '#42c4f6' # Cyan facet
+color_ice              = '#85c4ed' # Ice-blue facet (the cool side of the core)
+color_periwinkle       = '#838cd7' # Periwinkle facet
+color_blush            = '#ffbcdd' # Blush facet (top-centre highlight)
+color_apricot          = '#fcc79f' # Apricot facet
+color_hot_pink         = '#fe2f89' # Hot-pink facet
+color_tangerine_lit    = '#fca158' # Lit tangerine facet
+color_tangerine        = '#fc8448' # Tangerine facet
+color_coral_red        = '#fa4860' # Coral-red facet
+color_melon            = '#fd925e' # Melon facet
+color_wine             = '#8f0058' # Wine facet
+color_fuchsia          = '#fd2d8f' # Fuchsia facet
+color_aubergine        = '#3a084d' # Aubergine facet (bottom-right corner)
+color_cyan_lit         = '#4cc9f7' # Lit cyan facet (upper-left highlight)
+color_alarm            = '#fa0047' # Alarm red (the error facet)
+
+# 1. ULTRAMARINE SHADOW (the dark lower-left of the field)
+[os]
+disabled = false
+style = "bg:color_ultramarine_deep fg:color_frost bold"
+format = '[ 󰇈 ]($style)'
+
+# 2. AZURE (the cool left half)
+[directory]
+style = "bg:color_azure fg:color_ink_navy bold"
+format = "[ 󰲋 $path ]($style)"
+truncation_length = 3
+
+# 3. ORCHID (lilac and pink, where the blues turn warm)
+[git_branch]
+symbol = " "
+style = "bg:color_orchid fg:color_ink_navy bold"
+format = '[ $symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_orchid fg:color_ink_navy bold"
+format = '([$all_status$ahead_behind ]($style))'
+
+# 4. GOLD CORE (the brightest facets at the centre)
+[c]
+symbol = " "
+style = "bg:color_gold fg:color_ink_wine bold"
+format = '[ $symbol($version) ]($style)'
+
+[rust]
+symbol = " "
+style = "bg:color_gold fg:color_ink_wine bold"
+format = '[ $symbol($version) ]($style)'
+
+[golang]
+symbol = " "
+style = "bg:color_gold fg:color_ink_wine bold"
+format = '[ $symbol($version) ]($style)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_gold fg:color_ink_wine bold"
+format = '[ $symbol($version) ]($style)'
+
+[deno]
+symbol = " "
+style = "bg:color_gold fg:color_ink_wine bold"
+format = '[ $symbol($version) ]($style)'
+
+[python]
+symbol = " "
+style = "bg:color_gold fg:color_ink_wine bold"
+format = '[ $symbol($version) ]($style)'
+
+# 5. RASPBERRY (the hot right edge, sinking into aubergine)
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_raspberry fg:color_frost bold"
+format = '[ $time ]($style)'
+
+# 6. THE CUT GEM
+[character]
+success_symbol = "[◆❯](bold color_cyan_lit)"
+error_symbol = "[◆❯](bold color_alarm)"

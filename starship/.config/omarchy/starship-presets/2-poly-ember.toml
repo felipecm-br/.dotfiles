@@ -1,0 +1,131 @@
+# ==============================================================================
+#  Preset: Low-Poly Ember (Warm Core Facet Edition)
+#  Inspired by: low-poly triangulated gradient (~/Downloads/poly.jpg), colors sampled from its facets
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# Glyph chain: triangle strip, alternating U+E0B8 (lower-left) and U+E0BC (upper-left) with each fg equal
+# to the previous bg, so every color spans two cells as a ▼ or ▲ facet; U+E0BA opens the first facet.
+# The modules cascade through: Aubergine -> Tangerine -> Pink -> Gold -> Wine
+format = """
+[](fg:color_aubergine)\
+$os\
+[](fg:color_aubergine bg:color_raspberry)\
+[](fg:color_raspberry bg:color_coral_red)\
+[](fg:color_coral_red bg:color_crimson)\
+[](fg:color_crimson bg:color_tangerine)\
+
+$directory\
+[](fg:color_tangerine bg:color_peach)\
+[](fg:color_peach bg:color_hot_pink)\
+[](fg:color_hot_pink bg:color_candy)\
+[](fg:color_candy bg:color_pink)\
+
+$git_branch$git_status\
+[](fg:color_pink bg:color_apricot)\
+[](fg:color_apricot bg:color_hot_pink)\
+[](fg:color_hot_pink bg:color_tangerine_lit)\
+[](fg:color_tangerine_lit bg:color_gold)\
+
+$c$rust$golang$nodejs$deno$python\
+[](fg:color_gold bg:color_vermilion)\
+[](fg:color_vermilion bg:color_amber)\
+[](fg:color_amber bg:color_crimson)\
+[](fg:color_crimson bg:color_wine)\
+
+$time\
+[](fg:color_wine bg:color_fuchsia)\
+[](fg:color_fuchsia bg:color_plum)\
+[](fg:color_plum bg:color_fuchsia)\
+[](fg:color_fuchsia bg:transparent)\
+\n$character"""
+
+palette = 'poly_ember'
+
+[palettes.poly_ember]
+color_aubergine     = '#3a084d' # Aubergine facet (bottom-right corner)
+color_peach         = '#fdcfbf' # Peach facet
+color_tangerine     = '#fc8448' # Tangerine facet
+color_ink_wine      = '#2a0a14' # Wine ink (text on warm facets)
+color_pink          = '#fe61b0' # Pink facet
+color_gold          = '#fcd884' # Gold facet (the warm core)
+color_wine          = '#8f0058' # Wine facet
+color_raspberry     = '#b30354' # Raspberry facet
+color_coral_red     = '#fa4860' # Coral-red facet
+color_crimson       = '#e50136' # Crimson facet
+color_hot_pink      = '#fe2f89' # Hot-pink facet
+color_candy         = '#ffa3d2' # Candy-pink facet
+color_apricot       = '#fcc79f' # Apricot facet
+color_tangerine_lit = '#fca158' # Lit tangerine facet
+color_vermilion     = '#f94e47' # Vermilion facet
+color_amber         = '#fdaf5c' # Amber facet
+color_fuchsia       = '#fd2d8f' # Fuchsia facet
+color_plum          = '#69025b' # Plum facet
+color_alarm         = '#fa0047' # Alarm red (the error facet)
+
+# 1. AUBERGINE (the dark rim around the fire)
+[os]
+disabled = false
+style = "bg:color_aubergine fg:color_peach bold"
+format = '[ 󰇈 ]($style)'
+
+# 2. TANGERINE (the first flare)
+[directory]
+style = "bg:color_tangerine fg:color_ink_wine bold"
+format = "[ 󰲋 $path ]($style)"
+truncation_length = 3
+
+# 3. PINK (hot facets above the core)
+[git_branch]
+symbol = " "
+style = "bg:color_pink fg:color_ink_wine bold"
+format = '[ $symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_pink fg:color_ink_wine bold"
+format = '([$all_status$ahead_behind ]($style))'
+
+# 4. GOLD (the white-hot centre)
+[c]
+symbol = " "
+style = "bg:color_gold fg:color_ink_wine bold"
+format = '[ $symbol($version) ]($style)'
+
+[rust]
+symbol = " "
+style = "bg:color_gold fg:color_ink_wine bold"
+format = '[ $symbol($version) ]($style)'
+
+[golang]
+symbol = " "
+style = "bg:color_gold fg:color_ink_wine bold"
+format = '[ $symbol($version) ]($style)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_gold fg:color_ink_wine bold"
+format = '[ $symbol($version) ]($style)'
+
+[deno]
+symbol = " "
+style = "bg:color_gold fg:color_ink_wine bold"
+format = '[ $symbol($version) ]($style)'
+
+[python]
+symbol = " "
+style = "bg:color_gold fg:color_ink_wine bold"
+format = '[ $symbol($version) ]($style)'
+
+# 5. WINE (the embers cooling)
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_wine fg:color_peach bold"
+format = '[ $time ]($style)'
+
+# 6. THE CUT GEM
+[character]
+success_symbol = "[◆❯](bold color_gold)"
+error_symbol = "[◆❯](bold color_alarm)"

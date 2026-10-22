@@ -117,6 +117,7 @@ Chain ideas to start from (invent better ones):
 | Monsoon rain | `E0B9 E0BB E0B9` | thin diagonal separators stepping darker = rain cuts |
 | Sakura drift | `E0B4 E0C5 E0B6` | round petal, scattered drift, petal landing |
 | Glacier calving | `E0C8 E0CA E0C4` | ice fracture, mirrored shear, falling shards |
+| Low-poly facets | `E0B8 E0BC E0B8 E0BC` | **triangle strip**: alternate lower-left and upper-left triangles, each `fg` = previous `bg`, so every color spans two cells as a ▼ or ▲ facet; alternate light and shadowed facets (>= 1.3:1). See `2-poly-*` |
 
 #### Beyond Powerline: Unicode glyph families
 
