@@ -15,7 +15,7 @@ $directory\
 [\uE0C0](fg:color_dir bg:color_git)\
 $git_branch$git_status\
 [\uE0C6](fg:color_git bg:color_lang)\
-$rust$nodejs$python\
+$rust$nodejs$deno$python\
 [\uE0C0](fg:color_lang bg:color_time)\
 $time\
 [\uE0C0](fg:color_time)\
@@ -63,6 +63,11 @@ format = "[ $symbol($version) ]($style)"
 
 [nodejs]
 symbol = "\uE718 "
+style = "bg:color_lang fg:color_os bold"
+format = "[ $symbol($version) ]($style)"
+
+[deno]
+symbol = "\U0001F995 "
 style = "bg:color_lang fg:color_os bold"
 format = "[ $symbol($version) ]($style)"
 
