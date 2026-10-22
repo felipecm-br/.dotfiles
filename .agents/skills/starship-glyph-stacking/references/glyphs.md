@@ -45,7 +45,7 @@ Write glyphs into TOML from Python with `'\uE0C7'`, or in TOML basic strings (`"
 
 ## Thematic icons (Nerd Font Material Design, U+F0000+)
 
-Pick one icon per preset for `[os]` and `[directory]`. To find candidates, search https://www.nerdfonts.com/cheat-sheet by keyword (wave, snowflake, star, fire, leaf, mountain, ship-wheel). Existing presets use `󰠳` (U+F0833, ship wheel) and `󰲋` (U+F0C8B, folder).
+Pick one icon per preset for `[os]` and `[directory]`. To find candidates, search https://www.nerdfonts.com/cheat-sheet by keyword (wave, snowflake, star, fire, leaf, mountain, ship-wheel). Existing presets use `󰠳` (U+F0833, ship wheel) and `󰲋` (U+F0C8B, `md-application_brackets`). Look names up by keyword in `~/dev/github/nerdsight/main/assets/glyphnames.json` instead of guessing codepoints.
 
 ## Unicode glyph families
 
