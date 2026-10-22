@@ -36,6 +36,7 @@ if [ -z "${TMUX_POPUP:-}" ]; then
     -s "fg=${TMUX_POPUP_TEXT_COLOR:-default}" \
     -b rounded \
     -T "  " \
+    $(popup_gradient_flags WM_BORDER_GRADIENT) -e "WM_BORDER_TITLE=  " \
     -d "$PROJECT_DIR" \
     -w 75% -h 60% \
     -E \

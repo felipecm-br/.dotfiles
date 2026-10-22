@@ -250,6 +250,16 @@ The answer is **yes, completely and automatically**, through a three-tier synchr
 4. **Light vs. Dark Theme Contrast Compliance:**
    - In light themes (e.g., `catppuccin-latte`, `flexoki-light`, `white`), Omarchy remaps the ANSI palette so that `cyan` translates to a deep, legible teal/cyan on a light canvas, and `darkgray` maps to a crisp medium-dark gray, preserving WCAG 2.1 AA luminance contrast ($\ge 4.5:1$).
 
+### 3.5 Optional Gradient Frames (`border-gradient`)
+
+An opt-in, session-wide switch replaces the single-color popup border with a multi-color gradient (the notMyShell Chroma palettes: `aurora`, `nebula`, `rainbow`, `blackhole`, `warm`, `cool`, `lavender`, `monochrome`, or custom `#rrggbb,#rrggbb,...` stops), interpolated in OKLab along the top-left to bottom-right diagonal.
+
+- **Switch:** [`border-gradient`](../../utils/.local/bin/border-gradient) `[toggle] | on [PALETTE] | off | status | list`. State lives in `${XDG_STATE_HOME:-~/.local/state}/border-gradient/state`, so it survives tmux restarts and applies to the next popup opened (no reload).
+- **Why the app draws the frame:** `popup-border-style` accepts one color, so tmux cannot paint a gradient. While on, [`popup_gradient_flags`](../../tmux/.config/tmux/theme-helper.sh) (a builtin `read` of the state file, no fork) makes the launchers open the popup borderless (`-B`) and pass the palette to the app inside:
+  - Waymaker pickers (keybindings, cockpit, PR, scrollback, grep, workspace, awt): `WM_BORDER_GRADIENT` turns on a rounded gradient `ui` frame; `WM_BORDER_TITLE` carries the popup's icon badge onto it.
+  - lazygitrs: `LAZYGITRS_BORDER_GRADIENT` paints its active panel border.
+- **Scope:** only popups opened by these launchers. Waymaker used inline in panes (e.g. `Tab` completion) keeps its layout; guard modals, `nvim` (`Prefix + N`) and tmux pane borders keep their single-color borders.
+
 *See complete comparative audit and benchmarks in [State of the Art Terminal Agent Workflow](../architecture/state-of-the-art-terminal-agent-workflow.md).*
 
 ---

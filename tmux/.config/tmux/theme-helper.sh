@@ -128,6 +128,19 @@ get_theme_color() {
   printf '%s' "${_gtc_val:-${2:-}}"
 }
 
+# popup_gradient_flags VAR — display-popup flags for an app that draws its own
+# gradient frame: "-B -e VAR=<palette>" while `border-gradient` is on, nothing
+# when off. Expand it unquoted inside the display-popup call:
+#   tmux display-popup $(popup_gradient_flags WM_BORDER_GRADIENT) ...
+popup_gradient_flags() {
+  _pgf_state=""
+  _pgf_palette=""
+  [ -r "${XDG_STATE_HOME:-$HOME/.local/state}/border-gradient/state" ] \
+    && read -r _pgf_state _pgf_palette < "${XDG_STATE_HOME:-$HOME/.local/state}/border-gradient/state"
+  [ "$_pgf_state" = "on" ] && [ -n "$_pgf_palette" ] && printf -- '-B -e %s=%s' "$1" "$_pgf_palette"
+  return 0
+}
+
 _resolve_theme_colors_toml
 THEME_DIR="${THEME_COLORS_TOML%/*}"
 _load_theme_colors

@@ -495,3 +495,12 @@ $ (wm) session: wm session list 2>/dev/null
 $ (wm) file: find . -maxdepth 3 -type f \( -name '*.md' -o -name '*.markdown' -o -name '*.mmd' \) 2>/dev/null
 $ (mmdc) mmd_file: find . -maxdepth 4 -type f \( -name '*.mmd' -o -name '*.mermaid' \) 2>/dev/null
 $ (update-ai-workflow) component: echo -e "tmux\nfonts\ncodex\nagy\nantigravity-ide\nclaude\ndevin\nopencode\ncrush\nwaymux\nai-suite\nworktrunk\nmise"
+
+# Toggle gradient frames on tmux popups (Waymaker pickers, lazygitrs)
+border-gradient
+
+# Turn popup gradient frames on with a palette (aurora, nebula, rainbow, blackhole, warm, cool, lavender, monochrome)
+border-gradient on {{palette}}
+
+# Turn popup gradient frames off (back to themed single-color borders)
+border-gradient off

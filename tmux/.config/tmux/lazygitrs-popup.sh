@@ -86,6 +86,7 @@ tmux display-popup \
   -s "fg=${TMUX_POPUP_TEXT_COLOR:-default}" \
   -b rounded \
   -T " 󰊢 " \
+  $(popup_gradient_flags LAZYGITRS_BORDER_GRADIENT) \
   -d "$PROJECT_DIR" \
   -E \
   -w 90% -h 88% \

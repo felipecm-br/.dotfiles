@@ -30,6 +30,7 @@ elif [ -z "${TMUX_POPUP:-}" ]; then
     -s "fg=${TMUX_POPUP_TEXT_COLOR:-default}" \
     -b rounded \
     -T " 󱂬 " \
+    $(popup_gradient_flags WM_BORDER_GRADIENT) -e "WM_BORDER_TITLE= 󱂬 " \
     -w 85% -h 75% \
     -E \
     "TMUX_POPUP=1 TMUX_ORIGIN_SESSION='$ORIG_SESS' TMUX_ORIGIN_WINDOW='$ORIG_WIN' '$REAL_SCRIPT'"

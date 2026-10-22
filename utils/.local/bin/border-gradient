@@ -1,0 +1,93 @@
+#!/usr/bin/env bash
+# border-gradient — toggle multi-color gradient frames on tmux popups
+#
+# When on, tmux popups open borderless and the app inside draws the frame with
+# the gradient: Waymaker pickers get a full gradient frame (WM_BORDER_GRADIENT)
+# and lazygitrs gets a gradient active border (LAZYGITRS_BORDER_GRADIENT).
+# When off, popups go back to their themed single-color tmux border.
+#
+# State lives in one file read by theme-helper.sh (popup_gradient_flags), so it
+# survives tmux restarts and applies to the next popup opened, with no reload.
+#
+# Usage:
+#   border-gradient                 toggle (restores the last palette)
+#   border-gradient on [PALETTE]    turn on (default: last palette, or aurora)
+#   border-gradient off             turn off
+#   border-gradient status          print "on <palette>" or "off <palette>"
+#   border-gradient list            list presets
+#
+# PALETTE: a preset or two or more #rrggbb stops joined by commas
+# (e.g. "#3ee8b5,#8f6cf5,#e46cc8").
+set -eo pipefail
+
+STATE_FILE="${XDG_STATE_HOME:-$HOME/.local/state}/border-gradient/state"
+PRESETS=(aurora nebula rainbow blackhole warm cool lavender monochrome)
+DEFAULT_PALETTE="aurora"
+
+state="off"
+palette="$DEFAULT_PALETTE"
+if [[ -r "$STATE_FILE" ]]; then
+  read -r state palette < "$STATE_FILE" || true
+  palette="${palette:-$DEFAULT_PALETTE}"
+fi
+
+valid_palette() {
+  local p="$1" stop
+  for stop in "${PRESETS[@]}"; do
+    [[ "${p,,}" == "$stop" ]] && return 0
+  done
+  local count=0
+  IFS=',' read -ra stops <<< "$p"
+  for stop in "${stops[@]}"; do
+    [[ "$stop" =~ ^#[0-9a-fA-F]{6}$ ]] || return 1
+    count=$((count + 1))
+  done
+  (( count >= 2 ))
+}
+
+save() {
+  mkdir -p "${STATE_FILE%/*}"
+  printf '%s %s\n' "$1" "$2" > "$STATE_FILE"
+  local msg
+  if [[ "$1" == "on" ]]; then
+    msg="󰸌  Border gradient on ($2)"
+  else
+    msg="󰸌  Border gradient off"
+  fi
+  [[ -n "${TMUX:-}" ]] && tmux display-message "$msg" 2>/dev/null || true
+  echo "$msg"
+}
+
+cmd="${1:-toggle}"
+case "$cmd" in
+  on)
+    if [[ -n "${2:-}" ]]; then
+      palette="${2// /}"
+      if ! valid_palette "$palette"; then
+        echo "border-gradient: invalid palette '$2' (see: border-gradient list)" >&2
+        exit 1
+      fi
+      [[ "$palette" == \#* ]] || palette="${palette,,}"
+    fi
+    save on "$palette"
+    ;;
+  off)
+    save off "$palette"
+    ;;
+  toggle)
+    if [[ "$state" == "on" ]]; then save off "$palette"; else save on "$palette"; fi
+    ;;
+  status)
+    echo "$state $palette"
+    ;;
+  list)
+    printf '%s\n' "${PRESETS[@]}"
+    ;;
+  -h|--help)
+    sed -n '2,20p' "$0" | sed 's/^# \{0,1\}//'
+    ;;
+  *)
+    echo "border-gradient: unknown command '$cmd' (try --help)" >&2
+    exit 1
+    ;;
+esac
