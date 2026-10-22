@@ -1,0 +1,111 @@
+# ==============================================================================
+#  Preset: Sirocco over Erg Chebbi (Slip-Face Spindrift Edition)
+#  Inspired by: Natural phenomenon - barchan and star dunes of Erg Chebbi, Morocco, under a sirocco wind
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# Glyph chain: rising ridge U+E0BA -> slip face U+E0BC -> spindrift grains U+E0C4
+# The modules cascade through: Leeward Shadow -> Windward Face -> Iron-Oxide Crest -> Dust Haze -> Veiled Sky
+format = """
+[](fg:color_umber)\
+$os\
+[](fg:color_sand_dark bg:color_umber)\
+[](fg:color_sand bg:color_sand_dark)\
+
+$directory\
+[](fg:color_sand_lit bg:color_sand)\
+[](fg:color_sand_lit bg:color_crest)\
+[](fg:color_sand_lit bg:color_crest)\
+
+$git_branch$git_status\
+[](fg:color_crest bg:color_haze)\
+[](fg:color_crest bg:color_haze)\
+
+$c$rust$golang$nodejs$deno$python\
+[](fg:color_haze bg:color_sky)\
+
+$time\
+[](fg:color_haze bg:color_sky)\
+[](fg:color_sky bg:transparent)\
+[](fg:color_sand_lit bg:transparent)\
+\n$character"""
+
+palette = 'sirocco_dunes'
+
+[palettes.sirocco_dunes]
+color_umber       = '#3b2416' # Burnt umber (the leeward shadow at the dune foot)
+color_sand_dark   = '#8c5a32' # Raw sienna (sand turning toward the light)
+color_sand        = '#d39a55' # Yellow ochre (the sunlit windward face)
+color_sand_lit    = '#f0cc8a' # Naples yellow (grains catching the sun on the ridge)
+color_crest       = '#8f3b1d' # Hematite orange (iron-oxide coated crest grains)
+color_haze        = '#c9a67a' # Sirocco dust haze (suspended silt)
+color_sky         = '#e8dccb' # Dust-veiled sky (Mie-scattered white)
+color_ink         = '#24160d' # Bitumen (text on lit sand)
+color_tuareg      = '#4f6fd6' # Tuareg indigo (tagelmust veil, the alarm)
+
+# 1. THE LEEWARD SHADOW (the cold foot of the dune)
+[os]
+disabled = false
+style = "bg:color_umber fg:color_sand_lit bold"
+format = '[ 󰖝 ]($style)'
+
+# 2. THE WINDWARD FACE (sunlit ochre slope)
+[directory]
+style = "bg:color_sand fg:color_ink bold"
+format = "[󰲋 $path ]($style)"
+truncation_length = 3
+
+# 3. THE IRON-OXIDE CREST (spindrift tearing off the ridge)
+[git_branch]
+symbol = " "
+style = "bg:color_crest fg:color_sand_lit bold"
+format = '[ $symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_crest fg:color_sand_lit bold"
+format = '([$all_status$ahead_behind ]($style))'
+
+# 4. THE DUST HAZE (silt suspended by the sirocco)
+[c]
+symbol = " "
+style = "bg:color_haze fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[rust]
+symbol = " "
+style = "bg:color_haze fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[golang]
+symbol = " "
+style = "bg:color_haze fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_haze fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[deno]
+symbol = " "
+style = "bg:color_haze fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[python]
+symbol = " "
+style = "bg:color_haze fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+# 5. THE VEILED SKY
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_sky fg:color_ink bold"
+format = '[ $time ]($style)'
+
+# 6. THE GRAINS
+[character]
+success_symbol = "[∴❯](bold color_sand_lit)"
+error_symbol = "[∴❯](bold color_tuareg)"

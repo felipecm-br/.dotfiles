@@ -1,0 +1,102 @@
+# ==============================================================================
+#  Preset: Mount Fuji in Clear Weather / Red Fuji (Ukiyo-e Gaifū Kaisei Edition)
+#  Inspired by: Katsushika Hokusai (c. 1831) - Thirty-Six Views of Mount Fuji
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# The modules cascade through: Pine Forest Abyss -> Sloping Volcano -> Incandescent Red Summit -> Cirrus Wind Clouds -> Azure Sky
+format = """
+[](fg:color_forest)\
+$os\
+[](fg:color_cloud bg:color_forest)\
+[](fg:color_slope bg:color_red)\
+$directory\
+
+[](fg:color_cloud bg:color_red)\
+[](fg:color_mist bg:color_sky_mid)\
+[](fg:color_sky_mid bg:color_red)\
+$git_branch$git_status\
+
+[](fg:color_cloud bg:color_sky_mid)\
+[](fg:color_mist bg:color_forest)\
+[](fg:color_forest bg:color_sky_deep)\
+$c$rust$golang$nodejs$deno$python\
+
+$time\
+[](fg:color_cloud bg:color_sky_deep)\
+[](fg:color_mist bg:color_red)\
+[](fg:color_red bg:transparent)\
+
+\n$character"""
+
+palette = 'red_fuji'
+
+[palettes.red_fuji]
+color_forest   = '#14291c' # Virgin Sea of Trees (Aokigahara) at Fuji's Base
+color_slope    = '#6b1f17' # Volcanic Basalt Slope Shadow
+color_red      = '#b83b26' # Incandescent Terracotta Red Peak in Morning Sun
+color_mist     = '#e4c9b0' # Morning Mist & Residual Summit Snow
+color_cloud    = '#f7f4ed' # Cirrus Wind Clouds ("Mackerel Sky" streaks)
+color_sky_mid  = '#2a537d' # Crisp Morning Azure Sky
+color_sky_deep = '#12253b' # Deep Celestial Zenith
+
+# 1. THE VIRGIN FOREST AT THE BASE
+[os]
+disabled = false
+style = "bg:color_forest fg:color_cloud bold"
+format = '[  ]($style)'
+
+# 2. THE VOLCANIC RED ESCARPMENT
+[directory]
+style = "bg:color_red fg:color_cloud bold"
+format = "[󰲋 $path ]($style)"
+
+# 3. CIRRUS CLOUDS & RIDGE CREST
+[git_branch]
+symbol = " "
+style = "bg:color_red fg:color_cloud bold"
+format = '[$symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_red fg:color_cloud bold"
+format = '([$all_status$ahead_behind ]($style))'
+
+# 4. SUMMIT LANGUAGES
+[rust]
+symbol = " "
+style = "bg:color_sky_deep fg:color_cloud bold"
+format = '[ $symbol($version) ]($style)'
+
+[golang]
+symbol = " "
+style = "bg:color_sky_deep fg:color_cloud bold"
+format = '[ $symbol($version) ]($style)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_sky_deep fg:color_cloud bold"
+format = '[ $symbol($version) ]($style)'
+
+[deno]
+symbol = "🦕 "
+style = "bg:color_sky_deep fg:color_cloud bold"
+format = '[ $symbol($version) ]($style)'
+
+[python]
+symbol = " "
+style = "bg:color_sky_deep fg:color_cloud bold"
+format = '[ $symbol($version) ]($style)'
+
+# 5. THE AZURE ZENITH & TIME
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_sky_deep fg:color_cloud bold"
+format = '[ $time ]($style)'
+
+# 6. SOUTHERN BREEZE PROMPT
+[character]
+success_symbol = "[❯](bold #b83b26)"
+error_symbol = "[❯](bold #731b14)" # Deep Hanko Cinnabar Stamp

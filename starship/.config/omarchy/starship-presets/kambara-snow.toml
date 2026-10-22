@@ -1,0 +1,103 @@
+# ==============================================================================
+#  Preset: Night Snow at Kambara (Ukiyo-e Hiroshige Edition)
+#  Inspired by: Utagawa Hiroshige (c. 1833) - The Fifty-Three Stations of the Tōkaidō
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# The modules cascade through: Silent Midnight -> Mountain Snowbank -> Slate Dusk -> Lantern Glow
+format = """
+[](fg:color_night)\
+$os\
+[](fg:color_snow bg:color_night)\
+[](fg:color_snow_shade bg:color_slate)\
+$directory\
+
+[](fg:color_snow bg:color_slate)\
+[](fg:color_ice bg:color_deep_slate)\
+[](fg:color_deep_slate bg:color_slate)\
+$git_branch$git_status\
+
+[](fg:color_snow bg:color_slate)\
+[](fg:color_ice bg:color_lantern_base)\
+[](fg:color_lantern_base bg:color_lantern)\
+$c$rust$golang$nodejs$deno$python\
+
+$time\
+[](fg:color_snow bg:color_lantern)\
+[](fg:color_ice bg:color_night)\
+[](fg:color_night bg:transparent)\
+
+\n$character"""
+
+palette = 'kambara_snow'
+
+[palettes.kambara_snow]
+color_night        = '#0b0f17' # Deep Velvet Midnight Sky
+color_deep_slate   = '#182230' # Shadowed Mountain Ridge
+color_slate        = '#2c3b4f' # Heavy Winter Overcast
+color_snow_shade   = '#68829e' # Cool Snow Drift Shadow
+color_ice          = '#b8d0e8' # Crystalline Ice Edge & Powder Spray
+color_snow         = '#f0f6fc' # Pure Fallen Snow on Village Eaves
+color_lantern_base = '#634928' # Weathered Wood of Thatched Roof
+color_lantern      = '#d99843' # Warm Paper Lantern (*Andon*) Light
+
+# 1. THE SILENT WINTER NIGHT
+[os]
+disabled = false
+style = "bg:color_night fg:color_snow bold"
+format = '[  ]($style)'
+
+# 2. THE SNOW-COVERED VILLAGE RIDGE
+[directory]
+style = "bg:color_slate fg:color_snow bold"
+format = "[󰞍 $path ]($style)"
+
+# 3. WINTER SLATE COLD & DUSK
+[git_branch]
+symbol = " "
+style = "bg:color_deep_slate fg:color_snow bold"
+format = '[$symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_deep_slate fg:color_snow bold"
+format = '([$all_status$ahead_behind ]($style))'
+
+# 4. LANTERN WARMTH LANGUAGES
+[rust]
+symbol = " "
+style = "bg:color_lantern fg:color_night bold"
+format = '[ $symbol($version) ]($style)'
+
+[golang]
+symbol = " "
+style = "bg:color_lantern fg:color_night bold"
+format = '[ $symbol($version) ]($style)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_lantern fg:color_night bold"
+format = '[ $symbol($version) ]($style)'
+
+[deno]
+symbol = "🦕 "
+style = "bg:color_lantern fg:color_night bold"
+format = '[ $symbol($version) ]($style)'
+
+[python]
+symbol = " "
+style = "bg:color_lantern fg:color_night bold"
+format = '[ $symbol($version) ]($style)'
+
+# 5. PAPER LANTERN TIME
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_lantern fg:color_night bold"
+format = '[ $time ]($style)'
+
+# 6. WINTER SNOW PROMPT
+[character]
+success_symbol = "[❄❯](bold #b8d0e8)"
+error_symbol = "[❄❯](bold #c84b31)" # Traditional Red Hanko Seal in the Snow

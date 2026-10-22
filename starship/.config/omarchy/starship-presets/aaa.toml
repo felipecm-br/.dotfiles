@@ -20,7 +20,7 @@ $git_branch$git_status\
 [](fg:color_dark_bubbles bg:color_dir)\
 $directory\
 
-[](fg:color_white bg:color_git)\
+[](fg:color_white bg:color_dir)\
 [](fg:color_lang bg:color_wet_sand)\
 [](fg:color_wet_sand bg:color_time)\
 $deno\

@@ -1,0 +1,114 @@
+# ==============================================================================
+#  Preset: Sudden Shower over Shin-Ōhashi Bridge and Atake (Yūdachi Rain-Cut Edition)
+#  Inspired by: Utagawa Hiroshige (1857) - One Hundred Famous Views of Edo, No. 58
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# Glyph chain: two-tone rain lines U+E0BB U+E0BB -> diagonal wedge cut U+E0B8 / U+E0BC
+# The modules cascade through: Bokashi Storm Cloud -> Indigo Sumida River -> Hinoki Bridge -> Atake Shore -> Rain-Washed Sky
+format = """
+[](fg:color_cloud)\
+$os\
+[](fg:color_rain_lit bg:color_cloud)\
+[](fg:color_rain_dark bg:color_cloud_mid)\
+[](fg:color_cloud_mid bg:color_river)\
+
+$directory\
+[](fg:color_rain_lit bg:color_river)\
+[](fg:color_rain_dark bg:color_river_lit)\
+[](fg:color_river_lit bg:color_bridge)\
+
+$git_branch$git_status\
+[](fg:color_cloud bg:color_bridge)\
+[](fg:color_bridge bg:color_shore)\
+
+$c$rust$golang$nodejs$deno$python\
+[](fg:color_rain_lit bg:color_shore)\
+[](fg:color_shore bg:color_sky)\
+
+$time\
+[](fg:color_rain_dark bg:color_sky)\
+[](fg:color_sky bg:transparent)\
+[](fg:color_rain_dark bg:transparent)\
+\n$character"""
+
+palette = 'sudden_shower_atake'
+
+[palettes.sudden_shower_atake]
+color_cloud      = '#141414' # Sumi bokashi storm cloud (graded top band)
+color_cloud_mid  = '#585d63' # Grey bokashi (the cloud thinning into rain)
+color_river      = '#1f3a5f' # Aizuri Prussian Blue (the Sumida River)
+color_river_lit  = '#4f7396' # Diluted aizuri (rain-flattened water surface)
+color_bridge     = '#b08a5a' # Weathered hinoki wood (Shin-Ōhashi deck)
+color_shore      = '#3f4c36' # Atake far shore (rain-greyed pine green)
+color_sky        = '#c9cdc8' # Rain-washed sky (pale gofun haze)
+color_rain_dark  = '#7d848c' # Dark rain line (first rain block)
+color_rain_lit   = '#d8dde2' # Light rain line (second rain block)
+color_beni       = '#e0483b' # Beni safflower red (the travellers' alarm)
+
+# 1. THE BOKASHI STORM CLOUD (graded sumi band across the top)
+[os]
+disabled = false
+style = "bg:color_cloud fg:color_rain_lit bold"
+format = '[ 󰖖 ]($style)'
+
+# 2. THE SUMIDA RIVER (aizuri indigo under the downpour)
+[directory]
+style = "bg:color_river fg:color_rain_lit bold"
+format = "[󰲋 $path ]($style)"
+truncation_length = 3
+
+# 3. THE SHIN-ŌHASHI BRIDGE (hinoki deck, travellers running)
+[git_branch]
+symbol = " "
+style = "bg:color_bridge fg:color_cloud bold"
+format = '[ $symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_bridge fg:color_cloud bold"
+format = '([$all_status$ahead_behind ]($style))'
+
+# 4. THE ATAKE SHORE (far bank dissolving in rain)
+[c]
+symbol = " "
+style = "bg:color_shore fg:color_sky bold"
+format = '[ $symbol($version) ]($style)'
+
+[rust]
+symbol = " "
+style = "bg:color_shore fg:color_sky bold"
+format = '[ $symbol($version) ]($style)'
+
+[golang]
+symbol = " "
+style = "bg:color_shore fg:color_sky bold"
+format = '[ $symbol($version) ]($style)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_shore fg:color_sky bold"
+format = '[ $symbol($version) ]($style)'
+
+[deno]
+symbol = " "
+style = "bg:color_shore fg:color_sky bold"
+format = '[ $symbol($version) ]($style)'
+
+[python]
+symbol = " "
+style = "bg:color_shore fg:color_sky bold"
+format = '[ $symbol($version) ]($style)'
+
+# 5. THE RAIN-WASHED SKY
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_sky fg:color_cloud bold"
+format = '[ $time ]($style)'
+
+# 6. THE FALLING LINE
+[character]
+success_symbol = "[╱❯](bold color_rain_lit)"
+error_symbol = "[╱❯](bold color_beni)"

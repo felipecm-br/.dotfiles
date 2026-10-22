@@ -1,0 +1,108 @@
+# ==============================================================================
+#  Preset: Pine Trees in Mist (Sumi-e Kasure Edition)
+#  Inspired by: Hasegawa Tōhaku (c. 1595) - Shōrin-zu byōbu, ink on paper, Tokyo National Museum
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# Glyph chain: brush-entry wedge U+E0BC -> ink-bleed squares U+E0C6 -> soft wash fade U+E0B4
+# The modules cascade through: Ink Stone -> Wet Pine Trunk -> Washi Void -> Mist Wash -> Diluted Ink Horizon
+format = """
+[](fg:color_sumi)\
+$os\
+[](fg:color_sumi bg:color_ink_wash)\
+[](fg:color_ink_wash bg:color_ink_wet)\
+
+$directory\
+[](fg:color_ink_wet bg:color_ink_wash)\
+[](fg:color_ink_wash bg:color_mist)\
+[](fg:color_mist bg:color_washi)\
+
+$git_branch$git_status\
+[](fg:color_washi bg:color_fiber)\
+[](fg:color_fiber bg:color_mist)\
+
+$c$rust$golang$nodejs$deno$python\
+[](fg:color_mist bg:color_ink_wash)\
+
+$time\
+[](fg:color_ink_wash bg:color_mist)\
+[](fg:color_mist bg:transparent)\
+\n$character"""
+
+palette = 'sumi_e_pine_trees'
+
+[palettes.sumi_e_pine_trees]
+color_sumi         = '#1b1a19' # Lamp-black (shōen-boku pine-soot ink stick)
+color_ink_wet      = '#3b3936' # Koi-zumi dense wet ink (the near pine trunks)
+color_ink_wash     = '#5f5b55' # Usu-zumi diluted ink wash (the receding pines)
+color_mist         = '#a39d92' # Kasumi mist grey (fog swallowing the grove)
+color_fiber        = '#cbbfa6' # Kōzo fiber shadow (dry-brush kasure texture)
+color_washi        = '#ece4d4' # Washi mulberry paper (the unpainted void, ma)
+color_shuin        = '#c0392b' # Shuniku cinnabar seal paste (the artist's hanko)
+
+# 1. THE INK STONE (pine-soot sumi ground)
+[os]
+disabled = false
+style = "bg:color_sumi fg:color_washi bold"
+format = '[ 󰐅 ]($style)'
+
+# 2. THE WET PINE TRUNK (koi-zumi, the nearest tree)
+[directory]
+style = "bg:color_ink_wet fg:color_washi bold"
+format = "[󰲋 $path ]($style)"
+truncation_length = 3
+
+# 3. THE WASHI VOID (ma, the unpainted paper that is the mist)
+[git_branch]
+symbol = " "
+style = "bg:color_washi fg:color_sumi bold"
+format = '[ $symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_washi fg:color_sumi bold"
+format = '([$all_status$ahead_behind ]($style))'
+
+# 4. THE MIST WASH (kasumi swallowing the far trees)
+[c]
+symbol = " "
+style = "bg:color_mist fg:color_sumi bold"
+format = '[ $symbol($version) ]($style)'
+
+[rust]
+symbol = " "
+style = "bg:color_mist fg:color_sumi bold"
+format = '[ $symbol($version) ]($style)'
+
+[golang]
+symbol = " "
+style = "bg:color_mist fg:color_sumi bold"
+format = '[ $symbol($version) ]($style)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_mist fg:color_sumi bold"
+format = '[ $symbol($version) ]($style)'
+
+[deno]
+symbol = " "
+style = "bg:color_mist fg:color_sumi bold"
+format = '[ $symbol($version) ]($style)'
+
+[python]
+symbol = " "
+style = "bg:color_mist fg:color_sumi bold"
+format = '[ $symbol($version) ]($style)'
+
+# 5. THE DILUTED HORIZON (usu-zumi, the last pine dissolving)
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_ink_wash fg:color_washi bold"
+format = '[ $time ]($style)'
+
+# 6. THE ENSŌ AND THE SEAL
+[character]
+success_symbol = "[◯❯](bold color_mist)"
+error_symbol = "[◯❯](bold color_shuin)"
