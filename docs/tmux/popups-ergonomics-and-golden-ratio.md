@@ -202,6 +202,7 @@ Every interactive popup, picker, and confirmation dialog has been harmonized und
 | **Hyprland Borders** | [`borders.toml`](../../waymaker/.config/waymaker/presets/borders.toml) | `{cyan,bold:Enter} Salvar │ j/k Estilo │ h/l Velocidade │ r Girar Ângulo │ Esc Cancelar` |
 | **Starship Presets** | [`starship-presets.toml`](../../waymaker/.config/waymaker/presets/starship-presets.toml) | `{cyan,bold:Enter} Selecionar │ j/k Navegar │ C-l/h Modo Vim │ Esc Cancelar` |
 | **Guard Modals** | [`close-session.sh`](../../tmux/.config/tmux/close-session.sh), [`close-window.sh`](../../tmux/.config/tmux/close-window.sh) | `y Kill ... │ n / Esc Keep ...` (hairline `│` divider) |
+| **Picker Kill Confirm** | [`confirm-modal.sh`](../../tmux/.config/tmux/confirm-modal.sh) (called by `window-picker-delete.sh` for `d` on a session row or a multi-window selection; replaces `gum confirm`) | `y Kill ... │ n / Esc Keep ...` (same guard-modal look; exit 0 = confirmed) |
 
 ### 3.4 Omarchy Dynamic Theme Color Synchronization
 
