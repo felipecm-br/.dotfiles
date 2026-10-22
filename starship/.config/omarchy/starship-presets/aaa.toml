@@ -24,11 +24,14 @@ $git_branch$git_status\
 $bubbles\
 $wave_crest\
 [](fg:color_lang bg:color_wet_sand)\
-
-$times\
-$wave_crestshadow\
+$wave2_crest_shadow\
 [](fg:color_wet_sand bg:color_time)\
+
+$time\
 [](fg:color_time)\
+$wave3crestshadow\
+[](fg:color_wet_sand bg:transparent)\
+
 
 \n$character"""
 
@@ -76,16 +79,21 @@ symbol = ""
 style = "bg:color_lang fg:color_os bold"
 format = '[ $symbol($version) ]($style)'
 
-# [wave_crest_shadow]
-# symbol = ""
-# style = "bg:color_rose fg:color_os bold"
-# format = '[$symbol]($style)'
 
-[wave_crestshadow]
+[wave3crestshadow]
+symbol = ""
+style = "bg:color_wet_sand fg:color_os bold"
+format = ' [$symbol]($style) '
+
+[wave2_crest_shadow]
 symbol = ""
 style = "bg:color_wet_sand fg:color_os bold"
 format = '[$symbol]($style)'
 
+[wave1_crest_shadow]
+symbol = ""
+style = "bg:color_wet_sand fg:color_os bold"
+format = '[$symbol]($style)'
 
 [bubbles]
 symbol = ""
