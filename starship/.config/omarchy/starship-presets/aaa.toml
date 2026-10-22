@@ -23,11 +23,13 @@ $git_branch$git_status\
 [](fg:color_white bg:color_git)\
 $bubbles\
 $wave_crest\
-[](fg:color_lang bg:color_time)\
-$time\
+[](fg:color_lang bg:color_wet_sand)\
 
-[](fg:color_rose bg:color_time)\
+$times\
+$wave_crestshadow\
+[](fg:color_wet_sand bg:color_time)\
 [](fg:color_time)\
+
 \n$character"""
 
 palette = 'kanagawa_great_wave'
@@ -41,6 +43,7 @@ color_lang = '#f2f5f7' # Crisp White Foam (Breaking crest & Mt. Fuji snow)
 color_time = '#c7ad7f' # Warm Ochre Sand (Rowboats & warm sky horizon)
 color_fuji = '#58636d' # Stormy Grey (Mist behind Mount Fuji)
 color_rose = '#3a2c2c' # Stormy Grey (Mist behind Mount Fuji)
+color_wet_sand = '#887656' #s
 color_dark = '#3a2c2c' # Stormy Grey (Mist behind Mount Fuji)
 color_sky = '#87b5e0' # Stormy Grey (Mist behind Mount Fuji)
 color_white = '#ffffff'
@@ -73,19 +76,14 @@ symbol = ""
 style = "bg:color_lang fg:color_os bold"
 format = '[ $symbol($version) ]($style)'
 
-[wave_crest_shadow]
-symbol = ""
-style = "bg:color_rose fg:color_os bold"
-format = '[$symbol]($style)'
+# [wave_crest_shadow]
+# symbol = ""
+# style = "bg:color_rose fg:color_os bold"
+# format = '[$symbol]($style)'
 
-[wave_crest_shadow1]
+[wave_crestshadow]
 symbol = ""
-style = "bg:color_rose fg:color_os bold"
-format = '[$symbol]($style)'
-
-[wave_crest_shadow2]
-symbol = ""
-style = "bg:color_time fg:color_os bold"
+style = "bg:color_wet_sand fg:color_os bold"
 format = '[$symbol]($style)'
 
 
