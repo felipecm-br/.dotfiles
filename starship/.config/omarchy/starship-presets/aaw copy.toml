@@ -13,27 +13,17 @@ $os\
 [](fg:color_white bg:color_os)\
 $bubbles\
 $wave_crest\
-[](fg:color_lang bg:color_dark)\
-$wave_crest_shadow\
-[](fg:color_dark bg:color_dir)\
-[](fg:color_os bg:color_dir)\
-$directory\
 
 [](fg:color_white bg:color_dir)\
 $bubbles\
 $wave_crest\
-[](fg:color_lang bg:color_dark)\
-$wave_crest_shadow\
-[](fg:color_dark bg:color_git)\
-[](fg:color_dir bg:color_git)\
+[](fg:color_lang bg:color_git)\
 $git_branch$git_status\
 
 [](fg:color_white bg:color_git)\
 $bubbles\
 $wave_crest\
-[](fg:color_lang bg:color_rose)\
-$wave_crest_shadow\
-[](fg:color_rose bg:color_time)\
+[](fg:color_lang bg:color_time)\
 $time\
 
 [](fg:color_time)\
@@ -86,6 +76,17 @@ format = '[ $symbol($version) ]($style)'
 symbol = ""
 style = "bg:color_rose fg:color_os bold"
 format = '[$symbol]($style)'
+
+[wave_crest_shadow1]
+symbol = ""
+style = "bg:color_rose fg:color_os bold"
+format = '[$symbol]($style)'
+
+[wave_crest_shadow2]
+symbol = ""
+style = "bg:color_time fg:color_os bold"
+format = '[$symbol]($style)'
+
 
 [bubbles]
 symbol = ""
