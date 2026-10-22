@@ -1,0 +1,111 @@
+# ==============================================================================
+#  Preset: The Great Wave of Kanagawa (Ukiyo-e Crest Edition)
+#  Created by: Starship Studio (https://github.com/felipecm-br/starship-studio)
+#  Configured with Starship Studio: https://github.com/felipecm-br/starship-studio
+# ==============================================================================
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# The modules cascade from Deep Ocean -> Swell -> Seafoam -> White Crest -> Sandy Horizon
+format = """
+[](fg:color_os)\
+$os\
+[](fg:color_white bg:color_os)\
+$bubbles1\
+$wave_crest\
+
+[](fg:color_white bg:color_dir)\
+$bubbles\
+$wave_crest\
+[](fg:color_lang bg:color_git)\
+$git_branch$git_status\
+
+[](fg:color_white bg:color_git)\
+$bubbles\
+$wave_crest\
+[](fg:color_lang bg:color_time)\
+$time\
+
+[](fg:color_time)\
+\n$character"""
+
+palette = 'kanagawa_great_wave'
+
+[palettes.kanagawa_great_wave]
+color_bg   = '#051329' # Deepest Midnight Trench (High-contrast dark text)
+color_os   = '#071e3d' # Deep Prussian Blue (Base of the Great Wave)
+color_dir  = '#1f4e70' # Mid-Wave Indigo (Rising swell)
+color_git  = '#6d94a6' # Seafoam Slate (Curling wave claws)
+color_lang = '#f2f5f7' # Crisp White Foam (Breaking crest & Mt. Fuji snow)
+color_time = '#c7ad7f' # Warm Ochre Sand (Rowboats & warm sky horizon)
+color_fuji = '#58636d' # Stormy Grey (Mist behind Mount Fuji)
+color_rose = '#3a2c2c' # Stormy Grey (Mist behind Mount Fuji)
+color_dark = '#3a2c2c' # Stormy Grey (Mist behind Mount Fuji)
+color_sky = '#87b5e0' # Stormy Grey (Mist behind Mount Fuji)
+color_white = '#ffffff'
+
+# 1. THE DEEP ABYSS
+[os]
+disabled = false
+style = "bg:color_os fg:color_lang bold"
+format = '[ 󰣇 ]($style)'
+
+# 2. THE RISING SWELL
+[directory]
+style = "bg:color_dir fg:color_lang bold"
+format = "[󰲋 $path ]($style)"
+truncation_length = 3
+truncation_symbol = "≈/" # Wave tilde truncation!
+
+# 3. THE CURLING SEAFOAM
+[git_branch]
+symbol = " "
+style = "bg:color_git fg:color_bg bold"
+format = '[$symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_git fg:color_bg bold"
+format = '([$all_status$ahead_behind ]($style))'
+
+[wave_crest]
+symbol = ""
+style = "bg:color_lang fg:color_os bold"
+format = '[ $symbol($version) ]($style)'
+
+[wave_crest_shadow]
+symbol = ""
+style = "bg:color_rose fg:color_os bold"
+format = '[$symbol]($style)'
+
+[wave_crest_shadow1]
+symbol = ""
+style = "bg:color_rose fg:color_os bold"
+format = '[$symbol]($style)'
+
+[wave_crest_shadow2]
+symbol = ""
+style = "bg:color_time fg:color_os bold"
+format = '[$symbol]($style)'
+
+
+[bubbles1]
+symbol = ""
+style = "bg:color_rose fg:color_os bold"
+format = '[$symbol]($style)'
+
+[bubbles]
+symbol = ""
+style = "bg:color_rose fg:color_os bold"
+format = '[$symbol]($style)'
+
+# 5. THE WOODEN BOATS & HORIZON SKY
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_time fg:color_bg bold"
+format = '[ $time ]($style)'
+
+# THE SWELL PROMPT
+[character]
+success_symbol = "[≈❯](bold #6d94a6)"
+error_symbol = "[≈❯](bold #c84b31)" # Traditional Japanese Hokusai Hanko Stamp Red

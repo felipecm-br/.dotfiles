@@ -10,8 +10,8 @@
 format = """
 [](fg:color_os)\
 $os\
-[](fg:color_white bg:color_os)\
-$bubbles\
+[](fg:color_white bg:color_os)\
+$bubbles1\
 $wave_crest\
 
 [](fg:color_white bg:color_dir)\
@@ -87,6 +87,11 @@ symbol = ""
 style = "bg:color_time fg:color_os bold"
 format = '[$symbol]($style)'
 
+
+[bubbles1]
+symbol = ""
+style = "bg:color_rose fg:color_os bold"
+format = '[$symbol]($style)'
 
 [bubbles]
 symbol = ""
