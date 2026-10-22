@@ -14,10 +14,12 @@ $os\
 $directory\
 [](fg:color_dir bg:color_git)\
 $git_branch$git_status\
+[](fg:color_white bg:color_git)\
+$bubbles\
 [](fg:color_git bg:color_lang)\
-$empty\
+$wave_crest\
 [](fg:color_lang bg:color_rose)\
-$deno\
+$shadow\
 [](fg:color_rose bg:color_time)\
 $time\
 [](fg:color_time)\
@@ -33,7 +35,9 @@ color_git  = '#6d94a6' # Seafoam Slate (Curling wave claws)
 color_lang = '#f2f5f7' # Crisp White Foam (Breaking crest & Mt. Fuji snow)
 color_time = '#c7ad7f' # Warm Ochre Sand (Rowboats & warm sky horizon)
 color_fuji = '#58636d' # Stormy Grey (Mist behind Mount Fuji)
-color_rose = '#da8c8c' # Stormy Grey (Mist behind Mount Fuji)
+color_rose = '#6c4545' # Stormy Grey (Mist behind Mount Fuji)
+color_sky = '#87b5e0' # Stormy Grey (Mist behind Mount Fuji)
+color_white = '#ffffff'
 
 # 1. THE DEEP ABYSS
 [os]
@@ -58,12 +62,17 @@ format = '[ $symbol$branch ]($style)'
 style = "bg:color_git fg:color_bg bold"
 format = '([$all_status$ahead_behind ]($style))'
 
-[empty]
-symbol = " "
+[wave_crest]
+symbol = ""
 style = "bg:color_lang fg:color_os bold"
 format = '[ $symbol($version) ]($style)'
 
-[deno]
+[shadow]
+symbol = ""
+style = "bg:color_rose fg:color_os bold"
+format = '[$symbol]($style)'
+
+[bubbles]
 symbol = ""
 style = "bg:color_rose fg:color_os bold"
 format = '[$symbol]($style)'
