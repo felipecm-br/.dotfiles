@@ -46,3 +46,21 @@ Write glyphs into TOML from Python with `'\uE0C7'`, or in TOML basic strings (`"
 ## Thematic icons (Nerd Font Material Design, U+F0000+)
 
 Pick one icon per preset for `[os]` and `[directory]`. To find candidates, search https://www.nerdfonts.com/cheat-sheet by keyword (wave, snowflake, star, fire, leaf, mountain, ship-wheel). Existing presets use `󰠳` (U+F0833, ship wheel) and `󰲋` (U+F0C8B, folder).
+
+## Unicode glyph families
+
+Each of these is one cell. The glyph is drawn in `fg` over `bg`, and terminals such as Ghostty, Kitty, and Alacritty draw blocks, shades, and box drawing natively, so they tile seamlessly from cell to cell.
+
+| Range | Glyphs | Coverage in JetBrainsMono NF | Notes |
+|---|---|---|---|
+| U+2591-U+2593 shades | `░ ▒ ▓` | full | 25 / 50 / 75 % `fg`; a 3-cell ramp is a dithered cross-fade |
+| U+2581-U+2588 lower eighths | `▁ ▂ ▃ ▄ ▅ ▆ ▇ █` | full | `fg` fills from the bottom; skip steps (`▂▄▆`) for a steeper slope |
+| U+2580, U+2594 upper blocks | `▀ ▔` | full | overhang, lip, eave, cloud band |
+| U+2589-U+258F, U+2590, U+2595 vertical blocks | `▉ ▊ ▋ ▌ ▍ ▎ ▏ ▐ ▕` | full | horizontal wipe in 1/8 steps |
+| U+2596-U+259F quadrants | `▖ ▗ ▘ ▝ ▚ ▞ ▙ ▛ ▜ ▟` | full | fragments; order by filled quadrants (3, 2, 1) to shatter |
+| U+2800-U+28FF Braille | `⡀ ⣀ ⣤ ⣶ ⣿ ⠁ ⠂ ⠛ ⣠ ⣴ ⣾` | full | 2x4 dot grid; `⣀⣤⣶⣿` water level, `⠛⠋⠁` spray thinning, `⣠⣴⣾` diagonal curl |
+| U+2500-U+257F box drawing | `─ ┄ ╱ ╲ ╳ ╭ ╮ ╯ ╰ ═` | full | line only; `╱╲` zigzag or peak, `╯╰` rounded peaks, `╮╭` hanging drops |
+| U+25A0-U+25FF geometric | `▲ △ ● ○ ◆ ◇ ◉ ■` | partial | missing: `◢ ◣ ◤ ◥ ◖ ◗ ◠ ◡ ◐ ◑` |
+| U+1FB00-U+1FBFF Legacy Computing | sextants, smooth wedges | **none** | Ghostty may draw some natively, but other terminals will not; avoid |
+
+To check another glyph, query the font's charset with `fc-query --format='%{charset}\n' /usr/share/fonts/TTF/JetBrainsMonoNerdFontMono-Bold.ttf`.

@@ -1,0 +1,105 @@
+# ==============================================================================
+#  Preset: The Great Wave off Kanagawa v5 (Bokashi Dither Edition)
+#  Inspired by: Katsushika Hokusai (c. 1831) - Kanagawa oki nami ura, Thirty-Six Views of Mount Fuji
+#  Derived from: aaa.toml (Ukiyo-e Crest Edition)
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# Glyph family: shade blocks U+2591-U+2593 (light/medium/dark shade) as dithered bokashi gradients
+# The modules cascade through: Fade-in -> Abyss -> Swell -> Foam band -> Seafoam -> Gofun Crest -> Ochre Boats -> Fade-out
+format = """
+[░▒▓](fg:color_abyss)\
+$os\
+[▓▒░](fg:color_abyss bg:color_swell)\
+
+$directory\
+[▓▒](fg:color_swell bg:color_foam)\
+[░](fg:color_foam bg:color_seafoam)\
+
+$git_branch$git_status\
+[░▒▓](fg:color_foam bg:color_seafoam)\
+
+$c$rust$golang$nodejs$deno$python\
+[▓▒░](fg:color_foam bg:color_ochre)\
+
+$time\
+[▓▒░](fg:color_ochre bg:transparent)\
+\n$character"""
+
+palette = 'kanagawa_v5'
+
+[palettes.kanagawa_v5]
+color_trench  = '#051329' # Midnight trench (dark text)
+color_abyss   = '#071e3d' # Prussian Blue (Berlin blue, the wave's base)
+color_swell   = '#1f4e70' # Ai indigo (the rising swell)
+color_seafoam = '#6d94a6' # Seafoam slate (the curling claws)
+color_foam    = '#f2f5f7' # Gofun shell white (breaking crest, Fuji snow)
+color_ochre   = '#c7ad7f' # Yellow ochre (oshiokuri-bune boats)
+color_hanko   = '#c84b31' # Shuniku cinnabar (Hokusai's seal)
+
+# 1. THE ABYSS (inked in by the printer's graded wipe)
+[os]
+disabled = false
+style = "bg:color_abyss fg:color_foam bold"
+format = '[ 󰠳 ]($style)'
+
+# 2. THE SWELL (dithering into a band of foam)
+[directory]
+style = "bg:color_swell fg:color_foam bold"
+format = "[ 󰲋 $path ]($style)"
+truncation_length = 3
+
+# 3. THE SEAFOAM (sparse foam settling on the claws)
+[git_branch]
+symbol = " "
+style = "bg:color_seafoam fg:color_trench bold"
+format = '[ $symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_seafoam fg:color_trench bold"
+format = '([$all_status$ahead_behind ]($style))'
+
+# 4. THE GOFUN CREST (foam condensing to solid white)
+[c]
+symbol = " "
+style = "bg:color_foam fg:color_abyss bold"
+format = '[ $symbol($version) ]($style)'
+
+[rust]
+symbol = " "
+style = "bg:color_foam fg:color_abyss bold"
+format = '[ $symbol($version) ]($style)'
+
+[golang]
+symbol = " "
+style = "bg:color_foam fg:color_abyss bold"
+format = '[ $symbol($version) ]($style)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_foam fg:color_abyss bold"
+format = '[ $symbol($version) ]($style)'
+
+[deno]
+symbol = " "
+style = "bg:color_foam fg:color_abyss bold"
+format = '[ $symbol($version) ]($style)'
+
+[python]
+symbol = " "
+style = "bg:color_foam fg:color_abyss bold"
+format = '[ $symbol($version) ]($style)'
+
+# 5. THE OCHRE BOATS (the wave thinning over the hulls)
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_ochre fg:color_trench bold"
+format = '[ $time ]($style)'
+
+# 6. THE SWELL PROMPT AND THE HANKO SEAL
+[character]
+success_symbol = "[≈❯](bold color_seafoam)"
+error_symbol = "[≈❯](bold color_hanko)"

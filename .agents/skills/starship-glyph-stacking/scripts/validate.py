@@ -37,6 +37,16 @@ GLYPH_NAMES = {
     0xE0D6: "right_hard_inverse", 0xE0D7: "left_hard_inverse",
 }
 
+# Glyph-art ranges: Powerline/Nerd PUA, box drawing, block elements and shades,
+# geometric shapes, Braille, Legacy Computing.
+ART_RANGES = [(0xE000, 0xF8FF), (0x2500, 0x259F), (0x25A0, 0x25FF),
+              (0x2800, 0x28FF), (0x1FB00, 0x1FBFF)]
+
+
+def is_art(c):
+    return any(lo <= ord(c) <= hi for lo, hi in ART_RANGES)
+
+
 fails, warns = [], []
 
 
@@ -101,7 +111,14 @@ def contrast(a, b):
 
 
 def glyph_label(text):
-    return " ".join(f"U+{ord(c):04X}:{GLYPH_NAMES.get(ord(c), '?')}" for c in text)
+    def one(c):
+        cp = ord(c)
+        if cp in GLYPH_NAMES:
+            return f"U+{cp:04X}:{GLYPH_NAMES[cp]}"
+        if 0xE000 <= cp <= 0xF8FF:
+            return f"U+{cp:04X}:?"
+        return f"U+{cp:04X}:{c}"
+    return " ".join(one(c) for c in text)
 
 
 def main():
@@ -144,7 +161,7 @@ def main():
             continue
         used_colors.update(re.findall(r"color_[a-z0-9_]+", style))
         fg, bg = parse_style(style, palette, f"format [{glyph_label(text)}]")
-        if text and all(0xE000 <= ord(c) <= 0xF8FF for c in text):
+        if text and all(is_art(c) for c in text):
             cur.append((text, style, fg, bg))
         elif cur:
             chains.append(cur)
@@ -163,9 +180,9 @@ def main():
                 r = contrast(fg, bg)
                 note = f"{r:.2f}:1"
                 if r < 1.15:
-                    warn(f"chain {i} layer U+{ord(text[0]):04X} ({style}) {note}: glyph is invisible")
+                    warn(f"chain {i} layer {text} ({style}) {note}: glyph is invisible")
                 elif r < 1.3:
-                    warn(f"chain {i} layer U+{ord(text[0]):04X} ({style}) {note}: texture barely visible")
+                    warn(f"chain {i} layer {text} ({style}) {note}: texture barely visible")
         if len(chain) > 1:
             bg_a, fg_b = chain[-2][3], chain[-1][2]
             if bg_a and fg_b and bg_a != fg_b:

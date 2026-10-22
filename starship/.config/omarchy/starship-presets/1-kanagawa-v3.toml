@@ -1,0 +1,115 @@
+# ==============================================================================
+#  Preset: The Great Wave off Kanagawa v3 (Aizuri-e Indigo Edition)
+#  Inspired by: Katsushika Hokusai (c. 1831) - Kanagawa oki nami ura, Thirty-Six Views of Mount Fuji
+#  Derived from: aaa.toml (Ukiyo-e Crest Edition)
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# Glyph chain: foam U+E0C7 -> crest U+E0C0 -> backwash curl U+E0C2 (mirrored flame of the next blue)
+# The modules cascade through: Kachi-iro -> Asagi -> Ai -> Kamenozoki -> Hanada (the indigo dye grades, darkest to palest)
+format = """
+[](fg:color_kachi)\
+$os\
+[](fg:color_white bg:color_kachi)\
+[](fg:color_gofun bg:color_kon)\
+[](fg:color_asagi bg:color_kon)\
+
+$git_branch$git_status\
+[](fg:color_white bg:color_asagi)\
+[](fg:color_gofun bg:color_hanada)\
+[](fg:color_ai bg:color_hanada)\
+
+$directory\
+[](fg:color_white bg:color_ai)\
+[](fg:color_gofun bg:color_asagi)\
+[](fg:color_kamenozoki bg:color_asagi)\
+
+$c$rust$golang$nodejs$deno$python\
+[](fg:color_kamenozoki bg:color_asagi)\
+[](fg:color_hanada bg:color_asagi)\
+
+$time\
+[](fg:color_white bg:color_hanada)\
+[](fg:color_gofun bg:color_kon)\
+[](fg:color_kon bg:transparent)\
+\n$character"""
+
+palette = 'kanagawa_v3'
+
+[palettes.kanagawa_v3]
+color_kachi      = '#0b1a30' # Kachi-iro (darkest indigo dip, the victory blue)
+color_kon        = '#13355a' # Kon-iro (navy indigo)
+color_ai         = '#1e4f7f' # Ai-iro (true indigo)
+color_hanada     = '#33689a' # Hanada-iro (dayflower blue)
+color_asagi      = '#7fb0cf' # Asagi-iro (pale green-blue)
+color_kamenozoki = '#c6dde8' # Kamenozoki (a glimpse into the dye jar, palest dip)
+color_gofun      = '#f5f3ec' # Gofun shell white
+color_white      = '#ffffff' # Bare paper highlight
+color_hanko      = '#c84b31' # Shuniku cinnabar (the print's only warm mark)
+
+# 1. KACHI-IRO (the deepest dip, the abyss)
+[os]
+disabled = false
+style = "bg:color_kachi fg:color_kamenozoki bold"
+format = '[ 󰠳 ]($style)'
+
+# 3. AI (true indigo, the body of the wave)
+[directory]
+style = "bg:color_ai fg:color_gofun bold"
+format = "[ 󰲋 $path ]($style)"
+truncation_length = 3
+
+# 2. ASAGI (the claws, pale against the dark water)
+[git_branch]
+symbol = " "
+style = "bg:color_asagi fg:color_kachi bold"
+format = '[ $symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_asagi fg:color_kachi bold"
+format = '([$all_status$ahead_behind ]($style))'
+
+# 4. KAMENOZOKI (the palest dip, foam at the lip)
+[c]
+symbol = " "
+style = "bg:color_kamenozoki fg:color_kon bold"
+format = '[ $symbol($version) ]($style)'
+
+[rust]
+symbol = " "
+style = "bg:color_kamenozoki fg:color_kon bold"
+format = '[ $symbol($version) ]($style)'
+
+[golang]
+symbol = " "
+style = "bg:color_kamenozoki fg:color_kon bold"
+format = '[ $symbol($version) ]($style)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_kamenozoki fg:color_kon bold"
+format = '[ $symbol($version) ]($style)'
+
+[deno]
+symbol = " "
+style = "bg:color_kamenozoki fg:color_kon bold"
+format = '[ $symbol($version) ]($style)'
+
+[python]
+symbol = " "
+style = "bg:color_kamenozoki fg:color_kon bold"
+format = '[ $symbol($version) ]($style)'
+
+# 5. HANADA (the open sea toward the horizon)
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_hanada fg:color_gofun bold"
+format = '[ $time ]($style)'
+
+# 6. THE ONLY WARM MARK: THE SEAL
+[character]
+success_symbol = "[≋❯](bold color_asagi)"
+error_symbol = "[≋❯](bold color_hanko)"

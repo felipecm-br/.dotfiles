@@ -1,0 +1,114 @@
+# ==============================================================================
+#  Preset: The Great Wave off Kanagawa v2 (Fuji Beneath the Wave Edition)
+#  Inspired by: Katsushika Hokusai (c. 1831) - Kanagawa oki nami ura, Thirty-Six Views of Mount Fuji
+#  Derived from: aaa.toml (Ukiyo-e Crest Edition)
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# Glyph chain: stacked swells U+E0C0 U+E0C0, the claw U+E0C7 U+E0C0 U+E0C4, Fuji peak U+E0BA U+E0B8
+# The modules cascade through: Abyss -> Building Swell -> Seafoam Claws -> Gofun Crest -> Paper Sky with Mount Fuji
+format = """
+[](fg:color_abyss)\
+$os\
+[](fg:color_abyss bg:color_swell_deep)\
+[](fg:color_swell_deep bg:color_swell)\
+
+$directory\
+[](fg:color_white bg:color_swell)\
+[](fg:color_foam bg:color_swell_deep)\
+[](fg:color_swell_deep bg:color_seafoam)\
+
+$git_branch$git_status\
+[](fg:color_white bg:color_seafoam)\
+[](fg:color_spray bg:color_foam)\
+
+$c$rust$golang$nodejs$deno$python\
+[](fg:color_foam bg:color_sky)\
+
+$time\
+[](fg:color_fuji bg:color_sky)\
+[](fg:color_fuji bg:color_sky)\
+[](fg:color_sky bg:transparent)\
+\n$character"""
+
+palette = 'kanagawa_v2'
+
+[palettes.kanagawa_v2]
+color_trench     = '#06152b' # Midnight trench (dark text)
+color_abyss      = '#0b2341' # Prussian Blue (the trough)
+color_swell_deep = '#163a5e' # Kon indigo (the first swell)
+color_swell      = '#2a5f87' # Ai indigo (the swell lifting the boats)
+color_spray      = '#5b9ccc' # Hanada blue (spray in the light)
+color_seafoam    = '#7fa6b5' # Seafoam slate (the claws)
+color_foam       = '#f4f1e8' # Gofun shell white (crest and Fuji's snow)
+color_white      = '#ffffff' # Bare paper highlight
+color_sky        = '#d8c49a' # Yellowed kōzo paper sky (the print's aged ground)
+color_fuji       = '#3e5770' # Fuji slate (the distant cone under snow)
+color_hanko      = '#c84b31' # Shuniku cinnabar (Hokusai's seal)
+
+# 1. THE TROUGH (the sea drawn down before the wave)
+[os]
+disabled = false
+style = "bg:color_abyss fg:color_foam bold"
+format = '[ 󰠳 ]($style)'
+
+# 2. THE BUILDING SWELL (two flames, two swells rising)
+[directory]
+style = "bg:color_swell fg:color_foam bold"
+format = "[ 󰲋 $path ]($style)"
+truncation_length = 3
+
+# 3. THE SEAFOAM CLAWS
+[git_branch]
+symbol = " "
+style = "bg:color_seafoam fg:color_trench bold"
+format = '[ $symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_seafoam fg:color_trench bold"
+format = '([$all_status$ahead_behind ]($style))'
+
+# 4. THE GOFUN CREST
+[c]
+symbol = " "
+style = "bg:color_foam fg:color_abyss bold"
+format = '[ $symbol($version) ]($style)'
+
+[rust]
+symbol = " "
+style = "bg:color_foam fg:color_abyss bold"
+format = '[ $symbol($version) ]($style)'
+
+[golang]
+symbol = " "
+style = "bg:color_foam fg:color_abyss bold"
+format = '[ $symbol($version) ]($style)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_foam fg:color_abyss bold"
+format = '[ $symbol($version) ]($style)'
+
+[deno]
+symbol = " "
+style = "bg:color_foam fg:color_abyss bold"
+format = '[ $symbol($version) ]($style)'
+
+[python]
+symbol = " "
+style = "bg:color_foam fg:color_abyss bold"
+format = '[ $symbol($version) ]($style)'
+
+# 5. THE PAPER SKY AND MOUNT FUJI (the small still cone inside the trough)
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_sky fg:color_trench bold"
+format = '[ $time ]($style)'
+
+# 6. THE PEAK AND THE SEAL
+[character]
+success_symbol = "[△❯](bold color_foam)"
+error_symbol = "[△❯](bold color_hanko)"

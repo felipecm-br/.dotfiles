@@ -87,7 +87,8 @@ sameness is the monotony this technique is supposed to remove.
 
 Rules:
 
-1. A chain is 2-4 glyph-only segments placed back to back in `format`: `[G](fg:A bg:B)`.
+1. A chain is 2-4 glyph-only segments placed back to back in `format`: `[G](fg:A bg:B)`. A segment can
+   hold a short run of glyphs that share one style, such as a ramp: `[▂▄▆](fg:A bg:B)`.
 2. The glyph is drawn in `fg` over `bg`. The first glyph's `bg` is the segment you are leaving. The last
    glyph's `fg` or `bg` must land on the segment you are entering.
 3. Use highlight-then-hand-off: leading glyphs carry a highlight or texture `fg` over shifting `bg`s, and
@@ -116,6 +117,29 @@ Chain ideas to start from (invent better ones):
 | Monsoon rain | `E0B9 E0BB E0B9` | thin diagonal separators stepping darker = rain cuts |
 | Sakura drift | `E0B4 E0C5 E0B6` | round petal, scattered drift, petal landing |
 | Glacier calving | `E0C8 E0CA E0C4` | ice fracture, mirrored shear, falling shards |
+
+#### Beyond Powerline: Unicode glyph families
+
+Powerline-Extra is not the only material. Each cell is still one glyph in `fg` over `bg`, so these families
+stack the same way. Give each physical layer its own family: shades for gradients, eighth blocks for
+silhouettes, quadrants for fragments, Braille for particles, box drawing for outline. Codepoints, coverage,
+and examples are in [references/glyphs.md](references/glyphs.md#unicode-glyph-families).
+
+| Family | Glyphs | Physics |
+|---|---|---|
+| Shades | `░▒▓` | dithered gradient (ukiyo-e *bokashi*): `▓▒░` with `fg:prev bg:next` cross-fades |
+| Eighth blocks | `▁▂▃▄▅▆▇` / `▀▔` | `fg` fills from the bottom: a rising profile, swell, dune or skyline; reverse it to fall |
+| Quadrants | `▖▗▘▝▚▞▛▜▙▟` | fragments: dense to sparse (`▜▚▝`) shatters a crest or crumbles a cliff |
+| Braille | `⡀⣀⣤⣶⣿`, `⠁⠂⠛`, `⣠⣴⣾` | 2x4 particles per cell: water level, spray, snow, stars; `⣠⣴⣾` climbs diagonally into a curl |
+| Box drawing | `╱╲ ╭╮╯╰ ┄ ─` | outline only (key block, ink line): `╱╲` zigzag chop or a mountain, `╯╰` reaching peaks |
+| Geometric | `▲ ● ◆ ○` | a single motif inside a chain (Fuji, a moon, a seal) |
+
+Font coverage (JetBrainsMono Nerd Font): shades, blocks, quadrants, Braille, and box drawing are complete.
+Geometric is partial (no `◢◣◤◥◖◗◠◡`). Legacy Computing (U+1FB00, smooth wedges and sextants) is
+**missing**, so do not rely on it.
+
+Reference set: `1-kanagawa-v5` (shades), `v6` (blocks and quadrants), `v7` (Braille), `v8` (box drawing
+with a flame closing each chain), and `v9` (all families, one per layer).
 
 ### Step 4: Write the TOML
 
