@@ -46,7 +46,7 @@ color_fuji = '#58636d' # Stormy Grey (Mist behind Mount Fuji)
 color_rose = '#3a2c2c' # Stormy Grey (Mist behind Mount Fuji)
 color_wet_sand = '#887656' #s
 color_dark_bubbles = '#4590c6' #s
-color_dark = '#130e0e' # Stormy Grey (Mist behind Mount Fuji)
+color_dark = '#e07777' # Stormy Grey (Mist behind Mount Fuji)
 color_sky = '#87b5e0' # Stormy Grey (Mist behind Mount Fuji)
 color_white = '#ffffff'
 
@@ -59,14 +59,12 @@ format = '[$symbol]($style)'
 [os]
 disabled = false
 style = "bg:color_os fg:color_lang bold"
-format = '[ 󰣇 ]($style)'
+format = '[ 󰠳 ]($style)'
 
 # 2. THE RISING SWELL
 [directory]
 style = "bg:color_dir fg:color_lang bold"
 format = "[󰲋 $path ]($style)"
-truncation_length = 3
-truncation_symbol = "≈/" # Wave tilde truncation!
 
 # 3. THE CURLING SEAFOAM
 [git_branch]
