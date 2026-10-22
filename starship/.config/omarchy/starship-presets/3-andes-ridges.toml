@@ -1,0 +1,124 @@
+# ==============================================================================
+#  Preset: Andes Ridges (Altiplano Dusk Edition)
+#  Inspired by: Frederic Edwin Church, "Heart of the Andes" (1859) - layered ranges in aerial perspective
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# Glyph chain: U+E0BA lower-right triangle + U+E0B8 lower-left triangle = one mountain peak.
+# Each divider stacks a hazy far peak (sky mixed toward basalt) in front of a dark near peak,
+# whose down-slope lands in the next, warmer sky band. The sun sets on the right.
+# The modules cascade through: Zenith -> Upper Dusk -> Alpenglow -> Horizon -> Setting Sun
+format = """
+[](fg:color_sky1 bg:transparent)\
+$os\
+[](fg:color_far1 bg:color_sky1)\
+[](fg:color_far1 bg:color_sky1)\
+[](fg:color_near bg:color_sky1)\
+[](fg:color_near bg:color_sky2)\
+
+$directory\
+[](fg:color_far2 bg:color_sky2)\
+[](fg:color_far2 bg:color_sky2)\
+[](fg:color_near bg:color_sky2)\
+[](fg:color_near bg:color_sky3)\
+
+$git_branch$git_status\
+[](fg:color_far3 bg:color_sky3)\
+[](fg:color_far3 bg:color_sky3)\
+[](fg:color_near bg:color_sky3)\
+[](fg:color_near bg:color_sky4)\
+
+$c$rust$golang$nodejs$deno$python\
+[](fg:color_far4 bg:color_sky4)\
+[](fg:color_far4 bg:color_sky4)\
+[](fg:color_near bg:color_sky4)\
+[](fg:color_near bg:color_sky5)\
+
+$time\
+[](fg:color_far5 bg:color_sky5)\
+[](fg:color_far5 bg:transparent)\
+\n$character"""
+
+palette = 'art_andes_ridges'
+
+[palettes.art_andes_ridges]
+color_sky1  = '#4a2b80' # Zenith violet (the night still overhead)
+color_sky2  = '#5b2378' # Upper dusk purple (Rayleigh scatter fading)
+color_sky3  = '#b23a6b' # Alpenglow magenta (light bouncing off the snowfields)
+color_sky4  = '#f07a4a' # Horizon orange (Mie scatter in thick air)
+color_sky5  = '#ffd27a' # Sun gold (the disc touching the ridge)
+color_far1  = '#261741' # Far ridge haze over sky band 1 (aerial perspective)
+color_far2  = '#2c143e' # Far ridge haze over sky band 2 (aerial perspective)
+color_far3  = '#4b1e3a' # Far ridge haze over sky band 3 (aerial perspective)
+color_far4  = '#5f3534' # Far ridge haze over sky band 4 (aerial perspective)
+color_far5  = '#635245' # Far ridge haze over sky band 5 (aerial perspective)
+color_near  = '#100a1c' # Near ridge silhouette (basalt in shadow)
+color_ink   = '#140c1e' # Ink (text on light skies)
+color_paper = '#fff6ea' # Paper (text on dark skies)
+
+# 1. ZENITH (the first stars above the altiplano)
+[os]
+disabled = false
+style = "bg:color_sky1 fg:color_paper bold"
+format = '[ 󰖔 ]($style)'
+
+# 2. UPPER DUSK (the trail along the ridgeline)
+[directory]
+style = "bg:color_sky2 fg:color_paper bold"
+format = "[ 󰲋 $path ]($style)"
+truncation_length = 3
+
+# 3. ALPENGLOW (the branches of the valley)
+[git_branch]
+symbol = " "
+style = "bg:color_sky3 fg:color_paper bold"
+format = '[ $symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_sky3 fg:color_paper bold"
+format = '([$all_status$ahead_behind ]($style))'
+
+# 4. HORIZON (the thick, warm air above the passes)
+[c]
+symbol = " "
+style = "bg:color_sky4 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[rust]
+symbol = " "
+style = "bg:color_sky4 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[golang]
+symbol = " "
+style = "bg:color_sky4 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_sky4 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[deno]
+symbol = " "
+style = "bg:color_sky4 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[python]
+symbol = " "
+style = "bg:color_sky4 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+# 5. SETTING SUN (half a disc left on the last ridge)
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_sky5 fg:color_ink bold"
+format = '[ $time ]($style)'
+
+# 6. THE SUMMITS (two peaks before the cursor; errors turn the range to alpenglow)
+[character]
+success_symbol = "[▲](color_far4)[▲](bold color_sky5)[❯](bold color_sky4)"
+error_symbol = "[▲](color_far3)[▲](bold color_sky3)[✗](bold color_sky3)"

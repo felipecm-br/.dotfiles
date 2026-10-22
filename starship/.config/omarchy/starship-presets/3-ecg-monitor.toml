@@ -1,0 +1,107 @@
+# ==============================================================================
+#  Preset: ECG Monitor (Night Shift ICU Edition)
+#  Inspired by: Bedside patient monitors - the sinus rhythm trace and its color-coded channels
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# Glyph chain: the whole bar is one screen. Between readouts the ECG trace is plotted in Braille
+# (2x4 dots per cell, gaps filled): a full sinus beat (⠤⠖⠦⣼⢹⡤⠴⠲⠤: P wave, QRS spike, T wave), a
+# lone P wave and a flat baseline. Readouts follow monitor color coding: red HR, cyan SpO2,
+# yellow respiration, white NIBP. The error prompt is a flatline.
+# The modules cascade through: Heart Rate -> Beat -> SpO2 -> Respiration -> NIBP
+format = """
+[](fg:color_heart bg:transparent)\
+$os\
+[](fg:color_heart bg:color_screen)\
+[⠤⠖⠦⣼⢹⡤⠴⠲⠤](fg:color_trace bg:color_screen)\
+
+$directory\
+[⠤⠖⠦⠤⠤](fg:color_trace bg:color_screen)\
+
+$git_branch$git_status\
+[⠤⠖⠦⣼⢹⡤⠴⠲⠤](fg:color_trace bg:color_screen)\
+
+$c$rust$golang$nodejs$deno$python\
+[⠤⠤](fg:color_trace bg:color_screen)\
+
+$time\
+[⠤⠶⢤⣀](fg:color_trace bg:color_screen)\
+[](fg:color_screen bg:transparent)\
+\n$character"""
+
+palette = 'art_ecg_monitor'
+
+[palettes.art_ecg_monitor]
+color_screen = '#04140d' # Monitor screen (phosphor-dark glass)
+color_trace  = '#39ff88' # ECG trace (P1 green phosphor)
+color_heart  = '#ff4d6d' # Heart-rate red (the alarm channel)
+color_spo2   = '#3ce0ff' # SpO2 cyan (pulse oximetry channel)
+color_resp   = '#ffe14d' # Respiration yellow (impedance channel)
+color_nibp   = '#f2f5f3' # NIBP white (blood pressure readout)
+
+# 1. HEART RATE (the red alarm channel)
+[os]
+disabled = false
+style = "bg:color_heart fg:color_screen bold"
+format = '[ 󰗶 ]($style)'
+
+# 2. SpO2 (cyan readout: where you are)
+[directory]
+style = "bg:color_screen fg:color_spo2 bold"
+format = "[ 󰲋 $path ]($style)"
+truncation_length = 3
+
+# 3. RESPIRATION (yellow readout: the branch breathing)
+[git_branch]
+symbol = " "
+style = "bg:color_screen fg:color_resp bold"
+format = '[ $symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_screen fg:color_resp bold"
+format = '([$all_status$ahead_behind ]($style))'
+
+# 4. LEAD II (green readout: the toolchain)
+[c]
+symbol = " "
+style = "bg:color_screen fg:color_trace bold"
+format = '[ $symbol($version) ]($style)'
+
+[rust]
+symbol = " "
+style = "bg:color_screen fg:color_trace bold"
+format = '[ $symbol($version) ]($style)'
+
+[golang]
+symbol = " "
+style = "bg:color_screen fg:color_trace bold"
+format = '[ $symbol($version) ]($style)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_screen fg:color_trace bold"
+format = '[ $symbol($version) ]($style)'
+
+[deno]
+symbol = " "
+style = "bg:color_screen fg:color_trace bold"
+format = '[ $symbol($version) ]($style)'
+
+[python]
+symbol = " "
+style = "bg:color_screen fg:color_trace bold"
+format = '[ $symbol($version) ]($style)'
+
+# 5. NIBP (white readout: the timestamp of the last cuff)
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_screen fg:color_nibp bold"
+format = '[ $time ]($style)'
+
+# 6. THE PULSE (a beat before the cursor; errors flatline in red)
+[character]
+success_symbol = "[󰋑](bold color_heart)[⠴⣾⣧](color_trace)[ ❯](bold color_trace)"
+error_symbol = "[󰋑](color_screen)[⠤⠤⠤](bold color_heart)[ ❯](bold color_heart)"

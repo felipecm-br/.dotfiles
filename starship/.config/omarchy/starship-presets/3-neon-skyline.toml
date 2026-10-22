@@ -1,0 +1,137 @@
+# ==============================================================================
+#  Preset: Neon Skyline (Night Shift Edition)
+#  Inspired by: Blade Runner (1982) and Hong Kong neon signage - a skyline between glowing signs
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# Glyph chain: each neon sign closes with U+E0B4, then the skyline rises in block elements
+# (U+2581-U+2588) over the night sky. A full tower whose cell is a lit quadrant (U+259D on a
+# tower background) is a window left on. The next sign opens with U+E0B6.
+# The modules cascade through: Magenta Sign -> Cyan Sign -> Yellow Sign -> Violet Sign -> Green Sign
+format = """
+[](fg:color_magenta bg:transparent)\
+$os\
+[](fg:color_magenta bg:color_night)\
+[▃](fg:color_tower bg:color_night)\
+[▆](fg:color_tower bg:color_night)\
+[▝](fg:color_window bg:color_tower)\
+[▄](fg:color_tower bg:color_night)\
+[▂](fg:color_tower bg:color_night)\
+[](fg:color_cyan bg:color_night)\
+
+$directory\
+[](fg:color_cyan bg:color_night)\
+[▅](fg:color_tower bg:color_night)\
+[▂](fg:color_tower bg:color_night)\
+[▝](fg:color_window bg:color_tower)\
+[▇](fg:color_tower bg:color_night)\
+[▃](fg:color_tower bg:color_night)\
+[](fg:color_yellow bg:color_night)\
+
+$git_branch$git_status\
+[](fg:color_yellow bg:color_night)\
+[▂](fg:color_tower bg:color_night)\
+[▝](fg:color_window bg:color_tower)\
+[▆](fg:color_tower bg:color_night)\
+[▃](fg:color_tower bg:color_night)\
+[▅](fg:color_tower bg:color_night)\
+[](fg:color_violet bg:color_night)\
+
+$c$rust$golang$nodejs$deno$python\
+[](fg:color_violet bg:color_night)\
+[▄](fg:color_tower bg:color_night)\
+[▇](fg:color_tower bg:color_night)\
+[▂](fg:color_tower bg:color_night)\
+[▝](fg:color_window bg:color_tower)\
+[▃](fg:color_tower bg:color_night)\
+[](fg:color_green bg:color_night)\
+
+$time\
+[](fg:color_green bg:color_night)\
+[▆](fg:color_tower bg:color_night)\
+[▃](fg:color_tower bg:color_night)\
+[▝](fg:color_window bg:color_tower)\
+[▂](fg:color_tower bg:color_night)\
+[▁](fg:color_tower bg:color_night)\
+[](fg:color_night bg:transparent)\
+\n$character"""
+
+palette = 'art_neon_skyline'
+
+[palettes.art_neon_skyline]
+color_night   = '#2a2060' # Night sky (sodium haze over the city)
+color_tower   = '#07060f' # Tower silhouettes (unlit concrete and glass)
+color_window  = '#ffcf5a' # Lit window (warm tungsten behind blinds)
+color_magenta = '#ff3d9a' # Neon magenta (neon-argon tube with pink phosphor)
+color_cyan    = '#22e4ff' # Neon cyan (argon-mercury tube)
+color_yellow  = '#ffd23f' # Neon yellow (helium tube)
+color_violet  = '#b388ff' # Neon violet (argon with violet phosphor)
+color_green   = '#4dff9f' # Neon green (argon with green phosphor)
+color_ink     = '#0b0820' # Ink (text on neon)
+
+# 1. THE MOON SIGN (magenta neon at the top of the street)
+[os]
+disabled = false
+style = "bg:color_magenta fg:color_ink bold"
+format = '[ 󰅆 ]($style)'
+
+# 2. THE STREET SIGN (cyan, where you are)
+[directory]
+style = "bg:color_cyan fg:color_ink bold"
+format = "[ 󰲋 $path ]($style)"
+truncation_length = 3
+
+# 3. THE HOTEL SIGN (yellow, branching floors)
+[git_branch]
+symbol = " "
+style = "bg:color_yellow fg:color_ink bold"
+format = '[ $symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_yellow fg:color_ink bold"
+format = '([$all_status$ahead_behind ]($style))'
+
+# 4. THE ARCADE SIGN (violet, the toolchain inside)
+[c]
+symbol = " "
+style = "bg:color_violet fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[rust]
+symbol = " "
+style = "bg:color_violet fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[golang]
+symbol = " "
+style = "bg:color_violet fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_violet fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[deno]
+symbol = " "
+style = "bg:color_violet fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[python]
+symbol = " "
+style = "bg:color_violet fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+# 5. THE CLOCK SIGN (green, the late hour)
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_green fg:color_ink bold"
+format = '[ $time ]($style)'
+
+# 6. THE STREET (the skyline at the cursor; errors flash the hotel sign)
+[character]
+success_symbol = "[▃▆▄](color_night)[ ❯](bold color_magenta)"
+error_symbol = "[▃▆▄](color_night)[ ✗](bold color_yellow)"

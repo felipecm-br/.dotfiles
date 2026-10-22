@@ -1,0 +1,129 @@
+# ==============================================================================
+#  Preset: Digital Rain (Construct Edition)
+#  Inspired by: The Matrix (1999) - code rain falling in columns, a bright head and a decaying tail
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# Glyph chain: on the black void each cell is a Braille droplet column (U+2800-U+28FF). The
+# density and color step from a sparse dim tail (U+2801 U+2803) through the body (U+2847 U+28FF)
+# to a white-hot head (U+2840), the way the rain decays behind each falling glyph.
+# The modules cascade through: Glowing Head -> Dim Panel -> Dim Panel -> Dim Panel -> Glowing Head
+format = """
+[](fg:color_glow bg:transparent)\
+$os\
+[](fg:color_glow bg:color_void)\
+[⠁](fg:color_tail bg:color_void)\
+[⡇](fg:color_rain bg:color_void)\
+[⣿](fg:color_glow bg:color_void)\
+[⡀](fg:color_head bg:color_void)\
+[](fg:color_shade bg:color_void)\
+
+$directory\
+[](fg:color_shade bg:color_void)\
+[⠃](fg:color_tail bg:color_void)\
+[⣿](fg:color_rain bg:color_void)\
+[⡀](fg:color_head bg:color_void)\
+[⠁](fg:color_tail bg:color_void)\
+[](fg:color_shade bg:color_void)\
+
+$git_branch$git_status\
+[](fg:color_shade bg:color_void)\
+[⡇](fg:color_rain bg:color_void)\
+[⠃](fg:color_tail bg:color_void)\
+[⣿](fg:color_glow bg:color_void)\
+[⡀](fg:color_head bg:color_void)\
+[](fg:color_shade bg:color_void)\
+
+$c$rust$golang$nodejs$deno$python\
+[](fg:color_shade bg:color_void)\
+[⠁](fg:color_tail bg:color_void)\
+[⣿](fg:color_rain bg:color_void)\
+[⡇](fg:color_glow bg:color_void)\
+[⡀](fg:color_head bg:color_void)\
+[](fg:color_glow bg:color_void)\
+
+$time\
+[](fg:color_glow bg:color_void)\
+[⣿](fg:color_rain bg:color_void)\
+[⡇](fg:color_tail bg:color_void)\
+[⠁](fg:color_tail bg:color_void)\
+[](fg:color_void bg:transparent)\
+\n$character"""
+
+palette = 'art_digital_rain'
+
+[palettes.art_digital_rain]
+color_void  = '#000000' # The void (CRT black)
+color_shade = '#0b3a19' # Dim phosphor field (the readout panels)
+color_tail  = '#0f6a2a' # Rain tail (decaying phosphor)
+color_rain  = '#21b14b' # Rain body (P1 green)
+color_glow  = '#5dff8a' # Rain glow (fresh phosphor)
+color_head  = '#e0ffe8' # Droplet head (the white-hot leading character)
+color_pill  = '#ff3355' # Red pill (the error)
+
+# 1. THE OPERATOR (a glowing panel at the edge of the construct)
+[os]
+disabled = false
+style = "bg:color_glow fg:color_void bold"
+format = '[ 󰘨 ]($style)'
+
+# 2. THE CONSTRUCT (where you are loaded)
+[directory]
+style = "bg:color_shade fg:color_glow bold"
+format = "[ 󰲋 $path ]($style)"
+truncation_length = 3
+
+# 3. THE BRANCHES (choices in the code)
+[git_branch]
+symbol = " "
+style = "bg:color_shade fg:color_head bold"
+format = '[ $symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_shade fg:color_head bold"
+format = '([$all_status$ahead_behind ]($style))'
+
+# 4. THE PROGRAMS (the toolchain running inside)
+[c]
+symbol = " "
+style = "bg:color_shade fg:color_glow bold"
+format = '[ $symbol($version) ]($style)'
+
+[rust]
+symbol = " "
+style = "bg:color_shade fg:color_glow bold"
+format = '[ $symbol($version) ]($style)'
+
+[golang]
+symbol = " "
+style = "bg:color_shade fg:color_glow bold"
+format = '[ $symbol($version) ]($style)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_shade fg:color_glow bold"
+format = '[ $symbol($version) ]($style)'
+
+[deno]
+symbol = " "
+style = "bg:color_shade fg:color_glow bold"
+format = '[ $symbol($version) ]($style)'
+
+[python]
+symbol = " "
+style = "bg:color_shade fg:color_glow bold"
+format = '[ $symbol($version) ]($style)'
+
+# 5. THE SIGNAL (the clock of the real world)
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_glow fg:color_void bold"
+format = '[ $time ]($style)'
+
+# 6. THE RAIN (a falling droplet at the cursor; errors offer the red pill)
+[character]
+success_symbol = "[⠁⡇](color_rain)[⣿](bold color_glow)[⡀](bold color_head)[ ❯](bold color_glow)"
+error_symbol = "[󰐂](bold color_pill)[ ❯](bold color_pill)"

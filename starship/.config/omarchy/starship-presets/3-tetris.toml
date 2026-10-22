@@ -1,0 +1,118 @@
+# ==============================================================================
+#  Preset: Tetris (Line Clear Edition)
+#  Inspired by: Alexey Pajitnov, Tetris (1984) - the seven tetrominoes in their Tetris Company guideline colors
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# Glyph chain: segments end square with half blocks (U+258C / U+2590) on the black well, and a
+# tetromino falls between them, drawn two rows tall in half blocks: T = U+2580 U+2588 U+2580,
+# S = U+2584 U+2588 U+2580, Z = U+2580 U+2588 U+2584, L = U+2584 U+2584 U+2588. No piece repeats
+# the color of its neighbors.
+# The modules cascade through: I Piece -> J Piece -> L Piece -> S Piece -> O Piece
+format = """
+[▐](fg:color_i bg:transparent)\
+$os\
+[▌](fg:color_i bg:color_well)\
+[▀█▀](fg:color_t bg:color_well)\
+[▐](fg:color_j bg:color_well)\
+
+$directory\
+[▌](fg:color_j bg:color_well)\
+[▀█▄](fg:color_z bg:color_well)\
+[▐](fg:color_l bg:color_well)\
+
+$git_branch$git_status\
+[▌](fg:color_l bg:color_well)\
+[▀█▀](fg:color_t bg:color_well)\
+[▐](fg:color_s bg:color_well)\
+
+$c$rust$golang$nodejs$deno$python\
+[▌](fg:color_s bg:color_well)\
+[▀█▄](fg:color_z bg:color_well)\
+[▐](fg:color_o bg:color_well)\
+
+$time\
+[▌](fg:color_o bg:color_well)\
+[▄▄█](fg:color_l bg:color_well)\
+[ ](bg:color_well)\
+[▌](fg:color_well bg:transparent)\
+\n$character"""
+
+palette = 'art_tetris'
+
+[palettes.art_tetris]
+color_well = '#0a0a14' # The well (the empty playfield)
+color_i    = '#00e5ff' # I piece cyan
+color_j    = '#3b6dff' # J piece blue
+color_l    = '#ff9a1f' # L piece orange
+color_s    = '#3ee06a' # S piece green
+color_o    = '#ffe03d' # O piece yellow
+color_t    = '#b44dff' # T piece purple
+color_z    = '#ff3b4e' # Z piece red
+
+# 1. I PIECE (the long bar waiting for a well)
+[os]
+disabled = false
+style = "bg:color_i fg:color_well bold"
+format = '[ 󰊗 ]($style)'
+
+# 2. J PIECE (where you are)
+[directory]
+style = "bg:color_j fg:color_well bold"
+format = "[ 󰲋 $path ]($style)"
+truncation_length = 3
+
+# 3. L PIECE (branches turn the corner)
+[git_branch]
+symbol = " "
+style = "bg:color_l fg:color_well bold"
+format = '[ $symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_l fg:color_well bold"
+format = '([$all_status$ahead_behind ]($style))'
+
+# 4. S PIECE (the toolchain, offset)
+[c]
+symbol = " "
+style = "bg:color_s fg:color_well bold"
+format = '[ $symbol($version) ]($style)'
+
+[rust]
+symbol = " "
+style = "bg:color_s fg:color_well bold"
+format = '[ $symbol($version) ]($style)'
+
+[golang]
+symbol = " "
+style = "bg:color_s fg:color_well bold"
+format = '[ $symbol($version) ]($style)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_s fg:color_well bold"
+format = '[ $symbol($version) ]($style)'
+
+[deno]
+symbol = " "
+style = "bg:color_s fg:color_well bold"
+format = '[ $symbol($version) ]($style)'
+
+[python]
+symbol = " "
+style = "bg:color_s fg:color_well bold"
+format = '[ $symbol($version) ]($style)'
+
+# 5. O PIECE (the square clock)
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_o fg:color_well bold"
+format = '[ $time ]($style)'
+
+# 6. THE NEXT PIECE (a T falls at the cursor; errors drop the dreaded Z)
+[character]
+success_symbol = "[▀█▀](bold color_t)[ ❯](bold color_i)"
+error_symbol = "[▀█▄](bold color_z)[ ✗](bold color_z)"
