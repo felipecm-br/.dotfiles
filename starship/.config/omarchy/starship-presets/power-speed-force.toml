@@ -1,0 +1,108 @@
+# ==============================================================================
+#  Preset: Speed Force (Lightning Trail Edition)
+#  Inspired by: The Flash, Showcase #4 (Kanigher, Broome and Infantino, 1956) - running on the Speed Force
+#  Fan tribute; no logos or official artwork, only colors and motion.
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# Glyph chain: vertical eighths U+258A U+258C U+258E as motion smear; diagonals ╱╲ as the lightning crackle
+# The attack travels left to right: Fading Afterimage -> Afterimage -> Scarlet Suit -> Emblem Gold -> Speed Force White
+format = """
+[⠒⠒⠶](fg:color_after_dim bg:transparent)\
+$os\
+[▊▌▎](fg:color_after_dim bg:color_after)\
+
+$directory\
+[▊▌▎](fg:color_after bg:color_scarlet)\
+
+$git_branch$git_status\
+[╱╲](fg:color_gold bg:color_scarlet)\
+[](fg:color_scarlet bg:color_gold)\
+
+$c$rust$golang$nodejs$deno$python\
+[╲╱](fg:color_scarlet bg:color_gold)\
+[](fg:color_gold bg:color_force)\
+
+$time\
+[](fg:color_force bg:transparent)\
+[╲](fg:color_gold bg:transparent)\
+\n$character"""
+
+palette = 'power_speed_force'
+
+[palettes.power_speed_force]
+color_after_dim = '#3a0f14' # Oldest afterimage (fading)
+color_after     = '#7a1018' # Afterimage
+color_scarlet   = '#c41420' # Suit scarlet
+color_gold      = '#f6c21c' # Lightning emblem gold
+color_force     = '#fff6d8' # Speed Force white
+color_reverse   = '#ff2a2a' # Reverse-Flash red lightning (for errors)
+color_ink       = '#0b0d14' # Ink (text on light fills)
+color_paper     = '#ffffff' # Paper (text on dark fills)
+
+# 1. THE FADING AFTERIMAGE (speed lines, then a smear)
+[os]
+disabled = false
+style = "bg:color_after_dim fg:color_paper bold"
+format = '[ 󰑮 ]($style)'
+
+# 2. THE AFTERIMAGE (smearing into the suit)
+[directory]
+style = "bg:color_after fg:color_paper bold"
+format = "[ 󰲋 $path ]($style)"
+truncation_length = 3
+
+# 3. THE SCARLET SPEEDSTER (gold lightning crackling off the suit)
+[git_branch]
+symbol = " "
+style = "bg:color_scarlet fg:color_paper bold"
+format = '[ $symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_scarlet fg:color_paper bold"
+format = '([$all_status$ahead_behind ]($style))'
+
+# 4. THE EMBLEM (gold, scarlet sparks)
+[c]
+symbol = " "
+style = "bg:color_gold fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[rust]
+symbol = " "
+style = "bg:color_gold fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[golang]
+symbol = " "
+style = "bg:color_gold fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_gold fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[deno]
+symbol = " "
+style = "bg:color_gold fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[python]
+symbol = " "
+style = "bg:color_gold fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+# 5. THE SPEED FORCE (white, one bolt ahead of the runner)
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_force fg:color_ink bold"
+format = '[ $time ]($style)'
+
+# 6. THE BOLT, AND REVERSE-FLASH RED FOR ERRORS
+[character]
+success_symbol = "[󱐋❯](bold color_gold)"
+error_symbol = "[󱐋❯](bold color_reverse)"

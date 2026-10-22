@@ -43,7 +43,7 @@ color_white = '#ffffff'
 [os]
 disabled = false
 style = "bg:color_os fg:color_lang bold"
-format = '[ 󰣇 ]($style)'
+format = '[ 🌊 ]($style)'
 
 # 2. THE RISING SWELL
 [directory]

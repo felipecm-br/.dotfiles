@@ -1,0 +1,109 @@
+# ==============================================================================
+#  Preset: Ice Blast (Lin Kuei Cryomancer Edition)
+#  Inspired by: Sub-Zero, Mortal Kombat (Midway, 1992) - the ice ball
+#  Fan tribute; no logos or official artwork, only colors and motion.
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# Glyph chain: ice waveforms U+E0C8 for frost spreading; Braille dots U+2800 for snow and shards
+# The attack travels left to right: Lin Kuei Mask -> Uniform Blue -> Frost -> Ice -> Snow -> Shards
+format = """
+[](fg:color_mask bg:transparent)\
+$os\
+[](fg:color_mask bg:color_uniform)\
+[⠂⠁](fg:color_snow bg:color_uniform)\
+
+$directory\
+[](fg:color_uniform bg:color_frost)\
+[⠄⠁](fg:color_snow bg:color_frost)\
+
+$git_branch$git_status\
+[](fg:color_frost bg:color_ice)\
+[⠂⠈](fg:color_uniform bg:color_ice)\
+
+$c$rust$golang$nodejs$deno$python\
+[](fg:color_ice bg:color_snow)\
+
+$time\
+[](fg:color_snow bg:transparent)\
+[⢀⠄⠂⠁](fg:color_ice bg:transparent)\
+\n$character"""
+
+palette = 'power_ice_blast'
+
+[palettes.power_ice_blast]
+color_mask     = '#0d1a2b' # Lin Kuei mask (blue-black)
+color_uniform  = '#1d5fbf' # Uniform blue
+color_frost    = '#5fb4e8' # Spreading frost
+color_ice      = '#a3d9f3' # Ice ball
+color_snow     = '#f7fdff' # Snow white
+color_fatality = '#c1121f' # Fatality red (for errors)
+color_ink      = '#0b0d14' # Ink (text on light fills)
+color_paper    = '#ffffff' # Paper (text on dark fills)
+
+# 1. SUB-ZERO (the mask, frost cracking out of it)
+[os]
+disabled = false
+style = "bg:color_mask fg:color_paper bold"
+format = '[ 󰜗 ]($style)'
+
+# 2. THE UNIFORM (snow starting to fall)
+[directory]
+style = "bg:color_uniform fg:color_paper bold"
+format = "[ 󰲋 $path ]($style)"
+truncation_length = 3
+
+# 3. THE FROST (spreading in crystal edges)
+[git_branch]
+symbol = " "
+style = "bg:color_frost fg:color_ink bold"
+format = '[ $symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_frost fg:color_ink bold"
+format = '([$all_status$ahead_behind ]($style))'
+
+# 4. THE ICE BALL
+[c]
+symbol = " "
+style = "bg:color_ice fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[rust]
+symbol = " "
+style = "bg:color_ice fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[golang]
+symbol = " "
+style = "bg:color_ice fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_ice fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[deno]
+symbol = " "
+style = "bg:color_ice fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[python]
+symbol = " "
+style = "bg:color_ice fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+# 5. THE SNOW (shards spraying past the end)
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_snow fg:color_ink bold"
+format = '[ $time ]($style)'
+
+# 6. THE SNOWFLAKE, AND FATALITY RED FOR ERRORS
+[character]
+success_symbol = "[󰜗❯](bold color_frost)"
+error_symbol = "[󰜗❯](bold color_fatality)"

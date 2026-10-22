@@ -1,0 +1,118 @@
+# ==============================================================================
+#  Preset: Hadouken v3 (Classic Ryu Edition)
+#  Inspired by: Ryu, Street Fighter II (Capcom, 1991) - the Hadouken surge fist
+#  Fan tribute; no logos or official artwork, only colors and motion.
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# Glyph chain: big pixel squares U+E0C6 -> small pixel squares U+E0C4 (16-bit sprite edges) along the charge.
+# The bar ends on the white-hot core; the fireball itself is the prompt character on line 2:
+#   U+E0C7 U+E0C3 sparks and thin flame -> U+E0C2 solid flame (volume) -> U+F306 spiral core (linux-debian)
+#   -> U+E0B4 sphere front -> U+E0B5 wind barrier. Errors fire the red-hot Shakunetsu version.
+# The attack travels left to right: Headband -> Gi Sleeve -> Ki Between the Palms -> Fireball Body -> Outer Flame -> White-Hot Core -> Fireball on the prompt line
+format = """
+[](fg:color_red bg:transparent)\
+$os\
+[](fg:color_red bg:color_gi)\
+[](fg:color_gi bg:color_navy)\
+
+$directory\
+[](fg:color_navy bg:color_cyan)\
+[](fg:color_cyan bg:color_blue)\
+
+$git_branch$git_status\
+[](fg:color_blue bg:color_glow)\
+[](fg:color_glow bg:color_cyan)\
+
+$c$rust$golang$nodejs$deno$python\
+[](fg:color_cyan bg:color_glow)\
+[](fg:color_glow bg:color_core)\
+
+$time\
+[](fg:color_core bg:transparent)\
+\n$character"""
+
+palette = 'power_hadouken_v3'
+
+[palettes.power_hadouken_v3]
+color_red   = '#c8102e' # Ryu's headband red
+color_gi    = '#efe9dc' # Karate gi (worn white canvas)
+color_navy  = '#0b1d52' # Ki shadow (the charge cupped between the palms)
+color_blue  = '#1f4fd1' # Ki blue (the fireball body)
+color_cyan  = '#38b8ff' # Ki cyan (outer flame)
+color_glow  = '#9ee3ff' # Ki glow (the halo)
+color_core  = '#eefaff' # White-hot ki core
+color_sky   = '#0284c7' # Fireball sparks (deep sky trail)
+color_ki    = '#00b0ff' # Fireball body (solid flame and sphere)
+color_foam  = '#7dd3fc' # Wind barrier at the tip
+color_ember = '#9f1239' # Shakunetsu sparks (errors)
+color_shaku = '#ff5a2b' # Shakunetsu Hadouken (the red-hot fire version, for errors)
+color_ink   = '#0b0d14' # Ink (text on light fills)
+color_paper = '#ffffff' # Paper (text on dark fills)
+
+# 1. RYU (headband red, then a pixel break into the white gi sleeve)
+[os]
+disabled = false
+style = "bg:color_red fg:color_paper bold"
+format = '[ 󰠬 ]($style)'
+
+# 2. THE CHARGE (ki gathering between the palms, cyan flecks swirling)
+[directory]
+style = "bg:color_navy fg:color_paper bold"
+format = "[ 󰲋 $path ]($style)"
+truncation_length = 3
+
+# 3. THE SURGE (the fireball body leaves the hands)
+[git_branch]
+symbol = " "
+style = "bg:color_blue fg:color_paper bold"
+format = '[ $symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_blue fg:color_paper bold"
+format = '([$all_status$ahead_behind ]($style))'
+
+# 4. THE OUTER FLAME (16-bit pixel flicker)
+[c]
+symbol = " "
+style = "bg:color_cyan fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[rust]
+symbol = " "
+style = "bg:color_cyan fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[golang]
+symbol = " "
+style = "bg:color_cyan fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_cyan fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[deno]
+symbol = " "
+style = "bg:color_cyan fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[python]
+symbol = " "
+style = "bg:color_cyan fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+# 5. THE WHITE-HOT CORE (the bar closes in a rounded ki glow)
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_core fg:color_ink bold"
+format = '[ $time ]($style)'
+
+# 6. THE FIREBALL, AND THE SHAKUNETSU (red-hot) VERSION FOR ERRORS
+[character]
+success_symbol = "[](color_sky)[](color_ki)[](bg:color_ki fg:color_paper bold)[](color_ki)[](color_foam) "
+error_symbol = "[](color_ember)[](color_shaku)[](bg:color_shaku fg:color_paper bold)[](color_shaku)[](color_core) "

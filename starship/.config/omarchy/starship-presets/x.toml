@@ -1,0 +1,107 @@
+# ==============================================================================
+#  Preset: Ryu Classic Hadouken (Right-Prompt Energy Edition)
+#  Created by: Starship Studio (https://github.com/felipecm-br/starship-studio)
+#  Configured with Starship Studio: https://github.com/felipecm-br/starship-studio
+# ==============================================================================
+
+"$schema" = "https://starship.rs/config-schema.json"
+
+add_newline = true
+
+# LADO ESQUERDO: A postura do Ryu (Faixa Vermelha -> Kimono Branco -> Faixa Preta -> Concentração de Ki)
+format = """
+[\uE0B6](fg:ryu_headband)\
+$os\
+[\uE0C0](fg:ryu_headband bg:ryu_gi)\
+$directory\
+[\uE0C0](fg:ryu_gi bg:ryu_belt)\
+$git_branch$git_status\
+[\uE0C6](fg:ryu_belt bg:ki_charge)\
+$rust$nodejs$python$golang\
+[\uE0C0\uE0C1](fg:ki_charge)\
+\n$character"""
+
+# LADO DIREITO: O Hadouken voando pela direita + Status de Energia (Duração & Hora)
+right_format = """
+[\uE0C7\uE0C3](#0284c7)\
+[\uE0C2](#00b0ff)\
+[ \uF306 ](bg:#00b0ff fg:#ffffff bold)\
+$cmd_duration\
+$time\
+[\uE0B4](#00b0ff)\
+[\uE0B5](#7dd3fc)"""
+
+palette = "street_fighter_ryu"
+
+[palettes.street_fighter_ryu]
+color_bg     = "#090d16" # Noite de Suzaku Castle (Fundo escuro)
+ryu_headband = "#dc2626" # Faixa vermelha clássica do Ryu
+ryu_gi       = "#f1f5f9" # Kimono branco (Gi)
+ryu_belt     = "#1e293b" # Faixa preta desgastada (Fuurinkazan)
+ryu_gloves   = "#f59e0b" # Amarelo/Dourado Arcade
+ki_charge    = "#0284c7" # Energia azul carregando nas mãos
+hadouken_core= "#00b0ff" # Núcleo brilhante do Hadouken
+hadouken_wave= "#7dd3fc" # Onda de choque frontal
+
+# 1. FAIXA VERMELHA (OS)
+[os]
+disabled = false
+style = "bg:ryu_headband fg:#ffffff bold"
+format = "[ \U000F08C7 ]($style)"
+
+# 2. KIMONO BRANCO (Directory)
+[directory]
+style = "bg:ryu_gi fg:color_bg bold"
+format = "[ \U000F0C8B $path ]($style)"
+truncation_length = 3
+truncation_symbol = "\u2248/"
+
+# 3. FAIXA PRETA FUURINKAZAN (Git)
+[git_branch]
+symbol = "\uF418 "
+style = "bg:ryu_belt fg:ryu_gloves bold"
+format = "[ $symbol$branch ]($style)"
+
+[git_status]
+style = "bg:ryu_belt fg:#ef4444 bold"
+format = "([$all_status$ahead_behind ]($style))"
+
+# 4. CONCENTRAÇÃO DE KI (Languages)
+[rust]
+symbol = "\uE7A8 "
+style = "bg:ki_charge fg:#ffffff bold"
+format = "[ $symbol($version) ]($style)"
+
+[nodejs]
+symbol = "\uE718 "
+style = "bg:ki_charge fg:#ffffff bold"
+format = "[ $symbol($version) ]($style)"
+
+[python]
+symbol = "\uE606 "
+style = "bg:ki_charge fg:#ffffff bold"
+format = "[ $symbol($version) ]($style)"
+
+[golang]
+symbol = "\uE627 "
+style = "bg:ki_charge fg:#ffffff bold"
+format = "[ $symbol($version) ]($style)"
+
+# 5. MÓDULOS DA DIREITA (Dentro da esfera do Hadouken!)
+[cmd_duration]
+min_time = 500
+style = "bg:hadouken_core fg:color_bg bold"
+format = "[ \uF43A $duration ]($style)"
+
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:hadouken_core fg:#ffffff bold"
+format = "[ \uF43A $time ]($style)"
+
+# PROMPT DE COMANDO (Linha 2)
+[character]
+# Sucesso: Punho de energia azul
+success_symbol = "[\uE0C1\u276F](bold #00b0ff)"
+# Erro: Shakunetsu Hadouken (Vermelho/Fogo)
+error_symbol = "[\uE0C1\u276F](bold #ef4444)"

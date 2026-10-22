@@ -1,0 +1,110 @@
+# ==============================================================================
+#  Preset: Kamehameha (Turtle School Beam Edition)
+#  Inspired by: Son Goku, Dragon Ball (Akira Toriyama, 1984) - the Turtle Destruction Wave
+#  Fan tribute; no logos or official artwork, only colors and motion.
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# Glyph chain: the orb bursts with a flame U+E0C0; the beam runs as a heavy line U+2501 over shades U+2593-U+2591
+# The attack travels left to right: Orange Gi -> Blue Undershirt -> Charged Orb -> Beam -> Beam Core -> Impact Flare
+format = """
+[](fg:color_orange bg:transparent)\
+$os\
+[](fg:color_orange bg:color_navy_gi)\
+
+$directory\
+[](fg:color_navy_gi bg:color_beam_lit)\
+[](fg:color_beam_lit bg:color_orb)\
+
+$git_branch$git_status\
+[](fg:color_orb bg:color_beam)\
+
+$c$rust$golang$nodejs$deno$python\
+[━━](fg:color_core bg:color_beam)\
+[▓▒░](fg:color_beam bg:color_beam_lit)\
+
+$time\
+[━━](fg:color_core bg:color_beam_lit)\
+[](fg:color_beam_lit bg:color_core)\
+[](fg:color_core bg:transparent)\
+\n$character"""
+
+palette = 'power_kamehameha'
+
+[palettes.power_kamehameha]
+color_orange   = '#f47a1f' # Turtle School gi orange
+color_navy_gi  = '#1e3a8a' # Undershirt and wristband blue
+color_orb      = '#0c2a6b' # The orb charging in the cupped hands
+color_beam     = '#2f7bff' # Beam outer blue
+color_beam_lit = '#7cc4ff' # Beam inner light
+color_core     = '#f5fbff' # Beam core (the white streak)
+color_galick   = '#a259ff' # Galick Gun violet (the rival's beam, for errors)
+color_ink      = '#0b0d14' # Ink (text on light fills)
+color_paper    = '#ffffff' # Paper (text on dark fills)
+
+# 1. GOKU (Turtle School orange)
+[os]
+disabled = false
+style = "bg:color_orange fg:color_ink bold"
+format = '[ 󰓏 ]($style)'
+
+# 2. KA-ME (the undershirt blue, sparks gathering into the hands)
+[directory]
+style = "bg:color_navy_gi fg:color_paper bold"
+format = "[ 󰲋 $path ]($style)"
+truncation_length = 3
+
+# 3. HA-ME (the orb, bursting into the beam)
+[git_branch]
+symbol = " "
+style = "bg:color_orb fg:color_paper bold"
+format = '[ $symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_orb fg:color_paper bold"
+format = '([$all_status$ahead_behind ]($style))'
+
+# 4. HA! (the beam, its white core streaking through)
+[c]
+symbol = " "
+style = "bg:color_beam fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[rust]
+symbol = " "
+style = "bg:color_beam fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[golang]
+symbol = " "
+style = "bg:color_beam fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_beam fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[deno]
+symbol = " "
+style = "bg:color_beam fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[python]
+symbol = " "
+style = "bg:color_beam fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+# 5. THE BEAM CORE AND THE IMPACT FLARE
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_beam_lit fg:color_ink bold"
+format = '[ $time ]($style)'
+
+# 6. THE BEAM, AND THE RIVAL'S GALICK GUN FOR ERRORS
+[character]
+success_symbol = "[━❯](bold color_beam_lit)"
+error_symbol = "[━❯](bold color_galick)"

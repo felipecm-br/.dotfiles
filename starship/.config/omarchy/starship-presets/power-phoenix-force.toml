@@ -1,0 +1,112 @@
+# ==============================================================================
+#  Preset: Phoenix Force (Cosmic Firebird Edition)
+#  Inspired by: Jean Grey, X-Men #101 (Chris Claremont and Dave Cockrum, 1976) - the Phoenix Force
+#  Fan tribute; no logos or official artwork, only colors and motion.
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# Glyph chain: thick flames U+E0C0 ridden by thin flame outlines U+E0C1 (a bright lick on each tongue); wings = two flames and embers
+# The attack travels left to right: Ember -> Crimson -> Flame -> Orange -> Gold -> White-Hot Wings
+format = """
+[](fg:color_ember bg:transparent)\
+$os\
+[](fg:color_ember bg:color_crimson)\
+[](fg:color_orange bg:color_crimson)\
+
+$directory\
+[](fg:color_crimson bg:color_flame)\
+[](fg:color_gold bg:color_flame)\
+
+$git_branch$git_status\
+[](fg:color_flame bg:color_orange)\
+[](fg:color_white_hot bg:color_orange)\
+
+$c$rust$golang$nodejs$deno$python\
+[](fg:color_orange bg:color_gold)\
+[](fg:color_crimson bg:color_gold)\
+
+$time\
+[](fg:color_gold bg:color_white_hot)\
+[](fg:color_white_hot bg:transparent)\
+[](fg:color_orange bg:transparent)\
+\n$character"""
+
+palette = 'power_phoenix_force'
+
+[palettes.power_phoenix_force]
+color_ember        = '#2a0a06' # Smouldering ember
+color_crimson      = '#9e1b12' # Crimson fire
+color_flame        = '#e5481c' # Flame
+color_orange       = '#ff8c1a' # Orange fire
+color_gold         = '#ffc93c' # Gold fire
+color_white_hot    = '#fff3c4' # White-hot plumage
+color_dark_phoenix = '#a03bff' # Dark Phoenix violet (for errors)
+color_ink          = '#0b0d14' # Ink (text on light fills)
+color_paper        = '#ffffff' # Paper (text on dark fills)
+
+# 1. THE EMBER (smouldering, the first lick of fire)
+[os]
+disabled = false
+style = "bg:color_ember fg:color_paper bold"
+format = '[ 󰈸 ]($style)'
+
+# 2. CRIMSON (the fire catching)
+[directory]
+style = "bg:color_crimson fg:color_paper bold"
+format = "[ 󰲋 $path ]($style)"
+truncation_length = 3
+
+# 3. THE FLAME (rising tongues)
+[git_branch]
+symbol = " "
+style = "bg:color_flame fg:color_ink bold"
+format = '[ $symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_flame fg:color_ink bold"
+format = '([$all_status$ahead_behind ]($style))'
+
+# 4. ORANGE (the firebird taking shape)
+[c]
+symbol = " "
+style = "bg:color_orange fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[rust]
+symbol = " "
+style = "bg:color_orange fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[golang]
+symbol = " "
+style = "bg:color_orange fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_orange fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[deno]
+symbol = " "
+style = "bg:color_orange fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[python]
+symbol = " "
+style = "bg:color_orange fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+# 5. GOLD AND THE WINGS (white-hot plumage, embers trailing)
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_gold fg:color_ink bold"
+format = '[ $time ]($style)'
+
+# 6. THE FIRE, AND DARK PHOENIX VIOLET FOR ERRORS
+[character]
+success_symbol = "[󰈸❯](bold color_orange)"
+error_symbol = "[󰈸❯](bold color_dark_phoenix)"

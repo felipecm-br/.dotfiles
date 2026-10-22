@@ -1,0 +1,111 @@
+# ==============================================================================
+#  Preset: Web Swing (Thwip Edition)
+#  Inspired by: Spider-Man, Amazing Fantasy #15 (Stan Lee and Steve Ditko, 1962) - the web-shooter
+#  Fan tribute; no logos or official artwork, only colors and motion.
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# Glyph chain: crosses U+2573 for the webbing on the suit, a horizontal line U+2500 for the strand, ╲│╱ for the splat
+# The attack travels left to right: Red Suit with Webbing -> Blue Suit -> Strand across the Night -> Skyscraper -> Web Splat
+format = """
+[](fg:color_red bg:transparent)\
+$os\
+[╳╳](fg:color_webbing bg:color_red)\
+[](fg:color_red bg:color_blue)\
+
+$directory\
+[](fg:color_blue bg:color_night)\
+[───](fg:color_web bg:color_night)\
+
+$git_branch$git_status\
+[───](fg:color_web bg:color_night)\
+[](fg:color_night bg:color_tower)\
+
+$c$rust$golang$nodejs$deno$python\
+[╲│╱](fg:color_web bg:color_tower)\
+[](fg:color_tower bg:color_web)\
+
+$time\
+[](fg:color_web bg:transparent)\
+[╳](fg:color_web bg:transparent)\
+\n$character"""
+
+palette = 'power_web_swing'
+
+[palettes.power_web_swing]
+color_red     = '#c8102e' # Suit red
+color_webbing = '#1a0a0d' # Black webbing lines on the suit
+color_blue    = '#1f3c99' # Suit blue
+color_night   = '#0e1220' # City night
+color_tower   = '#3a4150' # Skyscraper wall
+color_web     = '#eef0f4' # Web fluid silk
+color_carnage = '#ff2d55' # Carnage red (for errors)
+color_ink     = '#0b0d14' # Ink (text on light fills)
+color_paper   = '#ffffff' # Paper (text on dark fills)
+
+# 1. THE SUIT (red, black webbing stitched across it)
+[os]
+disabled = false
+style = "bg:color_red fg:color_paper bold"
+format = '[ 󱇪 ]($style)'
+
+# 2. THE WEB-SHOOTER (blue, the strand firing out)
+[directory]
+style = "bg:color_blue fg:color_paper bold"
+format = "[ 󰲋 $path ]($style)"
+truncation_length = 3
+
+# 3. THWIP (the strand crossing the night)
+[git_branch]
+symbol = " "
+style = "bg:color_night fg:color_paper bold"
+format = '[ $symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_night fg:color_paper bold"
+format = '([$all_status$ahead_behind ]($style))'
+
+# 4. THE SKYSCRAPER (the web splats on the wall)
+[c]
+symbol = " "
+style = "bg:color_tower fg:color_paper bold"
+format = '[ $symbol($version) ]($style)'
+
+[rust]
+symbol = " "
+style = "bg:color_tower fg:color_paper bold"
+format = '[ $symbol($version) ]($style)'
+
+[golang]
+symbol = " "
+style = "bg:color_tower fg:color_paper bold"
+format = '[ $symbol($version) ]($style)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_tower fg:color_paper bold"
+format = '[ $symbol($version) ]($style)'
+
+[deno]
+symbol = " "
+style = "bg:color_tower fg:color_paper bold"
+format = '[ $symbol($version) ]($style)'
+
+[python]
+symbol = " "
+style = "bg:color_tower fg:color_paper bold"
+format = '[ $symbol($version) ]($style)'
+
+# 5. THE WEB (silk white, a net past the end)
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_web fg:color_ink bold"
+format = '[ $time ]($style)'
+
+# 6. THE WEB, AND CARNAGE RED FOR ERRORS
+[character]
+success_symbol = "[󰯊❯](bold color_web)"
+error_symbol = "[󰯊❯](bold color_carnage)"
