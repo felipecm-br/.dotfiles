@@ -380,7 +380,7 @@ ai-fix() {
 
     prompt+="Please analyze the error concisely, identify the root cause in the context of the recent code changes, and provide the exact fix or shell command."
 
-    echo "󰚩 Enviando contexto 360° de '$last_cmd' ao agente..."
+    echo "$(waymux icon agent) Enviando contexto 360° de '$last_cmd' ao agente..."
 
     if command -v opencode >/dev/null 2>&1; then
         opencode "$prompt"
@@ -426,7 +426,7 @@ bd() {
 }
 
 # waymux - Manage the Waymux daemon service
-# Usage: waymux [status|start|stop|restart|logs|kill]
+# Usage: waymux [status|start|stop|restart|logs|kill|<binary subcommand>...]
 waymux() {
     local action="${1:-status}"
     case "$action" in
@@ -449,8 +449,8 @@ waymux() {
             pkill -9 -x waymux 2>/dev/null && echo "waymux killed" || systemctl --user stop waymux.service
             ;;
         *)
-            echo "Usage: waymux [status|start|stop|restart|logs|kill]"
-            return 1
+            # Everything else (icon, icons, doctor, wt, cockpit, ...) is the binary's
+            command waymux "$@"
             ;;
     esac
 }

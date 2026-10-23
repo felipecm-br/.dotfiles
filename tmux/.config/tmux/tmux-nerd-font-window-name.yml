@@ -1,29 +1,9 @@
+# Base config for tmux-nerd-font-window-name. The `icons:` section is NOT kept here:
+# nerd-font-icons-sync.sh appends it from the waymux icon registry ([icons] in
+# ~/.config/waymux/config.toml) into ~/.cache/tmux/tmux-nerd-font-window-name.yml.
 config:
   fallback-icon: "?"
   multi-pane-icon: ""
   show-name: false # show the window name with the icon (defaults to false)
   always-show-fallback-name: false # always show the name alongside the fallback icon, even when show-name is false (defaults to false)
   icon-position: "left" # show the icon to the "left" or "right" of the window name (defaults to left)
-
-icons:
-  zsh: ""
-  btop: "󰨜"
-  bun: "󰟈"
-  docker: ""
-  gh: ""
-  ai-jail: "󰚩"
-  agy: ""
-  agyy: ""
-  agy-bin: ""
-  codex: ""
-  node: "󱚤"
-  htop: ""
-  lazygit: ""
-  lazygitrs: ""
-  npm: ""
-  opencode: "󰚩"
-  claude: ""
-  server: ""
-  muse: "󱚣"
-  devin: ""
-  yazi: "󰇥"

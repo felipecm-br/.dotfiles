@@ -266,7 +266,8 @@ run_confirm_modal() {
     printf "  ${c_bold}${c_yellow}  KILL WINDOW${c_reset} ${c_muted}·${c_reset} ${c_bold}${c_fg}%s${c_reset}\n\n" "$tab_label"
 
     printf "  ${c_bold}${c_red}󰮯  Active AI Agent in Window${c_reset}\n"
-    local shown=0
+    local shown=0 agent_icon
+    agent_icon=$(waymux icon agent)
     for ((i=0; i<AGENT_COUNT; i++)); do
       local st="${AGENT_STATES[$i]}"
       case "$st" in
@@ -277,21 +278,19 @@ run_confirm_modal() {
 
       local label="${AGENT_LABELS[$i]}"
       local desc="${AGENT_DESCS[$i]}"
-      local icon="󱥁"
-      local st_color="$c_yellow"
+      local icon st_color="$c_yellow"
       case "$st" in
-        busy|working) icon="󱥁"; st_color="$c_yellow" ;;
-        question|permission|awaiting_input) icon="󱜻"; st_color="$c_magenta" ;;
-        error|stalled) icon="󰨄"; st_color="$c_red" ;;
-        *) icon="󰑮"; st_color="$c_yellow" ;;
+        question|permission|awaiting_input) st_color="$c_magenta" ;;
+        error|stalled) st_color="$c_red" ;;
       esac
-      printf "     ${c_muted}󰚩${c_reset} ${c_bold}%-12s${c_reset}  ${c_fg}%-28s${c_reset}  ${st_color}%s %-7s${c_reset}\n" \
+      icon=$(waymux icon --state "$st" || waymux icon --state busy)
+      printf "     ${c_muted}${agent_icon}${c_reset} ${c_bold}%-12s${c_reset}  ${c_fg}%-28s${c_reset}  ${st_color}%s %-7s${c_reset}\n" \
         "$label" "$desc" "$icon" "$st"
       shown=$(( shown + 1 ))
       [ "$shown" -ge 3 ] && break
     done
     if [ "$ACTIVE_AGENT_COUNT" -gt 3 ]; then
-      printf "     ${c_muted}󰚩 ... and %d more active agent(s)${c_reset}\n" "$((ACTIVE_AGENT_COUNT - 3))"
+      printf "     ${c_muted}${agent_icon} ... and %d more active agent(s)${c_reset}\n" "$((ACTIVE_AGENT_COUNT - 3))"
     fi
     printf "\n"
 

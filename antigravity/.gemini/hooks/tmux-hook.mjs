@@ -76,7 +76,7 @@ async function main() {
   if (['SessionStart', 'PreInvocation'].includes(eventType)) {
     if (tmuxPane) {
       try {
-        execSync(`tmux rename-window -t "${tmuxPane}" "" 2>/dev/null || true`);
+        execSync(`tmux rename-window -t "${tmuxPane}" "$(waymux icon agy)" 2>/dev/null || true`);
       } catch (_) {}
     }
     const title = extractSessionTitle(ctx);

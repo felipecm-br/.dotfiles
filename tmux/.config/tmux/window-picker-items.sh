@@ -52,6 +52,9 @@ unset _color11 _color1
 cur_session="${1:-${TMUX_ORIGIN_SESSION:-$(tmux display-message -p '#S')}}"
 cur_window="${2:-${TMUX_ORIGIN_WINDOW:-$(tmux display-message -p '#I')}}"
 
+# State glyph fallbacks (when waymux has not set @ai_agent_state) from the icon registry
+eval "$(waymux icons --format sh 2>/dev/null)"
+
 tmux list-sessions -F '#S' | grep -Ev '^(_lazygitrs|_popups|\.)' | while IFS= read -r session; do
   printf '#  %s\n' "$session"
 
@@ -106,31 +109,31 @@ tmux list-sessions -F '#S' | grep -Ev '^(_lazygitrs|_popups|\.)' | while IFS= re
     case "$state" in
       busy|working)
         c_st=${c_st:-$C_BUSY}
-        icon=${state_icon:-"󰑮"}
+        icon=${state_icon:-$ICON_STATE_BUSY}
         ai_ico="${c_st}@SPIN@${R} "
         title="$idx $name $icon ${ai_search}"
         ;;
       idle)
         c_st=${c_st:-$C_IDLE}
-        icon=${state_icon:-"󱥂"}
+        icon=${state_icon:-$ICON_STATE_IDLE}
         ai_ico="${c_st}${icon}${R} "
         title="$idx $name $icon ${ai_search}"
         ;;
       question|awaiting_input)
         c_st=${c_st:-$C_QUESTION}
-        icon=${state_icon:-"󱜻"}
+        icon=${state_icon:-$ICON_STATE_QUESTION}
         ai_ico="${c_st}${icon}${R} "
         title="$idx $name $icon ${ai_search}"
         ;;
       error)
         c_st=${c_st:-$C_ERROR}
-        icon=${state_icon:-"󰨄"}
+        icon=${state_icon:-$ICON_STATE_ERROR}
         ai_ico="${c_st}${icon}${R} "
         title="$idx $name $icon ${ai_search}"
         ;;
       permission)
         c_st=${c_st:-$C_PERM}
-        icon=${state_icon:-"󱅭"}
+        icon=${state_icon:-$ICON_STATE_PERMISSION}
         ai_ico="${c_st}${icon}${R} "
         title="$idx $name $icon ${ai_search}"
         ;;

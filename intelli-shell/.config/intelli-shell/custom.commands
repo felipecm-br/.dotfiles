@@ -358,6 +358,18 @@ waymux triage --popup
 # Jump directly to the next AI agent requiring attention (zero-modal)
 waymux triage --jump
 
+# Print the Nerd Font glyph for a program/agent from the icon registry ([icons] in waymux config)
+waymux icon {{name}}
+
+# Print the Nerd Font glyph for an agent state (idle, busy, question, permission, stalled, error, review)
+waymux icon --state {{state}}
+
+# Export the whole icon registry (tsv, sh for eval, tmux for the window-name plugin)
+waymux icons --format {{format}}
+
+# Regenerate the tmux window-name plugin icons from the waymux icon registry
+~/.config/tmux/nerd-font-icons-sync.sh
+
 # Manage Git worktrees natively via Waymux (new, go, ls, rm, ship, reap)
 waymux wt {{subcommand}}
 
@@ -495,6 +507,9 @@ $ (stow.sh) package: find . -maxdepth 1 -mindepth 1 -type d ! -name '.*' ! -name
 $ (./stow.sh) package: find . -maxdepth 1 -mindepth 1 -type d ! -name '.*' ! -name 'scripts' ! -name 'docs' -printf '%f\n' 2>/dev/null
 $ (stow-it) package: find . -maxdepth 1 -mindepth 1 -type d ! -name '.*' ! -name 'scripts' ! -name 'docs' -printf '%f\n' 2>/dev/null
 $ (wm) session: wm session list 2>/dev/null
+$ (waymux) name: waymux icons | awk -F'\t' '$1 == "program" {print $2}' 2>/dev/null
+$ (waymux) state: waymux icons | awk -F'\t' '$1 == "state" {print $2}' 2>/dev/null
+$ (waymux) format: printf '%s\n' tsv sh tmux
 $ (wm) file: find . -maxdepth 3 -type f \( -name '*.md' -o -name '*.markdown' -o -name '*.mmd' \) 2>/dev/null
 $ (mmdc) mmd_file: find . -maxdepth 4 -type f \( -name '*.mmd' -o -name '*.mermaid' \) 2>/dev/null
 $ (update-ai-workflow) component: echo -e "tmux\nfonts\ncodex\nagy\nantigravity-ide\nclaude\ndevin\nopencode\nwaymux\nai-suite\nworktrunk\nmise"

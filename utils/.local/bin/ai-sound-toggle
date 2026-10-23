@@ -31,7 +31,7 @@ if [[ "$CURRENT" == "none" || "$CURRENT" == "off" || "$CURRENT" == "disabled" ||
   TITLE="$(echo "$TITLE" | awk '{for(i=1;i<=NF;i++) $i=toupper(substr($i,1,1)) substr($i,2); print}')"
 
   if command -v omarchy-notification-send >/dev/null 2>&1; then
-    omarchy-notification-send "AI Sounds Enabled" "Restored: $TITLE" -g "󱚤" -u normal 2>/dev/null || true
+    omarchy-notification-send "AI Sounds Enabled" "Restored: $TITLE" -g "$(waymux icon ai)" -u normal 2>/dev/null || true
   elif command -v notify-send >/dev/null 2>&1; then
     notify-send -a "AI Notification" -i "audio-speakers" "AI Sounds Enabled" "Restored: $TITLE" 2>/dev/null || true
   fi

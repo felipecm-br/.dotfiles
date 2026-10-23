@@ -200,24 +200,24 @@ run_confirm_modal() {
     # Section 1: Active AI Agent Fleet
     if [ "$AGENT_COUNT" -gt 0 ]; then
       printf "  ${c_bold}${c_red}󰮯  Active AI Agents Detected (%d)${c_reset}\n" "$AGENT_COUNT"
-      local show_count=$(( AGENT_COUNT > 3 ? 3 : AGENT_COUNT ))
+      local show_count=$(( AGENT_COUNT > 3 ? 3 : AGENT_COUNT )) agent_icon
+      agent_icon=$(waymux icon agent)
       for ((i=0; i<show_count; i++)); do
         local tab="${AGENT_TABS[$i]}"
         local desc="${AGENT_DESCS[$i]}"
         local st="${AGENT_STATES[$i]}"
-        local icon="󱥁"
-        local st_color="$c_yellow"
+        local icon st_color="$c_yellow"
         case "$st" in
-          idle) icon="󱥂"; st_color="$c_cyan" ;;
-          busy|working) icon="󱥁"; st_color="$c_yellow" ;;
-          question|permission|awaiting_input) icon="󱜻"; st_color="$c_magenta" ;;
-          error) icon="󰨄"; st_color="$c_red" ;;
+          idle) st_color="$c_cyan" ;;
+          question|permission|awaiting_input) st_color="$c_magenta" ;;
+          error) st_color="$c_red" ;;
         esac
-        printf "     ${c_muted}󰚩${c_reset} ${c_bold}Tab %-2s${c_reset}  ${c_fg}%-28s${c_reset}  ${st_color}%s %-7s${c_reset}\n" \
+        icon=$(waymux icon --state "$st" || waymux icon --state busy)
+        printf "     ${c_muted}${agent_icon}${c_reset} ${c_bold}Tab %-2s${c_reset}  ${c_fg}%-28s${c_reset}  ${st_color}%s %-7s${c_reset}\n" \
           "$tab" "$desc" "$icon" "$st"
       done
       if [ "$AGENT_COUNT" -gt 3 ]; then
-        printf "     ${c_muted}󰚩 ... and %d more active agent window(s)${c_reset}\n" "$((AGENT_COUNT - 3))"
+        printf "     ${c_muted}${agent_icon} ... and %d more active agent window(s)${c_reset}\n" "$((AGENT_COUNT - 3))"
       fi
       printf "\n"
     fi

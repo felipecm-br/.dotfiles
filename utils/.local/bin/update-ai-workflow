@@ -56,21 +56,16 @@ else
 fi
 
 # ── Icons ─────────────────────────────────────────────────────────────────────
-ICON_AI="󱚤"
-ICON_TMUX=""
-ICON_FONT=""
-ICON_CODEX=""
-ICON_AGY=""
-ICON_IDE="󰨞"
-ICON_CLAUDE=""
-ICON_DEVIN="󰚩"
-ICON_OPENCODE="󰘦"
-ICON_WAYMUX="󱐋"
-ICON_MEMORY="󰍛"
-ICON_JAIL="󰌾"
-ICON_USAGEBAR="󰄨"
-ICON_WORKTREE="󰙅"
-ICON_MISE="󰒓"
+# Program glyphs come from the waymux icon registry ([icons] in ~/.config/waymux/config.toml).
+# ICON_* names follow the registry keys: ai-memory -> ICON_AI_MEMORY.
+eval "$(waymux icons --format sh 2>/dev/null)"
+for _icon in ICON_AI ICON_TMUX ICON_FONTS ICON_CODEX ICON_AGY ICON_ANTIGRAVITY_IDE ICON_CLAUDE \
+  ICON_DEVIN ICON_OPENCODE ICON_WAYMUX ICON_AI_MEMORY ICON_AI_JAIL ICON_AI_USAGEBAR \
+  ICON_WORKTRUNK ICON_MISE; do
+  # Keep the matrix columns aligned when waymux is missing (first install)
+  printf -v "$_icon" '%s' "${!_icon:-·}"
+done
+unset _icon
 
 ICON_OK="${C_GREEN}✓${C_RESET}"
 ICON_WARN="${C_YELLOW}▲${C_RESET}"
@@ -313,7 +308,7 @@ inspect_fonts() {
     fi
   fi
 
-  record_status "fonts" "nerd fonts (mono+propo)" "$ICON_FONT" "$cur" "$lat" "$status"
+  record_status "fonts" "nerd fonts (mono+propo)" "$ICON_FONTS" "$cur" "$lat" "$status"
 }
 
 # 4. Mise Outdated Batch
@@ -432,7 +427,7 @@ inspect_antigravity_ide() {
     fi
   fi
 
-  record_status "antigravity-ide" "antigravity-ide (gui)" "$ICON_IDE" "$cur" "$lat" "$status"
+  record_status "antigravity-ide" "antigravity-ide (gui)" "$ICON_ANTIGRAVITY_IDE" "$cur" "$lat" "$status"
 }
 
 # 6b. Devin CLI (devin)
@@ -496,7 +491,7 @@ inspect_ai_memory() {
   local lat="1.17.3"
   local status="OK"
   [[ "$cur" == "missing" ]] && status="MISSING"
-  record_status "ai-memory" "ai-memory (knowledge store)" "$ICON_MEMORY" "$cur" "$lat" "$status"
+  record_status "ai-memory" "ai-memory (knowledge store)" "$ICON_AI_MEMORY" "$cur" "$lat" "$status"
 }
 
 # 8. AI Jail
@@ -509,7 +504,7 @@ inspect_ai_jail() {
   local lat="1.16.0"
   local status="OK"
   [[ "$cur" == "missing" ]] && status="MISSING"
-  record_status "ai-jail" "ai-jail (agent sandbox)" "$ICON_JAIL" "$cur" "$lat" "$status"
+  record_status "ai-jail" "ai-jail (agent sandbox)" "$ICON_AI_JAIL" "$cur" "$lat" "$status"
 }
 
 # 9. AI Usagebar
@@ -524,7 +519,7 @@ inspect_ai_usagebar() {
   local lat="$cur"
   local status="OK"
   [[ "$cur" == "missing" ]] && status="MISSING"
-  record_status "ai-usagebar" "ai-usagebar (plan usage)" "$ICON_USAGEBAR" "$cur" "$lat" "$status"
+  record_status "ai-usagebar" "ai-usagebar (plan usage)" "$ICON_AI_USAGEBAR" "$cur" "$lat" "$status"
 }
 
 # 10. Worktree Orchestrator (worktrunk / awt)
@@ -547,7 +542,7 @@ inspect_worktrunk() {
     fi
   fi
 
-  record_status "worktrunk" "worktrunk (awt engine)" "$ICON_WORKTREE" "$cur" "$lat" "$status"
+  record_status "worktrunk" "worktrunk (awt engine)" "$ICON_WORKTRUNK" "$cur" "$lat" "$status"
 }
 
 # 11. Mise

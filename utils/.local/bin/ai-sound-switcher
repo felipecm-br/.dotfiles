@@ -73,7 +73,7 @@ if [[ -f "$SOUND_PATH" ]]; then
 
   # 3. Desktop notification
   if command -v omarchy-notification-send >/dev/null 2>&1; then
-    omarchy-notification-send "AI Sound Updated" "Notification sound set to: $TITLE" -g "󱚤" -u normal 2>/dev/null || true
+    omarchy-notification-send "AI Sound Updated" "Notification sound set to: $TITLE" -g "$(waymux icon ai)" -u normal 2>/dev/null || true
   elif command -v notify-send >/dev/null 2>&1; then
     notify-send -a "AI Notification" -i "audio-speakers" "AI Sound Updated" "Notification sound set to: $TITLE" 2>/dev/null || true
   fi

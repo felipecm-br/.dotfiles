@@ -18,6 +18,7 @@ Welcome to the central documentation index for this Arch Linux + Omarchy dotfile
 - [**Evidence-Based Flow Telemetry & Deep Work Analytics**](architecture/evidence-based-telemetry-and-deep-work.md): Zero-latency TSV event logging (`flow-log.sh`), human-agent response latency metrics, 24h ASCII activity heatmaps, and `flow-telemetry` CLI.
 - [**Proactive Agent Supervision & Remote Orchestration (`waymux`)**](architecture/remote-agent-workflow-waymux.md): JSON-RPC 2.0 remote agent supervision via Waymux daemon (`waymux` / `waymux-cli`), auto-dismiss on focus (`pane-focus-in`), blocking `agentState/wait` barriers, and multi-agent handoff loops.
 - [**Open-Source AI Cockpit Stack Blueprint**](architecture/open-source-ai-tmux-stack-plan.md): Architecture and distribution strategy for the open-source `waymux` + `lazygitrs` + `waymaker` (`wm`) + `tmux` terminal AI cockpit stack.
+- [**Nerd Font Icon Registry**](architecture/nerd-font-icon-registry.md): Single source of truth for program, agent, and agent-state glyphs (`[icons]` in the waymux config), and how tmux, the Cockpit, alerts, and shell scripts read it (`waymux icon`, `waymux icons`).
 
 ### 🐚 1. Shell & Navigation (`docs/shell/`)
 - [**Smart Tab Completion & Waymaker**](shell/completion.md): Context-aware `<Tab>`, auto-spacing on aliases (`gco<Tab>`), dual backends (`Ctrl+N` vs `Ctrl+F`), and the [`ftb.toml`](../waymaker/.config/waymaker/presets/ftb.toml) preset with on-demand preview (`Ctrl+P`).
