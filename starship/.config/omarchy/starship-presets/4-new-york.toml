@@ -1,0 +1,135 @@
+# ==============================================================================
+#  Preset: New York (Midnight Express Edition)
+#  Inspired by: New York City - MTA subway bullets, the Brooklyn Bridge and the Empire State Building at night
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# Glyph chain: segments are subway bullets in official MTA line colors. Between stations the
+# city: a block-element skyline with a lit window; the Brooklyn Bridge with its gothic towers
+# (U+2590 U+258C) and suspension cables (U+2571 U+2572); and the Empire State Building, its
+# setbacks and spire plotted in Braille and floodlit.
+# The modules cascade through: 1 Train -> A Train -> N Train -> 6 Train -> 7 Train
+format = """
+[](fg:color_red bg:transparent)\
+$os\
+[](fg:color_red bg:color_night)\
+[▃▆](fg:color_tower bg:color_night)\
+[▝](fg:color_window bg:color_tower)\
+[▄▇▂](fg:color_tower bg:color_night)\
+[](fg:color_blue bg:color_night)\
+
+$directory\
+[](fg:color_blue bg:color_night)\
+[╲](fg:color_steel bg:color_night)\
+[▐▌](fg:color_steel bg:color_night)\
+[╱╲](fg:color_steel bg:color_night)\
+[▐▌](fg:color_steel bg:color_night)\
+[╱](fg:color_steel bg:color_night)\
+[](fg:color_yellow bg:color_night)\
+
+$git_branch$git_status\
+[](fg:color_yellow bg:color_night)\
+[▂](fg:color_tower bg:color_night)\
+[⣀⣶⣿⣶⣀](fg:color_empire bg:color_night)\
+[▃](fg:color_tower bg:color_night)\
+[](fg:color_green bg:color_night)\
+
+$c$rust$golang$nodejs$deno$python\
+[](fg:color_green bg:color_night)\
+[▃▆](fg:color_tower bg:color_night)\
+[▝](fg:color_window bg:color_tower)\
+[▄▇▂](fg:color_tower bg:color_night)\
+[](fg:color_purple bg:color_night)\
+
+$time\
+[](fg:color_purple bg:color_night)\
+[╲](fg:color_steel bg:color_night)\
+[▐▌](fg:color_steel bg:color_night)\
+[╱╲](fg:color_steel bg:color_night)\
+[▐▌](fg:color_steel bg:color_night)\
+[╱](fg:color_steel bg:color_night)\
+[](fg:color_night bg:transparent)\
+\n$character"""
+
+palette = 'place_new_york'
+
+[palettes.place_new_york]
+color_night  = '#1c2a50' # Manhattan night
+color_steel  = '#9aa7b8' # Bridge steel and granite towers
+color_tower  = '#030409' # Tower silhouettes
+color_window = '#ffd27a' # Lit office window
+color_empire = '#c9d6ff' # Empire State floodlights
+color_red    = '#d42b25' # MTA 1 2 3 red (Broadway-Seventh Avenue)
+color_blue   = '#0039a6' # MTA A C E blue (Eighth Avenue)
+color_yellow = '#fccc0a' # MTA N Q R W yellow (Broadway)
+color_green  = '#00843a' # MTA 4 5 6 green (Lexington Avenue)
+color_purple = '#b933ad' # MTA 7 purple (Flushing)
+color_paper  = '#ffffff' # Paper (text on subway bullets)
+color_ink    = '#0f1830' # Ink (text on yellow)
+
+# 1. 1 TRAIN (Broadway-Seventh Avenue local)
+[os]
+disabled = false
+style = "bg:color_red fg:color_paper bold"
+format = '[ 󰓿 ]($style)'
+
+# 2. A TRAIN (take it uptown, where you are)
+[directory]
+style = "bg:color_blue fg:color_paper bold"
+format = "[ 󰲋 $path ]($style)"
+truncation_length = 3
+
+# 3. N TRAIN (Broadway, branching to Astoria)
+[git_branch]
+symbol = " "
+style = "bg:color_yellow fg:color_ink bold"
+format = '[ $symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_yellow fg:color_ink bold"
+format = '([$all_status$ahead_behind ]($style))'
+
+# 4. 6 TRAIN (Lexington Avenue local)
+[c]
+symbol = " "
+style = "bg:color_green fg:color_paper bold"
+format = '[ $symbol($version) ]($style)'
+
+[rust]
+symbol = " "
+style = "bg:color_green fg:color_paper bold"
+format = '[ $symbol($version) ]($style)'
+
+[golang]
+symbol = " "
+style = "bg:color_green fg:color_paper bold"
+format = '[ $symbol($version) ]($style)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_green fg:color_paper bold"
+format = '[ $symbol($version) ]($style)'
+
+[deno]
+symbol = " "
+style = "bg:color_green fg:color_paper bold"
+format = '[ $symbol($version) ]($style)'
+
+[python]
+symbol = " "
+style = "bg:color_green fg:color_paper bold"
+format = '[ $symbol($version) ]($style)'
+
+# 5. 7 TRAIN (Flushing, the late train home)
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_purple fg:color_paper bold"
+format = '[ $time ]($style)'
+
+# 6. THE EMPIRE STATE (the spire at the cursor; errors light it red)
+[character]
+success_symbol = "[⣀⣶⣿⣶⣀](bold color_empire)[ ❯](bold color_yellow)"
+error_symbol = "[⣀⣶⣿⣶⣀](bold color_red)[ ✗](bold color_red)"

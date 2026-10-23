@@ -1,0 +1,126 @@
+# ==============================================================================
+#  Preset: Marrakech (Zellige Edition)
+#  Inspired by: Marrakech - the zellige tilework of the Ben Youssef Madrasa and the Majorelle garden
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# Glyph chain: on polished tadelakt each gap is a band of zellige, the hand-cut glazed tiles:
+# lozenges U+25C6, diamonds with a center U+25C8 and outline diamonds U+25C7, every tile in
+# its own glaze. Segments are the colors of the medina, ending in Majorelle blue.
+# The modules cascade through: Cobalt -> Saffron -> Emerald -> Terracotta -> Majorelle
+format = """
+[](fg:color_cobalt bg:transparent)\
+$os\
+[](fg:color_cobalt bg:color_plaster)\
+[◈](fg:color_emerald bg:color_plaster)\
+[◆](fg:color_saffron bg:color_plaster)\
+[◈](fg:color_cobalt bg:color_plaster)\
+[](fg:color_saffron bg:color_plaster)\
+
+$directory\
+[](fg:color_saffron bg:color_plaster)\
+[◆](fg:color_terracotta bg:color_plaster)\
+[◇](fg:color_cobalt bg:color_plaster)\
+[◆](fg:color_terracotta bg:color_plaster)\
+[](fg:color_emerald bg:color_plaster)\
+
+$git_branch$git_status\
+[](fg:color_emerald bg:color_plaster)\
+[◈](fg:color_cobalt bg:color_plaster)\
+[◆](fg:color_saffron bg:color_plaster)\
+[◈](fg:color_majorelle bg:color_plaster)\
+[](fg:color_terracotta bg:color_plaster)\
+
+$c$rust$golang$nodejs$deno$python\
+[](fg:color_terracotta bg:color_plaster)\
+[◆](fg:color_emerald bg:color_plaster)\
+[◇](fg:color_terracotta bg:color_plaster)\
+[◆](fg:color_emerald bg:color_plaster)\
+[](fg:color_majorelle bg:color_plaster)\
+
+$time\
+[](fg:color_majorelle bg:color_plaster)\
+[◈](fg:color_saffron bg:color_plaster)\
+[◆](fg:color_cobalt bg:color_plaster)\
+[◈](fg:color_emerald bg:color_plaster)\
+[](fg:color_plaster bg:transparent)\
+\n$character"""
+
+palette = 'place_marrakech'
+
+[palettes.place_marrakech]
+color_plaster    = '#f3ead8' # Tadelakt plaster (polished lime)
+color_cobalt     = '#1d3fa0' # Cobalt zellige (Fez blue)
+color_emerald    = '#0f7a52' # Emerald zellige (the green of the mosque roofs)
+color_saffron    = '#e8a317' # Saffron
+color_terracotta = '#b54a26' # Terracotta (the red walls of the medina)
+color_majorelle  = '#5a4bd6' # Majorelle blue (Jardin Majorelle, 1937)
+color_paper      = '#fbf6ec' # Paper (text on deep tiles)
+color_ink        = '#1a1410' # Ink (text on saffron)
+
+# 1. COBALT (the madrasa fountain)
+[os]
+disabled = false
+style = "bg:color_cobalt fg:color_paper bold"
+format = '[ 󱠧 ]($style)'
+
+# 2. SAFFRON (the souk, where you are)
+[directory]
+style = "bg:color_saffron fg:color_ink bold"
+format = "[ 󰲋 $path ]($style)"
+truncation_length = 3
+
+# 3. EMERALD (the branching derbs of the medina)
+[git_branch]
+symbol = " "
+style = "bg:color_emerald fg:color_paper bold"
+format = '[ $symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_emerald fg:color_paper bold"
+format = '([$all_status$ahead_behind ]($style))'
+
+# 4. TERRACOTTA (the walls and the workshops)
+[c]
+symbol = " "
+style = "bg:color_terracotta fg:color_paper bold"
+format = '[ $symbol($version) ]($style)'
+
+[rust]
+symbol = " "
+style = "bg:color_terracotta fg:color_paper bold"
+format = '[ $symbol($version) ]($style)'
+
+[golang]
+symbol = " "
+style = "bg:color_terracotta fg:color_paper bold"
+format = '[ $symbol($version) ]($style)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_terracotta fg:color_paper bold"
+format = '[ $symbol($version) ]($style)'
+
+[deno]
+symbol = " "
+style = "bg:color_terracotta fg:color_paper bold"
+format = '[ $symbol($version) ]($style)'
+
+[python]
+symbol = " "
+style = "bg:color_terracotta fg:color_paper bold"
+format = '[ $symbol($version) ]($style)'
+
+# 5. MAJORELLE (the garden at the end of the day)
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_majorelle fg:color_paper bold"
+format = '[ $time ]($style)'
+
+# 6. THE TILES (zellige at the cursor; an error leaves only the empty outlines)
+[character]
+success_symbol = "[◈](bold color_cobalt)[◆](bold color_saffron)[◈](bold color_emerald)[ ❯](bold color_saffron)"
+error_symbol = "[◇◇◇](bold color_terracotta)[ ✗](bold color_terracotta)"

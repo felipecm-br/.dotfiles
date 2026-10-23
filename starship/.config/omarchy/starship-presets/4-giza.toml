@@ -1,0 +1,134 @@
+# ==============================================================================
+#  Preset: Giza (Old Kingdom Edition)
+#  Inspired by: The Giza pyramid complex (c. 2560 BC) - Khufu, Khafre and Menkaure at dawn
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# Glyph chain: each pyramid is a lower-right triangle U+E0BA in sunlit limestone plus a
+# lower-left triangle U+E0B8 in shadow, so the faces read in three dimensions. The three
+# pyramids of Giza stand in a row with the smaller Menkaure as U+25B2; the sun disk of Ra
+# U+25CF rises over the plateau. Segments are the Nile, the sand and the treasures.
+# The modules cascade through: Nile -> Sand -> Lapis -> Pharaoh Gold -> Carnelian Dusk
+format = """
+[](fg:color_nile bg:transparent)\
+$os\
+[](fg:color_nile bg:color_sky)\
+[](fg:color_sunlit bg:color_sky)\
+[](fg:color_shadow bg:color_sky)\
+[●](fg:color_ra bg:color_sky)\
+[](fg:color_sand bg:color_sky)\
+
+$directory\
+[](fg:color_sand bg:color_sky)\
+[](fg:color_sunlit bg:color_sky)\
+[](fg:color_shadow bg:color_sky)\
+[](fg:color_sunlit bg:color_sky)\
+[](fg:color_shadow bg:color_sky)\
+[▲](fg:color_shadow bg:color_sky)\
+[](fg:color_lapis bg:color_sky)\
+
+$git_branch$git_status\
+[](fg:color_lapis bg:color_sky)\
+[●](fg:color_ra bg:color_sky)\
+[](fg:color_sunlit bg:color_sky)\
+[](fg:color_shadow bg:color_sky)\
+[](fg:color_gold bg:color_sky)\
+
+$c$rust$golang$nodejs$deno$python\
+[](fg:color_gold bg:color_sky)\
+[](fg:color_sunlit bg:color_sky)\
+[](fg:color_shadow bg:color_sky)\
+[▲](fg:color_shadow bg:color_sky)\
+[](fg:color_carnelian bg:color_sky)\
+
+$time\
+[](fg:color_carnelian bg:color_sky)\
+[](fg:color_sunlit bg:color_sky)\
+[](fg:color_shadow bg:color_sky)\
+[](fg:color_sunlit bg:color_sky)\
+[](fg:color_shadow bg:color_sky)\
+[▲](fg:color_shadow bg:color_sky)\
+[](fg:color_sky bg:transparent)\
+\n$character"""
+
+palette = 'place_giza'
+
+[palettes.place_giza]
+color_sky       = '#f6dfb0' # Desert dawn sky
+color_sunlit    = '#d9a55a' # Sunlit limestone face
+color_shadow    = '#8a5a2b' # Shadowed face
+color_ra        = '#e0461e' # Sun disk of Ra
+color_nile      = '#1f6f8b' # Nile blue
+color_sand      = '#e3c07a' # Sahara sand
+color_lapis     = '#26619c' # Lapis lazuli (Tutankhamun's mask)
+color_gold      = '#d4a017' # Pharaoh gold
+color_carnelian = '#9e2f1f' # Carnelian (the dusk over the plateau)
+color_paper     = '#fbf1dc' # Papyrus (text on dark fills)
+color_ink       = '#2a1a0c' # Ink (text on light fills)
+
+# 1. NILE (the river that made the kingdom)
+[os]
+disabled = false
+style = "bg:color_nile fg:color_paper bold"
+format = '[ 󱥒 ]($style)'
+
+# 2. SAND (the plateau, where you stand)
+[directory]
+style = "bg:color_sand fg:color_ink bold"
+format = "[ 󰲋 $path ]($style)"
+truncation_length = 3
+
+# 3. LAPIS (the branching causeways)
+[git_branch]
+symbol = " "
+style = "bg:color_lapis fg:color_paper bold"
+format = '[ $symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_lapis fg:color_paper bold"
+format = '([$all_status$ahead_behind ]($style))'
+
+# 4. PHARAOH GOLD (the tools of the builders)
+[c]
+symbol = " "
+style = "bg:color_gold fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[rust]
+symbol = " "
+style = "bg:color_gold fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[golang]
+symbol = " "
+style = "bg:color_gold fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_gold fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[deno]
+symbol = " "
+style = "bg:color_gold fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[python]
+symbol = " "
+style = "bg:color_gold fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+# 5. CARNELIAN (dusk over the necropolis)
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_carnelian fg:color_paper bold"
+format = '[ $time ]($style)'
+
+# 6. THE PYRAMID (a pyramid under the sun at the cursor; errors fall into dusk)
+[character]
+success_symbol = "[▲](bold color_sand)[●](bold color_ra)[ ❯](bold color_gold)"
+error_symbol = "[▲](bold color_carnelian)[ ✗](bold color_carnelian)"

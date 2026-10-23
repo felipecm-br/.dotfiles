@@ -1,0 +1,126 @@
+# ==============================================================================
+#  Preset: London (Mind the Gap Edition)
+#  Inspired by: London Underground - Edward Johnston's roundel (1919) and the Tube line colors
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# Glyph chain: each gap is a tiled platform wall carrying the roundel: a heavy horizontal
+# U+2501 in Tube blue through a fisheye U+25C9 in red, as on every station since 1919.
+# Segments are the line colors. The error prompt is the famous gap between train and platform.
+# The modules cascade through: Central -> Piccadilly -> Circle -> District -> Elizabeth
+format = """
+[](fg:color_roundel_red bg:transparent)\
+$os\
+[](fg:color_roundel_red bg:color_tile)\
+[━](fg:color_roundel_blue bg:color_tile)\
+[◉](fg:color_roundel_red bg:color_tile)\
+[━](fg:color_roundel_blue bg:color_tile)\
+[](fg:color_roundel_blue bg:color_tile)\
+
+$directory\
+[](fg:color_roundel_blue bg:color_tile)\
+[━](fg:color_roundel_blue bg:color_tile)\
+[◉](fg:color_roundel_red bg:color_tile)\
+[━](fg:color_roundel_blue bg:color_tile)\
+[](fg:color_circle bg:color_tile)\
+
+$git_branch$git_status\
+[](fg:color_circle bg:color_tile)\
+[━](fg:color_roundel_blue bg:color_tile)\
+[◉](fg:color_roundel_red bg:color_tile)\
+[━](fg:color_roundel_blue bg:color_tile)\
+[](fg:color_district bg:color_tile)\
+
+$c$rust$golang$nodejs$deno$python\
+[](fg:color_district bg:color_tile)\
+[━](fg:color_roundel_blue bg:color_tile)\
+[◉](fg:color_roundel_red bg:color_tile)\
+[━](fg:color_roundel_blue bg:color_tile)\
+[](fg:color_elizabeth bg:color_tile)\
+
+$time\
+[](fg:color_elizabeth bg:color_tile)\
+[━](fg:color_roundel_blue bg:color_tile)\
+[◉](fg:color_roundel_red bg:color_tile)\
+[━](fg:color_roundel_blue bg:color_tile)\
+[](fg:color_tile bg:transparent)\
+\n$character"""
+
+palette = 'place_london'
+
+[palettes.place_london]
+color_tile         = '#ffffff' # Platform tile (white glazed brick)
+color_roundel_red  = '#dc241f' # Roundel red (the ring)
+color_roundel_blue = '#0019a8' # Roundel blue (the bar)
+color_circle       = '#ffd300' # Circle line yellow
+color_district     = '#007d32' # District line green
+color_elizabeth    = '#6950a1' # Elizabeth line purple
+color_paper        = '#ffffff' # Paper (text on line colors)
+color_ink          = '#1a1a1a' # Ink (text on yellow)
+
+# 1. CENTRAL (red, straight through the middle)
+[os]
+disabled = false
+style = "bg:color_roundel_red fg:color_paper bold"
+format = '[ 󰞞 ]($style)'
+
+# 2. PICCADILLY (blue, where you are)
+[directory]
+style = "bg:color_roundel_blue fg:color_paper bold"
+format = "[ 󰲋 $path ]($style)"
+truncation_length = 3
+
+# 3. CIRCLE (yellow, going round the branches)
+[git_branch]
+symbol = " "
+style = "bg:color_circle fg:color_ink bold"
+format = '[ $symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_circle fg:color_ink bold"
+format = '([$all_status$ahead_behind ]($style))'
+
+# 4. DISTRICT (green, the toolchain branches west)
+[c]
+symbol = " "
+style = "bg:color_district fg:color_paper bold"
+format = '[ $symbol($version) ]($style)'
+
+[rust]
+symbol = " "
+style = "bg:color_district fg:color_paper bold"
+format = '[ $symbol($version) ]($style)'
+
+[golang]
+symbol = " "
+style = "bg:color_district fg:color_paper bold"
+format = '[ $symbol($version) ]($style)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_district fg:color_paper bold"
+format = '[ $symbol($version) ]($style)'
+
+[deno]
+symbol = " "
+style = "bg:color_district fg:color_paper bold"
+format = '[ $symbol($version) ]($style)'
+
+[python]
+symbol = " "
+style = "bg:color_district fg:color_paper bold"
+format = '[ $symbol($version) ]($style)'
+
+# 5. ELIZABETH (purple, the newest line keeps the time)
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_elizabeth fg:color_paper bold"
+format = '[ $time ]($style)'
+
+# 6. THE ROUNDEL (the sign at the cursor; an error opens the gap: mind it)
+[character]
+success_symbol = "[━](bold color_roundel_blue)[◉](bold color_roundel_red)[━](bold color_roundel_blue)[ ❯](bold color_circle)"
+error_symbol = "[━](bold color_circle)[  ]()[━](bold color_circle)[ ✗](bold color_roundel_red)"

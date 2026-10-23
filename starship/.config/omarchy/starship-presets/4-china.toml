@@ -1,0 +1,126 @@
+# ==============================================================================
+#  Preset: China (Great Wall Edition)
+#  Inspired by: The Great Wall at Mutianyu and the Forbidden City palette - red walls, imperial yellow, jade
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# Glyph chain: in each gap the wall climbs a misty ridge in eighth blocks (U+2581 U+2583 U+2585),
+# then runs into crenellations: alternating lower halves and full blocks (U+2584 U+2588) are the
+# merlons of the parapet. A red lantern U+25CF hangs at each watchtower.
+# The modules cascade through: Palace Red -> Jade -> Imperial Yellow -> Ink -> Cinnabar Seal
+format = """
+[](fg:color_red bg:transparent)\
+$os\
+[](fg:color_red bg:color_mist)\
+[▁▃▅](fg:color_wall bg:color_mist)\
+[▄█▄█](fg:color_wall bg:color_mist)\
+[●](fg:color_lantern bg:color_mist)\
+[](fg:color_jade bg:color_mist)\
+
+$directory\
+[](fg:color_jade bg:color_mist)\
+[▂▄](fg:color_wall bg:color_mist)\
+[▄█▄█](fg:color_wall bg:color_mist)\
+[●](fg:color_lantern bg:color_mist)\
+[](fg:color_gold bg:color_mist)\
+
+$git_branch$git_status\
+[](fg:color_gold bg:color_mist)\
+[▁▃▅](fg:color_wall bg:color_mist)\
+[▄█▄█](fg:color_wall bg:color_mist)\
+[●](fg:color_lantern bg:color_mist)\
+[](fg:color_ink bg:color_mist)\
+
+$c$rust$golang$nodejs$deno$python\
+[](fg:color_ink bg:color_mist)\
+[▃▅](fg:color_wall bg:color_mist)\
+[▄█▄█](fg:color_wall bg:color_mist)\
+[●](fg:color_lantern bg:color_mist)\
+[](fg:color_cinnabar bg:color_mist)\
+
+$time\
+[](fg:color_cinnabar bg:color_mist)\
+[█▄█▄](fg:color_wall bg:color_mist)\
+[▅▃▁](fg:color_wall bg:color_mist)\
+[](fg:color_mist bg:transparent)\
+\n$character"""
+
+palette = 'place_china'
+
+[palettes.place_china]
+color_mist     = '#e4ebe2' # Mountain mist (Mutianyu morning)
+color_wall     = '#4a4038' # Wall brick (fired grey brick)
+color_lantern  = '#d7261e' # Lantern red
+color_red      = '#a3201d' # Forbidden City red (palace walls)
+color_jade     = '#2e6b52' # Jade green
+color_gold     = '#f2b705' # Imperial yellow (glazed roof tiles)
+color_ink      = '#1d1a17' # Ink black (calligraphy)
+color_cinnabar = '#c23a22' # Cinnabar (the seal)
+color_paper    = '#fbeedb' # Xuan paper (text on dark fills)
+
+# 1. PALACE RED (the Meridian Gate)
+[os]
+disabled = false
+style = "bg:color_red fg:color_paper bold"
+format = '[  ]($style)'
+
+# 2. JADE (the garden, where you are)
+[directory]
+style = "bg:color_jade fg:color_paper bold"
+format = "[ 󰲋 $path ]($style)"
+truncation_length = 3
+
+# 3. IMPERIAL YELLOW (the roofs over the branching halls)
+[git_branch]
+symbol = " "
+style = "bg:color_gold fg:color_ink bold"
+format = '[ $symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_gold fg:color_ink bold"
+format = '([$all_status$ahead_behind ]($style))'
+
+# 4. INK (the calligraphy of the tools)
+[c]
+symbol = " "
+style = "bg:color_ink fg:color_paper bold"
+format = '[ $symbol($version) ]($style)'
+
+[rust]
+symbol = " "
+style = "bg:color_ink fg:color_paper bold"
+format = '[ $symbol($version) ]($style)'
+
+[golang]
+symbol = " "
+style = "bg:color_ink fg:color_paper bold"
+format = '[ $symbol($version) ]($style)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_ink fg:color_paper bold"
+format = '[ $symbol($version) ]($style)'
+
+[deno]
+symbol = " "
+style = "bg:color_ink fg:color_paper bold"
+format = '[ $symbol($version) ]($style)'
+
+[python]
+symbol = " "
+style = "bg:color_ink fg:color_paper bold"
+format = '[ $symbol($version) ]($style)'
+
+# 5. CINNABAR SEAL (the stamp of the hour)
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_cinnabar fg:color_paper bold"
+format = '[ $time ]($style)'
+
+# 6. THE PARAPET (battlements at the cursor; an error is a breach in the wall)
+[character]
+success_symbol = "[▄█▄█](bold color_gold)[●](bold color_lantern)[ ❯](bold color_gold)"
+error_symbol = "[▄█ ▄](bold color_lantern)[ ✗](bold color_lantern)"

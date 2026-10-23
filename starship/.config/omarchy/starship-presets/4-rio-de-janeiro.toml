@@ -1,0 +1,126 @@
+# ==============================================================================
+#  Preset: Rio de Janeiro (Cidade Maravilhosa Edition)
+#  Inspired by: Rio de Janeiro - Cristo Redentor on Corcovado, the Sugarloaf bondinho and the Arcos da Lapa
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# Glyph chain: the gaps are the skyline of Rio drawn on the carioca sky. Corcovado rises in
+# eighth blocks with the Redeemer as a white cross U+253C at the summit; the bondinho cable
+# U+254C runs from Urca to the Sugarloaf dome; the Lapa arches are rounded corners U+256D U+256E;
+# segments wear the flag: verde, amarelo, azul.
+# The modules cascade through: Bandeira Verde -> Amarelo -> Guanabara -> Azul -> Lapa Brick
+format = """
+[](fg:color_verde bg:transparent)\
+$os\
+[](fg:color_verde bg:color_sky)\
+[▂▄▆](fg:color_mata bg:color_sky)\
+[┼](fg:color_christ bg:color_mata)\
+[▆▄▂](fg:color_mata bg:color_sky)\
+[](fg:color_amarelo bg:color_sky)\
+
+$directory\
+[](fg:color_amarelo bg:color_sky)\
+[▃▅▃](fg:color_granite bg:color_sky)\
+[╌╌](fg:color_cable bg:color_sky)\
+[▅▇█▇▅](fg:color_granite bg:color_sky)\
+[](fg:color_guanabara bg:color_sky)\
+
+$git_branch$git_status\
+[](fg:color_guanabara bg:color_sky)\
+[╭╮╭╮╭╮](fg:color_tijolo bg:color_sky)\
+[](fg:color_azul bg:color_sky)\
+
+$c$rust$golang$nodejs$deno$python\
+[](fg:color_azul bg:color_sky)\
+[▂▄▆](fg:color_mata bg:color_sky)\
+[┼](fg:color_christ bg:color_mata)\
+[▆▄▂](fg:color_mata bg:color_sky)\
+[](fg:color_tijolo bg:color_sky)\
+
+$time\
+[](fg:color_tijolo bg:color_sky)\
+[▅▇█▇▅](fg:color_granite bg:color_sky)\
+[](fg:color_sky bg:transparent)\
+\n$character"""
+
+palette = 'place_rio_de_janeiro'
+
+[palettes.place_rio_de_janeiro]
+color_sky       = '#5fb4e6' # Carioca sky
+color_mata      = '#1f6b3a' # Mata Atlantica (the forest on the hills)
+color_granite   = '#3d4a52' # Sugarloaf granite
+color_christ    = '#fdfbf5' # Soapstone white (Cristo Redentor)
+color_cable     = '#2a2a2a' # Bondinho cable
+color_guanabara = '#0f5f8f' # Guanabara Bay blue
+color_verde     = '#009c3b' # Bandeira green
+color_amarelo   = '#ffdf00' # Bandeira yellow
+color_azul      = '#002776' # Bandeira blue
+color_tijolo    = '#a8432a' # Lapa night (brick red of the old town)
+color_ink       = '#0d1a12' # Ink (text on light fills)
+
+# 1. VERDE (the forests of the flag)
+[os]
+disabled = false
+style = "bg:color_verde fg:color_ink bold"
+format = '[  ]($style)'
+
+# 2. AMARELO (the gold, where you are)
+[directory]
+style = "bg:color_amarelo fg:color_ink bold"
+format = "[ 󰲋 $path ]($style)"
+truncation_length = 3
+
+# 3. GUANABARA (the bay the branches open onto)
+[git_branch]
+symbol = " "
+style = "bg:color_guanabara fg:color_christ bold"
+format = '[ $symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_guanabara fg:color_christ bold"
+format = '([$all_status$ahead_behind ]($style))'
+
+# 4. AZUL (the starry sphere of the flag)
+[c]
+symbol = " "
+style = "bg:color_azul fg:color_christ bold"
+format = '[ $symbol($version) ]($style)'
+
+[rust]
+symbol = " "
+style = "bg:color_azul fg:color_christ bold"
+format = '[ $symbol($version) ]($style)'
+
+[golang]
+symbol = " "
+style = "bg:color_azul fg:color_christ bold"
+format = '[ $symbol($version) ]($style)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_azul fg:color_christ bold"
+format = '[ $symbol($version) ]($style)'
+
+[deno]
+symbol = " "
+style = "bg:color_azul fg:color_christ bold"
+format = '[ $symbol($version) ]($style)'
+
+[python]
+symbol = " "
+style = "bg:color_azul fg:color_christ bold"
+format = '[ $symbol($version) ]($style)'
+
+# 5. LAPA (the night under the arches)
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_tijolo fg:color_christ bold"
+format = '[ $time ]($style)'
+
+# 6. THE REDEEMER (Corcovado at the cursor; errors light the statue red)
+[character]
+success_symbol = "[▆](color_mata)[┼](bold color_christ)[▆](color_mata)[ ❯](bold color_amarelo)"
+error_symbol = "[▆](color_mata)[┼](bold color_tijolo)[▆](color_mata)[ ✗](bold color_tijolo)"

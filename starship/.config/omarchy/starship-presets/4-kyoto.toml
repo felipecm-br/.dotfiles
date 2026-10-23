@@ -1,0 +1,137 @@
+# ==============================================================================
+#  Preset: Kyoto (Senbon Torii Edition)
+#  Inspired by: Fushimi Inari Taisha, Kyoto - the thousand vermilion torii climbing Mount Inari
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# Glyph chain: one torii is two quadrant glyphs: U+259B (kasagi beam + left pillar) and U+259C
+# (beam + right pillar). Five gates in a row form the Senbon Torii tunnel, and each one is a
+# darker vermilion than the last, so the tunnel recedes into the cedar shade.
+# The modules cascade through: Vermilion -> Black Lacquer -> Moss -> Stone Lantern -> Kitsune Gold
+format = """
+[](fg:color_shu bg:transparent)\
+$os\
+[](fg:color_shu bg:color_forest)\
+[▛▜](fg:color_gate1 bg:color_forest)\
+[▛▜](fg:color_gate2 bg:color_forest)\
+[▛▜](fg:color_gate3 bg:color_forest)\
+[▛▜](fg:color_gate4 bg:color_forest)\
+[▛▜](fg:color_gate5 bg:color_forest)\
+[](fg:color_lacquer bg:color_forest)\
+
+$directory\
+[](fg:color_lacquer bg:color_forest)\
+[▛▜](fg:color_gate1 bg:color_forest)\
+[▛▜](fg:color_gate2 bg:color_forest)\
+[▛▜](fg:color_gate3 bg:color_forest)\
+[▛▜](fg:color_gate4 bg:color_forest)\
+[](fg:color_moss bg:color_forest)\
+
+$git_branch$git_status\
+[](fg:color_moss bg:color_forest)\
+[▛▜](fg:color_gate1 bg:color_forest)\
+[▛▜](fg:color_gate2 bg:color_forest)\
+[▛▜](fg:color_gate3 bg:color_forest)\
+[▛▜](fg:color_gate4 bg:color_forest)\
+[▛▜](fg:color_gate5 bg:color_forest)\
+[](fg:color_stone bg:color_forest)\
+
+$c$rust$golang$nodejs$deno$python\
+[](fg:color_stone bg:color_forest)\
+[▛▜](fg:color_gate1 bg:color_forest)\
+[▛▜](fg:color_gate2 bg:color_forest)\
+[▛▜](fg:color_gate3 bg:color_forest)\
+[▛▜](fg:color_gate4 bg:color_forest)\
+[](fg:color_gold bg:color_forest)\
+
+$time\
+[](fg:color_gold bg:color_forest)\
+[▛▜](fg:color_gate1 bg:color_forest)\
+[▛▜](fg:color_gate3 bg:color_forest)\
+[▛▜](fg:color_gate5 bg:color_forest)\
+[](fg:color_forest bg:transparent)\
+\n$character"""
+
+palette = 'place_kyoto'
+
+[palettes.place_kyoto]
+color_forest  = '#0a120d' # Cedar shade on Mount Inari
+color_shu     = '#ea4a24' # Shu-iro vermilion (cinnabar lacquer of the torii)
+color_lacquer = '#3a2a22' # Black lacquer (the torii bases)
+color_moss    = '#3a5a32' # Temple moss
+color_stone   = '#9a958a' # Stone lantern (ishi-doro)
+color_gold    = '#e8b04a' # Kitsune gold (the fox messengers)
+color_paper   = '#fbf4e6' # Washi (text on dark fills)
+color_ink     = '#1a1310' # Sumi (text on light fills)
+color_gate1   = '#e2401c' # Torii 1 receding into the shade (vermilion darkening with depth)
+color_gate2   = '#c2381a' # Torii 2 receding into the shade (vermilion darkening with depth)
+color_gate3   = '#9e2f17' # Torii 3 receding into the shade (vermilion darkening with depth)
+color_gate4   = '#7a2614' # Torii 4 receding into the shade (vermilion darkening with depth)
+color_gate5   = '#6a2414' # Torii 5 receding into the shade (vermilion darkening with depth)
+
+# 1. VERMILION (the first gate at the foot of the mountain)
+[os]
+disabled = false
+style = "bg:color_shu fg:color_ink bold"
+format = '[  ]($style)'
+
+# 2. BLACK LACQUER (the pillar bases, where you stand)
+[directory]
+style = "bg:color_lacquer fg:color_paper bold"
+format = "[ 󰲋 $path ]($style)"
+truncation_length = 3
+
+# 3. MOSS (the paths branching up the mountain)
+[git_branch]
+symbol = " "
+style = "bg:color_moss fg:color_paper bold"
+format = '[ $symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_moss fg:color_paper bold"
+format = '([$all_status$ahead_behind ]($style))'
+
+# 4. STONE LANTERN (the light along the path)
+[c]
+symbol = " "
+style = "bg:color_stone fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[rust]
+symbol = " "
+style = "bg:color_stone fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[golang]
+symbol = " "
+style = "bg:color_stone fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_stone fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[deno]
+symbol = " "
+style = "bg:color_stone fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[python]
+symbol = " "
+style = "bg:color_stone fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+# 5. KITSUNE GOLD (the fox who keeps the time)
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_gold fg:color_ink bold"
+format = '[ $time ]($style)'
+
+# 6. THE GATES (two torii at the cursor; errors turn them to stone)
+[character]
+success_symbol = "[▛▜](bold color_gate1)[▛▜](bold color_gate3)[ ❯](bold color_gold)"
+error_symbol = "[▛▜](bold color_stone)[▛▜](color_stone)[ ✗](bold color_shu)"

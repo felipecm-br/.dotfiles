@@ -1,0 +1,123 @@
+# ==============================================================================
+#  Preset: Paris (Ville Lumiere Edition)
+#  Inspired by: Paris - Haussmann zinc roofs, the Seine, and the Eiffel Tower sparkling on the hour
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# Glyph chain: the gaps are the night city. Mansard roofs are quadrants U+259F U+2599 in zinc;
+# the Seine is a Braille trace rippling under the lamps; the Eiffel Tower is plotted in Braille
+# (wide base, a spire at the center) in sodium gold, with the hourly sparkle around it.
+# Segments run through the tricolore and the slate of the rooftops.
+# The modules cascade through: Bleu -> Blanc -> Rouge -> Ardoise -> Eiffel Gold
+format = """
+[](fg:color_bleu bg:transparent)\
+$os\
+[](fg:color_bleu bg:color_night)\
+[▟▙▟▙▟▙](fg:color_zinc bg:color_night)\
+[](fg:color_blanc bg:color_night)\
+
+$directory\
+[](fg:color_blanc bg:color_night)\
+[⠉⠙⣆⣠](fg:color_seine bg:color_night)\
+[](fg:color_rouge bg:color_night)\
+
+$git_branch$git_status\
+[](fg:color_rouge bg:color_night)\
+[⠁](fg:color_sparkle bg:color_night)\
+[⣀⣠⣿⣄⣀](fg:color_eiffel bg:color_night)\
+[⠂](fg:color_sparkle bg:color_night)\
+[](fg:color_ardoise bg:color_night)\
+
+$c$rust$golang$nodejs$deno$python\
+[](fg:color_ardoise bg:color_night)\
+[▟▙▟▙](fg:color_zinc bg:color_night)\
+[](fg:color_eiffel bg:color_night)\
+
+$time\
+[](fg:color_eiffel bg:color_night)\
+[⠂](fg:color_sparkle bg:color_night)\
+[⣀⣠⣿⣄⣀](fg:color_eiffel bg:color_night)\
+[⠁](fg:color_sparkle bg:color_night)\
+[](fg:color_night bg:transparent)\
+\n$character"""
+
+palette = 'place_paris'
+
+[palettes.place_paris]
+color_night   = '#0c1022' # Paris night
+color_zinc    = '#8a9aab' # Zinc mansard roofs (Haussmann)
+color_seine   = '#6f9fd8' # The Seine under the street lamps
+color_eiffel  = '#ffb547' # Eiffel Tower gold (the sodium lighting)
+color_sparkle = '#fff6d8' # Scintillement (the hourly sparkle)
+color_bleu    = '#002395' # Bleu (tricolore)
+color_blanc   = '#f4f1ea' # Blanc (tricolore)
+color_rouge   = '#f03a47' # Rouge (tricolore)
+color_ardoise = '#4f5d6b' # Ardoise (slate grey of the rooftops)
+color_ink     = '#0c1022' # Ink (text on light fills)
+
+# 1. BLEU (the first band of the tricolore)
+[os]
+disabled = false
+style = "bg:color_bleu fg:color_blanc bold"
+format = '[ 󱕫 ]($style)'
+
+# 2. BLANC (the boulevard, where you walk)
+[directory]
+style = "bg:color_blanc fg:color_ink bold"
+format = "[ 󰲋 $path ]($style)"
+truncation_length = 3
+
+# 3. ROUGE (the branching arrondissements)
+[git_branch]
+symbol = " "
+style = "bg:color_rouge fg:color_ink bold"
+format = '[ $symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_rouge fg:color_ink bold"
+format = '([$all_status$ahead_behind ]($style))'
+
+# 4. ARDOISE (the slate rooftops and their ateliers)
+[c]
+symbol = " "
+style = "bg:color_ardoise fg:color_blanc bold"
+format = '[ $symbol($version) ]($style)'
+
+[rust]
+symbol = " "
+style = "bg:color_ardoise fg:color_blanc bold"
+format = '[ $symbol($version) ]($style)'
+
+[golang]
+symbol = " "
+style = "bg:color_ardoise fg:color_blanc bold"
+format = '[ $symbol($version) ]($style)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_ardoise fg:color_blanc bold"
+format = '[ $symbol($version) ]($style)'
+
+[deno]
+symbol = " "
+style = "bg:color_ardoise fg:color_blanc bold"
+format = '[ $symbol($version) ]($style)'
+
+[python]
+symbol = " "
+style = "bg:color_ardoise fg:color_blanc bold"
+format = '[ $symbol($version) ]($style)'
+
+# 5. EIFFEL GOLD (the sparkle on the hour)
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_eiffel fg:color_ink bold"
+format = '[ $time ]($style)'
+
+# 6. LA TOUR (the tower at the cursor; errors turn it rouge)
+[character]
+success_symbol = "[⠁](color_sparkle)[⣠⣿⣄](bold color_eiffel)[⠂](color_sparkle)[ ❯](bold color_blanc)"
+error_symbol = "[⣠⣿⣄](bold color_rouge)[ ✗](bold color_rouge)"
