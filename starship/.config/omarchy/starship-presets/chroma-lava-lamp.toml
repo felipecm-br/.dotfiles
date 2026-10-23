@@ -1,0 +1,117 @@
+# ==============================================================================
+#  Preset: Chroma Lava Lamp (Rising Wax Edition)
+#  Inspired by: Edward Craven Walker's Astro lamp (1963) - heated wax blobs rising and sinking through oil
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+# glyph-stacking: gradient
+# Wax, not seams: in every gap a round blob of the next layer's wax (pill = U+E0B6 + U+E0B4) has
+# risen into the current layer, the next layer bulges in with a round cap, and a blob of the
+# current layer's wax has risen into it. The two blobs are OKLab mixes (62% and 30% of the way),
+# so wax is exchanged in both directions. The hottest blob detaches and drifts off the end.
+# Regenerate colors with .agents/skills/starship-glyph-stacking/scripts/gradient.py.
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+format = """
+[](fg:color_s0)\
+$os\
+[](fg:color_up0 bg:color_s0)\
+[](fg:color_s1 bg:color_s0)\
+[](fg:color_dn0 bg:color_s1)\
+$directory\
+[](fg:color_up1 bg:color_s1)\
+[](fg:color_s2 bg:color_s1)\
+[](fg:color_dn1 bg:color_s2)\
+$git_branch$git_status\
+[](fg:color_up2 bg:color_s2)\
+[](fg:color_s3 bg:color_s2)\
+[](fg:color_dn2 bg:color_s3)\
+$c$rust$golang$nodejs$deno$python\
+[](fg:color_up3 bg:color_s3)\
+[](fg:color_s4 bg:color_s3)\
+[](fg:color_dn3 bg:color_s4)\
+$time\
+[](fg:color_s4 bg:transparent)\
+ \
+[](fg:color_drift)\
+\n$character"""
+
+palette = 'chroma_lava_lamp'
+
+[palettes.chroma_lava_lamp]
+color_s0    = '#2d0a4e' # t=0.00 wax layer
+color_s1    = '#8a1c7c' # t=0.25 wax layer
+color_s2    = '#e4405f' # t=0.50 wax layer
+color_s3    = '#ff8a3d' # t=0.75 wax layer
+color_s4    = '#ffd166' # t=1.00 wax layer
+color_up0   = '#65186a' # blob of layer 1 wax rising into layer 0
+color_dn0   = '#47125c' # blob of layer 0 wax rising into layer 1
+color_up1   = '#c0366d' # blob of layer 2 wax rising into layer 1
+color_dn1   = '#a42a76' # blob of layer 1 wax rising into layer 2
+color_up2   = '#f5714f' # blob of layer 3 wax rising into layer 2
+color_dn2   = '#ed5958' # blob of layer 2 wax rising into layer 3
+color_up3   = '#ffb757' # blob of layer 4 wax rising into layer 3
+color_dn3   = '#ffa04a' # blob of layer 3 wax rising into layer 4
+color_drift = '#ffdd92' # the hottest blob, detached and drifting off the lamp
+color_error = '#33d6ff' # Error: the one cold hue, paired with the ✗ shape
+color_paper = '#fbfbff' # Paper (text on dark fills)
+color_ink   = '#15131a' # Ink (text on light fills)
+
+[os]
+disabled = false
+style = "bg:color_s0 fg:color_paper bold"
+format = '[ 󰈸 ]($style)'
+
+[directory]
+style = "bg:color_s1 fg:color_paper bold"
+format = "[ 󰉋 $path ]($style)"
+truncation_length = 3
+
+[git_branch]
+symbol = " "
+style = "bg:color_s2 fg:color_ink bold"
+format = '[ $symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_s2 fg:color_ink bold"
+format = '([$all_status$ahead_behind ]($style))'
+
+[c]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[rust]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[golang]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[deno]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[python]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_s4 fg:color_ink bold"
+format = '[ $time ]($style)'
+
+[character]
+success_symbol = "[](bold color_s3)[❯](bold color_s4)"
+error_symbol = "[✗❯](bold color_error)"

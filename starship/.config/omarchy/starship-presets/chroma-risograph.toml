@@ -1,0 +1,105 @@
+# ==============================================================================
+#  Preset: Chroma Risograph (Overprint Edition)
+#  Inspired by: Riso Kagaku stencil duplicators (1980s zines) - fluorescent soy inks laid one drum at a time
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+# glyph-stacking: gradient
+# Subtractive, not interpolated: the gradient has three real inks (Medium Blue, Fluorescent Pink,
+# Yellow) and the in-between segments are their overprints, computed as a multiply blend the way
+# translucent ink stacks on paper. Every seam is a misregistered cut (upper-left wedges U+E0BC):
+# odd seams show a sliver of bare paper, even seams a darker double hit where the drums overlap.
+# Regenerate colors with .agents/skills/starship-glyph-stacking/scripts/gradient.py.
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+format = """
+[](fg:color_s0)\
+$os\
+[](fg:color_s0 bg:color_riso_paper)\
+[](fg:color_riso_paper bg:color_s1)\
+$directory\
+[](fg:color_s1 bg:color_double1)\
+[](fg:color_double1 bg:color_s2)\
+$git_branch$git_status\
+[](fg:color_s2 bg:color_riso_paper)\
+[](fg:color_riso_paper bg:color_s3)\
+$c$rust$golang$nodejs$deno$python\
+[](fg:color_s3 bg:color_double3)\
+[](fg:color_double3 bg:color_s4)\
+$time\
+[](fg:color_s4 bg:transparent)\
+\n$character"""
+
+palette = 'chroma_risograph'
+
+[palettes.chroma_risograph]
+color_s0         = '#0078bf' # Medium Blue ink
+color_s1         = '#002284' # Blue x Fluorescent Pink overprint (multiply)
+color_s2         = '#ff48b0' # Fluorescent Pink ink
+color_s3         = '#ff4200' # Fluorescent Pink x Yellow overprint (multiply)
+color_s4         = '#ffe800' # Yellow ink
+color_riso_paper = '#f2ece0' # Uncoated riso paper (shows through misregistration gaps)
+color_double1    = '#000a5b' # double hit where the 1/2 drums overlap (multiply)
+color_double3    = '#ff3c00' # double hit where the 3/4 drums overlap (multiply)
+color_error      = '#ff3b30' # Error: Bright Red ink, paired with the ✗ shape
+color_paper      = '#fbfbff' # Paper (text on dark fills)
+color_ink        = '#15131a' # Ink (text on light fills)
+
+[os]
+disabled = false
+style = "bg:color_s0 fg:color_paper bold"
+format = '[ 󰐪 ]($style)'
+
+[directory]
+style = "bg:color_s1 fg:color_paper bold"
+format = "[ 󰉋 $path ]($style)"
+truncation_length = 3
+
+[git_branch]
+symbol = " "
+style = "bg:color_s2 fg:color_ink bold"
+format = '[ $symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_s2 fg:color_ink bold"
+format = '([$all_status$ahead_behind ]($style))'
+
+[c]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[rust]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[golang]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[deno]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[python]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_s4 fg:color_ink bold"
+format = '[ $time ]($style)'
+
+[character]
+success_symbol = "[❯](bold color_s0)[❯](bold color_s2)[❯](bold color_s4)"
+error_symbol = "[✗❯](bold color_error)"

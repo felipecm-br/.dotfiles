@@ -1,0 +1,126 @@
+# ==============================================================================
+#  Preset: Chroma Long Shadow (Flat Design Edition)
+#  Inspired by: The 2013 flat-design long-shadow trend - icons casting 45-degree shadows across their tiles
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+# glyph-stacking: gradient
+# Each tile casts a long shadow onto the next one instead of a divider glyph: the shadow starts
+# almost full height at the tile's edge and falls away in eighth blocks (U+2587 U+2586 U+2584
+# U+2582), each step a lighter OKLab mix of the next tile's shade, so it fades as it travels.
+# The tiles themselves step through a teal-blue-violet-rose-amber OKLab gradient.
+# Regenerate colors with .agents/skills/starship-glyph-stacking/scripts/gradient.py.
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+format = """
+[](fg:color_s0)\
+$os\
+[▇](fg:color_sh00 bg:color_s1)\
+[▆](fg:color_sh01 bg:color_s1)\
+[▄](fg:color_sh02 bg:color_s1)\
+[▂](fg:color_sh03 bg:color_s1)\
+$directory\
+[▇](fg:color_sh10 bg:color_s2)\
+[▆](fg:color_sh11 bg:color_s2)\
+[▄](fg:color_sh12 bg:color_s2)\
+[▂](fg:color_sh13 bg:color_s2)\
+$git_branch$git_status\
+[▇](fg:color_sh20 bg:color_s3)\
+[▆](fg:color_sh21 bg:color_s3)\
+[▄](fg:color_sh22 bg:color_s3)\
+[▂](fg:color_sh23 bg:color_s3)\
+$c$rust$golang$nodejs$deno$python\
+[▇](fg:color_sh30 bg:color_s4)\
+[▆](fg:color_sh31 bg:color_s4)\
+[▄](fg:color_sh32 bg:color_s4)\
+[▂](fg:color_sh33 bg:color_s4)\
+$time\
+[](fg:color_s4 bg:transparent)\
+\n$character"""
+
+palette = 'chroma_long_shadow'
+
+[palettes.chroma_long_shadow]
+color_s0    = '#00c2a8' # t=0.00 flat tile
+color_s1    = '#2f80ed' # t=0.25 flat tile
+color_s2    = '#7b4fd6' # t=0.50 flat tile
+color_s3    = '#e0457b' # t=0.75 flat tile
+color_s4    = '#ffb238' # t=1.00 flat tile
+color_sh00  = '#0041a9' # long shadow of tile 0 on tile 1, step 1/4 (fading)
+color_sh01  = '#074db6' # long shadow of tile 0 on tile 1, step 2/4 (fading)
+color_sh02  = '#1159c2' # long shadow of tile 0 on tile 1, step 3/4 (fading)
+color_sh03  = '#1a64cf' # long shadow of tile 0 on tile 1, step 4/4 (fading)
+color_sh10  = '#460093' # long shadow of tile 1 on tile 2, step 1/4 (fading)
+color_sh11  = '#4f169f' # long shadow of tile 1 on tile 2, step 2/4 (fading)
+color_sh12  = '#5926ac' # long shadow of tile 1 on tile 2, step 3/4 (fading)
+color_sh13  = '#6333b8' # long shadow of tile 1 on tile 2, step 4/4 (fading)
+color_sh20  = '#990043' # long shadow of tile 2 on tile 3, step 1/4 (fading)
+color_sh21  = '#a6134d' # long shadow of tile 2 on tile 3, step 2/4 (fading)
+color_sh22  = '#b32157' # long shadow of tile 2 on tile 3, step 3/4 (fading)
+color_sh23  = '#c02c62' # long shadow of tile 2 on tile 3, step 4/4 (fading)
+color_sh30  = '#bc7300' # long shadow of tile 3 on tile 4, step 1/4 (fading)
+color_sh31  = '#c87f0f' # long shadow of tile 3 on tile 4, step 2/4 (fading)
+color_sh32  = '#d58a1a' # long shadow of tile 3 on tile 4, step 3/4 (fading)
+color_sh33  = '#e19624' # long shadow of tile 3 on tile 4, step 4/4 (fading)
+color_error = '#ff4757' # Error: paired with the ✗ shape
+color_paper = '#fbfbff' # Paper (text on dark fills)
+color_ink   = '#15131a' # Ink (text on light fills)
+
+[os]
+disabled = false
+style = "bg:color_s0 fg:color_ink bold"
+format = '[ 󰆧 ]($style)'
+
+[directory]
+style = "bg:color_s1 fg:color_ink bold"
+format = "[ 󰉋 $path ]($style)"
+truncation_length = 3
+
+[git_branch]
+symbol = " "
+style = "bg:color_s2 fg:color_paper bold"
+format = '[ $symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_s2 fg:color_paper bold"
+format = '([$all_status$ahead_behind ]($style))'
+
+[c]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[rust]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[golang]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[deno]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[python]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_s4 fg:color_ink bold"
+format = '[ $time ]($style)'
+
+[character]
+success_symbol = "[❯](bold color_s0)[❯](bold color_s3)[❯](bold color_s4)"
+error_symbol = "[✗❯](bold color_error)"

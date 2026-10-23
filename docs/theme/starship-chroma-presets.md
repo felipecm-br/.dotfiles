@@ -64,6 +64,11 @@ These go beyond notMyShell's stops, and each one introduces a different gradient
 | `chroma-opal` | **Play-of-color**: a milky pale body gradient with a saturated fleck in every cell, colors rotating from gap to gap | quadrants `▗ ▘ ▝ ▖` |
 | `chroma-bokeh` | Dusk gradient with **out-of-focus light discs** of three sizes over each step; a few orbs drift off onto the terminal | `● ∙ •` |
 | `chroma-conic` | **Closed loop**: one full turn of the OKLCH hue wheel, so the last segment matches the first | pearls `U+E0B4` |
+| `chroma-lava-lamp` | **Two-way exchange**: a blob of the next layer's wax (an OKLab mix 62% of the way) has risen into the current segment and a blob of the current wax (30%) into the next; the hottest blob detaches and drifts off the end | pills `U+E0B6 U+E0B4`, round cap |
+| `chroma-risograph` | **Subtractive, not interpolated**: three riso inks, with the in-between segments computed as their multiply overprints; seams are misregistered, alternating a sliver of bare paper and a darker double hit | upper-left wedges `U+E0BC` x2 |
+| `chroma-mobius` | **Two-faced ribbon**: a warm front gradient and a cool back gradient; every seam shades, pinches through the terminal and reopens on the other face | `U+E0BC`, bowtie `U+E0B0 U+E0B2`, `U+E0BE` |
+| `chroma-long-shadow` | **Flat-design long shadow** instead of a divider: each tile casts a shadow that falls away and fades (OKLab steps from the next tile's shade) | eighths `▇ ▆ ▄ ▂` |
+| `chroma-kelvin` | **Physical colors only**: every cell is a blackbody color (Tanner Helland's fit), 1300 K candle to 12000 K sky, evenly spaced in mireds | full-block swatches `█` x3 |
 
 The files carry the `# glyph-stacking: gradient` marker, which tells the skill's validator not to
 flag the deliberately small contrast between neighboring gradient steps. Text contrast is still

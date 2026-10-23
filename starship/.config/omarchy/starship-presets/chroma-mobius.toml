@@ -1,0 +1,115 @@
+# ==============================================================================
+#  Preset: Chroma Mobius (Twisted Ribbon Edition)
+#  Inspired by: August Ferdinand Mobius (1858) - the one-sided strip, drawn as a two-faced ribbon
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+# glyph-stacking: gradient
+# A ribbon with a warm sunlit front and a cool shadowed back, each face carrying its own OKLab
+# gradient. At every seam the ribbon twists: the face shades as it turns away (upper-left wedge
+# U+E0BC into a darker tone), pinches to a point through the terminal (U+E0B0 U+E0B2 bowtie) and
+# reopens mirrored (upper-right wedge U+E0BE) showing the other face. Segments alternate faces.
+# Regenerate colors with .agents/skills/starship-glyph-stacking/scripts/gradient.py.
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+format = """
+[](fg:color_s0)\
+$os\
+[](fg:color_s0 bg:color_turn0)\
+[](fg:color_turn0 bg:transparent)\
+[](fg:color_turn1 bg:transparent)\
+[](fg:color_s1 bg:color_turn1)\
+$directory\
+[](fg:color_s1 bg:color_turn1)\
+[](fg:color_turn1 bg:transparent)\
+[](fg:color_turn2 bg:transparent)\
+[](fg:color_s2 bg:color_turn2)\
+$git_branch$git_status\
+[](fg:color_s2 bg:color_turn2)\
+[](fg:color_turn2 bg:transparent)\
+[](fg:color_turn3 bg:transparent)\
+[](fg:color_s3 bg:color_turn3)\
+$c$rust$golang$nodejs$deno$python\
+[](fg:color_s3 bg:color_turn3)\
+[](fg:color_turn3 bg:transparent)\
+[](fg:color_turn4 bg:transparent)\
+[](fg:color_s4 bg:color_turn4)\
+$time\
+[](fg:color_s4 bg:transparent)\
+\n$character"""
+
+palette = 'chroma_mobius'
+
+[palettes.chroma_mobius]
+color_s0    = '#ffb347' # front (sunlit) face at t=0.00
+color_s1    = '#2f338d' # back (shadow) face at t=0.25
+color_s2    = '#ff6f61' # front (sunlit) face at t=0.50
+color_s3    = '#4c2b8b' # back (shadow) face at t=0.75
+color_s4    = '#ff3d7f' # front (sunlit) face at t=1.00
+color_turn0 = '#c98000' # face 0 turning away from the light (OKLab L -0.16)
+color_turn1 = '#11005b' # face 1 turning away from the light (OKLab L -0.16)
+color_turn2 = '#c63a31' # face 2 turning away from the light (OKLab L -0.16)
+color_turn3 = '#260059' # face 3 turning away from the light (OKLab L -0.16)
+color_turn4 = '#c40051' # face 4 turning away from the light (OKLab L -0.16)
+color_error = '#ff2d55' # Error: torn ribbon, paired with the ✗ shape
+color_paper = '#fbfbff' # Paper (text on dark fills)
+color_ink   = '#15131a' # Ink (text on light fills)
+
+[os]
+disabled = false
+style = "bg:color_s0 fg:color_ink bold"
+format = '[ 󰑓 ]($style)'
+
+[directory]
+style = "bg:color_s1 fg:color_paper bold"
+format = "[ 󰉋 $path ]($style)"
+truncation_length = 3
+
+[git_branch]
+symbol = " "
+style = "bg:color_s2 fg:color_ink bold"
+format = '[ $symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_s2 fg:color_ink bold"
+format = '([$all_status$ahead_behind ]($style))'
+
+[c]
+symbol = " "
+style = "bg:color_s3 fg:color_paper bold"
+format = '[ $symbol($version) ]($style)'
+
+[rust]
+symbol = " "
+style = "bg:color_s3 fg:color_paper bold"
+format = '[ $symbol($version) ]($style)'
+
+[golang]
+symbol = " "
+style = "bg:color_s3 fg:color_paper bold"
+format = '[ $symbol($version) ]($style)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_s3 fg:color_paper bold"
+format = '[ $symbol($version) ]($style)'
+
+[deno]
+symbol = " "
+style = "bg:color_s3 fg:color_paper bold"
+format = '[ $symbol($version) ]($style)'
+
+[python]
+symbol = " "
+style = "bg:color_s3 fg:color_paper bold"
+format = '[ $symbol($version) ]($style)'
+
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_s4 fg:color_ink bold"
+format = '[ $time ]($style)'
+
+[character]
+success_symbol = "[](bold color_s0)[❯](bold color_s4)"
+error_symbol = "[✗❯](bold color_error)"

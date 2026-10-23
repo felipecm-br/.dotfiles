@@ -1,0 +1,117 @@
+# ==============================================================================
+#  Preset: Chroma Kelvin (Blackbody Edition)
+#  Inspired by: Max Planck (1900) - blackbody radiation; colors from Tanner Helland's fit to Mitchell Charity's table
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+# glyph-stacking: gradient
+# No interpolation at all: every cell is the real color of a blackbody at one temperature, from a
+# 1300 K candle flame through tungsten, halogen and daylight to a 12000 K clear northern sky.
+# Temperatures are evenly spaced in mireds (1e6 / K), the scale lighting designers use because
+# equal mired steps look equally different. Each gap is three full-block swatches (U+2588).
+# Regenerate colors with .agents/skills/starship-glyph-stacking/scripts/gradient.py.
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+format = """
+[](fg:color_s0)\
+$os\
+[█](fg:color_k01 bg:color_k01)\
+[█](fg:color_k02 bg:color_k02)\
+[█](fg:color_k03 bg:color_k03)\
+$directory\
+[█](fg:color_k11 bg:color_k11)\
+[█](fg:color_k12 bg:color_k12)\
+[█](fg:color_k13 bg:color_k13)\
+$git_branch$git_status\
+[█](fg:color_k21 bg:color_k21)\
+[█](fg:color_k22 bg:color_k22)\
+[█](fg:color_k23 bg:color_k23)\
+$c$rust$golang$nodejs$deno$python\
+[█](fg:color_k31 bg:color_k31)\
+[█](fg:color_k32 bg:color_k32)\
+[█](fg:color_k33 bg:color_k33)\
+$time\
+[](fg:color_s4 bg:transparent)\
+\n$character"""
+
+palette = 'chroma_kelvin'
+
+[palettes.chroma_kelvin]
+color_s0    = '#ff5e00' # 1300 K blackbody
+color_s1    = '#ff7600' # 1650 K blackbody
+color_s2    = '#ff9937' # 2350 K blackbody
+color_s3    = '#ffcba1' # 3900 K blackbody
+color_s4    = '#bfd3ff' # 12000 K blackbody
+color_k01   = '#ff6500' # 1400 K blackbody
+color_k02   = '#ff6900' # 1450 K blackbody
+color_k03   = '#ff7000' # 1550 K blackbody
+color_k11   = '#ff7e00' # 1800 K blackbody
+color_k12   = '#ff8607' # 1950 K blackbody
+color_k13   = '#ff9021' # 2150 K blackbody
+color_k21   = '#ffa34f' # 2600 K blackbody
+color_k22   = '#ffb06a' # 2950 K blackbody
+color_k23   = '#ffbc84' # 3350 K blackbody
+color_k31   = '#ffdec3' # 4700 K blackbody
+color_k32   = '#fff4ea' # 5900 K blackbody
+color_k33   = '#dfe7ff' # 7900 K blackbody
+color_error = '#ff3355' # Error: paired with the ✗ shape
+color_ink   = '#15131a' # Ink (text on light fills)
+
+[os]
+disabled = false
+style = "bg:color_s0 fg:color_ink bold"
+format = '[ 󰔏 ]($style)'
+
+[directory]
+style = "bg:color_s1 fg:color_ink bold"
+format = "[ 󰉋 $path ]($style)"
+truncation_length = 3
+
+[git_branch]
+symbol = " "
+style = "bg:color_s2 fg:color_ink bold"
+format = '[ $symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_s2 fg:color_ink bold"
+format = '([$all_status$ahead_behind ]($style))'
+
+[c]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[rust]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[golang]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[deno]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[python]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_s4 fg:color_ink bold"
+format = '[ $time ]($style)'
+
+[character]
+success_symbol = "[❯](bold color_s0)[❯](bold color_s2)[❯](bold color_s4)"
+error_symbol = "[✗❯](bold color_error)"
