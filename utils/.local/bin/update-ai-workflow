@@ -5,7 +5,7 @@
 # Audits, checks, and updates the core dependencies of the AI workflow stack:
 #   - Terminal Multiplexer & Plugins: tmux (custom 3.8+ build), TPM plugins
 #   - Typography & Icons: Nerd Fonts (Cascadia Mono, JetBrains Mono, Symbols)
-#   - AI Coding Agents & Models: Codex, Antigravity (agy), Claude Code, Devin, OpenCode, Crush
+#   - AI Coding Agents & Models: Codex, Antigravity (agy), Claude Code, Devin, OpenCode
 #   - Daemons & Control Plane: Waymux (control-plane daemon), systemd service
 #   - AI Tooling & Sandboxes: ai-memory, ai-jail, ai-usagebar
 #   - Worktree & Runtime Ecosystem: worktrunk (awt), mise runtime manager
@@ -65,7 +65,6 @@ ICON_IDE="󰨞"
 ICON_CLAUDE=""
 ICON_DEVIN="󰚩"
 ICON_OPENCODE="󰘦"
-ICON_CRUSH="󰻿"
 ICON_WAYMUX="󱐋"
 ICON_MEMORY="󰍛"
 ICON_JAIL="󰌾"
@@ -111,7 +110,6 @@ usage() {
   echo -e "  claude                Anthropic Claude Code CLI (via mise)"
   echo -e "  devin                 Cognition Devin CLI (devin self-update)"
   echo -e "  opencode              OpenCode CLI (via mise)"
-  echo -e "  crush                 Charm Crush CLI (via mise)"
   echo -e "  waymux                Waymux control-plane daemon & systemd service"
   echo -e "  ai-memory             AI long-term memory CLI (ai-memory)"
   echo -e "  ai-jail               AI agent filesystem & network sandbox (ai-jail)"
@@ -188,7 +186,6 @@ normalize_target() {
     claude|claudecode) echo "claude" ;;
     devin) echo "devin" ;;
     opencode) echo "opencode" ;;
-    crush) echo "crush" ;;
     waymux) echo "waymux" ;;
     ai-memory) echo "ai-memory" ;;
     ai-jail) echo "ai-jail" ;;
@@ -369,7 +366,6 @@ inspect_mise_tools() {
   check_one_mise "codex" "codex" "$ICON_CODEX" "codex" false
   check_one_mise "claude" "claude (claude code)" "$ICON_CLAUDE" "claude" false
   check_one_mise "opencode" "opencode" "$ICON_OPENCODE" "opencode" false
-  check_one_mise "crush" "crush (charm agent)" "$ICON_CRUSH" "crush" true
 }
 
 # 5. Antigravity CLI (agy)
@@ -583,7 +579,7 @@ run_parallel_audit() {
     inspect_fonts & pids+=($!)
   fi
 
-  if should_run "codex" || should_run "claude" || should_run "opencode" || should_run "crush"; then
+  if should_run "codex" || should_run "claude" || should_run "opencode"; then
     inspect_mise_tools & pids+=($!)
   fi
 
@@ -644,7 +640,7 @@ display_report() {
   printf "${C_BOLD}%-3s %-28s %-15s %-15s %-18s${C_RESET}\n" " " "Component" "Current" "Latest" "Status"
   echo -e "${C_GRAY}────────────────────────────────────────────────────────────────────────────${C_RESET}"
 
-  local order=("tmux" "plugins" "fonts" "codex" "agy" "antigravity-ide" "claude" "devin" "opencode" "crush" "waymux" "ai-memory" "ai-jail" "ai-usagebar" "worktrunk" "mise")
+  local order=("tmux" "plugins" "fonts" "codex" "agy" "antigravity-ide" "claude" "devin" "opencode" "waymux" "ai-memory" "ai-jail" "ai-usagebar" "worktrunk" "mise")
 
   for key in "${order[@]}"; do
     should_run "$key" || continue
@@ -823,15 +819,6 @@ update_opencode() {
   echo -e "  ${C_GREEN}${ICON_OK}${C_RESET} OpenCode active version: ${C_GREEN}v${new_ver}${C_RESET}"
 }
 
-update_crush() {
-  echo -e "${C_BLUE}${ICON_INFO}${C_RESET} Upgrading ${C_BOLD}Charm Crush${C_RESET} via mise..."
-  HOME="$TARGET_HOME" mise upgrade crush || HOME="$TARGET_HOME" mise install crush@latest || true
-  HOME="$TARGET_HOME" mise reshim || true
-  local new_ver
-  new_ver=$(HOME="$TARGET_HOME" mise current crush 2>/dev/null || true)
-  echo -e "  ${C_GREEN}${ICON_OK}${C_RESET} Crush active version: ${C_GREEN}v${new_ver}${C_RESET}"
-}
-
 update_waymux() {
   echo -e "${C_BLUE}${ICON_INFO}${C_RESET} Building and upgrading ${C_BOLD}Waymux (Unified Orchestrator & Daemon)${C_RESET} via cargo..."
   if command -v cargo &>/dev/null; then
@@ -1006,10 +993,6 @@ main() {
 
   if should_run "opencode" && needs_update "opencode"; then
     update_opencode
-  fi
-
-  if should_run "crush" && needs_update "crush"; then
-    update_crush
   fi
 
   if should_run "waymux" && needs_update "waymux"; then
