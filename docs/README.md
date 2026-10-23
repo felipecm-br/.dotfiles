@@ -40,6 +40,8 @@ Welcome to the central documentation index for this Arch Linux + Omarchy dotfile
 - [**MacBook Display Notch Adaptation**](desktop/macbook-notch.md): Linux kernel GRUB parameters and status bar layout adaptation for Apple Silicon MacBook notch screens.
 - [**Nerd Fonts Configuration**](desktop/nerd-fonts.md): Font glyph setup and symbol rendering.
 - [**Hyprland Crash Recovery**](desktop/hyprland-crash-fix.md): Crash triage and stability fixes.
+- [**Eyelash Sofle Keyboard**](desktop/eyelash-sofle-keyboard.md): Live ZMK keymap read over Studio RPC (printable PDF per layer), ZMK Studio connection runbook on Asahi, and firmware-level ergonomics tips (Esc tap / Ctrl hold, thumb chords).
+- [**Eyelash Sofle Home-Row Chord Guide**](desktop/eyelash-sofle-home-row-chords.md): Every hot-path tmux, zsh, lazygitrs and Hyprland chord mapped onto the Sofle's physical keys, with KLM cost, verdicts and ranked modifier changes (thumb Super, mirrored pinky Ctrl).
 - [**Hibiki Keystroke Visualizer**](desktop/hibiki-keystroke-visualizer.md): Wayland native GTK4 Layer Shell keystroke badge and bubble overlay, Mechvibes mechanical audio engine, and Hyprland integration.
 
 ### 🎨 4. Theme & Design System (`docs/theme/`)

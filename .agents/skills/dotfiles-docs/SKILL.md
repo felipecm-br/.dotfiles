@@ -54,6 +54,8 @@ docs/
 │   ├── macbook-notch.md           # Linux kernel GRUB parameters and status bar layout for notch
 │   ├── nerd-fonts.md              # Font glyph configuration and Nerd Font symbols
 │   ├── hyprland-crash-fix.md      # Crash triage and stability runbooks
+│   ├── eyelash-sofle-keyboard.md                # Live ZMK keymap (PDF per layer), Studio runbook, ergonomics tips
+│   ├── eyelash-sofle-home-row-chords.md         # Dotfiles chords mapped onto the Sofle, KLM verdicts, modifier plan
 │   └── hibiki-keystroke-visualizer.md           # Wayland GTK4 Layer Shell keystroke overlay & Mechvibes audio
 │
 ├── theme/                         # 🎨 Theming & Color Engine

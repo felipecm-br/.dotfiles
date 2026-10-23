@@ -232,6 +232,15 @@ wm session list
 # Audit documentation integrity, broken links, and root cleanliness
 ./scripts/docs-lint.sh
 
+# Read the live ZMK keymap from the keyboard (read-only) and redraw PDF/SVG/table
+./scripts/zmk-keymap/run.sh
+
+# Read the live ZMK keymap from an explicit Studio serial port
+./scripts/zmk-keymap/run.sh {{port}}
+
+# Redraw the ZMK keymap PDF/SVG/table from the committed snapshot
+./scripts/zmk-keymap/run.sh --offline
+
 # Render Mermaid diagram to PNG image
 mmdc -i {{mmd_file}} -o {{output_png}} -b transparent -t dark
 
