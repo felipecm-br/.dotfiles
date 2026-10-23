@@ -46,6 +46,7 @@ Welcome to the central documentation index for this Arch Linux + Omarchy dotfile
 - [**System Theming Architecture**](theme/system-theme.md): The Omarchy theme rendering pipeline (`~/.local/state/omarchy/current/theme/`), `colors.toml` template generation, overrides, and live reload hooks.
 - [**Separator & Nerd Font Glyph Library**](theme/separator.md): Reference catalog of Powerline dividers, pills, and Nerd Font status glyphs.
 - [**Starship Chroma Gradient Presets**](theme/starship-chroma-presets.md): Eight `chroma-*` Starship presets porting notMyShell's Chroma palettes as OKLab stepped gradients with glyph-stacked transitions.
+- [**Prompt Art (zsh)**](theme/prompt-art.md): Opt-in zsh modules for a gradient scrollback trail, a time-of-day palette, and a per-repo hue on any Starship preset.
 
 ### ⚡ 5. Utilities & Commands (`docs/utils.md`)
 - [**Utils & Command Reference**](utils.md): Quick reference for repository scripts (`stow-it`, `killport`, `dotadd`, `wtr`, `battery-threshold`, `perf-toggle`, Hyprland refresh helpers).

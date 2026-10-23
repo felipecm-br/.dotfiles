@@ -499,6 +499,21 @@ omarchy-starship-preset --preview-only {{preset_or_theme}}
 # Delete a custom Starship prompt preset file (Omarchy themes are refused)
 omarchy-starship-preset --delete ~/.config/omarchy/starship-presets/{{preset}}.toml
 
+# Write a copy of a Starship config with every palette hue rotated in OKLCh (prompt-art repo-hue engine)
+prompt-palette-transform --hue {{degrees}} {{src_toml}} {{dst_toml}}
+
+# Write a copy of a Starship config tinted for a time of day: night, dawn, morning, noon, golden, dusk (prompt-art sky-clock engine)
+prompt-palette-transform --sky {{band}} {{src_toml}} {{dst_toml}}
+
+# Show the base and active Starship configs chosen by the prompt-art zsh modules
+prompt-art status
+
+# Restore the base Starship config for this shell and stop prompt-art recoloring
+prompt-art off
+
+# Remove the cached prompt-art palette variants
+prompt-art clear-cache
+
 $ (awt) branch: git branch --format='%(refname:short)' 2>/dev/null
 $ (awt) base: git branch --format='%(refname:short)' 2>/dev/null
 $ (awt) pr_number: gh pr list --limit 30 --json number,title --template '{{range .}}{{tablerow .number .title}}{{end}}' 2>/dev/null

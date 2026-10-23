@@ -123,6 +123,11 @@ render sometimes (`cmd_duration`, `jobs`, `status`, git states) can join the bar
 | `chroma-reactive` | **Living gradient**: a calm night-ocean bar at rest that grows with events: amber heat for a slow command (`U+E0C6` sparks), a violet orbit for background jobs, a crimson flame (`U+E0C0`) when the last command failed. The battery closes the bar and slides along a red to aquamarine gradient with its charge (ten `[[battery.display]]` thresholds, one color each) |
 | `chroma-git-heat` | **Temperature of work**: each git state is its own cell, ordered cold to hot by how close the work is to shipping: untracked (frost violet), modified, renamed, deleted, staged (green), stashed, ahead (amber), behind, diverged, conflicted (red). Only the states present are drawn, so the cells always read as a rising ramp |
 
+## Beyond the TOML
+
+Effects that need shell state (scrollback history, the clock, the current repo) are opt-in zsh
+modules: see [Prompt Art (zsh)](prompt-art.md).
+
 ## Not included
 
 - notMyShell's reversed layout. Linear, center-out (`chroma-supernova`), and outside-in
