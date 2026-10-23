@@ -184,6 +184,12 @@ For a palette-driven gradient instead of an artwork (for example the `chroma-*` 
   `[<glyph>](fg:<band color>)$fill`. Each `$fill` inherits the seed glyph's color and Starship splits
   the width evenly between them. Shares round down, so keep it to five or six fills and join the
   bands with three to five interpolated seam cells (`chroma-divider`, `chroma-horizon`, `chroma-full-bleed`).
+- Multi-row scenes that scale with the width: give every row the same number of columns, each one
+  joint cell plus a `$fill` styled `bg:prev_bg`, so the columns align vertically at any width. Joints
+  are a plain cell (vertical wall) or a wedge with `fg` = previous column, `bg` = new column (a slope).
+  `$fill` only makes flat tops, so pick subjects that have them: mesas, buttes, hanging curtains
+  (`chroma-monument-valley`, `chroma-aurora-panorama`). Put dark sky at the right edge, where the
+  rounding gap lands.
 
 ### Step 4: Write the TOML
 

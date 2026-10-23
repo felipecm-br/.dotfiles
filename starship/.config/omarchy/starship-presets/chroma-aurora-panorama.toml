@@ -1,0 +1,122 @@
+# ==============================================================================
+#  Preset: Chroma Aurora Panorama (Polar Night Edition)
+#  Inspired by: The aurora borealis over a mountain ridge - nitrogen violet tops, oxygen 557.7 nm green curtains
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+# glyph-stacking: gradient
+# A three-row night sky that stretches with the terminal. Curtains of different lengths hang
+# from the top: violet (nitrogen) above, oxygen green in the middle, a bright fringe below. Their
+# edges taper as they hang (U+E0BA / U+E0BE wedges) and the hue shimmers along the curtain. A
+# black ridge rises at both ends (U+E0BC / U+E0B8). The sky is near-black, so the few cells
+# $fill rounding leaves at the right edge blend into the terminal.
+# Width-scaling grid: every scene row has the same number of columns, each a joint cell plus a
+# $fill ([fill] = a space styled bg:prev_bg), so the columns line up vertically at any width and
+# the whole scene stretches with the terminal. No [custom] module, no fork.
+# Regenerate colors with .agents/skills/starship-glyph-stacking/scripts/gradient.py.
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+format = """
+[ ](bg:color_00)$fill[ ](bg:color_01)$fill[ ](bg:color_02)$fill[](fg:color_02 bg:color_03)$fill[](fg:color_03 bg:color_04)$fill[ ](bg:color_05)$fill[ ](bg:color_06)$fill[ ](bg:color_07)$fill[](fg:color_07 bg:color_03)$fill[](fg:color_03 bg:color_08)$fill[ ](bg:color_09)$fill[ ](bg:color_10)$fill
+[ ](bg:color_11)$fill[](fg:color_11 bg:color_12)$fill[ ](bg:color_13)$fill[](fg:color_13 bg:color_11)$fill[](fg:color_11 bg:color_14)$fill[ ](bg:color_15)$fill[ ](bg:color_16)$fill[](fg:color_16 bg:color_11)$fill[ ](bg:color_11)$fill[](fg:color_11 bg:color_17)$fill[ ](bg:color_18)$fill[](fg:color_18 bg:color_11)$fill
+[ ](bg:color_19)$fill[ ](bg:color_19)$fill[](fg:color_19 bg:color_20)$fill[ ](bg:color_20)$fill[ ](bg:color_20)$fill[](fg:color_20 bg:color_21)$fill[ ](bg:color_22)$fill[](fg:color_22 bg:color_20)$fill[ ](bg:color_20)$fill[ ](bg:color_20)$fill[](fg:color_20 bg:color_19)$fill[ ](bg:color_19)$fill
+[](fg:color_s0)$os[](fg:color_s0) [](fg:color_s1)$directory[](fg:color_s1) [](fg:color_s2)$git_branch$git_status[](fg:color_s2) [](fg:color_s3)$c$rust$golang$nodejs$deno$python[](fg:color_s3) [](fg:color_s4)$time[](fg:color_s4)
+$character"""
+
+palette = 'chroma_aurora_panorama'
+
+[palettes.chroma_aurora_panorama]
+color_00    = '#9342d9' # aurora top (nitrogen violet), row 0 column 0
+color_01    = '#c455ef' # aurora top (nitrogen violet), row 0 column 1
+color_02    = '#d85bdf' # aurora top (nitrogen violet), row 0 column 2
+color_03    = '#060a1c' # night sky, row 0 column 3
+color_04    = '#ab69ec' # aurora top (nitrogen violet), row 0 column 4
+color_05    = '#b44efc' # aurora top (nitrogen violet), row 0 column 5
+color_06    = '#c856ec' # aurora top (nitrogen violet), row 0 column 6
+color_07    = '#b84ebb' # aurora top (nitrogen violet), row 0 column 7
+color_08    = '#a36aee' # aurora top (nitrogen violet), row 0 column 9
+color_09    = '#b850f8' # aurora top (nitrogen violet), row 0 column 10
+color_10    = '#aa4cc6' # aurora top (nitrogen violet), row 0 column 11
+color_11    = '#0a1230' # night sky, row 1 column 0
+color_12    = '#33dfa5' # aurora curtain (oxygen green), row 1 column 1
+color_13    = '#33c39d' # aurora curtain (oxygen green), row 1 column 2
+color_14    = '#39b7c2' # aurora curtain (oxygen green), row 1 column 4
+color_15    = '#2dda9c' # aurora curtain (oxygen green), row 1 column 5
+color_16    = '#35e1a8' # aurora curtain (oxygen green), row 1 column 6
+color_17    = '#39b5c6' # aurora curtain (oxygen green), row 1 column 9
+color_18    = '#2fdc9f' # aurora curtain (oxygen green), row 1 column 10
+color_19    = '#03040a' # ridge silhouette, row 2 column 0
+color_20    = '#10204a' # night sky, row 2 column 2
+color_21    = '#87dba6' # aurora lower fringe, row 2 column 5
+color_22    = '#97db9d' # aurora lower fringe, row 2 column 6
+color_s0    = '#2a1b5e' # buoy 1: polar night
+color_s1    = '#5b3fd0' # buoy 2: nitrogen violet
+color_s2    = '#2bb58a' # buoy 3: deep oxygen green
+color_s3    = '#3ee8b5' # buoy 4: oxygen green
+color_s4    = '#b8ffd0' # buoy 5: lower fringe
+color_error = '#ff4d6d' # Error: oxygen-red storm, paired with the ✗ shape
+color_paper = '#fbfbff' # Paper (text on dark fills)
+color_ink   = '#15131a' # Ink (text on light fills)
+
+[fill]
+symbol = " "
+style = "bg:prev_bg"
+
+[os]
+disabled = false
+style = "bg:color_s0 fg:color_paper bold"
+format = '[ 󰼱 ]($style)'
+
+[directory]
+style = "bg:color_s1 fg:color_paper bold"
+format = "[ 󰉋 $path ]($style)"
+truncation_length = 3
+
+[git_branch]
+symbol = " "
+style = "bg:color_s2 fg:color_ink bold"
+format = '[ $symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_s2 fg:color_ink bold"
+format = '([$all_status$ahead_behind ]($style))'
+
+[c]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[rust]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[golang]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[deno]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[python]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_s4 fg:color_ink bold"
+format = '[ $time ]($style)'
+
+[character]
+success_symbol = "[❯](bold color_s3)[❯](bold color_s4)"
+error_symbol = "[✗❯](bold color_error)"

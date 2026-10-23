@@ -1,0 +1,139 @@
+# ==============================================================================
+#  Preset: Chroma Monument Valley (Mittens at Sunset Edition)
+#  Inspired by: The Mittens buttes, Monument Valley (Navajo Nation) - sandstone towers at sunset
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+# glyph-stacking: gradient
+# A three-row panorama that stretches with the terminal. Two butte towers (the Mittens) rise on
+# sheer vertical walls (flat seams) above talus slopes and distant mesas, which rise and fall on
+# wedges (U+E0BC up, U+E0B8 down). $fill can only draw flat tops, which is exactly the geology:
+# mesas and buttes are flat-topped. The sun sets in the west (left), so the sky runs from glow to
+# dusk, the west faces of the rock catch the light and the far mesas fade into haze.
+# Width-scaling grid: every scene row has the same number of columns, each a joint cell plus a
+# $fill ([fill] = a space styled bg:prev_bg), so the columns line up vertically at any width and
+# the whole scene stretches with the terminal. No [custom] module, no fork.
+# Regenerate colors with .agents/skills/starship-glyph-stacking/scripts/gradient.py.
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+format = """
+[ ](bg:color_00)$fill[ ](bg:color_01)$fill[ ](bg:color_02)$fill[ ](bg:color_03)$fill[ ](bg:color_04)$fill[ ](bg:color_05)$fill[ ](bg:color_06)$fill[ ](bg:color_07)$fill[ ](bg:color_08)$fill[ ](bg:color_09)$fill[ ](bg:color_10)$fill[ ](bg:color_11)$fill
+[ ](bg:color_12)$fill[ ](bg:color_13)$fill[](fg:color_13 bg:color_14)$fill[ ](bg:color_15)$fill[ ](bg:color_16)$fill[ ](bg:color_17)$fill[ ](bg:color_18)$fill[ ](bg:color_19)$fill[ ](bg:color_20)$fill[ ](bg:color_21)$fill[](fg:color_21 bg:color_22)$fill[ ](bg:color_23)$fill
+[ ](bg:color_24)$fill[ ](bg:color_25)$fill[](fg:color_25 bg:color_26)$fill[ ](bg:color_27)$fill[ ](bg:color_28)$fill[](fg:color_28 bg:color_29)$fill[ ](bg:color_30)$fill[](fg:color_30 bg:color_31)$fill[ ](bg:color_32)$fill[ ](bg:color_33)$fill[](fg:color_33 bg:color_34)$fill[ ](bg:color_35)$fill
+[](fg:color_s0)$os[](fg:color_s0 bg:color_s01)[](fg:color_s01 bg:color_s1)$directory[](fg:color_s1 bg:color_s12)[](fg:color_s12 bg:color_s2)$git_branch$git_status[](fg:color_s2 bg:color_s23)[](fg:color_s23 bg:color_s3)$c$rust$golang$nodejs$deno$python[](fg:color_s3 bg:color_s34)[](fg:color_s34 bg:color_s4)$time[](fg:color_s4)
+$character"""
+
+palette = 'chroma_monument_valley'
+
+[palettes.chroma_monument_valley]
+color_00    = '#9e7378' # sky, row 0 column 0
+color_01    = '#9d6873' # sky, row 0 column 1
+color_02    = '#9b5d6e' # sky, row 0 column 2
+color_03    = '#d65e31' # butte sandstone, row 0 column 3
+color_04    = '#8c4970' # sky, row 0 column 4
+color_05    = '#823f75' # sky, row 0 column 5
+color_06    = '#743876' # sky, row 0 column 6
+color_07    = '#613273' # sky, row 0 column 7
+color_08    = '#c74f2a' # butte sandstone, row 0 column 8
+color_09    = '#432668' # sky, row 0 column 9
+color_10    = '#38215e' # sky, row 0 column 10
+color_11    = '#2e1c54' # sky, row 0 column 11
+color_12    = '#ea884d' # far mesa (atmospheric haze), row 1 column 0
+color_13    = '#e87c48' # far mesa (atmospheric haze), row 1 column 1
+color_14    = '#f68455' # sky, row 1 column 2
+color_15    = '#c35736' # butte sandstone, row 1 column 3
+color_16    = '#d75f67' # sky, row 1 column 4
+color_17    = '#c24e75' # sky, row 1 column 5
+color_18    = '#a64278' # sky, row 1 column 6
+color_19    = '#833a74' # sky, row 1 column 7
+color_20    = '#b64a30' # butte sandstone, row 1 column 8
+color_21    = '#4b2761' # sky, row 1 column 9
+color_22    = '#773b4c' # far mesa (atmospheric haze), row 1 column 10
+color_23    = '#6b3642' # far mesa (atmospheric haze), row 1 column 11
+color_24    = '#a94025' # desert floor, row 2 column 0
+color_25    = '#a13d25' # desert floor, row 2 column 1
+color_26    = '#be4e2d' # talus slope, row 2 column 2
+color_27    = '#b05139' # butte sandstone, row 2 column 3
+color_28    = '#b2462e' # talus slope, row 2 column 4
+color_29    = '#853223' # desert floor, row 2 column 5
+color_30    = '#7e3023' # desert floor, row 2 column 6
+color_31    = '#9b3c31' # talus slope, row 2 column 7
+color_32    = '#a54633' # butte sandstone, row 2 column 8
+color_33    = '#8b362e' # talus slope, row 2 column 9
+color_34    = '#672621' # desert floor, row 2 column 10
+color_35    = '#622420' # desert floor, row 2 column 11
+color_s0    = '#2a1630' # prompt segment 1: night shadow
+color_s1    = '#7c2a1c' # prompt segment 2: deep sandstone
+color_s2    = '#b5441f' # prompt segment 3: mid sandstone
+color_s3    = '#e8703a' # prompt segment 4: sunlit sandstone
+color_s4    = '#ffb067' # prompt segment 5: sunset glow
+color_s01   = '#51222b' # OKLab midpoint 1/2
+color_s12   = '#98371e' # OKLab midpoint 2/3
+color_s23   = '#ce5a2c' # OKLab midpoint 3/4
+color_s34   = '#f49151' # OKLab midpoint 4/5
+color_error = '#4dd2ff' # Error: the one cold hue, paired with the ✗ shape
+color_paper = '#fbfbff' # Paper (text on dark fills)
+color_ink   = '#15131a' # Ink (text on light fills)
+
+[fill]
+symbol = " "
+style = "bg:prev_bg"
+
+[os]
+disabled = false
+style = "bg:color_s0 fg:color_paper bold"
+format = '[ 󰖨 ]($style)'
+
+[directory]
+style = "bg:color_s1 fg:color_paper bold"
+format = "[ 󰉋 $path ]($style)"
+truncation_length = 3
+
+[git_branch]
+symbol = " "
+style = "bg:color_s2 fg:color_paper bold"
+format = '[ $symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_s2 fg:color_paper bold"
+format = '([$all_status$ahead_behind ]($style))'
+
+[c]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[rust]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[golang]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[deno]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[python]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_s4 fg:color_ink bold"
+format = '[ $time ]($style)'
+
+[character]
+success_symbol = "[❯](bold color_s3)[❯](bold color_s4)"
+error_symbol = "[✗❯](bold color_error)"
