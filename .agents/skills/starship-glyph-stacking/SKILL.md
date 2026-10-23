@@ -179,7 +179,11 @@ For a palette-driven gradient instead of an artwork (for example the `chroma-*` 
   rather than moving the gradient.
 - Add the line `# glyph-stacking: gradient` to the file. The validator then skips chain-layer contrast
   warnings (smooth steps are the intent) but still checks text contrast.
-- Never draw a full-width gradient with a `[custom]` module: it forks on every prompt.
+- Never draw a full-width gradient with a `[custom]` module: it forks on every prompt. Use `$fill`
+  bands instead: set `[fill]` to `style = "fg:prev_fg"` (or `bg:prev_bg`), then repeat
+  `[<glyph>](fg:<band color>)$fill`. Each `$fill` inherits the seed glyph's color and Starship splits
+  the width evenly between them. Shares round down, so keep it to five or six fills and join the
+  bands with three to five interpolated seam cells (`chroma-divider`, `chroma-horizon`, `chroma-full-bleed`).
 
 ### Step 4: Write the TOML
 

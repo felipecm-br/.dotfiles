@@ -1,0 +1,118 @@
+# ==============================================================================
+#  Preset: Chroma Full Bleed (Edge-to-Edge Edition)
+#  Inspired by: Full-bleed print and the classic sunset gradient - the color runs off the edge of the page
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+# glyph-stacking: gradient
+# The status bar fills the whole terminal row: the modules sit on the left on the first fifth of
+# a plum-to-peach gradient (OKLab midpoints in U+E0BC wedges between them), then six background
+# bands (three-cell seams) carry the gradient through the empty middle
+# to the clock, pinned to the right edge.
+# Full width with no fork: Starship splits the line evenly between every $fill, and [fill]
+# inherits the color of the glyph just before it (prev_fg / prev_bg), so each seed glyph
+# starts one band of the gradient and its $fill stretches it across its share of the width.
+# Regenerate colors with .agents/skills/starship-glyph-stacking/scripts/gradient.py.
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+format = """
+[](fg:color_os)$os[](fg:color_os bg:color_os_dir)[](fg:color_os_dir bg:color_dir)$directory[](fg:color_dir bg:color_dir_git)[](fg:color_dir_git bg:color_git)$git_branch$git_status[](fg:color_git bg:color_git_lang)[](fg:color_git_lang bg:color_lang)$c$rust$golang$nodejs$deno$python[ ](bg:color_b00)$fill[ ](bg:color_b01)[ ](bg:color_b02)[ ](bg:color_b03)[ ](bg:color_b04)$fill[ ](bg:color_b05)[ ](bg:color_b06)[ ](bg:color_b07)[ ](bg:color_b08)$fill[ ](bg:color_b09)[ ](bg:color_b10)[ ](bg:color_b11)[ ](bg:color_b12)$fill[ ](bg:color_b13)[ ](bg:color_b14)[ ](bg:color_b15)[ ](bg:color_b16)$fill[ ](bg:color_b17)[ ](bg:color_b18)[ ](bg:color_b19)$time[](fg:color_time)
+$character"""
+
+palette = 'chroma_full_bleed'
+
+[palettes.chroma_full_bleed]
+color_os       = '#1f005c' # t=0.00 segment
+color_dir      = '#48065f' # t=0.10 segment
+color_git      = '#6c0360' # t=0.20 segment
+color_lang     = '#8b0660' # t=0.30 segment
+color_time     = '#ffb56b' # t=1.00 segment
+color_b00      = '#9a175f' # background band at t=0.360
+color_b01      = '#a21e5f' # background band at t=0.392 (seam)
+color_b02      = '#ab245e' # background band at t=0.424 (seam)
+color_b03      = '#b22d5e' # background band at t=0.456 (seam)
+color_b04      = '#b8355e' # background band at t=0.488
+color_b05      = '#bf3c5d' # background band at t=0.520 (seam)
+color_b06      = '#c6445d' # background band at t=0.552 (seam)
+color_b07      = '#cc4b5c' # background band at t=0.584 (seam)
+color_b08      = '#d1535c' # background band at t=0.616
+color_b09      = '#d65b5c' # background band at t=0.648 (seam)
+color_b10      = '#dc635c' # background band at t=0.680 (seam)
+color_b11      = '#e16a5c' # background band at t=0.712 (seam)
+color_b12      = '#e5735d' # background band at t=0.744
+color_b13      = '#e97b5e' # background band at t=0.776 (seam)
+color_b14      = '#ed835f' # background band at t=0.808 (seam)
+color_b15      = '#f18c60' # background band at t=0.840 (seam)
+color_b16      = '#f49461' # background band at t=0.872
+color_b17      = '#f79c64' # background band at t=0.904 (seam)
+color_b18      = '#faa566' # background band at t=0.936 (seam)
+color_b19      = '#fcad69' # background band at t=0.968 (seam)
+color_os_dir   = '#33065e' # OKLab midpoint between os and dir
+color_dir_git  = '#5a0760' # OKLab midpoint between dir and git
+color_git_lang = '#7b0560' # OKLab midpoint between git and lang
+color_error    = '#38e1ff' # Error: the one cold hue, paired with the ✗ shape
+color_paper    = '#fbfbff' # Paper (text on dark fills)
+color_ink      = '#15131a' # Ink (text on light fills)
+
+[fill]
+symbol = " "
+style = "bg:prev_bg"
+
+[os]
+disabled = false
+style = "bg:color_os fg:color_paper bold"
+format = '[ 󰄛 ]($style)'
+
+[directory]
+style = "bg:color_dir fg:color_paper bold"
+format = "[ 󰉋 $path ]($style)"
+truncation_length = 3
+
+[git_branch]
+symbol = " "
+style = "bg:color_git fg:color_paper bold"
+format = '[ $symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_git fg:color_paper bold"
+format = '([$all_status$ahead_behind ]($style))'
+
+[c]
+symbol = " "
+style = "bg:color_lang fg:color_paper bold"
+format = '[ $symbol($version) ]($style)'
+
+[rust]
+symbol = " "
+style = "bg:color_lang fg:color_paper bold"
+format = '[ $symbol($version) ]($style)'
+
+[golang]
+symbol = " "
+style = "bg:color_lang fg:color_paper bold"
+format = '[ $symbol($version) ]($style)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_lang fg:color_paper bold"
+format = '[ $symbol($version) ]($style)'
+
+[deno]
+symbol = " "
+style = "bg:color_lang fg:color_paper bold"
+format = '[ $symbol($version) ]($style)'
+
+[python]
+symbol = " "
+style = "bg:color_lang fg:color_paper bold"
+format = '[ $symbol($version) ]($style)'
+
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_time fg:color_ink bold"
+format = '[ $time ]($style)'
+
+[character]
+success_symbol = "[❯](bold color_git)[❯](bold color_time)"
+error_symbol = "[✗❯](bold color_error)"

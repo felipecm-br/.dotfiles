@@ -81,10 +81,22 @@ python3 .agents/skills/starship-glyph-stacking/scripts/gradient.py 5 '#3ee8b5' '
 python3 .agents/skills/starship-glyph-stacking/scripts/validate.py starship/.config/omarchy/starship-presets/chroma-aurora.toml
 ```
 
+### Full-width set (`$fill` bands)
+
+These span the whole terminal row at any width with no fork. Starship splits a line evenly between
+every `$fill` module, and a `[fill]` styled `fg:prev_fg` / `bg:prev_bg` inherits the color of the
+glyph printed just before it. Each band is therefore one seed glyph followed by a `$fill`, which
+stretches the seed's color across its share of the width; a few interpolated seam cells join the
+bands. Starship rounds each share down, so up to (number of fills - 1) cells can stay empty at the
+right edge. The presets use five or six fills to keep that gap at a few cells.
+
+| File | Technique | Glyphs |
+|---|---|---|
+| `chroma-divider` | Port of notMyShell's `paintDivider`: a full-width rule in six OKLab bands, with the directory and clock set into it like a section title; the second line is text only, tinted per module | heavy rule `━` |
+| `chroma-horizon` | Panoramic sunset: every cell is an upper half block with the sky as `fg` and the sea reflection as `bg`; center-out across the width, with the sun in the middle and sun glitter on the water | `▀` |
+| `chroma-full-bleed` | The status bar fills the row: modules on the left, then the gradient keeps going as background bands through the empty middle to the clock at the right edge | spaces with `bg:prev_bg` |
+
 ## Not included
 
-- A full-width gradient divider above the prompt. It could be drawn by a zsh `precmd` that reads
-  `$COLUMNS` and computes the colors in pure zsh without forking, but it lives outside the presets
-  and is not implemented.
 - notMyShell's reversed layout. Linear, center-out (`chroma-supernova`), and outside-in
   (`chroma-wormhole`) are ported.

@@ -1,0 +1,118 @@
+# ==============================================================================
+#  Preset: Chroma Divider (Section Rule Edition)
+#  Inspired by: notMyShell paintDivider - a full-width rule colored per cell, with the section title set into it
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+# glyph-stacking: gradient
+# A direct port of notMyShell's divider: a heavy rule (U+2501) spans the whole terminal in six
+# OKLab bands joined by three-cell seams, with the directory set into its left end and the
+# clock into its right end like a section title. The second line is text only (no fills), each module tinted at its t.
+# Full width with no fork: Starship splits the line evenly between every $fill, and [fill]
+# inherits the color of the glyph just before it (prev_fg / prev_bg), so each seed glyph
+# starts one band of the gradient and its $fill stretches it across its share of the width.
+# Regenerate colors with .agents/skills/starship-glyph-stacking/scripts/gradient.py.
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+format = """
+[━━ ](fg:color_r00)$directory[ ](fg:color_r00)[━](fg:color_r00)$fill[━](fg:color_r01)[━](fg:color_r02)[━](fg:color_r03)[━](fg:color_r04)$fill[━](fg:color_r05)[━](fg:color_r06)[━](fg:color_r07)[━](fg:color_r08)$fill[━](fg:color_r09)[━](fg:color_r10)[━](fg:color_r11)[━](fg:color_r12)$fill[━](fg:color_r13)[━](fg:color_r14)[━](fg:color_r15)[━](fg:color_r16)$fill[━](fg:color_r17)[━](fg:color_r18)[━](fg:color_r19)[━](fg:color_r20)$fill[ ](fg:color_r20)$time[ ━━](fg:color_r20)
+$os$git_branch$git_status$c$rust$golang$nodejs$deno$python$character"""
+
+palette = 'chroma_divider'
+
+[palettes.chroma_divider]
+color_r00    = '#3ee8b5' # rule at t=0.000
+color_r01    = '#3edfc2' # rule at t=0.050 (seam)
+color_r02    = '#3fd6cf' # rule at t=0.100 (seam)
+color_r03    = '#40ccdb' # rule at t=0.150 (seam)
+color_r04    = '#42c2e6' # rule at t=0.200
+color_r05    = '#45b8f0' # rule at t=0.250 (seam)
+color_r06    = '#5eaaf1' # rule at t=0.300 (seam)
+color_r07    = '#709cf3' # rule at t=0.350 (seam)
+color_r08    = '#7d8df4' # rule at t=0.400
+color_r09    = '#877df4' # rule at t=0.450 (seam)
+color_r10    = '#8f6cf5' # rule at t=0.500 (seam)
+color_r11    = '#a06eec' # rule at t=0.550 (seam)
+color_r12    = '#b26fe4' # rule at t=0.600
+color_r13    = '#c36fdb' # rule at t=0.650 (seam)
+color_r14    = '#d36ed1' # rule at t=0.700 (seam)
+color_r15    = '#e46cc8' # rule at t=0.750 (seam)
+color_r16    = '#e97dba' # rule at t=0.800
+color_r17    = '#ee8caa' # rule at t=0.850 (seam)
+color_r18    = '#f49a98' # rule at t=0.900 (seam)
+color_r19    = '#f9a784' # rule at t=0.950 (seam)
+color_r20    = '#ffb36b' # rule at t=1.000
+color_t_os   = '#5effcb' # t=0.00 text color (OKLab L +0.07)
+color_t_dir  = '#5fcfff' # t=0.25 text color (OKLab L +0.07)
+color_t_git  = '#a482ff' # t=0.50 text color (OKLab L +0.07)
+color_t_lang = '#fc82df' # t=0.75 text color (OKLab L +0.07)
+color_t_time = '#ffca82' # t=1.00 text color (OKLab L +0.07)
+color_error  = '#ff3355' # Error: paired with the ✗ shape
+
+[os]
+disabled = false
+style = "fg:color_t_os bold"
+format = '[󰝨 ]($style)'
+
+[directory]
+style = "fg:color_t_dir bold"
+format = "[󰉋 $path]($style)"
+truncation_length = 3
+
+[fill]
+symbol = "━"
+style = "fg:prev_fg"
+
+[git_branch]
+symbol = " "
+style = "fg:color_t_git bold"
+format = '[$symbol$branch ]($style)'
+
+[git_status]
+style = "fg:color_t_git bold"
+format = '([$all_status$ahead_behind ]($style))'
+
+[c]
+symbol = " "
+style = "fg:color_t_lang bold"
+format = '[$symbol($version) ]($style)'
+
+
+[rust]
+symbol = " "
+style = "fg:color_t_lang bold"
+format = '[$symbol($version) ]($style)'
+
+
+[golang]
+symbol = " "
+style = "fg:color_t_lang bold"
+format = '[$symbol($version) ]($style)'
+
+
+[nodejs]
+symbol = " "
+style = "fg:color_t_lang bold"
+format = '[$symbol($version) ]($style)'
+
+
+[deno]
+symbol = " "
+style = "fg:color_t_lang bold"
+format = '[$symbol($version) ]($style)'
+
+
+[python]
+symbol = " "
+style = "fg:color_t_lang bold"
+format = '[$symbol($version) ]($style)'
+
+[time]
+disabled = false
+time_format = "%R"
+style = "fg:color_t_time bold"
+format = '[󰥔 $time]($style)'
+
+[character]
+success_symbol = "[❯](bold color_t_lang)[❯](bold color_t_time)"
+error_symbol = "[✗❯](bold color_error)"

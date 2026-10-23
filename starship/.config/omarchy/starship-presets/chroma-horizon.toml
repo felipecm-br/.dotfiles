@@ -1,0 +1,122 @@
+# ==============================================================================
+#  Preset: Chroma Horizon (Panoramic Sunset Edition)
+#  Inspired by: A sunset over open sea - sky above, its reflection below, the sun on the horizon at the center
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+# glyph-stacking: gradient
+# The whole first line is a seascape: every cell is an upper half block (U+2580) whose fg is the
+# sky and whose bg is the sea, so the horizon runs through the middle of the row. The gradient
+# is center-out across the terminal width: night at both edges, the sun in the middle, and the
+# water under it brightens (sun glitter). The modules float below as round buoys.
+# Full width with no fork: Starship splits the line evenly between every $fill, and [fill]
+# inherits the color of the glyph just before it (prev_fg / prev_bg), so each seed glyph
+# starts one band of the gradient and its $fill stretches it across its share of the width.
+# Regenerate colors with .agents/skills/starship-glyph-stacking/scripts/gradient.py.
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+format = """
+[▀](fg:color_h00 bg:color_h00_sea)$fill[▀](fg:color_h01 bg:color_h01_sea)[▀](fg:color_h02 bg:color_h02_sea)[▀](fg:color_h03 bg:color_h03_sea)[▀](fg:color_h04 bg:color_h04_sea)[▀](fg:color_h05 bg:color_h05_sea)[▀](fg:color_h06 bg:color_h06_sea)$fill[▀](fg:color_h07 bg:color_h07_sea)[▀](fg:color_h08 bg:color_h08_sea)[▀](fg:color_h09 bg:color_h09_sea)[▀](fg:color_h10 bg:color_h10_sea)[▀](fg:color_h11 bg:color_h11_sea)[▀](fg:color_h12 bg:color_h12_sea)$fill[▀](fg:color_h11 bg:color_h11_sea)[▀](fg:color_h10 bg:color_h10_sea)[▀](fg:color_h09 bg:color_h09_sea)[▀](fg:color_h08 bg:color_h08_sea)[▀](fg:color_h07 bg:color_h07_sea)[▀](fg:color_h06 bg:color_h06_sea)$fill[▀](fg:color_h05 bg:color_h05_sea)[▀](fg:color_h04 bg:color_h04_sea)[▀](fg:color_h03 bg:color_h03_sea)[▀](fg:color_h02 bg:color_h02_sea)[▀](fg:color_h01 bg:color_h01_sea)[▀](fg:color_h00 bg:color_h00_sea)$fill
+[](fg:color_s0)$os[](fg:color_s0) [](fg:color_s1)$directory[](fg:color_s1) [](fg:color_s2)$git_branch$git_status[](fg:color_s2) [](fg:color_s3)$c$rust$golang$nodejs$deno$python[](fg:color_s3) [](fg:color_s4)$time[](fg:color_s4)
+$character"""
+
+palette = 'chroma_horizon'
+
+[palettes.chroma_horizon]
+color_h00     = '#141b3d' # sky at t=0.000
+color_h00_sea = '#0d122c' # sky sea at t=0.000
+color_h01     = '#1a1c42' # sky at t=0.083 (seam)
+color_h01_sea = '#0f122e' # sky sea at t=0.083 (seam)
+color_h02     = '#251f4d' # sky at t=0.167 (seam)
+color_h02_sea = '#141433' # sky sea at t=0.167 (seam)
+color_h03     = '#33235c' # sky at t=0.250 (seam)
+color_h03_sea = '#1a163a' # sky sea at t=0.250 (seam)
+color_h04     = '#45266e' # sky at t=0.333 (seam)
+color_h04_sea = '#231842' # sky sea at t=0.333 (seam)
+color_h05     = '#5a2a85' # sky at t=0.417 (seam)
+color_h05_sea = '#2d1a4d' # sky sea at t=0.417 (seam)
+color_h06     = '#833885' # sky at t=0.500
+color_h06_sea = '#41224f' # sky sea at t=0.500
+color_h07     = '#b44181' # sky at t=0.583 (seam)
+color_h07_sea = '#5b2950' # sky sea at t=0.583 (seam)
+color_h08     = '#e34d77' # sky at t=0.667 (seam)
+color_h08_sea = '#78324f' # sky sea at t=0.667 (seam)
+color_h09     = '#f06c63' # sky at t=0.750 (seam)
+color_h09_sea = '#89454a' # sky sea at t=0.750 (seam)
+color_h10     = '#ff893e' # sky at t=0.833 (seam)
+color_h10_sea = '#9f5b3e' # sky sea at t=0.833 (seam)
+color_h11     = '#ffad51' # sky at t=0.917 (seam)
+color_h11_sea = '#b07c4b' # sky sea at t=0.917 (seam)
+color_h12     = '#ffd166' # sky at t=1.000
+color_h12_sea = '#c6a55d' # sky sea at t=1.000
+color_s0      = '#33235c' # buoy 1 lit by the sky at t=0.25
+color_s1      = '#a03e83' # buoy 2 lit by the sky at t=0.55
+color_s2      = '#ffd166' # buoy 3 lit by the sky at t=1.00
+color_s3      = '#a03e83' # buoy 4 lit by the sky at t=0.55
+color_s4      = '#33235c' # buoy 5 lit by the sky at t=0.25
+color_error   = '#4dd2ff' # Error: the cold hue of the abyss, paired with the ✗ shape
+color_paper   = '#fbfbff' # Paper (text on dark fills)
+color_ink     = '#15131a' # Ink (text on light fills)
+
+[fill]
+symbol = "▀"
+style = "fg:prev_fg bg:prev_bg"
+
+[os]
+disabled = false
+style = "bg:color_s0 fg:color_paper bold"
+format = '[ 󰖜 ]($style)'
+
+[directory]
+style = "bg:color_s1 fg:color_paper bold"
+format = "[ 󰉋 $path ]($style)"
+truncation_length = 3
+
+[git_branch]
+symbol = " "
+style = "bg:color_s2 fg:color_ink bold"
+format = '[ $symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_s2 fg:color_ink bold"
+format = '([$all_status$ahead_behind ]($style))'
+
+[c]
+symbol = " "
+style = "bg:color_s3 fg:color_paper bold"
+format = '[ $symbol($version) ]($style)'
+
+[rust]
+symbol = " "
+style = "bg:color_s3 fg:color_paper bold"
+format = '[ $symbol($version) ]($style)'
+
+[golang]
+symbol = " "
+style = "bg:color_s3 fg:color_paper bold"
+format = '[ $symbol($version) ]($style)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_s3 fg:color_paper bold"
+format = '[ $symbol($version) ]($style)'
+
+[deno]
+symbol = " "
+style = "bg:color_s3 fg:color_paper bold"
+format = '[ $symbol($version) ]($style)'
+
+[python]
+symbol = " "
+style = "bg:color_s3 fg:color_paper bold"
+format = '[ $symbol($version) ]($style)'
+
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_s4 fg:color_paper bold"
+format = '[ $time ]($style)'
+
+[character]
+success_symbol = "[❯](bold color_s1)[❯](bold color_s2)"
+error_symbol = "[✗❯](bold color_error)"
