@@ -184,6 +184,12 @@ For a palette-driven gradient instead of an artwork (for example the `chroma-*` 
   `[<glyph>](fg:<band color>)$fill`. Each `$fill` inherits the seed glyph's color and Starship splits
   the width evenly between them. Shares round down, so keep it to five or six fills and join the
   bands with three to five interpolated seam cells (`chroma-divider`, `chroma-horizon`, `chroma-full-bleed`).
+- Self-chaining joints: draw a divider `[<glyph>](fg:prev_bg bg:<this segment>)` at the start of each
+  module's own `format`. Starship fills in the previous segment's background, so the chain is right
+  whichever modules render. That makes conditional modules (`cmd_duration`, `jobs`, `status`, each git
+  state as its own styled sub-format) safe to put inside the bar, and close it with `[<cap>](fg:prev_bg)`
+  (`chroma-reactive`, `chroma-git-heat`). The validator accepts `prev_fg` / `prev_bg` and checks
+  per-threshold battery styles and inline sub-format styles.
 - Scenes that scale with the width: put them in the empty middle of the status line, one row
   tall. Each column is `[▀](fg:<top> bg:<bottom>)$fill` with `[fill]` styled `fg:prev_fg bg:prev_bg`,
   so every cell carries two pixel rows and the horizon runs through the middle. `$fill` only makes

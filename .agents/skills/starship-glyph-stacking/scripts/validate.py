@@ -76,6 +76,8 @@ def parse_style(style, palette, where):
             continue
         if kind == "bg" and val == "transparent":
             continue  # dropped by starship on purpose: terminal background
+        if val in ("prev_fg", "prev_bg"):
+            continue  # resolved at render time to the previous segment's color (self-chaining)
         hexv = resolve(val, palette)
         if hexv is None:
             if val in NAMED or val.isdigit():
@@ -208,23 +210,37 @@ def main():
             continue
         if mod in ("os", "time") and table.get("disabled", True):
             fail(f"[{mod}] needs disabled = false")
-        style = table.get("style")
-        if not style:
+        # Styles to check: the module style, else per-threshold battery styles, else the styles of
+        # text groups written inline in the module's sub-formats (e.g. git_status per state).
+        styles = []
+        if table.get("style"):
+            styles.append((f"[{mod}]", table["style"]))
+        elif isinstance(table.get("display"), list):
+            styles += [(f"[{mod}] display <= {d.get('threshold', '?')}%", d["style"])
+                       for d in table["display"] if d.get("style")]
+        else:
+            for key, val in table.items():
+                if isinstance(val, str):
+                    for text, st in re.findall(r"\[([^\]]*)\]\(([^)]*)\)", val):
+                        if text.strip() and not all(is_art(c) for c in text) and "$style" not in st:
+                            styles.append((f"[{mod}].{key}", st))
+        if not styles:
             warn(f"[{mod}] has no style")
             continue
-        used_colors.update(re.findall(r"color_[a-z0-9_]+", style))
-        fg, bg = parse_style(style, palette, f"[{mod}].style")
-        if fg and bg:
-            r = contrast(fg, bg)
-            msg = f"[{mod}] text {fg} on {bg}: {r:.2f}:1"
-            if r < 3:
-                fail(msg + " (below 3:1)")
-            elif r < 4.5:
-                warn(msg + " (below 4.5:1 AA)")
-            else:
-                info(msg)
-        elif bg and not fg:
-            warn(f"[{mod}] sets bg but no fg; text uses the terminal foreground")
+        for label, style in styles:
+            used_colors.update(re.findall(r"color_[a-z0-9_]+", style))
+            fg, bg = parse_style(style, palette, f"{label} style")
+            if fg and bg:
+                r = contrast(fg, bg)
+                msg = f"{label} text {fg} on {bg}: {r:.2f}:1"
+                if r < 3:
+                    fail(msg + " (below 3:1)")
+                elif r < 4.5:
+                    warn(msg + " (below 4.5:1 AA)")
+                else:
+                    info(msg)
+            elif bg and not fg:
+                warn(f"{label} sets bg but no fg; text uses the terminal foreground")
 
     char = cfg.get("character", {})
     succ, err = char.get("success_symbol"), char.get("error_symbol")

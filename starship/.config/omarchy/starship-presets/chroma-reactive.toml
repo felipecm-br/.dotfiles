@@ -1,0 +1,159 @@
+# ==============================================================================
+#  Preset: Chroma Reactive (Living Gradient Edition)
+#  Inspired by: A gradient that reacts to the shell - calm at rest, heating up and catching fire as things happen
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+# glyph-stacking: gradient
+# At rest the bar is a calm night-ocean gradient. Events grow it: a slow command adds an amber
+# heat segment (U+E0C6 sparks), background jobs a violet orbit, a failed command sets the end of
+# the bar on fire (U+E0C0 flame, crimson). The battery closes the bar and slides along a red to
+# aquamarine gradient with its charge: ten [[battery.display]] thresholds, each its own color.
+# Self-chaining joints: every divider is drawn fg:prev_bg, the background of whatever segment came
+# before it, so the bar hands off correctly whichever modules are present (no doubled dividers when
+# the language segment is empty) and conditional segments can join or leave it.
+# Regenerate colors with .agents/skills/starship-glyph-stacking/scripts/gradient.py.
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+format = """
+[](fg:color_os)$os$directory$git_branch$git_status$c$rust$golang$nodejs$deno$python$time$cmd_duration$jobs$status$battery[](fg:prev_bg)
+$character"""
+
+palette = 'chroma_reactive'
+
+[palettes.chroma_reactive]
+color_os    = '#0b1d3a' # calm night-ocean gradient, t=0.00
+color_dir   = '#123c69' # calm night-ocean gradient, t=0.25
+color_git   = '#1b6a8a' # calm night-ocean gradient, t=0.50
+color_lang  = '#2e9cab' # calm night-ocean gradient, t=0.75
+color_time  = '#7fd1d6' # calm night-ocean gradient, t=1.00
+color_heat  = '#ffb238' # slow command: heat (cmd_duration >= 2 s)
+color_orbit = '#9b6dff' # background jobs: orbiting violet
+color_fire  = '#d01f33' # failed command: the bar catches fire (status)
+color_error = '#d01f33' # Error chevron: same fire as the status segment
+color_paper = '#fbfbff' # Paper (text on dark fills)
+color_ink   = '#15131a' # Ink (text on light fills)
+
+[os]
+disabled = false
+style = "bg:color_os fg:color_paper bold"
+format = '[ 󰈸 ]($style)'
+
+[directory]
+style = "bg:color_dir fg:color_paper bold"
+format = "[](fg:prev_bg bg:color_dir)[ 󰉋 $path ]($style)"
+truncation_length = 3
+
+[git_branch]
+symbol = " "
+style = "bg:color_git fg:color_paper bold"
+format = '[](fg:prev_bg bg:color_git)[ $symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_git fg:color_paper bold"
+format = '([$all_status$ahead_behind ]($style))'
+
+[c]
+symbol = " "
+style = "bg:color_lang fg:color_ink bold"
+format = '[](fg:prev_bg bg:color_lang)[ $symbol($version) ]($style)'
+
+[rust]
+symbol = " "
+style = "bg:color_lang fg:color_ink bold"
+format = '[](fg:prev_bg bg:color_lang)[ $symbol($version) ]($style)'
+
+[golang]
+symbol = " "
+style = "bg:color_lang fg:color_ink bold"
+format = '[](fg:prev_bg bg:color_lang)[ $symbol($version) ]($style)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_lang fg:color_ink bold"
+format = '[](fg:prev_bg bg:color_lang)[ $symbol($version) ]($style)'
+
+[deno]
+symbol = " "
+style = "bg:color_lang fg:color_ink bold"
+format = '[](fg:prev_bg bg:color_lang)[ $symbol($version) ]($style)'
+
+[python]
+symbol = " "
+style = "bg:color_lang fg:color_ink bold"
+format = '[](fg:prev_bg bg:color_lang)[ $symbol($version) ]($style)'
+
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_time fg:color_ink bold"
+format = '[](fg:prev_bg bg:color_time)[ $time ]($style)'
+
+[cmd_duration]
+min_time = 2000
+style = "bg:color_heat fg:color_ink bold"
+format = '[](fg:prev_bg bg:color_heat)[ 󱦟 $duration ]($style)'
+
+[jobs]
+symbol = "󰑮 "
+number_threshold = 1
+style = "bg:color_orbit fg:color_ink bold"
+format = '[](fg:prev_bg bg:color_orbit)[ $symbol$number ]($style)'
+
+[status]
+disabled = false
+symbol = "✗"
+style = "bg:color_fire fg:color_paper bold"
+format = '[](fg:prev_bg bg:color_fire)[ $symbol $status ]($style)'
+
+[battery]
+full_symbol = "󰁹 "
+charging_symbol = "󰂄 "
+discharging_symbol = "󰂁 "
+unknown_symbol = "󰁽 "
+empty_symbol = "󰂎 "
+format = '[]($style fg:prev_bg)[ $symbol$percentage ]($style)'
+
+[[battery.display]]
+threshold = 10
+style = "bg:#d01f33 fg:#fbfbff bold"
+
+[[battery.display]]
+threshold = 20
+style = "bg:#e54e38 fg:#15131a bold"
+
+[[battery.display]]
+threshold = 30
+style = "bg:#fa723c fg:#15131a bold"
+
+[[battery.display]]
+threshold = 40
+style = "bg:#ff993e fg:#15131a bold"
+
+[[battery.display]]
+threshold = 50
+style = "bg:#ffbf3f fg:#15131a bold"
+
+[[battery.display]]
+threshold = 60
+style = "bg:#ecd749 fg:#15131a bold"
+
+[[battery.display]]
+threshold = 70
+style = "bg:#c1e05a fg:#15131a bold"
+
+[[battery.display]]
+threshold = 80
+style = "bg:#94e66f fg:#15131a bold"
+
+[[battery.display]]
+threshold = 90
+style = "bg:#71e795 fg:#15131a bold"
+
+[[battery.display]]
+threshold = 100
+style = "bg:#3ee8b5 fg:#15131a bold"
+
+[character]
+success_symbol = "[❯](bold color_lang)[❯](bold color_time)"
+error_symbol = "[✗❯](bold color_error)"

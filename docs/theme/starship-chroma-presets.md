@@ -111,6 +111,18 @@ rejected styles).
 | `chroma-monument-valley` | The Mittens at sunset: two buttes fill both halves of their columns and pierce the horizon, far mesas sit low in haze, the sky runs from western glow to dusk |
 | `chroma-aurora-panorama` | Aurora curtains: violet (nitrogen) in the top half, oxygen green below where a curtain is long, night sky in the gaps, a black ridge at both ends |
 
+### Reactive set (self-chaining joints)
+
+Every divider in these presets is drawn `fg:prev_bg`: the background of whatever segment came
+before it, resolved by Starship at render time. The bar therefore hands off correctly whichever
+modules are present (no doubled divider when the language segment is empty), and modules that only
+render sometimes (`cmd_duration`, `jobs`, `status`, git states) can join the bar and leave it.
+
+| File | Technique |
+|---|---|
+| `chroma-reactive` | **Living gradient**: a calm night-ocean bar at rest that grows with events: amber heat for a slow command (`U+E0C6` sparks), a violet orbit for background jobs, a crimson flame (`U+E0C0`) when the last command failed. The battery closes the bar and slides along a red to aquamarine gradient with its charge (ten `[[battery.display]]` thresholds, one color each) |
+| `chroma-git-heat` | **Temperature of work**: each git state is its own cell, ordered cold to hot by how close the work is to shipping: untracked (frost violet), modified, renamed, deleted, staged (green), stashed, ahead (amber), behind, diverged, conflicted (red). Only the states present are drawn, so the cells always read as a rising ramp |
+
 ## Not included
 
 - notMyShell's reversed layout. Linear, center-out (`chroma-supernova`), and outside-in
