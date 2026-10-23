@@ -20,6 +20,7 @@
 #   omarchy-starship-preset -a, --all               # filter: both themes and presets (default)
 #   omarchy-starship-preset --list [mode]           # print items for Waymaker (all|themes|presets)
 #   omarchy-starship-preset --preview-only <name>   # print preset or theme TOML to stdout
+#   omarchy-starship-preset --delete <path>         # delete a custom preset (themes are never touched)
 #
 # Interactive controls inside the picker:
 #   ↑↓ / j/k  navigate presets / themes
@@ -27,6 +28,7 @@
 #   Shift-Tab cycle view filter backwards
 #   Ctrl-L    cycle vim mode mock forward  (insert → normal → visual → insert)
 #   Ctrl-H    cycle vim mode mock backward
+#   Ctrl-D    delete the custom preset under the cursor (also `d` in nav mode)
 #   Enter     select / open action menu
 #   Esc       quit
 #
@@ -370,6 +372,24 @@ preview_only() {
   return 1
 }
 
+# ─── --delete <path> (custom presets only) ───────────────────────────────────
+
+# Deletes a preset file that lives directly in $CUSTOM_PRESETS. Themes, the current live
+# config and anything else are refused, so the picker keybind is a no-op on those rows.
+# Presets are stowed from the dotfiles repo, so a deleted one can be brought back with git.
+delete_preset() {
+  local file="$1" presets_dir target
+  while [[ "$file" == \'*\' || "$file" == \"*\" ]]; do file="${file:1:-1}"; done
+  presets_dir="$(realpath -e "$CUSTOM_PRESETS" 2>/dev/null)" || return 1
+  [[ "$file" == *.toml && -f "$file" ]] || return 1
+  [[ "$(realpath -e "$(dirname "$file")")" == "$presets_dir" ]] || return 1
+  target="$(realpath -e "$file")"
+  rm -f -- "$file"
+  # Per-file stow symlink: drop the repo file too, or a restow would bring it back.
+  [[ "$target" != "$presets_dir/$(basename "$file")" && -f "$target" ]] && rm -f -- "$target"
+  return 0
+}
+
 # ─── argument parsing ─────────────────────────────────────────────────────────
 
 FILTER_MODE="all"
@@ -383,6 +403,10 @@ while [[ $# -gt 0 ]]; do
     --preview-only)
       preview_only "${2:-}"
       exit 0
+      ;;
+    --delete)
+      delete_preset "${2:-}"
+      exit $?
       ;;
     --list)
       list_entries "${2:-all}"
@@ -409,6 +433,7 @@ while [[ $# -gt 0 ]]; do
       echo "  -a, --all        Show both themes and presets (default)"
       echo "  --preview-only <name>   Print rendered preset/theme TOML to stdout"
       echo "  --list [mode]           Print entries for Waymaker (all|themes|presets)"
+      echo "  --delete <path>         Delete a custom preset file (themes are refused)"
       echo "  -h, --help              Show this help message"
       exit 0
       ;;
@@ -495,6 +520,7 @@ while true; do
   printf '  [\033[1ms\033[0m]ave to current theme'
   printf '   [\033[1mt\033[0m]est in new shell'
   printf '   [\033[1md\033[0m]iff vs current'
+  [[ "$label" == "[preset]"* ]] && printf '   [\033[1mx\033[0m] delete preset'
   printf '   [\033[1mq\033[0m]uit\n  › '
   read -r -n1 choice
   printf '\n'
@@ -528,6 +554,17 @@ while true; do
         printf '  \033[38;5;240m(no current live config to compare against)\033[0m\n'
       fi
       printf '\n'
+      ;;
+    x|X)
+      [[ "$label" == "[preset]"* ]] || continue
+      printf '  Delete %s? [y/N] ' "$file"
+      read -r -n1 confirm
+      printf '\n'
+      if [[ "$confirm" == [yY] ]] && delete_preset "$file"; then
+        printf '\n  \033[1;31m✗ Deleted.\033[0m %s\n\n' "$(basename "$file")"
+        break
+      fi
+      printf '  \033[38;5;240m(kept)\033[0m\n\n'
       ;;
     q|Q|$'\x1b'|'')
       printf '  Quit.\n'

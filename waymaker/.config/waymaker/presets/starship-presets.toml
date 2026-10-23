@@ -56,7 +56,7 @@ additional = [
 ]
 
 [footer]
-content = " {cyan,bold:Enter} {darkgray:Selecionar} {darkgray:│} {cyan,bold:Tab} {darkgray:Filtro (Todos ↔ Temas ↔ Presets)} {darkgray:│} {cyan,bold:j/k} {darkgray:Navegar} {darkgray:│} {cyan,bold:C-l/h} {darkgray:Modo Vim} {darkgray:│} {cyan,bold:Esc} {darkgray:Cancelar}"
+content = " {cyan,bold:Enter} {darkgray:Selecionar} {darkgray:│} {cyan,bold:Tab} {darkgray:Filtro (Todos ↔ Temas ↔ Presets)} {darkgray:│} {cyan,bold:j/k} {darkgray:Navegar} {darkgray:│} {cyan,bold:C-l/h} {darkgray:Modo Vim} {darkgray:│} {cyan,bold:C-d} {darkgray:Deletar preset} {darkgray:│} {cyan,bold:Esc} {darkgray:Cancelar}"
 row_connection = "Full"
 match_indent = false
 separator = "light"
@@ -68,6 +68,8 @@ separator = "light"
 "ctrl-k" = "Up"
 "ctrl-l" = ["ExecuteSilent($OMARCHY_STARSHIP_CYCLE_SCRIPT $OMARCHY_MODE_FILE fwd)", '''Preview(omarchy-starship-preset --render-preview {path} {label})''']
 "ctrl-h" = ["ExecuteSilent($OMARCHY_STARSHIP_CYCLE_SCRIPT $OMARCHY_MODE_FILE bwd)", '''Preview(omarchy-starship-preset --render-preview {path} {label})''']
+# Delete the custom preset under the cursor, then re-list the active filter (themes are refused).
+"ctrl-d" = ["ExecuteSilent(omarchy-starship-preset --delete {path})", "Reload"]
 
 [ui.nav.binds]
 "tab" = "@next"
@@ -76,3 +78,5 @@ separator = "light"
 "k" = "Up"
 "ctrl-l" = ["ExecuteSilent($OMARCHY_STARSHIP_CYCLE_SCRIPT $OMARCHY_MODE_FILE fwd)", '''Preview(omarchy-starship-preset --render-preview {path} {label})''']
 "ctrl-h" = ["ExecuteSilent($OMARCHY_STARSHIP_CYCLE_SCRIPT $OMARCHY_MODE_FILE bwd)", '''Preview(omarchy-starship-preset --render-preview {path} {label})''']
+"d" = ["ExecuteSilent(omarchy-starship-preset --delete {path})", "Reload"]
+"ctrl-d" = ["ExecuteSilent(omarchy-starship-preset --delete {path})", "Reload"]
