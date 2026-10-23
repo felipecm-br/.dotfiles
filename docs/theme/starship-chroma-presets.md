@@ -96,20 +96,20 @@ right edge. The presets use five or six fills to keep that gap at a few cells.
 | `chroma-horizon` | Panoramic sunset: every cell is an upper half block with the sky as `fg` and the sea reflection as `bg`; center-out across the width, with the sun in the middle and sun glitter on the water | `▀` |
 | `chroma-full-bleed` | The status bar fills the row: modules on the left, then the gradient keeps going as background bands through the empty middle to the clock at the right edge | spaces with `bg:prev_bg` |
 
-### Width-scaling scenes (`$fill` grid)
+### Width-scaling scenes (`$fill` half-block panoramas)
 
-Multi-row panoramas that stretch with the terminal. Every scene row has the same number of
-columns, and each column is one joint cell followed by a `$fill` (a space styled `bg:prev_bg`).
-Because each `$fill` is preceded by the same number of fixed cells in every row, the fills get the
-same share of the width and the columns line up vertically at any terminal size. A joint is either
-a plain cell (a vertical edge) or a wedge drawn with `fg` = the previous column and `bg` = the new
-one (`U+E0BC`, `U+E0B8`, `U+E0BA`, `U+E0BE`), which draws a slope. `$fill` can only make flat
-tops, so the subjects are chosen to have them.
+A small landscape drawn in the empty middle of the status line, between the modules and the clock,
+so the prompt stays two lines tall. Each scene column is an upper half block (`U+2580`) whose `fg`
+is the top half and `bg` the bottom half, followed by a `$fill` styled `fg:prev_fg bg:prev_bg` that
+stretches it. The horizon runs through the middle of the row and the scene scales with the
+terminal. `$fill` can only draw flat tops, so the subjects are chosen to have them. A first version
+used three full scene rows above the prompt and took too much of the screen (see the skill's
+rejected styles).
 
-| File | Scene | Glyphs |
-|---|---|---|
-| `chroma-monument-valley` | The Mittens at sunset: two buttes on sheer walls above talus and hazy far mesas, sun setting in the west (left), sandstone lit on the west faces | flat seams, wedges `U+E0BC` / `U+E0B8` |
-| `chroma-aurora-panorama` | Aurora curtains of different lengths hanging from the top (nitrogen violet, oxygen green, bright fringe) with a shimmering hue, over a black ridge; the near-black sky hides the rounding gap at the right edge | hanging wedges `U+E0BA` / `U+E0BE`, ridge `U+E0BC` / `U+E0B8` |
+| File | Scene |
+|---|---|
+| `chroma-monument-valley` | The Mittens at sunset: two buttes fill both halves of their columns and pierce the horizon, far mesas sit low in haze, the sky runs from western glow to dusk |
+| `chroma-aurora-panorama` | Aurora curtains: violet (nitrogen) in the top half, oxygen green below where a curtain is long, night sky in the gaps, a black ridge at both ends |
 
 ## Not included
 

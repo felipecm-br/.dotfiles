@@ -1,6 +1,6 @@
 # Rejected Styles
 
-Presets the user tried and deleted (October 2026) because they looked ugly or would not be used.
+Presets the user tried and deleted or asked to shrink (October 2026) because they looked ugly or would not be used.
 Read this before designing a new preset: the patterns below failed in practice, while the kept
 sets (`chroma-*`, `2-poly-*`, most `3-*`, `4-giza`) show what works.
 
@@ -13,6 +13,7 @@ sets (`chroma-*`, `2-poly-*`, most `3-*`, `4-giza`) show what works.
 | **Repeating textile or tile patterns** | `3-fair-isle` (checker + diamonds), `4-marrakech` (zellige), `3-stained-glass` (half-block lead cames), `4-ipanema` (calçadão waves) | Busy, high-frequency texture competes with the text and makes the prompt noisy to scan. |
 | **Many unrelated saturated colors** | `4-new-york` (MTA bullets), `4-london` (Tube lines), `3-glitch-art` (RGB channel split), `4-rio-de-janeiro` / `4-paris` (flag colors) | No color continuity between segments: each seam is a hard jump, so the line reads as a list of badges instead of one flowing body. |
 | **Recycled chain signatures** | `red-fuji` (Great Wave claw), `power-hadouken-v3` (third iteration of the same charge), `power-rasengan` | Same look as an existing preset with a new palette; nothing new to justify a separate file. |
+| **Tall multi-row scenes above the prompt** | first versions of `chroma-monument-valley` and `chroma-aurora-panorama` (three full scene rows plus the status line and `❯`, five lines in total) | Took too much of the screen for a prompt that repeats after every command. Keep a preset at two or three lines; a scene fits in the status line itself with half blocks. |
 | **Plain early-style presets** | `nordic-aurora`, `sudden-shower-atake` | Single-glyph separators with no layering; superseded by the gradient and drawing techniques. |
 
 ## What works (keep doing)
