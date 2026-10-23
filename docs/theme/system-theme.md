@@ -73,7 +73,7 @@ underlying `sed` pass). See the render logic in
 repo needs:
 
 - Re-sources `~/.config/tmux/tmux.conf` across running tmux servers so tmux immediately picks up the freshly rendered `tmux-colors.conf`.
-- Copies the rendered `~/.local/state/omarchy/current/theme/waymux.toml` into `~/.config/waymux/config.toml` and restarts `waymux.service` (`systemctl --user restart waymux.service`) so AI agent status pills and colors match the active theme.
+- Restarts `waymux.service` (`systemctl --user restart waymux.service`) so the AI agent state palette follows the new theme's light/dark mode. `~/.config/waymux/config.toml` is the source of truth and is never rewritten: there is no waymux template, because state colors come from waymux's built-in palette.
 
 This is also where additional per-app refresh logic should be added when adopting a new tool into
 the dotfiles.

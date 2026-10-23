@@ -13,9 +13,8 @@ notifications.
 | Agent-state glyphs (`idle`, `busy`, `question`, `permission`, `stalled`, `error`) | `[theme.states.<state>].icon` in the same file |
 | Built-in defaults (used when a key is missing) | `src/icons.rs` in the waymux repository |
 
-`config.toml` is mirrored by the Omarchy template
-[`waymux/.config/omarchy/themed/waymux.toml.tpl`](../../waymux/.config/omarchy/themed/waymux.toml.tpl).
-Keep both files identical, otherwise `omarchy-theme-set` overwrites your edit.
+`config.toml` is hand-maintained and has no Omarchy template: theme switches only restart
+waymux, they never rewrite the file.
 
 Special keys:
 
@@ -44,7 +43,7 @@ waymux icons --format tmux        # the plugin's `icons:` YAML section
 
 ## Changing or adding an icon
 
-1. Edit `[icons]` (or `[theme.states.*]`) in `config.toml` **and** the `.tpl` mirror.
+1. Edit `[icons]` (or `[theme.states.*]`) in `config.toml`.
 2. Reload tmux (`prefix r`), or run `~/.config/tmux/nerd-font-icons-sync.sh`, to rebuild the
    plugin config. Everything else reads the registry on every call.
 3. Windows that are already open keep their name until the next rename (new command, or the

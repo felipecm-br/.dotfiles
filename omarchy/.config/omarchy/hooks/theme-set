@@ -3,7 +3,6 @@
 # Called by omarchy-hook theme-set with the new theme name as $1.
 
 THEME_NAME="$1"
-CURRENT_THEME_DIR="$HOME/.local/state/omarchy/current/theme"
 
 # Reload tmux configuration so new theme colors apply immediately
 if tmux info &>/dev/null; then
@@ -11,15 +10,12 @@ if tmux info &>/dev/null; then
   tmux refresh-client 2>/dev/null || true
 fi
 
-# Sync waymux.toml directly to ~/.config/waymux/config.toml and reload waymux
-if [[ -f "$CURRENT_THEME_DIR/waymux.toml" ]]; then
-  mkdir -p "$HOME/.config/waymux"
-  cp "$CURRENT_THEME_DIR/waymux.toml" "$HOME/.config/waymux/config.toml"
-  if systemctl --user is-active --quiet waymux.service 2>/dev/null; then
-    systemctl --user restart waymux.service 2>/dev/null || true
-  else
-    pkill -HUP -x waymux 2>/dev/null || true
-  fi
+# Restart waymux so its state palette follows the new theme's light/dark mode.
+# ~/.config/waymux/config.toml is the source of truth and is never rewritten here.
+if systemctl --user is-active --quiet waymux.service 2>/dev/null; then
+  systemctl --user restart waymux.service 2>/dev/null || true
+else
+  pkill -HUP -x waymux 2>/dev/null || true
 fi
 
 # Clear stale uwsm app-daemon error flag if any
