@@ -44,7 +44,7 @@ build a **stepped gradient** instead:
 
 ### Extended set
 
-These eight go beyond notMyShell's stops, and each one introduces a different gradient technique.
+These go beyond notMyShell's stops, and each one introduces a different gradient technique.
 
 | File | Technique | Glyph chain |
 |---|---|---|
@@ -56,6 +56,14 @@ These eight go beyond notMyShell's stops, and each one introduces a different gr
 | `chroma-mesh` | **2D mesh gradient**: upper half blocks with `fg` on a top track and `bg` on a different bottom track; segment fills are the midpoint of the two tracks | `▀` x4 |
 | `chroma-thermal` | Inferno colormap starting at t 0.18, so the coldest fill still shows on a dark terminal | pixel squares `U+E0C6 U+E0C6 U+E0C4` |
 | `chroma-oil-slick` | Thin-film interference cycle: violet, blue, teal, gold, magenta, back to violet | ice waveforms `U+E0C8` |
+| `chroma-supernova` | notMyShell's **center-out** layout: the gradient starts at the git segment (white-hot core) and runs to both ends; flames point away from the core on each side | mirrored flames `U+E0C2` left, flames `U+E0C0` right |
+| `chroma-wormhole` | notMyShell's **outside-in** layout: bright mouths at both ends, a dark throat in the middle, arrows converging inward | `U+E0B0` left, `U+E0B2` right |
+| `chroma-liquid-fill` | **Vertical wipe**: the next color rises from the bottom of the cells like liquid; the bar fills from the terminal and drains at the end | eighths `▁▂▃▄▅▆▇` |
+| `chroma-halftone` | **Print halftone**: no mixed inks, only dot size; the next ink's dots grow, then the current ink's dots shrink (Ben-Day dots) | `· ∙ • ●` and back |
+| `chroma-prism` | White light hits a glass prism (a peak) and **disperses** into an OKLCH spectrum at constant lightness, fading into ultraviolet | peak `U+E0BA U+E0B8`, slants `U+E0BC` |
+| `chroma-opal` | **Play-of-color**: a milky pale body gradient with a saturated fleck in every cell, colors rotating from gap to gap | quadrants `▗ ▘ ▝ ▖` |
+| `chroma-bokeh` | Dusk gradient with **out-of-focus light discs** of three sizes over each step; a few orbs drift off onto the terminal | `● ∙ •` |
+| `chroma-conic` | **Closed loop**: one full turn of the OKLCH hue wheel, so the last segment matches the first | pearls `U+E0B4` |
 
 The files carry the `# glyph-stacking: gradient` marker, which tells the skill's validator not to
 flag the deliberately small contrast between neighboring gradient steps. Text contrast is still
@@ -73,4 +81,5 @@ python3 .agents/skills/starship-glyph-stacking/scripts/validate.py starship/.con
 - A full-width gradient divider above the prompt. It could be drawn by a zsh `precmd` that reads
   `$COLUMNS` and computes the colors in pure zsh without forking, but it lives outside the presets
   and is not implemented.
-- notMyShell's reversed, center-out, and outside-in layouts. Only the linear direction is ported.
+- notMyShell's reversed layout. Linear, center-out (`chroma-supernova`), and outside-in
+  (`chroma-wormhole`) are ported.

@@ -1,0 +1,118 @@
+# ==============================================================================
+#  Preset: Chroma Prism (Dark Side Edition)
+#  Inspired by: notMyShell Chroma treatment, extended (white #eef2ff -> glass prism -> OKLCH spectrum L=0.72 C=0.17, hue 25 -> 300)
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+# glyph-stacking: gradient
+# White light (os) hits a glass prism drawn as a peak (U+E0BA + U+E0B8), and comes out dispersed:
+# the following segments are a spectrum at constant OKLCH lightness, hue 25 (red) to 300
+# (violet), stepped by slants U+E0BC through interpolated hue angles. The bar fades out into
+# ultraviolet.
+# Regenerate colors with .agents/skills/starship-glyph-stacking/scripts/gradient.py.
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+format = """
+[](fg:color_s0 bg:transparent)\
+$os\
+[](fg:color_glass bg:color_s0)\
+[](fg:color_glass bg:color_s1)\
+
+$directory\
+[](fg:color_s1 bg:color_s12a)\
+[](fg:color_s12a bg:color_s12b)\
+[](fg:color_s12b bg:color_s2)\
+
+$git_branch$git_status\
+[](fg:color_s2 bg:color_s23a)\
+[](fg:color_s23a bg:color_s23b)\
+[](fg:color_s23b bg:color_s3)\
+
+$c$rust$golang$nodejs$deno$python\
+[](fg:color_s3 bg:color_s34a)\
+[](fg:color_s34a bg:color_s34b)\
+[](fg:color_s34b bg:color_s4)\
+
+$time\
+[](fg:color_s4 bg:color_uv)\
+[](fg:color_uv bg:transparent)\
+\n$character"""
+
+palette = 'chroma_prism'
+
+[palettes.chroma_prism]
+color_s0    = '#eef2ff' # White light (the incoming beam)
+color_glass = '#8ea3c0' # Crown glass (the prism)
+color_s1    = '#fd736d' # Spectrum hue 25 segment fill
+color_s2    = '#c6a100' # Spectrum hue 95 segment fill
+color_s3    = '#00c2ce' # Spectrum hue 200 segment fill
+color_s4    = '#b688fe' # Spectrum hue 300 segment fill
+color_s12a  = '#f77e34' # Spectrum hue 48 step
+color_s12b  = '#e58f00' # Spectrum hue 72 step
+color_s23a  = '#80b934' # Spectrum hue 130 step
+color_s23b  = '#00c589' # Spectrum hue 165 step
+color_s34a  = '#00b3fd' # Spectrum hue 233 step
+color_s34b  = '#749eff' # Spectrum hue 267 step
+color_uv    = '#3a1f7a' # Ultraviolet (beyond the visible edge)
+color_ink   = '#15131a' # Ink (text on light fills)
+color_error = '#ff3355' # Error (paired with the ✗ shape)
+
+[os]
+disabled = false
+style = "bg:color_s0 fg:color_ink bold"
+format = '[ 󱥒 ]($style)'
+
+[directory]
+style = "bg:color_s1 fg:color_ink bold"
+format = "[ 󰲋 $path ]($style)"
+truncation_length = 3
+
+[git_branch]
+symbol = " "
+style = "bg:color_s2 fg:color_ink bold"
+format = '[ $symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_s2 fg:color_ink bold"
+format = '([$all_status$ahead_behind ]($style))'
+
+[c]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[rust]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[golang]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[deno]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[python]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_s4 fg:color_ink bold"
+format = '[ $time ]($style)'
+
+# A three-step gradient chevron (starting at the first fill visible on a dark terminal); errors swap to a single-hue ✗ so they never blend into the gradient.
+[character]
+success_symbol = "[❯](bold color_s1)[❯](bold color_s3)[❯](bold color_s4)"
+error_symbol = "[✗❯](bold color_error)"

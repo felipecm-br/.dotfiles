@@ -1,0 +1,102 @@
+# ==============================================================================
+#  Preset: Chroma Liquid Fill (Rising Tide Edition)
+#  Inspired by: notMyShell Chroma treatment, extended (stops: #0d2b52 #1a6fa0 #2fc0b0 #b8e05a #ffb347)
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+# glyph-stacking: gradient
+# A vertical wipe: each transition is the eighth-block staircase U+2581 -> U+2587, fg = the next
+# segment over bg = the current one, so the new color rises from the floor of the cells until
+# it fills them. The bar fills up from the terminal at the start and drains at the end.
+# Regenerate colors with .agents/skills/starship-glyph-stacking/scripts/gradient.py.
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+format = """
+[▁▂▃▄▅▆▇](fg:color_s0)\
+$os\
+[▁▂▃▄▅▆▇](fg:color_s1 bg:color_s0)\
+
+$directory\
+[▁▂▃▄▅▆▇](fg:color_s2 bg:color_s1)\
+
+$git_branch$git_status\
+[▁▂▃▄▅▆▇](fg:color_s3 bg:color_s2)\
+
+$c$rust$golang$nodejs$deno$python\
+[▁▂▃▄▅▆▇](fg:color_s4 bg:color_s3)\
+
+$time\
+[▇▆▅▄▃▂▁](fg:color_s4)\
+\n$character"""
+
+palette = 'chroma_liquid_fill'
+
+[palettes.chroma_liquid_fill]
+color_s0    = '#0d2b52' # t=0.00 segment fill
+color_s1    = '#1a6fa0' # t=0.25 segment fill
+color_s2    = '#2fc0b0' # t=0.50 segment fill
+color_s3    = '#b8e05a' # t=0.75 segment fill
+color_s4    = '#ffb347' # t=1.00 segment fill
+color_paper = '#fbfbff' # Paper (text on dark fills)
+color_ink   = '#15131a' # Ink (text on light fills)
+color_error = '#ff3355' # Error (paired with the ✗ shape)
+
+[os]
+disabled = false
+style = "bg:color_s0 fg:color_paper bold"
+format = '[ 󰆫 ]($style)'
+
+[directory]
+style = "bg:color_s1 fg:color_paper bold"
+format = "[ 󰲋 $path ]($style)"
+truncation_length = 3
+
+[git_branch]
+symbol = " "
+style = "bg:color_s2 fg:color_ink bold"
+format = '[ $symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_s2 fg:color_ink bold"
+format = '([$all_status$ahead_behind ]($style))'
+
+[c]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[rust]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[golang]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[deno]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[python]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_s4 fg:color_ink bold"
+format = '[ $time ]($style)'
+
+# A three-step gradient chevron (starting at the first fill visible on a dark terminal); errors swap to a single-hue ✗ so they never blend into the gradient.
+[character]
+success_symbol = "[❯](bold color_s1)[❯](bold color_s3)[❯](bold color_s4)"
+error_symbol = "[✗❯](bold color_error)"

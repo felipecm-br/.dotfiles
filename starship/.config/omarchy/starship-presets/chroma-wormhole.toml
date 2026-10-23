@@ -1,0 +1,119 @@
+# ==============================================================================
+#  Preset: Chroma Wormhole (Outside-In Edition)
+#  Inspired by: notMyShell Chroma treatment, extended (outside-in layout, stops: #7af0ff #5a8cff #7a3cff #2a0d6b #07021a)
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+# glyph-stacking: gradient
+# Port of notMyShell's outside-in direction: both ends are the bright mouth of the wormhole and
+# the gradient runs inward to the dark throat at the middle segment. Hard arrows point toward
+# the center from both sides (U+E0B0 on the left, U+E0B2 on the right), three OKLab steps each,
+# so the bar reads as a tunnel pulling inward.
+# Regenerate colors with .agents/skills/starship-glyph-stacking/scripts/gradient.py.
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+format = """
+[](fg:color_s0 bg:transparent)\
+$os\
+[](fg:color_s0 bg:color_s010)\
+[](fg:color_s010 bg:color_s011)\
+[](fg:color_s011 bg:color_s1)\
+
+$directory\
+[](fg:color_s1 bg:color_s120)\
+[](fg:color_s120 bg:color_s121)\
+[](fg:color_s121 bg:color_s2)\
+
+$git_branch$git_status\
+[](fg:color_s230 bg:color_s2)\
+[](fg:color_s231 bg:color_s230)\
+[](fg:color_s3 bg:color_s231)\
+
+$c$rust$golang$nodejs$deno$python\
+[](fg:color_s340 bg:color_s3)\
+[](fg:color_s341 bg:color_s340)\
+[](fg:color_s4 bg:color_s341)\
+
+$time\
+[](fg:color_s4 bg:transparent)\
+\n$character"""
+
+palette = 'chroma_wormhole'
+
+[palettes.chroma_wormhole]
+color_s0    = '#7af0ff' # t=0.00 segment fill (depth into the throat)
+color_s1    = '#7651ff' # t=0.45 segment fill (depth into the throat)
+color_s2    = '#140538' # t=0.90 segment fill (depth into the throat)
+color_s3    = '#7651ff' # t=0.45 segment fill (depth into the throat)
+color_s4    = '#7af0ff' # t=0.00 segment fill (depth into the throat)
+color_s010  = '#7bc0ff' # OKLab step 1/2 (s0 to s1)
+color_s011  = '#7a8dff' # OKLab step 2/2 (s0 to s1)
+color_s120  = '#5335b7' # OKLab step 1/2 (s1 to s2)
+color_s121  = '#321b74' # OKLab step 2/2 (s1 to s2)
+color_s230  = '#321b74' # OKLab step 1/2 (s2 to s3)
+color_s231  = '#5335b7' # OKLab step 2/2 (s2 to s3)
+color_s340  = '#7a8dff' # OKLab step 1/2 (s3 to s4)
+color_s341  = '#7bc0ff' # OKLab step 2/2 (s3 to s4)
+color_ink   = '#15131a' # Ink (text on light fills)
+color_paper = '#fbfbff' # Paper (text on dark fills)
+color_error = '#ff3355' # Error (paired with the ✗ shape)
+
+[os]
+disabled = false
+style = "bg:color_s0 fg:color_ink bold"
+format = '[ 󰀘 ]($style)'
+
+[directory]
+style = "bg:color_s1 fg:color_paper bold"
+format = "[ 󰲋 $path ]($style)"
+truncation_length = 3
+
+[git_branch]
+symbol = " "
+style = "bg:color_s2 fg:color_paper bold"
+format = '[ $symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_s2 fg:color_paper bold"
+format = '([$all_status$ahead_behind ]($style))'
+
+[c]
+symbol = " "
+style = "bg:color_s3 fg:color_paper bold"
+format = '[ $symbol($version) ]($style)'
+
+[rust]
+symbol = " "
+style = "bg:color_s3 fg:color_paper bold"
+format = '[ $symbol($version) ]($style)'
+
+[golang]
+symbol = " "
+style = "bg:color_s3 fg:color_paper bold"
+format = '[ $symbol($version) ]($style)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_s3 fg:color_paper bold"
+format = '[ $symbol($version) ]($style)'
+
+[deno]
+symbol = " "
+style = "bg:color_s3 fg:color_paper bold"
+format = '[ $symbol($version) ]($style)'
+
+[python]
+symbol = " "
+style = "bg:color_s3 fg:color_paper bold"
+format = '[ $symbol($version) ]($style)'
+
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_s4 fg:color_ink bold"
+format = '[ $time ]($style)'
+
+# A three-step gradient chevron (starting at the first fill visible on a dark terminal); errors swap to a single-hue ✗ so they never blend into the gradient.
+[character]
+success_symbol = "[❯](bold color_s0)[❯](bold color_s1)[❯](bold color_s0)"
+error_symbol = "[✗❯](bold color_error)"

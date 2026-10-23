@@ -1,0 +1,127 @@
+# ==============================================================================
+#  Preset: Chroma Bokeh (f/1.2 Night Edition)
+#  Inspired by: notMyShell Chroma treatment, extended (stops: #140c2e #2e1a52 #5a2368 #8f3260 #c45a4f, orbs: #ffd9a0 #a0e9ff #ffb0d0 #c9b5ff #fff1b8)
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+# glyph-stacking: gradient
+# A wide-open lens at dusk: the background gradient steps through OKLab, and out-of-focus
+# highlights float over each step as discs of three sizes (U+25CF U+2022 U+2219), warm sodium
+# and cool LED tints. A few orbs drift off the bar onto the terminal at both ends.
+# Regenerate colors with .agents/skills/starship-glyph-stacking/scripts/gradient.py.
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+format = """
+[∙](fg:color_orb1)\
+[•](fg:color_orb0)\
+[](fg:color_s0 bg:transparent)\
+$os\
+[●](fg:color_orb0 bg:color_s010)\
+[∙](fg:color_orb1 bg:color_s011)\
+[•](fg:color_orb2 bg:color_s1)\
+
+$directory\
+[●](fg:color_orb2 bg:color_s120)\
+[∙](fg:color_orb3 bg:color_s121)\
+[•](fg:color_orb4 bg:color_s2)\
+
+$git_branch$git_status\
+[●](fg:color_orb4 bg:color_s230)\
+[∙](fg:color_orb0 bg:color_s231)\
+[•](fg:color_orb1 bg:color_s3)\
+
+$c$rust$golang$nodejs$deno$python\
+[●](fg:color_orb1 bg:color_s340)\
+[∙](fg:color_orb2 bg:color_s341)\
+[•](fg:color_orb3 bg:color_s4)\
+
+$time\
+[](fg:color_s4 bg:transparent)\
+[●](fg:color_orb4)\
+[∙](fg:color_orb2)\
+\n$character"""
+
+palette = 'chroma_bokeh'
+
+[palettes.chroma_bokeh]
+color_s0       = '#140c2e' # t=0.00 dusk fill
+color_s1       = '#2e1a52' # t=0.25 dusk fill
+color_s2       = '#5a2368' # t=0.50 dusk fill
+color_s3       = '#8f3260' # t=0.75 dusk fill
+color_s4       = '#c45a4f' # t=1.00 dusk fill
+color_orb0     = '#ffd9a0' # Sodium lamp bokeh disc
+color_orb1     = '#a0e9ff' # LED cyan bokeh disc
+color_orb2     = '#ffb0d0' # Neon pink bokeh disc
+color_orb3     = '#c9b5ff' # Mercury violet bokeh disc
+color_orb4     = '#fff1b8' # Tungsten bokeh disc
+color_s010     = '#1c113a' # OKLab step 1/2 (s0 to s1)
+color_s011     = '#251546' # OKLab step 2/2 (s0 to s1)
+color_s120     = '#3c1d59' # OKLab step 1/2 (s1 to s2)
+color_s121     = '#4b2061' # OKLab step 2/2 (s1 to s2)
+color_s230     = '#6b2966' # OKLab step 1/2 (s2 to s3)
+color_s231     = '#7d2e63' # OKLab step 2/2 (s2 to s3)
+color_s340     = '#a0405c' # OKLab step 1/2 (s3 to s4)
+color_s341     = '#b24d57' # OKLab step 2/2 (s3 to s4)
+color_paper    = '#fbfbff' # Paper (text on dark fills)
+color_ink_deep = '#000000' # Pure black (contrast correction)
+color_error    = '#ff3355' # Error (paired with the ✗ shape)
+
+[os]
+disabled = false
+style = "bg:color_s0 fg:color_paper bold"
+format = '[ 󰄄 ]($style)'
+
+[directory]
+style = "bg:color_s1 fg:color_paper bold"
+format = "[ 󰲋 $path ]($style)"
+truncation_length = 3
+
+[git_branch]
+symbol = " "
+style = "bg:color_s2 fg:color_paper bold"
+format = '[ $symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_s2 fg:color_paper bold"
+format = '([$all_status$ahead_behind ]($style))'
+
+[c]
+symbol = " "
+style = "bg:color_s3 fg:color_paper bold"
+format = '[ $symbol($version) ]($style)'
+
+[rust]
+symbol = " "
+style = "bg:color_s3 fg:color_paper bold"
+format = '[ $symbol($version) ]($style)'
+
+[golang]
+symbol = " "
+style = "bg:color_s3 fg:color_paper bold"
+format = '[ $symbol($version) ]($style)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_s3 fg:color_paper bold"
+format = '[ $symbol($version) ]($style)'
+
+[deno]
+symbol = " "
+style = "bg:color_s3 fg:color_paper bold"
+format = '[ $symbol($version) ]($style)'
+
+[python]
+symbol = " "
+style = "bg:color_s3 fg:color_paper bold"
+format = '[ $symbol($version) ]($style)'
+
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_s4 fg:color_ink_deep bold"
+format = '[ $time ]($style)'
+
+# A three-step gradient chevron (starting at the first fill visible on a dark terminal); errors swap to a single-hue ✗ so they never blend into the gradient.
+[character]
+success_symbol = "[❯](bold color_orb1)[❯](bold color_orb2)[❯](bold color_orb0)"
+error_symbol = "[✗❯](bold color_error)"

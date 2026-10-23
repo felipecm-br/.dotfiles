@@ -1,0 +1,133 @@
+# ==============================================================================
+#  Preset: Chroma Opal (Play-of-Color Edition)
+#  Inspired by: notMyShell Chroma treatment, extended (body: #e9eef6 #f4e7f1 #e4f5ef #f6f1e2 #e8e6f7, flecks: #ff4fa3 #2fc8ff #3fe08a #ffb13b #9b6bff)
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+# glyph-stacking: gradient
+# Precious opal: a milky body whose gradient drifts through pale tints, lit by flecks of pure
+# spectral color (silica spheres diffracting light). Transitions step the body through three
+# OKLab samples, and every cell carries a quadrant fleck (U+2597 U+2598 U+259D U+2596) in a
+# different saturated color, rotating from gap to gap.
+# Regenerate colors with .agents/skills/starship-glyph-stacking/scripts/gradient.py.
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+format = """
+[](fg:color_s0 bg:transparent)\
+$os\
+[▗](fg:color_fleck0 bg:color_s010)\
+[▘](fg:color_fleck1 bg:color_s011)\
+[▝](fg:color_fleck2 bg:color_s012)\
+[▖](fg:color_fleck3 bg:color_s1)\
+
+$directory\
+[▘](fg:color_fleck1 bg:color_s120)\
+[▝](fg:color_fleck2 bg:color_s121)\
+[▖](fg:color_fleck3 bg:color_s122)\
+[▗](fg:color_fleck4 bg:color_s2)\
+
+$git_branch$git_status\
+[▝](fg:color_fleck2 bg:color_s230)\
+[▖](fg:color_fleck3 bg:color_s231)\
+[▗](fg:color_fleck4 bg:color_s232)\
+[▘](fg:color_fleck0 bg:color_s3)\
+
+$c$rust$golang$nodejs$deno$python\
+[▖](fg:color_fleck3 bg:color_s340)\
+[▗](fg:color_fleck4 bg:color_s341)\
+[▘](fg:color_fleck0 bg:color_s342)\
+[▝](fg:color_fleck1 bg:color_s4)\
+
+$time\
+[▘](fg:color_fleck4 bg:color_s4)\
+[▗](fg:color_fleck0 bg:color_s4)\
+[](fg:color_s4 bg:transparent)\
+\n$character"""
+
+palette = 'chroma_opal'
+
+[palettes.chroma_opal]
+color_s0     = '#e9eef6' # t=0.00 opal body
+color_s1     = '#f4e7f1' # t=0.25 opal body
+color_s2     = '#e4f5ef' # t=0.50 opal body
+color_s3     = '#f6f1e2' # t=0.75 opal body
+color_s4     = '#e8e6f7' # t=1.00 opal body
+color_fleck0 = '#ff4fa3' # Fire pink fleck
+color_fleck1 = '#2fc8ff' # Electric blue fleck
+color_fleck2 = '#3fe08a' # Jelly green fleck
+color_fleck3 = '#ffb13b' # Harlequin orange fleck
+color_fleck4 = '#9b6bff' # Royal violet fleck
+color_s010   = '#ececf5' # OKLab step 1/3 (s0 to s1)
+color_s011   = '#efebf3' # OKLab step 2/3 (s0 to s1)
+color_s012   = '#f1e9f2' # OKLab step 3/3 (s0 to s1)
+color_s120   = '#f0ebf1' # OKLab step 1/3 (s1 to s2)
+color_s121   = '#eceef0' # OKLab step 2/3 (s1 to s2)
+color_s122   = '#e8f2f0' # OKLab step 3/3 (s1 to s2)
+color_s230   = '#e9f4ec' # OKLab step 1/3 (s2 to s3)
+color_s231   = '#edf3e9' # OKLab step 2/3 (s2 to s3)
+color_s232   = '#f2f2e5' # OKLab step 3/3 (s2 to s3)
+color_s340   = '#f2eee7' # OKLab step 1/3 (s3 to s4)
+color_s341   = '#efeced' # OKLab step 2/3 (s3 to s4)
+color_s342   = '#ebe9f2' # OKLab step 3/3 (s3 to s4)
+color_ink    = '#15131a' # Ink (text on light fills)
+color_error  = '#ff3355' # Error (paired with the ✗ shape)
+
+[os]
+disabled = false
+style = "bg:color_s0 fg:color_ink bold"
+format = '[ 󰮊 ]($style)'
+
+[directory]
+style = "bg:color_s1 fg:color_ink bold"
+format = "[ 󰲋 $path ]($style)"
+truncation_length = 3
+
+[git_branch]
+symbol = " "
+style = "bg:color_s2 fg:color_ink bold"
+format = '[ $symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_s2 fg:color_ink bold"
+format = '([$all_status$ahead_behind ]($style))'
+
+[c]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[rust]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[golang]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[deno]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[python]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_s4 fg:color_ink bold"
+format = '[ $time ]($style)'
+
+# A three-step gradient chevron (starting at the first fill visible on a dark terminal); errors swap to a single-hue ✗ so they never blend into the gradient.
+[character]
+success_symbol = "[❯](bold color_fleck1)[❯](bold color_fleck4)[❯](bold color_fleck0)"
+error_symbol = "[✗❯](bold color_error)"
