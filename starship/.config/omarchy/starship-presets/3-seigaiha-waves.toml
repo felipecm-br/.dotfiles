@@ -1,0 +1,120 @@
+# ==============================================================================
+#  Preset: Seigaiha (Aizome Indigo Edition)
+#  Inspired by: Seigaiha, the "blue ocean wave" pattern of Japanese textiles, dyed in aizome indigo
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# Glyph chain: rounded corners U+256D U+256E draw the scallops of seigaiha. Each pair swaps fg
+# and bg between two neighboring indigo dips, so light arcs on dark ground alternate with dark
+# arcs on light ground, like the rows of overlapping waves. The dye lightens from left to right:
+# kachi-iro (twenty dips) to kamenozoki (one).
+# The modules cascade through: Kachi-iro -> Kon -> Ai-iro -> Hanada -> Kamenozoki
+format = """
+[](fg:color_ai1 bg:transparent)\
+$os\
+[╭╮](fg:color_ai2 bg:color_ai1)\
+[╭╮](fg:color_ai1 bg:color_ai2)\
+[╭╮](fg:color_ai2 bg:color_ai1)\
+[╭╮](fg:color_ai1 bg:color_ai2)\
+
+$directory\
+[╭╮](fg:color_ai3 bg:color_ai2)\
+[╭╮](fg:color_ai2 bg:color_ai3)\
+[╭╮](fg:color_ai3 bg:color_ai2)\
+[╭╮](fg:color_ai2 bg:color_ai3)\
+
+$git_branch$git_status\
+[╭╮](fg:color_ai4 bg:color_ai3)\
+[╭╮](fg:color_ai3 bg:color_ai4)\
+[╭╮](fg:color_ai4 bg:color_ai3)\
+[╭╮](fg:color_ai3 bg:color_ai4)\
+
+$c$rust$golang$nodejs$deno$python\
+[╭╮](fg:color_ai5 bg:color_ai4)\
+[╭╮](fg:color_ai4 bg:color_ai5)\
+[╭╮](fg:color_ai5 bg:color_ai4)\
+[╭╮](fg:color_ai4 bg:color_ai5)\
+
+$time\
+[╭╮](fg:color_ai3 bg:color_ai5)\
+[╭╮](fg:color_ai5 bg:color_ai3)\
+[](fg:color_ai3 bg:transparent)\
+\n$character"""
+
+palette = 'art_seigaiha_waves'
+
+[palettes.art_seigaiha_waves]
+color_ai1   = '#0c1a3c' # Kachi-iro (the darkest indigo, dyed twenty times)
+color_ai2   = '#1d3a78' # Kon (navy indigo)
+color_ai3   = '#3a66ad' # Ai-iro (indigo)
+color_ai4   = '#86a9d8' # Hanada (light indigo)
+color_ai5   = '#e9eef6' # Kamenozoki (a glimpse of the vat, palest indigo)
+color_ink   = '#0c1a3c' # Ink (text on pale cloth)
+color_paper = '#f4f7fb' # Paper (text on dark cloth)
+
+# 1. KACHI-IRO (the darkest dip, the samurai's "victory color")
+[os]
+disabled = false
+style = "bg:color_ai1 fg:color_paper bold"
+format = '[ 󰞍 ]($style)'
+
+# 2. KON (navy, where you are)
+[directory]
+style = "bg:color_ai2 fg:color_paper bold"
+format = "[ 󰲋 $path ]($style)"
+truncation_length = 3
+
+# 3. AI-IRO (indigo, the branching waves)
+[git_branch]
+symbol = " "
+style = "bg:color_ai3 fg:color_paper bold"
+format = '[ $symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_ai3 fg:color_paper bold"
+format = '([$all_status$ahead_behind ]($style))'
+
+# 4. HANADA (light indigo, the toolchain)
+[c]
+symbol = " "
+style = "bg:color_ai4 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[rust]
+symbol = " "
+style = "bg:color_ai4 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[golang]
+symbol = " "
+style = "bg:color_ai4 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_ai4 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[deno]
+symbol = " "
+style = "bg:color_ai4 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[python]
+symbol = " "
+style = "bg:color_ai4 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+# 5. KAMENOZOKI (a glimpse of the vat, the time)
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_ai5 fg:color_ink bold"
+format = '[ $time ]($style)'
+
+# 6. THE WAVES (two scallops at the cursor; errors sink them to deep indigo)
+[character]
+success_symbol = "[╭╮](bold color_ai4)[╭╮](bold color_ai3)[ ❯](bold color_ai5)"
+error_symbol = "[╭╮╭╮](bold color_ai3)[ ✗](bold color_ai5)"

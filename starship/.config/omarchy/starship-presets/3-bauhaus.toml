@@ -1,0 +1,121 @@
+# ==============================================================================
+#  Preset: Bauhaus (Weimar 1923 Edition)
+#  Inspired by: Bauhaus exhibition poster (Weimar, 1923) and Kandinsky's shape-color questionnaire
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# Glyph chain: each field closes on a half circle U+E0B4; in the cream gap stand the three
+# elementary forms in the colors Kandinsky assigned them (yellow triangle, red square, blue
+# circle), and the next field enters on a diagonal U+E0BA. The order of the forms rotates.
+# The modules cascade through: Black -> Red -> Blue -> Yellow -> Cream
+format = """
+[](fg:color_black bg:transparent)\
+$os\
+[](fg:color_black bg:color_cream)\
+[▲](fg:color_yellow bg:color_cream)\
+[■](fg:color_red bg:color_cream)\
+[●](fg:color_blue bg:color_cream)\
+[](fg:color_red bg:color_cream)\
+
+$directory\
+[](fg:color_red bg:color_cream)\
+[●](fg:color_blue bg:color_cream)\
+[▲](fg:color_yellow bg:color_cream)\
+[■](fg:color_red bg:color_cream)\
+[](fg:color_blue bg:color_cream)\
+
+$git_branch$git_status\
+[](fg:color_blue bg:color_cream)\
+[■](fg:color_red bg:color_cream)\
+[●](fg:color_blue bg:color_cream)\
+[▲](fg:color_yellow bg:color_cream)\
+[](fg:color_yellow bg:color_cream)\
+
+$c$rust$golang$nodejs$deno$python\
+[](fg:color_yellow bg:color_cream)\
+[▲](fg:color_yellow bg:color_cream)\
+[■](fg:color_red bg:color_cream)\
+[●](fg:color_blue bg:color_cream)\
+[](fg:color_black bg:color_cream)\
+
+$time\
+[](fg:color_cream bg:color_black)\
+[●](fg:color_red bg:color_black)\
+[](fg:color_black bg:transparent)\
+\n$character"""
+
+palette = 'art_bauhaus'
+
+[palettes.art_bauhaus]
+color_cream  = '#f1e8d4' # Poster cream (uncoated stock)
+color_black  = '#1a1a1a' # Bauhaus black
+color_red    = '#b8221a' # Signal red (the square)
+color_blue   = '#1f4e9c' # Bauhaus blue (the circle)
+color_yellow = '#e6b400' # Bauhaus yellow (the triangle)
+
+# 1. BLACK (the typography band)
+[os]
+disabled = false
+style = "bg:color_black fg:color_cream bold"
+format = '[ 󰠱 ]($style)'
+
+# 2. RED (the square: where you stand)
+[directory]
+style = "bg:color_red fg:color_cream bold"
+format = "[ 󰲋 $path ]($style)"
+truncation_length = 3
+
+# 3. BLUE (the circle: branches revolving)
+[git_branch]
+symbol = " "
+style = "bg:color_blue fg:color_cream bold"
+format = '[ $symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_blue fg:color_cream bold"
+format = '([$all_status$ahead_behind ]($style))'
+
+# 4. YELLOW (the triangle: the sharp tools)
+[c]
+symbol = " "
+style = "bg:color_yellow fg:color_black bold"
+format = '[ $symbol($version) ]($style)'
+
+[rust]
+symbol = " "
+style = "bg:color_yellow fg:color_black bold"
+format = '[ $symbol($version) ]($style)'
+
+[golang]
+symbol = " "
+style = "bg:color_yellow fg:color_black bold"
+format = '[ $symbol($version) ]($style)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_yellow fg:color_black bold"
+format = '[ $symbol($version) ]($style)'
+
+[deno]
+symbol = " "
+style = "bg:color_yellow fg:color_black bold"
+format = '[ $symbol($version) ]($style)'
+
+[python]
+symbol = " "
+style = "bg:color_yellow fg:color_black bold"
+format = '[ $symbol($version) ]($style)'
+
+# 5. CREAM (the open page)
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_cream fg:color_black bold"
+format = '[ $time ]($style)'
+
+# 6. THE THREE FORMS (triangle, square, circle at the cursor; errors turn them red)
+[character]
+success_symbol = "[▲](bold color_yellow)[■](bold color_red)[●](bold color_blue)[ ❯](bold color_cream)"
+error_symbol = "[▲■●](bold color_red)[ ✗](bold color_red)"

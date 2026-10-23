@@ -1,0 +1,119 @@
+# ==============================================================================
+#  Preset: Mondrian (Composition in Red, Blue and Yellow Edition)
+#  Inspired by: Piet Mondrian, "Composition with Red, Blue and Yellow" (1930) - De Stijl grid and primary fields
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# Glyph chain: every seam is a thick black bar built from a right half block U+2590 and a left
+# half block U+258C, so the line sits on the cell boundary like a painted band. Between two bars a
+# one-cell field of another primary appears, the small squares Mondrian set into the grid edges.
+# The modules cascade through: Red Field -> Canvas -> Blue Field -> Yellow Field -> Grey Field
+format = """
+[▐](fg:color_red bg:transparent)\
+$os\
+[▐](fg:color_line bg:color_red)\
+[▌](fg:color_line bg:color_yellow)\
+[▐](fg:color_line bg:color_yellow)\
+[▌](fg:color_line bg:color_canvas)\
+
+$directory\
+[▐](fg:color_line bg:color_canvas)\
+[▌](fg:color_line bg:color_grey)\
+[▐](fg:color_line bg:color_grey)\
+[▌](fg:color_line bg:color_blue)\
+
+$git_branch$git_status\
+[▐](fg:color_line bg:color_blue)\
+[▌](fg:color_line bg:color_canvas)\
+[▐](fg:color_line bg:color_canvas)\
+[▌](fg:color_line bg:color_yellow)\
+
+$c$rust$golang$nodejs$deno$python\
+[▐](fg:color_line bg:color_yellow)\
+[▌](fg:color_line bg:color_red)\
+[▐](fg:color_line bg:color_red)\
+[▌](fg:color_line bg:color_grey)\
+
+$time\
+[▐](fg:color_line bg:color_grey)\
+[▌](fg:color_line bg:color_blue)\
+[▐](fg:color_line bg:color_blue)\
+[▌](fg:color_line bg:transparent)\
+\n$character"""
+
+palette = 'art_mondrian'
+
+[palettes.art_mondrian]
+color_canvas = '#f2efe6' # Canvas white (oil ground)
+color_line   = '#111111' # Black line (the grid)
+color_red    = '#c8231b' # Cadmium red
+color_blue   = '#1d3e8f' # Ultramarine blue
+color_yellow = '#f4c51a' # Cadmium yellow
+color_grey   = '#c9c7c0' # Warm grey (the quiet field)
+
+# 1. RED FIELD (the large square that anchors the canvas)
+[os]
+disabled = false
+style = "bg:color_red fg:color_canvas bold"
+format = '[ 󰏘 ]($style)'
+
+# 2. CANVAS (the white plane, where you are)
+[directory]
+style = "bg:color_canvas fg:color_line bold"
+format = "[ 󰲋 $path ]($style)"
+truncation_length = 3
+
+# 3. BLUE FIELD (the branching corner)
+[git_branch]
+symbol = " "
+style = "bg:color_blue fg:color_canvas bold"
+format = '[ $symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_blue fg:color_canvas bold"
+format = '([$all_status$ahead_behind ]($style))'
+
+# 4. YELLOW FIELD (the small, loud rectangle)
+[c]
+symbol = " "
+style = "bg:color_yellow fg:color_line bold"
+format = '[ $symbol($version) ]($style)'
+
+[rust]
+symbol = " "
+style = "bg:color_yellow fg:color_line bold"
+format = '[ $symbol($version) ]($style)'
+
+[golang]
+symbol = " "
+style = "bg:color_yellow fg:color_line bold"
+format = '[ $symbol($version) ]($style)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_yellow fg:color_line bold"
+format = '[ $symbol($version) ]($style)'
+
+[deno]
+symbol = " "
+style = "bg:color_yellow fg:color_line bold"
+format = '[ $symbol($version) ]($style)'
+
+[python]
+symbol = " "
+style = "bg:color_yellow fg:color_line bold"
+format = '[ $symbol($version) ]($style)'
+
+# 5. GREY FIELD (the quiet edge)
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_grey fg:color_line bold"
+format = '[ $time ]($style)'
+
+# 6. THE PRIMARIES (red, yellow, blue at the cursor; errors leave only red)
+[character]
+success_symbol = "[■](bold color_red)[■](bold color_yellow)[■](bold color_blue)[ ❯](bold color_canvas)"
+error_symbol = "[■■■](bold color_red)[ ✗](bold color_red)"

@@ -1,0 +1,121 @@
+# ==============================================================================
+#  Preset: Space Invaders (Taito 1978 Edition)
+#  Inspired by: Tomohiro Nishikado, Space Invaders (Taito, 1978) - the marching fleet behind colored cellophane
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# Glyph chain: on the black CRT each gap holds one invader drawn in quadrants, two rows tall:
+# the crab U+259A U+2580 U+259E (legs in) and the octopus U+259B U+2580 U+259C (legs out),
+# dropping a bomb U+257B. Colors follow the cellophane strips of the cabinet. The bar ends on
+# the red mystery ship U+259F U+2588 U+2599; the prompt is the green laser cannon.
+# The modules cascade through: Score -> Cyan Rows -> Magenta Rows -> Shield Green -> Mystery Ship
+format = """
+[▐](fg:color_white bg:transparent)\
+$os\
+[▌](fg:color_white bg:color_void)\
+[▚▀▞](fg:color_cyan bg:color_void)\
+[╻](fg:color_white bg:color_void)\
+[▐](fg:color_cyan bg:color_void)\
+
+$directory\
+[▌](fg:color_cyan bg:color_void)\
+[▛▀▜](fg:color_magenta bg:color_void)\
+[╻](fg:color_white bg:color_void)\
+[▐](fg:color_magenta bg:color_void)\
+
+$git_branch$git_status\
+[▌](fg:color_magenta bg:color_void)\
+[▚▀▞](fg:color_white bg:color_void)\
+[╻](fg:color_white bg:color_void)\
+[▐](fg:color_green bg:color_void)\
+
+$c$rust$golang$nodejs$deno$python\
+[▌](fg:color_green bg:color_void)\
+[▛▀▜](fg:color_cyan bg:color_void)\
+[╻](fg:color_white bg:color_void)\
+[▐](fg:color_red bg:color_void)\
+
+$time\
+[▌](fg:color_red bg:color_void)\
+[▟█▙](fg:color_red bg:color_void)\
+[ ](bg:color_void)\
+[▌](fg:color_void bg:transparent)\
+\n$character"""
+
+palette = 'art_space_invaders'
+
+[palettes.art_space_invaders]
+color_void    = '#04040c' # Arcade black (the CRT)
+color_white   = '#f2f2f2' # Phosphor white
+color_cyan    = '#3cf2ff' # Cyan overlay (the top rows)
+color_magenta = '#ff4fd8' # Magenta overlay (the middle rows)
+color_green   = '#39ff14' # Green overlay (the shields and the cannon)
+color_red     = '#ff3030' # Red overlay (the mystery ship)
+color_ink     = '#04040c' # Ink (text on overlays)
+
+# 1. SCORE (the marquee)
+[os]
+disabled = false
+style = "bg:color_white fg:color_void bold"
+format = '[ 󰯉 ]($style)'
+
+# 2. CYAN ROWS (the fleet above you)
+[directory]
+style = "bg:color_cyan fg:color_void bold"
+format = "[ 󰲋 $path ]($style)"
+truncation_length = 3
+
+# 3. MAGENTA ROWS (the fleet branching down)
+[git_branch]
+symbol = " "
+style = "bg:color_magenta fg:color_void bold"
+format = '[ $symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_magenta fg:color_void bold"
+format = '([$all_status$ahead_behind ]($style))'
+
+# 4. SHIELD GREEN (the bunkers)
+[c]
+symbol = " "
+style = "bg:color_green fg:color_void bold"
+format = '[ $symbol($version) ]($style)'
+
+[rust]
+symbol = " "
+style = "bg:color_green fg:color_void bold"
+format = '[ $symbol($version) ]($style)'
+
+[golang]
+symbol = " "
+style = "bg:color_green fg:color_void bold"
+format = '[ $symbol($version) ]($style)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_green fg:color_void bold"
+format = '[ $symbol($version) ]($style)'
+
+[deno]
+symbol = " "
+style = "bg:color_green fg:color_void bold"
+format = '[ $symbol($version) ]($style)'
+
+[python]
+symbol = " "
+style = "bg:color_green fg:color_void bold"
+format = '[ $symbol($version) ]($style)'
+
+# 5. MYSTERY SHIP (worth 300 points)
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_red fg:color_void bold"
+format = '[ $time ]($style)'
+
+# 6. THE CANNON (the laser base fires at the cursor; errors mean you were invaded)
+[character]
+success_symbol = "[▗▆▖](bold color_green)[╹](bold color_white)[ ❯](bold color_green)"
+error_symbol = "[▚▀▞](bold color_red)[ ✗](bold color_red)"

@@ -1,0 +1,113 @@
+# ==============================================================================
+#  Preset: Chessboard (World Championship Edition)
+#  Inspired by: Tournament chess - the walnut and maple board, the brass frame and the green baize table
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# Glyph chain: a quadrant U+259A in walnut on maple draws two ranks of alternating squares in
+# one cell, so a run of them is a real checkered board. Each board sits in a brass frame (half
+# circles on the brass inlay). The prompt is the knight; an error is the king: checkmate.
+# The modules cascade through: Walnut -> Maple -> Baize -> Leather Clock -> Maple
+format = """
+[](fg:color_walnut bg:transparent)\
+$os\
+[](fg:color_walnut bg:color_brass)\
+[▚▚▚](fg:color_walnut bg:color_maple)\
+[](fg:color_maple bg:color_brass)\
+
+$directory\
+[](fg:color_maple bg:color_brass)\
+[▚▚▚▚](fg:color_walnut bg:color_maple)\
+[](fg:color_felt bg:color_brass)\
+
+$git_branch$git_status\
+[](fg:color_felt bg:color_brass)\
+[▚▚▚](fg:color_walnut bg:color_maple)\
+[](fg:color_burgundy bg:color_brass)\
+
+$c$rust$golang$nodejs$deno$python\
+[](fg:color_burgundy bg:color_brass)\
+[▚▚▚▚](fg:color_walnut bg:color_maple)\
+[](fg:color_maple bg:color_brass)\
+
+$time\
+[](fg:color_maple bg:color_brass)\
+[▚▚](fg:color_walnut bg:color_maple)\
+[](fg:color_maple bg:transparent)\
+\n$character"""
+
+palette = 'art_chessboard'
+
+[palettes.art_chessboard]
+color_walnut   = '#3b2416' # Walnut (dark squares)
+color_maple    = '#e8cfa0' # Maple (light squares)
+color_brass    = '#c9a24a' # Brass inlay (the board frame)
+color_felt     = '#1f5c3a' # Green baize (the tournament table)
+color_burgundy = '#7a1f2b' # Burgundy leather (the clock case)
+
+# 1. WALNUT (the dark side of the board)
+[os]
+disabled = false
+style = "bg:color_walnut fg:color_maple bold"
+format = '[ 󰡛 ]($style)'
+
+# 2. MAPLE (your square)
+[directory]
+style = "bg:color_maple fg:color_walnut bold"
+format = "[ 󰲋 $path ]($style)"
+truncation_length = 3
+
+# 3. BAIZE (the table where the lines branch)
+[git_branch]
+symbol = " "
+style = "bg:color_felt fg:color_maple bold"
+format = '[ $symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_felt fg:color_maple bold"
+format = '([$all_status$ahead_behind ]($style))'
+
+# 4. LEATHER CLOCK (the engines thinking)
+[c]
+symbol = " "
+style = "bg:color_burgundy fg:color_maple bold"
+format = '[ $symbol($version) ]($style)'
+
+[rust]
+symbol = " "
+style = "bg:color_burgundy fg:color_maple bold"
+format = '[ $symbol($version) ]($style)'
+
+[golang]
+symbol = " "
+style = "bg:color_burgundy fg:color_maple bold"
+format = '[ $symbol($version) ]($style)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_burgundy fg:color_maple bold"
+format = '[ $symbol($version) ]($style)'
+
+[deno]
+symbol = " "
+style = "bg:color_burgundy fg:color_maple bold"
+format = '[ $symbol($version) ]($style)'
+
+[python]
+symbol = " "
+style = "bg:color_burgundy fg:color_maple bold"
+format = '[ $symbol($version) ]($style)'
+
+# 5. MAPLE (the game clock)
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_maple fg:color_walnut bold"
+format = '[ $time ]($style)'
+
+# 6. THE KNIGHT (your move at the cursor; an error topples the king)
+[character]
+success_symbol = "[󰡘](bold color_maple)[ ❯](bold color_brass)"
+error_symbol = "[󰡗](bold color_burgundy)[ ✗](bold color_burgundy)"
