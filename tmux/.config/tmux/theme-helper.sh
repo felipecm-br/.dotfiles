@@ -129,15 +129,28 @@ get_theme_color() {
 }
 
 # popup_gradient_flags VAR — display-popup flags for an app that draws its own
-# gradient frame: "-B -e VAR=<palette>" while `border-gradient` is on, nothing
-# when off. Expand it unquoted inside the display-popup call:
+# gradient frame: "-B -e VAR=<palette>" while `border-gradient` is on, and
+# "-e VAR=" when off (an empty value also overrides a gradient set in the app's
+# own config, e.g. lazygitrs gui.borderGradient). Expand it unquoted inside the
+# display-popup call:
 #   tmux display-popup $(popup_gradient_flags WM_BORDER_GRADIENT) ...
 popup_gradient_flags() {
-  _pgf_state=""
-  _pgf_palette=""
+  border_gradient_palette
+  if [ -n "$BORDER_GRADIENT_PALETTE" ]; then
+    printf -- '-B -e %s=%s' "$1" "$BORDER_GRADIENT_PALETTE"
+  else
+    printf -- '-e %s=' "$1"
+  fi
+}
+
+# border_gradient_palette — sets BORDER_GRADIENT_PALETTE to the active palette
+# while `border-gradient` is on, empty when off (zero forks).
+border_gradient_palette() {
+  _bgp_state=""
+  BORDER_GRADIENT_PALETTE=""
   [ -r "${XDG_STATE_HOME:-$HOME/.local/state}/border-gradient/state" ] \
-    && read -r _pgf_state _pgf_palette < "${XDG_STATE_HOME:-$HOME/.local/state}/border-gradient/state"
-  [ "$_pgf_state" = "on" ] && [ -n "$_pgf_palette" ] && printf -- '-B -e %s=%s' "$1" "$_pgf_palette"
+    && read -r _bgp_state BORDER_GRADIENT_PALETTE < "${XDG_STATE_HOME:-$HOME/.local/state}/border-gradient/state"
+  [ "$_bgp_state" = "on" ] || BORDER_GRADIENT_PALETTE=""
   return 0
 }
 

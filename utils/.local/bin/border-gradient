@@ -8,12 +8,15 @@
 #
 # State lives in one file read by theme-helper.sh (popup_gradient_flags), so it
 # survives tmux restarts and applies to the next popup opened, with no reload.
+# It is mirrored to the tmux option @border_gradient (palette when on, empty when
+# off) for launchers outside the dotfiles, such as `waymux cockpit`.
 #
 # Usage:
 #   border-gradient                 toggle (restores the last palette)
 #   border-gradient on [PALETTE]    turn on (default: last palette, or aurora)
 #   border-gradient off             turn off
 #   border-gradient status          print "on <palette>" or "off <palette>"
+#   border-gradient sync            mirror the state to tmux (run by tmux.conf)
 #   border-gradient list            list presets
 #
 # PALETTE: a preset or two or more #rrggbb stops joined by commas
@@ -45,9 +48,19 @@ valid_palette() {
   (( count >= 2 ))
 }
 
+sync_tmux() {
+  [[ -n "${TMUX:-}" ]] || return 0
+  if [[ "$1" == "on" ]]; then
+    tmux set-option -g @border_gradient "$2" 2>/dev/null || true
+  else
+    tmux set-option -g @border_gradient "" 2>/dev/null || true
+  fi
+}
+
 save() {
   mkdir -p "${STATE_FILE%/*}"
   printf '%s %s\n' "$1" "$2" > "$STATE_FILE"
+  sync_tmux "$1" "$2"
   local msg
   if [[ "$1" == "on" ]]; then
     msg="󰸌  Border gradient on ($2)"
@@ -77,6 +90,9 @@ case "$cmd" in
   toggle)
     if [[ "$state" == "on" ]]; then save off "$palette"; else save on "$palette"; fi
     ;;
+  sync)
+    sync_tmux "$state" "$palette"
+    ;;
   status)
     echo "$state $palette"
     ;;
@@ -84,7 +100,7 @@ case "$cmd" in
     printf '%s\n' "${PRESETS[@]}"
     ;;
   -h|--help)
-    sed -n '2,20p' "$0" | sed 's/^# \{0,1\}//'
+    sed -n '2,23p' "$0" | sed 's/^# \{0,1\}//'
     ;;
   *)
     echo "border-gradient: unknown command '$cmd' (try --help)" >&2

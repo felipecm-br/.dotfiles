@@ -2,6 +2,19 @@
 # Dotfiles Helper Functions
 # ─────────────────────────────────────────────────────────────────────────────
 
+# lazygitrs - Run lazygitrs following the `border-gradient` toggle
+# Exports the active palette (empty when off, which also overrides
+# gui.borderGradient in ~/.config/lazygitrs/config.yml). A value already in the
+# environment wins, so lazygitrs-popup.sh keeps passing its own.
+#
+lazygitrs() {
+    local state palette
+    local state_file="${XDG_STATE_HOME:-$HOME/.local/state}/border-gradient/state"
+    [[ -r "$state_file" ]] && read -r state palette < "$state_file"
+    [[ "$state" == on ]] || palette=""
+    LAZYGITRS_BORDER_GRADIENT="${LAZYGITRS_BORDER_GRADIENT-$palette}" command lazygitrs "$@"
+}
+
 # killport - Kill whatever process (or Docker container) is listening on a port
 # Usage: killport <port>
 # Examples:

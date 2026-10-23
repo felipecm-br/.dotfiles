@@ -254,11 +254,13 @@ The answer is **yes, completely and automatically**, through a three-tier synchr
 
 An opt-in, session-wide switch replaces the single-color popup border with a multi-color gradient (the notMyShell Chroma palettes: `aurora`, `nebula`, `rainbow`, `blackhole`, `warm`, `cool`, `lavender`, `monochrome`, or custom `#rrggbb,#rrggbb,...` stops), interpolated in OKLab along the top-left to bottom-right diagonal.
 
-- **Switch:** [`border-gradient`](../../utils/.local/bin/border-gradient) `[toggle] | on [PALETTE] | off | status | list`. State lives in `${XDG_STATE_HOME:-~/.local/state}/border-gradient/state`, so it survives tmux restarts and applies to the next popup opened (no reload).
-- **Why the app draws the frame:** `popup-border-style` accepts one color, so tmux cannot paint a gradient. While on, [`popup_gradient_flags`](../../tmux/.config/tmux/theme-helper.sh) (a builtin `read` of the state file, no fork) makes the launchers open the popup borderless (`-B`) and pass the palette to the app inside:
+- **Switch:** `Prefix + B` (toggle) or [`border-gradient`](../../utils/.local/bin/border-gradient) `[toggle] | on [PALETTE] | off | status | list`. State lives in `${XDG_STATE_HOME:-~/.local/state}/border-gradient/state`, so it survives tmux restarts and applies to the next popup opened (no reload).
+- **Why the app draws the frame:** `popup-border-style` accepts one color, so tmux cannot paint a gradient. While on, [`popup_gradient_flags`](../../tmux/.config/tmux/theme-helper.sh) (a builtin `read` of the state file, no fork) makes the launchers open the popup borderless (`-B`) and pass the palette to the app inside; while off it passes the variable empty, which also disables any gradient set in the app's own config:
   - Waymaker pickers (keybindings, cockpit, PR, scrollback, grep, workspace, awt): `WM_BORDER_GRADIENT` turns on a rounded gradient `ui` frame; `WM_BORDER_TITLE` carries the popup's icon badge onto it.
-  - lazygitrs: `LAZYGITRS_BORDER_GRADIENT` paints its active panel border.
-- **Scope:** only popups opened by these launchers. Waymaker used inline in panes (e.g. `Tab` completion) keeps its layout; guard modals, `nvim` (`Prefix + N`) and tmux pane borders keep their single-color borders.
+  - Cockpit (`Prefix + Space`): `waymux cockpit` opens its own popup without these launchers, so `border-gradient` also mirrors the palette to the tmux option `@border_gradient` (set on every change and by `border-gradient sync` when `tmux.conf` loads), which `waymux` reads.
+  - lazygitrs: `LAZYGITRS_BORDER_GRADIENT` paints its active panel border. Its [config](../../lazygitrs/.config/lazygitrs/config.yml) sets `gui.borderGradient: aurora` as the fallback, and the zsh [`lazygitrs`](../../zsh/.zsh/utils/functions.zsh) wrapper exports the toggle's palette (empty when off) for runs outside the popup.
+  - Guard modals (`close-session.sh`, `close-window.sh`, `confirm-modal.sh`): `BORDER_GRADIENT` makes them paint the rounded frame themselves with [`gradient-frame.sh`](../../tmux/.config/tmux/gradient-frame.sh) (one `awk` pass, same presets and OKLab math), keeping the yellow warning badge on top and the body exactly where the tmux border left it.
+- **Scope:** only popups opened by these launchers. Waymaker used inline in panes (e.g. `Tab` completion) keeps its layout; `nvim` (`Prefix + N`) and tmux pane borders keep their single-color borders.
 
 *See complete comparative audit and benchmarks in [State of the Art Terminal Agent Workflow](../architecture/state-of-the-art-terminal-agent-workflow.md).*
 

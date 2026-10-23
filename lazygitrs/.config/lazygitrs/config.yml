@@ -4,6 +4,9 @@ git:
 
 gui:
   border: "rounded"
+  # Fallback palette; the `border-gradient` toggle overrides it through
+  # LAZYGITRS_BORDER_GRADIENT (lazygitrs-popup.sh and the zsh wrapper).
+  borderGradient: "aurora"
 
 keybinding:
   universal:

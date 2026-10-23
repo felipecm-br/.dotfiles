@@ -20,6 +20,8 @@ SCRIPT_DIR=$(dirname "$REAL_SCRIPT")
 # -----------------------------------------------------------------------------
 # shellcheck source=/dev/null
 . "$SCRIPT_DIR/theme-helper.sh"
+# shellcheck source=/dev/null
+. "$SCRIPT_DIR/gradient-frame.sh"
 
 COLOR_YELLOW=$(get_theme_color "yellow" "#e0af68")
 COLOR_RED=$(get_theme_color "red" "#f7768e")
@@ -190,43 +192,50 @@ run_confirm_modal() {
   c_reset="\033[0m"
   c_bold="\033[1m"
 
-  printf "\n"
-  printf "  ${c_bold}${c_yellow}  KILL SESSION${c_reset} ${c_muted}·${c_reset} ${c_bold}${c_fg}%s${c_reset}\n\n" "$target"
-
-  # Section 1: Active AI Agent Fleet
-  if [ "$AGENT_COUNT" -gt 0 ]; then
-    printf "  ${c_bold}${c_red}󰮯  Active AI Agents Detected (%d)${c_reset}\n" "$AGENT_COUNT"
-    local show_count=$(( AGENT_COUNT > 3 ? 3 : AGENT_COUNT ))
-    for ((i=0; i<show_count; i++)); do
-      local tab="${AGENT_TABS[$i]}"
-      local desc="${AGENT_DESCS[$i]}"
-      local st="${AGENT_STATES[$i]}"
-      local icon="󱥁"
-      local st_color="$c_yellow"
-      case "$st" in
-        idle) icon="󱥂"; st_color="$c_cyan" ;;
-        busy|working) icon="󱥁"; st_color="$c_yellow" ;;
-        question|permission|awaiting_input) icon="󱜻"; st_color="$c_magenta" ;;
-        error) icon="󰨄"; st_color="$c_red" ;;
-      esac
-      printf "     ${c_muted}󰚩${c_reset} ${c_bold}Tab %-2s${c_reset}  ${c_fg}%-28s${c_reset}  ${st_color}%s %-7s${c_reset}\n" \
-        "$tab" "$desc" "$icon" "$st"
-    done
-    if [ "$AGENT_COUNT" -gt 3 ]; then
-      printf "     ${c_muted}󰚩 ... and %d more active agent window(s)${c_reset}\n" "$((AGENT_COUNT - 3))"
-    fi
+  local body
+  body=$(
     printf "\n"
-  fi
+    printf "  ${c_bold}${c_yellow}  KILL SESSION${c_reset} ${c_muted}·${c_reset} ${c_bold}${c_fg}%s${c_reset}\n\n" "$target"
 
-  # Section 2: Session Window Layout Threshold
-  if [ "$WIN_COUNT" -gt 3 ]; then
-    printf "  ${c_bold}${c_cyan}󱂬  Layout Threshold Triggered${c_reset}\n"
-    printf "     ${c_muted}󱂬${c_reset}  ${c_fg}%d active windows in session${c_reset} ${c_muted}(>3 threshold)${c_reset}\n\n" "$WIN_COUNT"
-  fi
+    # Section 1: Active AI Agent Fleet
+    if [ "$AGENT_COUNT" -gt 0 ]; then
+      printf "  ${c_bold}${c_red}󰮯  Active AI Agents Detected (%d)${c_reset}\n" "$AGENT_COUNT"
+      local show_count=$(( AGENT_COUNT > 3 ? 3 : AGENT_COUNT ))
+      for ((i=0; i<show_count; i++)); do
+        local tab="${AGENT_TABS[$i]}"
+        local desc="${AGENT_DESCS[$i]}"
+        local st="${AGENT_STATES[$i]}"
+        local icon="󱥁"
+        local st_color="$c_yellow"
+        case "$st" in
+          idle) icon="󱥂"; st_color="$c_cyan" ;;
+          busy|working) icon="󱥁"; st_color="$c_yellow" ;;
+          question|permission|awaiting_input) icon="󱜻"; st_color="$c_magenta" ;;
+          error) icon="󰨄"; st_color="$c_red" ;;
+        esac
+        printf "     ${c_muted}󰚩${c_reset} ${c_bold}Tab %-2s${c_reset}  ${c_fg}%-28s${c_reset}  ${st_color}%s %-7s${c_reset}\n" \
+          "$tab" "$desc" "$icon" "$st"
+      done
+      if [ "$AGENT_COUNT" -gt 3 ]; then
+        printf "     ${c_muted}󰚩 ... and %d more active agent window(s)${c_reset}\n" "$((AGENT_COUNT - 3))"
+      fi
+      printf "\n"
+    fi
 
-  # Divider & Hints (English Action Guide)
-  printf "  ${c_muted}────────────────────────────────────────────────────────────${c_reset}\n"
-  printf "  ${c_bold}${c_red}y${c_reset} ${c_muted}Kill Session${c_reset}   ${c_muted}│${c_reset}   ${c_bold}${c_cyan}n${c_reset} ${c_muted}/${c_reset} ${c_bold}${c_cyan}Esc${c_reset} ${c_muted}Keep Session${c_reset}\n"
+    # Section 2: Session Window Layout Threshold
+    if [ "$WIN_COUNT" -gt 3 ]; then
+      printf "  ${c_bold}${c_cyan}󱂬  Layout Threshold Triggered${c_reset}\n"
+      printf "     ${c_muted}󱂬${c_reset}  ${c_fg}%d active windows in session${c_reset} ${c_muted}(>3 threshold)${c_reset}\n\n" "$WIN_COUNT"
+    fi
+
+    # Divider & Hints (English Action Guide)
+    printf "  ${c_muted}────────────────────────────────────────────────────────────${c_reset}\n"
+    printf "  ${c_bold}${c_red}y${c_reset} ${c_muted}Kill Session${c_reset}   ${c_muted}│${c_reset}   ${c_bold}${c_cyan}n${c_reset} ${c_muted}/${c_reset} ${c_bold}${c_cyan}Esc${c_reset} ${c_muted}Keep Session${c_reset}\n"
+  )
+  print_modal_body "$body"
+  if [ -n "${BORDER_GRADIENT:-}" ]; then
+    gradient_frame_draw "$BORDER_GRADIENT" $' \uea6c ' "$COLOR_YELLOW" || true
+  fi
 
   # Hide cursor during prompt to eliminate blinking artifacts
   printf '\033[?25l'
@@ -392,6 +401,7 @@ EOF
       -s "bg=default,fg=default" \
       -S "fg=$border_color,bg=default" \
       -T "$badge" \
+      $(popup_gradient_flags BORDER_GRADIENT) \
       -w "$popup_w" \
       -h "$popup_h" \
       -E \

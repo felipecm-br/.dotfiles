@@ -39,6 +39,7 @@ emit_tmux() {
 󰮯  Prefix + L	Last Active Session (MRU Flip-Flop)	tmux	tmux-last-sess	tmux switch-client -l
 󰑐  Prefix + r	Reload Tmux Configuration	tmux	tmux-reload	tmux source-file ~/.config/tmux/tmux.conf
 󰅖  Prefix + W	Smart Kill Session (Guarded)	tmux	tmux-kill-sess	~/.config/tmux/close-session.sh
+󰸌  Prefix + B	Toggle Gradient Popup Frames	tmux	tmux-border-gradient	~/.local/bin/border-gradient toggle >/dev/null
 󰌌  Prefix + ?	Keybindings & Workflow Catalog HUD	tmux	tmux-help	~/.config/tmux/keybindings-picker.sh
 󰌌  Prefix + :	Tmux Raw Keybindings (list-keys -N)	tmux	tmux-raw-keys	tmux list-keys -N
 EOF

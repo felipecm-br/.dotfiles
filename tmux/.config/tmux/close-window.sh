@@ -19,6 +19,8 @@ RECORD_SCRIPT="${SCRIPT_DIR}/record-window-state.sh"
 # -----------------------------------------------------------------------------
 # shellcheck source=/dev/null
 . "$SCRIPT_DIR/theme-helper.sh"
+# shellcheck source=/dev/null
+. "$SCRIPT_DIR/gradient-frame.sh"
 
 COLOR_YELLOW=$(get_theme_color "yellow" "#e0af68")
 COLOR_RED=$(get_theme_color "red" "#f7768e")
@@ -255,45 +257,52 @@ run_confirm_modal() {
   c_reset="\033[0m"
   c_bold="\033[1m"
 
-  local tab_label="Tab ${WIN_INDEX:-?}"
-  [ -n "$WIN_NAME" ] && tab_label="${tab_label} (${WIN_NAME})"
+  local body
+  body=$(
+    local tab_label="Tab ${WIN_INDEX:-?}"
+    [ -n "$WIN_NAME" ] && tab_label="${tab_label} (${WIN_NAME})"
 
-  printf "\n"
-  printf "  ${c_bold}${c_yellow}  KILL WINDOW${c_reset} ${c_muted}·${c_reset} ${c_bold}${c_fg}%s${c_reset}\n\n" "$tab_label"
+    printf "\n"
+    printf "  ${c_bold}${c_yellow}  KILL WINDOW${c_reset} ${c_muted}·${c_reset} ${c_bold}${c_fg}%s${c_reset}\n\n" "$tab_label"
 
-  printf "  ${c_bold}${c_red}󰮯  Active AI Agent in Window${c_reset}\n"
-  local shown=0
-  for ((i=0; i<AGENT_COUNT; i++)); do
-    local st="${AGENT_STATES[$i]}"
-    case "$st" in
-      idle|done|closed|inactive|completed)
-        continue
-        ;;
-    esac
+    printf "  ${c_bold}${c_red}󰮯  Active AI Agent in Window${c_reset}\n"
+    local shown=0
+    for ((i=0; i<AGENT_COUNT; i++)); do
+      local st="${AGENT_STATES[$i]}"
+      case "$st" in
+        idle|done|closed|inactive|completed)
+          continue
+          ;;
+      esac
 
-    local label="${AGENT_LABELS[$i]}"
-    local desc="${AGENT_DESCS[$i]}"
-    local icon="󱥁"
-    local st_color="$c_yellow"
-    case "$st" in
-      busy|working) icon="󱥁"; st_color="$c_yellow" ;;
-      question|permission|awaiting_input) icon="󱜻"; st_color="$c_magenta" ;;
-      error|stalled) icon="󰨄"; st_color="$c_red" ;;
-      *) icon="󰑮"; st_color="$c_yellow" ;;
-    esac
-    printf "     ${c_muted}󰚩${c_reset} ${c_bold}%-12s${c_reset}  ${c_fg}%-28s${c_reset}  ${st_color}%s %-7s${c_reset}\n" \
-      "$label" "$desc" "$icon" "$st"
-    shown=$(( shown + 1 ))
-    [ "$shown" -ge 3 ] && break
-  done
-  if [ "$ACTIVE_AGENT_COUNT" -gt 3 ]; then
-    printf "     ${c_muted}󰚩 ... and %d more active agent(s)${c_reset}\n" "$((ACTIVE_AGENT_COUNT - 3))"
+      local label="${AGENT_LABELS[$i]}"
+      local desc="${AGENT_DESCS[$i]}"
+      local icon="󱥁"
+      local st_color="$c_yellow"
+      case "$st" in
+        busy|working) icon="󱥁"; st_color="$c_yellow" ;;
+        question|permission|awaiting_input) icon="󱜻"; st_color="$c_magenta" ;;
+        error|stalled) icon="󰨄"; st_color="$c_red" ;;
+        *) icon="󰑮"; st_color="$c_yellow" ;;
+      esac
+      printf "     ${c_muted}󰚩${c_reset} ${c_bold}%-12s${c_reset}  ${c_fg}%-28s${c_reset}  ${st_color}%s %-7s${c_reset}\n" \
+        "$label" "$desc" "$icon" "$st"
+      shown=$(( shown + 1 ))
+      [ "$shown" -ge 3 ] && break
+    done
+    if [ "$ACTIVE_AGENT_COUNT" -gt 3 ]; then
+      printf "     ${c_muted}󰚩 ... and %d more active agent(s)${c_reset}\n" "$((ACTIVE_AGENT_COUNT - 3))"
+    fi
+    printf "\n"
+
+    # Divider & Compact Action Keys (English Action Guide)
+    printf "  ${c_muted}────────────────────────────────────────────────────────────${c_reset}\n"
+    printf "  ${c_bold}${c_red}y${c_reset} ${c_muted}Kill Window${c_reset}   ${c_muted}│${c_reset}   ${c_bold}${c_cyan}n${c_reset} ${c_muted}/${c_reset} ${c_bold}${c_cyan}Esc${c_reset} ${c_muted}Keep Window${c_reset}\n"
+  )
+  print_modal_body "$body"
+  if [ -n "${BORDER_GRADIENT:-}" ]; then
+    gradient_frame_draw "$BORDER_GRADIENT" $' \uea6c ' "$COLOR_YELLOW" || true
   fi
-  printf "\n"
-
-  # Divider & Compact Action Keys (English Action Guide)
-  printf "  ${c_muted}────────────────────────────────────────────────────────────${c_reset}\n"
-  printf "  ${c_bold}${c_red}y${c_reset} ${c_muted}Kill Window${c_reset}   ${c_muted}│${c_reset}   ${c_bold}${c_cyan}n${c_reset} ${c_muted}/${c_reset} ${c_bold}${c_cyan}Esc${c_reset} ${c_muted}Keep Window${c_reset}\n"
 
   # Hide cursor during prompt to eliminate blinking artifacts
   printf '\033[?25l'
@@ -439,6 +448,7 @@ EOF
       -s "bg=default,fg=default" \
       -S "fg=$border_color,bg=default" \
       -T "$badge" \
+      $(popup_gradient_flags BORDER_GRADIENT) \
       -w "$popup_w" \
       -h "$popup_h" \
       -E \

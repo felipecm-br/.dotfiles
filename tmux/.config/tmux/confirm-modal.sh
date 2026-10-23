@@ -17,6 +17,8 @@ SCRIPT_DIR=$(dirname "$REAL_SCRIPT")
 
 # shellcheck source=/dev/null
 . "$SCRIPT_DIR/theme-helper.sh"
+# shellcheck source=/dev/null
+. "$SCRIPT_DIR/gradient-frame.sh"
 
 COLOR_YELLOW=$(get_theme_color "yellow" "#e0af68")
 COLOR_RED=$(get_theme_color "red" "#f7768e")
@@ -43,15 +45,22 @@ run_modal() {
   c_muted=$(_hex_to_ansi "$COLOR_MUTED")
   c_fg=$(_hex_to_ansi "$COLOR_FG")
 
-  printf "\n"
-  if [ -n "$subject" ]; then
-    printf "  ${c_bold}${c_yellow}%s  %s${c_reset} ${c_muted}·${c_reset} ${c_bold}${c_fg}%s${c_reset}\n\n" "$BADGE" "$title" "$subject"
-  else
-    printf "  ${c_bold}${c_yellow}%s  %s${c_reset}\n\n" "$BADGE" "$title"
+  local body
+  body=$(
+    printf "\n"
+    if [ -n "$subject" ]; then
+      printf "  ${c_bold}${c_yellow}%s  %s${c_reset} ${c_muted}·${c_reset} ${c_bold}${c_fg}%s${c_reset}\n\n" "$BADGE" "$title" "$subject"
+    else
+      printf "  ${c_bold}${c_yellow}%s  %s${c_reset}\n\n" "$BADGE" "$title"
+    fi
+    printf "  ${c_muted}────────────────────────────────────────${c_reset}\n"
+    printf "  ${c_bold}${c_red}y${c_reset} ${c_muted}%s${c_reset}   ${c_muted}│${c_reset}   ${c_bold}${c_cyan}n${c_reset} ${c_muted}/${c_reset} ${c_bold}${c_cyan}Esc${c_reset} ${c_muted}%s${c_reset}\n" \
+      "$yes_label" "$no_label"
+  )
+  print_modal_body "$body"
+  if [ -n "${BORDER_GRADIENT:-}" ]; then
+    gradient_frame_draw "$BORDER_GRADIENT" " $BADGE " "$COLOR_YELLOW" || true
   fi
-  printf "  ${c_muted}────────────────────────────────────────${c_reset}\n"
-  printf "  ${c_bold}${c_red}y${c_reset} ${c_muted}%s${c_reset}   ${c_muted}│${c_reset}   ${c_bold}${c_cyan}n${c_reset} ${c_muted}/${c_reset} ${c_bold}${c_cyan}Esc${c_reset} ${c_muted}%s${c_reset}\n" \
-    "$yes_label" "$no_label"
 
   # Hide cursor during prompt to eliminate blinking artifacts
   printf '\033[?25l'
@@ -96,6 +105,7 @@ main() {
       -s "bg=default,fg=default" \
       -S "fg=$COLOR_YELLOW,bg=default" \
       -T " $BADGE " \
+      $(popup_gradient_flags BORDER_GRADIENT) \
       -w "$popup_w" \
       -h 8 \
       -E \
