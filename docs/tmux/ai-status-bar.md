@@ -20,6 +20,10 @@ State colors are **semantic constants**, not theme slots: `waymux` picks them fr
 | `error` | `󰨄` | `#ff6b7a` red | `#be123c` |
 | `idle` (done, waiting for your next prompt) | `󱥂` | `#8aa4b8` slate | `#4f6b5f` |
 
+A new, resumed or cleared session starts `idle`: `SessionStart` only renames the window and sets the title, and the spinner starts on `UserPromptSubmit`. A `compact` `SessionStart` (which can fire mid-turn) leaves the state untouched.
+
+The window icon comes from the agent binary running in the pane (`pane_current_command`); the agent named in the hook command (`waymux hook tmux <Event> claude`) only applies when the pane runs no known agent binary (e.g. a `node`-wrapped CLI). Devin imports `~/.claude/settings.json`, so every Claude hook also fires inside Devin windows alongside the ones in [`devin/.config/devin/config.json`](../../devin/.config/devin/config.json). The duplicates are harmless: sounds, bells and telemetry fire only on state transitions. Any hook added to the Claude settings also runs in Devin.
+
 The Cockpit adds `review` (`󰈈`, done but not reviewed): `#7ee0b5` dark / `#166534` light. Windows without an agent use `@CURRENT_COLOR`. Every pair stays apart by at least 10.8 CIEDE2000 on the dark palette, including simulated deuteranopia and protanopia; on the light palette, question and permission converge for red-green color deficiency, so the glyph carries that difference. All values reach 4.5:1 contrast on every built-in Omarchy background. To pin a color, set `color = "#rrggbb"` for that state in [`config.toml`](../../waymux/.config/waymux/config.toml); an empty `color` means the built-in palette.
 
 Inside the active filled pill, the window title `#W` and state icon `@ai_agent_state` are forced to high-contrast dark text (`fg=#{@SESSION_ACTIVE_FG}`) for clean legibility on top of filled backgrounds.
