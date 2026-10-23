@@ -86,5 +86,12 @@
         ]
       }
     ]
-  }
+  },
+  "devin": {
+    "org_id": "org-d4289c3026bd43a7afe09b3f0feabe85"
+  },
+  "shell": {
+    "setup_complete": true
+  },
+  "theme_mode": "dark"
 }
