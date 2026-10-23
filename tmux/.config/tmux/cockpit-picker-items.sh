@@ -164,7 +164,7 @@ while IFS=$'\x1f' read -r sess idx wname pid pane_os_pid ppath pcmd ptitle raw_s
   case "$st" in
     permission)
       prio=1
-      ico="󱅭"
+      ico="󰳌"
       c_ico="$C_PERM"
       ;;
     question|awaiting_input)
@@ -174,12 +174,12 @@ while IFS=$'\x1f' read -r sess idx wname pid pane_os_pid ppath pcmd ptitle raw_s
       ;;
     stalled|hanging)
       prio=2
-      ico="󱥁"
+      ico="󰔟"
       c_ico="$C_PERM"
       ;;
     error)
       prio=3
-      ico="󰨄"
+      ico=""
       c_ico="$C_ERROR"
       ;;
     busy|working)
@@ -189,7 +189,7 @@ while IFS=$'\x1f' read -r sess idx wname pid pane_os_pid ppath pcmd ptitle raw_s
       ;;
     idle)
       prio=5
-      ico="󱥂"
+      ico="󰗡"
       c_ico="$C_IDLE"
       ;;
     *)

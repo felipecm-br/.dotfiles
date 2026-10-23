@@ -51,7 +51,7 @@ With a custom frame interval (ms):
 | State        | Icon | Color  | When                        |
 |--------------|------|--------|-----------------------------|
 | `busy`       | spinner | yellow | AI processing / tool running |
-| `idle`       | 󱥂   | green  | AI finished the prompt      |
+| `idle`       | 󰗡   | green  | AI finished the prompt      |
 | `question`   |    | cyan   | AI asking you something     |
 | `retry`      |    | orange | AI retrying                 |
 | `permission` | 󰌾 | red    | Tool needs permission       |

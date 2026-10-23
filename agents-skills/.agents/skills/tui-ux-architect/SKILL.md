@@ -180,7 +180,7 @@ flowchart TD
 - **The Hybrid Golden-Grid Architecture (40/60 Split + Columnar Alignment):**
   - Synthesizes the macro-superiority of 40/60 Left-Right vertical splits (100% vertical viewport height for preview streams; avoids the central "Dead Void" of 50/50 horizontal splits) with micro-tabular column alignment.
   - Candidate lists must never use ragged, variable-length inline strings. They must use deterministic fixed-width columns (`[St 2c (X=1)] [Idx 3c] [Title/Agent 24c] [Branch+Sync 14c] [Churn/PR 11c] [Age 6c]`).
-  - **Leftmost $X=1$ Preattentive Urgency Gutter:** Critical agent status glyphs (`󱅭`, `󱜻`, `󰨄`, `⠋`, `󱥂`, `·`) must reside at column $X=1$ (the start of LTR saccades), never buried at Column 5 or 7.
+  - **Leftmost $X=1$ Preattentive Urgency Gutter:** Critical agent status glyphs (`󰳌`, `󱜻`, ``, `⠋`, `󰗡`, `·`) must reside at column $X=1$ (the start of LTR saccades), never buried at Column 5 or 7.
   - **Urgency-Aware Age Luminance:** Waiting time (`Age`) must render in bold urgency colors (`C_PERM`/`C_QUESTION`/`C_ERROR`) when an agent is stalled or requesting input (`prio <= 3`), dimming to `C_MUTED` only when healthy/idle.
   - **UTF-8 Visual Width Rule:** In Bash/POSIX candidate generators, never use byte-based `printf "%-24s"`. Always compute visual character width via `${#str}` in UTF-8 locales and pad using space injection (`printf -v spaces "%*s" "$pad" ""`) to prevent multibyte icon (``, `⎇`, `󰄬`, `…`, `↑`, `↓`) misalignment.
 - **Bichromatic Uniform Footer Standard (` {darkgray:│} ` Separators):**

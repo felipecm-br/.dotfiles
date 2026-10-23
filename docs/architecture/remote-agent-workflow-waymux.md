@@ -104,7 +104,7 @@ The `waymux-cli` utility ([`waymux/.local/bin/waymux-cli`](../../waymux/.local/b
 `waymux` includes built-in proactive supervision heuristics:
 1. **Stall Detection (Hung Agent Heuristic):**
    - When an agent is in `working` state, `waymux` samples pane output (scrollback diff and cursor position) and Linux process tree CPU ticks (`utime + stime`) every 5 seconds.
-   - If a pane emits **no new text output for > 20 seconds** and CPU delta is **zero**, `waymux` transitions the state to `stalled` (glyph `󱥁`, amber color `#fab387` / `#e09d7f`) and triggers an alert.
+   - If a pane emits **no new text output for > 20 seconds** and CPU delta is **zero**, `waymux` transitions the state to `stalled` (glyph `󰔟`, amber color `#fab387` / `#e09d7f`) and triggers an alert.
    - If output resumes or CPU activity picks up, `waymux` automatically recovers the state back to `working`.
 2. **Auto-Dismiss on Pane Focus:**
    - When an agent requests attention (`question` or `permission`), switching to that window/pane immediately triggers Tmux's `pane-focus-in` hook.

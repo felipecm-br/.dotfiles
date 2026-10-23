@@ -8,7 +8,7 @@ This document records the identified issues of visual flicker, rendering collisi
 
 ### 🔴 Issue A: Status Pill Flicker & Rapid State Bouncing
 - **Cause:** During active AI executions (such as Antigravity / OpenCode), chained tasks emit rapid lifecycle events: `PostInvocation` (`idle`) followed immediately by `PreInvocation` (`working`) within 20ms to 100ms intervals on each file read, search, or executed command.
-- **Visual Impact:** The window status tab and pill at the top of tmux rapidly flickered between yellow (`󰑮` working) and blue/teal (`󱥂` idle) multiple times per second during a single AI response turn.
+- **Visual Impact:** The window status tab and pill at the top of tmux rapidly flickered between yellow (`󰑮` working) and blue/teal (`󰗡` idle) multiple times per second during a single AI response turn.
 
 ### 🔴 Issue B: Popup Top Border & Search Input Disappearing
 - **Cause:** Tmux's `display-popup` command renders a floating overlay directly over the active pane. While the AI agent outputs text, the background pane rapidly outputs dozens of lines of text and ANSI scroll escapes per second. In the tmux core engine, `server_client_draw_pane` redraws updated background cells directly to the terminal, clobbering and overwriting the popup's top frame.

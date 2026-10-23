@@ -27,7 +27,7 @@ active_spinner = "minidot"
 # (Kept as an empty key so waymux <= 0.2.3, where `color` is required, still parses this.)
 
 [theme.states.idle]
-icon = "󱥂"
+icon = "󰗡"
 color = ""
 
 [theme.states.busy]
@@ -43,15 +43,20 @@ icon = "󱜻"
 color = ""
 
 [theme.states.permission]
-icon = "󱅭"
+icon = "󰳌"
 color = ""
 
 [theme.states.stalled]
-icon = "󱥁"
+icon = "󰔟"
 color = ""
 
 [theme.states.error]
-icon = "󰨄"
+icon = ""
+color = ""
+
+# Cockpit-only: done, not reviewed (cleared by opening lazygitrs).
+[theme.states.review]
+icon = "󰷋"
 color = ""
 
 # Nerd Font icon registry — the single source of truth for program/agent glyphs.

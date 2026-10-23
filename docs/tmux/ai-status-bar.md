@@ -15,16 +15,18 @@ State colors are **semantic constants**, not theme slots: `waymux` picks them fr
 | :--- | :---: | :---: | :---: |
 | `busy` / `working` (animated spinner `⠋`) | `󰑮` | `#89b4fa` blue | `#2563eb` |
 | `question` / `awaiting_input` | `󱜻` | `#f9e2af` gold | `#7c6a00` |
-| `permission` | `󱅭` | `#ff9e57` orange | `#c2410c` |
-| `stalled` | `󱥁` | `#f5c2e7` pink | `#a21caf` |
-| `error` | `󰨄` | `#ff6b7a` red | `#be123c` |
-| `idle` (done, waiting for your next prompt) | `󱥂` | `#8aa4b8` slate | `#4f6b5f` |
+| `permission` | `󰳌` | `#ff9e57` orange | `#c2410c` |
+| `stalled` | `󰔟` | `#f5c2e7` pink | `#a21caf` |
+| `error` | `` | `#ff6b7a` red | `#be123c` |
+| `idle` (done, waiting for your next prompt) | `󰗡` | `#8aa4b8` slate | `#4f6b5f` |
+
+Glyphs are set in `[theme.states.*]` of [`config.toml`](../../waymux/.config/waymux/config.toml) and each state that needs you has its own silhouette, so the gutter reads without color: question is the only plain speech bubble, permission a shield, stalled an hourglass, error the codicon chat-sparkle-error (AI chat that failed). `idle` is a low-ink check circle with no notification dot, since it shows on every agent tab. Before Oct 2026 idle (`message_badge_outline`) and stalled (`message_badge`) differed only by fill.
 
 A new, resumed or cleared session starts `idle`: `SessionStart` only renames the window and sets the title, and the spinner starts on `UserPromptSubmit`. A `compact` `SessionStart` (which can fire mid-turn) leaves the state untouched.
 
 The window icon comes from the agent binary running in the pane (`pane_current_command`); the agent named in the hook command (`waymux hook tmux <Event> claude`) only applies when the pane runs no known agent binary (e.g. a `node`-wrapped CLI). Devin imports `~/.claude/settings.json`, so every Claude hook also fires inside Devin windows alongside the ones in [`devin/.config/devin/config.json`](../../devin/.config/devin/config.json). The duplicates are harmless: sounds, bells and telemetry fire only on state transitions. Any hook added to the Claude settings also runs in Devin.
 
-The Cockpit adds `review` (`󰈈`, done but not reviewed): `#7ee0b5` dark / `#166534` light. Windows without an agent use `@CURRENT_COLOR`. Every pair stays apart by at least 10.8 CIEDE2000 on the dark palette, including simulated deuteranopia and protanopia; on the light palette, question and permission converge for red-green color deficiency, so the glyph carries that difference. All values reach 4.5:1 contrast on every built-in Omarchy background. To pin a color, set `color = "#rrggbb"` for that state in [`config.toml`](../../waymux/.config/waymux/config.toml); an empty `color` means the built-in palette.
+The Cockpit adds `review` (`󰷋`, done but not reviewed): `#7ee0b5` dark / `#166534` light. Windows without an agent use `@CURRENT_COLOR`. Every pair stays apart by at least 10.8 CIEDE2000 on the dark palette, including simulated deuteranopia and protanopia; on the light palette, question and permission converge for red-green color deficiency, so the glyph carries that difference. All values reach 4.5:1 contrast on every built-in Omarchy background. To pin a color, set `color = "#rrggbb"` for that state in [`config.toml`](../../waymux/.config/waymux/config.toml); an empty `color` means the built-in palette.
 
 Inside the active filled pill, the window title `#W` and state icon `@ai_agent_state` are forced to high-contrast dark text (`fg=#{@SESSION_ACTIVE_FG}`) for clean legibility on top of filled backgrounds.
 
@@ -38,7 +40,7 @@ For inactive background tabs, `@ai_agent_state` is rendered in `#[fg=#{@ai_agent
 
 ## 3. Orthogonal Tmux Options Pushed by `waymux` & Agent Hooks
 
-- `@ai_agent_state`: Pure icon or animated spinner frame string without embedded ANSI color tags (e.g. `⠋`, `󱜻`, `󱅭`, `󰨄`).
+- `@ai_agent_state`: Pure icon or animated spinner frame string without embedded ANSI color tags (e.g. `⠋`, `󱜻`, `󰳌`, ``).
 - `@ai_agent_state_color`: Hex color resolved by `waymux`: the state's `color` override from `config.toml` when set, else the built-in semantic palette above (e.g. `#89b4fa`, `#ff9e57`).
 - `@ai_agent_title`: Clean active session title or initial prompt (e.g. `Fix memory leak in parser`), rendered in the Cockpit & Window Pickers (`Prefix + Space` / [`cockpit-picker.sh`](../../tmux/.config/tmux/cockpit-picker.sh) and [`window-picker.sh`](../../tmux/.config/tmux/window-picker.sh)) matching the window item color and indexed for instant Waymaker fuzzy search.
 

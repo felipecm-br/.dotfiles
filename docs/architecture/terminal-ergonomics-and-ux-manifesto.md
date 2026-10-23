@@ -94,7 +94,7 @@ When switching themes via `omarchy theme set <theme>`, **100% of popups instantl
 │        │  │ Candidate List        │ Live Context Preview        │  │        │
 │        │  │ (38.2% ≈ 40%)         │ (61.8% ≈ 60%)               │  │        │
 │        │  │                       │                             │  │        │
-│        │  │ 󱥂 0•  nvim     idle   │ $ git status -s             │  │        │
+│        │  │ 󰗡 0•  nvim     idle   │ $ git status -s             │  │        │
 │        │  │ 󰑮 1·  agent    work   │ M tmux/tmux.conf            │  │        │
 │        │  │ · 2·  zsh             │ M waymaker/jump.toml        │  │        │
 │        │  │                       │                             │  │        │
@@ -151,7 +151,7 @@ A critical visual ergonomic discovery emerged from head-to-head empirical testin
 2. **Micro-Columnar Precision (Eliminating Ragged Inline Soup):**
    - Ragged inline string concatenation forces continuous corrective horizontal micro-saccades ($\approx +140\text{–}210\text{ ms/row}$) during vertical scanning.
    - Fixed-width columnar padding allows the fovea ($2^\circ$) to drop vertically in $O(1)$ ballistic sweeps ($X = \text{const}$, $\approx 25\text{–}35\text{ ms/row}$).
-   - **Gutter Rule:** Semantic urgency glyphs (`󱅭`, `󱜻`, `󰨄`, `⠋`, `󱥂`, `·`) must reside at column $X=1$, never buried across 45+ columns.
+   - **Gutter Rule:** Semantic urgency glyphs (`󰳌`, `󱜻`, ``, `⠋`, `󰗡`, `·`) must reside at column $X=1$, never buried across 45+ columns.
    - **UTF-8 Visual Width Rule:** Character widths in Bash/POSIX formatters must be computed using codepoint length (`${#str}`) in UTF-8 locales and padded via space injection (`printf -v spaces "%*s" "$pad" ""`), avoiding byte-based `printf "%-24s"` which breaks alignment on multibyte Nerd Font glyphs (``, `⎇`, `󰄬`, `…`, `↑`, `↓`).
 3. **Footer Chromatic Discipline, De-Cluttering & Dynamic Theme Sync:**
    - **Treisman Hue Reservation (1985):** Hue is reserved exclusively for real-time operational urgency in candidate rows. Footers must adopt a **uniform bichromatic neutral palette** (`cyan,bold` keys, `darkgray` action labels, `{darkgray:│}` hairline separators) with zero "rainbow" clutter.
@@ -201,7 +201,7 @@ error      = "~/.local/share/sounds/ai/10-arcade-blip.wav"    # Execution error 
 ```
 
 * **Zero-Gaze Monitoring:** Developers can switch to other workspaces or read documentation without constantly polling the terminal. A distinct sound communicates agent state transitions: blocking states (permission, question, stalled, error) at once; completion chimes only for panes you are not looking at, deferred to a typing pause.
-* **Perceptual Complementarity:** Audio signals trigger reflex orientation, while the status bar pills (`󱥂 idle`, `󰑮 work`, `󱅭 permission`) and popups provide precise contextual detail on demand.
+* **Perceptual Complementarity:** Audio signals trigger reflex orientation, while the status bar pills (`󰗡 idle`, `󰑮 work`, `󰳌 permission`) and popups provide precise contextual detail on demand.
 
 ---
 

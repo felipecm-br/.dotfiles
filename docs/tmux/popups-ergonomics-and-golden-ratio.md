@@ -113,7 +113,7 @@ Whenever the system theme switches (`omarchy theme set <name>`), 100% of termina
 │        │  │ Candidate List        │ Contextual Live Preview     │  │        │
 │        │  │ (38.2% ≈ 40%)         │ (61.8% ≈ 60%)               │  │        │
 │        │  │                       │                             │  │        │
-│        │  │ 󱥂 0•  nvim    idle    │ $ git status -s             │  │        │
+│        │  │ 󰗡 0•  nvim    idle    │ $ git status -s             │  │        │
 │        │  │ 󰑮 1·  agent   work    │ M tmux/tmux.conf            │  │        │
 │        │  │   2·  zsh             │ M waymaker/jump.toml        │  │        │
 │        │  │                       │                             │  │        │
@@ -148,7 +148,7 @@ The Window Picker (`prefix + s` / [`window-picker.sh`](../../tmux/.config/tmux/w
 6. **Bottom-Anchored Live Preview Stream (`preview.initial.tail = true`)**:
    Terminal applications, CLI commands, and AI agent reasoning loops continuously stream output to the bottom of the viewport. Rather than starting at line 0 (which reveals stale header banners or empty top margins), the preview pane is pinned to the bottom of the active conversation stream (`tail = true`). Backed by [`window-picker-preview.sh`](../../tmux/.config/tmux/window-picker-preview.sh), it captures the last 100 history lines, trims trailing blank terminal rows, and positions the viewport directly on the active prompt and latest dialog lines with sub-4ms execution latency.
 7. **Leftmost Telemetry Gutter with Adjacent Index Dot (`0•` vs `1·`)**:
-   Process telemetry icons (`󰑮` working spinner, `󱜻` waiting for input, `󰨄` error, `󱥂` idle) are anchored directly to the leftmost column ($X=1$). This eliminates horizontal scanning jitter across variable window name widths, achieving preattentive visual detection in $<15\text{ ms}$. The origin window (the active Tmux window where the modal was invoked) is cleanly encoded via an adjacent bright cyan bullet directly on the window index (`0•`), while non-active windows feature a dimmed middle dot (`1·`, `2·`), maintaining rhythmic typographic alignment across all items without consuming a separate marker column.
+   Process telemetry icons (`󰑮` working spinner, `󱜻` waiting for input, `` error, `󰗡` idle) are anchored directly to the leftmost column ($X=1$). This eliminates horizontal scanning jitter across variable window name widths, achieving preattentive visual detection in $<15\text{ ms}$. The origin window (the active Tmux window where the modal was invoked) is cleanly encoded via an adjacent bright cyan bullet directly on the window index (`0•`), while non-active windows feature a dimmed middle dot (`1·`, `2·`), maintaining rhythmic typographic alignment across all items without consuming a separate marker column.
 
 8. **Cockpit Dual-Layout Dynamic Preview Switcher (`SwitchPreview(n)`) & In-Place Lazygitrs (`g`)**:
    Waymaker supports stacked preview layouts with instant sub-1ms switching via `SwitchPreview(n)`. The Cockpit HUD keeps the 60% right panel focused on pure live terminal scrollback and telemetry, while delegating full-width interactive Git diffing/hunk staging to Lazygitrs (`g`, returning via `Esc`):
@@ -165,7 +165,7 @@ While standard horizontal splits (e.g. `workmux dashboard`'s 50/50 Top/Bottom sp
 2. **Fixed-Width Columnar Candidate Alignment ($O(1)$ Vertical Scanning):**
    - Eliminates ragged, variable-length inline string concatenation ([`cockpit-picker-items.sh`](../../tmux/.config/tmux/cockpit-picker-items.sh)), which forces corrective horizontal micro-saccades ($\approx +140\text{–}210\text{ ms/row}$).
    - Enforces deterministic columnar slots: `[St 2c (X=1)] [Idx 3c] [Title/Agent 24c] [Branch+Sync 14c] [Churn/PR 11c] [Age 6c]`.
-   - **Leftmost $X=1$ Urgency Gutter:** Anchors agent states (`󱅭`, `󱜻`, `󰨄`, `⠋`, `󱥂`, `·`) at the initial foveal landing coordinate ($X=1$), eliminating horizontal search.
+   - **Leftmost $X=1$ Urgency Gutter:** Anchors agent states (`󰳌`, `󱜻`, ``, `⠋`, `󰗡`, `·`) at the initial foveal landing coordinate ($X=1$), eliminating horizontal search.
    - **Urgency-Aware Age Luminance:** Highlights elapsed waiting time in bold urgency colors (`C_PERM`/`C_QUESTION`/`C_ERROR`) when blocked (`prio <= 3`), dimming to `C_MUTED` only when healthy/idle.
    - **UTF-8 Visual Codepoint Width:** Computes string widths strictly via `${#str}` in UTF-8 locales and pads using space injection (`printf -v spaces "%*s" "$pad" ""`), preventing multibyte Nerd Font icon (``, `⎇`, `󰄬`, `…`, `↑`, `↓`) misalignment.
 

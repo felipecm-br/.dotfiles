@@ -118,9 +118,9 @@ The Cockpit HUD is the central control plane, bound to `Prefix + Space` (`85% ×
 ┌────────────────────────────────────────────────────────────────────────────────────────┐
 │ 󱂬  Fleet (All Windows) ❯                                        ? Help · Esc Close     │
 ├────────────────────────────────────────────────────────────────────────────────────────┤
-│ 󱅭  1•  dotfiles · agy: Audit docs   main ↑2         +14 -3      2m                     │
+│ 󰳌  1•  dotfiles · agy: Audit docs   main ↑2         +14 -3      2m                     │
 │ 󰑮  2   api · claude: Fix auth       feat/auth ✓     +42 -8  #12 35s                   │
-│ 󱥁  3   web · codex: Add tests       fix/tests ↑1    +5 -1       4m                     │
+│ 󰔟  3   web · codex: Add tests       fix/tests ↑1    +5 -1       4m                     │
 │ ·  4   nvim                         main ✓          clean       12m                    │
 ├────────────────────────────────────────────────────────────────────────────────────────┤
 │ Enter Jump │ y/n Ack │ r Review │ i Input │ g Git │ a Agents │ Tab Worktrees │ ? Help │ Esc Exit │
@@ -129,7 +129,7 @@ The Cockpit HUD is the central control plane, bound to `Prefix + Space` (`85% ×
 
 - **Sub-50ms Data-Path Latency (`waymux cockpit-items` $P_{50} \approx 19\text{ms}$ measured; see §5):** Streams pre-formatted candidate lines into `wm --config cockpit-picker.toml` with zero intermediate disk scans.
 - **Fixed 6-Column Golden Grid (`cockpit-picker-items.sh`):** Monospace columns provide dedicated vertical tracks in the left 40% candidate pane:
-  1. `[State Icon]` (2 chars anchored at $X=1$: `󱅭` permission, `󱜻` question, spinner working, `󱥁` stalled, `󰨄` error, `󱥂` idle, `·` no agent). Rows sort by the triage service class (permission → question → error/stalled → working → idle), waiting rows oldest first, and the cursor opens on the first waiting agent.
+  1. `[State Icon]` (2 chars anchored at $X=1$: `󰳌` permission, `󱜻` question, spinner working, `󰔟` stalled, `` error, `󰗡` idle, `·` no agent). Rows sort by the triage service class (permission → question → error/stalled → working → idle), waiting rows oldest first, and the cursor opens on the first waiting agent.
   2. `[Win Idx + Dot]` (3 chars: e.g. `1•` for active window, `2 ` for background)
   3. `[Win + Agent Title]` (24 chars: window name + active agent prompt/task title)
   4. `[Branch + Sync]` (14 chars: Git branch + upstream `↑N`/`↓N`/`✓`)
@@ -140,7 +140,7 @@ The Cockpit HUD is the central control plane, bound to `Prefix + Space` (`85% ×
   - **Bouma Visual Crowding Reduction:** Eliminates noisy brackets (`[Enter]` $\to$ `Enter`) and uses `{darkgray:│}` hairline separators across the footer.
   - **Dynamic Theme Sync (chrome only):** Branch, diffstat and PR colors are generated from `~/.local/state/omarchy/current/theme/colors.toml`. Theme `muted` is lifted toward the foreground until metadata text reaches 4.5:1 and separators/borders 3:1 (under `lumon` it was 1.68:1), only where the theme falls short. Rows are no longer dimmed; the selection keeps BOLD and the cyan bar.
   - **Why an Agent Waits:** waiting rows show the tool behind the prompt (`Bash: cargo test -p auth`, `Edit: main.rs`, the question text) in place of the task title, from the summary the waymux hook records at `PreToolUse` (ParallelPilot, 2026: a one-line reason per attention flag).
-  - **Done, Not Reviewed (`󰈈`):** an idle agent that finished after its worktree was last opened in lazygitrs, and left uncommitted changes or new commits, is marked for review. Opening lazygitrs (`g` in the Cockpit, `Ctrl + G`) touches `<git-dir>/waymux-reviewed` and clears it. These rows sort right after waiting agents and get the cursor when nothing is waiting: completion is not acceptance.
+  - **Done, Not Reviewed (`󰷋`):** an idle agent that finished after its worktree was last opened in lazygitrs, and left uncommitted changes or new commits, is marked for review. Opening lazygitrs (`g` in the Cockpit, `Ctrl + G`) touches `<git-dir>/waymux-reviewed` and clears it. These rows sort right after waiting agents and get the cursor when nothing is waiting: completion is not acceptance.
 
 ### 3.3 Daemon Telemetry & Urgency Aggregation (`waymux daemon`)
 
@@ -148,7 +148,7 @@ The Waymux daemon (`waymux daemon`) is an asynchronous Rust daemon communicating
 
 - **Multi-Pane Window Urgency Aggregation:** When a Tmux window contains multiple split panes (e.g., editor in pane `%1`, test runner in pane `%2`, AI agent in pane `%3`), `waymux` evaluates urgency across **all** child panes. If *any* pane enters `question`, `permission`, or `error`, the parent window's urgency reflects that highest-priority state, guaranteeing that background agent prompts are never missed.
 - **650ms Biomechanical Idle Debounce:** Protects against false idle/waiting states triggered during rapid tool-call chaining or streaming LLM output chunks.
-- **Proactive Stall Detection & Focus Auto-Dismiss:** Detects hung `working` agents (>20s zero output and zero CPU delta $\to$ `stalled` `󱥁`) and automatically dismisses question/permission alerts via Tmux's `pane-focus-in` hook (`waymux dismiss`).
+- **Proactive Stall Detection & Focus Auto-Dismiss:** Detects hung `working` agents (>20s zero output and zero CPU delta $\to$ `stalled` `󰔟`) and automatically dismisses question/permission alerts via Tmux's `pane-focus-in` hook (`waymux dismiss`).
 - **Triage Queue (`Prefix + I` / `Prefix + i`):** Waiting agents are served by class (permission → question → error/stalled, quick decisions first), longest-waiting first within a class. The next target is the entry after the current pane (or after the last peeked pane for the popup), else the head, so servicing an agent never makes the next jump skip one.
 - **Spatial PipeWire Audio Telemetry:** Non-blocking auditory feedback (`pw-play`) with distinct cues when tasks complete or require interactive feedback. Permission, question, stalled and error cues play immediately. The completion chime (most of the sound volume) is skipped when a focused client shows that pane, otherwise it waits for a 2 s typing pause (capped at 15 s), and agents finishing meanwhile share one chime (Iqbal & Bailey 2008: interruptions delivered at breakpoints cost less).
 - **100% Event-Driven Status Bar:** Tmux runs with `status-interval 0`. State updates are pushed instantly via `tmux set-option -w` and `refresh-client -S`, consuming 0.0% CPU when idle.
@@ -224,7 +224,7 @@ Engineered strictly in accordance with [Terminal Ergonomics & UX Architecture Ma
 | **Supervision Audit Oct 2026** (S3) | Triage served newest-first with a stored index that skipped agents after one was serviced | Stateless queue by service class, oldest first; Cockpit sorts and opens on the same head | `cargo test` (`test_next_in_queue_never_skips_after_service`, `test_start_idx_prefers_first_waiting_agent`) |
 | **Supervision Audit Oct 2026** (S4) | State colors from theme slots collapsed (`lumon`: one blue; `tokyo-night`: permission = stalled) | Built-in semantic palette per light/dark mode in `waymux`; template leaves `color` empty | `cargo test` (`status_palette` contrast and distinctness tests) |
 | **Supervision Audit Oct 2026** (S5) | `pane-focus-in` ran `record-window-state.sh --track` synchronously (p50 193 ms) before `waymux dismiss` | Both backgrounded; stale runs drop their result | `tests/focus_hook_async.test.sh` |
-| **Supervision Audit Oct 2026** (S6) | The Cockpit showed that an agent waited, not why; finished work looked the same reviewed or not | Tool summary as wait reason; `󰈈` done-not-reviewed state cleared by opening lazygitrs | `cargo test` (`test_tool_summary_shapes`, `test_needs_review`), sandboxed-daemon e2e runs |
+| **Supervision Audit Oct 2026** (S6) | The Cockpit showed that an agent waited, not why; finished work looked the same reviewed or not | Tool summary as wait reason; `󰷋` done-not-reviewed state cleared by opening lazygitrs | `cargo test` (`test_tool_summary_shapes`, `test_needs_review`), sandboxed-daemon e2e runs |
 | **Supervision Audit Oct 2026** (S7) | Rows rendered DIM over 1.68:1 metadata; `Prefix + w` repeated within 500 ms | No DIM; metadata ≥ 4.5:1, lines ≥ 3:1; `bind w` without `-r` | `cargo test` (`test_ensure_contrast_lifts_only_what_falls_short`), `tests/close_window.test.sh` |
 | **Supervision Audit Oct 2026** (S8) | Test suites ran on the live tmux server (18% of logged context switches were artifacts); the telemetry report showed fixed demo numbers as evidence | `tests/lib/private_tmux.sh`; `flow-log.sh` skips `_test_*`/`_popups`; real values or `—`, demo values only with `--canonical`; review rate from `review_size` | Converted suites pass on private servers |
 | **Supervision Audit Oct 2026** (S9) | Every file edit in a disposable worktree raised a Claude Code prompt, though lazygitrs reviews the diff before merge | `post-create.sh` writes `acceptEdits` with `ask` rules for push and PR actions, excluded from `git status`; opt out with `AWT_CLAUDE_ACCEPT_EDITS=0` | `tests/awt_improvements.test.sh` (policy, exclude, opt-out, no clobber) |

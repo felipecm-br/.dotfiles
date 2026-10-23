@@ -160,7 +160,7 @@ Powered by **Waymaker** (`wm`), the window picker lists **all sessions and windo
 The AI agent state management pipeline consists of 6 integrated components:
 
 1. **Orthogonal State Options (`waymux` & Agent Hooks)**:
-   - `@ai_agent_state`: Pure icon or animated spinner frame (e.g. `⠋`, `󱜻`, `󱅭`, `󰨄`, `󱥂`) without embedded ANSI escape sequences.
+   - `@ai_agent_state`: Pure icon or animated spinner frame (e.g. `⠋`, `󱜻`, `󰳌`, ``, `󰗡`) without embedded ANSI escape sequences.
    - `@ai_agent_state_color`: Hex color string (`#89b482`, `#d8a657`, `#d3869b`, `#ea6962`) compiled from Omarchy theme templates.
    - `@ai_agent_state_raw`: Raw state string (`busy`, `working`, `question`, `awaiting_input`, `permission`, `error`, `idle`, `closed`).
    - `@ai_agent_title`: Clean active session title or initial prompt (e.g. `Fix memory leak in parser`), rendered in the window picker and indexed for instant Waymaker fuzzy search.
@@ -172,7 +172,7 @@ The AI agent state management pipeline consists of 6 integrated components:
 
 3. **Waymaker Sync (`window-picker-items.sh`)**:
    - Queries `@ai_agent_state`, `@ai_agent_state_color`, and `@ai_agent_title` in real time.
-   - Animates `@SPIN@` during `working`/`busy` states and renders matching Nerdfont state icons (`󱥂`, `󱜻`, `󱅭`, `󰨄`) colored with the active Omarchy theme palette.
+   - Animates `@SPIN@` during `working`/`busy` states and renders matching Nerdfont state icons (`󰗡`, `󱜻`, `󰳌`, ``) colored with the active Omarchy theme palette.
    - Formats the AI session title dynamically (truncated to 28 characters for ergonomic layout preservation), matching the focused window's vibrant active color while keeping inactive windows cleanly readable in foreground text, and injects the full title into the search index so users can jump to any agent window by typing keywords from its current task.
 
 4. **Dynamic Visual Hierarchy & Contrast Model (`window-picker.toml`)**:
