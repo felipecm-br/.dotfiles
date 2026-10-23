@@ -27,6 +27,9 @@ breaking, snow crusting, light scattering).
 - Canonical reference preset: `aaa.toml` (The Great Wave off Kanagawa, Ukiyo-e Crest Edition).
 - Glyph codepoints and names: [references/glyphs.md](references/glyphs.md).
 - Validator: `scripts/validate.py` (see Step 5). Run it every time.
+- Styles the user rejected, and what worked instead: [references/rejected-styles.md](references/rejected-styles.md).
+  **Read it before designing.** In short: filled mass and continuous color beat thin box-drawing lines,
+  one-cell pictograms, busy textile repeats, and unrelated flag or brand colors.
 
 ## The reference technique (Great Wave)
 
@@ -82,7 +85,7 @@ The order of `$directory` and `$git_*` can swap if the story needs it (the refer
 ### Step 3: Invent the glyph chain
 
 Every preset gets **its own chain signature**. Do not reuse the Great Wave's `E0C7 E0C0 E0C4` claw for
-an unrelated subject. Recent presets (`red-fuji`, `kambara-snow`, `starry-night`) all copied it, and that
+an unrelated subject. Earlier presets (`red-fuji`, since deleted, `kambara-snow`, `starry-night`) all copied it, and that
 sameness is the monotony this technique is supposed to remove.
 
 Rules:
@@ -139,8 +142,8 @@ Font coverage (JetBrainsMono Nerd Font): shades, blocks, quadrants, Braille, and
 Geometric is partial (no `◢◣◤◥◖◗◠◡`). Legacy Computing (U+1FB00, smooth wedges and sextants) is
 **missing**, so do not rely on it.
 
-Reference set: `1-kanagawa-v5` (shades), `v6` (blocks and quadrants), `v7` (Braille), `v8` (box drawing
-with a flame closing each chain), and `v9` (all families, one per layer).
+Reference set: `1-kanagawa-v5` (shades), `v6` (blocks and quadrants), `v7` (Braille), and `v9` (all
+families, one per layer). Box drawing as the main material (the deleted `v8`) did not work; see below.
 
 #### Drawings: Braille plotting and per-cell color
 
@@ -159,11 +162,10 @@ A divider can be a picture, not a texture. The `3-*` presets are the reference s
   - A peak is `E0BA` + `E0B8`.
   - A dome is `▂▄▆▇▇▆▄▂`.
   - A tetromino is two rows of half blocks (`▀█▀`).
-  - A black piano key is `▐▌` straddling a cell seam.
   - A firework burst is `⢎⡱`.
   - A lit window is a quadrant on a full-block background.
-- **Semantic error prompts.** Make the error state part of the drawing (ECG flatline, short circuit
-  `━╳`, the Tetris Z piece), not just a recolor.
+- **Semantic error prompts.** Make the error state part of the drawing (ECG flatline, the Tetris Z
+  piece), not just a recolor.
 
 #### Gradient presets
 
