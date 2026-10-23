@@ -11,6 +11,10 @@ target="${1:?usage: move-window-to.sh <index>}"
 
 cur="$(tmux display-message -p '#I')"
 
+# Clamp to the last window so e.g. Ctrl+Shift+9 with 4 windows moves to the end
+last="$(tmux list-windows -F '#I' | tail -n 1)"
+[ "$target" -gt "$last" ] && target="$last"
+
 if [ "$cur" -lt "$target" ]; then
   i="$cur"
   while [ "$i" -lt "$target" ]; do
