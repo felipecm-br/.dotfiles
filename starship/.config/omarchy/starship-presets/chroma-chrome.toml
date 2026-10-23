@@ -1,0 +1,119 @@
+# ==============================================================================
+#  Preset: Chroma Chrome (Liquid Metal Edition)
+#  Inspired by: notMyShell Chroma treatment, extended (stops: sky #1b2a40 #3f78b8 #bcdcf7 | glint #ffffff | earth #4a2f1e #c9925f)
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+# glyph-stacking: gradient
+# Chrome is a gradient with a break: polished metal mirrors the sky above the horizon and the
+# ground below it, as on 1980s chrome lettering. The sky half steps in OKLab through slants
+# U+E0BC (italic, like the lettering); at the horizon the gradient snaps: a white glint, then
+# dark earth, which brightens again toward the end. A specular star U+2736 closes the bar.
+# Regenerate colors with .agents/skills/starship-glyph-stacking/scripts/gradient.py.
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+format = """
+[](fg:color_s0 bg:transparent)\
+$os\
+[](fg:color_s0 bg:color_s010)\
+[](fg:color_s010 bg:color_s011)\
+[](fg:color_s011 bg:color_s1)\
+
+$directory\
+[](fg:color_s1 bg:color_s120)\
+[](fg:color_s120 bg:color_s121)\
+[](fg:color_s121 bg:color_s2)\
+
+$git_branch$git_status\
+[](fg:color_s2 bg:color_glint)\
+[](fg:color_glint bg:color_s3)\
+
+$c$rust$golang$nodejs$deno$python\
+[](fg:color_s3 bg:color_s340)\
+[](fg:color_s340 bg:color_s341)\
+[](fg:color_s341 bg:color_s4)\
+
+$time\
+[](fg:color_s4 bg:transparent)\
+[✶](fg:color_glint)\
+\n$character"""
+
+palette = 'chroma_chrome'
+
+[palettes.chroma_chrome]
+color_s0       = '#1b2a40' # Deep sky (the top of the reflection)
+color_s1       = '#3f78b8' # Sky blue (mid reflection)
+color_s2       = '#bcdcf7' # Pale sky (just above the horizon)
+color_s3       = '#4a2f1e' # Earth shadow (just below the horizon)
+color_s4       = '#c9925f' # Sunlit earth (the bottom of the reflection)
+color_glint    = '#ffffff' # Horizon glint (the specular line)
+color_s010     = '#274366' # OKLab step 1/2 (s0 to s1)
+color_s011     = '#335d8e' # OKLab step 2/2 (s0 to s1)
+color_s120     = '#6899cd' # OKLab step 1/2 (s1 to s2)
+color_s121     = '#92bae2' # OKLab step 2/2 (s1 to s2)
+color_s340     = '#724e32' # OKLab step 1/2 (s3 to s4)
+color_s341     = '#9c6f48' # OKLab step 2/2 (s3 to s4)
+color_paper    = '#fbfbff' # Paper (text on dark fills)
+color_ink_deep = '#000000' # Pure black (contrast correction)
+color_ink      = '#15131a' # Ink (text on light fills)
+color_error    = '#ff3355' # Error (paired with the ✗ shape)
+
+[os]
+disabled = false
+style = "bg:color_s0 fg:color_paper bold"
+format = '[ 󰞬 ]($style)'
+
+[directory]
+style = "bg:color_s1 fg:color_ink_deep bold"
+format = "[ 󰲋 $path ]($style)"
+truncation_length = 3
+
+[git_branch]
+symbol = " "
+style = "bg:color_s2 fg:color_ink bold"
+format = '[ $symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_s2 fg:color_ink bold"
+format = '([$all_status$ahead_behind ]($style))'
+
+[c]
+symbol = " "
+style = "bg:color_s3 fg:color_paper bold"
+format = '[ $symbol($version) ]($style)'
+
+[rust]
+symbol = " "
+style = "bg:color_s3 fg:color_paper bold"
+format = '[ $symbol($version) ]($style)'
+
+[golang]
+symbol = " "
+style = "bg:color_s3 fg:color_paper bold"
+format = '[ $symbol($version) ]($style)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_s3 fg:color_paper bold"
+format = '[ $symbol($version) ]($style)'
+
+[deno]
+symbol = " "
+style = "bg:color_s3 fg:color_paper bold"
+format = '[ $symbol($version) ]($style)'
+
+[python]
+symbol = " "
+style = "bg:color_s3 fg:color_paper bold"
+format = '[ $symbol($version) ]($style)'
+
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_s4 fg:color_ink bold"
+format = '[ $time ]($style)'
+
+# A three-step gradient chevron (starting at the first fill visible on a dark terminal); errors swap to a single-hue ✗ so they never blend into the gradient.
+[character]
+success_symbol = "[❯](bold color_s1)[❯](bold color_glint)[❯](bold color_s4)"
+error_symbol = "[✗❯](bold color_error)"

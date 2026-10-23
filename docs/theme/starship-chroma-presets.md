@@ -1,6 +1,6 @@
 # Starship Chroma Gradient Presets
 
-Eight Starship presets that port the gradient palettes of the notMyShell **Chroma** treatment
+Starship presets that port the gradient palettes of the notMyShell **Chroma** treatment
 (`src/chroma/treatment.ts`, `PRESET_STOPS`) to the prompt, built with the
 [starship-glyph-stacking skill](../../.agents/skills/starship-glyph-stacking/SKILL.md).
 
@@ -41,6 +41,21 @@ build a **stepped gradient** instead:
 | `chroma-warm` | `#e8573c #f29e4c #f1c453 #d9486b` | shades `▓ ▒ ░` (heat shimmer) |
 | `chroma-cool` | `#2ec4b6 #3a86ff #5e60ce #48bfe3` | ice waveforms `U+E0C8` x3 (frost) |
 | `chroma-monochrome` | `#6a6e78 #d4d7dd #f4f5f7 #9a9ea8` | vertical eighths `▊ ▌ ▎` (staircase wipe) |
+
+### Extended set
+
+These eight go beyond notMyShell's stops, and each one introduces a different gradient technique.
+
+| File | Technique | Glyph chain |
+|---|---|---|
+| `chroma-chrome` | 1980s chrome lettering: the sky reflection steps in OKLab, then **snaps** at the horizon to a white glint and dark earth | slants `U+E0BC`, specular star `U+2736` |
+| `chroma-holographic` | Pastel iridescent foil that **fades in and out of the terminal** | shades `▓ ▒ ░` |
+| `chroma-isoluminant` | Hue sweep from 20 to 320 at **constant OKLCH lightness** (L 0.78, C 0.13), interpolating the hue angle, so text contrast is the same in every segment | honeycomb `U+E0CC` |
+| `chroma-dither-sunset` | **No in-between colors**: a Braille dither ramp of one segment over the next, mixed by the eye (ordered dither) | `⣿ ⡷ ⡵ ⠕ ⠂` |
+| `chroma-neon-tube` | **Inverted**: the gradient is carried by the text and the tube caps, on glass tinted 16% toward each gas color | thin caps `U+E0B5` / `U+E0B7` |
+| `chroma-mesh` | **2D mesh gradient**: upper half blocks with `fg` on a top track and `bg` on a different bottom track; segment fills are the midpoint of the two tracks | `▀` x4 |
+| `chroma-thermal` | Inferno colormap starting at t 0.18, so the coldest fill still shows on a dark terminal | pixel squares `U+E0C6 U+E0C6 U+E0C4` |
+| `chroma-oil-slick` | Thin-film interference cycle: violet, blue, teal, gold, magenta, back to violet | ice waveforms `U+E0C8` |
 
 The files carry the `# glyph-stacking: gradient` marker, which tells the skill's validator not to
 flag the deliberately small contrast between neighboring gradient steps. Text contrast is still

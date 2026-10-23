@@ -1,0 +1,118 @@
+# ==============================================================================
+#  Preset: Chroma Thermal (Infrared Camera Edition)
+#  Inspired by: notMyShell Chroma treatment, extended (stops: inferno #000004 #420a68 #932667 #dd513a #fca50a #fcffa4, t 0.18 -> 1)
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+# glyph-stacking: gradient
+# The inferno colormap (perceptually uniform, from matplotlib) as a thermal camera sees heat.
+# Segments start at t = 0.18 so the coldest fill still reads on a dark terminal. Transitions are
+# the sensor grid: big then small pixel squares (U+E0C6 U+E0C6 U+E0C4) stepping through OKLab.
+# Regenerate colors with .agents/skills/starship-glyph-stacking/scripts/gradient.py.
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+format = """
+[](fg:color_s0 bg:transparent)\
+$os\
+[](fg:color_s0 bg:color_s01a)\
+[](fg:color_s01a bg:color_s01b)\
+[](fg:color_s01b bg:color_s1)\
+
+$directory\
+[](fg:color_s1 bg:color_s12a)\
+[](fg:color_s12a bg:color_s12b)\
+[](fg:color_s12b bg:color_s2)\
+
+$git_branch$git_status\
+[](fg:color_s2 bg:color_s23a)\
+[](fg:color_s23a bg:color_s23b)\
+[](fg:color_s23b bg:color_s3)\
+
+$c$rust$golang$nodejs$deno$python\
+[](fg:color_s3 bg:color_s34a)\
+[](fg:color_s34a bg:color_s34b)\
+[](fg:color_s34b bg:color_s4)\
+
+$time\
+[](fg:color_s4 bg:transparent)\
+\n$character"""
+
+palette = 'chroma_thermal'
+
+[palettes.chroma_thermal]
+color_s0    = '#39085c' # t=0.18 segment fill
+color_s1    = '#8c2567' # t=0.39 segment fill
+color_s2    = '#d94f3e' # t=0.59 segment fill
+color_s3    = '#fba30e' # t=0.80 segment fill
+color_s4    = '#fcffa4' # t=1.00 segment fill
+color_s01a  = '#541669' # t=0.248 transition step
+color_s01b  = '#6f1f69' # t=0.317 transition step
+color_s12a  = '#a6335f' # t=0.453 transition step
+color_s12b  = '#bf4252' # t=0.522 transition step
+color_s23a  = '#e76b35' # t=0.658 transition step
+color_s23b  = '#f28829' # t=0.727 transition step
+color_s34a  = '#fec251' # t=0.863 transition step
+color_s34b  = '#ffe17d' # t=0.932 transition step
+color_paper = '#fbfbff' # Paper (text on dark fills)
+color_ink   = '#15131a' # Ink (text on light fills)
+color_error = '#ff3355' # Error (paired with the ✗ shape)
+
+[os]
+disabled = false
+style = "bg:color_s0 fg:color_paper bold"
+format = '[ 󰔏 ]($style)'
+
+[directory]
+style = "bg:color_s1 fg:color_paper bold"
+format = "[ 󰲋 $path ]($style)"
+truncation_length = 3
+
+[git_branch]
+symbol = " "
+style = "bg:color_s2 fg:color_ink bold"
+format = '[ $symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_s2 fg:color_ink bold"
+format = '([$all_status$ahead_behind ]($style))'
+
+[c]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[rust]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[golang]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[deno]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[python]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_s4 fg:color_ink bold"
+format = '[ $time ]($style)'
+
+# A three-step gradient chevron (starting at the first fill visible on a dark terminal); errors swap to a single-hue ✗ so they never blend into the gradient.
+[character]
+success_symbol = "[❯](bold color_s2)[❯](bold color_s3)[❯](bold color_s4)"
+error_symbol = "[✗❯](bold color_error)"

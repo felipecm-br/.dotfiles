@@ -1,0 +1,121 @@
+# ==============================================================================
+#  Preset: Chroma Neon Tube (Glass and Gas Edition)
+#  Inspired by: notMyShell Chroma treatment, extended (stops: #ff3df2 #ff6b6b #ffd93d #3dffb5 #3dc8ff)
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+# glyph-stacking: gradient
+# Inverted chroma: the gradient is carried by the text and the tube outlines, on dark glass tinted
+# 16% toward each tube's gas color, like light bleeding into the glass. Each tube ends in a thin
+# glowing cap U+E0B5, closes on a half circle into the dark gap, and the next tube opens with a
+# half circle and a cap U+E0B7.
+# Regenerate colors with .agents/skills/starship-glyph-stacking/scripts/gradient.py.
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+format = """
+[](fg:color_tube0 bg:transparent)\
+[](fg:color_gas0 bg:color_tube0)\
+$os\
+[](fg:color_gas0 bg:color_tube0)\
+[](fg:color_tube0 bg:color_glass)\
+[](fg:color_tube1 bg:color_glass)\
+[](fg:color_gas1 bg:color_tube1)\
+
+$directory\
+[](fg:color_gas1 bg:color_tube1)\
+[](fg:color_tube1 bg:color_glass)\
+[](fg:color_tube2 bg:color_glass)\
+[](fg:color_gas2 bg:color_tube2)\
+
+$git_branch$git_status\
+[](fg:color_gas2 bg:color_tube2)\
+[](fg:color_tube2 bg:color_glass)\
+[](fg:color_tube3 bg:color_glass)\
+[](fg:color_gas3 bg:color_tube3)\
+
+$c$rust$golang$nodejs$deno$python\
+[](fg:color_gas3 bg:color_tube3)\
+[](fg:color_tube3 bg:color_glass)\
+[](fg:color_tube4 bg:color_glass)\
+[](fg:color_gas4 bg:color_tube4)\
+
+$time\
+[](fg:color_gas4 bg:color_tube4)\
+[](fg:color_tube4 bg:transparent)\
+\n$character"""
+
+palette = 'chroma_neon_tube'
+
+[palettes.chroma_neon_tube]
+color_glass = '#0a0a12' # Dark glass (the gap between tubes)
+color_gas0  = '#ff3df2' # t=0.00 gas color (text and caps)
+color_tube0 = '#2b152f' # Tube glass tinted 16% toward gas 0
+color_gas1  = '#ff6b6b' # t=0.25 gas color (text and caps)
+color_tube1 = '#2b1920' # Tube glass tinted 16% toward gas 1
+color_gas2  = '#ffd93d' # t=0.50 gas color (text and caps)
+color_tube2 = '#29261f' # Tube glass tinted 16% toward gas 2
+color_gas3  = '#3dffb5' # t=0.75 gas color (text and caps)
+color_tube3 = '#172a29' # Tube glass tinted 16% toward gas 3
+color_gas4  = '#3dc8ff' # t=1.00 gas color (text and caps)
+color_tube4 = '#162331' # Tube glass tinted 16% toward gas 4
+color_error = '#ff3355' # Error (paired with the ✗ shape)
+
+[os]
+disabled = false
+style = "bg:color_tube0 fg:color_gas0 bold"
+format = '[ 󱠄 ]($style)'
+
+[directory]
+style = "bg:color_tube1 fg:color_gas1 bold"
+format = "[ 󰲋 $path ]($style)"
+truncation_length = 3
+
+[git_branch]
+symbol = " "
+style = "bg:color_tube2 fg:color_gas2 bold"
+format = '[ $symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_tube2 fg:color_gas2 bold"
+format = '([$all_status$ahead_behind ]($style))'
+
+[c]
+symbol = " "
+style = "bg:color_tube3 fg:color_gas3 bold"
+format = '[ $symbol($version) ]($style)'
+
+[rust]
+symbol = " "
+style = "bg:color_tube3 fg:color_gas3 bold"
+format = '[ $symbol($version) ]($style)'
+
+[golang]
+symbol = " "
+style = "bg:color_tube3 fg:color_gas3 bold"
+format = '[ $symbol($version) ]($style)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_tube3 fg:color_gas3 bold"
+format = '[ $symbol($version) ]($style)'
+
+[deno]
+symbol = " "
+style = "bg:color_tube3 fg:color_gas3 bold"
+format = '[ $symbol($version) ]($style)'
+
+[python]
+symbol = " "
+style = "bg:color_tube3 fg:color_gas3 bold"
+format = '[ $symbol($version) ]($style)'
+
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_tube4 fg:color_gas4 bold"
+format = '[ $time ]($style)'
+
+# A three-step gradient chevron (starting at the first fill visible on a dark terminal); errors swap to a single-hue ✗ so they never blend into the gradient.
+[character]
+success_symbol = "[❯](bold color_gas0)[❯](bold color_gas2)[❯](bold color_gas4)"
+error_symbol = "[✗❯](bold color_error)"

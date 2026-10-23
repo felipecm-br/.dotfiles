@@ -1,0 +1,151 @@
+# ==============================================================================
+#  Preset: Chroma Mesh (Two-Track Gradient Edition)
+#  Inspired by: notMyShell Chroma treatment, extended (top: #ff7ab6 #ffb36b #ffe17a #7af0c8 #7ab8ff | bottom: #5b4bff #9b4bff #ff4bd2 #ff6a5b #ffb35b)
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+# glyph-stacking: gradient
+# A 2D mesh gradient in one row: every transition cell is an upper half block U+2580 whose fg
+# follows a top gradient and whose bg follows a different bottom gradient, both in OKLab, so the
+# bar shows two color tracks drifting apart and back. Segment fills are the OKLab midpoint of the
+# two tracks at their position, where the mesh blends.
+# Regenerate colors with .agents/skills/starship-glyph-stacking/scripts/gradient.py.
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+format = """
+[▀](fg:color_t0 bg:color_b0)\
+$os\
+[▀](fg:color_t01 bg:color_b01)\
+[▀](fg:color_t02 bg:color_b02)\
+[▀](fg:color_t03 bg:color_b03)\
+[▀](fg:color_t04 bg:color_b04)\
+
+$directory\
+[▀](fg:color_t11 bg:color_b11)\
+[▀](fg:color_t12 bg:color_b12)\
+[▀](fg:color_t13 bg:color_b13)\
+[▀](fg:color_t14 bg:color_b14)\
+
+$git_branch$git_status\
+[▀](fg:color_t21 bg:color_b21)\
+[▀](fg:color_t22 bg:color_b22)\
+[▀](fg:color_t23 bg:color_b23)\
+[▀](fg:color_t24 bg:color_b24)\
+
+$c$rust$golang$nodejs$deno$python\
+[▀](fg:color_t31 bg:color_b31)\
+[▀](fg:color_t32 bg:color_b32)\
+[▀](fg:color_t33 bg:color_b33)\
+[▀](fg:color_t34 bg:color_b34)\
+
+$time\
+[▀](fg:color_t4 bg:color_b4)\
+[▀](fg:color_t4 bg:transparent)\
+\n$character"""
+
+palette = 'chroma_mesh'
+
+[palettes.chroma_mesh]
+color_s0    = '#ab6ede' # t=0.00 segment fill (track midpoint)
+color_s1    = '#c78bc3' # t=0.25 segment fill (track midpoint)
+color_s2    = '#ffa1b0' # t=0.50 segment fill (track midpoint)
+color_s3    = '#d5b592' # t=0.75 segment fill (track midpoint)
+color_s4    = '#c2bab8' # t=1.00 segment fill (track midpoint)
+color_t01   = '#ff87aa' # t=0.050 top track
+color_b01   = '#694cff' # t=0.050 bottom track
+color_t02   = '#ff939d' # t=0.100 top track
+color_b02   = '#764cff' # t=0.100 bottom track
+color_t03   = '#ff9e8e' # t=0.150 top track
+color_b03   = '#834cff' # t=0.150 bottom track
+color_t04   = '#ffa97e' # t=0.200 top track
+color_b04   = '#8f4cff' # t=0.200 bottom track
+color_t11   = '#ffbc6e' # t=0.300 top track
+color_b11   = '#af4ff7' # t=0.300 bottom track
+color_t12   = '#ffc671' # t=0.350 top track
+color_b12   = '#c351ee' # t=0.350 bottom track
+color_t13   = '#ffcf74' # t=0.400 top track
+color_b13   = '#d752e5' # t=0.400 bottom track
+color_t14   = '#ffd877' # t=0.450 top track
+color_b14   = '#eb50dc' # t=0.450 bottom track
+color_t21   = '#eae58c' # t=0.550 top track
+color_b21   = '#ff55bd' # t=0.550 bottom track
+color_t22   = '#d3e89d' # t=0.600 top track
+color_b22   = '#fe5da7' # t=0.600 bottom track
+color_t23   = '#b9ebac' # t=0.650 top track
+color_b23   = '#fe6290' # t=0.650 bottom track
+color_t24   = '#9deeba' # t=0.700 top track
+color_b24   = '#ff6777' # t=0.700 bottom track
+color_t31   = '#7ae5d5' # t=0.800 top track
+color_b31   = '#ff7a5b' # t=0.800 bottom track
+color_t32   = '#79dbe0' # t=0.850 top track
+color_b32   = '#ff895c' # t=0.850 bottom track
+color_t33   = '#79cfeb' # t=0.900 top track
+color_b33   = '#ff985c' # t=0.900 bottom track
+color_t34   = '#7ac4f5' # t=0.950 top track
+color_b34   = '#ffa55b' # t=0.950 bottom track
+color_t0    = '#ff7ab6' # t=0 top track
+color_b0    = '#5b4bff' # t=0 bottom track
+color_t4    = '#7ab8ff' # t=1 top track
+color_b4    = '#ffb35b' # t=1 bottom track
+color_ink   = '#15131a' # Ink (text on light fills)
+color_error = '#ff3355' # Error (paired with the ✗ shape)
+
+[os]
+disabled = false
+style = "bg:color_s0 fg:color_ink bold"
+format = '[ 󰚠 ]($style)'
+
+[directory]
+style = "bg:color_s1 fg:color_ink bold"
+format = "[ 󰲋 $path ]($style)"
+truncation_length = 3
+
+[git_branch]
+symbol = " "
+style = "bg:color_s2 fg:color_ink bold"
+format = '[ $symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_s2 fg:color_ink bold"
+format = '([$all_status$ahead_behind ]($style))'
+
+[c]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[rust]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[golang]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[deno]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[python]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_s4 fg:color_ink bold"
+format = '[ $time ]($style)'
+
+# A three-step gradient chevron (starting at the first fill visible on a dark terminal); errors swap to a single-hue ✗ so they never blend into the gradient.
+[character]
+success_symbol = "[❯](bold color_t0)[❯](bold color_b33)[❯](bold color_t4)"
+error_symbol = "[✗❯](bold color_error)"
