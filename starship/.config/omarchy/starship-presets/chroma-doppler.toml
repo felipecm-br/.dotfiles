@@ -1,0 +1,129 @@
+# ==============================================================================
+#  Preset: Chroma Doppler (Redshift to Blueshift Wavelength Edition)
+#  Inspired by: Christian Doppler (1842) and Hippolyte Fizeau (1848) - relativistic wavelength stretching and compression
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+# glyph-stacking: gradient
+# Spatial-frequency gradient: a moving light source at the git segment (589 nm sodium rest frame)
+# stretches wavefronts behind it into long infrared/red eighths (U+2589 U+258A U+258B) and
+# compresses wavefronts ahead of it into progressively narrower cyan/violet eighths
+# (U+258C U+258D -> U+258D U+258E U+258F) as it approaches a bow shock.
+# Regenerate colors with .agents/skills/starship-glyph-stacking/scripts/gradient.py.
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# The modules cascade through: Infrared Wake -> H-Alpha Redshift -> Rest-Frame Emitter -> Cyan Blueshift -> UV Bow Shock
+format = """
+[](fg:color_s0 bg:transparent)\
+$os\
+[▉](fg:color_s0 bg:color_w01)\
+[▊](fg:color_w01 bg:color_w02)\
+[▋](fg:color_w02 bg:color_s1)\
+
+$directory\
+[▋](fg:color_s1 bg:color_w11)\
+[▌](fg:color_w11 bg:color_w12)\
+[▍](fg:color_w12 bg:color_s2)\
+
+$git_branch$git_status\
+[▌](fg:color_s2 bg:color_w21)\
+[▍](fg:color_w21 bg:color_w22)\
+[▎](fg:color_w22 bg:color_s3)\
+
+$c$rust$golang$nodejs$deno$python\
+[▍](fg:color_s3 bg:color_w31)\
+[▎](fg:color_w31 bg:color_w32)\
+[▎](fg:color_w32 bg:color_w33)\
+[▏](fg:color_w33 bg:color_s4)\
+
+$time\
+[▎](fg:color_s4 bg:color_uv)\
+[▏](fg:color_uv bg:transparent)\
+\n$character"""
+
+palette = 'chroma_doppler'
+
+[palettes.chroma_doppler]
+color_s0    = '#4a0c1d' # Deep infrared receding wake (z > 0.5)
+color_w01   = '#731527' # Stretched redshift wavefront 1/2 (OKLab)
+color_w02   = '#9e1f30' # Stretched redshift wavefront 2/2 (OKLab)
+color_s1    = '#c92a3a' # H-alpha redshifted emission (656.3 nm -> 720 nm)
+color_w11   = '#e0633e' # Approaching emitter wavefront 1/2 (OKLab)
+color_w12   = '#f2a14d' # Approaching emitter wavefront 2/2 (OKLab)
+color_s2    = '#ffe066' # Rest-frame emitter (589 nm sodium D doublet, v = 0)
+color_w21   = '#a4dd97' # Compressed blueshift wavefront 1/2 (OKLab)
+color_w22   = '#55d4c6' # Compressed blueshift wavefront 2/2 (OKLab)
+color_s3    = '#1ec8e8' # O-III / H-beta blueshifted cyan (486 nm)
+color_w31   = '#2da6f2' # High-frequency wavefront 1/3 (OKLab)
+color_w32   = '#4684f9' # High-frequency wavefront 2/3 (OKLab)
+color_w33   = '#5b66fd' # High-frequency wavefront 3/3 (OKLab)
+color_s4    = '#6b4cff' # Relativistic ultraviolet bow shock (z < -0.3)
+color_uv    = '#3b1f9e' # Leading shock edge into vacuum
+color_paper = '#fbfbff' # Paper (text on dark red and violet fills)
+color_ink   = '#12101b' # Ink (text on bright emitter and cyan fills)
+color_error = '#ff2e4c' # Error: runaway redshift, paired with the ✗ shape
+
+# 1. INFRARED WAKE (long, stretched wavelengths trailing behind the source)
+[os]
+disabled = false
+style = "bg:color_s0 fg:color_paper bold"
+format = '[ 󰥛 ]($style)'
+
+# 2. H-ALPHA REDSHIFT (receding spectral lines shifted toward red)
+[directory]
+style = "bg:color_s1 fg:color_paper bold"
+format = "[ 󰲋 $path ]($style)"
+truncation_length = 3
+
+# 3. REST-FRAME EMITTER (the moving source itself at the center of the wave train)
+[git_branch]
+symbol = " "
+style = "bg:color_s2 fg:color_ink bold"
+format = '[ $symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_s2 fg:color_ink bold"
+format = '([$all_status$ahead_behind ]($style))'
+
+# 4. CYAN BLUESHIFT (wavefronts bunching up ahead of the emitter)
+[c]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[rust]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[golang]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[deno]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[python]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+# 5. ULTRAVIOLET BOW SHOCK (maximum frequency compression at the leading edge)
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_s4 fg:color_paper bold"
+format = '[ $time ]($style)'
+
+# 6. THE WAVE TRAIN (compressing vertical blocks at the cursor; errors redshift to crimson)
+[character]
+success_symbol = "[▌](bold color_s1)[▍](bold color_s2)[▎](bold color_s3)[▏](bold color_s4)[❯](bold color_s3)"
+error_symbol = "[✗❯](bold color_error)"

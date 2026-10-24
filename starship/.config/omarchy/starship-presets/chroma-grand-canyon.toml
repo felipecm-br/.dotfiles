@@ -1,0 +1,120 @@
+# ==============================================================================
+#  Preset: Chroma Grand Canyon (South Rim Gorge Panorama Edition)
+#  Inspired by: Clarence Dutton, "Tertiary History of the Grand Canon District" (1882) - terraced strata and the Inner Gorge
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+# glyph-stacking: gradient
+# Inverted width-scaling panorama: while Monument Valley builds towers up into the sky, Grand
+# Canyon carves downward across the empty middle of the status line. The 12 $fill half-block
+# columns step down from the Kaibab and Redwall rims at both edges into the shadowed Vishnu
+# Schist Inner Gorge at the center, where the emerald-turquoise Colorado River glints in the
+# bottom half of columns 5 and 6. Left modules climb the geological column across fault scarps.
+# Regenerate colors with .agents/skills/starship-glyph-stacking/scripts/gradient.py.
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+format = """
+[](fg:color_s0)$os[](fg:color_s0 bg:color_s01)[](fg:color_s01 bg:color_s1)$directory[](fg:color_s1 bg:color_s12)[](fg:color_s12 bg:color_s2)$git_branch$git_status[](fg:color_s2 bg:color_s23)[](fg:color_s23 bg:color_s3)$c$rust$golang$nodejs$deno$python[▀](fg:color_v00 bg:color_v01)$fill[▀](fg:color_v02 bg:color_v03)$fill[▀](fg:color_v04 bg:color_v05)$fill[▀](fg:color_v06 bg:color_v07)$fill[▀](fg:color_v08 bg:color_v09)$fill[▀](fg:color_v10 bg:color_v11)$fill[▀](fg:color_v12 bg:color_v13)$fill[▀](fg:color_v14 bg:color_v15)$fill[▀](fg:color_v16 bg:color_v17)$fill[▀](fg:color_v18 bg:color_v19)$fill[▀](fg:color_v20 bg:color_v21)$fill[▀](fg:color_v22 bg:color_v23)$fill$time[](fg:color_s4)
+$character"""
+
+palette = 'chroma_grand_canyon'
+
+[palettes.chroma_grand_canyon]
+color_s0    = '#261a24' # segment 1: Vishnu Basement Schist (1.75 Ga)
+color_s1    = '#6e2c26' # segment 2: Hermit Shale & Supai Group
+color_s2    = '#b03a24' # segment 3: Redwall Limestone cliff
+color_s3    = '#e07a3c' # segment 4: Coconino Sandstone buff
+color_s4    = '#f5c276' # segment 5: Kaibab Limestone rim in golden hour
+color_s01   = '#4b2325' # fault scarp step, Vishnu to Hermit (OKLab)
+color_s12   = '#8f3325' # fault scarp step, Hermit to Redwall (OKLab)
+color_s23   = '#c85a30' # fault scarp step, Redwall to Coconino (OKLab)
+color_v00   = '#ffb86b' # panorama col 0 top: western golden sky over South Rim
+color_v01   = '#d96b38' # panorama col 0 bottom: high Coconino rim wall
+color_v02   = '#f79d65' # panorama col 1 top: golden sky
+color_v03   = '#c4542d' # panorama col 1 bottom: upper Redwall terrace
+color_v04   = '#ea8264' # panorama col 2 top: canyon alpenglow haze
+color_v05   = '#9c3325' # panorama col 2 bottom: Redwall Limestone drop
+color_v06   = '#d66967' # panorama col 3 top: mid-canyon haze
+color_v07   = '#782722' # panorama col 3 bottom: Tonto Platform & Tapeats rim
+color_v08   = '#b8546a' # panorama col 4 top: Inner Gorge shadow haze
+color_v09   = '#3b222c' # panorama col 4 bottom: descending Vishnu Schist wall
+color_v10   = '#4a263a' # panorama col 5 top: steep Inner Gorge shadow wall
+color_v11   = '#2ec4b6' # panorama col 5 bottom: emerald Colorado River in the chasm
+color_v12   = '#422236' # panorama col 6 top: steep Inner Gorge shadow wall
+color_v13   = '#38d9a9' # panorama col 6 bottom: sunlit riffle on the Colorado River
+color_v14   = '#69304f' # panorama col 7 top: east gorge haze
+color_v15   = '#542d36' # panorama col 7 bottom: east Vishnu Schist wall
+color_v16   = '#7c3b66' # panorama col 8 top: eastern dusk sky
+color_v17   = '#b53f26' # panorama col 8 bottom: sunlit east Redwall cliff
+color_v18   = '#5e2e5c' # panorama col 9 top: dusk sky
+color_v19   = '#d4562c' # panorama col 9 bottom: sunlit Supai & Redwall butte
+color_v20   = '#42224d' # panorama col 10 top: twilight over North Rim
+color_v21   = '#e87738' # panorama col 10 bottom: North Rim Coconino wall
+color_v22   = '#2b173b' # panorama col 11 top: eastern night shadow
+color_v23   = '#f5954c' # panorama col 11 bottom: North Rim Kaibab caprock catching last sun
+color_error = '#2ec4b6' # Error: flash-flood turquoise, paired with the ✗ shape
+color_paper = '#fbfbff' # Paper (text on dark strata)
+color_ink   = '#15131a' # Ink (text on light sandstone strata)
+
+[fill]
+symbol = "▀"
+style = "fg:prev_fg bg:prev_bg"
+
+[os]
+disabled = false
+style = "bg:color_s0 fg:color_paper bold"
+format = '[ 󰋵 ]($style)'
+
+[directory]
+style = "bg:color_s1 fg:color_paper bold"
+format = "[ 󰉋 $path ]($style)"
+truncation_length = 3
+
+[git_branch]
+symbol = " "
+style = "bg:color_s2 fg:color_paper bold"
+format = '[ $symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_s2 fg:color_paper bold"
+format = '([$all_status$ahead_behind ]($style))'
+
+[c]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[rust]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[golang]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[deno]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[python]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_s4 fg:color_ink bold"
+format = '[ $time ]($style)'
+
+[character]
+success_symbol = "[❯](bold color_s3)[❯](bold color_s4)"
+error_symbol = "[✗❯](bold color_error)"

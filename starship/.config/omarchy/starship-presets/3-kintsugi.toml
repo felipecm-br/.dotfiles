@@ -1,0 +1,120 @@
+# ==============================================================================
+#  Preset: Kintsugi (Muromachi Golden Joinery Edition)
+#  Inspired by: Kintsugi / Kintsukuroi (15th c., Ashikaga Yoshimasa) - broken stoneware mended with urushi lacquer and 24k gold dust
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# Glyph chain: five dark Japanese ceramic glaze shards (Tenmoku, Oribe, Karatsu, Sometsuke,
+# Kuro-Raku) are welded together by bold three-layer fracture veins of red benigara urushi
+# lacquer, 24k keshi-fun gold powder, and burnished agate-polished gold highlights. Each crack
+# has a distinct fracture geometry (crystalline waveforms U+E0C8/U+E0CA and diagonal wedges
+# U+E0BC/U+E0B8). Errors shatter the vessel into raw quadrant fragments (U+259C U+259A U+259D).
+# The modules cascade through: Tenmoku Iron -> Oribe Green -> Karatsu Clay -> Sometsuke Cobalt -> Kuro-Raku
+format = """
+[](fg:color_tenmoku bg:transparent)\
+$os\
+[](fg:color_urushi bg:color_tenmoku)\
+[](fg:color_gleam bg:color_gold)\
+[](fg:color_gold bg:color_oribe)\
+
+$directory\
+[](fg:color_urushi bg:color_oribe)\
+[](fg:color_gleam bg:color_gold)\
+[](fg:color_gold bg:color_karatsu)\
+
+$git_branch$git_status\
+[](fg:color_urushi bg:color_karatsu)\
+[](fg:color_gleam bg:color_gold)\
+[](fg:color_gold bg:color_sometsuke)\
+
+$c$rust$golang$nodejs$deno$python\
+[](fg:color_urushi bg:color_sometsuke)\
+[](fg:color_gleam bg:color_gold)\
+[](fg:color_gold bg:color_raku)\
+
+$time\
+[](fg:color_gold bg:color_raku)\
+[](fg:color_gleam bg:color_urushi)\
+[](fg:color_urushi bg:transparent)\
+\n$character"""
+
+palette = 'art_kintsugi'
+
+[palettes.art_kintsugi]
+color_tenmoku   = '#17131c' # Tenmoku iron-oxide oil-spot glaze (Jian / Seto ware)
+color_oribe     = '#15382b' # Oribe vitrified copper-green glaze (Furuta Oribe)
+color_karatsu   = '#4a3020' # Karatsu wood-fired iron-rich stoneware clay
+color_sometsuke = '#1b355e' # Sometsuke cobalt-blue underglaze porcelain (Arita ware)
+color_raku      = '#28191e' # Kuro-Raku hand-formed black lead glaze (Chojiro)
+color_urushi    = '#8f2d1e' # Benigara urushi (red iron-oxide lacquer foundation)
+color_gold      = '#d69418' # Keshi-fun (24-karat matte gold powder bed)
+color_gleam     = '#fff5b8' # Migaki (burnished gold specular highlight)
+color_raw       = '#ff3b2f' # Raw unmended cinnabar lacquer on a fresh break
+color_washi     = '#f7f1e3' # Warm washi paper (text on dark glazes)
+
+# 1. TENMOKU SHARD (the dark iron-glazed foot ring that anchors the bowl)
+[os]
+disabled = false
+style = "bg:color_tenmoku fg:color_washi bold"
+format = '[ 󰊎 ]($style)'
+
+# 2. ORIBE SHARD (vitrified copper green, where you stand)
+[directory]
+style = "bg:color_oribe fg:color_washi bold"
+format = "[ 󰲋 $path ]($style)"
+truncation_length = 3
+
+# 3. KARATSU SHARD (earthy stoneware where golden fracture veins branch)
+[git_branch]
+symbol = " "
+style = "bg:color_karatsu fg:color_washi bold"
+format = '[ $symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_karatsu fg:color_washi bold"
+format = '([$all_status$ahead_behind ]($style))'
+
+# 4. SOMETSUKE SHARD (deep Arita cobalt porcelain holding the craft)
+[c]
+symbol = " "
+style = "bg:color_sometsuke fg:color_washi bold"
+format = '[ $symbol($version) ]($style)'
+
+[rust]
+symbol = " "
+style = "bg:color_sometsuke fg:color_washi bold"
+format = '[ $symbol($version) ]($style)'
+
+[golang]
+symbol = " "
+style = "bg:color_sometsuke fg:color_washi bold"
+format = '[ $symbol($version) ]($style)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_sometsuke fg:color_washi bold"
+format = '[ $symbol($version) ]($style)'
+
+[deno]
+symbol = " "
+style = "bg:color_sometsuke fg:color_washi bold"
+format = '[ $symbol($version) ]($style)'
+
+[python]
+symbol = " "
+style = "bg:color_sometsuke fg:color_washi bold"
+format = '[ $symbol($version) ]($style)'
+
+# 5. KURO-RAKU RIM (the quiet tea-stained lip of the vessel)
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_raku fg:color_gleam bold"
+format = '[ $time ]($style)'
+
+# 6. THE GOLDEN SEAM (burnished gold joinery at the cursor; errors shatter into raw shards)
+[character]
+success_symbol = "[](bold color_urushi)[](bold color_gold)[ ❯](bold color_gleam)"
+error_symbol = "[▜▚▝](bold color_raw)[ ✗](bold color_raw)"

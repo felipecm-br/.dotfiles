@@ -1,0 +1,131 @@
+# ==============================================================================
+#  Preset: Chroma Caustics (Refracted Pool Floor Edition)
+#  Inspired by: Marcel Minnaert, "Light and Colour in the Open Air" (1940) - underwater caustic networks focused by surface ripples
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+# glyph-stacking: gradient
+# Bi-convex optical focal chains: instead of stepping monotonically between segments, each seam
+# focuses sunlight like a converging water wave crest. Two mirrored ice waveforms (U+E0CA x2)
+# step up from deep pool water into a cyan halo and a blinding white-aquamarine caustic cusp,
+# then two forward waveforms (U+E0C8 x2) defocus the cusp into the next depth.
+# Regenerate colors with .agents/skills/starship-glyph-stacking/scripts/gradient.py.
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# The modules cascade through: Abyssal Tile -> Submerged Cobalt -> Cerulean Swell -> Lagoon Shallows -> Sunlit Crest
+format = """
+[](fg:color_s0 bg:transparent)\
+$os\
+[](fg:color_h0a bg:color_s0)\
+[](fg:color_cusp bg:color_h0a)\
+[](fg:color_cusp bg:color_h0b)\
+[](fg:color_h0b bg:color_s1)\
+
+$directory\
+[](fg:color_h1a bg:color_s1)\
+[](fg:color_cusp bg:color_h1a)\
+[](fg:color_cusp bg:color_h1b)\
+[](fg:color_h1b bg:color_s2)\
+
+$git_branch$git_status\
+[](fg:color_h2a bg:color_s2)\
+[](fg:color_cusp bg:color_h2a)\
+[](fg:color_cusp bg:color_h2b)\
+[](fg:color_h2b bg:color_s3)\
+
+$c$rust$golang$nodejs$deno$python\
+[](fg:color_h3a bg:color_s3)\
+[](fg:color_cusp bg:color_h3a)\
+[](fg:color_cusp bg:color_h3b)\
+[](fg:color_h3b bg:color_s4)\
+
+$time\
+[](fg:color_cusp bg:color_s4)\
+[](fg:color_s4 bg:transparent)\
+\n$character"""
+
+palette = 'chroma_caustics'
+
+[palettes.chroma_caustics]
+color_s0    = '#072244' # Deep pool shadow (t=0.00)
+color_s1    = '#0c446e' # Submerged cobalt tile (t=0.25)
+color_s2    = '#116385' # Mid-water cerulean (t=0.50)
+color_s3    = '#22b8bd' # Lagoon turquoise shallows (t=0.75)
+color_s4    = '#6ef2d8' # Sunlit surface aquamarine (t=1.00)
+color_h0a   = '#1a759f' # Caustic converging halo 1 left (OKLab)
+color_h0b   = '#1f88ad' # Caustic diverging halo 1 right (OKLab)
+color_h1a   = '#2494b5' # Caustic converging halo 2 left (OKLab)
+color_h1b   = '#2ca6be' # Caustic diverging halo 2 right (OKLab)
+color_h2a   = '#35bdd0' # Caustic converging halo 3 left (OKLab)
+color_h2b   = '#4cd4dc' # Caustic diverging halo 3 right (OKLab)
+color_h3a   = '#64e3e2' # Caustic converging halo 4 left (OKLab)
+color_h3b   = '#8bf7e5' # Caustic diverging halo 4 right (OKLab)
+color_cusp  = '#ebfffb' # Refracted caustic focal cusp (focused zenith sunlight)
+color_paper = '#fbfbff' # Paper (text on deep water fills)
+color_ink   = '#061524' # Ink (text on shallow sunlit fills)
+color_error = '#ff3864' # Error: coral reef alarm, paired with the ✗ shape
+
+# 1. ABYSSAL TILE (the shaded floor of the pool)
+[os]
+disabled = false
+style = "bg:color_s0 fg:color_paper bold"
+format = '[ 󰞍 ]($style)'
+
+# 2. SUBMERGED COBALT (mosaic tiles wavering under the swell)
+[directory]
+style = "bg:color_s1 fg:color_paper bold"
+format = "[ 󰲋 $path ]($style)"
+truncation_length = 3
+
+# 3. CERULEAN SWELL (where refracted light webs branch and cross)
+[git_branch]
+symbol = " "
+style = "bg:color_s2 fg:color_paper bold"
+format = '[ $symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_s2 fg:color_paper bold"
+format = '([$all_status$ahead_behind ]($style))'
+
+# 4. LAGOON SHALLOWS (warm turquoise lit from above)
+[c]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[rust]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[golang]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[deno]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[python]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+# 5. SUNLIT CREST (the shimmering water surface)
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_s4 fg:color_ink bold"
+format = '[ $time ]($style)'
+
+# 6. THE FOCAL CUSP (a bi-convex caustic lens at the cursor; errors flash coral red)
+[character]
+success_symbol = "[](bold color_s3)[](bold color_cusp)[❯](bold color_s4)"
+error_symbol = "[✗❯](bold color_error)"

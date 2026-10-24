@@ -1,0 +1,124 @@
+# ==============================================================================
+#  Preset: Bioluminescence (Dinoflagellate Midnight Surf Edition)
+#  Inspired by: Noctiluca scintillans (Sea Sparkle) on Vaadhoo Island and Watasenia scintillans in Toyama Bay
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# Glyph chain: pitch-black midnight water that ignites into 475 nm luciferin blue only where
+# mechanical shear agitates the surf. Across the four gaps a wave progresses from (1) a rising
+# eighth-block and Braille swell (U+2582 U+2584 U+2586 U+28FE) to (2) a curling lip flash
+# (U+E0C0 U+E0C0 U+E0C7), (3) a counter-rotating turbulent tube (U+E0C2 U+E0C0 U+E0C4), and
+# (4) glowing plankton thinning out on wet black sand (U+28FF U+2877 U+2815 U+2802).
+# The modules cascade through: Offshore Swell -> Shoaling Reef -> Breaking Lip -> Luciferin Foam -> Basalt Shore
+format = """
+[](fg:color_s0 bg:transparent)\
+$os\
+[▂](fg:color_swell1 bg:color_s0)\
+[▄](fg:color_swell2 bg:color_s0)\
+[▆](fg:color_swell3 bg:color_s1)\
+[⣾](fg:color_spark bg:color_s1)\
+
+$directory\
+[](fg:color_s1 bg:color_cobalt)\
+[](fg:color_cobalt bg:color_s2)\
+[](fg:color_spark bg:color_s2)\
+
+$git_branch$git_status\
+[](fg:color_spark bg:color_s2)\
+[](fg:color_s2 bg:color_cobalt)\
+[](fg:color_cobalt bg:color_s3)\
+
+$c$rust$golang$nodejs$deno$python\
+[⣿](fg:color_s3 bg:color_s4)\
+[⡷](fg:color_s2 bg:color_s4)\
+[⠕](fg:color_swell3 bg:color_s4)\
+[⠂](fg:color_swell2 bg:color_s4)\
+
+$time\
+[⠂](fg:color_spark bg:color_s4)\
+[](fg:color_s4 bg:transparent)\
+\n$character"""
+
+palette = 'art_bioluminescence'
+
+[palettes.art_bioluminescence]
+color_s0       = '#081226' # Offshore swell before shear threshold (dark pelagic water)
+color_s1       = '#102e5e' # Shoaling reef water (initial pressure wave)
+color_cobalt   = '#1652a8' # Deep bioluminescent cobalt (460 nm)
+color_s2       = '#00b4ff' # Breaking lip luciferin emission (475 nm peak)
+color_s3       = '#5cf2ff' # Oxygenated luciferin-luciferase surf foam
+color_s4       = '#0c1c36' # Wet volcanic basalt sand on the beach
+color_swell1   = '#1b5099' # Swell rising step 1/3 (OKLab)
+color_swell2   = '#2274cc' # Swell rising step 2/3 (OKLab)
+color_swell3   = '#2fa0f0' # Swell rising step 3/3 (OKLab)
+color_spark    = '#d6ffff' # Scintillon flash (core dinoflagellate spark)
+color_paper    = '#ebf8ff' # Moonlight white (text on dark water)
+color_ink      = '#040b18' # Abyssal ink (text on glowing luciferin fills)
+color_red_tide = '#ff2e55' # Karenia brevis Red Tide (toxic daytime algal bloom)
+
+# 1. OFFSHORE SWELL (silent black water rolling in from the deep)
+[os]
+disabled = false
+style = "bg:color_s0 fg:color_paper bold"
+format = '[ 󰫢 ]($style)'
+
+# 2. SHOALING REEF (the wave feels the reef and begins to glow)
+[directory]
+style = "bg:color_s1 fg:color_paper bold"
+format = "[ 󰲋 $path ]($style)"
+truncation_length = 3
+
+# 3. BREAKING LIP (shear stress triggers the 475 nm luciferin flash)
+[git_branch]
+symbol = " "
+style = "bg:color_s2 fg:color_ink bold"
+format = '[ $symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_s2 fg:color_ink bold"
+format = '([$all_status$ahead_behind ]($style))'
+
+# 4. LUCIFERIN FOAM (blinding electric-cyan surf tumbling shoreward)
+[c]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[rust]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[golang]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[deno]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[python]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+# 5. BASALT SHORE (lingering blue sparks on wet black sand)
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_s4 fg:color_s3 bold"
+format = '[ $time ]($style)'
+
+# 6. THE SURF (a glowing wave crest at the cursor; errors bloom into a toxic Red Tide)
+[character]
+success_symbol = "[▂](bold color_swell2)[▄](bold color_s2)[⣾](bold color_s3)[ ❯](bold color_spark)"
+error_symbol = "[▂▄⣾](bold color_red_tide)[ ✗](bold color_red_tide)"

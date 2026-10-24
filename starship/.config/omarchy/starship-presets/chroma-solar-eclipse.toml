@@ -1,0 +1,128 @@
+# ==============================================================================
+#  Preset: Chroma Solar Eclipse (Diamond Ring & Totality Edition)
+#  Inspired by: Total solar eclipse (Arthur Eddington, Principe, 1919) - Baily's beads, H-alpha prominence and the Diamond Ring
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+# glyph-stacking: gradient
+# Umbral occultation: unlike center-out (supernova) or outside-in (wormhole), the git segment in
+# the middle is the velvet-black silhouette of the Moon (U+E0B6 ... U+E0B4). On its left limb a
+# crimson Hydrogen-alpha prominence (656.3 nm) leaps from the chromosphere; on its right limb a
+# blinding photosphere jewel (U+25CF) erupts into the golden K-corona (the Diamond Ring effect).
+# Regenerate colors with .agents/skills/starship-glyph-stacking/scripts/gradient.py.
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# The modules cascade through: Totality Sky -> Outer F-Corona -> Lunar Umbra -> Inner K-Corona -> 360-Degree Horizon
+format = """
+[](fg:color_s0 bg:transparent)\
+$os\
+[](fg:color_s0 bg:color_s01)\
+[](fg:color_s01 bg:color_s02)\
+[](fg:color_s02 bg:color_s1)\
+
+$directory\
+[](fg:color_s1 bg:color_chromo)\
+[](fg:color_chromo bg:color_prominence)\
+[](fg:color_umbra bg:color_prominence)\
+
+$git_branch$git_status\
+[](fg:color_umbra bg:color_diamond)\
+[●](fg:color_photosphere bg:color_diamond)\
+[](fg:color_diamond bg:color_flare)\
+[](fg:color_flare bg:color_s3)\
+
+$c$rust$golang$nodejs$deno$python\
+[](fg:color_s3 bg:color_s34a)\
+[](fg:color_s34a bg:color_s34b)\
+[](fg:color_s34b bg:color_s4)\
+
+$time\
+[](fg:color_s4 bg:color_dusk_edge)\
+[](fg:color_dusk_edge bg:transparent)\
+\n$character"""
+
+palette = 'chroma_solar_eclipse'
+
+[palettes.chroma_solar_eclipse]
+color_s0          = '#0c1633' # Totality zenith (daytime stars in deep twilight blue)
+color_s01         = '#18274a' # Outer coronal streamer step 1/2 (OKLab)
+color_s02         = '#253b62' # Outer coronal streamer step 2/2 (OKLab)
+color_s1          = '#32527b' # F-corona (sunlight scattered by interplanetary dust)
+color_chromo      = '#7a1f4a' # Lower chromosphere rim at second contact
+color_prominence  = '#ff2e63' # Hydrogen-alpha solar prominence (656.3 nm emission line)
+color_umbra       = '#07070f' # Lunar umbra (the occulting disc of the Moon)
+color_photosphere = '#ffffff' # Blinding photosphere bead (Baily's bead core)
+color_diamond     = '#ffe98a' # Diamond Ring glare at third contact
+color_flare       = '#ffae42' # Inner coronal mass ejection streamer
+color_s3          = '#f58233' # K-corona (electron-scattered golden solar atmosphere)
+color_s34a        = '#d66035' # Horizon twilight step 1/2 (OKLab)
+color_s34b        = '#b64338' # Horizon twilight step 2/2 (OKLab)
+color_s4          = '#962b3b' # 360-degree sunset horizon glow around totality
+color_dusk_edge   = '#4a1528' # Umbral shadow edge fading into space
+color_paper       = '#fbfbff' # Paper (text on dark fills and lunar umbra)
+color_ink         = '#15131a' # Ink (text on sunlit coronal fills)
+
+# 1. TOTALITY SKY (deep zenith where planets and bright stars appear at midday)
+[os]
+disabled = false
+style = "bg:color_s0 fg:color_paper bold"
+format = '[ 󰽥 ]($style)'
+
+# 2. OUTER F-CORONA (pearly streamers extending millions of kilometers)
+[directory]
+style = "bg:color_s1 fg:color_paper bold"
+format = "[ 󰲋 $path ]($style)"
+truncation_length = 3
+
+# 3. THE MOON'S UMBRA (totality at the center of the bar, framed by H-alpha and the Diamond Ring)
+[git_branch]
+symbol = " "
+style = "bg:color_umbra fg:color_paper bold"
+format = '[ $symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_umbra fg:color_paper bold"
+format = '([$all_status$ahead_behind ]($style))'
+
+# 4. INNER K-CORONA (golden plasma bursting past the lunar limb)
+[c]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[rust]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[golang]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[deno]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[python]
+symbol = " "
+style = "bg:color_s3 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+# 5. 360-DEGREE HORIZON (sunset colors ringing the entire horizon outside the umbra)
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_s4 fg:color_paper bold"
+format = '[ $time ]($style)'
+
+# 6. THE DIAMOND RING (eclipsed Moon inside a golden corona pill; errors erupt in H-alpha crimson)
+[character]
+success_symbol = "[](bold color_diamond)[●](bold fg:color_umbra bg:color_diamond)[](bold color_diamond)[ ❯](bold color_s3)"
+error_symbol = "[](bold color_prominence)[✗❯](bold color_prominence)"

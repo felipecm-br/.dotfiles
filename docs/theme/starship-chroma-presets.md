@@ -69,6 +69,9 @@ These go beyond notMyShell's stops, and each one introduces a different gradient
 | `chroma-mobius` | **Two-faced ribbon**: a warm front gradient and a cool back gradient; every seam shades, pinches through the terminal and reopens on the other face | `U+E0BC`, bowtie `U+E0B0 U+E0B2`, `U+E0BE` |
 | `chroma-long-shadow` | **Flat-design long shadow** instead of a divider: each tile casts a shadow that falls away and fades (OKLab steps from the next tile's shade) | eighths `▇ ▆ ▄ ▂` |
 | `chroma-kelvin` | **Physical colors only**: every cell is a blackbody color (Tanner Helland's fit), 1300 K candle to 12000 K sky, evenly spaced in mireds | full-block swatches `█` x3 |
+| `chroma-solar-eclipse` | **Umbral occultation**: the git segment is the velvet-black silhouette of the Moon, flanked by a crimson H-alpha solar prominence on the left limb and a blinding golden-white Diamond Ring flare on the right limb | `U+E0C0 U+E0C7 U+E0B6` left, `U+E0B4 U+25CF U+E0C0 U+E0C4` right |
+| `chroma-caustics` | **Bi-convex optical focal chains**: instead of stepping monotonically, each seam focuses sunlight like a converging water wave crest into a razor-bright aquamarine-white caustic cusp and defocuses into the next depth | mirrored + forward ice waveforms `U+E0CA U+E0CA U+E0C8 U+E0C8` |
+| `chroma-doppler` | **Spatial-frequency gradient**: a moving source at the git segment stretches wavefronts behind it into wide infrared/red eighths and compresses wavefronts ahead of it into progressively narrower cyan/violet eighths | `▉ ▊ ▋` -> `▋ ▌ ▍` -> `▌ ▍ ▎` -> `▍ ▎ ▎ ▏` |
 
 The files carry the `# glyph-stacking: gradient` marker, which tells the skill's validator not to
 flag the deliberately small contrast between neighboring gradient steps. Text contrast is still
@@ -110,6 +113,7 @@ rejected styles).
 |---|---|
 | `chroma-monument-valley` | The Mittens at sunset: two buttes fill both halves of their columns and pierce the horizon, far mesas sit low in haze, the sky runs from western glow to dusk |
 | `chroma-aurora-panorama` | Aurora curtains: violet (nitrogen) in the top half, oxygen green below where a curtain is long, night sky in the gaps, a black ridge at both ends |
+| `chroma-grand-canyon` | The Inner Gorge from the South Rim: terraced Redwall and Supai cliffs step downward from both rims into the shadowed Vishnu Schist chasm, with the emerald-turquoise Colorado River glinting in the bottom half of the center columns |
 
 ### Reactive set (self-chaining joints)
 
