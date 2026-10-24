@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# utils/.local/bin/key-telemetry — shortcut usage, unused bindings and faster-path suggestions
+set -euo pipefail
+
+if [ "$#" -eq 0 ]; then
+  set -- report
+fi
+exec python3 "$HOME/.config/tmux/key-telemetry.py" "$@"

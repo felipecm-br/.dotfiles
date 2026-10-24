@@ -82,7 +82,7 @@ Sources: [workmux](https://github.com/raine/workmux) README, [herdr](https://her
 | **Review loop** | **Closed**: Dual-Diff, inline line notes (`.git/info/lines.json`), batch injection into the agent pane | Diff/hunk staging in dashboard; no per-line note dispatch | None | Review UI, PR integration | Unified diffs, one-click PR |
 | **Dirty-state carryover** | `awt -c -W` | Rescue options exist (README); semantics not verified here | n/a | n/a | n/a |
 | **Safe removal / undo** | Quarantine delete + Undo Close Tab (`Prefix + u`) | `confirm_unmerged_removal` (default on) | Window destruction | App-managed | App-managed |
-| **Sandboxing** | None (hermetic env only) | Container / Lima backends | None | Not documented here | Worktree isolation only |
+| **Sandboxing** | `ai-jail` (bubblewrap) is installed and wired for opencode (`.ai-jail`); Claude runs unjailed | Container / Lima backends | None | Not documented here | Worktree isolation only |
 | **Fan-out** | Manual | Multi-worktree `add` | Manual | First-class: one prompt to N agents, compare, merge winner | Parallel threads |
 | **Crash model** | Tmux server owns PTYs; `waymux daemon` is supervised by systemd (`Restart=on-failure`); hooks degrade silently when the daemon is down | Tmux owns PTYs | Server owns PTYs; TUI crash is harmless (server crash ≈ tmux-server crash) | App quit stops its agents | Service can run in background (`t3 service install`) |
 | **Remote / mobile** | SSH / mosh / Tailscale; no mobile UI | Terminal only | Attach from any tty | iOS / Android companion | iOS / Android / web |
@@ -93,7 +93,7 @@ Sources: [workmux](https://github.com/raine/workmux) README, [herdr](https://her
 1. **Runtime ownership (herdr) vs. Tmux + daemon (this stack):** herdr's thesis is that multiplexers persist terminals, not agents, and that a server should own the PTYs with disposable clients. This stack reaches a similar crash profile by delegating PTY ownership to Tmux and keeping agent state in `waymux daemon` (supervised; `agentState/wait` covers the "wait instead of poll" primitive). It does **not** offer herdr's attach-from-anywhere UX or plugin ecosystem. The earlier claim that herdr has a "catastrophic blast radius" was incorrect.
 2. **Fixed-grid HUD vs. list dashboards:** the Cockpit uses a fixed 6-column monospace grid with explicit UTF-8 width alignment, which supports ballistic vertical scanning. workmux's dashboard and herdr's sidebar are functional list views. This is a design argument (saccade model), **not** a measured user-study result.
 3. **The review loop is the differentiator:** competitors focus on *dispatching* agents. As dispatch cost approaches zero, human review dominates cycle time (Amdahl). Dual-Diff, inline line notes, and batch injection (`S` / `r`) close the loop; none of the surveyed tools dispatches per-line review notes back into the agent pane.
-4. **Known gaps (honest):** no sandboxing (workmux has container/Lima), no fan-out/compare (Orca), no mobile surface (Orca, T3 Code), single-maintainer ecosystem (waymux v0.2.x), and Cockpit footer exceeds the 7-item chunk cap.
+4. **Known gaps (honest):** sandboxing covers opencode only (`ai-jail`; Claude, the main agent, runs unjailed, and workmux has container/Lima backends), no fan-out/compare (Orca), no mobile surface (Orca, T3 Code), and a single-maintainer ecosystem (waymux v0.2.x).
 
 ---
 
@@ -230,6 +230,7 @@ Engineered strictly in accordance with [Terminal Ergonomics & UX Architecture Ma
 | **Supervision Audit Oct 2026** (S9) | Every file edit in a disposable worktree raised a Claude Code prompt, though lazygitrs reviews the diff before merge | `post-create.sh` writes `acceptEdits` with `ask` rules for push and PR actions, excluded from `git status`; opt out with `AWT_CLAUDE_ACCEPT_EDITS=0` | `tests/awt_improvements.test.sh` (policy, exclude, opt-out, no clobber) |
 | **Supervision Audit Oct 2026** (S10) | Opening lazygitrs cleared `󰷋` at once (median review 10 s, 3760 lines/min); 41% of logged session switches repeated the focused session | Marker written on exit after 20 s or a stage/commit/discard; `flow-log.sh` drops repeated `session`/`window` targets and `flow-telemetry.py` skips them in older logs | `tests/review_marker.test.sh`, `cargo test` (`test_counts_as_review`) |
 | **Supervision Audit Oct 2026** (S11) | Triage skipped `󰷋` work, so 85% of completions waited for a Cockpit visit; two agents in one repository mixed their edits silently | `Prefix + I` visits review rows after waiting agents; `󰀏` branch badge on agent rows that share a repository | `cargo test` (`test_select_notifying_prefers_daemon_waiting_agents`, `test_pane_needs_review_until_marked`, `test_shared_agent_paths`) |
+| **Supervision Audit Oct 2026** (S12) | The Cockpit footer had 9 items (cap 7) and `r Review` named a different action than the `󰷋` review state; nothing showed which shortcuts were used or skipped | 7-item footer, `r Notes`; key telemetry (`waymux keylog`, `key-telemetry.py`) logs tmux and Cockpit presses and suggests shorter paths | `tests/key_telemetry.test.sh`, `cargo test` (`test_line_keeps_columns_aligned`) |
 
 > [!NOTE]
 > **Waymux Migration:** all consumers (hooks, `waymux-cli`, Cockpit/triage scripts, `drift-doctor`) use native `waymux` paths (`$XDG_RUNTIME_DIR/waymux/token`), configuration is loaded from `~/.config/waymux/config.toml`, sounds are located in `~/.config/waymux/sounds/`, and the systemd unit runs under `waymux.service`.
@@ -246,10 +247,12 @@ Measured on this host (**Linux aarch64**), Oct 2026, wall-clock including proces
 | `waymux health` | ~2 ms | ~4 ms |
 | `waymux list` | ~2 ms | ~3 ms |
 | `waymux wt ls` | ~10 ms | ~18 ms |
+| `Ctrl+G` up to the popup (`lazygitrs-popup.sh`, popup stubbed) | ~41 ms | ~53 ms |
+| `waymux keylog` (per key press, in the background) | <1 ms | ~1 ms |
 | `wm --version` | ~2 ms | ~4 ms |
 | `lazygitrs --version` | ~2 ms | ~3 ms |
 
-Not yet measured: end-to-end Cockpit popup render, worktree creation, `Ctrl+G` Dual-Diff toggle, memory footprint. Do not cite figures for these until a script exists.
+Not yet measured: end-to-end Cockpit popup render and lazygitrs drawing (both need a real terminal), worktree creation, the in-TUI `Ctrl+G` Dual-Diff toggle, memory footprint. Do not cite figures for these until a script exists.
 
 ---
 
@@ -264,7 +267,7 @@ Suites that drive tmux source [`tests/lib/private_tmux.sh`](../../tests/lib/priv
 3. **`tests/close_window.test.sh`**, **`tests/close_session.test.sh`**: guarded termination (clean/idle bypass, confirmation on active agents).
 4. **`tests/reopen_window.test.sh`**: Undo Close Tab transaction stack and state restoration.
 5. **`tests/awt_improvements.test.sh`**: worktree creation, dirty-state migration, async trash deletion.
-6. **Other:** `tests/keybindings_picker.test.sh`, `tests/picker_rg_files.test.sh`, `tests/scrollback_picker.test.sh`, `tests/pr_workflow.test.sh`, `tests/focus_hook_async.test.sh`, `tests/awt_switch_latency.test.sh`.
+6. **Other:** `tests/keybindings_picker.test.sh`, `tests/picker_rg_files.test.sh`, `tests/scrollback_picker.test.sh`, `tests/pr_workflow.test.sh`, `tests/focus_hook_async.test.sh`, `tests/awt_switch_latency.test.sh`, `tests/review_marker.test.sh` (a glance keeps `󰷋`, a review clears it; deduplicated switches), `tests/key_telemetry.test.sh` (wrapping, logging, report and suggestions).
 7. **System validation:** `./scripts/docs-lint.sh` (link integrity, English, root cleanliness), `./scripts/drift-doctor.sh` (binary drift, `waymux` RPC health, symlinks), `./stow.sh -n` (symlink health).
 
 ---

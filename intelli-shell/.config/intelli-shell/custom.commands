@@ -454,6 +454,12 @@ flow-telemetry --hud
 # Output GitHub-flavored markdown telemetry table and heatmap
 flow-telemetry --markdown
 
+# Show most used shortcuts, never-used bindings and faster-path suggestions (last 14 days)
+key-telemetry
+
+# Key telemetry report over a custom window of days
+key-telemetry report --days {{days}}
+
 # Dispatch review note directly to active AI agent pane in worktree
 agent-note.sh {{target_dir}} {{prompt}}
 

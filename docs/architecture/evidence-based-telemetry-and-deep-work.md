@@ -112,3 +112,34 @@ flow-telemetry --json
 ```
 
 All commands are cataloged in `intelli-shell/.config/intelli-shell/custom.commands` (`Ctrl + T` discoverable).
+
+---
+
+## 7. Key Telemetry (`key-telemetry`)
+
+Which shortcuts you use, which you never press, and where a shorter path existed. Presses land in `$XDG_STATE_HOME/flow/keys.tsv`, separate from `events.tsv` so they never inflate the flow clusters or the heatmap:
+
+| Column | Example | Meaning |
+|:---|:---|:---|
+| epoch | `1792809841` | Seconds |
+| context | `tmux`, `cockpit`, `cockpit-filter` | Where the key was pressed (Cockpit filter mode is separate) |
+| key | `prefix:I`, `g`, `enter`, `esc` | tmux `<table>:<key>`, or the Cockpit key |
+| state | `permission`, `review` | Agent state of the Cockpit row the key acted on |
+| target | `dotfiles/main:2` | That row's `session:window` (tmux: the current window) |
+| origin | `dotfiles/main:0` | The window the Cockpit was opened from |
+
+- **tmux:** [`key-telemetry.py install`](../../tmux/.config/tmux/key-telemetry.py) runs last in `tmux.conf` and rebinds every prefix and root binding (mouse excluded) as `run-shell -b "<waymux> keylog …" \; <original command>`. The log call runs in the background, so the binding keeps its latency; each key keeps its note (`-N`), so `list-keys -N` stays complete; a second run never wraps twice, a waymux without `keylog` is left alone, and `set -g @key_telemetry off` disables it.
+- **Cockpit:** every key in the waymux preset starts with `ExecuteAsync(waymux keylog cockpit …)`; `Enter` and `Esc` are logged by the Cockpit itself, which knows the chosen row. `WAYMUX_KEYLOG=0` turns logging off.
+
+`key-telemetry` (or `key-telemetry report --days N`, default 14) prints three sections:
+
+1. **Most used:** presses per action, aliases merged (`g`, `G`, `gg`, `ctrl-g` count as one).
+2. **Never used:** actions bound in `tmux.conf` or the Cockpit with no press in the window; tmux and plugin defaults are only counted.
+3. **Faster paths:** habits where a shorter route existed:
+   - `Enter` in the Cockpit on an agent waiting for you → `Prefix + I`
+   - `g` in the Cockpit on the window it was opened from → `Ctrl + G`
+   - `s` in the Cockpit to reach sessions → `Prefix + s`
+   - Cockpit opened and closed with `Esc` only (3+ times) → status bar icons and `Prefix + I`
+   - the same tmux key 3+ times within 3 s (resize and pane moves excluded) → `Prefix + f` or the window number
+   - `cd <path>` in shell history (atuin, 5+ times) → `j <query>` or `Tab` on an empty prompt
+
