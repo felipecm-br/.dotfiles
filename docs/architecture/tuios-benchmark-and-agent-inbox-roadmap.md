@@ -72,7 +72,7 @@ Mail lives in daemon memory (256 messages per session). Bodies are fenced as unt
 
 Ranked by risk removed per unit of complexity. Keys stay as they are: per the [Zero-Churn principle](terminal-ergonomics-and-ux-manifesto.md), the Cockpit keeps `y`/`n` (TUIOS's `1`/`2`/`3` would also collide with `a` Toggle Fleet).
 
-### Tier S: safety fixes (implemented on the `waymux` branch `feat/delivery-queue`)
+### Tier S: safety fixes (shipped in `waymux` `6628f4a`, installed as 0.2.4)
 
 | ID | Feature | What changed |
 | :---: | :--- | :--- |
