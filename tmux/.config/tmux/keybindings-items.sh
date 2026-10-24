@@ -26,6 +26,7 @@ emit_tmux() {
 󱂩  Ctrl + Shift + 0 .. 9	Move Window to Target Slot (Shift Reorder)	tmux	tmux-move-win	~/.config/tmux/move-window-to.sh 1
 󰊢  Ctrl + Shift + G	AWT Autonomous Worktree Popup	tmux	tmux-awt	~/.config/tmux/awt-popup.sh
 󰚩  Prefix + a / Ctrl + Shift + A	AI Agent Launcher (CLI × Model + Quota)	tmux	tmux-ai-launch	~/.config/tmux/ai-launch-popup.sh
+󰓅  Prefix + u	AI Quota & Burn Telemetry Visual Popup	tmux	tmux-ai-quota	~/.config/tmux/ai-quota-popup.sh
 󰊢  Ctrl + G	Lazygitrs Floating Popup & Dual-Diff	tmux	tmux-lazygitrs	~/.config/tmux/lazygitrs-popup.sh
 󰙀  Ctrl + Shift + T	Undo Close Tab (Exact Index & AI Resume)	tmux	tmux-reopen	~/.config/tmux/reopen-window.sh
 󰒭  Ctrl + Shift + I	AI Attention Trampoline Direct Jump	tmux	tmux-triage	~/.config/tmux/ai-agent-bell-triage.sh
@@ -35,7 +36,7 @@ emit_tmux() {
 󰏫  Prefix + N	Neovim Floating Scratchpad (90%x90%)	tmux	tmux-scratchpad	~/.config/tmux/nvim-scratchpad.sh
 󰄧  Prefix + E	Scrollback & AI Mermaid Modal (90%x88%)	tmux	tmux-view-scrollback	~/.config/tmux/scrollback-view.sh
 󰏌  Prefix + t	Create New Window in Current Path	tmux	tmux-new-win	tmux new-window -c '#{pane_current_path}'
-󰙀  Prefix + T / u	Reopen Last Closed Tab (Exact Index & AI Resume)	tmux	tmux-reopen	~/.config/tmux/reopen-window.sh
+󰙀  Prefix + T	Reopen Last Closed Tab (Exact Index & AI Resume)	tmux	tmux-reopen	~/.config/tmux/reopen-window.sh
 󰅖  Prefix + w / x	Close Window / Pane (AI Guarded)	tmux	tmux-close	~/.config/tmux/close-window.sh
 󰹑  Prefix + m / z	Maximize / Zoom Active Pane	tmux	tmux-zoom	tmux resize-pane -Z
 󱁐  Prefix + C-h/j/k/l	Resize Pane (Asymmetric 10%: 20c/5l)	tmux	tmux-resize	tmux resize-pane -L 20
@@ -48,8 +49,8 @@ emit_tmux() {
 󰅖  Prefix + W	Smart Kill Session (Guarded)	tmux	tmux-kill-sess	~/.config/tmux/close-session.sh
 󰸌  Prefix + B	Toggle Gradient Popup Frames	tmux	tmux-border-gradient	~/.local/bin/border-gradient toggle >/dev/null
 󰌌  Prefix + ?	Keybindings & Workflow Catalog HUD	tmux	tmux-help	~/.config/tmux/keybindings-picker.sh
-󰌌  Prefix + :	Tmux Raw Keybindings (list-keys -N)	tmux	tmux-raw-keys	tmux list-keys -N
 󰘳  Prefix + p / Ctrl + Shift + P	Command Palette (VS Code-style, every command)	tmux	tmux-palette	~/.config/tmux/command-palette.sh
+󰌌  Prefix + :	Tmux Raw Keybindings (list-keys -N)	tmux	tmux-raw-keys	tmux list-keys -N
 EOF
 }
 
@@ -94,7 +95,6 @@ emit_hypr() {
 EOF
 }
 
-case "$FILTER" in
 emit_cmd() {
   # Palette-only commands: no shortcut (empty key column); actions run through `tmux run-shell`.
   cat <<'EOF'
@@ -128,6 +128,7 @@ EOF
 }
 
 emit_filter() {
+case "$FILTER" in
   tmux)
     emit_tmux
     ;;
@@ -140,16 +141,16 @@ emit_filter() {
   hypr)
     emit_hypr
     ;;
-  all|*)
   cmd)
     emit_cmd
     ;;
+  all|*)
     emit_tmux
     emit_shell
     emit_frecency
     emit_hypr
-    ;;
     if [ -n "$PALETTE" ]; then emit_cmd; fi
+    ;;
 esac
 }
 

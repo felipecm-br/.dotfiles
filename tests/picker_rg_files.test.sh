@@ -288,8 +288,11 @@ grep -q "bind-key \"/\" run-shell \".*grep-picker.sh '#{pane_id}' '#{pane_curren
 grep -q "bind-key \"T\" run-shell \".*reopen-window.sh\"" "$CONF" \
   && ok "tmux.conf: prefix + T -> reopen-window.sh" || bad "tmux.conf prefix+T missing"
 
-grep -q "bind-key \"u\" run-shell \".*reopen-window.sh\"" "$CONF" \
-  && ok "tmux.conf: prefix + u -> reopen-window.sh" || bad "tmux.conf prefix+u missing"
+grep -q "bind-key \"u\" run-shell \".*ai-quota-popup.sh" "$CONF" \
+  && ok "tmux.conf: prefix + u -> ai-quota-popup.sh" || bad "tmux.conf prefix+u missing"
+
+grep -q "bind-key o run-shell \".*toggle-ai-split.sh" "$CONF" \
+  && ok "tmux.conf: prefix + o -> toggle-ai-split.sh" || bad "tmux.conf prefix+o missing"
 
 # ── 5. Validate IntelliShell Sync ──
 echo -e "\n[5/6] Validating IntelliShell Custom Commands..."

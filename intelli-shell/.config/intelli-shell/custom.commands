@@ -121,6 +121,12 @@ awtc {{repo_url}}
 # Show AI quota report (Claude 5h/7d burn rate, Antigravity exhaustion, recommended agent)
 ai-quota
 
+# Show visual AI quota & burn telemetry dashboard with bullet gauges and 5h sparklines
+ai-quota --visual
+
+# Open visual AI quota & burn telemetry popup in Tmux (Prefix+u)
+~/.config/tmux/ai-quota-popup.sh
+
 # Force a refresh of the AI quota caches (normally run every 2 min by ai-quota-refresh.timer)
 ai-quota --refresh
 
@@ -181,14 +187,14 @@ ai-launch {{agent}}
 # Open interactive Keybindings & Navigation HUD in Tmux popup (Prefix + ?)
 ~/.config/tmux/keybindings-picker.sh
 
+# Open VS Code-style Command Palette in Tmux popup (Prefix + p / Ctrl + Shift + P)
+~/.config/tmux/command-palette.sh
+
 # Open Workmux agent fleet dashboard in Tmux popup (Prefix + D / Prefix + C-d)
 ~/.config/tmux/workmux-dashboard-popup.sh
 
 # Open Workmux agent fleet dashboard directly in terminal
 workmux dashboard
-
-# Open VS Code-style Command Palette in Tmux popup (Prefix + p / Ctrl + Shift + P)
-~/.config/tmux/command-palette.sh
 
 # Paste files or clipboard into last visited Waymaker target directory
 ptl {{files}}
@@ -327,6 +333,15 @@ waymux triage --jump
 
 # Cycle AI agent alerts and open floating triage popup
 waymux triage --popup
+
+# List prompts the waymux daemon holds until each agent is at rest
+waymux queue ls
+
+# Queue a prompt for an agent pane (typed after 1s idle, never into a permission prompt)
+waymux queue add {{pane}} {{prompt}}
+
+# Drop a queued or stalled prompt for an agent pane
+waymux queue rm {{pane}} {{id}}
 
 # Launch interactive TUI picker or session manager via Waymaker
 wm
@@ -492,6 +507,21 @@ key-telemetry report --days {{days}}
 
 # Dispatch review note directly to active AI agent pane in worktree
 agent-note.sh {{target_dir}} {{prompt}}
+
+# Display quota-aware AI agent telemetry and recommendation report
+ai-quota
+
+# Render visual TUI quota dashboard with Stephen Few bullet gauges and 5h sparklines
+ai-quota --visual
+
+# Output JSON snapshot of AI agent quotas, burn rate, and recommended agent
+ai-quota --json
+
+# Open CLI x model launch menu with live quota telemetry per row
+ai-launch
+
+# Launch quota-recommended AI agent and model automatically
+ai-launch --auto
 
 # Launch Antigravity CLI interactive agent session
 agy

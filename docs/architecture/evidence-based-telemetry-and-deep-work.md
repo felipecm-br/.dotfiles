@@ -140,10 +140,12 @@ Which shortcuts you use, which you never press, and where a shorter path existed
    - `g` in the Cockpit on the window it was opened from → `Ctrl + G`
    - `s` in the Cockpit to reach sessions → `Prefix + s`
    - Cockpit opened and closed with `Esc` only (3+ times) → status bar icons and `Prefix + I`
-   - the same tmux key 3+ times within 3 s (resize and pane moves excluded) → `Prefix + f` or the window number
+   - the same tmux key 3+ times within 3 s (resize, pane moves, and popups/pickers excluded) → `Prefix + f` or the window number
    - a click on a window tab → `Prefix + f` or `Prefix + <number>`
    - a click that focuses another pane → `Ctrl + h/j/k/l`
    - `cd <path>` in shell history (atuin, 5+ times) → `j <query>` or `Tab` on an empty prompt
+   - `ai-quota` in shell history (atuin, 3+ times) → `Prefix + u` (`ai-quota-popup.sh`)
+   - `ai-launch` in shell history (atuin, 3+ times) → `Prefix + a` or `Ctrl + Shift + A` (`ai-launch-popup.sh`)
 
 The report also prints a mouse line: total clicks and how many changed pane or window. Each logged event costs about 1.7 ms of CPU (one `sh` plus `waymux keylog`) in the background, so a click or key press keeps its latency.
 

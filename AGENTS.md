@@ -49,6 +49,7 @@ See [.shell/install/README.md](.shell/install/README.md) for the current bootstr
 - **Single Source of Truth**: Link to existing documentation rather than duplicating explanations across files.
 - **Validation**: Run `./scripts/docs-lint.sh` to verify link integrity and root cleanliness before finalizing commits.
 - **IntelliShell Command Catalog Sync**: Whenever an agent creates, alters, or deprecates a CLI command, shell alias, script, or workflow entrypoint (e.g., `awt`, `awc`, `ptl`, `stow.sh`, etc.), the agent MUST update `intelli-shell/.config/intelli-shell/custom.commands` in the SAME commit to maintain immediate interactive command palette discoverability (`Ctrl+T` / `intelli-sync`).
+- **Key Telemetry & Keybindings HUD Sync**: Whenever an agent creates, modifies, or rebinds a Tmux shortcut (`tmux/.config/tmux/tmux.conf`), Cockpit binding, or popup/picker script (`tmux/.config/tmux/*-popup.sh`, `*-picker.sh`), the agent MUST check and update `tmux/.config/tmux/key-telemetry.py` (action labels, repeat exclusions, and faster-path suggestions), `tmux/.config/tmux/keybindings-items.sh`, `tmux/.config/tmux/keybindings-preview.sh`, and the binding contract tests (`tests/key_telemetry.test.sh`, `tests/picker_rg_files.test.sh`) in the SAME commit, and re-run `~/.config/tmux/key-telemetry.py install` on the live Tmux server.
 - **Documentation Skill**: When auditing or updating documentation, activate the `.agents/skills/dotfiles-docs/SKILL.md` skill.
 
 ## Useful References

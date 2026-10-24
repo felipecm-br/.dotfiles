@@ -163,7 +163,7 @@ def tmux_inventory() -> Dict[str, str]:
             m = BIND_RE.match(line.strip())
             if not m or SKIP_RE.search(m.group(3)):
                 continue
-            command = re.sub(r'^run-shell -b "[^"]*keylog [^"]*" \\; ', "", m.group(4))
+            command = re.sub(r'^run-shell -b (?:-t = )?"[^"]*keylog [^"]*" \\; ', "", m.group(4))
             inv[f"tmux:{table}:{key_label(m.group(3))}"] = command
     return inv
 
@@ -253,6 +253,9 @@ def action_label(key: str, command: str) -> str:
         for needle, label in COCKPIT_ACTIONS:
             if needle in command:
                 return label
+    home = os.path.expanduser("~")
+    if home:
+        command = command.replace(home, "~")
     return shorten(command, 48)
 
 
@@ -311,7 +314,10 @@ def suggestions(presses: List[Press], inventory: Dict[str, str]) -> List[Tuple[i
                       "agent's state, and Prefix + I jumps only when one needs you."))
 
     # The same tmux key pressed 3+ times within 3 s: stepping through windows one by one.
-    repeat_ok = {k for k, cmd in inventory.items() if "resize-pane" in cmd or "select-pane" in cmd}
+    repeat_ok = {
+        k for k, cmd in inventory.items()
+        if any(s in cmd for s in ("resize-pane", "select-pane", "display-popup", "-popup.sh", "-picker.sh"))
+    }
     runs: collections.Counter = collections.Counter()
     tmux_presses = [p for p in ordered if p.ctx == "tmux"]
     keys_only = [p for p in tmux_presses if not MOUSE_RE.search(p.key)]
@@ -340,12 +346,39 @@ def suggestions(presses: List[Press], inventory: Dict[str, str]) -> List[Tuple[i
                       "Click to focus another pane: Ctrl + h/j/k/l moves between panes (and Neovim "
                       "splits) from the home row."))
 
-    long_cds = shell_cd_count(min(p.ts for p in presses) if presses else int(time.time()) - 14 * 86400)
+    since_ts = min(p.ts for p in presses) if presses else int(time.time()) - 14 * 86400
+    long_cds = shell_cd_count(since_ts)
     if long_cds >= 5:
         found.append((long_cds,
                       "`cd <path>` typed in the shell: `j <part of the name>` jumps by frecency, "
                       "and Tab on an empty prompt opens the jump picker."))
+    quota_cmds = shell_prefix_count(since_ts, "^ai-quota( +-v| +--visual| +--report)?$")
+    if quota_cmds >= 3:
+        found.append((quota_cmds,
+                      "`ai-quota` typed in the shell: Prefix + u opens the visual quota & burn "
+                      "telemetry popup from any pane (Enter launches the recommended agent)."))
+    launch_cmds = shell_prefix_count(since_ts, "^ai-launch( +--menu)?$")
+    if launch_cmds >= 3:
+        found.append((launch_cmds,
+                      "`ai-launch` typed in the shell: Prefix + a (or Ctrl + Shift + A) opens the "
+                      "CLI × model launch menu popup and starts the pick in a new window."))
     return sorted(found, reverse=True)
+
+
+def shell_prefix_count(since: int, pattern: str) -> int:
+    """Count matching interactive shell commands in atuin history since `since`."""
+    if not shutil.which("atuin"):
+        return 0
+    after = time.strftime("%Y-%m-%d", time.localtime(since))
+    try:
+        out = subprocess.run(
+            ["atuin", "search", "--after", after, "--format", "{command}", "--limit", "100000", pattern],
+            capture_output=True, text=True, timeout=10,
+        ).stdout
+    except (OSError, subprocess.TimeoutExpired):
+        return 0
+    rx = re.compile(pattern)
+    return sum(1 for line in out.splitlines() if rx.match(line.strip()))
 
 
 def shell_cd_count(since: int) -> int:

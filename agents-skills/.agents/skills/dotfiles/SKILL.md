@@ -104,10 +104,11 @@ When a package requires compiling from source, custom configuration, or non-AUR 
 - **Root Directory Cleanliness:** Never create loose markdown files in the repository root.
 - **Verification:** Always execute `./scripts/docs-lint.sh` before completing tasks to verify markdown link integrity and root cleanliness.
 
-### 4.2 IntelliShell Command Catalog Sync
-Whenever creating, altering, or deprecating a CLI tool, alias, or script:
+### 4.2 IntelliShell Command Catalog & Key Telemetry Sync
+Whenever creating, altering, or deprecating a CLI tool, alias, script, or Tmux/Cockpit keybinding:
 - Update `intelli-shell/.config/intelli-shell/custom.commands` in the SAME commit.
 - Format placeholders using `{{param}}` and include completion helpers where applicable.
+- When modifying Tmux bindings (`tmux.conf`), Cockpit bindings, or popup/picker scripts (`*-popup.sh`, `*-picker.sh`), always check and update `tmux/.config/tmux/key-telemetry.py` (action labels, repeat exclusions, faster-path suggestions), `keybindings-items.sh`, `keybindings-preview.sh`, and contract tests (`tests/key_telemetry.test.sh`, `tests/picker_rg_files.test.sh`), then run `~/.config/tmux/key-telemetry.py install`.
 
 ### 4.3 Ergonomics & Zero-Churn
 - Consult `docs/architecture/terminal-ergonomics-and-ux-manifesto.md` and the `tui-ux-architect` skill before modifying keybindings or TUI components.

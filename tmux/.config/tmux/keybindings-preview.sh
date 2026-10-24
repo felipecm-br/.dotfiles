@@ -224,9 +224,9 @@ EOF
   tmux-ai-split)
     cat <<'EOF'
 ### 󰄧 AI Agent Side-by-Side Split (35% Right)
-Toggles a persistent 35% right split pane running the active AI agent (`$AI_AGENT`).
+Toggles a persistent 35% right split pane running the quota-recommended AI agent and model (`ai-launch --auto`, honoring `$AI_LAUNCH_AGENT` and ignoring `$AI_AGENT`).
 
-- **Ergonomics**: `o` = polymOrphic AI split.
+- **Ergonomics**: `o` = polymOrphic AI split (`toggle-ai-split.sh`).
 - **Usage**: Press `Prefix + o` to reveal or hide the AI assistant pane alongside your active work.
 EOF
     ;;
@@ -255,10 +255,24 @@ EOF
 
   tmux-reopen)
     cat <<'EOF'
-### 󰙀 Reopen Closed Window / Tab (`Ctrl + Shift + T` / `Prefix + T` / `u`)
+### 󰙀 Reopen Closed Window / Tab (`Ctrl + Shift + T` / `Prefix + T`)
 Restores the last closed window or pane with its directory path, running command, and active buffer.
 
-- **Ergonomics**: Universal VSCode/Browser mnemonic (`Ctrl + Shift + T`), also available with `Prefix + T` and `u`.
+- **Ergonomics**: Universal VSCode/Browser mnemonic (`Ctrl + Shift + T`), also available with `Prefix + T`.
+EOF
+    ;;
+
+  tmux-ai-quota)
+    cat <<'EOF'
+### 󰓅 AI Quota & Burn Telemetry Visual Popup (`Prefix + u`, `75% × 60%`)
+Displays visual Stephen Few bullet gauges (`█` actual, `▒` projected burn, `│` weekly budget pace marker, `░` headroom) and 10-bucket (`10×30m`) 5h prompt activity sparklines across Claude Code and Antigravity profiles.
+
+- **Ergonomics**: `u` = **U**sage / Quota (matches `u` in Session Picker). Golden Ratio `75% × 60%` modal.
+- **Controls**:
+  - `Enter`: Launch the recommended agent and model in a new window (`ai-launch --auto`).
+  - `a`: Switch in-place to the CLI × model launch menu (`ai-launch --pick`).
+  - `r`: Force-refresh API quota & badge cache and redraw in place.
+  - `u` / `q` / `Esc`: Dismiss popup with zero side effect.
 EOF
     ;;
 
@@ -325,20 +339,6 @@ Gracefully closes the current tmux session with built-in safeguard heuristics:
 EOF
     ;;
 
-  tmux-help|tmux-flow-telemetry)
-    _kb_script_dir="$(cd "$(dirname "$0")" && pwd)"
-    if [ -f "$_kb_script_dir/flow-telemetry.py" ]; then
-      python3 "$_kb_script_dir/flow-telemetry.py" --markdown
-    fi
-    cat <<'EOF'
-
-### 󰌌 Keybindings & Workflow Catalog HUD (`Prefix + ?`)
-Interactive catalog of all keyboard shortcuts, layer definitions, and ergonomics standards.
-
-- **Ergonomics**: Full Home Row navigation, sub-100ms latency ($H=0$).
-EOF
-    ;;
-
   tmux-palette)
     cat <<'EOF'
 ### 󰘳 Command Palette (`Prefix + p` / `Ctrl + Shift + P`)
@@ -359,6 +359,20 @@ EOF
     cat <<EOF
 ### 󰘳 Palette Command
 Runs \`$ACTION\` through \`tmux run-shell\`. This command has no dedicated shortcut: reach it from the Command Palette (\`Ctrl + Shift + P\`).
+EOF
+    ;;
+
+  tmux-help|tmux-flow-telemetry)
+    _kb_script_dir="$(cd "$(dirname "$0")" && pwd)"
+    if [ -f "$_kb_script_dir/flow-telemetry.py" ]; then
+      python3 "$_kb_script_dir/flow-telemetry.py" --markdown
+    fi
+    cat <<'EOF'
+
+### 󰌌 Keybindings & Workflow Catalog HUD (`Prefix + ?`)
+Interactive catalog of all keyboard shortcuts, layer definitions, and ergonomics standards.
+
+- **Ergonomics**: Full Home Row navigation, sub-100ms latency ($H=0$).
 - **Controls**:
   - `Enter`: Execute workflow action (if runnable)
   - `Tab` / `Shift + Tab`: Filter modes (`all` → `tmux` → `shell` → `frecency` → `hypr`)

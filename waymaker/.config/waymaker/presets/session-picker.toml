@@ -104,7 +104,7 @@ percentage = 60
 "A"             = ["Print(@agent=agyy)", "Accept"]
 "c"             = ["Print(@agent=claude)", "Accept"]
 "C"             = ["Print(@agent=claude)", "Accept"]
-"u"             = "Execute(bash -c 'ai-quota; read -rsn1')"
+"u"             = "Execute(bash -c 'ai-quota --visual; read -rsn1')"
 "w"             = ["Print(__SWITCH_COCKPIT__)", "Quit"]
 "W"             = ["Print(__SWITCH_COCKPIT__)", "Quit"]
 "s"             = ["Print(__SWITCH_COCKPIT__)", "Quit"]
