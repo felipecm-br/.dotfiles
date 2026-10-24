@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+# ai-launch — Start the AI agent CLI for a tmux session (Waymaker startup_command)
+#
+#   ai-launch                 Pick: one-shot picker choice → $AI_LAUNCH_AGENT → ai-quota --recommend
+#   ai-launch <agent>         Force claude | agy | agyy (extra args pass through)
+#   ai-launch --next <agent>  Arm a one-shot choice for the next ai-launch (session picker a / A / c)
+#   ai-launch --peek          Print the agent that would start, without starting it
+
+NEXT_FILE="${XDG_RUNTIME_DIR:-/tmp}/ai-launch.next"
+NEXT_TTL=30
+
+case "${1:-}" in
+  --next)
+    printf '%s\n' "${2:?agent required}" >"$NEXT_FILE"
+    exit 0
+    ;;
+  -h | --help)
+    sed -n '2,8p' "$0" | sed 's/^# \{0,1\}//'
+    exit 0
+    ;;
+esac
+
+peek=false
+[ "${1:-}" = "--peek" ] && { peek=true; shift; }
+
+agent="" why=""
+if [ -n "${1:-}" ]; then
+  agent=$1; shift
+elif [ -f "$NEXT_FILE" ]; then
+  # Consume the picker choice only while fresh, so a stale arm never hijacks a later session
+  if [ $(($(date +%s) - $(stat -c %Y "$NEXT_FILE"))) -le $NEXT_TTL ]; then
+    agent=$(head -n 1 "$NEXT_FILE")
+  fi
+  $peek || rm -f "$NEXT_FILE"
+fi
+if [ -z "$agent" ] && [ -n "${AI_LAUNCH_AGENT:-}" ]; then
+  agent=$AI_LAUNCH_AGENT
+fi
+if [ -z "$agent" ]; then
+  snapshot=$(ai-quota --json 2>/dev/null)
+  agent=$(jq -r '.recommend // empty' <<<"$snapshot" 2>/dev/null)
+  why=$(jq -r 'select(.reason | test("falling back")) | .reason' <<<"$snapshot" 2>/dev/null)
+fi
+agent=${agent:-agy}
+
+if $peek; then
+  echo "$agent"
+  exit 0
+fi
+
+case "$agent" in
+  claude | agy | agyy) ;;
+  *) echo "ai-launch: unknown agent '$agent' (claude | agy | agyy)" >&2; exit 2 ;;
+esac
+
+[ -n "$why" ] && printf '\033[90m%s %s → %s\033[0m\n' "$(waymux icon "$agent" 2>/dev/null)" "$why" "$agent"
+exec "$agent" "$@"

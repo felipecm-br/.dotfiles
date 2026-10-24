@@ -118,6 +118,18 @@ awtc {{repo_url}}
 # Open interactive session picker in Tmux popup
 ~/.config/tmux/session-picker.sh
 
+# Show AI quota report (Claude 5h/7d burn rate, Antigravity exhaustion, recommended agent)
+ai-quota
+
+# Print the quota-recommended AI agent (claude | agy | agyy)
+ai-quota --recommend
+
+# Start the quota-recommended AI agent in this pane
+ai-launch
+
+# Start a specific AI agent CLI
+ai-launch {{agent}}
+
 # Gracefully terminate Tmux session with AI agent and multi-window safeguards
 ~/.config/tmux/close-session.sh
 

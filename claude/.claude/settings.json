@@ -120,5 +120,10 @@
     "claude-opus-5-5": {
       "effortLevel": "medium"
     }
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "$HOME/.local/bin/ai-quota statusline",
+    "padding": 0
   }
 }

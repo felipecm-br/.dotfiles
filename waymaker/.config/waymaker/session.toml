@@ -1,15 +1,15 @@
 [[wildcard]]
 pattern = "~/dev/github/starship-studio/**"
-startup_command = "agy"
+startup_command = "ai-launch"
 windows = ["server"]
 
 [[wildcard]]
 pattern = "~/dev/github/**"
-startup_command = "agy"
+startup_command = "ai-launch"
 
 [[wildcard]]
 pattern = "~/.dotfiles/*"
-startup_command = "agy"
+startup_command = "ai-launch"
 
 [[session]]
 name = " Downloads"

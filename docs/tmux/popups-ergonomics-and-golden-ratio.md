@@ -192,7 +192,7 @@ Every interactive popup, picker, and confirmation dialog has been harmonized und
 | **AWT PR Review** | [`awt-pr.toml`](../../awt/.config/waymaker/presets/awt-pr.toml) | `{cyan,bold:Enter} Checkout │ Tab Cycle Tab │ C-e Chrome │ C-d Diff │ p Preview │ Esc Exit` |
 | **AWT Sub-Wizards** | `awt-prompt`, `awt-ai`, `awt-base`, `awt-type` | `{cyan,bold:Enter} Confirm/Select │ Esc Back/Cancel` |
 | **Tmux Windows** | [`window-picker.toml`](../../waymaker/.config/waymaker/presets/window-picker.toml) | `{cyan,bold:Enter} Switch │ t Sessions │ / Filter │ n New │ d Kill │ ? Help │ Esc Exit` |
-| **Tmux Sessions** | [`session-picker.toml`](../../waymaker/.config/waymaker/presets/session-picker.toml) | `{cyan,bold:Enter} Connect │ c Cockpit │ Tab Cycle │ / Filter │ d Kill │ Esc Exit` |
+| **Tmux Sessions** | [`session-picker.toml`](../../waymaker/.config/waymaker/presets/session-picker.toml) | `{cyan,bold:Enter} Smart │ a Agy │ c Claude │ u Quota │ s Cockpit │ Tab Cycle │ / Filter │ d Kill │ Esc Exit` |
 | **Live Ripgrep** | [`rg.toml`](../../waymaker/.config/waymaker/presets/rg.toml) | `{cyan,bold:Enter} Nvim │ C-v Insert │ y Copy │ J/K Scroll │ C-/ Layout │ C-s Case │ C-w Word │ Esc Exit` |
 | **Workspace / Files** | [`workspace.toml`](../../waymaker/.config/waymaker/presets/workspace.toml) | `{cyan,bold:Enter} Full │ Tab Cycle │ C-h/l Dir │ C-j/k Move │ C-d/u Scroll │ C-v Insert │ C-e Edit │ C-y Copy │ Esc Exit` |
 | **Keybindings HUD** | [`keybindings.toml`](../../waymaker/.config/waymaker/presets/keybindings.toml) | `{cyan,bold:Enter} Run │ Tab Filter │ y Copy │ J/K Scroll │ Esc Exit` |
