@@ -132,7 +132,7 @@ Unified triage cockpit, window manager, and autonomous agent fleet overview powe
 - **Ergonomics**: `Prefix + Space` = Zero-reach thumb roll ($H=0$).
 - **Controls**:
   - `Enter`: Instant jump to selected window / agent session.
-  - `y` / `n`: Approve / Deny pending agent permission prompts.
+  - `y` / `n`: Approve / Deny pending agent permission prompts (`n` sends `Esc`; risky calls such as `rm -rf` or `git push --force` need `y` twice within 3s).
   - `r`: Dispatch pending Lazygitrs code review notes to the agent.
   - `i`: Open inline prompt to reply directly to an agent question.
   - `v`: Toggle side-by-side Git diff preview (`Layout 2`).

@@ -27,7 +27,7 @@ The audit, run with the `tui-ux-architect` skill, reaches two conclusions:
 | **File Navigation** | Tree inside the Rail | `wm -o jump` frecency + ZLE `_smart_tab`, `ptl`/`ptg` | **This Stack** |
 | **Git & Diff Review** | `tuios review` with daemon-held line notes | `lazygitrs` Dual-Diff (`Ctrl+G`) + `.git/info/lines.json` notes sent with `r` | **This Stack** (full staging/rebase) |
 | **Prompt Delivery** | Daemon delivery queue: typed after 1 s at rest, one per rest, never on `needs_input`, `stalled` after 5 s | Now the same model: `waymux queue` (see §4, Phase S1) | **Parity** (absorbed) |
-| **Approvals** | Inbox `1`/`2`/`3`, held through the harness's `PermissionRequest` hook, 0.4 s dwell, risky double-press | Cockpit `y`/`n` (keystrokes) with live re-check and 0.4 s dwell (§4, Phase S2) | **TUIOS** until hook-held approvals land (§4, A3) |
+| **Approvals** | Inbox `1`/`2`/`3`, held through the harness's `PermissionRequest` hook, 0.4 s dwell, risky double-press | Cockpit `y`/`n` (keystrokes: `1` / `Esc` on Claude Code) with live re-check, 0.4 s dwell and risky double-press (§4, S2–S4) | **TUIOS** until hook-held approvals land (§4, A3) |
 | **Quota & Burn-Rate Telemetry** | None (`tuios fan` is blind to rate limits) | [`ai-quota`](../../utils/.local/bin/ai-quota) (`Prefix + u`), [`ai-launch`](../../utils/.local/bin/ai-launch) (`Prefix + a`), quota-aware AI split (`Prefix + o`) | **This Stack** |
 
 ---
@@ -72,24 +72,21 @@ Mail lives in daemon memory (256 messages per session). Bodies are fenced as unt
 
 Ranked by risk removed per unit of complexity. Keys stay as they are: per the [Zero-Churn principle](terminal-ergonomics-and-ux-manifesto.md), the Cockpit keeps `y`/`n` (TUIOS's `1`/`2`/`3` would also collide with `a` Toggle Fleet).
 
-### Tier S: safety fixes (shipped in `waymux` `6628f4a`, installed as 0.2.4)
+### Tier S: safety fixes (shipped in `waymux` `6628f4a` and `a8f2d6d`, installed as 0.2.4)
 
 | ID | Feature | What changed |
 | :---: | :--- | :--- |
 | **S1** | **Delivery queue** (`waymux queue add\|ls\|rm`, RPC `queue/push`, `queue/list`, `queue/cancel`) | `inject`, `review-notes send` and the Cockpit's `I` go through the daemon. A prompt is typed only after 1 s of `idle`, one per rest, never into `working`, `permission` or `question`; not taken in 5 s → `stalled`, announced, never retyped. 8 × 16 KiB per pane. Without a daemon, typing is refused when the hook last saw the agent working or on a prompt. Review notes are marked sent only once queued. |
 | **S1b** | **Large-paste offload & invisible-character strip** | Prompts over 12 KB go to `$XDG_RUNTIME_DIR/waymux/paste/` (`0600`, pruned after 24 h) as `[Pasted text: <path>, N lines]`; Unicode tags, bidi controls and zero-width spaces are removed. |
 | **S2** | **Live re-check + 400 ms dwell on `y`/`n`** | `agent-action approve\|deny` reads the daemon's live state (`changed_at` in `agentState/list`) instead of the row's, refuses when the agent left the prompt, and ignores a prompt on screen for less than 400 ms. |
-
-Still open in Tier S:
-
-- **S3. Risk rules on `y`:** require a second `y` within 3 s when the remembered tool summary (`remember_pane_tool`) matches the TUIOS rule set, and badge the preview header red (`#f38ba8`, reserved for operational urgency).
-- **S4. Deny-key audit:** `n` is sent as `n` + `Enter`. Verify per harness that `n` denies. Where it is not a hotkey, `Enter` confirms the highlighted option, so `Esc` may be the correct deny.
+| **S3** | **Risk rules on `y`** | A shell call matching recursive delete, force push, `reset --hard`, `git clean -f`, discard changes or pipe to shell needs a second `y` within 3 s for the same prompt; the preview shows a red `󰳌 risky:` line. Every command of the call is checked (separators, pipes, `$( )`, `sh -c`, `eval`, wrappers); the hook keeps the full command (`pane-cmd-*`). |
+| **S4** | **Deny-key audit** | Verified on Claude Code 2.1.310: `y`/`n` are not hotkeys and "1. Yes" is highlighted, so the old `n` + `Enter` **approved** the call. `n` now sends `Esc` (verified: the call is not run), and `y` sends `1` to Claude Code. Antigravity was not testable (its config auto-allows); other harnesses keep `y` + `Enter` for approve and get `Esc` for deny. |
+| **A1** | **Queued badge** | Cockpit rows show a muted `󰇮N` before the age when prompts wait in the queue. |
 
 ### Tier A: worth it
 
 | ID | Feature | Notes |
 | :---: | :--- | :--- |
-| **A1** | **Queued badge in the Cockpit** | `agentState/list` already reports `queued`; render `󰇮 N` in darkgray in the age column of `cockpit-items`. |
 | **A2** | **Unread finished turns + away recap** | Count turns per pane; show a one-line recap in the preview after 10+ minutes away. Fits [evidence-based telemetry](evidence-based-telemetry-and-deep-work.md). |
 | **A3** | **Hook-held approvals** | Have `waymux hook tmux PermissionRequest` wait for the Cockpit's decision and print `hookSpecificOutput.decision`; print nothing on any error. Off by default; single-line `Bash`/`Read`/`Grep` only. Removes keystroke injection from approvals entirely. |
 | **A4** | **Alert burst coalescing** | One sound and one message when several agents need you at once. Check `adapters/sound.rs` first. |
