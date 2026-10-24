@@ -17,7 +17,7 @@ This means you can orchestrate your workspace:
 
 ## Core Concepts
 
-You can control Tmux via `waymux` (`waymux status`, `waymux list`, `waymux dismiss [pane]`, `waymux cockpit`, `waymux triage --popup|--jump`, `waymux wt`, `waymux review-notes`, `waymux inject`), `waymux-cli` (`waymux-cli run [-d] [-s sess] [-w win] <cmd>`, `waymux-cli capture <pane>`, `waymux-cli send <pane> <keys>`, `waymux-cli wait <pane> --state idle`, `waymux-cli msg <text>`, `waymux-cli bell <pane>`), or by sending HTTP POST requests using `curl` to `http://127.0.0.1:4040/rpc`.
+You can control Tmux via `waymux` (`waymux status`, `waymux list`, `waymux dismiss [pane]`, `waymux cockpit`, `waymux triage --popup|--jump`, `waymux wt`, `waymux review-notes`, `waymux inject`, `waymux queue add|ls|rm`; `inject`, `review-notes send` and `queue add` hold the prompt in the daemon until the agent is idle, so never use `waymux-cli send` to type a prompt into an agent), `waymux-cli` (`waymux-cli run [-d] [-s sess] [-w win] <cmd>`, `waymux-cli capture <pane>`, `waymux-cli send <pane> <keys>`, `waymux-cli wait <pane> --state idle`, `waymux-cli msg <text>`, `waymux-cli bell <pane>`), or by sending HTTP POST requests using `curl` to `http://127.0.0.1:4040/rpc`.
 All raw HTTP requests must be valid JSON-RPC 2.0 payloads with the Bearer token header from `/run/user/$UID/waymux/token`.
 
 **Endpoints Available via RPC `method`:**
