@@ -125,7 +125,10 @@ agy_sessions() { # <home>: live agy CLI processes (top-level agy-bin) running un
   echo "$n"
 }
 
-agy_token() { # <home>: a valid Antigravity access token for that profile, or nothing
+# The three functions that touch the token run in a subshell `( … )` with xtrace off, so
+# `bash -x ai-quota` never prints it and the rest of the script keeps its tracing.
+agy_token() ( # <home>: a valid Antigravity access token for that profile, or nothing
+  { set +x; } 2>/dev/null # never trace the token (bash -x would print it expanded)
   # The primary profile keeps its live token in the keyring (service gemini), the secondary one
   # in its token file; the keyring token is used only when its account matches the profile's.
   local home=$1 file="$1/.gemini/antigravity-cli/antigravity-oauth-token" src tok exp email file_email="" best="" best_exp=0
@@ -147,15 +150,17 @@ agy_token() { # <home>: a valid Antigravity access token for that profile, or no
     if [ "$exp" -gt $((now + 60)) ] && [ "$exp" -gt "$best_exp" ]; then best=$tok; best_exp=$exp; fi
   done
   printf '%s' "$best"
-}
+)
 
-agy_post() { # <token> <url> <json body>: POST with the token read from stdin, never from argv
+agy_post() ( # <token> <url> <json body>: POST with the token read from stdin, never from argv
+  { set +x; } 2>/dev/null # never trace the token (bash -x would print it expanded)
   printf 'header = "Authorization: Bearer %s"\n' "$1" |
     curl -sS --max-time 8 --config - -H 'Content-Type: application/json' -H 'User-Agent: antigravity' \
       -X POST --data "$3" "$2" 2>/dev/null
-}
+)
 
-agy_api() { # <home> <label>: per-model quota from fetchAvailableModels, cached 60 s; `null` when unavailable
+agy_api() ( # <home> <label>: per-model quota from fetchAvailableModels, cached 60 s; `null` when unavailable
+  { set +x; } 2>/dev/null # never trace the token (bash -x would print it expanded)
   local home=$1 label=$2 cache="$STATE_DIR/agy-models-$2.json" proj_file="$STATE_DIR/agy-project-$2" tok proj resp
   if [ -n "${AI_QUOTA_FIXTURE_DIR:-}" ]; then
     # Tests: a recorded fetchAvailableModels response instead of the network
@@ -192,7 +197,7 @@ agy_api() { # <home> <label>: per-model quota from fetchAvailableModels, cached 
          (entry($r.tieredModelIds.pro[0]? // "") | select(. != null) | {key: "pro", label: "Gemini pro tier"} + .)
        ]}' <<<"$resp" 2>/dev/null >"$cache.tmp" && [ -s "$cache.tmp" ] && mv -f "$cache.tmp" "$cache" || rm -f "$cache.tmp"
   if [ -s "$cache" ]; then cat "$cache"; else echo null; fi
-}
+)
 
 agy_bin=false; { command -v agy-bin >/dev/null 2>&1 || [ -x "$HOME/.local/bin/agy-bin" ]; } && agy_bin=true
 agyy_ok=false; $agy_bin && [ -s "$AGYY_HOME/.gemini/antigravity-cli/antigravity-oauth-token" ] && agyy_ok=true

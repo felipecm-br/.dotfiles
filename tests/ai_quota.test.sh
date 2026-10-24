@@ -82,6 +82,22 @@ snap=$(AI_QUOTA_FIXTURE_DIR="$FIX" ai-quota --json)
   ok "every group exhausted -> red until the first reset" || bad "agy all exhausted: $(jq -c '.agents[1] | {level, until}' <<<"$snap")"
 [ "$(AI_QUOTA_FIXTURE_DIR="$FIX" ai-quota --badge | grep -c 'C0 G0%')" -eq 0 ] && ok "red badge shows the reset, not percentages" || bad "badge"
 
+# 4c. `bash -x ai-quota` never prints the token: a fake token file, a curl stub that answers with
+# the fixture, and a secret-tool stub, so no network and no real keyring.
+SECRET="FAKE-ACCESS-TOKEN-$$"
+jq -n --arg t "$SECRET" --arg e "$(date -d '+1 hour' --iso-8601=seconds)" \
+  '{token: {access_token: $t, expiry: $e}, id_token_email: "test@example.invalid"}' \
+  >"$HOME/.gemini/antigravity-cli/antigravity-oauth-token"
+models none 1 >"$FIX/agy.json"
+printf '#!/bin/sh\ncat >/dev/null\ncat "%s"\n' "$FIX/agy.json" >"$SANDBOX/bin/curl"
+printf '#!/bin/sh\nexit 1\n' >"$SANDBOX/bin/secret-tool"
+chmod +x "$SANDBOX/bin/curl" "$SANDBOX/bin/secret-tool"
+rm -f "$XDG_STATE_HOME/ai-quota/agy-models-agy.json"
+trace=$(bash -x "$ROOT/utils/.local/bin/ai-quota" --json 2>&1)
+[ "$(tail -n 1 <<<"$trace" | jq -r '.agents[1].source')" = "api" ] && ok "token path reaches the API (stubbed)" || bad "token path: $(tail -n 1 <<<"$trace")"
+grep -qF "$SECRET" <<<"$trace" && bad "bash -x printed the token" || ok "bash -x never prints the token"
+rm -f "$HOME/.gemini/antigravity-cli/antigravity-oauth-token" "$SANDBOX/bin/curl" "$SANDBOX/bin/secret-tool" "$XDG_STATE_HOME/ai-quota/agy-models-agy.json"
+
 # 5. ai-launch precedence: one-shot arm > AI_LAUNCH_AGENT > recommendation; AI_AGENT ignored
 ai-launch --next agyy
 [ "$(AI_LAUNCH_AGENT=claude ai-launch --peek)" = "agyy" ] && ok "armed choice wins" || bad "arm precedence"
