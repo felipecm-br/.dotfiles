@@ -19,6 +19,18 @@ esac
 
 printf -v now '%(%s)T' -1
 
+# Popups and reattaches re-fire the switch hooks for the session/window already in focus;
+# only a change of target is a context switch.
+case "$event" in
+  session|window)
+    last_file="$log_dir/last_${event}.txt"
+    last=""
+    [ -s "$last_file" ] && read -r last < "$last_file"
+    [ "$last" = "$target" ] && exit 0
+    printf '%s\n' "$target" > "$last_file"
+    ;;
+esac
+
 safe_target="${target//\//_}"
 safe_target="${safe_target//%/_pane_}"
 

@@ -74,8 +74,14 @@ fi
 REVIEW_LINES=$(printf '%s\n' "$REVIEW_STAT" | awk '{for (i = 1; i < NF; i++) if ($(i + 1) ~ /^(insertion|deletion)/) n += $i} END {print n + 0}')
 [ -x "$FLOW_LOG" ] && "$FLOW_LOG" review_size "$PROJECT_DIR" "$REVIEW_LINES" >/dev/null 2>&1 || true
 
-# Opening the review clears the Cockpit's "done, not reviewed" state for this worktree.
-REVIEW_GIT_DIR=$(git -C "$PROJECT_DIR" rev-parse --absolute-git-dir 2>/dev/null) && : > "$REVIEW_GIT_DIR/waymux-reviewed"
+# A review clears the Cockpit's "done, not reviewed" state for this worktree, but a glance does
+# not: the session must last WAYMUX_REVIEW_MIN_SECS (20s) or stage, commit or discard something.
+# Mirrors items::finish_review in waymux.
+review_snapshot() {
+    { git -C "$PROJECT_DIR" rev-parse HEAD; git -C "$PROJECT_DIR" status --porcelain; } 2>/dev/null | cksum
+}
+REVIEW_BEFORE=$(review_snapshot)
+printf -v REVIEW_STARTED '%(%s)T' -1
 
 ORIGIN_SESSION=$(tmux display-message -p '#{session_name}' 2>/dev/null || echo "")
 ORIGIN_WINDOW=$(tmux display-message -p '#{window_index}' 2>/dev/null || echo "")
@@ -92,6 +98,11 @@ tmux display-popup \
   -w 90% -h 88% \
   "TMUX_ORIGIN_SESSION='$ORIGIN_SESSION' TMUX_ORIGIN_PANE='$ORIGIN_PANE' TMUX_ORIGIN_WINDOW='$ORIGIN_WINDOW' $LZG_CMD"
 rc=$?
+
+printf -v REVIEW_ENDED '%(%s)T' -1
+if (( REVIEW_ENDED - REVIEW_STARTED >= ${WAYMUX_REVIEW_MIN_SECS:-20} )) || [ "$(review_snapshot)" != "$REVIEW_BEFORE" ]; then
+    REVIEW_GIT_DIR=$(git -C "$PROJECT_DIR" rev-parse --absolute-git-dir 2>/dev/null) && : > "$REVIEW_GIT_DIR/waymux-reviewed"
+fi
 
 [ -x "$FLOW_LOG" ] && "$FLOW_LOG" review_end "$PROJECT_DIR" >/dev/null 2>&1 || true
 exit $rc

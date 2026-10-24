@@ -82,6 +82,8 @@ class TelemetryEngine:
     def load_events(self):
         if not os.path.exists(self.tsv_path):
             return
+        # Logs written before flow-log.sh deduplicated switches repeat the focused target.
+        last_target: Dict[str, str] = {}
         try:
             with open(self.tsv_path, "r", encoding="utf-8", errors="ignore") as f:
                 for line in f:
@@ -89,9 +91,13 @@ class TelemetryEngine:
                     if len(parts) >= 2:
                         try:
                             ts = int(parts[0])
+                            ev = parts[1]
+                            target = parts[2] if len(parts) > 2 else ""
+                            if ev in ("session", "window"):
+                                if last_target.get(ev) == target:
+                                    continue
+                                last_target[ev] = target
                             if ts >= self.today_start:
-                                ev = parts[1]
-                                target = parts[2] if len(parts) > 2 else ""
                                 extra = parts[3] if len(parts) > 3 else ""
                                 self.events.append((ts, ev, target, extra))
                         except ValueError:

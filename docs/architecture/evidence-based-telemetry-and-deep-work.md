@@ -30,8 +30,8 @@ Events are written to `${XDG_STATE_HOME:-~/.local/state}/flow/events.tsv` with t
 
 | Event Type | Trigger Origin | Target Parameter | Extra Field | Description |
 |:---|:---|:---|:---|:---|
-| `session` | Tmux hook `client-session-changed` | Session Name | — | Context switch between workspaces (test `_test_*` and `_popups` sessions are skipped) |
-| `window` | Tmux hook `after-select-window` | `session:win` | — | Focus transition between windows (same filter) |
+| `session` | Tmux hook `client-session-changed` | Session Name | — | Context switch between workspaces (test `_test_*` and `_popups` sessions are skipped; a repeat of the focused session is dropped) |
+| `window` | Tmux hook `after-select-window` | `session:win` | — | Focus transition between windows (same filters) |
 | `agent_question` | `waymux` daemon state update | Pane ID (`%X`) | Context message | AI agent transitioned to `AwaitingInput` / `Permission` |
 | `human_reply` | `waymux` daemon state update / focus dismiss | Pane ID (`%X`) | Latency (e.g. `8s`) | Human responded to agent prompt or dismissed attention badge |
 | `agent_finished` | `waymux` daemon debounce completion | Pane ID (`%X`) | Task / prompt ID | AI agent completed task (`Working` $\rightarrow$ `Idle`) |
