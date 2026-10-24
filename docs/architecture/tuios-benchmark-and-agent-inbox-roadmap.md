@@ -72,7 +72,7 @@ Mail lives in daemon memory (256 messages per session). Bodies are fenced as unt
 
 Ranked by risk removed per unit of complexity. Keys stay as they are: per the [Zero-Churn principle](terminal-ergonomics-and-ux-manifesto.md), the Cockpit keeps `y`/`n` (TUIOS's `1`/`2`/`3` would also collide with `a` Toggle Fleet).
 
-### Tier S: safety fixes (shipped in `waymux` `6628f4a` and `a8f2d6d`, installed as 0.2.4)
+### Shipped (`waymux` `6628f4a`, `a8f2d6d`, `9f90704`, installed as 0.2.4)
 
 | ID | Feature | What changed |
 | :---: | :--- | :--- |
@@ -81,15 +81,16 @@ Ranked by risk removed per unit of complexity. Keys stay as they are: per the [Z
 | **S2** | **Live re-check + 400 ms dwell on `y`/`n`** | `agent-action approve\|deny` reads the daemon's live state (`changed_at` in `agentState/list`) instead of the row's, refuses when the agent left the prompt, and ignores a prompt on screen for less than 400 ms. |
 | **S3** | **Risk rules on `y`** | A shell call matching recursive delete, force push, `reset --hard`, `git clean -f`, discard changes or pipe to shell needs a second `y` within 3 s for the same prompt; the preview shows a red `󰳌 risky:` line. Every command of the call is checked (separators, pipes, `$( )`, `sh -c`, `eval`, wrappers); the hook keeps the full command (`pane-cmd-*`). |
 | **S4** | **Deny-key audit** | Verified on Claude Code 2.1.310: `y`/`n` are not hotkeys and "1. Yes" is highlighted, so the old `n` + `Enter` **approved** the call. `n` now sends `Esc` (verified: the call is not run), and `y` sends `1` to Claude Code. Antigravity was not testable (its config auto-allows); other harnesses keep `y` + `Enter` for approve and get `Esc` for deny. |
+| **S5** | **Focus-dismissed prompts are not a rest** | Focusing a pane on a permission prompt (`waymux dismiss` on `pane-focus-in`) set it `idle` to clear the badge, so the queue would type into the prompt 1 s later. That `idle` no longer counts as a rest. |
 | **A1** | **Queued badge** | Cockpit rows show a muted `󰇮N` before the age when prompts wait in the queue. |
+| **A2** | **Away recap** | The daemon counts each pane's finished turns (≥ 5 s of work), edited files, commands and last test command since the pane was last focused (`agent/recap`); after 10 minutes away the Cockpit preview opens with `󰋚 Since you last looked (42m): 3 turns · 6 files: … · 11 commands · tests: cargo test`. Pass/fail of the tests is not tracked. |
+| **A4** | **Alert bursts** | Blocking alerts within 1.5 s play one sound; status-bar alerts within 2 s share one line (`3 agents need you › 3:api, 4:web and 5:docs`), cleared only by the latest alert's timer. |
 
 ### Tier A: worth it
 
 | ID | Feature | Notes |
 | :---: | :--- | :--- |
-| **A2** | **Unread finished turns + away recap** | Count turns per pane; show a one-line recap in the preview after 10+ minutes away. Fits [evidence-based telemetry](evidence-based-telemetry-and-deep-work.md). |
 | **A3** | **Hook-held approvals** | Have `waymux hook tmux PermissionRequest` wait for the Cockpit's decision and print `hookSpecificOutput.decision`; print nothing on any error. Off by default; single-line `Bash`/`Read`/`Grep` only. Removes keystroke injection from approvals entirely. |
-| **A4** | **Alert burst coalescing** | One sound and one message when several agents need you at once. Check `adapters/sound.rs` first. |
 
 ### Tier B: when the workflow needs it
 
