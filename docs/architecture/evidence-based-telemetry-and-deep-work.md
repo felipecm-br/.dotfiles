@@ -124,11 +124,11 @@ Which shortcuts you use, which you never press, and where a shorter path existed
 | epoch | `1792809841` | Seconds |
 | context | `tmux`, `cockpit`, `cockpit-filter` | Where the key was pressed (Cockpit filter mode is separate) |
 | key | `prefix:I`, `g`, `enter`, `esc` | tmux `<table>:<key>`, or the Cockpit key |
-| state | `permission`, `review` | Agent state of the Cockpit row the key acted on |
+| state | `permission`, `review`, `pane` | Agent state of the Cockpit row the key acted on; for a tmux click, where it landed: `same` (the focused pane), `pane` (another pane), `window` (another window) |
 | target | `dotfiles/main:2` | That row's `session:window` (tmux: the current window) |
 | origin | `dotfiles/main:0` | The window the Cockpit was opened from |
 
-- **tmux:** [`key-telemetry.py install`](../../tmux/.config/tmux/key-telemetry.py) runs last in `tmux.conf` and rebinds every prefix and root binding (mouse excluded) as `run-shell -b "<waymux> keylog …" \; <original command>`. The log call runs in the background, so the binding keeps its latency; each key keeps its note (`-N`), so `list-keys -N` stays complete; a second run never wraps twice, a waymux without `keylog` is left alone, and `set -g @key_telemetry off` disables it.
+- **tmux:** [`key-telemetry.py install`](../../tmux/.config/tmux/key-telemetry.py) runs last in `tmux.conf` and rebinds every prefix and root binding, clicks included (scroll and drag are left alone: they fire tens of events a second), as `run-shell -b "<waymux> keylog …" \; <original command>`. The log call runs in the background, so the binding keeps its latency; each key keeps its note (`-N`), so `list-keys -N` stays complete; clicks whose command targets the mouse (`-t =`) log with `run-shell -t =`, which reads the clicked pane's `pane_active`/`window_active` before the click moves focus; a second run never wraps twice, a waymux without `keylog` is left alone, and `set -g @key_telemetry off` disables it.
 - **Cockpit:** every key in the waymux preset starts with `ExecuteAsync(waymux keylog cockpit …)`; `Enter` and `Esc` are logged by the Cockpit itself, which knows the chosen row. `WAYMUX_KEYLOG=0` turns logging off.
 
 `key-telemetry` (or `key-telemetry report --days N`, default 14) prints three sections:
@@ -141,5 +141,9 @@ Which shortcuts you use, which you never press, and where a shorter path existed
    - `s` in the Cockpit to reach sessions → `Prefix + s`
    - Cockpit opened and closed with `Esc` only (3+ times) → status bar icons and `Prefix + I`
    - the same tmux key 3+ times within 3 s (resize and pane moves excluded) → `Prefix + f` or the window number
+   - a click on a window tab → `Prefix + f` or `Prefix + <number>`
+   - a click that focuses another pane → `Ctrl + h/j/k/l`
    - `cd <path>` in shell history (atuin, 5+ times) → `j <query>` or `Tab` on an empty prompt
+
+The report also prints a mouse line: total clicks and how many changed pane or window. Each logged event costs about 1.7 ms of CPU (one `sh` plus `waymux keylog`) in the background, so a click or key press keeps its latency.
 

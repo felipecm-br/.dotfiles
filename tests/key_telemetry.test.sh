@@ -45,6 +45,31 @@ for _ in $(seq 1 50); do [ -s "$CALLS" ] && break; sleep 0.05; done
 grep -q "^keylog tmux prefix:X  " "$CALLS" || { echo "FAIL: press not logged: $(cat "$CALLS" 2>/dev/null)" >&2; exit 1; }
 echo "PASS: A wrapped binding still runs and logs the press"
 
+# Clicks are wrapped with the mouse target; scroll and drag are left alone.
+tmux list-keys -T root MouseDown1Pane | grep -q 'keylog.*window_active' || { echo "FAIL: pane click not wrapped" >&2; exit 1; }
+tmux list-keys -T root WheelUpPane | grep -q keylog && { echo "FAIL: scroll wrapped" >&2; exit 1; }
+tmux list-keys -T root MouseDrag1Pane | grep -q keylog && { echo "FAIL: drag wrapped" >&2; exit 1; }
+echo "PASS: Clicks are wrapped, scroll and drag are not"
+
+# A real click: an outer tmux runs a client attached to the private server and receives raw
+# SGR mouse sequences, so the private server sees the same event a terminal click produces.
+tmux set -g mouse on
+tmux new-session -d -s clicks -x 80 -y 20 'sleep 60'
+tmux split-window -h -t clicks 'sleep 60'
+tmux select-pane -t clicks:0.0
+OUTER="outer-$$"
+command tmux -L "$OUTER" -f /dev/null new-session -d -s outer -x 80 -y 21 \
+  "TMUX= tmux -S '${TMUX%%,*}' attach -t clicks"
+trap 'command tmux -L "$OUTER" kill-server 2>/dev/null; private_tmux_cleanup' EXIT
+sleep 1.5
+: > "$CALLS"
+command tmux -L "$OUTER" send-keys -t outer -l $'\e[<0;60;5M'
+command tmux -L "$OUTER" send-keys -t outer -l $'\e[<0;60;5m'
+for _ in $(seq 1 50); do [ -s "$CALLS" ] && break; sleep 0.05; done
+[ "$(tmux display -p -t clicks '#{pane_index}')" = "1" ] || { echo "FAIL: the click did not focus the right pane" >&2; exit 1; }
+grep -q "^keylog tmux root:MouseDown1Pane pane clicks:0" "$CALLS" || { echo "FAIL: click not logged as a pane change: $(cat "$CALLS")" >&2; exit 1; }
+echo "PASS: A real click still focuses the pane and is logged as a pane change"
+
 tmux list-keys -T root F9 | grep -q keylog || { echo "FAIL: root binding not wrapped" >&2; exit 1; }
 tmux set -g @key_telemetry off
 tmux bind-key Z set -g @z yes
@@ -60,11 +85,17 @@ mkdir -p "$XDG_STATE_HOME/flow"
   printf '%s\tcockpit\tenter\tpermission\ts:1\ts:0\n' "$now"
   printf '%s\tcockpit\tg\tidle\ts:0\ts:0\n' "$now"
   printf '%s\tcockpit\tg\tidle\ts:2\ts:0\n' "$now"
+  printf '%s\ttmux\troot:MouseDown1Status\twindow\ts:0\t\n' "$now"
+  printf '%s\ttmux\troot:MouseDown1Pane\tpane\ts:0\t\n' "$now"
+  printf '%s\ttmux\troot:MouseDown1Pane\tsame\ts:0\t\n' "$now"
 } > "$XDG_STATE_HOME/flow/keys.tsv"
 out=$(python3 "$KT" report --days 1)
 grep -q "1× Cockpit → Enter on an agent waiting for you: Prefix + I" <<<"$out" || { echo "FAIL: no Prefix + I tip:\n$out" >&2; exit 1; }
 grep -q "1× Cockpit → g on the window you came from: Ctrl + G" <<<"$out" || { echo "FAIL: no Ctrl + G tip:\n$out" >&2; exit 1; }
 grep -q "tmux and plugin defaults never pressed" <<<"$out" || { echo "FAIL: unused defaults not counted:\n$out" >&2; exit 1; }
+grep -q "Mouse: 3 clicks, 2 of them to change pane or window" <<<"$out" || { echo "FAIL: no click summary:\n$out" >&2; exit 1; }
+grep -q "1× Click on a window tab: Prefix + f" <<<"$out" || { echo "FAIL: no tab-click tip:\n$out" >&2; exit 1; }
+grep -q "1× Click to focus another pane: Ctrl + h/j/k/l" <<<"$out" || { echo "FAIL: no pane-click tip:\n$out" >&2; exit 1; }
 echo "PASS: Report counts usage, lists unused bindings and suggests faster paths"
 
 echo "=== All Key Telemetry Tests Passed ==="

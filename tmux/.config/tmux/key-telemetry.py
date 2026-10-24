@@ -3,7 +3,8 @@
 key-telemetry.py — which shortcuts you use, which you never touch, and where a shorter path
 existed.
 
-  install          wrap every prefix and root tmux binding so each press is logged
+  install          wrap every prefix and root tmux binding (clicks included, scroll and drag
+                   left alone) so each press is logged
                    (run from tmux.conf; `set -g @key_telemetry off` disables it)
   report [--days N] usage, unused bindings and faster-path suggestions (default 14 days)
 
@@ -37,6 +38,11 @@ WAITING = {"permission", "question", "awaiting_input", "error", "stalled", "hang
 GIT_KEYS = {"g", "G", "gg", "ctrl-g", "p", "P", "ctrl-p"}
 BIND_RE = re.compile(r"^bind-key\s+((?:-\w\s+)*)-T\s+(\S+)\s+(\S+)\s+(.*)$")
 MOUSE_RE = re.compile(r"Mouse|Wheel|DoubleClick|TripleClick")
+# Scroll ticks and drag motion fire tens of events a second and carry no habit worth a tip.
+SKIP_RE = re.compile(r"Wheel|Drag")
+# Where a click landed relative to the focus before it: the clicked pane is the focused one
+# (`same`), another pane of the current window (`pane`), or another window (`window`).
+CLICK_STATE = "#{?window_active,#{?pane_active,same,pane},window}"
 
 
 def tmux(*args: str) -> str:
@@ -76,10 +82,14 @@ def wrapped_bindings(listing: str, waymux: str, notes: Optional[Dict[str, str]] 
         if not m or "keylog" in line:
             continue
         flags, table, key, command = m.groups()
-        if MOUSE_RE.search(key):
+        if SKIP_RE.search(key):
             continue
+        # `-t =` is the mouse target; use it only where the original command does, since a
+        # failing command in the list would stop the click itself from running.
+        mouse_target = bool(MOUSE_RE.search(key)) and "-t =" in command
+        target_flag, state = ("-t = ", CLICK_STATE) if mouse_target else ("", "")
         log = (
-            f"run-shell -b \"{waymux} keylog tmux '{table}:{key_label(key)}' '' "
+            f"run-shell -b {target_flag}\"{waymux} keylog tmux '{table}:{key_label(key)}' '{state}' "
             f"'#{{session_name}}:#{{window_index}}'\""
         )
         note = notes.get(key_label(key), "").replace("'", "’")
@@ -151,7 +161,7 @@ def tmux_inventory() -> Dict[str, str]:
     for table in ("prefix", "root"):
         for line in tmux("list-keys", "-T", table).splitlines():
             m = BIND_RE.match(line.strip())
-            if not m or MOUSE_RE.search(m.group(3)):
+            if not m or SKIP_RE.search(m.group(3)):
                 continue
             command = re.sub(r'^run-shell -b "[^"]*keylog [^"]*" \\; ', "", m.group(4))
             inv[f"tmux:{table}:{key_label(m.group(3))}"] = command
@@ -304,8 +314,9 @@ def suggestions(presses: List[Press], inventory: Dict[str, str]) -> List[Tuple[i
     repeat_ok = {k for k, cmd in inventory.items() if "resize-pane" in cmd or "select-pane" in cmd}
     runs: collections.Counter = collections.Counter()
     tmux_presses = [p for p in ordered if p.ctx == "tmux"]
+    keys_only = [p for p in tmux_presses if not MOUSE_RE.search(p.key)]
     streak = 1
-    for prev, cur in zip(tmux_presses, tmux_presses[1:]):
+    for prev, cur in zip(keys_only, keys_only[1:]):
         if cur.key == prev.key and cur.ts - prev.ts <= 3:
             streak += 1
             if streak == 3 and f"tmux:{cur.key}" not in repeat_ok:
@@ -316,6 +327,18 @@ def suggestions(presses: List[Press], inventory: Dict[str, str]) -> List[Tuple[i
         found.append((n,
                       f"{key} pressed 3+ times in a row: Prefix + f (window hints) or the window "
                       "number jumps straight to the target."))
+
+    # Mouse clicks that moved the focus: each one leaves the home row and comes back.
+    tab_clicks = [p for p in tmux_presses if p.key.startswith("root:MouseDown1Status") and p.state == "window"]
+    if tab_clicks:
+        found.append((len(tab_clicks),
+                      "Click on a window tab: Prefix + f (home-row hints) or Prefix + <number> "
+                      "switches without leaving the keyboard."))
+    pane_clicks = [p for p in tmux_presses if p.key == "root:MouseDown1Pane" and p.state == "pane"]
+    if pane_clicks:
+        found.append((len(pane_clicks),
+                      "Click to focus another pane: Ctrl + h/j/k/l moves between panes (and Neovim "
+                      "splits) from the home row."))
 
     long_cds = shell_cd_count(min(p.ts for p in presses) if presses else int(time.time()) - 14 * 86400)
     if long_cds >= 5:
@@ -385,6 +408,11 @@ def report(days: int) -> int:
     defaults = [k for k in inventory if k.startswith("tmux:") and k not in user and k not in counts]
     if defaults:
         print(f"    + {len(defaults)} tmux and plugin defaults never pressed")
+
+    clicks = [p for p in presses if p.ctx == "tmux" and MOUSE_RE.search(p.key)]
+    if clicks:
+        moved = sum(1 for p in clicks if p.state in ("pane", "window"))
+        print(f"\n  Mouse: {len(clicks)} clicks, {moved} of them to change pane or window")
 
     tips = suggestions(presses, inventory)
     print("\n  Faster paths")
