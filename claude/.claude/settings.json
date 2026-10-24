@@ -15,6 +15,17 @@
         ]
       }
     ],
+    "PermissionRequest": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "waymux hook tmux PermissionRequest claude",
+            "timeout": 310
+          }
+        ]
+      }
+    ],
     "PostToolUse": [
       {
         "hooks": [

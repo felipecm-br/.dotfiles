@@ -19,6 +19,13 @@ question = "~/.local/share/sounds/ai/02-gentle-ping.wav"
 permission = "~/.local/share/sounds/ai/06-cyber-pulse.wav"
 error = "~/.local/share/sounds/ai/10-arcade-blip.wav"
 
+# The Cockpit's y/n answer Claude Code's permission prompt through the PermissionRequest
+# hook (claude/.claude/settings.json) instead of keystrokes; Claude keeps its dialog on screen
+# meanwhile and the first answer wins. Set enabled = false to go back to keystrokes.
+[approvals]
+enabled = true
+hold_seconds = 120
+
 [theme]
 active_spinner = "minidot"
 

@@ -27,7 +27,7 @@ The audit, run with the `tui-ux-architect` skill, reaches two conclusions:
 | **File Navigation** | Tree inside the Rail | `wm -o jump` frecency + ZLE `_smart_tab`, `ptl`/`ptg` | **This Stack** |
 | **Git & Diff Review** | `tuios review` with daemon-held line notes | `lazygitrs` Dual-Diff (`Ctrl+G`) + `.git/info/lines.json` notes sent with `r` | **This Stack** (full staging/rebase) |
 | **Prompt Delivery** | Daemon delivery queue: typed after 1 s at rest, one per rest, never on `needs_input`, `stalled` after 5 s | Now the same model: `waymux queue` (see §4, Phase S1) | **Parity** (absorbed) |
-| **Approvals** | Inbox `1`/`2`/`3`, held through the harness's `PermissionRequest` hook, 0.4 s dwell, risky double-press | Cockpit `y`/`n` (keystrokes: `1` / `Esc` on Claude Code) with live re-check, 0.4 s dwell and risky double-press (§4, S2–S4) | **TUIOS** until hook-held approvals land (§4, A3) |
+| **Approvals** | Inbox `1`/`2`/`3`, held through the harness's `PermissionRequest` hook, 0.4 s dwell, risky double-press | Cockpit `y`/`n` answering through the held `PermissionRequest` hook (keystrokes `1` / `Esc` as fallback), live re-check, 0.4 s dwell, risky double-press (§4, S2–S4, A3) | **Parity** (absorbed) |
 | **Quota & Burn-Rate Telemetry** | None (`tuios fan` is blind to rate limits) | [`ai-quota`](../../utils/.local/bin/ai-quota) (`Prefix + u`), [`ai-launch`](../../utils/.local/bin/ai-launch) (`Prefix + a`), quota-aware AI split (`Prefix + o`) | **This Stack** |
 
 ---
@@ -72,7 +72,7 @@ Mail lives in daemon memory (256 messages per session). Bodies are fenced as unt
 
 Ranked by risk removed per unit of complexity. Keys stay as they are: per the [Zero-Churn principle](terminal-ergonomics-and-ux-manifesto.md), the Cockpit keeps `y`/`n` (TUIOS's `1`/`2`/`3` would also collide with `a` Toggle Fleet).
 
-### Shipped (`waymux` `6628f4a`, `a8f2d6d`, `9f90704`, installed as 0.2.4)
+### Shipped (`waymux` `6628f4a`, `a8f2d6d`, `9f90704`, `6fa959f`, installed as 0.2.4)
 
 | ID | Feature | What changed |
 | :---: | :--- | :--- |
@@ -84,13 +84,8 @@ Ranked by risk removed per unit of complexity. Keys stay as they are: per the [Z
 | **S5** | **Focus-dismissed prompts are not a rest** | Focusing a pane on a permission prompt (`waymux dismiss` on `pane-focus-in`) set it `idle` to clear the badge, so the queue would type into the prompt 1 s later. That `idle` no longer counts as a rest. |
 | **A1** | **Queued badge** | Cockpit rows show a muted `󰇮N` before the age when prompts wait in the queue. |
 | **A2** | **Away recap** | The daemon counts each pane's finished turns (≥ 5 s of work), edited files, commands and last test command since the pane was last focused (`agent/recap`); after 10 minutes away the Cockpit preview opens with `󰋚 Since you last looked (42m): 3 turns · 6 files: … · 11 commands · tests: cargo test`. Pass/fail of the tests is not tracked. |
+| **A3** | **Held approvals** | `[approvals] enabled = true` (on in this repo's `waymux/.config/waymux/config.toml`) plus the `PermissionRequest` hook (`claude/.claude/settings.json`, `"timeout": 310`): the hook asks the daemon to hold the prompt and the Cockpit's `y`/`n` answer it through Claude Code's decision output, with no keystroke. Unlike TUIOS's description, Claude Code 2.1.310 keeps its dialog on screen while the hook waits, and the first answer wins. One-line `Bash`/`Read`/`Glob`/`Grep`/`WebFetch`/`WebSearch` calls only; 400 ms dwell; a risky allow carries the matched rules (`risk_ack`); any failure prints nothing, so Claude asks as before. Limit: a same-user process with the daemon token could answer, as it could `tmux send-keys`. |
 | **A4** | **Alert bursts** | Blocking alerts within 1.5 s play one sound; status-bar alerts within 2 s share one line (`3 agents need you › 3:api, 4:web and 5:docs`), cleared only by the latest alert's timer. |
-
-### Tier A: worth it
-
-| ID | Feature | Notes |
-| :---: | :--- | :--- |
-| **A3** | **Hook-held approvals** | Have `waymux hook tmux PermissionRequest` wait for the Cockpit's decision and print `hookSpecificOutput.decision`; print nothing on any error. Off by default; single-line `Bash`/`Read`/`Grep` only. Removes keystroke injection from approvals entirely. |
 
 ### Tier B: when the workflow needs it
 
