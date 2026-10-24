@@ -88,6 +88,7 @@ Whenever the system theme switches (`omarchy theme set <name>`), 100% of termina
 | **1. Ephemeral** | [`workspace-picker.sh`](../../tmux/.config/tmux/workspace-picker.sh) (`workspace.toml`) | `blue` / `cyan` | `#89b4fa` | ` 󰈞 ` | `85% × 75%` / `96% × 92%` | `Esc` (1 tap) |
 | **1. Ephemeral** | [`grep-picker.sh`](../../tmux/.config/tmux/grep-picker.sh) | `teal` / `cyan` | `#94e2d5` | ` 󰍉 ` | `85% × 75%` / `96% × 92%` | `Esc` (1 tap) |
 | **1. Ephemeral** | [`keybindings-picker.sh`](../../tmux/.config/tmux/keybindings-picker.sh) | `yellow` / `orange` | `#f9e2af` | ` 󰌌 ` | `85% × 75%` | `Esc` / `q` |
+| **1. Ephemeral** | [`command-palette.sh`](../../tmux/.config/tmux/command-palette.sh) (`command-palette.toml`) | `cyan` | `#89dceb` | ` 󰘳 ` | `75% × 60%` | `Esc` (1 tap) |
 | **1. Ephemeral** | [`pr-picker.sh`](../../tmux/.config/tmux/pr-picker.sh) | `blue` / `cyan` | `#7aa2f7` | `  ` | `75% × 60%` | `Esc` (1 tap) |
 | **1. Ephemeral** | [`awt-popup.sh`](../../awt/.config/tmux/awt-popup.sh) | `orange` / `peach` | `#e84d31` | `  ` | `85% × 75%` | `Esc` / `q` |
 | **1. Ephemeral** | [`ai-launch-popup.sh`](../../tmux/.config/tmux/ai-launch-popup.sh) (`ai-launch.toml`) | `magenta` / `mauve` | `#cba6f7` | ` 󰚩 ` + quota badge | `75% × 60%` | `Esc` (1 tap) |
@@ -200,6 +201,7 @@ Every interactive popup, picker, and confirmation dialog has been harmonized und
 | **Keybindings HUD** | [`keybindings.toml`](../../waymaker/.config/waymaker/presets/keybindings.toml) | `{cyan,bold:Enter} Run │ Tab Filter │ y Copy │ J/K Scroll │ Esc Exit` |
 | **Scrollback Buffer** | [`scrollback-picker.toml`](../../waymaker/.config/waymaker/presets/scrollback-picker.toml) | `{cyan,bold:Enter} Yank │ Tab Filter │ C-v Insert │ C-e Open │ C-b Chrome │ J/K Scroll │ Space Multi │ Esc Exit` |
 | **Process Killer** | [`kill.toml`](../../waymaker/.config/waymaker/presets/kill.toml) | `{cyan,bold:Enter} SIGTERM (15) │ C-x SIGKILL (-9) │ C-p Toggle Preview` |
+| **Command Palette** | [`command-palette.toml`](../../waymaker/.config/waymaker/presets/command-palette.toml) | `{cyan,bold:Enter} Run │ Tab Filter │ Ctrl+O Cmds │ Ctrl+Y Copy Key │ Ctrl+J/K Move │ Esc Close` |
 | **System Sounds** | [`sounds.toml`](../../waymaker/.config/waymaker/presets/sounds.toml) | `{cyan,bold:Enter} Set Sound │ p / Space Replay │ Esc / q Quit` |
 | **Hyprland Borders** | [`borders.toml`](../../waymaker/.config/waymaker/presets/borders.toml) | `{cyan,bold:Enter} Salvar │ j/k Estilo │ h/l Velocidade │ r Girar Ângulo │ Esc Cancelar` |
 | **Starship Presets** | [`starship-presets.toml`](../../waymaker/.config/waymaker/presets/starship-presets.toml) | `{cyan,bold:Enter} Selecionar │ j/k Navegar │ C-l/h Modo Vim │ Esc Cancelar` |

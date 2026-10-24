@@ -1,9 +1,15 @@
 #!/usr/bin/env sh
 # keybindings-items.sh — emit structured keybindings for Waymaker HUD.
-# Usage: keybindings-items.sh [all|tmux|shell|frecency|hypr]
+# Usage: keybindings-items.sh [all|tmux|shell|frecency|hypr|cmd] [palette]
+#   Default rows are `key<TAB>name<TAB>layer<TAB>id<TAB>action` (Keybindings HUD, Prefix + ?).
+#   Command Palette mode (2nd arg `palette` or WM_KB_PALETTE=1, Ctrl + Shift + P) emits
+#   `name<TAB>key<TAB>layer<TAB>id<TAB>action` (VS Code order: label first, shortcut on the right)
+#   and adds the shortcut-less `cmd` layer to `all`. Palette rows are ordered most-recently-run first.
 set -u
 
 FILTER="${1:-all}"
+PALETTE="${2:-}"
+if [ -z "$PALETTE" ] && [ "${WM_KB_PALETTE:-0}" = "1" ]; then PALETTE=palette; fi
 
 emit_tmux() {
   cat <<'EOF'
@@ -43,6 +49,7 @@ emit_tmux() {
 󰸌  Prefix + B	Toggle Gradient Popup Frames	tmux	tmux-border-gradient	~/.local/bin/border-gradient toggle >/dev/null
 󰌌  Prefix + ?	Keybindings & Workflow Catalog HUD	tmux	tmux-help	~/.config/tmux/keybindings-picker.sh
 󰌌  Prefix + :	Tmux Raw Keybindings (list-keys -N)	tmux	tmux-raw-keys	tmux list-keys -N
+󰘳  Prefix + p / Ctrl + Shift + P	Command Palette (VS Code-style, every command)	tmux	tmux-palette	~/.config/tmux/command-palette.sh
 EOF
 }
 
@@ -88,6 +95,39 @@ EOF
 }
 
 case "$FILTER" in
+emit_cmd() {
+  # Palette-only commands: no shortcut (empty key column); actions run through `tmux run-shell`.
+  cat <<'EOF'
+󰐕  	New Session (prompt for name)	cmd	cmd-new-session	tmux command-prompt -p 'New session:' 'new-session -d -s "%%" ; switch-client -t "%%"'
+󰑕  	Rename Window	cmd	cmd-rename-window	tmux command-prompt -I '#W' -p 'Rename window:' 'rename-window -- "%%"'
+󰑕  	Rename Session	cmd	cmd-rename-session	tmux command-prompt -I '#S' -p 'Rename session:' 'rename-session -- "%%"'
+󰙅  	Choose Tree (Sessions & Windows)	cmd	cmd-choose-tree	tmux choose-tree -Zw
+󰓦  	Toggle Synchronize Panes	cmd	cmd-sync-panes	tmux set-window-option synchronize-panes
+󰍽  	Toggle Mouse Support	cmd	cmd-mouse	tmux set-option -g mouse
+󰕮  	Layout: Tiled	cmd	cmd-layout-tiled	tmux select-layout tiled
+󰕮  	Layout: Even Horizontal	cmd	cmd-layout-even-h	tmux select-layout even-horizontal
+󰕮  	Layout: Even Vertical	cmd	cmd-layout-even-v	tmux select-layout even-vertical
+󰕮  	Layout: Main Vertical	cmd	cmd-layout-main-v	tmux select-layout main-vertical
+󰑞  	Rotate Panes	cmd	cmd-rotate	tmux rotate-window
+󰁌  	Break Pane into New Window	cmd	cmd-break-pane	tmux break-pane
+󰅖  	Kill Other Panes	cmd	cmd-kill-other-panes	tmux kill-pane -a
+󰃢  	Clear Pane History	cmd	cmd-clear-history	tmux clear-history
+󰆏  	Enter Copy Mode	cmd	cmd-copy-mode	tmux copy-mode
+󰘳  	Tmux Command Prompt	cmd	cmd-command-prompt	tmux command-prompt
+󰁔  	Move Window to Session (prompt)	cmd	cmd-move-window-session	tmux command-prompt -p 'Move window to session:' 'move-window -t "%%:"'
+󰁔  	Move Window to Index (prompt)	cmd	cmd-move-window-index	tmux command-prompt -p 'Move window to index:' 'move-window -t "%%"'
+󰁌  	Join Pane from Window (prompt)	cmd	cmd-join-pane	tmux command-prompt -p 'Join pane from (window.pane):' 'join-pane -s "%%"'
+󰑐  	Respawn Pane (kill and restart)	cmd	cmd-respawn-pane	tmux respawn-pane -k
+󰕮  	Next Layout	cmd	cmd-next-layout	tmux next-layout
+󰍉  	Display Pane Numbers	cmd	cmd-display-panes	tmux display-panes
+󰖲  	Toggle Status Bar	cmd	cmd-status	tmux set-option -g status
+󰥔  	Show Clock	cmd	cmd-clock	tmux clock-mode
+󰑓  	Refresh Client	cmd	cmd-refresh	tmux refresh-client
+󰍃  	Detach Client	cmd	cmd-detach	tmux detach-client
+EOF
+}
+
+emit_filter() {
   tmux)
     emit_tmux
     ;;
@@ -101,9 +141,42 @@ case "$FILTER" in
     emit_hypr
     ;;
   all|*)
+  cmd)
+    emit_cmd
+    ;;
     emit_tmux
     emit_shell
     emit_frecency
     emit_hypr
     ;;
+    if [ -n "$PALETTE" ]; then emit_cmd; fi
 esac
+}
+
+# Palette order: split the leading Nerd Font badge off the key column and prepend it to the name,
+# so rows read `<badge> Name<TAB>Shortcut` like VS Code.
+palette_rows() {
+  awk -F'\t' 'BEGIN { OFS = "\t" }
+    {
+      key = $1; icon = ""
+      if (match(key, /^[^ ]+ +/)) { icon = substr(key, 1, RLENGTH); key = substr(key, RLENGTH + 1); sub(/ +$/, "", icon) }
+      sub(/ +$/, "", key)
+      $1 = (icon == "" ? $2 : icon "  " $2); $2 = key
+      print
+    }'
+}
+
+# Most-recently-run first (VS Code style). keybindings-run.sh appends the id of every command run
+# from the palette to RECENT_FILE (oldest first); unseen rows keep catalog order (stable sort).
+RECENT_FILE="${PALETTE_RECENT_FILE:-${XDG_STATE_HOME:-$HOME/.local/state}/tmux-command-palette/recent}"
+mru_rows() {
+  if [ ! -s "$RECENT_FILE" ]; then cat; return; fi
+  awk -F'\t' 'NR == FNR { rank[$0] = FNR; next } { print (($4 in rank) ? rank[$4] : 0) "\t" $0 }' "$RECENT_FILE" - \
+    | sort -s -t "$(printf '\t')" -k1,1nr | cut -f2-
+}
+
+if [ -n "$PALETTE" ]; then
+  emit_filter | palette_rows | mru_rows
+else
+  emit_filter
+fi

@@ -1,0 +1,51 @@
+# Waymaker Command Palette (`wm -o keybindings -o command-palette`, `Ctrl + Shift + P`).
+# VS Code-style palette layered on top of the `keybindings` preset: it reuses the same catalog,
+# filter modes (Tab / Shift-Tab) and Markdown docs preview, but lists every command by NAME first
+# with its shortcut on the right, and adds the shortcut-less `cmd` layer.
+# `command-palette.sh` exports WM_KB_PALETTE=1 so every `keybindings-items.sh` Reload keeps palette rows.
+
+[ui.nav]
+focus_on_start = "filter"
+
+[query]
+prompt = "> "
+
+[columns]
+split = "\t"
+names = [
+  "name",
+  "key",
+  "layer",
+  { name = "id", hidden = true },
+  { name = "action", hidden = true }
+]
+
+# Palette rows are `name key layer id action`; the preview script keeps its `key name ...` contract.
+[[preview.layout]]
+command = "~/.config/tmux/keybindings-preview.sh {2} {1} {3} {4} {5}"
+side = "right"
+percentage = 55
+
+[preview.border]
+title = " Command "
+
+[footer]
+content = " {cyan,bold:Enter} {darkgray:Run} {darkgray:│} {cyan,bold:Tab} {darkgray:Filter} {darkgray:│} {cyan,bold:Ctrl+O} {darkgray:Cmds} {darkgray:│} {cyan,bold:Ctrl+Y} {darkgray:Copy Key} {darkgray:│} {cyan,bold:Ctrl+J/K} {darkgray:Move} {darkgray:│} {cyan,bold:Esc} {darkgray:Close}"
+
+[binds]
+# Ctrl+O: jump to shortcut-less commands only (`cmd` layer); Ctrl+O / Tab inside it returns to `all`.
+ctrl-o = ["SetPrompt(cmd> )", "SetQuery()", "Reload(~/.config/tmux/keybindings-items.sh cmd)", "SetMode(cmd)", "Pos(0)"]
+"cmd^^ctrl-o" = ["SetPrompt(> )", "SetQuery()", "Reload(~/.config/tmux/keybindings-items.sh all)", "SetMode(all)", "Pos(0)"]
+"cmd^^tab" = ["SetPrompt(> )", "SetQuery()", "Reload(~/.config/tmux/keybindings-items.sh all)", "SetMode(all)", "Pos(0)"]
+"cmd^^shift-tab" = ["SetPrompt(> )", "SetQuery()", "Reload(~/.config/tmux/keybindings-items.sh all)", "SetMode(all)", "Pos(0)"]
+"cmd^^backtab" = ["SetPrompt(> )", "SetQuery()", "Reload(~/.config/tmux/keybindings-items.sh all)", "SetMode(all)", "Pos(0)"]
+"cmd^^shift-backtab" = ["SetPrompt(> )", "SetQuery()", "Reload(~/.config/tmux/keybindings-items.sh all)", "SetMode(all)", "Pos(0)"]
+enter = 'ExecuteSilent(~/.config/tmux/keybindings-run.sh {5} {2} {1} {4})'
+ctrl-y = 'ExecuteSilent(printf "%s" {2} | (command -v wl-copy >/dev/null 2>&1 && wl-copy || xclip -in -selection clipboard 2>/dev/null || tmux load-buffer -))'
+ctrl-v = 'ExecuteSilent(test -n "$MM_ORIGIN_PANE" && tmux send-keys -t "$MM_ORIGIN_PANE" -l -- {2})'
+
+[ui.nav.binds]
+enter = 'ExecuteSilent(~/.config/tmux/keybindings-run.sh {5} {2} {1} {4})'
+y = 'ExecuteSilent(printf "%s" {2} | (command -v wl-copy >/dev/null 2>&1 && wl-copy || xclip -in -selection clipboard 2>/dev/null || tmux load-buffer -))'
+ctrl-y = 'ExecuteSilent(printf "%s" {2} | (command -v wl-copy >/dev/null 2>&1 && wl-copy || xclip -in -selection clipboard 2>/dev/null || tmux load-buffer -))'
+ctrl-v = 'ExecuteSilent(test -n "$MM_ORIGIN_PANE" && tmux send-keys -t "$MM_ORIGIN_PANE" -l -- {2})'

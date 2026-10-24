@@ -10,7 +10,7 @@ ID="${4:-}"
 ACTION="${5:-}"
 
 # Header banner
-printf '# %s\n\n' "$KEY"
+printf '# %s\n\n' "${KEY:-$NAME}"
 printf '**Action:** %s  \n' "$NAME"
 printf '**Layer:** `%s`  \n' "$LAYER"
 
@@ -336,6 +336,29 @@ EOF
 Interactive catalog of all keyboard shortcuts, layer definitions, and ergonomics standards.
 
 - **Ergonomics**: Full Home Row navigation, sub-100ms latency ($H=0$).
+EOF
+    ;;
+
+  tmux-palette)
+    cat <<'EOF'
+### 󰘳 Command Palette (`Prefix + p` / `Ctrl + Shift + P`)
+VS Code-style command palette: type a command name, press `Enter`, done. No need to remember the shortcut.
+
+- **Catalog**: every Tmux, Shell, Frecency and Hyprland workflow plus shortcut-less tmux commands (`cmd` layer: rename, layouts, sync panes, detach...).
+- **Layout**: command name on the left, its shortcut on the right (learn the shortcut while you use the palette).
+- **Controls**:
+  - `Enter`: Run the selected command (most recent first; shell/desktop-only shortcuts just copy the key and notify)
+  - `Tab` / `Shift + Tab`: Filter layers (`all` → `tmux` → `shell` → `frecency` → `hypr`); `Ctrl + O` toggles shortcut-less commands only
+  - `Ctrl + Y`: Copy the shortcut · `Ctrl + V`: Inject it into the origin pane
+  - `Esc`: Close
+- **Source**: same catalog as `Prefix + ?` (`keybindings-items.sh <layer> palette`).
+EOF
+    ;;
+
+  cmd-*)
+    cat <<EOF
+### 󰘳 Palette Command
+Runs \`$ACTION\` through \`tmux run-shell\`. This command has no dedicated shortcut: reach it from the Command Palette (\`Ctrl + Shift + P\`).
 - **Controls**:
   - `Enter`: Execute workflow action (if runnable)
   - `Tab` / `Shift + Tab`: Filter modes (`all` → `tmux` → `shell` → `frecency` → `hypr`)

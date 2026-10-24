@@ -1,11 +1,21 @@
 #!/usr/bin/env sh
 # keybindings-run.sh — execute or display telemetry for selected keybinding in HUD.
-# Usage: keybindings-run.sh <action> [key] [name]
+# Usage: keybindings-run.sh <action> [key] [name] [id]
+#   [id] (Command Palette only) is recorded in the palette MRU file so recent commands list first.
 set -u
 
 ACTION="${1:-}"
 KEY="${2:-}"
 NAME="${3:-}"
+ID="${4:-}"
+
+# Command Palette MRU: remember the id (capped at 200 lines, oldest first).
+if [ -n "$ID" ]; then
+  RECENT_FILE="${PALETTE_RECENT_FILE:-${XDG_STATE_HOME:-$HOME/.local/state}/tmux-command-palette/recent}"
+  mkdir -p "$(dirname "$RECENT_FILE")" 2>/dev/null || true
+  printf '%s\n' "$ID" >> "$RECENT_FILE" 2>/dev/null || true
+  tail -n 200 "$RECENT_FILE" > "$RECENT_FILE.tmp" 2>/dev/null && mv "$RECENT_FILE.tmp" "$RECENT_FILE" 2>/dev/null || true
+fi
 
 # Copy key to clipboard
 if [ -n "$KEY" ]; then
