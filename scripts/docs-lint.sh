@@ -29,7 +29,7 @@ echo -e "${BOLD}${BLUE}=== [Docs Linter] Starting Documentation Integrity Audit 
 # ------------------------------------------------------------------------------
 echo -e "\n${BOLD}[1/2] Checking Root Markdown Cleanliness...${NC}"
 
-ALLOWED_ROOT_MD=("README.md" "AGENTS.md" "prompt.md" "OPENSOURCE_PLAN.md" "todo.md")
+ALLOWED_ROOT_MD=("README.md" "AGENTS.md" "CLAUDE.md" "prompt.md" "OPENSOURCE_PLAN.md" "todo.md")
 
 while IFS= read -r file; do
     filename="$(basename "$file")"
@@ -80,8 +80,10 @@ for dirpath, _, filenames in os.walk(repo_root):
                         continue
                     if in_code_block:
                         continue
-                    # Remove only inline code spans that wrap an entire markdown link `[text](url)`
-                    sanitized_line = re.sub(r"`[^`\n]*\[[^\]]+\]\([^)]+\)[^`\n]*`", "", line)
+                    # Remove only inline code spans that wrap an entire markdown link `[text](url)`.
+                    # Link text and target exclude backticks, so a match cannot start at the
+                    # closing backtick of an earlier span and swallow a real link such as [`awt`](...).
+                    sanitized_line = re.sub(r"`[^`\n]*\[[^\]`]+\]\([^)`]+\)[^`\n]*`", "", line)
                     for match in link_pattern.finditer(sanitized_line):
                         target = match.group(2).strip()
                         if target.startswith("file:///home/fecavmi/.dotfiles/main/"):
