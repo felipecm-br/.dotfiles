@@ -1,57 +1,162 @@
 #!/usr/bin/env bash
-# ai-launch — Start the AI agent CLI for a tmux session (Waymaker startup_command)
+# ai-launch — Start an AI agent CLI for a tmux session (Waymaker startup_command)
 #
-#   ai-launch                 Pick: one-shot picker choice → $AI_LAUNCH_AGENT → ai-quota --recommend
-#   ai-launch <agent>         Force claude | agy | agyy (extra args pass through)
-#   ai-launch --next <agent>  Arm a one-shot choice for the next ai-launch (session picker a / A / c)
-#   ai-launch --peek          Print the agent that would start, without starting it
+#   ai-launch                  Menu of CLI × model with live quota, cursor on the recommended row
+#                              (non-interactive callers get --auto)
+#   ai-launch --auto           Start the recommended agent and model directly
+#   ai-launch <agent> [args]   Force claude | agy | agyy (extra args pass through, e.g. --model sonnet)
+#   ai-launch --next <choice>  Arm a one-shot choice (agent | auto) for the next ai-launch (session picker)
+#   ai-launch --peek           Print what would start ("<agent> [args]" or "menu"), without starting it
+#   ai-launch --pick           Show the menu, print the chosen "<agent> [args]" and exit (tmux popup:
+#                              tmux/.config/tmux/ai-launch-popup.sh starts it in a new window)
+#
+# Nothing armed: $AI_LAUNCH_AGENT (agent | auto | menu), else menu.
+# Recommended model: Claude green → opus, yellow → sonnet, red → haiku; Antigravity → its default
+# model while that group has quota, otherwise the group with the most quota left.
 
 NEXT_FILE="${XDG_RUNTIME_DIR:-/tmp}/ai-launch.next"
 NEXT_TTL=30
+STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/ai-quota"
+AGY_MODELS="$STATE_DIR/agy-models.tsv"
 
 case "${1:-}" in
   --next)
-    printf '%s\n' "${2:?agent required}" >"$NEXT_FILE"
+    printf '%s\n' "${2:?choice required}" >"$NEXT_FILE"
     exit 0
     ;;
   -h | --help)
-    sed -n '2,8p' "$0" | sed 's/^# \{0,1\}//'
+    sed -n '2,15p' "$0" | sed 's/^# \{0,1\}//'
     exit 0
     ;;
 esac
 
 peek=false
+pick_only=false
 [ "${1:-}" = "--peek" ] && { peek=true; shift; }
+[ "${1:-}" = "--pick" ] && { pick_only=true; shift; }
 
-agent="" why=""
-if [ -n "${1:-}" ]; then
-  agent=$1; shift
+choice=""
+if $pick_only; then
+  choice=menu
+elif [ -n "${1:-}" ]; then
+  choice=$1; shift
 elif [ -f "$NEXT_FILE" ]; then
   # Consume the picker choice only while fresh, so a stale arm never hijacks a later session
   if [ $(($(date +%s) - $(stat -c %Y "$NEXT_FILE"))) -le $NEXT_TTL ]; then
-    agent=$(head -n 1 "$NEXT_FILE")
+    choice=$(head -n 1 "$NEXT_FILE")
   fi
   $peek || rm -f "$NEXT_FILE"
 fi
-if [ -z "$agent" ] && [ -n "${AI_LAUNCH_AGENT:-}" ]; then
-  agent=$AI_LAUNCH_AGENT
-fi
-if [ -z "$agent" ]; then
-  snapshot=$(ai-quota --json 2>/dev/null)
-  agent=$(jq -r '.recommend // empty' <<<"$snapshot" 2>/dev/null)
-  why=$(jq -r 'select(.reason | test("falling back")) | .reason' <<<"$snapshot" 2>/dev/null)
-fi
-agent=${agent:-agy}
+[ -z "$choice" ] && choice=${AI_LAUNCH_AGENT:-menu}
+[ "$choice" = "--auto" ] && choice=auto
+[ "$choice" = "--menu" ] && choice=menu
+# A menu needs a terminal; scripts and pipes get the recommendation instead
+# (--pick runs with stdout captured by its caller, so it only needs a terminal on stdin)
+if [ "$choice" = "menu" ] && ! { [ -t 0 ] && { $pick_only || [ -t 1 ]; }; }; then choice=auto; fi
 
-if $peek; then
-  echo "$agent"
-  exit 0
-fi
-
-case "$agent" in
-  claude | agy | agyy) ;;
-  *) echo "ai-launch: unknown agent '$agent' (claude | agy | agyy)" >&2; exit 2 ;;
+case "$choice" in
+  claude | agy | agyy)
+    if $peek; then echo "$choice${*:+ $*}"; exit 0; fi
+    exec "$choice" "$@"
+    ;;
+  auto | menu) ;;
+  *) echo "ai-launch: unknown choice '$choice' (claude | agy | agyy | auto | menu)" >&2; exit 2 ;;
 esac
+if $peek && [ "$choice" = "menu" ]; then echo menu; exit 0; fi
 
-[ -n "$why" ] && printf '\033[90m%s %s → %s\033[0m\n' "$(waymux icon "$agent" 2>/dev/null)" "$why" "$agent"
-exec "$agent" "$@"
+# ── Antigravity model list: `agy models`, cached for a day (refreshed in the background) ──
+if [ -z "$(find "$AGY_MODELS" -mtime -1 2>/dev/null)" ] && command -v agy-bin >/dev/null 2>&1; then
+  mkdir -p "$STATE_DIR"
+  (timeout 20 agy-bin models 2>/dev/null | grep -P '^[a-z0-9.-]+\t' >"$AGY_MODELS.tmp" &&
+    [ -s "$AGY_MODELS.tmp" ] && mv -f "$AGY_MODELS.tmp" "$AGY_MODELS" || rm -f "$AGY_MODELS.tmp") >/dev/null 2>&1 &
+fi
+agy_models=$(cat "$AGY_MODELS" 2>/dev/null)
+# First run before the cache exists: the families known at the time of writing
+[ -n "$agy_models" ] || agy_models=$'gemini-4-argon-medium\tGemini 4 Argon (Medium)\ngemini-3.8-flash-medium\tGemini 3.8 Flash (Medium)\nclaude-opus-5-5-medium\tClaude Opus 5.5 (Medium)\nclaude-sonnet-5-5-medium\tClaude Sonnet 5.5 (Medium)\ngpt-oss-120b-medium\tGPT-OSS 120B (Medium)'
+
+[ "$choice" = "menu" ] && printf '\033[90m%s\033[0m\n' "reading quota…" >&2
+snapshot=$(ai-quota --json 2>/dev/null)
+[ -n "$snapshot" ] || snapshot='{"recommend":"claude","agents":[]}'
+
+# One row per CLI × model family: agent \t args \t plain text \t colored text \t recommended (0|1)
+rows=$(jq -r -n --argjson s "$snapshot" --arg models "$agy_models" \
+  --arg ic_claude "$(waymux icon claude 2>/dev/null || echo C)" --arg ic_agy "$(waymux icon agy 2>/dev/null || echo A)" '
+def fam: sub("-(low|medium|high)$"; "");
+def pad($n): . + (" " * ([$n - length, 1] | max));
+def clock: strflocaltime("%H:%M");
+def code($l): {green: "32", yellow: "33", red: "31"}[$l] // "90";
+def tier: if test("fable|argon") then "$$$$" elif test("opus") then "$$$" elif test("sonnet") then "$$" else "$" end;
+($s.agents // [] | map({(.agent): .}) | add // {}) as $A
+| ($models | split("\n") | map(select(length > 0) | split("\t") | {id: .[0], name: (.[1] // .[0] | sub(" \\((Low|Medium|High)\\)$"; ""))})
+   | group_by(.id | fam)
+   | map((map(select(.id | endswith("-medium"))) | first) // first)) as $families
+| ($s.recommend // "claude") as $rec
+| [
+    ($A.claude // null | select(. != null and .available) as $c
+     | (if $c.five == null then "quota ?" else "5h \($c.five | floor)% · 7d \($c.seven // 0 | floor)%" end
+        + (if $c.until then " ⏳\($c.until | clock)" else "" end)) as $q
+     | ({green: "opus", unknown: "opus", yellow: "sonnet", red: "haiku"}[$c.level] // "opus") as $want
+     | (["fable", "Fable"], ["opus", "Opus"], ["sonnet", "Sonnet"], ["haiku", "Haiku"])
+     | {agent: "claude", args: "--model \(.[0])", icon: $ic_claude, cli: "Claude Code", model: .[1],
+        tier: (.[0] | tier), quota: $q, level: $c.level, rec: ($rec == "claude" and .[0] == $want)}),
+    (("agy", "agyy") as $a | $A[$a] // null | select(. != null and .available) as $g
+     | (($g.groups // null)) as $groups
+     | ($groups // [] | map(select(.key != "pro")) | map(select((.pct // 0) > 0)) | max_by(.pct) | .key? // null) as $best
+     | (($g.default_model // "") | fam) as $dfam
+     | ($families | map(.id | fam) | index($dfam)) as $has_default
+     | $families[]
+     | (.id | fam) as $f
+     | (if ($f | startswith("claude-")) or ($f | startswith("gpt-oss")) then "claude" elif ($f | test("flash")) then "flash" else "pro" end) as $key
+     | ($groups // [] | map(select(.key == $key and ($key != "pro" or ((.model // "") | fam) == $f))) | first) as $grp
+     | {agent: $a, args: "--model \(.id)", icon: $ic_agy,
+        cli: (if $a == "agyy" then "Antigravity ²" else "Antigravity" end), model: .name, tier: ($f | tier),
+        quota: (if $groups == null then (if $g.until then "exhausted ⏳\($g.until | clock)" else "quota ?" end)
+                elif $grp == null then "no quota data"
+                else "\($grp.pct)% left" + (if $grp.reset and $grp.pct < 100 then " ⟳\($grp.reset | clock)" else "" end) end),
+        level: (if $groups == null then $g.level elif $grp == null then "unknown"
+                elif $grp.pct == 0 then "red" elif $grp.pct < 20 then "yellow" else "green" end),
+        rec: ($rec == $a and (
+          if $groups != null and ($g.default_exhausted | not) and $has_default != null then $f == $dfam
+          elif $best == "claude" then ($f | test("sonnet"))
+          elif $best == "flash" then ($f | test("flash"))
+          else $f == ($families[0].id | fam) end))})
+  ]
+| (if any(.[]; .rec) then . else (.[0].rec = true) end)
+| .[]
+| ("\(.icon) " + (.cli | pad(14)) + (.model | pad(20)) + (.tier | pad(5))) as $head
+| [.agent, .args, "\($head)\(.quota)\(if .rec then "  ★" else "" end)",
+   "\($head)\u001b[\(code(.level))m\(.quota)\u001b[0m\(if .rec then "  \u001b[36m★\u001b[0m" else "" end)",
+   (if .rec then 1 else 0 end)]
+| @tsv')
+
+mapfile -t agents < <(cut -f1 <<<"$rows")
+mapfile -t argv < <(cut -f2 <<<"$rows")
+mapfile -t plain < <(cut -f3 <<<"$rows")
+mapfile -t colored < <(cut -f4 <<<"$rows" | sed 's/\\033/\x1b/g; s/\\u001b/\x1b/g')
+mapfile -t recs < <(cut -f5 <<<"$rows")
+
+pick=-1
+for i in "${!recs[@]}"; do [ "${recs[$i]}" = 1 ] && { pick=$i; break; }; done
+
+if [ "$choice" = "menu" ]; then
+  WM_BIN="$HOME/.local/bin/wm"
+  [ -x "$WM_BIN" ] || WM_BIN=$(command -v wm)
+  PRESET="$HOME/.config/waymaker/presets/ai-launch.toml"
+  # Esc leaves a plain shell in the pane
+  sel=$(printf '%s\n' "${colored[@]}" | "$WM_BIN" -o "$PRESET" --pos "$((pick < 0 ? 0 : pick))") || exit 0
+  sel=$(sed 's/\x1b\[[0-9;]*m//g' <<<"$sel")
+  pick=-1
+  for i in "${!plain[@]}"; do [ "${plain[$i]}" = "$sel" ] && { pick=$i; break; }; done
+fi
+
+if [ "$pick" -lt 0 ]; then
+  # No rows (no quota data, no CLIs) or an unmatched selection: plain recommended agent
+  agent=$(jq -r '.recommend // "claude"' <<<"$snapshot")
+  if $peek || $pick_only; then echo "$agent"; exit 0; fi
+  exec "$agent"
+fi
+
+read -r -a args <<<"${argv[$pick]}"
+if $peek || $pick_only; then echo "${agents[$pick]} ${args[*]}"; exit 0; fi
+[ "$choice" = "auto" ] && printf '\033[90m%s\033[0m\n' "${plain[$pick]}"
+exec "${agents[$pick]}" "${args[@]}"

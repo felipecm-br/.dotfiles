@@ -14,8 +14,12 @@ Canonical design and policy: [docs/architecture/quota-aware-agent-selection.md](
 | `ai-quota` | Human report: per-agent level, 5h / 7d %, burn %/h, projection at reset, sessions |
 | `ai-quota --json` | Snapshot for scripts and agents (`.recommend`, `.reason`, `.agents[]`) |
 | `ai-quota --recommend` | Print `claude`, `agy` or `agyy` |
-| `ai-launch [agent]` | Start the recommended (or forced) agent; Waymaker `startup_command` |
-| `ai-launch --peek` | Show what would start, without starting it |
+| `ai-launch` | CLI × model menu with quota per row (Waymaker `startup_command`) |
+| `ai-launch --auto` | Start the recommended agent and model directly |
+| `ai-launch <agent> [args]` | Force one, e.g. `ai-launch claude --model sonnet` |
+| `ai-quota --refresh` | Silent forced refresh of the Antigravity cache and badge (run every 2 min by `ai-quota-refresh.timer`; readers serve up to 15 min stale and refresh in the background) |
+| `ai-launch --pick` | Show the menu and print the chosen `<agent> [args]` without starting it (backend of the `Prefix + a` tmux popup, `ai-launch-popup.sh`) |
+| `ai-launch --peek [--auto]` | Show what would start (`<agent> [args]` or `menu`), without starting it |
 
 ## Agent workflow
 

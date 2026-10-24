@@ -19,6 +19,7 @@ emit_tmux() {
 󰌌  Ctrl + 1 .. 9	Direct Jump to Window 1 .. 9 (Zero-Prefix)	tmux	tmux-select-win	tmux select-window -t 1
 󱂩  Ctrl + Shift + 0 .. 9	Move Window to Target Slot (Shift Reorder)	tmux	tmux-move-win	~/.config/tmux/move-window-to.sh 1
 󰊢  Ctrl + Shift + G	AWT Autonomous Worktree Popup	tmux	tmux-awt	~/.config/tmux/awt-popup.sh
+󰚩  Prefix + a / Ctrl + Shift + A	AI Agent Launcher (CLI × Model + Quota)	tmux	tmux-ai-launch	~/.config/tmux/ai-launch-popup.sh
 󰊢  Ctrl + G	Lazygitrs Floating Popup & Dual-Diff	tmux	tmux-lazygitrs	~/.config/tmux/lazygitrs-popup.sh
 󰙀  Ctrl + Shift + T	Undo Close Tab (Exact Index & AI Resume)	tmux	tmux-reopen	~/.config/tmux/reopen-window.sh
 󰒭  Ctrl + Shift + I	AI Attention Trampoline Direct Jump	tmux	tmux-triage	~/.config/tmux/ai-agent-bell-triage.sh

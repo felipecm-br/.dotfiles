@@ -70,6 +70,7 @@ install_packages \
     mosh \
     devin \
     claude \
+    ai-quota \
     waymux
 
 install_plugins \

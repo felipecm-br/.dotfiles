@@ -48,7 +48,7 @@ prompt = " "
 prompt_style.fg = "yellow"
 
 [footer]
-content = " {cyan,bold:Enter} {darkgray:Smart} {darkgray:│} {cyan,bold:a} {darkgray:Agy} {darkgray:│} {cyan,bold:c} {darkgray:Claude} {darkgray:│} {cyan,bold:u} {darkgray:Quota} {darkgray:│} {cyan,bold:s} {darkgray:Cockpit} {darkgray:│} {cyan,bold:Tab} {darkgray:Cycle} {darkgray:│} {cyan,bold:/} {darkgray:Filter} {darkgray:│} {cyan,bold:d} {darkgray:Kill} {darkgray:│} {cyan,bold:Esc} {darkgray:Exit}"
+content = " {cyan,bold:Enter} {darkgray:Menu} {darkgray:│} {cyan,bold:r} {darkgray:Auto} {darkgray:│} {cyan,bold:a} {darkgray:Agy} {darkgray:│} {cyan,bold:c} {darkgray:Claude} {darkgray:│} {cyan,bold:u} {darkgray:Quota} {darkgray:│} {cyan,bold:s} {darkgray:Cockpit} {darkgray:│} {cyan,bold:Tab} {darkgray:Cycle} {darkgray:│} {cyan,bold:/} {darkgray:Filter} {darkgray:│} {cyan,bold:d} {darkgray:Kill} {darkgray:│} {cyan,bold:Esc} {darkgray:Exit}"
 row_connection = "Full"
 match_indent = false
 separator = "light"
@@ -99,6 +99,7 @@ percentage = 60
 "/"             = "FocusFilter"
 "esc"           = "Quit"
 "q"             = "Quit"
+"r"             = ["Print(@agent=auto)", "Accept"]
 "a"             = ["Print(@agent=agy)", "Accept"]
 "A"             = ["Print(@agent=agyy)", "Accept"]
 "c"             = ["Print(@agent=claude)", "Accept"]

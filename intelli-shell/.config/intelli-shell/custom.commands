@@ -121,11 +121,26 @@ awtc {{repo_url}}
 # Show AI quota report (Claude 5h/7d burn rate, Antigravity exhaustion, recommended agent)
 ai-quota
 
+# Force a refresh of the AI quota caches (normally run every 2 min by ai-quota-refresh.timer)
+ai-quota --refresh
+
+# Show the AI quota refresh timer schedule
+systemctl --user list-timers ai-quota-refresh.timer
+
 # Print the quota-recommended AI agent (claude | agy | agyy)
 ai-quota --recommend
 
-# Start the quota-recommended AI agent in this pane
+# Open the AI CLI × model launch menu with live quota per row
 ai-launch
+
+# Open the AI CLI × model launch menu as a tmux popup (Prefix+a / Ctrl+Shift+A); the pick starts in a new window
+~/.config/tmux/ai-launch-popup.sh
+
+# Print the CLI × model choice from the launch menu without starting it
+ai-launch --pick
+
+# Start the quota-recommended AI agent and model directly
+ai-launch --auto
 
 # Start a specific AI agent CLI
 ai-launch {{agent}}

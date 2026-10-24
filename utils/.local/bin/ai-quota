@@ -5,13 +5,16 @@
 #   ai-quota --json          Machine-readable snapshot (all agents, levels, recommendation)
 #   ai-quota --badge         Compact tmux-format badge (session picker popup title)
 #   ai-quota --recommend     Print the agent to launch: claude | agy | agyy
+#   ai-quota --refresh       Silently re-read the Antigravity API and rewrite the badge cache
+#                            (run every 2 min by ai-quota-refresh.timer so readers never wait)
 #   ai-quota statusline      Claude Code statusLine command: records rate_limits from stdin, prints a line
 #
 # Data sources (all local, no extra network calls):
 #   claude  rate_limits.{five_hour,seven_day} pushed by Claude Code into the statusLine JSON
 #           (recorded here as samples -> burn rate in %/h), live sessions in ~/.claude/sessions/
 #   agy     percent left per group (Claude & GPT, Gemini Flash, pro tier) from fetchAvailableModels,
-#           with the profile's own token on curl's stdin, cached 60 s; without a valid token, 429
+#           with the profile's own token on curl's stdin, cached 60 s (a reader accepts up to 15 min
+#           of staleness and refreshes in the background); without a valid token, 429
 #           "Individual quota reached ... Resets in XhYmZs" lines in antigravity-cli logs
 #           (exhausted-until + learned prompt capacity per 5h window), prompts in history.jsonl
 #   agyy    same as agy, under the secondary profile ($AGYY_HOME)
@@ -20,6 +23,8 @@
 #   AI_AGENT_PREFERENCE     Ordered candidates (default: "claude agy agyy")
 #   AI_QUOTA_SESSION_RATE   Assumed 5h burn per Claude session in %/h when no samples exist (default: 10)
 #   AI_QUOTA_NO_API         1 = never call the Antigravity API (logs and history only)
+#   AI_QUOTA_MAX_STALE      Seconds a cached Antigravity answer may be served stale while a background
+#                           refresh runs (default: 900)
 
 set -uo pipefail
 
@@ -62,7 +67,19 @@ case "${1:-}" in
   --badge) MODE="badge" ;;
   --line) MODE="line" ;;
   --recommend) MODE="recommend" ;;
-  -h | --help) sed -n '2,22p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+  --refresh)
+    # Forced API read (bypasses the 60 s TTL), then the tmux popup badge; serialised so overlapping
+    # timers and reader-spawned refreshes never stack up
+    mkdir -p "$STATE_DIR"
+    exec 9>"$STATE_DIR/refresh.lock"
+    flock -n 9 || exit 0
+    AI_QUOTA_FORCE=1 "$0" --json >/dev/null 2>&1
+    "$0" --badge >"$STATE_DIR/badge.tmp" 2>/dev/null && [ -s "$STATE_DIR/badge.tmp" ] &&
+      mv -f "$STATE_DIR/badge.tmp" "$STATE_DIR/badge"
+    rm -f "$STATE_DIR/badge.tmp"
+    exit 0
+    ;;
+  -h | --help) sed -n '2,25p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
   "" | --report) ;;
   *) echo "ai-quota: unknown option '$1' (see --help)" >&2; exit 2 ;;
 esac
@@ -161,12 +178,20 @@ agy_post() ( # <token> <url> <json body>: POST with the token read from stdin, n
 
 agy_api() ( # <home> <label>: per-model quota from fetchAvailableModels, cached 60 s; `null` when unavailable
   { set +x; } 2>/dev/null # never trace the token (bash -x would print it expanded)
-  local home=$1 label=$2 cache="$STATE_DIR/agy-models-$2.json" proj_file="$STATE_DIR/agy-project-$2" tok proj resp
+  local home=$1 label=$2 cache="$STATE_DIR/agy-models-$2.json" proj_file="$STATE_DIR/agy-project-$2" tok proj resp age
   if [ -n "${AI_QUOTA_FIXTURE_DIR:-}" ]; then
     # Tests: a recorded fetchAvailableModels response instead of the network
     resp=$(cat "$AI_QUOTA_FIXTURE_DIR/$label.json" 2>/dev/null) || { echo null; return; }
   else
-    if [ -s "$cache" ] && [ $((now - $(stat -c %Y "$cache"))) -lt 60 ]; then cat "$cache"; return; fi
+    if [ -s "$cache" ] && [ "${AI_QUOTA_FORCE:-0}" != 1 ]; then
+      age=$((now - $(stat -c %Y "$cache")))
+      [ "$age" -lt 60 ] && { cat "$cache"; return; }
+      if [ "$age" -lt "${AI_QUOTA_MAX_STALE:-900}" ]; then
+        # Stale-while-revalidate: answer from the cache now, refresh for the next reader
+        (setsid -f "$0" --refresh </dev/null >/dev/null 2>&1) 2>/dev/null
+        cat "$cache"; return
+      fi
+    fi
     tok=$(agy_token "$home")
     if [ -z "$tok" ]; then echo null; return; fi
     proj=$(cat "$proj_file" 2>/dev/null)

@@ -1,0 +1,10 @@
+[Unit]
+Description=Keep AI agent quota caches warm so the launch popups open instantly
+
+[Timer]
+OnBootSec=1min
+OnUnitActiveSec=2min
+AccuracySec=10s
+
+[Install]
+WantedBy=timers.target

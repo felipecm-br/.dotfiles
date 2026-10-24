@@ -1,0 +1,10 @@
+[Unit]
+Description=Refresh AI agent quota caches (ai-quota --refresh)
+Documentation=file://%h/.dotfiles/main/docs/architecture/quota-aware-agent-selection.md
+
+[Service]
+Type=oneshot
+Nice=19
+IOSchedulingClass=idle
+TimeoutStartSec=60
+ExecStart=%h/.local/bin/ai-quota --refresh

@@ -16,14 +16,14 @@ elif [ -z "${TMUX_POPUP:-}" ]; then
   SESSION_POPUP_COLOR=$(get_theme_color "cyan" "${TMUX_POPUP_BORDER_COLOR:-#89dceb}")
 
   # Quota badge (Claude 5h·7d, Antigravity exhaustion, recommended agent): served from a
-  # cache so the popup opens instantly; recomputed inline only when older than 10 min
+  # cache so the popup opens instantly; recomputed inline only when absent or older than an hour (ai-quota-refresh.timer keeps it fresh)
   QUOTA_BIN="$HOME/.local/bin/ai-quota"
   BADGE_FILE="${XDG_STATE_HOME:-$HOME/.local/state}/ai-quota/badge"
   badge=""
   if [ -x "$QUOTA_BIN" ]; then
-    if [ -n "$(find "$BADGE_FILE" -mmin -10 2>/dev/null)" ]; then
+    if [ -n "$(find "$BADGE_FILE" -mmin -60 2>/dev/null)" ]; then
       badge=$(cat "$BADGE_FILE")
-      ("$QUOTA_BIN" --badge >"$BADGE_FILE.tmp" && mv -f "$BADGE_FILE.tmp" "$BADGE_FILE") >/dev/null 2>&1 &
+      [ -z "$(find "$BADGE_FILE" -mmin -2 2>/dev/null)" ] && "$QUOTA_BIN" --refresh >/dev/null 2>&1 &
     else
       badge=$("$QUOTA_BIN" --badge 2>/dev/null) && printf '%s' "$badge" >"$BADGE_FILE"
     fi
@@ -58,7 +58,7 @@ chosen=$("$WM_BIN" \
   -o "$PRESET" \
   --color "${TMUX_COLOR_SPEC:-}")
 
-# a / A / c binds emit "@agent=<name>" before the selection; Enter emits only the selection
+# r / a / A / c binds emit "@agent=<auto|name>" before the selection; Enter emits only the selection
 agent=$(printf '%s\n' "$chosen" | sed -n 's/^@agent=//p' | head -n 1)
 chosen=$(printf '%s\n' "$chosen" | grep -v '^@agent=' | head -n 1)
 
@@ -70,7 +70,7 @@ if [ "$chosen" = "__SWITCH_WINDOW__" ] || [ "$chosen" = "__SWITCH_COCKPIT__" ]; 
   fi
 elif [ -n "$chosen" ]; then
   if [ -z "$agent" ]; then
-    # New sessions run startup_command = ai-launch (quota-aware pick)
+    # New sessions run startup_command = ai-launch (CLI × model menu with quota)
     "$WM_BIN" connect "$chosen"
   else
     ai-launch --next "$agent"

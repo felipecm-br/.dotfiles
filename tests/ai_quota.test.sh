@@ -104,4 +104,32 @@ ai-launch --next agyy
 touch -d '-1 min' "$XDG_RUNTIME_DIR/ai-launch.next"
 [ "$(AI_LAUNCH_AGENT=claude ai-launch --peek)" = "claude" ] && ok "stale arm ignored" || bad "stale arm"
 rm -f "$XDG_RUNTIME_DIR/ai-launch.next"
-[ "$(AI_AGENT=claude-code_agent ai-launch --peek)" = "agy" ] && ok "AI_AGENT marker ignored" || bad "AI_AGENT leak"
+out=$(AI_AGENT=claude-code_agent ai-launch --peek)
+[ "${out%% *}" = "agy" ] && ok "AI_AGENT marker ignored" || bad "AI_AGENT leak: $out"
+[ "$(AI_LAUNCH_AGENT=menu ai-launch --peek)" = "$out" ] && ok "menu without a terminal falls back to auto" || bad "menu fallback"
+[ "$(ai-launch --peek claude --model haiku)" = "claude --model haiku" ] && ok "explicit args pass through" || bad "explicit args"
+
+# 6. Recommended model follows quota: Claude green -> opus, yellow -> sonnet; Antigravity with its
+# default (Claude) group exhausted -> the Gemini Flash row
+rm -f "$XDG_STATE_HOME/ai-quota/claude-samples.tsv"
+export AI_AGENT_PREFERENCE=claude # isolate the model mapping from the agent ranking
+feed 20 >/dev/null
+[ "$(ai-launch --peek --auto)" = "claude --model opus" ] && ok "claude green -> opus" || bad "green: $(ai-launch --peek --auto)"
+feed 85 >/dev/null
+[ "$(ai-launch --peek --auto)" = "claude --model sonnet" ] && ok "claude yellow -> sonnet" || bad "yellow: $(ai-launch --peek --auto)"
+ai-launch --next auto
+[ "$(ai-launch --peek)" = "claude --model sonnet" ] && ok "armed auto resolves the recommendation" || bad "armed auto"
+rm -f "$XDG_RUNTIME_DIR/ai-launch.next"
+unset AI_AGENT_PREFERENCE
+feed 99 >/dev/null
+models none 1 >"$FIX/agy.json"
+[ "$(AI_QUOTA_FIXTURE_DIR="$FIX" ai-launch --peek --auto)" = "agy --model gemini-3.8-flash-medium" ] &&
+  ok "agy default exhausted -> Gemini Flash" || bad "agy model: $(AI_QUOTA_FIXTURE_DIR="$FIX" ai-launch --peek --auto)"
+
+# 7. --pick (tmux popup backend) prints the choice instead of exec'ing it; no terminal -> recommendation
+pick=$(AI_QUOTA_FIXTURE_DIR="$FIX" ai-launch --pick </dev/null)
+[ "$pick" = "$(AI_QUOTA_FIXTURE_DIR="$FIX" ai-launch --peek --auto)" ] && ok "--pick without a terminal prints the recommendation" || bad "--pick fallback: $pick"
+
+# 8. --refresh is silent and serialised (no network: AI_QUOTA_NO_API keeps it local)
+[ -z "$(AI_QUOTA_NO_API=1 ai-quota --refresh 2>&1)" ] && ok "--refresh is silent" || bad "--refresh output"
+[ -s "$XDG_STATE_HOME/ai-quota/badge" ] && ok "--refresh writes the badge cache" || bad "badge cache missing"
