@@ -72,7 +72,7 @@ Mail lives in daemon memory (256 messages per session). Bodies are fenced as unt
 
 Ranked by risk removed per unit of complexity. Keys stay as they are: per the [Zero-Churn principle](terminal-ergonomics-and-ux-manifesto.md), the Cockpit keeps `y`/`n` (TUIOS's `1`/`2`/`3` would also collide with `a` Toggle Fleet).
 
-### Shipped (`waymux` `6628f4a`, `a8f2d6d`, `9f90704`, `6fa959f`, installed as 0.2.4)
+### Shipped (`waymux` `6628f4a`, `a8f2d6d`, `9f90704`, `6fa959f`, `aa107aa`, installed as 0.2.4)
 
 | ID | Feature | What changed |
 | :---: | :--- | :--- |
@@ -85,13 +85,13 @@ Ranked by risk removed per unit of complexity. Keys stay as they are: per the [Z
 | **A1** | **Queued badge** | Cockpit rows show a muted `󰇮N` before the age when prompts wait in the queue. |
 | **A2** | **Away recap** | The daemon counts each pane's finished turns (≥ 5 s of work), edited files, commands and last test command since the pane was last focused (`agent/recap`); after 10 minutes away the Cockpit preview opens with `󰋚 Since you last looked (42m): 3 turns · 6 files: … · 11 commands · tests: cargo test`. Pass/fail of the tests is not tracked. |
 | **A3** | **Held approvals** | `[approvals] enabled = true` (on in this repo's `waymux/.config/waymux/config.toml`) plus the `PermissionRequest` hook (`claude/.claude/settings.json`, `"timeout": 310`): the hook asks the daemon to hold the prompt and the Cockpit's `y`/`n` answer it through Claude Code's decision output, with no keystroke. Unlike TUIOS's description, Claude Code 2.1.310 keeps its dialog on screen while the hook waits, and the first answer wins. One-line `Bash`/`Read`/`Glob`/`Grep`/`WebFetch`/`WebSearch` calls only; 400 ms dwell; a risky allow carries the matched rules (`risk_ack`); any failure prints nothing, so Claude asks as before. Limit: a same-user process with the daemon token could answer, as it could `tmux send-keys`. |
+| **B1** | **Turn checkpoints** | At the end of every turn the daemon saves the pane's work tree; `waymux checkpoint list\|diff <n>\|restore <n> [--force]`. Unlike TUIOS (`refs/tuios/...` inside the repository), checkpoints live in a bare store per repository under `$XDG_STATE_HOME/waymux/checkpoints/` that borrows the repository's objects through alternates, because lazygitrs graphs `git log --all`: the repository gets no refs, no objects and no index or `HEAD` changes. Restore saves a safety checkpoint first. ~5 ms per snapshot on this 690-file repository. |
 | **A4** | **Alert bursts** | Blocking alerts within 1.5 s play one sound; status-bar alerts within 2 s share one line (`3 agents need you › 3:api, 4:web and 5:docs`), cleared only by the latest alert's timer. |
 
 ### Tier B: when the workflow needs it
 
 | ID | Feature | Notes |
 | :---: | :--- | :--- |
-| **B1** | **Turn checkpoints** | `refs/waymux/checkpoints/<pane>/<n>` via a temporary index; `restore` saves a safety checkpoint first. The best safety net among the remaining items. |
 | **B2** | **Quota-aware `awt fan` / `verify` / `keep`** | `awt` is `waymux wt`, so this lands in the `waymux` crate. Gate on `ai-quota --json` (`projected_five`). Only worth it for regular best-of-N runs. |
 | **B3** | **Fenced inter-agent mail + wake** | High complexity for a single-human workflow. The untrusted-content fence (`│ ` gutter) can be adopted on its own wherever agent text is relayed to another agent. |
 

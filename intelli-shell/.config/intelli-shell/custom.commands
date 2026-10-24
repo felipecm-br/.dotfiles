@@ -343,6 +343,15 @@ waymux queue add {{pane}} {{prompt}}
 # Drop a queued or stalled prompt for an agent pane
 waymux queue rm {{pane}} {{id}}
 
+# List the work-tree checkpoints each agent turn left in this pane
+waymux checkpoint list
+
+# Show what one agent turn changed
+waymux checkpoint diff {{n}}
+
+# Put the files back as an agent turn left them (saves a safety checkpoint first)
+waymux checkpoint restore {{n}}
+
 # Launch interactive TUI picker or session manager via Waymaker
 wm
 
