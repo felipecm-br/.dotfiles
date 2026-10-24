@@ -10,13 +10,16 @@
 # Data sources (all local, no extra network calls):
 #   claude  rate_limits.{five_hour,seven_day} pushed by Claude Code into the statusLine JSON
 #           (recorded here as samples -> burn rate in %/h), live sessions in ~/.claude/sessions/
-#   agy     429 "Individual quota reached ... Resets in XhYmZs" lines in antigravity-cli logs
+#   agy     percent left per group (Claude & GPT, Gemini Flash, pro tier) from fetchAvailableModels,
+#           with the profile's own token on curl's stdin, cached 60 s; without a valid token, 429
+#           "Individual quota reached ... Resets in XhYmZs" lines in antigravity-cli logs
 #           (exhausted-until + learned prompt capacity per 5h window), prompts in history.jsonl
 #   agyy    same as agy, under the secondary profile ($AGYY_HOME)
 #
 # Tunables (env):
 #   AI_AGENT_PREFERENCE     Ordered candidates (default: "claude agy agyy")
 #   AI_QUOTA_SESSION_RATE   Assumed 5h burn per Claude session in %/h when no samples exist (default: 10)
+#   AI_QUOTA_NO_API         1 = never call the Antigravity API (logs and history only)
 
 set -uo pipefail
 
@@ -122,6 +125,75 @@ agy_sessions() { # <home>: live agy CLI processes (top-level agy-bin) running un
   echo "$n"
 }
 
+agy_token() { # <home>: a valid Antigravity access token for that profile, or nothing
+  # The primary profile keeps its live token in the keyring (service gemini), the secondary one
+  # in its token file; the keyring token is used only when its account matches the profile's.
+  local home=$1 file="$1/.gemini/antigravity-cli/antigravity-oauth-token" src tok exp email file_email="" best="" best_exp=0
+  local jwt_email='(.id_token_email // ((.id_token // "") | split(".") | .[1] // "" | gsub("-";"+") | gsub("_";"/")
+    | (. + ("=" * ((4 - length % 4) % 4))) | (@base64d | fromjson? | .email) // ""))'
+  [ -r "$file" ] && file_email=$(jq -r "$jwt_email" "$file" 2>/dev/null)
+  for src in file keyring; do
+    if [ "$src" = file ]; then
+      [ -r "$file" ] || continue
+      IFS=$'\t' read -r tok exp email < <(jq -r "[.token.access_token // \"\", .token.expiry // \"\", $jwt_email] | @tsv" "$file" 2>/dev/null)
+    else
+      IFS=$'\t' read -r tok exp email < <(secret-tool lookup service gemini 2>/dev/null |
+        jq -r "[.token.access_token // \"\", .token.expiry // \"\", $jwt_email] | @tsv" 2>/dev/null)
+      # No token file means no profile here (e.g. a sandboxed HOME): never borrow the keyring's.
+      [ -n "$file_email" ] && [ "$email" = "$file_email" ] || continue
+    fi
+    [ -n "$tok" ] && [ -n "$exp" ] || continue
+    exp=$(date -d "$exp" +%s 2>/dev/null) || continue
+    if [ "$exp" -gt $((now + 60)) ] && [ "$exp" -gt "$best_exp" ]; then best=$tok; best_exp=$exp; fi
+  done
+  printf '%s' "$best"
+}
+
+agy_post() { # <token> <url> <json body>: POST with the token read from stdin, never from argv
+  printf 'header = "Authorization: Bearer %s"\n' "$1" |
+    curl -sS --max-time 8 --config - -H 'Content-Type: application/json' -H 'User-Agent: antigravity' \
+      -X POST --data "$3" "$2" 2>/dev/null
+}
+
+agy_api() { # <home> <label>: per-model quota from fetchAvailableModels, cached 60 s; `null` when unavailable
+  local home=$1 label=$2 cache="$STATE_DIR/agy-models-$2.json" proj_file="$STATE_DIR/agy-project-$2" tok proj resp
+  if [ -n "${AI_QUOTA_FIXTURE_DIR:-}" ]; then
+    # Tests: a recorded fetchAvailableModels response instead of the network
+    resp=$(cat "$AI_QUOTA_FIXTURE_DIR/$label.json" 2>/dev/null) || { echo null; return; }
+  else
+    if [ -s "$cache" ] && [ $((now - $(stat -c %Y "$cache"))) -lt 60 ]; then cat "$cache"; return; fi
+    tok=$(agy_token "$home")
+    if [ -z "$tok" ]; then echo null; return; fi
+    proj=$(cat "$proj_file" 2>/dev/null)
+    if [ -z "$proj" ]; then
+      proj=$(agy_post "$tok" "https://cloudcode-pa.googleapis.com/v1internal:loadCodeAssist" \
+        '{"metadata":{"ideType":"ANTIGRAVITY"}}' | jq -r '.cloudaicompanionProject // empty' 2>/dev/null)
+      [ -n "$proj" ] && printf '%s\n' "$proj" >"$proj_file"
+    fi
+    resp=$(agy_post "$tok" "https://daily-cloudcode-pa.googleapis.com/v1internal:fetchAvailableModels" \
+      "$(jq -cn --arg p "$proj" 'if $p == "" then {} else {project: $p} end')")
+  fi
+  # A model with a resetTime but no remainingFraction is exhausted (the API omits zero).
+  jq -c --argjson now "$now" '
+    def epoch: if . == null then null else (sub("\\.[0-9]+"; "") | fromdateiso8601?) end;
+    select(.models) | . as $r
+    | def entry($id): ($r.models[$id] // null) as $m | if $m == null then null else {
+        model: $id, name: ($m.displayName // $id),
+        pct: (($m.quotaInfo.remainingFraction // (if $m.quotaInfo.resetTime then 0 else null end))
+              | if . == null then null else (. * 100 | round) end),
+        reset: ($m.quotaInfo.resetTime | epoch) } end;
+    .
+    | ([$r.models | keys[] | select(startswith("claude-") or startswith("gpt-oss"))] | map(entry(.)) | map(select(.pct != null))) as $cg
+    | {ts: $now, default_model: .defaultAgentModelId,
+       groups: [
+         (if ($cg | length) > 0 then {key: "claude", label: "Claude & GPT", pct: ($cg | map(.pct) | min),
+            reset: ($cg | map(.reset) | map(select(. != null)) | min)} else empty end),
+         (entry($r.tieredModelIds.flash[0]? // "") | select(. != null) | {key: "flash", label: "Gemini Flash"} + .),
+         (entry($r.tieredModelIds.pro[0]? // "") | select(. != null) | {key: "pro", label: "Gemini pro tier"} + .)
+       ]}' <<<"$resp" 2>/dev/null >"$cache.tmp" && [ -s "$cache.tmp" ] && mv -f "$cache.tmp" "$cache" || rm -f "$cache.tmp"
+  if [ -s "$cache" ]; then cat "$cache"; else echo null; fi
+}
+
 agy_bin=false; { command -v agy-bin >/dev/null 2>&1 || [ -x "$HOME/.local/bin/agy-bin" ]; } && agy_bin=true
 agyy_ok=false; $agy_bin && [ -s "$AGYY_HOME/.gemini/antigravity-cli/antigravity-oauth-token" ] && agyy_ok=true
 
@@ -141,6 +213,14 @@ else
   agyy_ev='[]'; agyy_pr='[]'; agyy_n=0
 fi
 
+# Per-model quota from the API (cached 60 s); never on the statusline path. AI_QUOTA_NO_API=1
+# keeps the log heuristic only.
+agy_api_json=null; agyy_api_json=null
+if [ "$MODE" != "line" ] && [ "${AI_QUOTA_NO_API:-0}" != 1 ] && command -v curl >/dev/null 2>&1; then
+  $agy_bin && agy_api_json=$(agy_api "$HOME" agy)
+  $agyy_ok && agyy_api_json=$(agy_api "$AGYY_HOME" agyy)
+fi
+
 # ── Model + scoring (single jq pass) ────────────────────────────────────────
 jq -n -r \
   --arg mode "$MODE" \
@@ -152,7 +232,8 @@ jq -n -r \
   --argjson c_bin "$claude_bin" --argjson c_latest "$claude_latest" --argjson c_samples "$claude_samples" \
   --argjson c_n "$claude_sessions" --argjson c_act "${claude_active:-0}" --argjson c_pr "$claude_prompts" \
   --argjson a_bin "$agy_bin" --argjson a_ev "$agy_ev" --argjson a_pr "$agy_pr" --argjson a_n "$agy_n" \
-  --argjson y_ok "$agyy_ok" --argjson y_ev "$agyy_ev" --argjson y_pr "$agyy_pr" --argjson y_n "$agyy_n" '
+  --argjson y_ok "$agyy_ok" --argjson y_ev "$agyy_ev" --argjson y_pr "$agyy_pr" --argjson y_n "$agyy_n" \
+  --argjson a_api "${agy_api_json:-null}" --argjson y_api "${agyy_api_json:-null}" '
 def epoch: if . == null then null
   elif type == "number" then (if . > 1e12 then . / 1000 else . end)
   elif type == "string" then ((sub("\\.[0-9]+"; "") | sub("\\+00:00$"; "Z") | fromdateiso8601?) // (tonumber? // null))
@@ -199,25 +280,38 @@ def claude_model:
       until: (if ($five // 0) >= 98 then $r5 elif ($seven // 0) >= 98 then $r7 else null end)
     };
 
-# Antigravity: exhausted-until from 429s; capacity learned from the window that hit the cap
-def agy_model($name; $bin; $ev; $pr; $n):
+# Antigravity: per-group quota from the API when it answered; otherwise exhausted-until from
+# 429s and capacity learned from the window that hit the cap
+def agy_model($name; $bin; $ev; $pr; $n; $api):
   ([$ev[] | select(.reset > $now)] | max_by(.reset)) as $active
   | ([$ev[] | select(.reset - .ts <= 18000)] | max_by(.ts)) as $last5
   | (if $last5 then count_since([$pr[] | select(. <= $last5.ts)]; $last5.reset - 18000) else null end) as $cap
   | count_since($pr; $now - 18000) as $p5
   | (if $cap != null and $cap > 0 then ($p5 * 100 / $cap) else null end) as $est
+  | (($api // {}).groups // null) as $groups
+  | (($api // {}).default_model // "") as $dm
+  | (if ($dm | startswith("claude-")) or ($dm | startswith("gpt-oss")) then "claude" else "flash" end) as $dkey
+  | (if $groups then [$groups[] | select(.key == $dkey)] | first else null end) as $dgroup
+  | (if $groups then [$groups[] | select((.pct // 0) > 0)] else null end) as $usable
+  | (if $groups == null then null
+     elif ($usable | length) == 0 then "red"
+     elif ($dgroup != null and ($dgroup.pct // 0) == 0) or ([$usable[] | select(.pct < 20)] | length) > 0 then "yellow"
+     else "green" end) as $api_level
   | {
       agent: $name, available: $bin, icon: $ic_agy, sessions: $n,
       prompts_1h: count_since($pr; $now - 3600), prompts_5h: $p5,
       capacity_5h: $cap, est_five: ($est | if . == null then null else round end),
-      until: ($active.reset // null),
-      window: (if $active then (if ($active.reset - $active.ts) > 21600 then "7d" else "5h" end) else null end),
-      level: (if $active then "red" elif ($est // 0) >= 80 then "yellow" elif $cap == null then "unknown" else "green" end)
+      source: (if $groups then "api" else "logs" end), groups: $groups, default_model: $dm,
+      default_exhausted: ($dgroup != null and ($dgroup.pct // 0) == 0),
+      until: (if $groups == null then ($active.reset // null)
+              elif $api_level == "red" then ([$groups[].reset | select(. != null)] | min) else null end),
+      window: (if $groups == null and $active then (if ($active.reset - $active.ts) > 21600 then "7d" else "5h" end) else null end),
+      level: ($api_level // (if $active then "red" elif ($est // 0) >= 80 then "yellow" elif $cap == null then "unknown" else "green" end))
     };
 
 [ claude_model,
-  agy_model("agy"; $a_bin; $a_ev; $a_pr; $a_n),
-  (if $y_ok then agy_model("agyy"; true; $y_ev; $y_pr; $y_n) else empty end)
+  agy_model("agy"; $a_bin; $a_ev; $a_pr; $a_n; $a_api),
+  (if $y_ok then agy_model("agyy"; true; $y_ev; $y_pr; $y_n; $y_api) else empty end)
 ] as $agents
 | ($pref | split(" ") | map(select(length > 0))) as $order
 | [$order[] as $o | $agents[] | select(.agent == $o and .available)] as $cands
@@ -236,6 +330,9 @@ def agy_model($name; $bin; $ev; $pr; $n):
     elif .agent == "claude" then
       (if .five == null then "?" else "\(.five | floor)·\(.seven // 0 | floor)%" end)
       + (if (.rate // 0) >= 1 then " ↗" else "" end)
+    elif .groups != null then
+      # Percent left per group: C = Claude & GPT, G = Gemini Flash
+      ([.groups[] | select(.key == "claude" or .key == "flash") | "\(if .key == "claude" then "C" else "G" end)\(.pct)"] | join(" ")) + "%"
     else (if .est_five != null then "~\(.est_five)%" else "\(.prompts_5h)p" end) end;
   def sess: if .sessions > 0 then " ×\(.sessions)" else "" end;
 
@@ -260,9 +357,21 @@ else
         + "    7d: \(.seven // "?")%  reset \(if .seven_reset then (.seven_reset | strflocaltime("%a %H:%M")) else "-" end)  pace: \(.week_pace // "-")×"
         + (if (.stale_s // 0) > 900 then "\n    \u001b[90m(last statusline sample \(.stale_s | hm) ago)\u001b[0m" else "" end)
         + (if .stale_s == null then "\n    \u001b[90m(no samples yet: start a claude session with the ai-quota statusLine)\u001b[0m" else "" end)
+      elif .groups != null then
+        (.groups | map(select(.key == "flash")) | first) as $flash
+        | ([.groups[] | select(.key != "pro" or .model != ($flash.model // ""))
+            | "    \(.label)\(if .key != "claude" then " (\(.model))" else "" end): \(.pct)% left  reset \(if .reset then (.reset | strflocaltime("%a %H:%M")) + " (in \((.reset - $now) | hm))" else "-" end)"]
+           | join("\n"))
+        + ([.groups[] | select(.key == "pro" and .model == ($flash.model // ""))] | if length > 0
+            then "\n    Gemini 4 Argon: no per-model quota in the API; its pro tier maps to \(.[0].model) (the Gemini Flash quota above)"
+            else "" end)
+        + (if .default_exhausted and ([.groups[] | select(.key == "flash" and (.pct // 0) > 0)] | length) > 0
+           then "\n    \u001b[33mdefault model \(.default_model) is out of quota: start with --model gemini-3.8-flash-high\u001b[0m"
+           else "" end)
       else
         "    est 5h: \(if .est_five != null then "~\(.est_five)% of learned capacity (\(.capacity_5h) prompts)" else "unknown (no cap hit observed yet)" end)"
         + (if .until then "\n    exhausted (\(.window)) until \(.until | strflocaltime("%a %H:%M")) (in \((.until - $now) | hm))" else "" end)
+        + "\n    \u001b[90m(no live API data: the profile has no valid token; open agy once to refresh it)\u001b[0m"
       end) + "\n"
   ),
   "→ recommend: \($rec)  (\($why))"

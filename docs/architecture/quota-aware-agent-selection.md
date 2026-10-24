@@ -18,23 +18,26 @@ When `a`, `A` or `c` targets a session that **already exists**, the picker switc
 The popup title shows a quota badge, for example `⚡  42·22% ↗ ×4 │  ⏳11:22 │ ² 0p │ → `:
 
 - Claude: 5h% · 7d% used, `↗` when burning ≥ 1 %/h, `×N` live sessions.
-- Antigravity: `⏳HH:MM` while exhausted, otherwise `~N%` of learned capacity, or `Np` (prompts in the last 5h).
+- Antigravity: `C<n> G<n>%` = percent **left** for the Claude & GPT group and for Gemini Flash (from the API), `⏳HH:MM` when every group is out; without a valid token, `~N%` of learned capacity or `Np` (prompts in the last 5h).
 - `→` shows the agent `Enter` will start. Icon color is the level: green · yellow · red · gray (unknown). These are Tmux ANSI names, so they follow the Omarchy theme.
 
 The badge is cached in `~/.local/state/ai-quota/badge` and refreshed in the background, so the popup opens without waiting on telemetry. It is recomputed inline only when the cache is older than 10 minutes (about 90 ms).
 
-## Data sources (local only)
+## Data sources
 
 | Agent | Signal | Source |
 | --- | --- | --- |
 | `claude` | Real 5h / 7d utilization + reset time | `rate_limits` in the Claude Code statusLine JSON, recorded by `ai-quota statusline` |
 | `claude` | Burn rate (%/h) | Slope of samples in the current 5h window over the last 60 min |
 | `claude` | Sessions (live / active) | `~/.claude/sessions/<pid>.json` with a live `claude` PID / sessions prompted in the last 30 min |
-| `agy`, `agyy` | Exhausted until + window (5h / 7d) | `RESOURCE_EXHAUSTED … Resets in XhYmZs` lines in `antigravity-cli/log/cli-*.log` |
+| `agy`, `agyy` | Percent left + reset per group: Claude & GPT (min over `claude-*`, `gpt-oss*`), Gemini Flash and the pro tier (`tieredModelIds.flash` / `.pro`) | `fetchAvailableModels` (`quotaInfo.remainingFraction`, `resetTime`; a model with a reset but no fraction is at 0%), cached 60 s in `~/.local/state/ai-quota/agy-models-<profile>.json` |
+| `agy`, `agyy` | Fallback without a token: exhausted until + window (5h / 7d) | `RESOURCE_EXHAUSTED … Resets in XhYmZs` lines in `antigravity-cli/log/cli-*.log` |
 | `agy`, `agyy` | Learned 5h capacity | Prompts between `reset − 5h` and the 429 of the last 5h cap hit |
 | `agy`, `agyy` | Sessions | Top-level `agy-bin` processes, split by profile `HOME` |
 
-Antigravity logs quota only on failure, so its percentage is an estimate (`~`). Claude's figures are server-reported. No private endpoints are called and no OAuth tokens are read.
+Claude's figures are server-reported through the statusLine. For Antigravity, `ai-quota` calls the same endpoints the agy CLI and `ai-usagebar` use: `loadCodeAssist` once per profile (the project id is cached in `agy-project-<profile>`) and `fetchAvailableModels`. The token is the profile's own: its token file, or the keyring entry (`secret-tool lookup service gemini`) only when that entry's account matches the profile's file. It is passed to `curl` on stdin, never on the command line, and is never refreshed by `ai-quota` (agy refreshes it while it runs; with no valid token the log heuristic applies, so its percentage is an estimate, `~`). The statusLine path (`--line`) never calls the API. `AI_QUOTA_NO_API=1` keeps everything local.
+
+`retrieveUserQuotaSummary` (what `ai-usagebar` reads) only returns the *Claude and GPT models* group for this account, so it cannot show Gemini. **Gemini 4 Argon** has no entry of its own in `fetchAvailableModels`: its levels are built into `agy-bin`, and the API maps the pro tier to `gemini-3.8-flash-tiered`, so the report says so instead of inventing a number.
 
 ## Model
 
@@ -49,10 +52,10 @@ week_pace   = seven / (elapsed_week_fraction × 100)   (1.0 = on budget)
 
 | Level | Claude | Antigravity |
 | --- | --- | --- |
-| `red` | ≥ 98% (5h or 7d), or full in < 30 min at the measured burn | Active 429 reset in the future |
-| `yellow` | 5h ≥ 80%, projected ≥ 90% (measured burn only), 7d ≥ 85%, or pace ≥ 1.25× with 7d ≥ 40% | est. ≥ 80% of learned capacity |
+| `red` | ≥ 98% (5h or 7d), or full in < 30 min at the measured burn | Every group at 0% (API), or an active 429 reset in the future (logs) |
+| `yellow` | 5h ≥ 80%, projected ≥ 90% (measured burn only), 7d ≥ 85%, or pace ≥ 1.25× with 7d ≥ 40% | The default model's group at 0% or any group under 20% left (API; the report suggests `--model gemini-3.8-flash-high`), or est. ≥ 80% of learned capacity (logs) |
 | `green` | otherwise | otherwise |
-| `unknown` | no statusLine sample yet | no cap hit observed yet |
+| `unknown` | no statusLine sample yet | no valid token and no cap hit observed yet |
 
 Projections only change the level once a burn rate has been **measured** (≥ 2 samples, ≥ 5 min apart, in the current window). The fallback session rate only feeds the `+1 session` estimate in the report, so an assumption never pushes you off your preferred agent.
 

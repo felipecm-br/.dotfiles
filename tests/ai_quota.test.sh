@@ -52,6 +52,36 @@ rm -f "$HOME/.gemini/antigravity-cli/log/"*.log
 feed 99 >/dev/null
 [ "$(ai-quota --recommend)" = "agy" ] && ok "claude red -> agy" || bad "recommend with claude red"
 
+# 4b. Per-model quota from fetchAvailableModels (fixture, no network): a model with resetTime and
+# no remainingFraction is exhausted; the pro tier mapping to the Flash model is reported once.
+FIX="$SANDBOX/fixtures"; mkdir -p "$FIX"
+iso() { date -u -d "@$1" +%Y-%m-%dT%H:%M:%SZ; }
+models() { # <claude remainingFraction or "none"> <flash remainingFraction>
+  jq -n --arg c "$1" --argjson f "$2" --arg rc "$(iso $((now + 3600)))" --arg rf "$(iso $((now + 18000)))" '{
+    defaultAgentModelId: "claude-opus-5-5-low",
+    tieredModelIds: {flash: ["gemini-3.8-flash-tiered"], pro: ["gemini-3.8-flash-tiered"]},
+    models: {
+      "claude-opus-5-5-low": {quotaInfo: ({resetTime: $rc} + (if $c == "none" then {} else {remainingFraction: ($c | tonumber)} end))},
+      "gpt-oss-120b-medium": {quotaInfo: {resetTime: $rc}},
+      "gemini-3.8-flash-tiered": {quotaInfo: {remainingFraction: $f, resetTime: $rf}}
+    }}'
+}
+models none 1 >"$FIX/agy.json"
+snap=$(AI_QUOTA_FIXTURE_DIR="$FIX" ai-quota --json)
+[ "$(jq -r '.agents[1].source' <<<"$snap")" = "api" ] && ok "agy reads the API quota" || bad "agy source: $(jq -c '.agents[1]' <<<"$snap")"
+[ "$(jq -c '[.agents[1].groups[] | {key, pct}]' <<<"$snap")" = '[{"key":"claude","pct":0},{"key":"flash","pct":100},{"key":"pro","pct":100}]' ] &&
+  ok "Claude/GPT 0% (no remainingFraction), Gemini Flash 100%" || bad "groups: $(jq -c '.agents[1].groups' <<<"$snap")"
+[ "$(jq -r '.agents[1].level' <<<"$snap")" = "yellow" ] && [ "$(jq -r '.agents[1].default_exhausted' <<<"$snap")" = "true" ] &&
+  ok "default model out of quota -> yellow" || bad "agy api level: $(jq -r '.agents[1].level' <<<"$snap")"
+report=$(AI_QUOTA_FIXTURE_DIR="$FIX" ai-quota)
+[[ "$report" == *"Gemini 4 Argon: no per-model quota in the API"* && "$report" == *"--model gemini-3.8-flash-high"* ]] &&
+  ok "report explains Argon and the Gemini fallback" || bad "report: $report"
+models 0 0 >"$FIX/agy.json"
+snap=$(AI_QUOTA_FIXTURE_DIR="$FIX" ai-quota --json)
+[ "$(jq -r '.agents[1].level' <<<"$snap")" = "red" ] && [ "$(jq -r '.agents[1].until' <<<"$snap")" = "$((now + 3600))" ] &&
+  ok "every group exhausted -> red until the first reset" || bad "agy all exhausted: $(jq -c '.agents[1] | {level, until}' <<<"$snap")"
+[ "$(AI_QUOTA_FIXTURE_DIR="$FIX" ai-quota --badge | grep -c 'C0 G0%')" -eq 0 ] && ok "red badge shows the reset, not percentages" || bad "badge"
+
 # 5. ai-launch precedence: one-shot arm > AI_LAUNCH_AGENT > recommendation; AI_AGENT ignored
 ai-launch --next agyy
 [ "$(AI_LAUNCH_AGENT=claude ai-launch --peek)" = "agyy" ] && ok "armed choice wins" || bad "arm precedence"
