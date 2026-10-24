@@ -70,9 +70,9 @@ Integrated in [`tmux/.config/tmux/lazygitrs-popup.sh`](../../tmux/.config/tmux/l
 Located at [`tmux/.config/tmux/flow-telemetry.py`](../../tmux/.config/tmux/flow-telemetry.py) and exposed globally via `utils/.local/bin/flow-telemetry`.
 
 ### 5.1. Daily Evidence Summary Banner
-Formatted from today's events only. Missing data is shown as `—` or "nenhuma revisão registrada", never as a target value; statuses in the markdown table are computed against each target (`✅` / `⚠️` / `— sem dados`). The demo values below appear only with `--canonical`:
+Formatted from today's events only. Missing data is shown as `—` or "no reviews recorded", never as a target value; statuses in the markdown table are computed against each target (`✅` / `⚠️` / `— no data`). The demo values below appear only with `--canonical`:
 ```
-Hoje você teve 4h12min de fluxo ininterrupto, 8 revisões com média de 92s e nenhum agente ficou ocioso > 2 min
+Today you had 4h12min of uninterrupted flow, 8 reviews averaging 92s, and no agent sat idle > 2 min
 ```
 The HUD and markdown views also report the median time from a finished task to opening its review and the median review rate in lines per minute.
 
@@ -81,7 +81,7 @@ Renders an ASCII/ANSI block density chart from 08h to 23h:
 ```
   08 09 10 11 12 13 14 15 16 17 18 19 20 21 22 23
   ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ░  ▓  █  ·  ·  · 
-  Legenda: · Vazio  ░ Leve  ▒ Foco  ▓ Intenso  █ Deep Work
+  Legend: · Empty  ░ Light  ▒ Focus  ▓ Intense  █ Deep Work
 ```
 
 ### 5.3. Cockpit HUD (`Prefix + Space` then `?`)

@@ -100,9 +100,9 @@ if [ -f "$PRESET_PATH" ]; then
     [ -z "$TITLE" ] && TITLE="${PRESET_PATH##*/}"
 
     if command -v notify-send >/dev/null 2>&1; then
-        notify-send -a "Hyprland" -i "preferences-desktop-theme" "Estilo de Borda Aplicado" "$TITLE\nVelocidade: $SPEED | Ângulo: $ANGLE°"
+        notify-send -a "Hyprland" -i "preferences-desktop-theme" "Border Style Applied" "$TITLE\nSpeed: $SPEED | Angle: $ANGLE°"
     fi
-    echo "🌈 Estilo de borda '$TITLE' salvo! (Velocidade: $SPEED | Ângulo: $ANGLE°)"
+    echo "🌈 Border style '$TITLE' saved! (Speed: $SPEED | Angle: $ANGLE°)"
 else
     echo "Error: Preset file not found: $PRESET_PATH" >&2
     exit 1

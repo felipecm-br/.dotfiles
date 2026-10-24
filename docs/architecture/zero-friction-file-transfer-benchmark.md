@@ -94,7 +94,7 @@ flowchart LR
   ```
   The dedicated shortcuts `ptl` (`pasteto -l`) and `mtl` (`moveto -l`) bypass the picker entirely. Destination resolution drops to **$0\text{ ms}$**, yielding the record **$220\text{ ms}$** execution speed.
   * **Safety Guard:** If `_MM_LAST_TARGET` is empty or points to a removed directory, the command aborts gracefully with:
-    `pasteto: Nenhum destino anterior gravado (_MM_LAST_TARGET está vazio).`
+    `pasteto: No previous target recorded (_WM_LAST_TARGET is empty).`
 
 ### Pillar 4: Automatic Frecency Feedback Boosting
 * **Problem:** Static bookmarks become stale, and manual directory favoriting introduces administrative friction.
@@ -175,7 +175,7 @@ sequenceDiagram
     end
     Note over Shell: 2. Pre-flight verification (all sources exist)
     alt Any source missing
-        Shell-->>User: Abort (Exit 1): Arquivo não encontrado
+        Shell-->>User: Abort (Exit 1): File not found
     end
     alt Flag -l (--last) active
         Shell->>Cache: Read $_MM_LAST_TARGET
@@ -256,7 +256,7 @@ Transferring configuration files or assets to another project without losing you
 ```zsh
 ~/dev/github/project $ pt styles.css assets/
 # 1. Waymaker opens listing frecency directories:
-#    PASTE TO (Escolha o Destino)
+#    PASTE TO (Choose Destination)
 # 2. Type 'lazy' -> Enter (selects ~/dev/github/lazygitrs/)
 # Output:
 ✓ 2 item(ns) copiado(s) para /home/fecavmi/dev/github/lazygitrs
@@ -346,7 +346,7 @@ Moving multiple unknown or newly downloaded files interactively:
 Invoking `ptl` or `mtl` before any prior transfer in the session:
 ```zsh
 $ ptl file.txt
-pasteto: Nenhum destino anterior gravado (_MM_LAST_TARGET está vazio).
+pasteto: No previous target recorded (_WM_LAST_TARGET is empty).
 # Exit code: 1 (safe abort, no files touched)
 ```
 
@@ -354,7 +354,7 @@ pasteto: Nenhum destino anterior gravado (_MM_LAST_TARGET está vazio).
 If the cached destination directory was removed in another process:
 ```zsh
 $ ptl file.txt
-pasteto: Diretório de destino inválido: /path/to/removed_dir
+pasteto: Invalid target directory: /path/to/removed_dir
 # _MM_LAST_TARGET is automatically cleared to prevent cascading errors; Exit code: 1.
 ```
 
@@ -362,7 +362,7 @@ pasteto: Diretório de destino inválido: /path/to/removed_dir
 If any specified source file does not exist:
 ```zsh
 $ pt missing_file.txt existing_file.txt
-pasteto: Arquivo não encontrado: missing_file.txt
+pasteto: File not found: missing_file.txt
 # Aborts immediately before prompting for destination or touching disk.
 ```
 

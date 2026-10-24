@@ -64,7 +64,7 @@ elif command -v xdg-open >/dev/null 2>&1; then
 fi
 
 if [ -z "$BROWSER_BIN" ]; then
-  tmux display-message "scrollback: navegador não encontrado (google-chrome-stable/xdg-open)" 2>/dev/null || true
+  tmux display-message "scrollback: browser not found (google-chrome-stable/xdg-open)" 2>/dev/null || true
   exit 1
 fi
 

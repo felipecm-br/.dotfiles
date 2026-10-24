@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# killothers - Encerra processos de outros usuários, preservando o usuário atual
-# Uso: killothers [--dry-run] [--force] [--signal SIGNAL] [--help]
+# killothers - Kill processes owned by other users, preserving the current user
+# Usage: killothers [--dry-run] [--force] [--signal SIGNAL] [--help]
 
 set -uo pipefail
 
-# ── Cores ──────────────────────────────────────────────────────────────────────
+# ── Colors ─────────────────────────────────────────────────────────────────────
 RED='\033[0;31m'; YELLOW='\033[1;33m'; GREEN='\033[0;32m'
 CYAN='\033[0;36m'; BOLD='\033[1m'; DIM='\033[2m'; RESET='\033[0m'
 
@@ -15,7 +15,7 @@ SIGNAL="TERM"
 CURRENT_USER="$(id -un)"
 CURRENT_UID="$(id -u)"
 
-# Processos críticos do sistema — nunca serão encerrados
+# Critical system processes — never killed
 CRITICAL_PROCESSES=(
   systemd kernel kthreadd init journald sshd
   udevd dbus-daemon polkitd cron crond
@@ -30,35 +30,35 @@ while [[ $# -gt 0 ]]; do
     --force|-f)     FORCE=true ;;
     --signal|-s)    SIGNAL="${2:-TERM}"; shift ;;
     --help|-h)
-      printf "Uso: killothers [OPÇÕES]\n\n"
-      printf "Encerra todos os processos de usuários diferentes do usuário atual (%s).\n\n" "$CURRENT_USER"
-      printf "Opções:\n"
-      printf "  -n, --dry-run        Apenas lista os processos, não os encerra\n"
-      printf "  -f, --force          Usa SIGKILL imediatamente (sem tentar SIGTERM antes)\n"
-      printf "  -s, --signal SIG     Sinal inicial (padrão: TERM). Ex: KILL, HUP, INT\n"
-      printf "  -h, --help           Exibe esta ajuda\n\n"
-      printf "Exemplos:\n"
-      printf "  killothers              # Encerra processos de outros usuários (TERM → KILL)\n"
-      printf "  killothers --dry-run    # Apenas lista sem encerrar\n"
-      printf "  killothers --force      # Encerra imediatamente com SIGKILL\n"
+      printf "Usage: killothers [OPTIONS]\n\n"
+      printf "Kill every process owned by users other than the current user (%s).\n\n" "$CURRENT_USER"
+      printf "Options:\n"
+      printf "  -n, --dry-run        Only list the processes, do not kill them\n"
+      printf "  -f, --force          Use SIGKILL immediately (skip SIGTERM first)\n"
+      printf "  -s, --signal SIG     Initial signal (default: TERM). E.g. KILL, HUP, INT\n"
+      printf "  -h, --help           Show this help\n\n"
+      printf "Examples:\n"
+      printf "  killothers              # Kill other users' processes (TERM → KILL)\n"
+      printf "  killothers --dry-run    # List only, kill nothing\n"
+      printf "  killothers --force      # Kill immediately with SIGKILL\n"
       exit 0 ;;
-    *) printf "${RED}Opção desconhecida: %s. Use --help${RESET}\n" "$1"; exit 1 ;;
+    *) printf "${RED}Unknown option: %s. Use --help${RESET}\n" "$1"; exit 1 ;;
   esac
   shift
 done
 
-# ── Verificação de permissões ──────────────────────────────────────────────────
+# ── Permission check ──────────────────────────────────────────────────────────
 if [[ "$CURRENT_UID" -ne 0 ]]; then
-  printf "${YELLOW}${BOLD}Aviso:${RESET}${YELLOW} Executando sem root. Apenas processos do mesmo grupo de permissões\n"
-  printf "       podem ser encerrados. Use 'sudo killothers' para encerrar todos.${RESET}\n\n"
+  printf "${YELLOW}${BOLD}Warning:${RESET}${YELLOW} Running without root. Only processes in the same permission group\n"
+  printf "         can be killed. Use 'sudo killothers' to kill all of them.${RESET}\n\n"
 fi
 
-# ── Checa se nome é processo crítico ──────────────────────────────────────────
+# ── Check whether a name is critical ─────────────────────────────────────────
 is_critical() {
   local name="$1"
   local pid="$2"
 
-  # PIDs do sistema (kernel threads) — sempre protegidos
+  # System PIDs (kernel threads) — always protected
   (( pid <= 2 )) && return 0
 
   for crit in "${CRITICAL_PROCESSES[@]}"; do
@@ -67,13 +67,13 @@ is_critical() {
   return 1
 }
 
-# ── Coleta processos de outros usuários ───────────────────────────────────────
+# ── Collect other users' processes ─────────────────────────────────────────
 declare -a OTHER_PIDS OTHER_USERS OTHER_NAMES OTHER_MEMS
 
 while IFS= read -r line; do
   read -r u pid mem cmd <<< "$line"
   [[ "$u" == "$CURRENT_USER" ]] && continue
-  [[ "$u" == "root" && "$CURRENT_UID" -ne 0 ]] && continue  # sem root, pula processos de root
+  [[ "$u" == "root" && "$CURRENT_UID" -ne 0 ]] && continue  # without root, skip root processes
 
   local_name="${cmd##*/}"
   local_name="${local_name%%[[:space:]]*}"
@@ -84,23 +84,23 @@ while IFS= read -r line; do
   OTHER_MEMS+=("$mem")
 done < <(ps aux --sort=-%cpu | awk 'NR>1 {print $1, $2, $4, $11}')
 
-# ── Sem processos encontrados ──────────────────────────────────────────────────
+# ── No processes found ────────────────────────────────────────────────────────
 if [[ ${#OTHER_PIDS[@]} -eq 0 ]]; then
-  printf "${GREEN}Nenhum processo de outro usuário encontrado.${RESET}\n"
+  printf "${GREEN}No processes from other users found.${RESET}\n"
   exit 0
 fi
 
-# ── Cabeçalho ─────────────────────────────────────────────────────────────────
+# ── Header ───────────────────────────────────────────────────────────────────
 printf "\n${BOLD}${CYAN}══ KILLOTHERS ════════════════════════════════════════════════════${RESET}\n"
-printf "  Usuário atual : ${BOLD}%s${RESET}\n" "$CURRENT_USER"
+printf "  Current user  : ${BOLD}%s${RESET}\n" "$CURRENT_USER"
   if $DRY_RUN; then
-    printf "  Modo          : ${YELLOW}DRY-RUN (nada será encerrado)${RESET}\n"
+    printf "  Mode          : ${YELLOW}DRY-RUN (nothing will be killed)${RESET}\n"
   else
-    printf "  Modo          : ${RED}ATIVO${RESET}\n"
+    printf "  Mode          : ${RED}ACTIVE${RESET}\n"
   fi
-printf "  Sinal         : %s\n\n" "$SIGNAL"
+printf "  Signal        : %s\n\n" "$SIGNAL"
 
-printf "${BOLD}%-8s %-14s %-8s %6s   %-35s${RESET}\n" "STATUS" "USUARIO" "PID" "CPU%" "PROCESSO"
+printf "${BOLD}%-8s %-14s %-8s %6s   %-35s${RESET}\n" "STATUS" "USER" "PID" "CPU%" "PROCESS"
 printf "${DIM}%s${RESET}\n" "────────────────────────────────────────────────────────────────────────────"
 
 killed=0
@@ -113,11 +113,11 @@ for (( i=0; i<${#OTHER_PIDS[@]}; i++ )); do
   name="${OTHER_NAMES[$i]}"
   mem="${OTHER_MEMS[$i]}"
 
-  # Verifica se processo ainda existe
+  # Check that the process still exists
   kill -0 "$pid" 2>/dev/null || continue
 
   if is_critical "$name" "$pid"; then
-    printf "  ${DIM}%-6s${RESET}  ${DIM}%-14s %-8s %5s%%   %-35s [crítico, ignorado]${RESET}\n" \
+    printf "  ${DIM}%-6s${RESET}  ${DIM}%-14s %-8s %5s%%   %-35s [critical, skipped]${RESET}\n" \
       "SKIP" "${user:0:14}" "$pid" "$mem" "${name:0:35}"
     (( skipped++ ))
     continue
@@ -130,29 +130,29 @@ for (( i=0; i<${#OTHER_PIDS[@]}; i++ )); do
     continue
   fi
 
-  # Tenta encerrar
+  # Try to kill
   if $FORCE; then
-    # SIGKILL direto
+    # Straight SIGKILL
     if kill -KILL "$pid" 2>/dev/null; then
       printf "  ${RED}%-6s${RESET}  %-14s %-8s %5s%%   %-35s\n" \
         "KILL" "${user:0:14}" "$pid" "$mem" "${name:0:35}"
       (( killed++ ))
     else
-      printf "  ${YELLOW}%-6s${RESET}  %-14s %-8s %5s%%   %-35s [sem permissão]\n" \
+      printf "  ${YELLOW}%-6s${RESET}  %-14s %-8s %5s%%   %-35s [permission denied]\n" \
         "DENY" "${user:0:14}" "$pid" "$mem" "${name:0:35}"
       (( failed++ ))
     fi
   else
-    # SIGTERM → aguarda → SIGKILL se persistir
+    # SIGTERM → wait → SIGKILL if it persists
     if kill -"$SIGNAL" "$pid" 2>/dev/null; then
       sleep 1
       if kill -0 "$pid" 2>/dev/null; then
-        # Processo resistiu — força SIGKILL
+        # Process survived — force SIGKILL
         if kill -KILL "$pid" 2>/dev/null; then
-          printf "  ${RED}%-6s${RESET}  %-14s %-8s %5s%%   %-35s [KILL forçado]\n" \
+          printf "  ${RED}%-6s${RESET}  %-14s %-8s %5s%%   %-35s [forced KILL]\n" \
             "KILL" "${user:0:14}" "$pid" "$mem" "${name:0:35}"
         else
-          printf "  ${YELLOW}%-6s${RESET}  %-14s %-8s %5s%%   %-35s [resistiu ao KILL]\n" \
+          printf "  ${YELLOW}%-6s${RESET}  %-14s %-8s %5s%%   %-35s [survived KILL]\n" \
             "STUCK" "${user:0:14}" "$pid" "$mem" "${name:0:35}"
           (( failed++ ))
           continue
@@ -163,19 +163,19 @@ for (( i=0; i<${#OTHER_PIDS[@]}; i++ )); do
       fi
       (( killed++ ))
     else
-      printf "  ${YELLOW}%-6s${RESET}  %-14s %-8s %5s%%   %-35s [sem permissão]\n" \
+      printf "  ${YELLOW}%-6s${RESET}  %-14s %-8s %5s%%   %-35s [permission denied]\n" \
         "DENY" "${user:0:14}" "$pid" "$mem" "${name:0:35}"
       (( failed++ ))
     fi
   fi
 done
 
-# ── Resumo ─────────────────────────────────────────────────────────────────────
+# ── Summary ────────────────────────────────────────────────────────────────────
 printf "${DIM}%s${RESET}\n" "────────────────────────────────────────────────────────────────────────────"
 if $DRY_RUN; then
-  printf "\n${YELLOW}${BOLD}Dry-run:${RESET} %d processo(s) seriam encerrados. Reexecute sem --dry-run para confirmar.\n\n" "$killed"
+  printf "\n${YELLOW}${BOLD}Dry-run:${RESET} %d process(es) would be killed. Re-run without --dry-run to confirm.\n\n" "$killed"
 else
-  printf "\n${BOLD}Resumo:${RESET}  ${GREEN}%d encerrado(s)${RESET}  |  ${YELLOW}%d ignorado(s)${RESET}  |  ${RED}%d falha(s)${RESET}\n\n" \
+  printf "\n${BOLD}Summary:${RESET}  ${GREEN}%d killed${RESET}  |  ${YELLOW}%d skipped${RESET}  |  ${RED}%d failed${RESET}\n\n" \
     "$killed" "$skipped" "$failed"
-  (( failed > 0 )) && printf "${DIM}Dica: use 'sudo killothers' para encerrar processos sem permissão.${RESET}\n\n"
+  (( failed > 0 )) && printf "${DIM}Tip: use 'sudo killothers' to kill processes you lack permission for.${RESET}\n\n"
 fi

@@ -3,8 +3,8 @@ set -e
 
 TARGET_USER="${1:-$USER}"
 
-echo "Configurando login automático no SDDM para: $TARGET_USER"
+echo "Configuring SDDM autologin for: $TARGET_USER"
 sudo mkdir -p /etc/sddm.conf.d
 printf "[Autologin]\nUser=%s\nSession=hyprland\nRelogin=false\n" "$TARGET_USER" | sudo tee /etc/sddm.conf.d/autologin.conf > /dev/null
-echo "✓ Login automático no Hyprland configurado com sucesso!"
+echo "✓ Hyprland autologin configured successfully!"
 cat /etc/sddm.conf.d/autologin.conf

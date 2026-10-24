@@ -37,7 +37,7 @@ if [ "$exists" != "1" ]; then
   if printf '%s' "$clean_t" | grep -qE '^(https?://|git@|www\.|//|[a-zA-Z0-9._-]+\.[a-zA-Z]{2,}(/|:|$)|localhost(:|/)|127\.0\.0\.1(:|/))'; then
     exec "$(dirname "$0")/scrollback-chrome.sh" "$t"
   fi
-  tmux display-message "scrollback: não é arquivo: $file" 2>/dev/null || true
+  tmux display-message "scrollback: not a file: $file" 2>/dev/null || true
   exit 0
 fi
 

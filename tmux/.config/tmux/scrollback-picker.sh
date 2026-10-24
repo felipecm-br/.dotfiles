@@ -48,7 +48,7 @@ WM_BIN="$HOME/.local/bin/wm"
 [ -x "$WM_BIN" ] || WM_BIN="$(command -v wm 2>/dev/null || command -v mm 2>/dev/null || echo wm)"
 
 if ! tmux capture-pane -pJS - -t "$ORIGIN" 2>/dev/null | sed '/^$/d' > "$SRC"; then
-  tmux display-message "scrollback: capture-pane falhou ($ORIGIN)"
+  tmux display-message "scrollback: capture-pane failed ($ORIGIN)"
   exit 1
 fi
 
@@ -158,7 +158,7 @@ with open(tok_sha_f, 'w', encoding='utf-8') as f:
 PYEOF
 
 if [ ! -s "$TOK_ALL" ]; then
-  tmux display-message "scrollback: nada extraível (cmd/path/URL/hash)"
+  tmux display-message "scrollback: nothing extractable (cmd/path/URL/hash)"
   exit 0
 fi
 

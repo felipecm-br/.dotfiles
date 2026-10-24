@@ -84,11 +84,11 @@ TITLE="${TITLE# }"
 # Speed description
 case "$SPEED" in
     10) SPEED_LABEL="10 (⚡ Turbo / 1s)" ;;
-    25) SPEED_LABEL="25 (🔥 Rápido / 2.5s)" ;;
-    50) SPEED_LABEL="50 (🚀 Dinâmico / 5s)" ;;
-    100) SPEED_LABEL="100 (✨ Suave / 10s Padrão)" ;;
+    25) SPEED_LABEL="25 (🔥 Fast / 2.5s)" ;;
+    50) SPEED_LABEL="50 (🚀 Dynamic / 5s)" ;;
+    100) SPEED_LABEL="100 (✨ Smooth / 10s Default)" ;;
     200) SPEED_LABEL="200 (🍃 Zen / 20s Lento)" ;;
-    0) SPEED_LABEL="0 (⏸️ Estático / Sem Rotação)" ;;
+    0) SPEED_LABEL="0 (⏸️ Static / No Rotation)" ;;
     *) SPEED_LABEL="$SPEED" ;;
 esac
 

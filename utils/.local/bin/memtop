@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# memtop - Analisador e gerenciador interativo de memória
-# Uso: memtop [--kill] [--report] [--watch] [--top N]
+# memtop - Interactive memory analyzer and manager
+# Usage: memtop [--kill] [--report] [--watch] [--top N]
 
 set -uo pipefail
 
-# ── Cores ──────────────────────────────────────────────────────────────────────
+# ── Colors ─────────────────────────────────────────────────────────────────────
 RED='\033[0;31m'; YELLOW='\033[1;33m'; GREEN='\033[0;32m'
 CYAN='\033[0;36m'; BOLD='\033[1m'; DIM='\033[2m'; RESET='\033[0m'
 
@@ -23,18 +23,18 @@ while [[ $# -gt 0 ]]; do
     --watch|-w)    WATCH_MODE=true ;;
     --top|-t)      TOP_N="${2:-15}"; shift ;;
     --help|-h)
-      echo "Uso: memtop [--kill] [--report] [--watch] [--top N]"
-      echo "  --kill    Modo interativo para encerrar processos"
-      echo "  --report  Gera relatório markdown em ~/memory-report-*.md"
-      echo "  --watch   Atualiza a cada 3s (pressione Ctrl+C para sair)"
-      echo "  --top N   Mostra os N processos mais pesados (padrão: 15)"
+      echo "Usage: memtop [--kill] [--report] [--watch] [--top N]"
+      echo "  --kill    Interactive mode to kill processes"
+      echo "  --report  Write a markdown report to ~/memory-report-*.md"
+      echo "  --watch   Refresh every 3s (press Ctrl+C to quit)"
+      echo "  --top N   Show the N heaviest processes (default: 15)"
       exit 0 ;;
-    *) echo "Opção desconhecida: $1. Use --help"; exit 1 ;;
+    *) echo "Unknown option: $1. Use --help"; exit 1 ;;
   esac
   shift
 done
 
-# ── Funções auxiliares ─────────────────────────────────────────────────────────
+# ── Helper functions ───────────────────────────────────────────────────────────
 bytes_to_human() {
   local kb=$1
   if   (( kb >= 1048576 )); then
@@ -60,7 +60,7 @@ bar() {
                                         "$(printf '░%.0s' $(seq 1 $empty  2>/dev/null || true))"
 }
 
-# Fallback para bar() sem seq pipe problems
+# Fallback for bar() without seq pipe problems
 draw_bar() {
   local pct=$1 width=${2:-20}
   local filled=$(( pct * width / 100 ))
@@ -73,7 +73,7 @@ draw_bar() {
   printf "${color}%s${RESET}" "$bar_str"
 }
 
-# ── Leitura de memória ─────────────────────────────────────────────────────────
+# ── Memory reading ─────────────────────────────────────────────────────────────
 read_mem() {
   declare -gA MEM
   while IFS=: read -r key val; do
@@ -84,7 +84,7 @@ read_mem() {
   done < /proc/meminfo
 }
 
-# ── Cabeçalho de resumo ────────────────────────────────────────────────────────
+# ── Summary header ─────────────────────────────────────────────────────────────
 print_summary() {
   read_mem
   local total=${MEM[MemTotal]}
@@ -102,8 +102,8 @@ print_summary() {
   local swap_pct=0
   (( swap_total > 0 )) && swap_pct=$(( swap_used * 100 / swap_total ))
 
-  printf "\n${BOLD}${CYAN}══ RESUMO DE MEMÓRIA ═══════════════════════════════════════════${RESET}\n"
-  printf "  ${BOLD}RAM Total :${RESET} %-10s  ${BOLD}Usada :${RESET} %-10s  ${BOLD}Disponível :${RESET} %s\n" \
+  printf "\n${BOLD}${CYAN}══ MEMORY SUMMARY ══════════════════════════════════════════════${RESET}\n"
+  printf "  ${BOLD}RAM Total :${RESET} %-10s  ${BOLD}Used  :${RESET} %-10s  ${BOLD}Available  :${RESET} %s\n" \
     "$(bytes_to_human $total)" "$(bytes_to_human $used)" "$(bytes_to_human $avail)"
   printf "  ${BOLD}Buffers   :${RESET} %-10s  ${BOLD}Cache :${RESET} %-10s  ${BOLD}Shared     :${RESET} %s\n" \
     "$(bytes_to_human $buffers)" "$(bytes_to_human $cached)" "$(bytes_to_human $shmem)"
@@ -111,34 +111,34 @@ print_summary() {
   printf "  SWAP [%s] %d%%  (%s / %s)\n\n" \
     "$(draw_bar $swap_pct)" $swap_pct "$(bytes_to_human $swap_used)" "$(bytes_to_human $swap_total)"
 
-  # Alertas
+  # Alerts
   if (( swap_pct >= 95 )); then
-    printf "  ${RED}${BOLD}⚠  SWAP CRÍTICO (%d%%) — sistema pode travar por falta de swap!${RESET}\n\n" $swap_pct
+    printf "  ${RED}${BOLD}⚠  CRITICAL SWAP (%d%%) — system may freeze when swap runs out!${RESET}\n\n" $swap_pct
   elif (( swap_pct >= 70 )); then
-    printf "  ${YELLOW}${BOLD}⚠  Uso de SWAP elevado (%d%%) — possível lentidão!${RESET}\n\n" $swap_pct
+    printf "  ${YELLOW}${BOLD}⚠  High SWAP usage (%d%%) — expect slowdowns!${RESET}\n\n" $swap_pct
   fi
   if (( used_pct >= 90 )); then
-    printf "  ${RED}${BOLD}⚠  RAM CRÍTICA (%d%%) — risco de OOM killer!${RESET}\n\n" $used_pct
+    printf "  ${RED}${BOLD}⚠  CRITICAL RAM (%d%%) — OOM killer risk!${RESET}\n\n" $used_pct
   fi
 }
 
-# ── Tabela de processos ────────────────────────────────────────────────────────
+# ── Process table ─────────────────────────────────────────────────────────────
 print_processes() {
   local n=${1:-$TOP_N}
-  printf "${BOLD}${CYAN}══ TOP %d PROCESSOS POR MEMÓRIA ═══════════════════════════════════${RESET}\n" $n
+  printf "${BOLD}${CYAN}══ TOP %d PROCESSES BY MEMORY ═════════════════════════════════════${RESET}\n" $n
   printf "${BOLD}%-5s %-12s %-8s %8s %8s %8s   %-30s${RESET}\n" \
-    "RANK" "USER" "PID" "RSS" "SWAP" "MEM%" "COMANDO"
+    "RANK" "USER" "PID" "RSS" "SWAP" "MEM%" "COMMAND"
   printf "${DIM}%s${RESET}\n" "────────────────────────────────────────────────────────────────────────────"
 
   local rank=0
   ps aux --sort=-%mem | awk 'NR>1' | head -"$n" | while read -r user pid cpu mem vsz rss tty stat start time cmd rest; do
     rank=$(( rank + 1 ))
 
-    # RSS em kB
+    # RSS in kB
     local rss_kb=$(( rss ))
     local rss_h; rss_h=$(bytes_to_human $rss_kb)
 
-    # Swap do processo via /proc
+    # Per-process swap via /proc
     local swap_kb=0
     if [[ -r /proc/$pid/status ]]; then
       swap_kb=$(awk '/VmSwap/{print $2}' /proc/$pid/status 2>/dev/null || echo 0)
@@ -146,11 +146,11 @@ print_processes() {
     fi
     local swap_h; swap_h=$(bytes_to_human $swap_kb)
 
-    # Nome curto
+    # Short name
     local name="${cmd##*/}"
     name="${name:0:30}"
 
-    # Cor por uso
+    # Color by usage
     local color=$RESET
     (( rss_kb > 200000 )) && color=$RED || { (( rss_kb > 80000 )) && color=$YELLOW || color=; }
 
@@ -159,10 +159,10 @@ print_processes() {
   done
 }
 
-# ── Agrupamento por app ────────────────────────────────────────────────────────
+# ── Grouping by app ───────────────────────────────────────────────────────────
 print_grouped() {
-  printf "\n${BOLD}${CYAN}══ MEMÓRIA POR APLICAÇÃO (agrupado) ═══════════════════════════════${RESET}\n"
-  printf "${BOLD}%-22s %10s %8s %6s${RESET}\n" "APLICAÇÃO" "RSS TOTAL" "CPU%" "PROCS"
+  printf "\n${BOLD}${CYAN}══ MEMORY BY APPLICATION (grouped) ════════════════════════════════${RESET}\n"
+  printf "${BOLD}%-22s %10s %8s %6s${RESET}\n" "APPLICATION" "RSS TOTAL" "CPU%" "PROCS"
   printf "${DIM}%s${RESET}\n" "──────────────────────────────────────────────────────"
 
   ps aux --sort=-%mem | awk 'NR>1 {
@@ -180,13 +180,13 @@ print_grouped() {
   done
 }
 
-# ── Modo kill interativo ───────────────────────────────────────────────────────
+# ── Interactive kill mode ──────────────────────────────────────────────────────
 interactive_kill() {
   echo ""
-  printf "${YELLOW}${BOLD}══ MODO ENCERRAMENTO INTERATIVO ══════════════════════════════════${RESET}\n"
-  printf "${DIM}Lista os processos. Você escolhe quais encerrar.${RESET}\n\n"
+  printf "${YELLOW}${BOLD}══ INTERACTIVE KILL MODE ═════════════════════════════════════════${RESET}\n"
+  printf "${DIM}Lists the processes. You choose which ones to kill.${RESET}\n\n"
 
-  # Monta array de processos
+  # Build the process arrays
   local -a pids names mems users
   while IFS= read -r line; do
     local user pid mem cmd
@@ -204,10 +204,10 @@ interactive_kill() {
   done
 
   echo ""
-  printf "${BOLD}Digite o(s) número(s) para encerrar (ex: 1 3 5), ou 'q' para sair:${RESET} "
+  printf "${BOLD}Enter the number(s) to kill (e.g. 1 3 5), or 'q' to quit:${RESET} "
   read -r choices
 
-  [[ "$choices" == "q" || -z "$choices" ]] && { echo "Cancelado."; return; }
+  [[ "$choices" == "q" || -z "$choices" ]] && { echo "Cancelled."; return; }
 
   for choice in $choices; do
     if [[ "$choice" =~ ^[0-9]+$ ]] && (( choice >= 1 && choice <= ${#pids[@]} )); then
@@ -216,30 +216,30 @@ interactive_kill() {
       local name="${names[$idx]}"
       local user="${users[$idx]}"
 
-      # Proteção: não matar processos críticos do sistema
+      # Safety: never kill critical system processes
       if [[ "$name" =~ ^(systemd|kernel|kthreadd|init|journald|sshd)$ ]]; then
-        printf "  ${RED}✗ Recusado: '%s' é um processo crítico do sistema.${RESET}\n" "$name"
+        printf "  ${RED}✗ Refused: '%s' is a critical system process.${RESET}\n" "$name"
         continue
       fi
 
-      printf "  Encerrando PID %s (%s) do usuário %s... " "$pid" "$name" "$user"
+      printf "  Killing PID %s (%s) owned by %s... " "$pid" "$name" "$user"
       if kill -TERM "$pid" 2>/dev/null; then
         sleep 1
         if kill -0 "$pid" 2>/dev/null; then
-          kill -KILL "$pid" 2>/dev/null && printf "${RED}[KILL forçado]${RESET}\n" || printf "${YELLOW}[resistiu]${RESET}\n"
+          kill -KILL "$pid" 2>/dev/null && printf "${RED}[forced KILL]${RESET}\n" || printf "${YELLOW}[survived]${RESET}\n"
         else
-          printf "${GREEN}[encerrado]${RESET}\n"
+          printf "${GREEN}[killed]${RESET}\n"
         fi
       else
-        printf "${RED}[sem permissão — tente com sudo]${RESET}\n"
+        printf "${RED}[permission denied — try sudo]${RESET}\n"
       fi
     else
-      printf "  ${YELLOW}Número inválido: %s${RESET}\n" "$choice"
+      printf "  ${YELLOW}Invalid number: %s${RESET}\n" "$choice"
     fi
   done
 }
 
-# ── Geração de relatório markdown ─────────────────────────────────────────────
+# ── Markdown report generation ───────────────────────────────────────────────
 generate_report() {
   local file="${1:-$REPORT_FILE}"
   read_mem
@@ -278,9 +278,9 @@ generate_report() {
   local cached_pct=$(( cached * 100 / total ))
 
   cat > "$file" <<MARKDOWN
-# Relatório de Análise de Memória
+# Memory Analysis Report
 
-**Gerado em:** $date_now  
+**Generated at:** $date_now  
 **Host:** $hostname_str  
 **Uptime:** $uptime_str  
 **Load Average:** $load
@@ -289,7 +289,7 @@ generate_report() {
 
 ## Hardware
 
-| Item | Valor |
+| Item | Value |
 |------|-------|
 | CPU | $cpu_model |
 | Cores | $cpu_count |
@@ -298,33 +298,33 @@ generate_report() {
 
 ---
 
-## Estado Atual da Memória
+## Current Memory State
 
-| Métrica | Valor | % do Total |
+| Metric | Value | % of Total |
 |---------|-------|-----------|
-| RAM Usada (real) | $h_used | ${used_pct}% |
-| RAM Disponível | $h_avail | ${avail_pct}% |
-| Cache de disco | $h_cached | ${cached_pct}% |
+| RAM Used (real) | $h_used | ${used_pct}% |
+| RAM Available | $h_avail | ${avail_pct}% |
+| Disk cache | $h_cached | ${cached_pct}% |
 | Buffers | $h_buffers | — |
 | Shared (tmpfs) | $h_shmem | — |
-| SWAP Usada | $h_swap_used | ${swap_pct}% do swap |
-| SWAP Livre | $h_swap_free | — |
+| SWAP Used | $h_swap_used | ${swap_pct}% of swap |
+| SWAP Free | $h_swap_free | — |
 
 MARKDOWN
 
-  # Nível de alerta
+  # Alert level
   if (( swap_pct >= 95 )); then
     cat >> "$file" <<MARKDOWN
 > [!CAUTION]
-> **SWAP CRÍTICO (${swap_pct}%):** A swap está praticamente esgotada. O sistema está
-> usando disco como RAM, o que causa lentidão severa e risco de congelamento (OOM kill).
+> **CRITICAL SWAP (${swap_pct}%):** Swap is nearly exhausted. The system is
+> using disk as RAM, causing severe slowdowns and a risk of freezing (OOM kill).
 
 MARKDOWN
   elif (( swap_pct >= 70 )); then
     cat >> "$file" <<MARKDOWN
 > [!WARNING]
-> **Swap elevado (${swap_pct}%):** Parte da memória foi movida para disco.
-> Isso indica pressão de RAM e pode causar lentidão perceptível.
+> **High swap (${swap_pct}%):** Part of memory has been moved to disk.
+> This indicates RAM pressure and may cause noticeable slowdowns.
 
 MARKDOWN
   fi
@@ -333,10 +333,10 @@ MARKDOWN
 
 ---
 
-## Top $TOP_N Processos por Consumo de RAM
+## Top $TOP_N Processes by RAM Usage
 
-| # | PID | Usuário | RSS | SWAP | MEM% | Processo |
-|---|-----|---------|-----|------|------|---------|
+| # | PID | User | RSS | SWAP | MEM% | Process |
+|---|-----|------|-----|------|------|---------|
 MARKDOWN
 
   local rank=0
@@ -354,10 +354,10 @@ MARKDOWN
 
 ---
 
-## Memória por Aplicação (Agrupado)
+## Memory by Application (Grouped)
 
-| Aplicação | RSS Total | CPU% | Processos |
-|-----------|-----------|------|-----------|
+| Application | RSS Total | CPU% | Processes |
+|-------------|-----------|------|-----------|
 MARKDOWN
 
   ps aux --sort=-%mem | awk 'NR>1 {
@@ -375,7 +375,7 @@ MARKDOWN
 
 ---
 
-## Diagnóstico e Causas Identificadas
+## Diagnosis and Identified Causes
 
 MARKDOWN
 
@@ -385,116 +385,116 @@ MARKDOWN
   if (( chrome_rss > 300000 )); then
     local chrome_rss_h; chrome_rss_h=$(bytes_to_human "$chrome_rss")
     {
-      printf '### Google Chrome — Alto consumo multi-processo\n\n'
-      printf 'O Chrome usa uma **arquitetura de processo por aba/extensão**. Foram encontrados\n'
-      printf '**%s processos** do Chrome consumindo no total **%s**.\n\n' "$chrome_count" "$chrome_rss_h"
+      printf '### Google Chrome — High multi-process usage\n\n'
+      printf 'Chrome uses a **process-per-tab/extension architecture**. Found\n'
+      printf '**%s Chrome processes** using **%s** in total.\n\n' "$chrome_count" "$chrome_rss_h"
       cat <<'EOF'
-**Por que acontece:**
-- Cada aba, extensão e serviço (rede, GPU, storage) roda em processo isolado
-- Abas abertas há muitos dias acumulam memória com vazamentos graduais
-- Renderers mantêm cache de JS/DOM mesmo em abas inativas
+**Why it happens:**
+- Every tab, extension and service (network, GPU, storage) runs in its own process
+- Tabs left open for days accumulate memory through gradual leaks
+- Renderers keep JS/DOM caches even in inactive tabs
 
-**Mitigação:**
-- Ative "Memory Saver" em `chrome://settings/performance`
-- Feche abas não utilizadas ou use extensão como "The Great Suspender"
-- Limite extensões ativas
+**Mitigation:**
+- Enable "Memory Saver" in `chrome://settings/performance`
+- Close unused tabs or use an extension like "The Great Suspender"
+- Limit active extensions
 
 EOF
     } >> "$file"
   fi
 
-  # Swap saturada
+  # Saturated swap
   if (( swap_pct >= 70 )); then
     local swap_used_h; swap_used_h=$(bytes_to_human "$swap_used")
     local swap_total_h; swap_total_h=$(bytes_to_human "$swap_total")
     local total_h; total_h=$(bytes_to_human "$total")
     {
-      printf '### Swap Saturada — Sistema em Pressão de Memória\n\n'
-      printf 'A swap (zram neste sistema) está em **%d%%** de uso (**%s** de **%s**).\n\n' \
+      printf '### Saturated Swap — System Under Memory Pressure\n\n'
+      printf 'Swap (zram on this system) is at **%d%%** usage (**%s** of **%s**).\n\n' \
         "$swap_pct" "$swap_used_h" "$swap_total_h"
-      printf '**Por que acontece:**\n'
-      printf '%s\n' "- A RAM física ($total_h) é insuficiente para a carga atual"
+      printf '**Why it happens:**\n'
+      printf '%s\n' "- Physical RAM ($total_h) is insufficient for the current load"
       cat <<'EOF'
-- Processos em segundo plano por dias foram paginados para swap
-- zram comprime dados na RAM, mas tem limite de compressão (~2-3x)
-- Com swap esgotada, o kernel aciona o **OOM Killer** encerrando processos
+- Processes left in the background for days were paged out to swap
+- zram compresses data in RAM, but its compression ratio is limited (~2-3x)
+- Once swap is exhausted, the kernel triggers the **OOM Killer**, killing processes
 
-**Mitigação:**
-- Reinicializar o sistema libera a swap completamente
-- `sudo swapoff -a && sudo swapon -a` recicla a swap (libera páginas ociosas)
-- Aumentar RAM física é a solução definitiva para esta configuração
+**Mitigation:**
+- Rebooting frees swap completely
+- `sudo swapoff -a && sudo swapon -a` recycles swap (frees idle pages)
+- Adding physical RAM is the definitive fix for this setup
 
 EOF
     } >> "$file"
   fi
 
-  # Uptime longo
+  # Long uptime
   local days; days=$(uptime | grep -oP '\d+(?= day)')
   if [[ -n "$days" ]] && (( days >= 2 )); then
     {
-      printf '### Uptime Elevado — %s dias sem reinicialização\n\n' "$days"
+      printf '### High Uptime — %s days without a reboot\n\n' "$days"
       cat <<'EOF'
-Sistemas com uptime prolongado acumulam:
-- Fragmentação de heap em processos de longa vida
-- Vazamentos de memória graduais (especialmente em browsers e Electron apps)
-- Aumento gradual do uso de swap por páginas raramente acessadas
+Systems with long uptime accumulate:
+- Heap fragmentation in long-lived processes
+- Gradual memory leaks (especially in browsers and Electron apps)
+- Gradually growing swap usage from rarely accessed pages
 
-**Mitigação:** Reiniciar o sistema periodicamente (a cada 3-7 dias) em máquinas
-com RAM limitada é uma prática válida.
+**Mitigation:** Rebooting periodically (every 3-7 days) is a valid practice on
+machines with limited RAM.
 
 EOF
     } >> "$file"
   fi
 
   cat >> "$file" <<'EOF'
-### Serviço `makima.service` em Crash Loop
+### `makima.service` in a Crash Loop
 
-O serviço `makima` está falhando continuamente (código de saída 101),
-gerando dezenas de restarts por hora. Embora o uso de memória de cada instância
-seja pequeno (~7 MB), o crash loop causa:
-- Ruído no journal do sistema
-- Sobrecarga pontual de CPU a cada restart
-- Indicativo de configuração incorreta ou dependência ausente
+The `makima` service keeps failing (exit code 101),
+restarting dozens of times per hour. Although each instance uses little
+memory (~7 MB), the crash loop causes:
+- Noise in the system journal
+- A CPU spike on every restart
+- A sign of misconfiguration or a missing dependency
 
-**Verificar:** `systemctl status makima.service` e `journalctl -u makima -n 50`
+**Check:** `systemctl status makima.service` and `journalctl -u makima -n 50`
 
 EOF
 
   {
-    printf '%s\n' '' '---' '' '## Recomendações Prioritárias' ''
-    printf '1. **Fechar ou suspender abas do Chrome** — libera centenas de MB imediatamente\n'
-    printf '2. **Reciclar a swap:** `sudo swapoff -a && sudo swapon -a`\n'
-    printf '3. **Reiniciar o sistema** — único jeito de limpar swap + vazamentos acumulados (%s dias)\n' "$days"
+    printf '%s\n' '' '---' '' '## Priority Recommendations' ''
+    printf '1. **Close or suspend Chrome tabs** — frees hundreds of MB immediately\n'
+    printf '2. **Recycle swap:** `sudo swapoff -a && sudo swapon -a`\n'
+    printf '3. **Reboot the system** — the only way to clear swap + accumulated leaks (%s days)\n' "$days"
     cat <<'EOF'
-4. **Corrigir makima.service** — `journalctl -u makima -n 50` para ver o erro real
-5. **Considerar upgrade de RAM** — 3.6 GB é o limite inferior para Chrome + DE pesado
+4. **Fix makima.service** — `journalctl -u makima -n 50` to see the actual error
+5. **Consider a RAM upgrade** — 3.6 GB is the lower bound for Chrome + a heavy DE
 
 ---
 
-## Comandos Úteis
+## Useful Commands
 
 ```bash
-# Ver processos em tempo real
+# Watch processes in real time
 memtop --watch
 
-# Encerrar processos interativamente
+# Kill processes interactively
 memtop --kill
 
-# Reciclar swap
+# Recycle swap
 sudo swapoff -a && sudo swapon -a
 
-# Ver log do makima
+# Show the makima log
 journalctl -u makima -n 50 --no-pager
 
-# Chrome com menos memória
+# Chrome with less memory
 google-chrome-stable --js-flags="--max-old-space-size=512"
 ```
 
 EOF
-    printf '\n%s\n%s\n' '---' "*Relatório gerado por \`memtop\` — $(date '+%Y-%m-%d %H:%M:%S')*"
+    printf '\n%s\n%s\n' '---' "*Report generated by \`memtop\` — $(date '+%Y-%m-%d %H:%M:%S')*"
   } >> "$file"
 
-  printf "\n${GREEN}${BOLD}Relatório salvo em: %s${RESET}\n" "$file"
+  printf "\n${GREEN}${BOLD}Report saved to: %s${RESET}\n" "$file"
 }
 
 # ── Main ───────────────────────────────────────────────────────────────────────
@@ -509,7 +509,7 @@ run_once() {
 if $WATCH_MODE; then
   while true; do
     run_once
-    printf "${DIM}Atualizando em 3s… Ctrl+C para sair${RESET}\n"
+    printf "${DIM}Refreshing in 3s… Ctrl+C to quit${RESET}\n"
     sleep 3
   done
 elif $KILL_MODE; then
@@ -520,5 +520,5 @@ elif $REPORT_MODE; then
   run_once
 else
   run_once
-  printf "${DIM}Dica: use --kill para encerrar processos, --watch para monitorar, --report para gerar relatório${RESET}\n\n"
+  printf "${DIM}Tip: use --kill to kill processes, --watch to monitor, --report to write a report${RESET}\n\n"
 fi

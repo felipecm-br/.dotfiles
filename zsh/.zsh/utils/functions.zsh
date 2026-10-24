@@ -227,7 +227,7 @@ j() {
     fi
 
     (( $+commands[wm] )) || {
-        echo "j: 'wm' (Waymaker) não encontrado no PATH."
+        echo "j: 'wm' (Waymaker) not found in PATH."
         return 1
     }
 
@@ -284,7 +284,7 @@ j() {
 # Usage: ji [query]
 ji() {
     (( $+commands[wm] )) || {
-        echo "ji: 'wm' (Waymaker) não encontrado no PATH."
+        echo "ji: 'wm' (Waymaker) not found in PATH."
         return 1
     }
 
@@ -389,7 +389,7 @@ ai-fix() {
     elif command -v claude >/dev/null 2>&1; then
         claude "$prompt"
     else
-        echo "ai-fix: Nenhum agente ('opencode', 'agy' ou 'claude') encontrado no PATH."
+        echo "ai-fix: No agent ('opencode', 'agy' or 'claude') found in PATH."
         return 1
     fi
 }
@@ -516,7 +516,7 @@ pasteto() {
     fi
 
     if (( ${#sources} == 0 )); then
-        echo "pasteto: Nenhum arquivo selecionado."
+        echo "pasteto: No file selected."
         return 1
     fi
 
@@ -524,7 +524,7 @@ pasteto() {
     local src
     for src in "${sources[@]}"; do
         if [[ ! -e "$src" && ! -L "$src" ]]; then
-            echo "pasteto: Arquivo não encontrado: $src"
+            echo "pasteto: File not found: $src"
             return 1
         fi
     done
@@ -534,11 +534,11 @@ pasteto() {
     if (( use_last )); then
         target_dir="${_WM_LAST_TARGET:-$_MM_LAST_TARGET}"
         if [[ -z "$target_dir" ]]; then
-            echo "pasteto: Nenhum destino anterior gravado (_WM_LAST_TARGET está vazio)."
+            echo "pasteto: No previous target recorded (_WM_LAST_TARGET is empty)."
             return 1
         fi
     else
-        target_dir=$(wm list --dirs 2>/dev/null | wm -o jump header.content="PASTE TO (Escolha o Destino)")
+        target_dir=$(wm list --dirs 2>/dev/null | wm -o jump header.content="PASTE TO (Choose Destination)")
         [[ -z "$target_dir" ]] && return 0
     fi
 
@@ -550,7 +550,7 @@ pasteto() {
     fi
 
     if [[ ! -d "$target_dir" ]]; then
-        echo "pasteto: Diretório de destino inválido: $target_dir"
+        echo "pasteto: Invalid target directory: $target_dir"
         _WM_LAST_TARGET=""
         _MM_LAST_TARGET=""
         return 1
@@ -558,7 +558,7 @@ pasteto() {
 
     # 4. Perform copy
     cp -a -- "${sources[@]}" "$target_dir/" || return 1
-    echo "✓ ${#sources[@]} item(ns) copiado(s) para $target_dir"
+    echo "✓ ${#sources[@]} item(s) copied to $target_dir"
 
     # Cache last target
     _WM_LAST_TARGET="$target_dir"
@@ -628,7 +628,7 @@ moveto() {
     fi
 
     if (( ${#sources} == 0 )); then
-        echo "moveto: Nenhum arquivo selecionado."
+        echo "moveto: No file selected."
         return 1
     fi
 
@@ -636,7 +636,7 @@ moveto() {
     local src
     for src in "${sources[@]}"; do
         if [[ ! -e "$src" && ! -L "$src" ]]; then
-            echo "moveto: Arquivo não encontrado: $src"
+            echo "moveto: File not found: $src"
             return 1
         fi
     done
@@ -646,11 +646,11 @@ moveto() {
     if (( use_last )); then
         target_dir="${_WM_LAST_TARGET:-$_MM_LAST_TARGET}"
         if [[ -z "$target_dir" ]]; then
-            echo "moveto: Nenhum destino anterior gravado (_WM_LAST_TARGET está vazio)."
+            echo "moveto: No previous target recorded (_WM_LAST_TARGET is empty)."
             return 1
         fi
     else
-        target_dir=$(wm list --dirs 2>/dev/null | wm -o jump header.content="MOVE TO (Escolha o Destino)")
+        target_dir=$(wm list --dirs 2>/dev/null | wm -o jump header.content="MOVE TO (Choose Destination)")
         [[ -z "$target_dir" ]] && return 0
     fi
 
@@ -662,7 +662,7 @@ moveto() {
     fi
 
     if [[ ! -d "$target_dir" ]]; then
-        echo "moveto: Diretório de destino inválido: $target_dir"
+        echo "moveto: Invalid target directory: $target_dir"
         _WM_LAST_TARGET=""
         _MM_LAST_TARGET=""
         return 1
@@ -670,7 +670,7 @@ moveto() {
 
     # 4. Perform move
     mv -- "${sources[@]}" "$target_dir/" || return 1
-    echo "✓ ${#sources[@]} item(ns) movido(s) para $target_dir"
+    echo "✓ ${#sources[@]} item(s) moved to $target_dir"
 
     # Cache last target
     _WM_LAST_TARGET="$target_dir"

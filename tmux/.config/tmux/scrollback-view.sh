@@ -21,11 +21,11 @@ if [ -n "$ORIGIN" ]; then
 fi
 
 if ! tmux capture-pane -epJS - $TARGET_FLAG 2>"$ERRLOG" | sed '/^$/d' > "$OUT"; then
-  tmux display-message "scrollback: capture-pane falhou (ver $ERRLOG)"
+  tmux display-message "scrollback: capture-pane failed (see $ERRLOG)"
   exit 1
 fi
 if [ ! -s "$OUT" ]; then
-  tmux display-message "scrollback: pane vazio, nada para abrir"
+  tmux display-message "scrollback: pane is empty, nothing to open"
   exit 1
 fi
 

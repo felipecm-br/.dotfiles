@@ -194,21 +194,21 @@ class TelemetryEngine:
 
         if metrics["review_count"]:
             reviews_str = (
-                f"{metrics['review_count']} revisões com média de "
+                f"{metrics['review_count']} reviews averaging "
                 f"{round(metrics['avg_review_duration'])}s"
             )
         else:
-            reviews_str = "nenhuma revisão registrada"
+            reviews_str = "no reviews recorded"
         max_idle = metrics["max_idle_seconds"]
         if max_idle is None:
-            idle_str = "sem dados de espera de agente"
+            idle_str = "no agent wait data"
         elif max_idle <= 120:
-            idle_str = "nenhum agente ficou ocioso > 2 min"
+            idle_str = "no agent sat idle > 2 min"
         else:
-            idle_str = f"tempo máx de espera de agente foi {round(max_idle / 60)} min"
+            idle_str = f"max agent wait was {round(max_idle / 60)} min"
         metrics["summary_text"] = (
-            f"Hoje você teve {metrics['flow_str']} de fluxo ininterrupto, "
-            f"{reviews_str} e {idle_str}"
+            f"Today you had {metrics['flow_str']} of uninterrupted flow, "
+            f"{reviews_str}, and {idle_str}"
         )
         return metrics
 
@@ -260,23 +260,23 @@ class TelemetryEngine:
         rev_count = metrics["review_count"]
         review_lag = fmt_secs(metrics["median_review_latency"])
         rate = metrics["median_review_rate"]
-        rate_str = "—" if rate is None else f"{rate:.0f} linhas/min"
+        rate_str = "—" if rate is None else f"{rate:.0f} lines/min"
 
         out = []
-        out.append(f"\n  {c_cyan}{c_bold}📊 Telemetria de Fluxo & Deep Work{c_reset}")
+        out.append(f"\n  {c_cyan}{c_bold}📊 Flow & Deep Work Telemetry{c_reset}")
         out.append(f"  {c_dim}────────────────────────────────────────────────────────────{c_reset}")
         out.append(f"  {c_green}󰄬 {c_bold}{summary}{c_reset}")
         out.append(f"  {c_dim}────────────────────────────────────────────────────────────{c_reset}\n")
-        out.append(f"  {c_yellow}{c_bold}󰓩 Heatmap de Concentração Horária (Hoje){c_reset}")
+        out.append(f"  {c_yellow}{c_bold}󰓩 Hourly Focus Heatmap (Today){c_reset}")
         out.append(line1_hours)
         out.append(line2_blocks)
-        out.append(f"  {c_dim}Legenda: {c_dark}· Vazio  {c_cyan}░ Leve  {c_green}▒ Foco  {c_yellow}▓ Intenso  {c_magenta}█ Deep Work{c_reset}\n")
-        out.append(f"  {c_blue}{c_bold}󰊢 Evidência Matemática & Latências{c_reset}")
-        out.append(f"    • {c_yellow}Pergunta → Resposta (Humano):{c_reset}    méd {c_bold}{avg_reply}{c_reset} (máx {max_reply})")
-        out.append(f"    • {c_cyan}Tarefa Concluída → Revisão:{c_reset}      mediana {c_bold}{review_lag}{c_reset}")
-        out.append(f"    • {c_magenta}Duração Média de Revisão:{c_reset}       {c_bold}{avg_rev}{c_reset} ({rev_count} revisões)")
-        out.append(f"    • {c_blue}Ritmo de Revisão:{c_reset}               mediana {c_bold}{rate_str}{c_reset}")
-        out.append(f"    • {c_green}Sessões Ininterruptas de Fluxo:{c_reset} {c_bold}{metrics['flow_str']}{c_reset} ({max(metrics['clusters_count'], 1)} blocos)")
+        out.append(f"  {c_dim}Legend: {c_dark}· Empty  {c_cyan}░ Light  {c_green}▒ Focus  {c_yellow}▓ Intense  {c_magenta}█ Deep Work{c_reset}\n")
+        out.append(f"  {c_blue}{c_bold}󰊢 Evidence & Latencies{c_reset}")
+        out.append(f"    • {c_yellow}Question → Reply (Human):{c_reset}       avg {c_bold}{avg_reply}{c_reset} (max {max_reply})")
+        out.append(f"    • {c_cyan}Task Done → Review:{c_reset}             median {c_bold}{review_lag}{c_reset}")
+        out.append(f"    • {c_magenta}Average Review Duration:{c_reset}        {c_bold}{avg_rev}{c_reset} ({rev_count} reviews)")
+        out.append(f"    • {c_blue}Review Pace:{c_reset}                    median {c_bold}{rate_str}{c_reset}")
+        out.append(f"    • {c_green}Uninterrupted Flow Sessions:{c_reset}    {c_bold}{metrics['flow_str']}{c_reset} ({max(metrics['clusters_count'], 1)} blocks)")
         out.append("")
 
         return "\n".join(out)
@@ -317,8 +317,8 @@ class TelemetryEngine:
         def status(value: Optional[float], limit: float) -> str:
             # Measured against the target; no data is reported as such, never as a pass.
             if value is None:
-                return "— sem dados"
-            return "✅ dentro da meta" if value < limit else "⚠️ acima da meta"
+                return "— no data"
+            return "✅ within target" if value < limit else "⚠️ above target"
 
         cells = []
         for h in range(8, 24):
@@ -335,29 +335,29 @@ class TelemetryEngine:
                 cells.append("█")
         table_row = " | ".join(cells)
 
-        md = f"""### 📊 Telemetria Pessoal de Fluxo & Deep Work
+        md = f"""### 📊 Personal Flow & Deep Work Telemetry
 
 > [!IMPORTANT]
-> **Resumo Diário Baseado em Evidências:**  
+> **Evidence-Based Daily Summary:**  
 > **{summary}**
 
-#### 󰓩 Heatmap de Foco Horário (08h - 23h)
+#### 󰓩 Hourly Focus Heatmap (08h - 23h)
 
 | 08h | 09h | 10h | 11h | 12h | 13h | 14h | 15h | 16h | 17h | 18h | 19h | 20h | 21h | 22h | 23h |
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
 | {table_row} |
 
-*Legenda: `·` Ocioso • `░` Atividade leve • `▒` Concentração • `▓` Foco contínuo • `█` Deep Work pleno*
+*Legend: `·` Idle • `░` Light activity • `▒` Concentration • `▓` Sustained focus • `█` Full deep work*
 
-#### 󰊢 Tabela de Evidência de Latências
+#### 󰊢 Latency Evidence Table
 
-| Métrica de Interação | Valor Médio | Limite Máximo | Meta Ergonomia | Status |
+| Interaction Metric | Average | Maximum | Ergonomic Target | Status |
 |:---|:---:|:---:|:---:|:---:|
-| **Pergunta do Agente → Resposta do Operador** | **{fmt_secs(avg_reply_v)}** | {fmt_secs(max_reply_v)} | `< 15s` | {status(avg_reply_v, 15)} |
-| **Término de Tarefa → Abertura do Lazygitrs** (mediana) | **{fmt_secs(lag_v)}** | {fmt_secs(max_lag_v)} | `< 30s` | {status(lag_v, 30)} |
-| **Duração por Revisão** | **{fmt_secs(avg_rev_v)}** | {fmt_secs(max_rev_v)} | `< 100s` | {status(avg_rev_v, 100)} |
-| **Tempo Ininterrupto em Estado de Fluxo** | **{metrics['flow_str']}** | — | `> 4h00min` | {"✅ dentro da meta" if metrics["total_flow_seconds"] > 4 * 3600 else "⚠️ abaixo da meta"} |
-| **Ociosidade Máxima de Agente** | **{fmt_secs(idle_v)}** | — | `< 2 min` | {status(idle_v, 120)} |
+| **Agent Question → Operator Reply** | **{fmt_secs(avg_reply_v)}** | {fmt_secs(max_reply_v)} | `< 15s` | {status(avg_reply_v, 15)} |
+| **Task Done → Lazygitrs Opened** (median) | **{fmt_secs(lag_v)}** | {fmt_secs(max_lag_v)} | `< 30s` | {status(lag_v, 30)} |
+| **Duration per Review** | **{fmt_secs(avg_rev_v)}** | {fmt_secs(max_rev_v)} | `< 100s` | {status(avg_rev_v, 100)} |
+| **Uninterrupted Time in Flow** | **{metrics['flow_str']}** | — | `> 4h00min` | {"✅ within target" if metrics["total_flow_seconds"] > 4 * 3600 else "⚠️ below target"} |
+| **Maximum Agent Idle Time** | **{fmt_secs(idle_v)}** | — | `< 2 min` | {status(idle_v, 120)} |
 """
         return md
 
