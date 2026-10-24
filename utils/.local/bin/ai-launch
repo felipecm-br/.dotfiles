@@ -94,7 +94,7 @@ rows=$(jq -r -n --argjson s "$snapshot" --arg models "$agy_models" \
   --arg ic_claude "$(waymux icon claude 2>/dev/null || echo C)" --arg ic_agy "$(waymux icon agy 2>/dev/null || echo A)" '
 def fam: sub("-(low|medium|high)$"; "");
 def pad($n): . + (" " * ([$n - length, 1] | max));
-def clock: strflocaltime("%H:%M");
+def clock: if (. - ($s.now // 0)) > 86400 then strflocaltime("%a %H:%M") else strflocaltime("%H:%M") end;
 def code($l): {green: "32", yellow: "33", red: "31"}[$l] // "90";
 def tier: if test("fable|argon") then "$$$$" elif test("opus") then "$$$" elif test("sonnet") then "$$" else "$" end;
 ($s.agents // [] | map({(.agent): .}) | add // {}) as $A
@@ -117,7 +117,9 @@ def tier: if test("fable|argon") then "$$$$" elif test("opus") then "$$$" elif t
      | ($families | map(.id | fam) | index($dfam)) as $has_default
      | $families[]
      | (.id | fam) as $f
-     | (if ($f | startswith("claude-")) or ($f | startswith("gpt-oss")) then "claude" elif ($f | test("flash")) then "flash" else "pro" end) as $key
+     | (if ($f | startswith("claude-")) or ($f | startswith("gpt-oss")) then "claude"
+        elif ($f | startswith("gemini-4-argon")) then "argon"
+        elif ($f | test("flash")) then "flash" else "pro" end) as $key
      | ($groups // [] | map(select(.key == $key and ($key != "pro" or ((.model // "") | fam) == $f))) | first) as $grp
      | {agent: $a, args: "--model \(.id)", icon: $ic_agy,
         cli: (if $a == "agyy" then "Antigravity ²" else "Antigravity" end), model: .name, tier: ($f | tier),
@@ -128,6 +130,7 @@ def tier: if test("fable|argon") then "$$$$" elif test("opus") then "$$$" elif t
                 elif $grp.pct == 0 then "red" elif $grp.pct < 20 then "yellow" else "green" end),
         rec: ($rec == $a and (
           if $groups != null and ($g.default_exhausted | not) and $has_default != null then $f == $dfam
+          elif $best == "argon" then ($f | startswith("gemini-4-argon"))
           elif $best == "claude" then ($f | test("sonnet"))
           elif $best == "flash" then ($f | test("flash"))
           else $f == ($families[0].id | fam) end))})

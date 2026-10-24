@@ -11,7 +11,7 @@ New Tmux sessions opened from the session picker (`Prefix + s`) no longer hard-c
 | `a` | Connect + Antigravity (`agy`) |
 | `A` | Connect + Antigravity secondary account (`agyy`) |
 | `c` / `C` | Connect + Claude Code (`claude`) |
-| `u` | Full quota report (`ai-quota`), any key returns to the picker |
+| `u` | Visual quota & burn telemetry dashboard (`ai-quota --visual`), any key returns to the picker |
 | `s` / `w` / `Ctrl+S` | Switch to Cockpit (`c` moved to Claude; Cockpit keeps its other aliases) |
 
 The picker arms the pick with `ai-launch --next <agent> [args]` (valid for 30 s, consumed by the new session's `startup_command`), so the model chosen in the popup reaches the session. A session counts as new only when it is not running (by name or path) and has no `[[session]]` entry in `session.toml`; the others keep their own behaviour and the arm is removed after 10 s.
@@ -23,16 +23,16 @@ When `r`, `a`, `A` or `c` targets a session that **already exists**, the picker 
 One row per CLI × model family, in a **fixed order** so positions stay learnable: Claude Code (Fable, Opus, Sonnet, Haiku), then each Antigravity account with one row per family from `agy models` (cached daily in `~/.local/state/ai-quota/agy-models.tsv`, effort `-medium`). Each row shows a relative cost tier (`$` … `$$$$`) and its quota:
 
 - Claude rows: 5h · 7d used (one shared pool), colored by the Claude level.
-- Antigravity rows: percent **left** of the row's group (Claude & GPT, Gemini Flash), reset time; `no quota data` for Gemini 4 Argon.
+- Antigravity rows: percent **left** of the row's group (Claude & GPT, Gemini Flash, Gemini 4 Argon) and its reset time.
 
 The cursor starts on the recommended row (`★`), so `Enter` `Enter` from the session picker launches the smart pick in two keystrokes. Typing filters and jumps to the best match (`QueryChange → Pos(0)`), for example `son` → Claude Sonnet or `² flash` → secondary account Flash. Red rows stay selectable: starting Claude at 95% to work on a cheaper model is a valid choice. The last row, `Shell`, starts a plain terminal without an agent. `Esc` closes the menu: in the session picker it returns to the picker, so nothing is created until a row is chosen; in a bare `ai-launch` it leaves a plain shell.
 
-Recommended model: Claude green → Opus, yellow → Sonnet, red → Haiku. Antigravity → its default model while that group has quota, otherwise the group with the most quota left (Claude & GPT → Sonnet row, Gemini Flash → Flash row).
+Recommended model: Claude green → Opus, yellow → Sonnet, red → Haiku. Antigravity → its default model while that group has quota, otherwise the group with the most quota left (Claude & GPT → Sonnet row, Gemini Flash → Flash row, Gemini 4 Argon → Argon row).
 
-The popup title shows a quota badge, for example `⚡  42·22% ↗ ×4 │  ⏳11:22 │ ² 0p │ → `:
+The popup title shows a quota badge, for example `⚡  42·22% ↗ ×4 │  C100 G96 A10% │ ² C1 G100 A0% │ → `:
 
 - Claude: 5h% · 7d% used, `↗` when burning ≥ 1 %/h, `×N` live sessions.
-- Antigravity: `C<n> G<n>%` = percent **left** for the Claude & GPT group and for Gemini Flash (from the API), `⏳HH:MM` when every group is out; without a valid token, `~N%` of learned capacity or `Np` (prompts in the last 5h).
+- Antigravity: `C<n> G<n> A<n>%` = percent **left** for the Claude & GPT group, Gemini Flash, and Gemini 4 Argon (from the API), `⏳HH:MM` when every group is out; without a valid token, `~N%` of learned capacity or `Np` (prompts in the last 5h).
 - `→` shows the recommended agent (the `★` row in the menu, and what `r` starts). Icon color is the level: green · yellow · red · gray (unknown). These are Tmux ANSI names, so they follow the Omarchy theme.
 
 The badge is cached in `~/.local/state/ai-quota/badge` and kept fresh by the refresh timer below, so the popup opens without waiting on telemetry. It is recomputed inline only when absent or older than an hour (about 90 ms).
@@ -53,14 +53,14 @@ The slow part of a cold read is the Antigravity API (about 0.5 s per account, 1 
 | `claude` | Real 5h / 7d utilization + reset time | `rate_limits` in the Claude Code statusLine JSON, recorded by `ai-quota statusline` |
 | `claude` | Burn rate (%/h) | Slope of samples in the current 5h window over the last 60 min |
 | `claude` | Sessions (live / active) | `~/.claude/sessions/<pid>.json` with a live `claude` PID / sessions prompted in the last 30 min |
-| `agy`, `agyy` | Percent left + reset per group: Claude & GPT (min over `claude-*`, `gpt-oss*`), Gemini Flash and the pro tier (`tieredModelIds.flash` / `.pro`) | `fetchAvailableModels` (`quotaInfo.remainingFraction`, `resetTime`; a model with a reset but no fraction is at 0%), cached 60 s in `~/.local/state/ai-quota/agy-models-<profile>.json` |
+| `agy`, `agyy` | Percent left + reset per group: Claude & GPT (min over `claude-*`, `gpt-oss*`), Gemini Flash (`tieredModelIds.flash`), Gemini 4 Argon (`gemini-4-argon*`), and the pro tier (`.pro` when distinct from Flash) | `fetchAvailableModels` (`quotaInfo.remainingFraction`, `resetTime`; a model with a reset but no fraction is at 0%), cached 60 s in `~/.local/state/ai-quota/agy-models-<profile>.json` |
 | `agy`, `agyy` | Fallback without a token: exhausted until + window (5h / 7d) | `RESOURCE_EXHAUSTED … Resets in XhYmZs` lines in `antigravity-cli/log/cli-*.log` |
 | `agy`, `agyy` | Learned 5h capacity | Prompts between `reset − 5h` and the 429 of the last 5h cap hit |
 | `agy`, `agyy` | Sessions | Top-level `agy-bin` processes, split by profile `HOME` |
 
 Claude's figures are server-reported through the statusLine. For Antigravity, `ai-quota` calls the same endpoints the agy CLI and `ai-usagebar` use: `loadCodeAssist` once per profile (the project id is cached in `agy-project-<profile>`) and `fetchAvailableModels`. The token is the profile's own: its token file, or the keyring entry (`secret-tool lookup service gemini`) only when that entry's account matches the profile's file. It is passed to `curl` on stdin, never on the command line, and the functions that hold it run in a subshell with xtrace off, so `bash -x ai-quota` cannot print it; and is never refreshed by `ai-quota` (agy refreshes it while it runs; with no valid token the log heuristic applies, so its percentage is an estimate, `~`). The statusLine path (`--line`) never calls the API. `AI_QUOTA_NO_API=1` keeps everything local.
 
-`retrieveUserQuotaSummary` (what `ai-usagebar` reads) only returns the *Claude and GPT models* group for this account, so it cannot show Gemini. **Gemini 4 Argon** has no entry of its own in `fetchAvailableModels`: its levels are built into `agy-bin`, and the API maps the pro tier to `gemini-3.8-flash-tiered`, so the report says so instead of inventing a number.
+`fetchAvailableModels` filters out `gemini-4-argon-*` unless the HTTP `User-Agent` header identifies a recent CLI build with a changelist (`cl=...`). `ai-quota` sends `User-Agent: antigravity/cli/2.0 (aidev_client; cl=9999999999)`, so the API returns `gemini-4-argon-low` / `-medium` / `-high` with their weekly `quotaInfo` (`remainingFraction`, `resetTime`) and `defaultAgentModelId: "gemini-4-argon-medium"` alongside the Claude/GPT and Gemini Flash groups.
 
 ## Model
 
@@ -93,15 +93,19 @@ Selection walks `AI_AGENT_PREFERENCE` (default `claude agy agyy`) and picks the 
 
 `ai-launch --peek` prints what would start (`<agent> [args]` or `menu`) without starting it. `ai-launch --pick` shows the menu and prints the chosen `<agent> [args]` without starting it; it backs the standalone popup below.
 
-## Standalone popup (`Prefix + a` / `Ctrl + Shift + A`)
+## Standalone popups (`Prefix + a` / `Ctrl + Shift + A` and `Prefix + u`)
 
-[`ai-launch-popup.sh`](../../tmux/.config/tmux/ai-launch-popup.sh) opens the same menu in a `75% × 60%` tmux popup from any pane, the same shape as the `awt` popup (badge ` 󰚩 `, magenta ephemeral frame, quota badge in the title). `Enter` opens the pick in a **new window** of the originating session, rooted at the pane directory; `Esc` closes with no side effect. It works in sessions that already exist, which the session picker cannot do for `startup_command`. `Prefix + o` is unchanged.
+[`ai-launch-popup.sh`](../../tmux/.config/tmux/ai-launch-popup.sh) opens the launch menu in a `75% × 60%` tmux popup from any pane, the same shape as the `awt` popup (badge ` 󰚩 `, magenta ephemeral frame, quota badge in the title). `Enter` opens the pick in a **new window** of the originating session, rooted at the pane directory; `Esc` closes with no side effect. It works in sessions that already exist, which the session picker cannot do for `startup_command`. `Prefix + o` ([`toggle-ai-split.sh`](../../tmux/.config/tmux/toggle-ai-split.sh)) toggles a 35% right split running `ai-launch --auto` (honoring `$AI_LAUNCH_AGENT` and ignoring Claude Code's `$AI_AGENT` identity marker).
+
+[`ai-quota-popup.sh`](../../tmux/.config/tmux/ai-quota-popup.sh) (`Prefix + u`, badge ` 󰓅 ` + quota badge, cyan frame, `75% × 60%`) renders `ai-quota --visual` (`-v`): 20-cell Stephen Few bullet gauges (`█` actual usage/headroom, `▒` projected 5h burn at reset, `│` cyan elapsed-week budget pace marker, `░` remaining headroom) and `10×30m` 5h prompt activity sparklines (`·▁▂▃▄▅▆▇█`) across `claude`, `agy`, and `agyy`. Inside the popup: `Enter` launches the recommended agent and model in a new window (`ai-launch --auto`), `a` switches in-place to the CLI × model launch menu (`ai-launch --pick`), `r` forces a live refresh (`ai-quota --refresh`), and `u` / `q` / `Esc` dismisses with no side effect.
 
 ## Files
 
-- [`utils/.local/bin/ai-quota`](../../utils/.local/bin/ai-quota): telemetry, model, badge, report, statusLine recorder
+- [`utils/.local/bin/ai-quota`](../../utils/.local/bin/ai-quota): telemetry, model, badge, report, visual bullet gauges (`-v` / `--visual`), statusLine recorder
 - [`utils/.config/systemd/user/ai-quota-refresh.timer`](../../utils/.config/systemd/user/ai-quota-refresh.timer) / [`.service`](../../utils/.config/systemd/user/ai-quota-refresh.service): 2-minute cache refresh
-- [`tmux/.config/tmux/ai-launch-popup.sh`](../../tmux/.config/tmux/ai-launch-popup.sh): tmux popup wrapper (`Prefix + a`, `Ctrl + Shift + A`)
+- [`tmux/.config/tmux/ai-launch-popup.sh`](../../tmux/.config/tmux/ai-launch-popup.sh): tmux launcher popup (`Prefix + a`, `Ctrl + Shift + A`)
+- [`tmux/.config/tmux/ai-quota-popup.sh`](../../tmux/.config/tmux/ai-quota-popup.sh): visual quota & burn telemetry tmux popup (`Prefix + u`)
+- [`tmux/.config/tmux/toggle-ai-split.sh`](../../tmux/.config/tmux/toggle-ai-split.sh): 35% right-side AI split pane toggle backed by `ai-launch --auto` (`Prefix + o`)
 - [`utils/.local/bin/ai-launch`](../../utils/.local/bin/ai-launch): launch menu and launcher used by Waymaker
 - [`waymaker/.config/waymaker/presets/ai-launch.toml`](../../waymaker/.config/waymaker/presets/ai-launch.toml): launch menu preset
 - [`waymaker/.config/waymaker/session.toml`](../../waymaker/.config/waymaker/session.toml): `startup_command = "ai-launch"`

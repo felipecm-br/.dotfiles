@@ -76,11 +76,33 @@ snap=$(AI_QUOTA_FIXTURE_DIR="$FIX" ai-quota --json)
 report=$(AI_QUOTA_FIXTURE_DIR="$FIX" ai-quota)
 [[ "$report" == *"Gemini 4 Argon: no per-model quota in the API"* && "$report" == *"--model gemini-3.8-flash-high"* ]] &&
   ok "report explains Argon and the Gemini fallback" || bad "report: $report"
+vis=$(AI_QUOTA_FIXTURE_DIR="$FIX" ai-quota --visual)
+[[ "$vis" == *"AI Quota & Burn Telemetry"* && "$vis" == *"█"* && "$vis" == *"▒"* && "$vis" == *"│"* && "$vis" == *"Gemini 4 Argon: no per-model quota in the API"* && "$vis" == *"recommend:"*"agy"* ]] &&
+  ok "--visual renders bullet gauges, sparklines, Argon note and recommendation" || bad "visual: $vis"
 models 0 0 >"$FIX/agy.json"
 snap=$(AI_QUOTA_FIXTURE_DIR="$FIX" ai-quota --json)
 [ "$(jq -r '.agents[1].level' <<<"$snap")" = "red" ] && [ "$(jq -r '.agents[1].until' <<<"$snap")" = "$((now + 3600))" ] &&
   ok "every group exhausted -> red until the first reset" || bad "agy all exhausted: $(jq -c '.agents[1] | {level, until}' <<<"$snap")"
 [ "$(AI_QUOTA_FIXTURE_DIR="$FIX" ai-quota --badge | grep -c 'C0 G0%')" -eq 0 ] && ok "red badge shows the reset, not percentages" || bad "badge"
+
+# 4b-argon. With cli User-Agent (cl=...), fetchAvailableModels includes gemini-4-argon-* quotaInfo
+jq -n --arg rc "$(iso $((now + 3600)))" --arg rf "$(iso $((now + 18000)))" --arg ra "$(iso $((now + 500000)))" '{
+  defaultAgentModelId: "gemini-4-argon-medium",
+  tieredModelIds: {flash: ["gemini-3.8-flash-tiered"], pro: ["gemini-3.8-flash-tiered"]},
+  models: {
+    "claude-opus-5-5-low": {quotaInfo: {remainingFraction: 1, resetTime: $rc}},
+    "gemini-3.8-flash-tiered": {quotaInfo: {remainingFraction: 0.97, resetTime: $rf}},
+    "gemini-4-argon-medium": {quotaInfo: {remainingFraction: 0.25, resetTime: $ra}}
+  }}' >"$FIX/agy.json"
+snap=$(AI_QUOTA_FIXTURE_DIR="$FIX" ai-quota --json)
+[ "$(jq -c '[.agents[1].groups[] | select(.key == "argon") | {key, pct}]' <<<"$snap")" = '[{"key":"argon","pct":25}]' ] &&
+  ok "Gemini 4 Argon group parsed (25% left)" || bad "argon group: $(jq -c '.agents[1].groups' <<<"$snap")"
+[[ "$(AI_QUOTA_FIXTURE_DIR="$FIX" ai-quota)" == *"Gemini 4 Argon: 25% left"* ]] &&
+  ok "report shows Gemini 4 Argon quota" || bad "argon report"
+[[ "$(AI_QUOTA_FIXTURE_DIR="$FIX" ai-quota --badge)" == *"C100 G97 A25%"* ]] &&
+  ok "badge includes A25% for Gemini 4 Argon" || bad "argon badge: $(AI_QUOTA_FIXTURE_DIR="$FIX" ai-quota --badge)"
+[ "$(AI_QUOTA_FIXTURE_DIR="$FIX" ai-launch --peek --auto)" = "agy --model gemini-4-argon-medium" ] &&
+  ok "ai-launch recommends default Gemini 4 Argon when it has quota" || bad "argon launch: $(AI_QUOTA_FIXTURE_DIR="$FIX" ai-launch --peek --auto)"
 
 # 4c. `bash -x ai-quota` never prints the token: a fake token file, a curl stub that answers with
 # the fixture, and a secret-tool stub, so no network and no real keyring.

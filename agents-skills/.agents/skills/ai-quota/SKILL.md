@@ -12,10 +12,11 @@ Canonical design and policy: [docs/architecture/quota-aware-agent-selection.md](
 | Command | Use |
 | --- | --- |
 | `ai-quota` | Human report: per-agent level, 5h / 7d %, burn %/h, projection at reset, sessions |
+| `ai-quota -v` / `--visual` | Visual TUI dashboard: 20-cell bullet gauges (`█` actual, `▒` projected burn, `│` weekly budget pace marker, `░` headroom) + `10×30m` 5h activity sparklines (also in `Prefix + u` tmux popup, `ai-quota-popup.sh`) |
 | `ai-quota --json` | Snapshot for scripts and agents (`.recommend`, `.reason`, `.agents[]`) |
 | `ai-quota --recommend` | Print `claude`, `agy` or `agyy` |
 | `ai-launch` | CLI × model menu with quota per row (Waymaker `startup_command`) |
-| `ai-launch --auto` | Start the recommended agent and model directly |
+| `ai-launch --auto` | Start the recommended agent and model directly (also backs `Prefix + o` 35% right split via `toggle-ai-split.sh`) |
 | `ai-launch <agent> [args]` | Force one, e.g. `ai-launch claude --model sonnet` |
 | `ai-quota --refresh` | Silent forced refresh of the Antigravity cache and badge (run every 2 min by `ai-quota-refresh.timer`; readers serve up to 15 min stale and refresh in the background) |
 | `ai-launch --pick` | Show the menu and print the chosen `<agent> [args]` without starting it (backend of the `Prefix + a` tmux popup, `ai-launch-popup.sh`) |
@@ -26,10 +27,10 @@ Canonical design and policy: [docs/architecture/quota-aware-agent-selection.md](
 1. Before dispatching a sub-agent or a long autonomous run to another CLI, run `ai-quota --json` and read `.agents[] | {agent, level, projected_five, week_pace, until}`.
 2. Avoid agents at `red` (exhausted, or projected to hit the cap within 30 min). Prefer `green` over `yellow`.
 3. Each extra concurrent session raises the burn rate; check `rate_with_new` before starting parallel Claude agents.
-4. Do not add new quota endpoints or token handling beyond what `ai-quota` already does: Antigravity quota comes from `fetchAvailableModels` with the profile's own token, passed to `curl` on stdin and never refreshed or printed. `AI_QUOTA_NO_API=1` keeps everything local. Gemini 4 Argon has no per-model quota in the API; do not estimate one.
+4. Do not add new quota endpoints or token handling beyond what `ai-quota` already does: Antigravity quota comes from `fetchAvailableModels` (using `User-Agent: antigravity/cli/2.0 (aidev_client; cl=9999999999)` so `gemini-4-argon-*` quota is included) with the profile's own token, passed to `curl` on stdin and never refreshed or printed. `AI_QUOTA_NO_API=1` keeps everything local.
 
 ## Data contract
 
 - Claude samples: `${XDG_STATE_HOME:-~/.local/state}/ai-quota/claude-samples.tsv` (`epoch  five%  seven%  five_resets_at`), written only by `ai-quota statusline` (configured as `statusLine` in `claude/.claude/settings.json`).
-- Antigravity: `.agents[] | select(.source == "api") | .groups[] | {key, pct, reset}` (`claude` = Claude & GPT, `flash` = Gemini Flash, `pro` = pro tier), percent **left**; `default_exhausted` is true when the profile's default model is out of quota. Fallback (`source: "logs"`): 429 lines `Individual quota reached ... Resets in XhYmZs` in `~/.gemini/antigravity-cli/log/cli-*.log` (same path under `$AGYY_HOME` for `agyy`).
+- Antigravity: `.agents[] | select(.source == "api") | .groups[] | {key, pct, reset}` (`claude` = Claude & GPT, `flash` = Gemini Flash, `argon` = Gemini 4 Argon, `pro` = pro tier), percent **left**; `default_exhausted` is true when the profile's default model is out of quota. Fallback (`source: "logs"`): 429 lines `Individual quota reached ... Resets in XhYmZs` in `~/.gemini/antigravity-cli/log/cli-*.log` (same path under `$AGYY_HOME` for `agyy`).
 - Levels: `green` · `yellow` · `red` · `unknown` (no data yet, treated as usable).
