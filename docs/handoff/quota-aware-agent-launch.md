@@ -19,6 +19,7 @@ New tmux sessions from the session picker (`Prefix + s`) always started `agy`. T
 | `0307c0d` feat(shell) | Committed | `ai-quota` (Claude statusLine recorder, burn-rate model, badge, report), first `ai-launch` (auto-start recommended agent), picker keys `a` / `A` / `c` / `u`, quota badge in the popup title, `startup_command = "ai-launch"`, `statusLine` in Claude settings, skill, tests, docs |
 | `423ff4b`, `597e4a0` fix(shell) | Committed (follow-up session) | Antigravity per-model-group quota from `fetchAvailableModels`, token kept out of `bash -x` traces |
 | Launch popup | **Uncommitted** | `tmux/.config/tmux/ai-launch-popup.sh` (new; restow `tmux`), `ai-launch --pick`, binds `Prefix + a` / `Ctrl + Shift + A`, keybindings picker entry, docs, test section 7. Headless-tested in a detached tmux; the real `display-popup` is not yet verified visually |
+| Menu in popup | **Uncommitted** | `session-picker.sh` shows `ai-launch --pick` in the popup before `wm connect` on new sessions, `--next` carries args, new `Shell` row; classification and menu tested headless, the full `Prefix + s` flow not yet live |
 | Quota refresh | **Uncommitted** | `ai-quota --refresh`, stale-while-revalidate in `agy_api`, `ai-quota-refresh.timer` (enabled live, every 2 min), installer `.shell/install/packages/ai-quota.zsh`, popups serve the badge up to 1 h old |
 | Launch menu | **Uncommitted** (working tree) | `ai-launch` rewritten as a CLI × model menu; `r` = direct recommended launch; new preset `ai-launch.toml`; tests and docs updated |
 
@@ -45,7 +46,7 @@ Suggested commit: `feat(shell): add CLI × model launch menu with per-row quota 
 
 | Key | Action |
 | --- | --- |
-| `Enter` | Connect; a new session opens the `ai-launch` menu |
+| `Enter` | Existing session: switch. New session: the `ai-launch` menu inside the popup first (`Esc` back to the picker), then the session starts with that pick |
 | `r` | Connect + recommended agent and model, no menu |
 | `a` / `A` / `c` | Connect + `agy` / `agyy` / `claude` with the default model |
 | `u` | Full `ai-quota` report |

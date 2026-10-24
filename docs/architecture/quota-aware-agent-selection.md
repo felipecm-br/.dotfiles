@@ -6,13 +6,15 @@ New Tmux sessions opened from the session picker (`Prefix + s`) no longer hard-c
 
 | Key | Action |
 | --- | --- |
-| `Enter` | Connect; a **new** session opens the launch menu (below) |
+| `Enter` | Existing session: switch. **New** session: the launch menu (below) opens **inside the popup** first, then the session starts with that pick; `Esc` returns to the picker |
 | `r` | Connect + the recommended agent **and model**, no menu (`ai-launch --auto`) |
 | `a` | Connect + Antigravity (`agy`) |
 | `A` | Connect + Antigravity secondary account (`agyy`) |
 | `c` / `C` | Connect + Claude Code (`claude`) |
 | `u` | Full quota report (`ai-quota`), any key returns to the picker |
 | `s` / `w` / `Ctrl+S` | Switch to Cockpit (`c` moved to Claude; Cockpit keeps its other aliases) |
+
+The picker arms the pick with `ai-launch --next <agent> [args]` (valid for 30 s, consumed by the new session's `startup_command`), so the model chosen in the popup reaches the session. A session counts as new only when it is not running (by name or path) and has no `[[session]]` entry in `session.toml`; the others keep their own behaviour and the arm is removed after 10 s.
 
 When `r`, `a`, `A` or `c` targets a session that **already exists**, the picker switches to it and opens the agent in a new window. Without this, nothing would launch, because `startup_command` only runs on session creation.
 
@@ -23,7 +25,7 @@ One row per CLI × model family, in a **fixed order** so positions stay learnabl
 - Claude rows: 5h · 7d used (one shared pool), colored by the Claude level.
 - Antigravity rows: percent **left** of the row's group (Claude & GPT, Gemini Flash), reset time; `no quota data` for Gemini 4 Argon.
 
-The cursor starts on the recommended row (`★`), so `Enter` `Enter` from the session picker launches the smart pick in two keystrokes. Typing filters and jumps to the best match (`QueryChange → Pos(0)`), for example `son` → Claude Sonnet or `² flash` → secondary account Flash. Red rows stay selectable: starting Claude at 95% to work on a cheaper model is a valid choice. `Esc` leaves a plain shell.
+The cursor starts on the recommended row (`★`), so `Enter` `Enter` from the session picker launches the smart pick in two keystrokes. Typing filters and jumps to the best match (`QueryChange → Pos(0)`), for example `son` → Claude Sonnet or `² flash` → secondary account Flash. Red rows stay selectable: starting Claude at 95% to work on a cheaper model is a valid choice. The last row, `Shell`, starts a plain terminal without an agent. `Esc` closes the menu: in the session picker it returns to the picker, so nothing is created until a row is chosen; in a bare `ai-launch` it leaves a plain shell.
 
 Recommended model: Claude green → Opus, yellow → Sonnet, red → Haiku. Antigravity → its default model while that group has quota, otherwise the group with the most quota left (Claude & GPT → Sonnet row, Gemini Flash → Flash row).
 

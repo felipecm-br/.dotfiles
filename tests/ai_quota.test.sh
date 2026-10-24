@@ -133,3 +133,11 @@ pick=$(AI_QUOTA_FIXTURE_DIR="$FIX" ai-launch --pick </dev/null)
 # 8. --refresh is silent and serialised (no network: AI_QUOTA_NO_API keeps it local)
 [ -z "$(AI_QUOTA_NO_API=1 ai-quota --refresh 2>&1)" ] && ok "--refresh is silent" || bad "--refresh output"
 [ -s "$XDG_STATE_HOME/ai-quota/badge" ] && ok "--refresh writes the badge cache" || bad "badge cache missing"
+
+# 9. The pick armed by the session picker carries the model and a plain-terminal choice
+ai-launch --next claude --model sonnet
+[ "$(ai-launch --peek)" = "claude --model sonnet" ] && ok "armed pick keeps its model" || bad "armed args: $(ai-launch --peek)"
+rm -f "$XDG_RUNTIME_DIR/ai-launch.next"
+ai-launch --next shell
+[ "$(ai-launch --peek)" = "shell" ] && ok "armed shell choice" || bad "armed shell"
+rm -f "$XDG_RUNTIME_DIR/ai-launch.next"

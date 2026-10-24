@@ -5,12 +5,14 @@
 #                              (non-interactive callers get --auto)
 #   ai-launch --auto           Start the recommended agent and model directly
 #   ai-launch <agent> [args]   Force claude | agy | agyy (extra args pass through, e.g. --model sonnet)
-#   ai-launch --next <choice>  Arm a one-shot choice (agent | auto) for the next ai-launch (session picker)
+#   ai-launch --next <choice> [args]
+#                              Arm a one-shot choice (agent | auto | shell, plus args such as
+#                              --model sonnet) for the next ai-launch (session picker)
 #   ai-launch --peek           Print what would start ("<agent> [args]" or "menu"), without starting it
 #   ai-launch --pick           Show the menu, print the chosen "<agent> [args]" and exit (tmux popup:
 #                              tmux/.config/tmux/ai-launch-popup.sh starts it in a new window)
 #
-# Nothing armed: $AI_LAUNCH_AGENT (agent | auto | menu), else menu.
+# Nothing armed: $AI_LAUNCH_AGENT (agent | auto | menu | shell), else menu.
 # Recommended model: Claude green → opus, yellow → sonnet, red → haiku; Antigravity → its default
 # model while that group has quota, otherwise the group with the most quota left.
 
@@ -21,11 +23,13 @@ AGY_MODELS="$STATE_DIR/agy-models.tsv"
 
 case "${1:-}" in
   --next)
-    printf '%s\n' "${2:?choice required}" >"$NEXT_FILE"
+    [ -n "${2:-}" ] || { echo "ai-launch: --next needs a choice" >&2; exit 2; }
+    shift
+    printf '%s\n' "$*" >"$NEXT_FILE"
     exit 0
     ;;
   -h | --help)
-    sed -n '2,15p' "$0" | sed 's/^# \{0,1\}//'
+    sed -n '2,17p' "$0" | sed 's/^# \{0,1\}//'
     exit 0
     ;;
 esac
@@ -43,7 +47,10 @@ elif [ -n "${1:-}" ]; then
 elif [ -f "$NEXT_FILE" ]; then
   # Consume the picker choice only while fresh, so a stale arm never hijacks a later session
   if [ $(($(date +%s) - $(stat -c %Y "$NEXT_FILE"))) -le $NEXT_TTL ]; then
-    choice=$(head -n 1 "$NEXT_FILE")
+    # "<choice> [args…]": the session picker arms the full pick, model included
+    read -r choice armed <"$NEXT_FILE"
+    read -r -a armed_args <<<"$armed"
+    set -- "${armed_args[@]}" "$@"
   fi
   $peek || rm -f "$NEXT_FILE"
 fi
@@ -58,6 +65,10 @@ case "$choice" in
   claude | agy | agyy)
     if $peek; then echo "$choice${*:+ $*}"; exit 0; fi
     exec "$choice" "$@"
+    ;;
+  shell)
+    if $peek; then echo shell; exit 0; fi
+    exec "${SHELL:-bash}"
     ;;
   auto | menu) ;;
   *) echo "ai-launch: unknown choice '$choice' (claude | agy | agyy | auto | menu)" >&2; exit 2 ;;
@@ -139,6 +150,13 @@ pick=-1
 for i in "${!recs[@]}"; do [ "${recs[$i]}" = 1 ] && { pick=$i; break; }; done
 
 if [ "$choice" = "menu" ]; then
+  # Last row, always: a plain terminal without an agent (same columns as the rows above)
+  shell_row="󰆍 Shell         Terminal            -    no agent"
+  agents+=(shell); argv+=(""); plain+=("$shell_row"); recs+=(0)
+  colored+=("$(printf '\033[90m%s\033[0m' "$shell_row")")
+fi
+
+if [ "$choice" = "menu" ]; then
   WM_BIN="$HOME/.local/bin/wm"
   [ -x "$WM_BIN" ] || WM_BIN=$(command -v wm)
   PRESET="$HOME/.config/waymaker/presets/ai-launch.toml"
@@ -157,6 +175,10 @@ if [ "$pick" -lt 0 ]; then
 fi
 
 read -r -a args <<<"${argv[$pick]}"
+if [ "${agents[$pick]}" = shell ]; then
+  if $peek || $pick_only; then echo shell; exit 0; fi
+  exec "${SHELL:-bash}"
+fi
 if $peek || $pick_only; then echo "${agents[$pick]} ${args[*]}"; exit 0; fi
 [ "$choice" = "auto" ] && printf '\033[90m%s\033[0m\n' "${plain[$pick]}"
 exec "${agents[$pick]}" "${args[@]}"

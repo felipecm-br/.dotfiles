@@ -54,33 +54,67 @@ if [ ! -f "$PRESET" ]; then
   fi
 fi
 
-chosen=$("$WM_BIN" \
-  -o "$PRESET" \
-  --color "${TMUX_COLOR_SPEC:-}")
+NEXT_FILE="${XDG_RUNTIME_DIR:-/tmp}/ai-launch.next"
 
-# r / a / A / c binds emit "@agent=<auto|name>" before the selection; Enter emits only the selection
-agent=$(printf '%s\n' "$chosen" | sed -n 's/^@agent=//p' | head -n 1)
-chosen=$(printf '%s\n' "$chosen" | grep -v '^@agent=' | head -n 1)
-
-if [ "$chosen" = "__SWITCH_WINDOW__" ] || [ "$chosen" = "__SWITCH_COCKPIT__" ]; then
-  if [ "$1" = "--fullscreen" ]; then
-    exec "$SCRIPT_DIR/cockpit-picker.sh" --fullscreen
-  else
-    exec "$SCRIPT_DIR/cockpit-picker.sh"
+# Would connecting to "$1" create a session whose startup_command is ai-launch? A running session
+# (by name or by path) only gets switched to, and a [[session]] entry in session.toml keeps its own
+# startup_command, so neither of them asks for an agent.
+creates_agent_session() {
+  tmux has-session -t "=$1" 2>/dev/null && return 1
+  case "$1" in
+    "~"*) _path="$HOME${1#"~"}" ;;
+    /*) _path="$1" ;;
+    *) _path="" ;;
+  esac
+  if [ -n "$_path" ] && tmux list-sessions -F '#{session_path}' 2>/dev/null | grep -qxF "$_path"; then
+    return 1
   fi
-elif [ -n "$chosen" ]; then
+  grep -F "$1\"" "$HOME/.config/waymaker/session.toml" 2>/dev/null | grep -q '^name' && return 1
+  return 0
+}
+
+while :; do
+  chosen=$("$WM_BIN" \
+    -o "$PRESET" \
+    --color "${TMUX_COLOR_SPEC:-}")
+
+  # r / a / A / c binds emit "@agent=<auto|name>" before the selection; Enter emits only the selection
+  agent=$(printf '%s\n' "$chosen" | sed -n 's/^@agent=//p' | head -n 1)
+  chosen=$(printf '%s\n' "$chosen" | grep -v '^@agent=' | head -n 1)
+
+  if [ "$chosen" = "__SWITCH_WINDOW__" ] || [ "$chosen" = "__SWITCH_COCKPIT__" ]; then
+    if [ "$1" = "--fullscreen" ]; then
+      exec "$SCRIPT_DIR/cockpit-picker.sh" --fullscreen
+    else
+      exec "$SCRIPT_DIR/cockpit-picker.sh"
+    fi
+  fi
+  [ -n "$chosen" ] || exit 0
+
   if [ -z "$agent" ]; then
-    # New sessions run startup_command = ai-launch (CLI × model menu with quota)
-    "$WM_BIN" connect "$chosen"
+    if creates_agent_session "$chosen"; then
+      # New session: show the CLI × model menu here, in the popup, before the session exists.
+      # Esc goes back to the picker; the pick is armed for the ai-launch the new session runs.
+      pick=$(ai-launch --pick) || pick=""
+      [ -n "$pick" ] || continue
+      # shellcheck disable=SC2086 # "<agent> [args]" is split on purpose
+      ai-launch --next $pick
+      "$WM_BIN" connect "$chosen"
+      # A session configured without ai-launch must not leave the pick armed for a later one
+      setsid -f sh -c "sleep 10; rm -f '$NEXT_FILE'" </dev/null >/dev/null 2>&1
+    else
+      "$WM_BIN" connect "$chosen"
+    fi
   else
     ai-launch --next "$agent"
     before=$(tmux list-sessions -F '#{session_id}' 2>/dev/null)
     "$WM_BIN" connect "$chosen"
     if [ "$before" = "$(tmux list-sessions -F '#{session_id}' 2>/dev/null)" ]; then
       # Existing session: startup_command did not run, so open the agent in a new window
-      rm -f "${XDG_RUNTIME_DIR:-/tmp}/ai-launch.next"
+      rm -f "$NEXT_FILE"
       pane=$(tmux new-window -P -F '#{pane_id}' -c '#{pane_current_path}')
       tmux send-keys -t "$pane" "ai-launch $agent" Enter
     fi
   fi
-fi
+  exit 0
+done
