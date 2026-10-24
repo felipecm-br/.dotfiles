@@ -32,6 +32,7 @@ docs/
 │   ├── cockpit-topology-snapshot-and-restore.md    # Session topology snapshot, post-reboot restore & agent resume
 │   ├── evidence-based-telemetry-and-deep-work.md   # Human response latency metrics & 24h deep work heatmaps
 │   ├── remote-agent-workflow-waymux.md             # Proactive agent supervision, focus auto-dismiss & wait RPCs
+│   ├── tuios-benchmark-and-agent-inbox-roadmap.md  # TUIOS audit, Agent Mail/Queue deep-dive & 5-feature roadmap
 │   └── open-source-ai-tmux-stack-plan.md           # Two-tier umbrella blueprint for waymux / lazygitrs / wm
 │
 ├── shell/                         # 🐚 Shell, ZLE & Waymaker Pickers
@@ -118,7 +119,7 @@ When reviewing or updating dotfiles, verify synchronicity between code and docs:
 | `zsh/.zsh/utils/functions.zsh` | `docs/architecture/zero-friction-file-transfer-benchmark.md` | `pt`, `ptg`, `ptl`, `mt`, `mtg`, `mtl`, `j`, `ji` flags and timings |
 | `zsh/.zsh/utils/aliases.zsh` | `docs/architecture/workflow-keybindings-matrix.md` | Shell alias bindings and mnemonic shortcuts |
 | `lazygitrs/.../popup.yaml` | `docs/architecture/workflow-keybindings-matrix.md` | In-TUI keys (`<c-g>`, `<c-s>`, `<c-f>`, `-`, `,`, `.`, `<`, `>`) |
-| `tmux/.config/tmux/tmux.conf` | `docs/architecture/workflow-keybindings-matrix.md` & `docs/tmux/` | Prefix chords, popup dimensions, and options (`status-interval 0`) |
+| `tmux/.config/tmux/tmux.conf` | `docs/architecture/workflow-keybindings-matrix.md` & `docs/tmux/` | Prefix chords, popup dimensions, options (`status-interval 0`), and `key-telemetry.py` / `keybindings-items.sh` sync |
 | `tmux/.config/tmux/*-popup.sh` | `docs/tmux/popups-ergonomics-and-golden-ratio.md` | Popup widths/heights, `-T` icon badges, and Omarchy theme colors |
 | `omarchy/.../colors.toml` | `docs/theme/system-theme.md` | Color token mapping and template compilation pipeline |
 
