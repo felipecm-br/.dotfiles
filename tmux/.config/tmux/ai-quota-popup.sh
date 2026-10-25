@@ -43,8 +43,8 @@ if [ -z "${TMUX_POPUP:-}" ] && [ -n "${TMUX:-}" ]; then
 
   ORIGIN_SESSION=$(tmux display-message -p '#{session_id}' 2>/dev/null || true)
   exec tmux display-popup \
-    -S "fg=$POPUP_COLOR,bg=default" \
-    -s "bg=default,fg=default" \
+    -S "fg=$POPUP_COLOR" \
+    -s "fg=${TMUX_POPUP_TEXT_COLOR:-default}" \
     -b rounded \
     -T " 󰓅 ${badge:+ $badge }" \
     $(popup_gradient_flags BORDER_GRADIENT) \
