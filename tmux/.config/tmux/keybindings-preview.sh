@@ -414,10 +414,12 @@ EOF
   shell-lazygitrs|tmux-lazygitrs)
     cat <<'EOF'
 ### 󰊢 Lazygitrs Floating Popup (`Ctrl + G`)
-Instant Git cockpit in a floating popup modal.
+Instant Git cockpit in a floating popup modal (`lazygitrs -d -c popup`, opening directly in fullscreen patch/diff mode when the tree is dirty).
 
-- **Dual-Diff Toggle**: Press `Ctrl + G` inside the popup to toggle between modified Files and HEAD commit diff.
-- Runs without losing your terminal cursor position.
+- **Turbo Hunk Staging (`Space`)**: Stages/unstages the active hunk and auto-advances to the next hunk ($H=0$).
+- **Quick Note for AI Agent (`Ctrl + N`)**: Anchors to the active `[file:line]` (or selected file), saves to `.git/info/lines.json`, and immediately dispatches the prompt to the active AI agent pane.
+- **Batch Inline Review Notes (`c` $\rightarrow$ `S`)**: Queue line-by-line review notes with `c` and batch-dispatch them with `S` (or `r` from the Cockpit HUD).
+- **Dual-Diff Toggle (`Ctrl + G`)**: Toggles inside the popup between uncommitted Working Tree changes and the `HEAD` commit diff.
 EOF
     ;;
 

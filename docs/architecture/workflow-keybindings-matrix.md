@@ -157,9 +157,10 @@ This document provides a comprehensive audit and definitive reference of all key
 | **`r` / `R`** | Commits Panel | **Rename Commit:** `r` renames in-place; `R` opens default `$EDITOR`. |
 | **`g`** | Commits Panel | **Reset Options:** Soft, mixed, or hard reset menu. |
 
-#### 4.4 Diff Review & Hunk Navigation
+#### 4.4 Diff Review & Hunk Navigation (Turbo Patch Mode)
 | Keybinding | Scope | Behavior |
 | :--- | :--- | :--- |
+| **`Space`** | Diff View | **Turbo Hunk Staging:** Stages (or unstages) the active hunk and **auto-advances** selection to the next hunk (`cycle_next_revert_hunk`). |
 | **`{` / `}`** | Diff View | Cycles between change hunks backwards / forwards. |
 | **`[` / `]`** | Diff View | Switches view between Old side only, New side only, or Side-by-Side. |
 | **`Enter`** | Diff View | **Revert Block:** Reverts hovered or selected diff block in working tree. |
@@ -169,11 +170,12 @@ This document provides a comprehensive audit and definitive reference of all key
 #### 4.5 AI Review Notes Workflow & Worktree Isolation
 | Keybinding | Scope | Action & Mechanics |
 | :--- | :--- | :--- |
-| **`c`** | Diff View / Note | **Create Note:** Creates inline review comment on hovered line (or adds note to selected line). |
+| **`Ctrl + N`** (`<c-n>`) | Diff / Files | **Quick Note for AI Agent (`quickAiNote`):** Opens a 1-step prompt modal pre-anchored to `[file:line]` (in Diff View) or `[file]` (in Files / CommitFiles), saves the note to `.git/info/lines.json`, and **immediately dispatches** it to the active AI agent pane. |
+| **`c`** | Diff View / Note | **Create Inline Note (Queue):** Creates an inline review comment (`status: New`) on the hovered/selected line without dispatching immediately, allowing multi-hunk/multi-file batch review. |
 | **`n` / `N`** | Diff View | **Cycle Notes:** Jumps to next (`n`) or previous (`N`) review note in current diff. |
 | **`y`** | Note Selected | **Yank / Copy Note:** Copies full note text to system clipboard with a 500ms Neovim-style flash highlight. |
-| **`S`** (Shift+S) | Note Selected | **Send to AI:** Dispatches note to active AI session via SSE, TUI push, or `notifyCommand`. Marks note as `sent`. |
-| **`r` / `R`** | Note Selected | **Reset Note Status:** Resets note status from `sent`/`addressed` back to `new`. |
+| **`S` / `A` / `R`** | Diff View / Note | **Batch Send to AI:** Formats all pending (`New`) notes in `.git/info/lines.json` into a numbered review prompt, dispatches to the active AI session (via ACP HTTP, SSE, or `agent-note.sh` Tmux bracketed paste), and marks them `Sent`. (Also triggered via `r` from the Cockpit HUD). |
+| **`r`** | Note Selected | **Reset Note Status:** Resets the selected note's status from `Sent`/`Addressed` back to `New`. |
 | **`d`** | Note Selected | **Delete Note:** Removes review note from `.git/info/lines.json` with fallback selection to adjacent note. |
 | **`Enter` / `o`** | Note Selected | **View Note Details:** Opens modal popup displaying author, timestamp, status, and full markdown text. |
 | *Automated* | Worktree Root | **Worktree Port Isolation (`.lazygitrs.port`):** Each worktree writes its dynamic port to `.lazygitrs.port`, isolating concurrent agent sessions. |
@@ -227,11 +229,12 @@ The table below consolidates the definitive keybindings across all layers, audit
 | **`[` / `]`** | Lazygitrs Diff | Old / New / Both Diff Side Switch | Right Pinky reach to bracket keys | $120\text{ ms}$ | Fast inspection of individual file revisions. |
 | **`Enter`** (in diff) | Lazygitrs Diff | Revert Hovered Diff Block | Right Pinky tap on Enter | $100\text{ ms}$ | Immediate hunk rejection during review. |
 | **`u`** (in diff) | Lazygitrs Diff | Undo Last Revert Block | Right Index reach up to `u` | $110\text{ ms}$ | Safety net: instant recovery of accidental hunk reverts. |
-| **`c`** | Lazygitrs Diff | Create Inline Review Note | Left Middle reach down to `c` | $110\text{ ms}$ | Initiates inline comment on active line for AI review. |
+| **`Ctrl + N`** | Lazygitrs Diff/Files| Quick Note for AI Agent (1-Step Send) | CapsLock (Pinky) + N (Right Index) | $130\text{ ms}$ | Anchors to `[file:line]`, saves to `.lines.json`, and dispatches immediately to AI pane. |
+| **`c`** | Lazygitrs Diff | Create Inline Review Note (Queue) | Left Middle reach down to `c` | $110\text{ ms}$ | Queues inline comment (`New`) on active line for multi-note batch review. |
 | **`n` / `N`** | Lazygitrs Diff | Cycle Next / Prev Review Note | Right Index reach to `n` / Shift + `N` | $110\text{ ms}$ / $140\text{ ms}$ | Standard search-next convention for review note navigation. |
 | **`y`** (on note) | Lazygitrs Diff | Yank / Copy Note to Clipboard | Right Index reach up to `y` | $110\text{ ms}$ | Neovim-style 500ms flash feedback; copies full note text. |
-| **`S`** (Shift+S) | Lazygitrs Diff | Send Note to Active AI Session | Left Pinky (Shift) + Left Ring (S) | $140\text{ ms}$ | `S` = Send / Submit. Notifies AI via dynamic `.lazygitrs.port`. |
-| **`r` / `R`** (on note)| Lazygitrs Diff | Reset Note Status to `New` | Left Index reach up to `r` | $110\text{ ms}$ | Enables re-reviewing or re-dispatching notes to agent. |
+| **`S` / `A` / `R`** | Lazygitrs Diff | Batch Send Pending Notes to AI | Left Pinky (Shift) + Left Ring (`S`) | $140\text{ ms}$ | `S` = Send / Submit all `New` notes to active AI session (`Sent`). |
+| **`r`** (on note)| Lazygitrs Diff | Reset Selected Note Status to `New` | Left Index reach up to `r` | $110\text{ ms}$ | Enables re-reviewing or re-dispatching a specific note to agent. |
 | **`d`** (on note) | Lazygitrs Diff | Delete Review Note | Left Middle tap on Home Row `d` | $100\text{ ms}$ | Destructive single-note dismissal with auto-selection of next note. |
 | **`Enter` / `o`** | Lazygitrs Diff | View Note Full Details Popup | Right Pinky tap / Right Ring reach | $100\text{ ms}$ / $110\text{ ms}$ | Full markdown rendering of rationale, author, and timestamp. |
 | **`Esc`** | Lazygitrs Global | Hierarchical Context Unwind / Cockpit Return | Left Pinky tap (keyd CapsLock tap) | $100\text{ ms}$ | $H=0$. In diff: unwinds to Files panel. At Files panel: returns to Cockpit (code 10) or dismisses standalone popup (code 0). |

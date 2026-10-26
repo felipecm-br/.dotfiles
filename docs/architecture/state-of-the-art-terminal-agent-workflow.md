@@ -153,7 +153,7 @@ The Waymux daemon (`waymux daemon`) is an asynchronous Rust daemon communicating
 - **Spatial PipeWire Audio Telemetry:** Non-blocking auditory feedback (`pw-play`) with distinct cues when tasks complete or require interactive feedback. Permission, question, stalled and error cues play immediately. The completion chime (most of the sound volume) is skipped when a focused client shows that pane, otherwise it waits for a 2 s typing pause (capped at 15 s), and agents finishing meanwhile share one chime (Iqbal & Bailey 2008: interruptions delivered at breakpoints cost less).
 - **100% Event-Driven Status Bar:** Tmux runs with `status-interval 0`. State updates are pushed instantly via `tmux set-option -w` and `refresh-client -S`, consuming 0.0% CPU when idle.
 
-### 3.4 Bidirectional AI Code-Review Loop (`lazygitrs`)
+### 3.4 Bidirectional AI Code-Review Loop & Turbo Hunk Staging (`lazygitrs`)
 
 Closing the gap between agent diff production and human verification:
 
@@ -168,14 +168,46 @@ Closing the gap between agent diff production and human verification:
 │     hud.rs               │ 15 +    socket.set_read_timeout(Some(Duration::from_secs(5)))│
 │   * orchestrator.rs      │ 16      let resp = socket.read_response()?;                 │
 ├──────────────────────────┴─────────────────────────────────────────────────────────────┤
-│ Actions: Ctrl+G Dual-Diff │ c Add Note │ Enter View Note │ r/R Reset │ S Send │ g Cockpit │
+│ Space Stage Hunk │ Enter Revert │ Ctrl+N Quick AI Note │ c Queue Note │ S Send Batch   │
 └────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-- **Fast Startup (~2 ms `--version`):** Instant Rust binary startup with zero Electron or Node overhead.
-- **Dual-Diff Toggle (`Ctrl+G`):** Instantly toggles between viewing uncommitted working tree diffs and reviewing commits against `HEAD` or target base branch.
-- **Inline Review Notes (`.git/info/lines.json`):** Pressing `c` on any diff line (or visual range `v`) opens an inline comment prompt. Notes are stored cleanly inside `.git/info/lines.json` (with XDG fallback) with file path, line range, and instruction text.
-- **Direct & Cockpit Review Dispatch (`S` in `lazygitrs` / `r` in Cockpit):** Pressing `S` inside `lazygitrs` dispatches notes directly to the active AI agent pane via HTTP TUI push, SSE, or bracketed paste. Furthermore, the Cockpit HUD preview pane surfaces `󰆈 Pending AI Review Notes (N)` and allows batch-dispatching all pending notes directly from Cockpit via `r` (`R` in the Cockpit reaps stale agents; it does not clear notes).
+- **Fast Startup (~2 ms `--version`) & Patch-Mode Launch (`-d`):** `lazygitrs-popup.sh` launches `lazygitrs -d -c popup`, opening directly in fullscreen Diff / Patch view with the first hunk (`hunk 0`) pre-selected when uncommitted changes exist (or auto-switching to `--commits` when the working tree is clean).
+- **Turbo Hunk Staging (`Space` in Diff View):** Pressing `Space` ($H=0$ thumb tap, $100\text{ ms}$) stages (or unstages) the currently selected/hovered hunk (`stage_selected_file_hunk`) and **automatically advances** selection to the next hunk (`cycle_next_revert_hunk`). Unwanted blocks can be immediately reverted with `Enter` (and recovered via the session undo stack with `u`), while `{` / `}` manually steps backward or forward across hunks.
+- **Dual-Diff Toggle (`Ctrl+G`):** Instantly toggles between viewing uncommitted working tree diffs (`Files`) and reviewing the latest commit against `HEAD`.
+- **Two-Speed AI Review Note Workflows:**
+  1. **1-Step Quick Note for AI Agent (`Ctrl+N` / `<c-n>`):** Works in both the **Diff View** (automatically anchoring to `[file:line]` on the active/hovered diff line) and the **Files / CommitFiles** lists (anchoring to `[file]`). Opens the *"Quick Note for AI Agent"* modal (`PopupState::Input`); pressing `Enter` saves the note to `.git/info/lines.json` and **immediately dispatches** it to the active AI agent pane in a single action.
+  2. **Multi-Note Batch Queue (`c` $\rightarrow$ `S` / `A` / `R` or Cockpit `r`):** When reviewing a larger multi-hunk or multi-file diff, pressing `c` on any diff line queues an inline review note (`status: New`) in `.git/info/lines.json` without interrupting your review flow. Once you finish staging good hunks with `Space`, pressing `S` (or `A` / `R`) inside `lazygitrs`—or `r` from the Cockpit HUD (`Prefix + Space`)—bundles all `New` notes into a single numbered prompt, dispatches them to the agent pane, and marks them `Sent` (press `r` on a selected note in `lazygitrs` to reset its status back to `New`).
+- **4-Tier Agent Pane Delivery Bridge (`agent-note.sh` & `waymux review-notes`):** Dispatches notes via ACP HTTP push / SSE or Tmux bracketed paste (`tmux load-buffer` + `paste-buffer -p`), resolving the target agent pane via: (A) `TMUX_ORIGIN_PANE` if it runs an AI agent, (B) any AI agent pane (`agy`, `claude`, `codex`, `opencode`, `muse`) in `TMUX_ORIGIN_SESSION`, (C) a non-editor pane matching the worktree path in the current session, or (D) a global path-matched agent pane across all Tmux sessions.
+
+```mermaid
+flowchart TD
+    Open["Press Ctrl+G (or g in Cockpit)<br/>Opens lazygitrs -d -c popup in Fullscreen Diff"] --> Hunk["Inspect Active Hunk<br/>({ / } or j / k to navigate)"]
+
+    Hunk --> Decision{"Hunk Verdict?"}
+
+    Decision -- "Approve Hunk<br/>Press Space (H=0)" --> Stage["Turbo Hunk Stage:<br/>Stages hunk & auto-advances<br/>to next hunk"]
+    Stage --> MoreHunks{"More Hunks?"}
+
+    Decision -- "Reject Block<br/>Press Enter" --> Revert["Reverts diff block in working tree<br/>(Press u to undo revert)"]
+    Revert --> MoreHunks
+
+    Decision -- "Single Fast Fix<br/>Press Ctrl+N" --> QuickNote["Quick Note for AI Agent Modal<br/>Auto-anchored to [file:line]"]
+    QuickNote --> QuickSend["Press Enter:<br/>Saves to .git/info/lines.json &<br/>dispatches immediately to AI Pane"]
+
+    Decision -- "Multi-Item Review<br/>Press c on line" --> QueueNote["Adds Inline Note (status: New)<br/>in .git/info/lines.json"]
+    QueueNote --> MoreHunks
+
+    MoreHunks -- "Yes" --> Hunk
+    MoreHunks -- "Done reviewing" --> HasQueued{"Pending 'New' Notes?"}
+
+    HasQueued -- "Yes: Press S in lazygitrs<br/>(or r in Cockpit HUD)" --> BatchSend["Formats numbered batch prompt,<br/>marks notes 'Sent' & injects into AI Pane"]
+    HasQueued -- "No (All good hunks staged)" --> Commit["Press C to Commit<br/>(or G for AI Commit Message)"]
+
+    QuickSend --> Agent["AI Agent Pane (agy / claude / codex)<br/>Receives prompt via bracketed paste,<br/>applies fix & runs tests"]
+    BatchSend --> Agent
+    Agent --> Open
+```
 
 ### 3.5 Smart Window Lifecycle, Topology Snapshot & Safe Pruning
 
