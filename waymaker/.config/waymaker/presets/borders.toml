@@ -9,7 +9,7 @@ min = 15
 max = 85
 
 [footer]
-content = " {cyan,bold:Enter} {darkgray:Salvar} {darkgray:│} {cyan,bold:j/k} {darkgray:Estilo} {darkgray:│} {cyan,bold:h/l} {darkgray:Velocidade} {darkgray:│} {cyan,bold:r} {darkgray:Girar Ângulo} {darkgray:│} {cyan,bold:Esc} {darkgray:Cancelar}"
+content = " {cyan,bold:Enter} {darkgray:Apply} {darkgray:│} {cyan,bold:j/k} {darkgray:Style} {darkgray:│} {cyan,bold:h/l} {darkgray:Speed} {darkgray:│} {cyan,bold:r} {darkgray:Angle} {darkgray:│} {cyan,bold:Esc} {darkgray:Exit}"
 row_connection = "Full"
 match_indent = false
 separator = "light"

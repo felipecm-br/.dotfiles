@@ -56,7 +56,7 @@ additional = [
 ]
 
 [footer]
-content = " {cyan,bold:Enter} {darkgray:Selecionar} {darkgray:│} {cyan,bold:Tab} {darkgray:Filtro (Todos ↔ Temas ↔ Presets)} {darkgray:│} {cyan,bold:j/k} {darkgray:Navegar} {darkgray:│} {cyan,bold:C-l/h} {darkgray:Modo Vim} {darkgray:│} {cyan,bold:C-d} {darkgray:Deletar preset} {darkgray:│} {cyan,bold:Esc} {darkgray:Cancelar}"
+content = " {cyan,bold:Enter} {darkgray:Select} {darkgray:│} {cyan,bold:Tab} {darkgray:Filter} {darkgray:│} {cyan,bold:j/k} {darkgray:Move} {darkgray:│} {cyan,bold:C-l/h} {darkgray:Vim Mode} {darkgray:│} {cyan,bold:C-d} {darkgray:Delete} {darkgray:│} {cyan,bold:Esc} {darkgray:Exit}"
 row_connection = "Full"
 match_indent = false
 separator = "light"

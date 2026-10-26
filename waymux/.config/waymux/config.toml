@@ -10,6 +10,7 @@ idle_debounce_ms = 650
 log_level = "info"
 # Since 0.2.4 the daemon runs the flow telemetry hook only when it is named here.
 flow_log_hook = "~/.config/tmux/flow-log.sh"
+keylog = true
 
 [sound]
 enabled = true

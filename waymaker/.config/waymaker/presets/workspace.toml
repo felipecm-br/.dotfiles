@@ -125,7 +125,7 @@ color = "Darkgray"
 title_fg = "Cyan"
 
 [footer]
-content = " {cyan,bold:Enter} {darkgray:Full} {darkgray:│} {cyan,bold:Tab} {darkgray:Cycle} {darkgray:│} {cyan,bold:C-h/l} {darkgray:Dir} {darkgray:│} {cyan,bold:C-j/k} {darkgray:Move} {darkgray:│} {cyan,bold:C-d/u} {darkgray:Scroll} {darkgray:│} {cyan,bold:C-v} {darkgray:Insert} {darkgray:│} {cyan,bold:C-e} {darkgray:Edit} {darkgray:│} {cyan,bold:C-y} {darkgray:Copy} {darkgray:│} {cyan,bold:Esc} {darkgray:Exit}"
+content = " {cyan,bold:Enter} {darkgray:Full} {darkgray:│} {cyan,bold:Tab} {darkgray:Cycle} {darkgray:│} {cyan,bold:C-h/l} {darkgray:Dir} {darkgray:│} {cyan,bold:C-d/u} {darkgray:Scroll} {darkgray:│} {cyan,bold:C-v} {darkgray:Insert} {darkgray:│} {cyan,bold:C-e} {darkgray:Edit} {darkgray:│} {cyan,bold:C-y} {darkgray:Copy}"
 match_indent = false
 row_connection = "Full"
 separator = "light"
@@ -137,10 +137,10 @@ abort_empty = true
 
 [start.command]
 command = ""
-# Fontes de dados cicláveis via @reloadnext (Tab / Shift+Tab):
-# Índice 0: "" -> Usa AsyncWalker nativo para pasta/arquivos locais.
-# Índice 1: Lista global por frecência via wm list.
-# Índice 2: Lista exclusiva de favoritos via wm list --bookmarks.
+# Cyclable data sources via @reloadnext (Tab / Shift+Tab):
+# Index 0: "" -> Uses native AsyncWalker for local directory/files.
+# Index 1: Global frecency list via wm list.
+# Index 2: Starred bookmarks list via wm list --bookmarks.
 additional = [
     "",
     "wm list 2>/dev/null",

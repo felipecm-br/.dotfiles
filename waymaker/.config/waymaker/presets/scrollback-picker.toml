@@ -84,7 +84,7 @@ debounce_ms = 200
 delay_clear = true
 
 [footer]
-content = " {cyan,bold:Enter} {darkgray:Yank} {darkgray:│} {cyan,bold:Tab} {darkgray:Filter} {darkgray:│} {cyan,bold:C-v} {darkgray:Insert} {darkgray:│} {cyan,bold:C-e} {darkgray:Open} {darkgray:│} {cyan,bold:C-b} {darkgray:Chrome} {darkgray:│} {cyan,bold:J/K} {darkgray:Scroll} {darkgray:│} {cyan,bold:Space} {darkgray:Multi} {darkgray:│} {cyan,bold:Esc} {darkgray:Exit}"
+content = " {cyan,bold:Enter} {darkgray:Yank} {darkgray:│} {cyan,bold:Tab} {darkgray:Filter} {darkgray:│} {cyan,bold:C-v} {darkgray:Insert} {darkgray:│} {cyan,bold:C-e} {darkgray:Open} {darkgray:│} {cyan,bold:C-b} {darkgray:Chrome} {darkgray:│} {cyan,bold:J/K} {darkgray:Scroll} {darkgray:│} {cyan,bold:Space} {darkgray:Multi}"
 match_indent = false
 row_connection = "Full"
 separator = "light"

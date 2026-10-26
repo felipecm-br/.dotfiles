@@ -123,7 +123,7 @@ The Cockpit HUD is the central control plane, bound to `Prefix + Space` (`85% ×
 │ 󰔟  3   web · codex: Add tests       fix/tests ↑1    +5 -1       4m                     │
 │ ·  4   nvim                         main ✓          clean       12m                    │
 ├────────────────────────────────────────────────────────────────────────────────────────┤
-│ Enter Jump │ y/n Ack │ r Review │ i Input │ g Git │ a Agents │ Tab Worktrees │ ? Help │ Esc Exit │
+│ Enter Jump │ y/n Ack │ r Notes │ i Input │ g Git │ a Agents │ ? Help                   │
 └────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 

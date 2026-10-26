@@ -190,23 +190,23 @@ Every interactive popup, picker, and confirmation dialog has been harmonized und
 
 | Scope | Preset / Script | Uniform Footer Contract |
 | :--- | :--- | :--- |
-| **Cockpit HUD** | [`cockpit-picker.toml`](../../waymaker/.config/waymaker/presets/cockpit-picker.toml) | `{cyan,bold:Enter} Jump │ y/n Ack │ r Review │ i Input │ g Git │ a Agents │ Tab Worktrees │ ? Help │ Esc Exit` |
+| **Cockpit HUD** | [`cockpit-picker.toml`](../../waymaker/.config/waymaker/presets/cockpit-picker.toml) | `{cyan,bold:Enter} Jump │ y/n Ack │ r Notes │ i Input │ g Git │ a Agents │ ? Help` |
 | **AWT Worktrees** | [`awt.toml`](../../awt/.config/waymaker/presets/awt.toml) | `{cyan,bold:Enter} Connect │ Tab Cockpit │ c New │ S Ship │ m Merge │ R Rebase │ P PR │ d Delete │ p Preview │ Esc Exit` |
 | **AWT PR Review** | [`awt-pr.toml`](../../awt/.config/waymaker/presets/awt-pr.toml) | `{cyan,bold:Enter} Checkout │ Tab Cycle Tab │ C-e Chrome │ C-d Diff │ p Preview │ Esc Exit` |
 | **AWT Sub-Wizards** | `awt-prompt`, `awt-ai`, `awt-base`, `awt-type` | `{cyan,bold:Enter} Confirm/Select │ Esc Back/Cancel` |
 | **AI Agent Launcher** | [`ai-launch.toml`](../../waymaker/.config/waymaker/presets/ai-launch.toml) | `{cyan,bold:Enter} Launch │ ★ Recommended │ type Filter │ Esc Shell` |
 | **AI Quota Telemetry** | [`ai-quota-popup.sh`](../../tmux/.config/tmux/ai-quota-popup.sh) | `{cyan,bold:Enter} Launch (<auto>) │ a Model Menu │ r Refresh │ u / q / Esc Exit` |
 | **Tmux Windows** | [`window-picker.toml`](../../waymaker/.config/waymaker/presets/window-picker.toml) | `{cyan,bold:Enter} Switch │ t Sessions │ / Filter │ n New │ d Kill │ ? Help │ Esc Exit` |
-| **Tmux Sessions** | [`session-picker.toml`](../../waymaker/.config/waymaker/presets/session-picker.toml) | `{cyan,bold:Enter} Menu │ r Auto │ a Agy │ c Claude │ u Quota │ s Cockpit │ Tab Cycle │ / Filter │ d Kill │ Esc Exit` |
-| **Live Ripgrep** | [`rg.toml`](../../waymaker/.config/waymaker/presets/rg.toml) | `{cyan,bold:Enter} Nvim │ C-v Insert │ y Copy │ J/K Scroll │ C-/ Layout │ C-s Case │ C-w Word │ Esc Exit` |
-| **Workspace / Files** | [`workspace.toml`](../../waymaker/.config/waymaker/presets/workspace.toml) | `{cyan,bold:Enter} Full │ Tab Cycle │ C-h/l Dir │ C-j/k Move │ C-d/u Scroll │ C-v Insert │ C-e Edit │ C-y Copy │ Esc Exit` |
+| **Tmux Sessions** | [`session-picker.toml`](../../waymaker/.config/waymaker/presets/session-picker.toml) | `{cyan,bold:Enter} Menu │ r Auto │ a/c Agy/Claude │ u Quota │ s Cockpit │ Tab Cycle │ d Kill` |
+| **Live Ripgrep** | [`rg.toml`](../../waymaker/.config/waymaker/presets/rg.toml) | `{cyan,bold:Enter} Nvim │ C-v Insert │ y Copy │ J/K Scroll │ C-/ Layout │ C-s Case │ C-w Word` |
+| **Workspace / Files** | [`workspace.toml`](../../waymaker/.config/waymaker/presets/workspace.toml) | `{cyan,bold:Enter} Full │ Tab Cycle │ C-h/l Dir │ C-d/u Scroll │ C-v Insert │ C-e Edit │ C-y Copy` |
 | **Keybindings HUD** | [`keybindings.toml`](../../waymaker/.config/waymaker/presets/keybindings.toml) | `{cyan,bold:Enter} Run │ Tab Filter │ y Copy │ J/K Scroll │ Esc Exit` |
 | **Command Palette** | [`command-palette.toml`](../../waymaker/.config/waymaker/presets/command-palette.toml) | `{cyan,bold:Enter} Run │ Tab Filter │ Ctrl+O Cmds │ Ctrl+Y Copy Key │ Ctrl+J/K Move │ Esc Close` |
-| **Scrollback Buffer** | [`scrollback-picker.toml`](../../waymaker/.config/waymaker/presets/scrollback-picker.toml) | `{cyan,bold:Enter} Yank │ Tab Filter │ C-v Insert │ C-e Open │ C-b Chrome │ J/K Scroll │ Space Multi │ Esc Exit` |
+| **Scrollback Buffer** | [`scrollback-picker.toml`](../../waymaker/.config/waymaker/presets/scrollback-picker.toml) | `{cyan,bold:Enter} Yank │ Tab Filter │ C-v Insert │ C-e Open │ C-b Chrome │ J/K Scroll │ Space Multi` |
 | **Process Killer** | [`kill.toml`](../../waymaker/.config/waymaker/presets/kill.toml) | `{cyan,bold:Enter} SIGTERM (15) │ C-x SIGKILL (-9) │ C-p Toggle Preview` |
 | **System Sounds** | [`sounds.toml`](../../waymaker/.config/waymaker/presets/sounds.toml) | `{cyan,bold:Enter} Set Sound │ p / Space Replay │ Esc / q Quit` |
-| **Hyprland Borders** | [`borders.toml`](../../waymaker/.config/waymaker/presets/borders.toml) | `{cyan,bold:Enter} Salvar │ j/k Estilo │ h/l Velocidade │ r Girar Ângulo │ Esc Cancelar` |
-| **Starship Presets** | [`starship-presets.toml`](../../waymaker/.config/waymaker/presets/starship-presets.toml) | `{cyan,bold:Enter} Selecionar │ j/k Navegar │ C-l/h Modo Vim │ Esc Cancelar` |
+| **Hyprland Borders** | [`borders.toml`](../../waymaker/.config/waymaker/presets/borders.toml) | `{cyan,bold:Enter} Apply │ j/k Style │ h/l Speed │ r Angle │ Esc Exit` |
+| **Starship Presets** | [`starship-presets.toml`](../../waymaker/.config/waymaker/presets/starship-presets.toml) | `{cyan,bold:Enter} Select │ Tab Filter │ j/k Move │ C-l/h Vim Mode │ C-d Delete │ Esc Exit` |
 | **Guard Modals** | [`close-session.sh`](../../tmux/.config/tmux/close-session.sh), [`close-window.sh`](../../tmux/.config/tmux/close-window.sh) | `y Kill ... │ n / Esc Keep ...` (hairline `│` divider) |
 | **Picker Kill Confirm** | [`confirm-modal.sh`](../../tmux/.config/tmux/confirm-modal.sh) (called by `window-picker-delete.sh` for `d` on a session row or a multi-window selection; replaces `gum confirm`) | `y Kill ... │ n / Esc Keep ...` (same guard-modal look; exit 0 = confirmed) |
 

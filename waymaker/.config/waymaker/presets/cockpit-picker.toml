@@ -65,7 +65,7 @@ prompt = " "
 show = true
 
 [footer]
-content = " {cyan,bold:Enter} {darkgray:Jump} {darkgray:│} {cyan,bold:y/n} {darkgray:Ack} {darkgray:│} {cyan,bold:r} {darkgray:Review} {darkgray:│} {cyan,bold:i} {darkgray:Input} {darkgray:│} {cyan,bold:g} {darkgray:Git} {darkgray:│} {cyan,bold:a} {darkgray:Agents} {darkgray:│} {cyan,bold:Tab} {darkgray:Worktrees} {darkgray:│} {cyan,bold:?} {darkgray:Help} {darkgray:│} {cyan,bold:Esc} {darkgray:Exit}"
+content = " {cyan,bold:Enter} {darkgray:Jump} {darkgray:│} {cyan,bold:y/n} {darkgray:Ack} {darkgray:│} {cyan,bold:r} {darkgray:Notes} {darkgray:│} {cyan,bold:i} {darkgray:Input} {darkgray:│} {cyan,bold:g} {darkgray:Git} {darkgray:│} {cyan,bold:a} {darkgray:Agents} {darkgray:│} {cyan,bold:?} {darkgray:Help}"
 row_connection = "Full"
 match_indent = false
 separator = "light"
