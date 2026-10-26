@@ -59,7 +59,7 @@ workspace "cockpit"  (tightly coupled toolchain: shared contracts, keybindings, 
 
 workspace "side"     (independent products; no shared contracts)
   ├─ felipecm-br.starship-studio
-  └─ nerdsight      (remote host, see section 5; marker not yet added)
+  └─ nerdsight      (remote host, see section 6; marker not yet added)
 ```
 
 Why this split:
@@ -103,7 +103,7 @@ Per-repo markers win for repos you own; use home routes only for repos where you
 | Where did we leave off | ask the agent: "catch me up" | Handoff + optional on-start brief |
 | Diagnose capture | `ai-memory doctor` | Reports marker routing, missing hooks, leftover configs |
 | Prune noise | `ai-memory-clean --apply` | Existing helper in `utils/` |
-| Update | `ai-update --only ai-memory` | See section 6 |
+| Update | `ai-update --only ai-memory` | See section 7 |
 
 Per-repo opt-in worth enabling when sessions start cold:
 
@@ -119,7 +119,28 @@ the marker's `[briefing]` keys (compiled project brief at SessionStart, costs to
 
 ---
 
-## 5. Remote Projects (nerdsight)
+## 5. Capture Wiring & Verification
+
+Hooks are what make capture automatic. They are written into each agent's config, and those configs are **stowed**, so installing hooks edits tracked dotfiles and must be committed.
+
+| Harness | Install | Tracked file touched |
+| :--- | :--- | :--- |
+| Claude Code | `ai-memory install-hooks --agent claude-code --apply` | `claude/.claude/settings.json` (additive; existing `waymux hook …` entries stay) |
+| Antigravity CLI | `ai-memory install-hooks --agent antigravity-cli --apply` | `antigravity/.gemini/config/hooks.json` |
+| OpenCode / Codex / others | `ai-memory run <agent>` wires hooks + MCP on first launch | none or per-agent config |
+
+Hooks load at session start: open a **new** session after installing. Verify with `ai-memory doctor`:
+
+- `✓ <harness> N local → M captured` means events reach the server.
+- `⚠ … ran here but nothing was captured` means the hook is missing or the session predates it; install it and start a fresh session.
+- `hook spool: N event(s) waiting` is transient flush lag. If it persists, the daemon is down (`systemctl --user status ai-memory.service`). Nothing is lost: the spool replays when the server returns.
+- `auth: none (loopback)` is acceptable while bound to `127.0.0.1`; run `ai-memory auth enable` before any tunnel or LAN bind.
+
+Status when this was written: Claude Code and Antigravity confirmed captured for `cockpit/felipecm-br.dotfiles`; codex, copilot-cli and open-code capture on next launch. Sessions that predate the hooks can be imported once with `ai-memory backfill` (new, empty store only).
+
+---
+
+## 6. Remote Projects (nerdsight)
 
 Decision depends on whether nerdsight's history may sit next to the rest of your memory:
 
@@ -132,7 +153,7 @@ Hooks spool locally when the server is unreachable (`ai-memory status` shows `pe
 
 ---
 
-## 6. Updating (and why `ai-update` was stuck)
+## 7. Updating (and why `ai-update` was stuck)
 
 | Symptom | Root cause | Fix (applied) |
 | :--- | :--- | :--- |
@@ -154,7 +175,7 @@ Behavior changes that matter here: new installs create a root bearer token and t
 
 ---
 
-## 7. Stow Hygiene (data directory is a symlink into the repo)
+## 8. Stow Hygiene (data directory is a symlink into the repo)
 
 `~/.local/share/ai-memory` is stowed as a **directory symlink** to `ai-memory/.local/share/ai-memory/`, so the server's runtime state (wiki, SQLite, logs, `auth-tokens/`) would be written inside the dotfiles worktree.
 
@@ -164,7 +185,7 @@ Behavior changes that matter here: new installs create a root bearer token and t
 
 ---
 
-## 8. Open Decisions
+## 9. Open Decisions
 
 | Decision | Recommendation |
 | :--- | :--- |
