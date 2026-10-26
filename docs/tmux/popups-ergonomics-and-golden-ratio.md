@@ -195,7 +195,7 @@ Every interactive popup, picker, and confirmation dialog has been harmonized und
 | **AWT PR Review** | [`awt-pr.toml`](../../awt/.config/waymaker/presets/awt-pr.toml) | `{cyan,bold:Enter} Checkout │ Tab Cycle Tab │ C-e Chrome │ C-d Diff │ p Preview │ Esc Exit` |
 | **AWT Sub-Wizards** | `awt-prompt`, `awt-ai`, `awt-base`, `awt-type` | `{cyan,bold:Enter} Confirm/Select │ Esc Back/Cancel` |
 | **AI Agent Launcher** | [`ai-launch.toml`](../../waymaker/.config/waymaker/presets/ai-launch.toml) | `{cyan,bold:Enter} Launch │ ★ Recommended │ type Filter │ Esc Shell` |
-| **AI Quota Telemetry** | [`ai-quota-popup.sh`](../../tmux/.config/tmux/ai-quota-popup.sh) | `{cyan,bold:Enter} Launch (<auto>) │ a Model Menu │ r Refresh │ u / q / Esc Exit` |
+| **AI Quota Telemetry** | [`ai-quota-popup.sh`](../../tmux/.config/tmux/ai-quota-popup.sh) | `{cyan,bold:Enter} Auto-Launch │ a Model Menu │ r Refresh │ Esc Exit` |
 | **Tmux Windows** | [`window-picker.toml`](../../waymaker/.config/waymaker/presets/window-picker.toml) | `{cyan,bold:Enter} Switch │ t Sessions │ / Filter │ n New │ d Kill │ ? Help │ Esc Exit` |
 | **Tmux Sessions** | [`session-picker.toml`](../../waymaker/.config/waymaker/presets/session-picker.toml) | `{cyan,bold:Enter} Menu │ r Auto │ a/c Agy/Claude │ u Quota │ s Cockpit │ Tab Cycle │ d Kill` |
 | **Live Ripgrep** | [`rg.toml`](../../waymaker/.config/waymaker/presets/rg.toml) | `{cyan,bold:Enter} Nvim │ C-v Insert │ y Copy │ J/K Scroll │ C-/ Layout │ C-s Case │ C-w Word` |

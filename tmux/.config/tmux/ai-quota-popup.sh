@@ -84,12 +84,38 @@ trap 'printf "\033[?25h"' EXIT
 while :; do
   clear
   vis=$(ai-quota --visual 2>/dev/null || true)
-  footer="  ${c_bold}${c_cyan}Enter${c_reset} ${c_muted}Auto-Launch${c_reset} ${c_muted}│${c_reset} ${c_bold}${c_cyan}a${c_reset} ${c_muted}Model Menu${c_reset} ${c_muted}│${c_reset} ${c_bold}${c_cyan}r${c_reset} ${c_muted}Refresh${c_reset} ${c_muted}│${c_reset} ${c_bold}${c_cyan}u${c_reset} ${c_muted}/${c_reset} ${c_bold}${c_cyan}q${c_reset} ${c_muted}/${c_reset} ${c_bold}${c_cyan}Esc${c_reset} ${c_muted}Exit${c_reset}"
-  body=$(printf '\n%s\n\n%s' "$vis" "$footer")
+  body=$(printf '\n%s' "$vis")
   print_modal_body "$body"
   if [ -n "${BORDER_GRADIENT:-}" ]; then
     gradient_frame_draw "$BORDER_GRADIENT" " 󰓅 " "$POPUP_COLOR" || true
   fi
+
+  size=$(stty size < /dev/tty 2>/dev/null || echo "24 80")
+  term_rows="${size% *}"
+  term_cols="${size#* }"
+  [ -z "$term_rows" ] || [ "$term_rows" -lt 10 ] && term_rows=24
+  [ -z "$term_cols" ] || [ "$term_cols" -lt 20 ] && term_cols=80
+
+  if [ -n "${BORDER_GRADIENT:-}" ]; then
+    sep_r=$(( term_rows - 2 ))
+    foot_r=$(( term_rows - 1 ))
+    col=2
+    w=$(( term_cols - 2 ))
+  else
+    sep_r=$(( term_rows - 1 ))
+    foot_r=$term_rows
+    col=1
+    w=$(( term_cols - 1 ))
+  fi
+  [ "$w" -lt 10 ] && w=74
+  sep_line=$(printf '─%.0s' $(seq 1 "$w"))
+  footer=" ${c_bold}${c_cyan}Enter${c_reset} ${c_muted}Auto-Launch${c_reset} ${c_muted}│${c_reset} ${c_bold}${c_cyan}a${c_reset} ${c_muted}Model Menu${c_reset} ${c_muted}│${c_reset} ${c_bold}${c_cyan}r${c_reset} ${c_muted}Refresh${c_reset} ${c_muted}│${c_reset} ${c_bold}${c_cyan}Esc${c_reset} ${c_muted}Exit${c_reset}"
+
+  # Pin Cockpit-style separator line and footer to the bottom of the popup
+  printf '\033[%d;%dH%s%s%s\033[%d;%dH%s\033[%d;%dH' \
+    "$sep_r" "$col" "$c_muted" "$sep_line" "$c_reset" \
+    "$foot_r" "$col" "$footer" \
+    "$foot_r" "$(( col + 1 ))"
 
   IFS= read -rsn1 key || exit 0
   if [[ "$key" == $'\e' ]]; then
@@ -111,7 +137,7 @@ while :; do
       exit 0
       ;;
     r | R)
-      printf '\n  %s⟳ refreshing quota telemetry…%s' "$c_muted" "$c_reset"
+      printf '\033[%d;%dH\033[2K  %s⟳ refreshing quota telemetry…%s' "$foot_r" "$col" "$c_muted" "$c_reset"
       ai-quota --refresh 2>/dev/null || true
       ;;
     q | Q | u | U)
