@@ -10,7 +10,7 @@
     }
   ],
   "artifactReviewPolicy": "always-proceed",
-  "model": "Gemini 3.8 Flash (High)",
+  "model": "Gemini 4 Argon (Medium)",
   "notifications": true,
   "permissions": {
     "allow": [
@@ -18,12 +18,14 @@
       "command(cargo add async-trait)"
     ]
   },
+  "runningLightSpeed": "fast",
   "toolPermission": "always-proceed",
   "trustedWorkspaces": [
     "/home/fecavmi/.dotfiles/main",
     "/home/fecavmi",
     "/home/fecavmi/dev/github/lazygitrs/ai-notes",
     "/home/fecavmi/dev/github/waymux",
+    "/home/fecavmi/dev/github/waymux/main",
     "/home/fecavmi/scratch-test-sesh",
     "/home/fecavmi/dev/github/speco",
     "/home/fecavmi/dev/github/ai-memory",

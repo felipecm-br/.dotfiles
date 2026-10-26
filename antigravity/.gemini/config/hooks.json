@@ -21,7 +21,7 @@
     ],
     "PreInvocation": [
       {
-        "command": "waymux hook tmux PreInvocation",
+        "command": "waymux hook tmux PreInvocation agy",
         "timeout": 0,
         "type": "command"
       },
@@ -41,6 +41,18 @@
           }
         ],
         "matcher": "*"
+      }
+    ],
+    "SessionStart": [
+      {
+        "command": "waymux hook tmux SessionStart agy",
+        "timeout": 0,
+        "type": "command"
+      },
+      {
+        "command": "waymux hook lazygit SessionStart",
+        "timeout": 0,
+        "type": "command"
       }
     ],
     "SessionEnd": [
