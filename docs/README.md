@@ -65,3 +65,4 @@ Welcome to the central documentation index for this Arch Linux + Omarchy dotfile
 - [**AI Jail & Memory Architecture**](articles/ai-jail-memory-guide-en.md): Memory isolation and workspace jail documentation.
 - [**AI Workflow Definitive Analysis**](articles/ai-workflow-definitive-analysis.md): Deep dive into agent tool use and telemetry.
 - [**Multi-Repository AI Memory Architecture**](articles/ai-memory-multi-repo-guide-en.md): Connecting multiple repositories to a centralized memory hub.
+- [**ai-memory in Our Workflow (v3.2.5)**](architecture/ai-memory-workflow.md): Workspace/project topology for dotfiles, waymux, lazygitrs, side projects and remote hosts; update path and stow hygiene.

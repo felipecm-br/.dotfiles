@@ -11,3 +11,7 @@ hypr/.config/hypr/local.lua
 tmux/.config/tmux/theme.path
 tmux/.config/tmux/theme.conf
 fcitx5/.config/fcitx5/profile
+
+# ai-memory runtime state (the data dir is stowed as a symlink into this repo; only config.toml is versioned)
+ai-memory/.local/share/ai-memory/*
+!ai-memory/.local/share/ai-memory/config.toml

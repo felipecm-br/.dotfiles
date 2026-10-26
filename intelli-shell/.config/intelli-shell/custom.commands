@@ -562,7 +562,7 @@ update-ai-workflow -y
 # Force reinstallation or rebuild of all AI workflow dependencies
 update-ai-workflow --all
 
-# Update only a specific AI workflow component (tmux, fonts, codex, agy, claude, devin, opencode)
+# Update only a specific AI workflow component (tmux, fonts, codex, agy, claude, devin, opencode, ai-memory)
 update-ai-workflow --only {{component}}
 
 # Convenient shortcut to update AI workflow dependencies

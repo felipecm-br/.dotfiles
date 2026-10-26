@@ -3,7 +3,7 @@ Description=ai-memory background daemon
 After=network.target
 
 [Service]
-ExecStart=/home/fecavmi/.cargo/bin/ai-memory serve --transport http
+ExecStart=/usr/bin/ai-memory serve --transport http
 Restart=on-failure
 RestartSec=5s
 

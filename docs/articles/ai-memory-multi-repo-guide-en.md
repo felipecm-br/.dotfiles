@@ -2,6 +2,8 @@
 
 This guide describes how to leverage **`ai-memory`** to connect multiple repositories within a project ecosystem (e.g., `frontend`, `backend`, `microservices`) to a centralized documentation and architecture repository.
 
+> Our concrete topology (workspaces, markers, worktrees, remote hosts) is in [ai-memory in Our Workflow](../architecture/ai-memory-workflow.md).
+
 ---
 
 ## 🚀 The Problem Solved

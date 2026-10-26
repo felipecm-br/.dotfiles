@@ -482,15 +482,36 @@ inspect_waymux() {
 }
 
 # 7. AI Memory
+# Installed via AUR (ai-memory-bin, /usr/bin) or cargo (~/.cargo/bin). The latest
+# version is resolved live: AUR for pacman installs (what yay can actually deliver),
+# GitHub releases otherwise.
 inspect_ai_memory() {
-  local cur="missing"
-  if command -v ai-memory &>/dev/null; then
+  local cur="missing" via="cargo"
+  if pacman -Q ai-memory-bin &>/dev/null; then
+    cur=$(pacman -Q ai-memory-bin 2>/dev/null | awk '{print $2}')
+    cur="${cur%%-*}"
+    via="aur"
+  elif command -v ai-memory &>/dev/null; then
     cur=$(ai-memory --version 2>/dev/null | awk '{print $2}' || true)
     cur="${cur##v}"
   fi
-  local lat="1.17.3"
+
+  local lat="$cur" fetched=""
+  if [[ "$via" == "aur" ]]; then
+    fetched=$(curl -fsSL --max-time 4 "https://aur.archlinux.org/rpc/v5/info?arg[]=ai-memory-bin" 2>/dev/null \
+      | grep -o '"Version":"[^"]*"' | head -1 | sed -E 's/.*:"([^"-]+).*/\1/' || true)
+  else
+    fetched=$(curl -fsSL --max-time 4 https://api.github.com/repos/akitaonrails/ai-memory/releases/latest 2>/dev/null \
+      | grep -m1 '"tag_name":' | sed -E 's/.*"v?([^"]+)".*/\1/' || true)
+  fi
+  [[ -n "$fetched" ]] && lat="$fetched"
+
   local status="OK"
-  [[ "$cur" == "missing" ]] && status="MISSING"
+  if [[ "$cur" == "missing" ]]; then
+    status="MISSING"
+  elif [[ "$cur" != "$lat" && "$(printf '%s\n%s\n' "$cur" "$lat" | sort -V | tail -1)" == "$lat" ]]; then
+    status="UPDATE"
+  fi
   record_status "ai-memory" "ai-memory (knowledge store)" "$ICON_AI_MEMORY" "$cur" "$lat" "$status"
 }
 
@@ -836,11 +857,19 @@ update_waymux() {
 }
 
 update_ai_memory() {
-  echo -e "${C_BLUE}${ICON_INFO}${C_RESET} Updating ${C_BOLD}ai-memory${C_RESET} via cargo..."
-  if command -v cargo &>/dev/null; then
-    HOME="$TARGET_HOME" cargo install --git https://github.com/akitaonrails/ai-memory ai-memory-cli || true
-    echo -e "  ${C_GREEN}${ICON_OK}${C_RESET} ai-memory updated successfully"
+  if pacman -Q ai-memory-bin &>/dev/null && command -v yay &>/dev/null; then
+    echo -e "${C_BLUE}${ICON_INFO}${C_RESET} Updating ${C_BOLD}ai-memory${C_RESET} via AUR (ai-memory-bin)..."
+    yay -S --needed --noconfirm ai-memory-bin || return 1
+  elif command -v cargo &>/dev/null; then
+    echo -e "${C_BLUE}${ICON_INFO}${C_RESET} Updating ${C_BOLD}ai-memory${C_RESET} via cargo..."
+    HOME="$TARGET_HOME" cargo install --git https://github.com/akitaonrails/ai-memory ai-memory-cli || return 1
+  else
+    echo -e "  ${C_RED}${ICON_FAIL}${C_RESET} Neither yay nor cargo available for ai-memory"
+    return 1
   fi
+  # Restart the daemon so hooks/MCP talk to the new server binary.
+  systemctl --user try-restart ai-memory.service 2>/dev/null || true
+  echo -e "  ${C_GREEN}${ICON_OK}${C_RESET} ai-memory updated successfully"
 }
 
 update_ai_jail() {
@@ -936,6 +965,7 @@ main() {
   echo -e "${C_BOLD}│  ${C_CYAN}${ICON_WAIT}${C_RESET}${C_BOLD}  EXECUTING AI WORKFLOW UPGRADES                                         │${C_RESET}"
   echo -e "${C_BOLD}╰────────────────────────────────────────────────────────────────────────────╯${C_RESET}\n"
 
+  local failed=()
   needs_update() {
     local key="$1"
     if [[ "$FORCE_ALL" == true ]]; then
@@ -995,7 +1025,7 @@ main() {
   fi
 
   if should_run "ai-memory" && needs_update "ai-memory"; then
-    update_ai_memory
+    update_ai_memory || failed+=("ai-memory")
   fi
 
   if should_run "ai-jail" && needs_update "ai-jail"; then
@@ -1011,6 +1041,10 @@ main() {
   fi
 
   echo ""
+  if (( ${#failed[@]} )); then
+    echo -e "${C_YELLOW}${ICON_WARN}${C_RESET} ${C_BOLD}Update failed for: ${failed[*]}${C_RESET}\n"
+    return 1
+  fi
   echo -e "${C_GREEN}${ICON_OK}${C_RESET} ${C_BOLD}All requested AI workflow updates completed successfully!${C_RESET}\n"
 }
 
