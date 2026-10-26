@@ -10,3 +10,4 @@ apm_modules/
 hypr/.config/hypr/local.lua
 tmux/.config/tmux/theme.path
 tmux/.config/tmux/theme.conf
+fcitx5/.config/fcitx5/profile
