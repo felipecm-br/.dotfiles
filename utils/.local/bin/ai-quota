@@ -136,9 +136,9 @@ agy_events() { # <log dir>: [{ts, reset}] from 429 quota lines in logs touched i
 
 agy_sessions() { # <home>: live agy CLI processes (top-level agy-bin) running under that HOME
   local home=$1 n=0 pid ppid env_home
-  for pid in $(pgrep -x agy-bin 2>/dev/null); do
+  for pid in $(pgrep -x 'agy|agy-bin' 2>/dev/null); do
     ppid=$(awk '{print $4}' "/proc/$pid/stat" 2>/dev/null)
-    [ "$(cat "/proc/$ppid/comm" 2>/dev/null)" = "agy-bin" ] && continue
+    case "$(cat "/proc/$ppid/comm" 2>/dev/null)" in agy | agy-bin) continue ;; esac
     env_home=$(tr '\0' '\n' <"/proc/$pid/environ" 2>/dev/null | sed -n 's/^HOME=//p')
     [ "${env_home:-$HOME}" = "$home" ] && n=$((n + 1))
   done
@@ -231,7 +231,9 @@ agy_api() ( # <home> <label>: per-model quota from fetchAvailableModels, cached 
   if [ -s "$cache" ]; then cat "$cache"; else echo null; fi
 )
 
-agy_bin=false; { command -v agy-bin >/dev/null 2>&1 || [ -x "$HOME/.local/bin/agy-bin" ]; } && agy_bin=true
+# Real Antigravity binary: agy-bin when present, else the first `agy` that is not our PATH wrapper
+agy_bin=false; { command -v agy-bin >/dev/null 2>&1 || [ -x "$HOME/.local/bin/agy-bin" ] ||
+  which -a agy 2>/dev/null | grep -qv "^$HOME/.local/bin/agy$"; } && agy_bin=true
 agyy_ok=false; $agy_bin && [ -s "$AGYY_HOME/.gemini/antigravity-cli/antigravity-oauth-token" ] && agyy_ok=true
 
 # Per-model quota from the API (cached 60 s); never on the statusline path. AI_QUOTA_NO_API=1

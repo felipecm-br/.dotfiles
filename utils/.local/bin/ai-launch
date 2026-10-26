@@ -78,7 +78,7 @@ if $peek && [ "$choice" = "menu" ]; then echo menu; exit 0; fi
 # ── Antigravity model list: `agy models`, cached for a day (refreshed in the background) ──
 if [ -z "$(find "$AGY_MODELS" -mtime -1 2>/dev/null)" ] && command -v agy-bin >/dev/null 2>&1; then
   mkdir -p "$STATE_DIR"
-  (timeout 20 agy-bin models 2>/dev/null | grep -P '^[a-z0-9.-]+\t' >"$AGY_MODELS.tmp" &&
+  (timeout 20 "$AGY_REAL" models 2>/dev/null | grep -P '^[a-z0-9.-]+\t' >"$AGY_MODELS.tmp" &&
     [ -s "$AGY_MODELS.tmp" ] && mv -f "$AGY_MODELS.tmp" "$AGY_MODELS" || rm -f "$AGY_MODELS.tmp") >/dev/null 2>&1 &
 fi
 agy_models=$(cat "$AGY_MODELS" 2>/dev/null)
