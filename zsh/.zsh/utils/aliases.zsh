@@ -11,7 +11,7 @@ alias adopt='bash $HOME/.dotfiles/main/.shell/sh/stow-adopt-path.sh'
 alias oc='exec /usr/bin/opencode'
 alias agy="$HOME/.dotfiles/main/antigravity/.gemini/hooks/agy-wrapper.sh"
 # Claude Code without ai-memory: skips ~/.claude/settings.json (no hooks) and all MCP servers
-alias cnm='claude --setting-sources project,local --strict-mcp-config --mcp-config "{}"'
+alias cnm='claude --setting-sources project,local --strict-mcp-config --mcp-config "{\"mcpServers\":{}}"'
 
 # Quick parent directory traversal
 alias ..='cd ..'
