@@ -70,9 +70,9 @@ Why this split:
 
 ### Markers (committed, one per repository)
 
-Committed on the `main` worktree of `dotfiles`, `waymux` and `waymaker` (local commits `chore: add ai-memory project marker`, not pushed).
+Committed on the `main` worktree of `dotfiles` and `waymux` (local commits `chore: add ai-memory project marker`, not pushed).
 
-**Exception, `lazygitrs`:** `main` tracks upstream and stays marker-free (reset to `origin/main`). Only the `fecavmi` worktree carries `.ai-memory.toml` (`workflow` / `fcmiranda.lazygitrs`), uncommitted and listed in the repo's shared `info/exclude` so it never reaches a commit. Sessions in `lazygitrs/main` are not captured under `workflow`.
+**Exception, `lazygitrs` and `waymaker`:** `main` tracks upstream and stays marker-free (reset to `origin/main`). Only the `fecavmi` worktree carries `.ai-memory.toml` (`workflow` / `fcmiranda.lazygitrs` and `fcmiranda.waymaker`), uncommitted and listed in each repo's shared `info/exclude` so it never reaches a commit. Sessions in their `main` worktrees are not captured under `workflow`.
 
 ```toml
 # <repo>/.ai-memory.toml  (committed; every worktree inherits it)
