@@ -1,4 +1,5 @@
 {
+  "model": "sonnet",
   "hooks": {
     "Notification": [
       {
@@ -200,13 +201,12 @@
       }
     }
   },
-  "model": "sonnet",
-  "theme": "dark",
   "modelSettings": {
     "claude-opus-5-5": {
       "effortLevel": "medium"
     }
   },
+  "theme": "dark",
   "autoMode": {
     "environment": [
       "### Org-wide",
