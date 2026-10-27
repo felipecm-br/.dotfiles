@@ -60,6 +60,7 @@ install_packages \
     intelli-shell \
     mermaid-cli \
     bitwarden-bin \
+    bitwarden-cli \
     hibiki \
     aws-cli-v2 \
     uv \
@@ -70,6 +71,7 @@ install_packages \
     mosh \
     devin \
     claude \
+    hermes \
     ai-quota \
     waymux
 
