@@ -5,6 +5,9 @@
 #                              (non-interactive callers get --auto)
 #   ai-launch --auto           Start the recommended agent and model directly
 #   ai-launch <agent> [args]   Force claude | agy | agyy (extra args pass through, e.g. --model sonnet)
+#   ai-launch jail-claude [args]
+#                              Claude in the ai-jail sandbox with permission prompts off (the menu's
+#                              "Claude Jailed" row); falls back to plain claude where ai-jail cannot start
 #   ai-launch --next <choice> [args]
 #                              Arm a one-shot choice (agent | auto | shell, plus args such as
 #                              --model sonnet) for the next ai-launch (session picker)
@@ -29,10 +32,28 @@ case "${1:-}" in
     exit 0
     ;;
   -h | --help)
-    sed -n '2,17p' "$0" | sed 's/^# \{0,1\}//'
+    sed -n '2,20p' "$0" | sed 's/^# \{0,1\}//'
     exit 0
     ;;
 esac
+
+# Claude in ai-jail with --dangerously-skip-permissions: the project directory is the blast radius.
+# ai-jail fails closed when the global ~/.ai-jail resolves inside the project (the dotfiles repo
+# itself), so that case, and a missing ai-jail, start plain claude with prompts on instead.
+# --no-save-config keeps ai-jail from dropping a .ai-jail file into the project.
+launch_jailed() {
+  local global
+  global=$(readlink -f "$HOME/.ai-jail" 2>/dev/null)
+  if ! command -v ai-jail >/dev/null 2>&1; then
+    printf '\033[33m%s\033[0m\n' "ai-launch: ai-jail not installed, starting claude unjailed (prompts on)" >&2
+  elif [ -n "$global" ] && [[ $global == "$(pwd -P)"/* ]]; then
+    printf '\033[33m%s\033[0m\n' "ai-launch: ~/.ai-jail lives inside this project, ai-jail would refuse; starting claude unjailed (prompts on)" >&2
+  else
+    exec ai-jail --no-save-config claude --dangerously-skip-permissions "$@"
+  fi
+  sleep 2
+  exec claude "$@"
+}
 
 peek=false
 pick_only=false
@@ -66,12 +87,16 @@ case "$choice" in
     if $peek; then echo "$choice${*:+ $*}"; exit 0; fi
     exec "$choice" "$@"
     ;;
+  jail-claude)
+    if $peek; then echo "$choice${*:+ $*}"; exit 0; fi
+    launch_jailed "$@"
+    ;;
   shell)
     if $peek; then echo shell; exit 0; fi
     exec "${SHELL:-bash}"
     ;;
   auto | menu) ;;
-  *) echo "ai-launch: unknown choice '$choice' (claude | agy | agyy | auto | menu)" >&2; exit 2 ;;
+  *) echo "ai-launch: unknown choice '$choice' (claude | agy | agyy | jail-claude | auto | menu)" >&2; exit 2 ;;
 esac
 if $peek && [ "$choice" = "menu" ]; then echo menu; exit 0; fi
 
@@ -136,6 +161,9 @@ def tier: if test("fable|argon") then "$$$$" elif test("opus") then "$$$" elif t
           else $f == ($families[0].id | fam) end))})
   ]
 | (if any(.[]; .rec) then . else (.[0].rec = true) end)
+# One sandboxed row, after the plain ones: the recommended Claude model (else the first), run in ai-jail
+| . + [(map(select(.agent == "claude" and .rec)) + map(select(.agent == "claude")) | first
+        | select(. != null) | .agent = "jail-claude" | .cli = "Claude Jailed" | .icon = "󰌾" | .rec = false)]
 | .[]
 | ("\(.icon) " + (.cli | pad(14)) + (.model | pad(20)) + (.tier | pad(5))) as $head
 | [.agent, .args, "\($head)\(.quota)\(if .rec then "  ★" else "" end)",
@@ -184,4 +212,5 @@ if [ "${agents[$pick]}" = shell ]; then
 fi
 if $peek || $pick_only; then echo "${agents[$pick]} ${args[*]}"; exit 0; fi
 [ "$choice" = "auto" ] && printf '\033[90m%s\033[0m\n' "${plain[$pick]}"
+[ "${agents[$pick]}" = jail-claude ] && launch_jailed "${args[@]}"
 exec "${agents[$pick]}" "${args[@]}"

@@ -130,6 +130,7 @@ out=$(AI_AGENT=claude-code_agent ai-launch --peek)
 [ "${out%% *}" = "agy" ] && ok "AI_AGENT marker ignored" || bad "AI_AGENT leak: $out"
 [ "$(AI_LAUNCH_AGENT=menu ai-launch --peek)" = "$out" ] && ok "menu without a terminal falls back to auto" || bad "menu fallback"
 [ "$(ai-launch --peek claude --model haiku)" = "claude --model haiku" ] && ok "explicit args pass through" || bad "explicit args"
+[ "$(ai-launch --peek jail-claude --model opus)" = "jail-claude --model opus" ] && ok "jail-claude choice accepted" || bad "jail-claude choice"
 
 # 6. Recommended model follows quota: Claude green -> opus, yellow -> sonnet; Antigravity with its
 # default (Claude) group exhausted -> the Gemini Flash row

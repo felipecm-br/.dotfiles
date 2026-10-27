@@ -151,6 +151,9 @@ ai-launch --auto
 # Start a specific AI agent CLI
 ai-launch {{agent}}
 
+# Start Claude inside the ai-jail sandbox with permission prompts off (the Claude Jailed menu row)
+ai-launch jail-claude --model {{model}}
+
 # Gracefully terminate Tmux session with AI agent and multi-window safeguards
 ~/.config/tmux/close-session.sh
 
