@@ -33,7 +33,7 @@ scripts in `.shell/install/packages/` and plugin scripts in `.shell/install/plug
 `fonts`, `foot`, `gh`, `ghostty`, `git`, `herdr`, `hibiki`, `hypr`, `intelli-shell`, `kitty`,
 `lazycommit`, `lazygitrs`, `lolcat`, `mise`, `nvim`, `omarchy`, `omarchy-antigravity`, `opencode`,
 `procs`, `sounds`, `starship`, `tmux`, `tuikit`, `upscayl`, `utils`, `vimium`, `waymaker`, `waymux`,
-`workmux`, `worktrunk`, `xcompose`, `xkb`, `yazi`, `zsh`, `zsh-plugins`.
+`worktrunk`, `xcompose`, `xkb`, `yazi`, `zsh`, `zsh-plugins`.
 
 Non-stow directories: `.agents`, `.bare`, `.git`, `.github`, `.shell`, `assets`, `docs`, `scratch`, `scripts`, `tests`.
 

@@ -68,10 +68,10 @@ elif [[ -x "$wt_path/.git/hooks/pre-worktree-merge" ]]; then
     exit $?
 fi
 
-# 2. Declarative hooks from .awt.toml (canonical) / .workmux.yaml
+# 2. Declarative hooks from .awt.toml (canonical) / .awt.yaml
 config_file=""
 for cf in "$wt_path/.awt.toml" "$wt_path/.awt/config.toml" \
-          "$wt_path/.awt.yaml" "$wt_path/.awt/config.yaml" "$wt_path/.workmux.yaml"; do
+          "$wt_path/.awt.yaml" "$wt_path/.awt/config.yaml"; do
     if [[ -f "$cf" ]]; then
         config_file="$cf"
         break

@@ -131,8 +131,8 @@ if [[ -n "$primary_wt" && -d "$primary_wt" ]]; then
     # 2. Declarative File Copy & Symlink Synchronization (.awt.toml canonical / manifests / YAML fallback)
     config_file=""
     for cf in "$wt_path/.awt.toml" "$wt_path/.awt/config.toml" "$primary_wt/.awt.toml" "$primary_wt/.awt/config.toml" \
-              "$wt_path/.awt.yaml" "$wt_path/.awt/config.yaml" "$wt_path/.workmux.yaml" \
-              "$primary_wt/.awt.yaml" "$primary_wt/.workmux.yaml"; do
+              "$wt_path/.awt.yaml" "$wt_path/.awt/config.yaml" \
+              "$primary_wt/.awt.yaml"; do
         if [[ -f "$cf" ]]; then
             config_file="$cf"
             break
@@ -217,10 +217,10 @@ JSON
     fi
 fi
 
-# 3. Declarative Post-Create Lifecycle Hook Commands (.awt.toml / .workmux.yaml)
+# 3. Declarative Post-Create Lifecycle Hook Commands (.awt.toml / .awt.yaml)
 config_file=""
 for cf in "$wt_path/.awt.toml" "$wt_path/.awt/config.toml" \
-          "$wt_path/.awt.yaml" "$wt_path/.awt/config.yaml" "$wt_path/.workmux.yaml"; do
+          "$wt_path/.awt.yaml" "$wt_path/.awt/config.yaml"; do
     if [[ -f "$cf" ]]; then
         config_file="$cf"
         break

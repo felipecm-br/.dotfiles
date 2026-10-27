@@ -324,8 +324,6 @@ IMPORTANT: Modify ONLY the theme/color resolution logic in the files that exist 
    - Replace all inline `grep ... colors.toml | sed ...` pipelines, local `_get_color` functions (`close-session.sh`, `close-window.sh`), and `while IFS='=' read ... < "$_colors_toml"` loops (`cockpit-picker-items.sh`, `cockpit-picker-diff.sh`) with direct calls to `get_theme_color "<key>" "<fallback>"`.
    - In `grep-picker.sh` (`teal|cyan|green`), use:
      `BORDER_COLOR=$(get_theme_color teal "$(get_theme_color cyan "$(get_theme_color green "#94e2d5")")")`
-   - In `workmux-dashboard-popup.sh` (`accent|blue`), use:
-     `POPUP_COLOR=$(get_theme_color accent "$(get_theme_color blue "#7aa2f7")")`
    - In `pr-picker.sh` (if present), keep a comment `# Dynamic theme colors from colors.toml via theme-helper.sh` for test suite compatibility.
 
 ---

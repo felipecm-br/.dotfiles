@@ -95,7 +95,6 @@ Whenever the system theme switches (`omarchy theme set <name>`), 100% of termina
 | **1. Ephemeral** | [`ai-quota-popup.sh`](../../tmux/.config/tmux/ai-quota-popup.sh) (`ai-quota --visual`) | `cyan` / `blue` | `#94e2d5` | ` 󰓅 ` + quota badge | `75% × 60%` | `u` / `q` / `Esc` |
 | **1. Ephemeral** | [`close-window.sh`](../../tmux/.config/tmux/close-window.sh) / [`close-session.sh`](../../tmux/.config/tmux/close-session.sh) | `yellow` / `orange` | `#e0af68` | `  ` | `68 × 11..18` | `y` / `n` / `Esc` |
 | **2. Persistent** | [`lazygitrs-popup.sh`](../../tmux/.config/tmux/lazygitrs-popup.sh)| `orange` / `peach` | `#e84d31` | ` 󰊢 ` | `90% × 88%` | `Esc` (Files) / `q` |
-| **2. Persistent** | [`workmux-dashboard-popup.sh`](../../tmux/.config/tmux/workmux-dashboard-popup.sh) | `accent` / `blue` | `#7aa2f7` | ` 󱙝 ` | `85% × 75%` | `q` / `Esc` |
 | **2. Persistent** | Floating Agent Overlay | `accent` / `blue` | `#b4befe` | ` 󱜻 ` | `85% × 85%` | `Ctrl+C` / `exit` |
 | **2. Persistent** | [`scrollback-view.sh`](../../tmux/.config/tmux/scrollback-view.sh) | `accent` / `blue` | `#7aa2f7` | ` 󰄧 ` | `90% × 88%` | `Esc` / `q` |
 | **2. Persistent** | `nvim` (`prefix+N`) | `orange` / `peach` | `#fab387` | `  ` | `90% × 90%` | `:q` |

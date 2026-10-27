@@ -117,7 +117,6 @@ O ambiente de trabalho em que você atua representa o estado da arte absoluto em
   - Salto direto de 1 toque para qualquer janela através de letras mnemônicas da Home Row (`a, s, d, f, j, k, l, ;, g, h`) renderizadas in-situ nos tabs do Tmux ($T_R = 0\text{ ms}$).
 - **Gerenciamento de Sessões & Workspaces:**
   - `Prefix + s`: Sesh Workspace Picker (`Tab` cicla All $\rightarrow$ Tmux $\rightarrow$ Dirs; `c` abre Cockpit).
-  - `Prefix + D`: Workmux Fleet Dashboard com visão global de agentes em execução.
 - **Ciclo de Vida de Janelas & Undo de Abas Fechadas:**
   - `Prefix + w`: Fecha janela salvando caminho, arquivo ativo e comando em pilha de reabertura.
   - `Prefix + u` / `Prefix + T` / `Ctrl+Shift+T`: Reabre última janela fechada com restauração completa de contexto (`reopen-window.sh`).
@@ -305,7 +304,6 @@ Tabela consolidando todas as operações do componente com teclas, contextos, te
 | **`Prefix + y`** | **Yank Tokens / URLs / Hashes Modal** | Dedo indicador direito | $120\text{ ms}$ | Extração instantânea de texto e links do buffer |
 | **`Prefix + e` / `C-e`** | **Explorador de Arquivos do Workspace** | Dedo médio esquerdo | $120\text{ ms}$ | Preview rico com Mermaid, Markdown e split Neovim |
 | **`Prefix + /`** | **Ripgrep Live Search no Workspace** | Dedo mínimo direito | $120\text{ ms}$ | Busca textual com sincronização de linha no Neovim |
-| **`Prefix + D`** | **Workmux Agent Fleet Dashboard** | Dedo médio esquerdo + Shift | $130\text{ ms}$ | Visão global de agentes em execução multi-sessão |
 | **`Prefix + ?`** | **HUD Interativo de Atalhos** | Dedo mínimo direito + Shift | $130\text{ ms}$ | Ajuda e execução direta de comandos do ecossistema |
 | **`Prefix + C-h/j/k/l`**| **Redimensionar Painel (Assimétrico 10%)**| Vim directional com Prefix preso | $120\text{ ms}$ | Ajuste fino em incrementos de 20 cols / 5 linhas |
 

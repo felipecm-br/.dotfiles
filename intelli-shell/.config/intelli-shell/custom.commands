@@ -190,12 +190,6 @@ ai-launch {{agent}}
 # Open VS Code-style Command Palette in Tmux popup (Prefix + p / Ctrl + Shift + P)
 ~/.config/tmux/command-palette.sh
 
-# Open Workmux agent fleet dashboard in Tmux popup (Prefix + D / Prefix + C-d)
-~/.config/tmux/workmux-dashboard-popup.sh
-
-# Open Workmux agent fleet dashboard directly in terminal
-workmux dashboard
-
 # Paste files or clipboard into last visited Waymaker target directory
 ptl {{files}}
 

@@ -62,7 +62,6 @@ Toggle instantly between 3 live preview panes in Nav Mode:
   pre-merge = ["cargo test", "npm test"]
   pre-remove = ["echo 'cleaning worktree temp state'"]
   ```
-  *(Also supports `.workmux.yaml` as an automatic fallback for legacy compatibility).*
 
 ---
 
@@ -192,7 +191,7 @@ When inside the interactive Waymaker dashboard (`awt` / `awp`):
 │   │   │   ├── awt-fetch.sh         # Remote fetch helper
 │   │   │   └── awt-rename.sh        # Branch, folder, and session rename handler
 │   │   └── hooks/
-│   │       ├── awt-config.py        # Declarative .awt.toml / .workmux.yaml parser
+│   │       ├── awt-config.py        # Declarative .awt.toml / .awt.yaml parser
 │   │       ├── post-create.sh       # .env copying, declarative files & repo triggers
 │   │       ├── pre-merge.sh         # Pre-merge validation quality gate & docs check
 │   │       ├── post-merge.sh        # Post-merge cleanup & rebuild triggers
