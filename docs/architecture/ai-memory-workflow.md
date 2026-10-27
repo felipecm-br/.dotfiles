@@ -51,21 +51,21 @@ The default names work, but the leading dot and the mixed `-` separators are har
 | **Hybrid: workspaces by context, one project per repo, explicit bridges** | **Recommended** | Isolation by default, deliberate sharing where the code is actually coupled |
 
 ```
-workspace "cockpit"  (tightly coupled toolchain: shared contracts, keybindings, RPC)
+workspace "workflow"  (tightly coupled toolchain: shared contracts, keybindings, RPC)
   ├─ felipecm-br.dotfiles   ~/.dotfiles/*
   ├─ felipecm-br.waymux     ~/dev/github/waymux/*
   ├─ fcmiranda.lazygitrs    ~/dev/github/lazygitrs/*
   └─ fcmiranda.waymaker     ~/dev/github/waymaker/*
 
-workspace "side"     (independent products; no shared contracts)
+workspace "projects"  (independent products; no shared contracts)
   ├─ felipecm-br.starship-studio
   └─ nerdsight      (remote host, see section 6; marker not yet added)
 ```
 
 Why this split:
 
-- **`cockpit` shares a workspace** because the repos are coupled by contracts that already live in `docs/architecture/` (waymux RPC, lazygitrs `.lazygitrs.port`, waymaker presets, tmux popups). Sibling links `[[waymux:path]]` and workspace-scoped queries pay off here.
-- **`side` stays separate** so recall in `dotfiles` never surfaces starship-studio noise, and a future client/NDA project can opt out of everything with `[profile] contribute = false`.
+- **`workflow` shares a workspace** because the repos are coupled by contracts that already live in `docs/architecture/` (waymux RPC, lazygitrs `.lazygitrs.port`, waymaker presets, tmux popups). Sibling links `[[waymux:path]]` and workspace-scoped queries pay off here.
+- **`projects` stays separate** so recall in `dotfiles` never surfaces starship-studio noise, and a future client/NDA project can opt out of everything with `[profile] contribute = false`.
 - **Bridges are explicit, not ambient:** use `memory_message_send` (claim-once inbox) for "waymux must expose X for dotfiles", and `scope: "global"` / the cross-project profile for personal rules ("never force-push", "docs in English"). Avoid `[recall] default_global = true` except in a deliberate meta-repo.
 
 ### Markers (committed, one per repository)
@@ -74,7 +74,7 @@ Already added to all five repos (local commits `chore: add ai-memory project mar
 
 ```toml
 # <repo>/.ai-memory.toml  (committed; every worktree inherits it)
-workspace = "cockpit"
+workspace = "workflow"
 project   = "felipecm-br.waymux"
 # project_strategy = "repo-root"   # only for remote-less repos
 ```
@@ -85,7 +85,7 @@ For an operator-wide default (no per-repo file), `~/.ai-memory.toml` can route b
 
 ```toml
 [routes.path."~/dev/github/waymux"]
-route_workspace = "cockpit"
+route_workspace = "workflow"
 route_project = "felipecm-br.waymux"
 ```
 
@@ -136,7 +136,7 @@ Hooks load at session start: open a **new** session after installing. Verify wit
 - `hook spool: N event(s) waiting` is transient flush lag. If it persists, the daemon is down (`systemctl --user status ai-memory.service`). Nothing is lost: the spool replays when the server returns.
 - `auth: none (loopback)` is acceptable while bound to `127.0.0.1`; run `ai-memory auth enable` before any tunnel or LAN bind.
 
-Status when this was written: Claude Code and Antigravity confirmed captured for `cockpit/felipecm-br.dotfiles`; codex, copilot-cli and open-code capture on next launch. Sessions that predate the hooks can be imported once with `ai-memory backfill` (new, empty store only).
+Workspaces were renamed from `cockpit`/`side` to `workflow`/`projects` on 2026-10-26, right after the first captures; the store was reset (`ai-memory reset --confirm`, after a backup) rather than migrated. Re-verify with `ai-memory doctor` in a new session. Sessions that predate the hooks can be imported once with `ai-memory backfill` (new, empty store only), which is now possible again.
 
 ---
 
@@ -189,7 +189,7 @@ Behavior changes that matter here: new installs create a root bearer token and t
 
 | Decision | Recommendation |
 | :--- | :--- |
-| Workspace names (`cockpit` / `side`) | Adopt; rename only before first capture (renames after are costly) |
+| Workspace names (`workflow` / `projects`) | Adopt; rename only before first capture (renames after are costly) |
 | Existing `felipecm-br-*` / `fcmiranda-*` projects from earlier captures | Add `aliases` in markers so history keeps its UUID |
 | Enable `[briefing]` on `dotfiles` | No; `AGENTS.md` already injects the rules |
 | nerdsight mode A vs B | A unless it holds third-party data |
