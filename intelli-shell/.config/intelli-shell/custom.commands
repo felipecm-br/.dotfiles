@@ -553,6 +553,9 @@ claude "{{prompt}}"
 # Resume most recent Claude Code session in current directory
 claude -c
 
+# Launch Claude Code without ai-memory hooks or MCP servers (alias: cnm)
+cnm
+
 # Audit, check, and update all dependencies of the AI workflow stack
 update-ai-workflow
 
