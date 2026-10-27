@@ -516,15 +516,35 @@ inspect_ai_memory() {
 }
 
 # 8. AI Jail
+# Installed via AUR (ai-jail-bin, /usr/bin) or cargo. The latest version is resolved
+# live: AUR for pacman installs (what yay can actually deliver), GitHub releases otherwise.
 inspect_ai_jail() {
-  local cur="missing"
-  if command -v ai-jail &>/dev/null; then
+  local cur="missing" via="cargo"
+  if pacman -Q ai-jail-bin &>/dev/null; then
+    cur=$(pacman -Q ai-jail-bin 2>/dev/null | awk '{print $2}')
+    cur="${cur%%-*}"
+    via="aur"
+  elif command -v ai-jail &>/dev/null; then
     cur=$(ai-jail --version 2>/dev/null | awk '{print $2}' || true)
     cur="${cur##v}"
   fi
-  local lat="1.16.0"
+
+  local lat="$cur" fetched=""
+  if [[ "$via" == "aur" ]]; then
+    fetched=$(curl -fsSL --max-time 4 "https://aur.archlinux.org/rpc/v5/info?arg[]=ai-jail-bin" 2>/dev/null \
+      | grep -o '"Version":"[^"]*"' | head -1 | sed -E 's/.*:"([^"-]+).*/\1/' || true)
+  else
+    fetched=$(curl -fsSL --max-time 4 https://api.github.com/repos/akitaonrails/ai-jail/releases/latest 2>/dev/null \
+      | grep -m1 '"tag_name":' | sed -E 's/.*"v?([^"]+)".*/\1/' || true)
+  fi
+  [[ -n "$fetched" ]] && lat="$fetched"
+
   local status="OK"
-  [[ "$cur" == "missing" ]] && status="MISSING"
+  if [[ "$cur" == "missing" ]]; then
+    status="MISSING"
+  elif [[ "$cur" != "$lat" && "$(printf '%s\n%s\n' "$cur" "$lat" | sort -V | tail -1)" == "$lat" ]]; then
+    status="UPDATE"
+  fi
   record_status "ai-jail" "ai-jail (agent sandbox)" "$ICON_AI_JAIL" "$cur" "$lat" "$status"
 }
 
@@ -873,11 +893,17 @@ update_ai_memory() {
 }
 
 update_ai_jail() {
-  echo -e "${C_BLUE}${ICON_INFO}${C_RESET} Updating ${C_BOLD}ai-jail${C_RESET} via cargo..."
-  if command -v cargo &>/dev/null; then
-    HOME="$TARGET_HOME" cargo install --git https://github.com/akitaonrails/ai-jail || true
-    echo -e "  ${C_GREEN}${ICON_OK}${C_RESET} ai-jail updated successfully"
+  if pacman -Q ai-jail-bin &>/dev/null && command -v yay &>/dev/null; then
+    echo -e "${C_BLUE}${ICON_INFO}${C_RESET} Updating ${C_BOLD}ai-jail${C_RESET} via AUR (ai-jail-bin)..."
+    yay -S --needed --noconfirm ai-jail-bin || return 1
+  elif command -v cargo &>/dev/null; then
+    echo -e "${C_BLUE}${ICON_INFO}${C_RESET} Updating ${C_BOLD}ai-jail${C_RESET} via cargo..."
+    HOME="$TARGET_HOME" cargo install --git https://github.com/akitaonrails/ai-jail || return 1
+  else
+    echo -e "  ${C_RED}${ICON_FAIL}${C_RESET} Neither yay nor cargo available for ai-jail"
+    return 1
   fi
+  echo -e "  ${C_GREEN}${ICON_OK}${C_RESET} ai-jail updated successfully"
 }
 
 update_ai_usagebar() {
