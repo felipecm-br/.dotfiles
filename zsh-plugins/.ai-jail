@@ -8,3 +8,8 @@ command = [
     "opencode",
     "--yolo",
 ]
+
+# Relay the host ai-memory daemon (127.0.0.1:49374) into the jail's private
+# network namespace so MCP tools and lifecycle hooks work inside the sandbox.
+# Only the CLI and this global file can open forwards; project .ai-jail cannot.
+forward_ports = [49374]

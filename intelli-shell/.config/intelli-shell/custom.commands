@@ -478,6 +478,12 @@ ai-fix {{note}}
 # Audit and clean stale observations and orphan sessions in ai-memory
 ai-memory-clean --apply
 
+# Launch an agent in a managed ai-memory workstream inside the ai-jail sandbox
+ai-memory run --jail {{agent}} --yolo
+
+# Verify the ai-jail sandbox can reach the host ai-memory daemon (forward_ports)
+ai-jail bash -c 'curl -s -m4 http://127.0.0.1:49374/healthz'
+
 # Interactive Waymux auditory telemetry sound pack switcher
 ai-sound-switcher
 

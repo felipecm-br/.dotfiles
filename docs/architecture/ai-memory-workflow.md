@@ -100,7 +100,7 @@ Per-repo markers win for repos you own; use home routes only for repos where you
 | Step | Command | Notes |
 | :--- | :--- | :--- |
 | Launch an agent | `ai-memory run claude` (or `opencode`, `agy`…) | Auto-wires hooks + MCP on first use; resumes the cross-harness workstream |
-| Launch inside the sandbox | `ai-jail …` (see `.ai-jail`: `ai-memory run opencode --yolo`) | Server runs on the host (`opencode.json` MCP URL `http://127.0.0.1:49374/mcp`) |
+| Launch inside the sandbox | `ai-jail …` (global `~/.ai-jail`: `ai-memory run opencode --yolo`) or `ai-memory run --jail …` | Server runs on the host; the jail needs `forward_ports = [49374]` in `~/.ai-jail` (`opencode.json` MCP URL `http://127.0.0.1:49374/mcp`). See [ai-jail-memory-guide-en.md](../articles/ai-jail-memory-guide-en.md) |
 | Switch agent mid-task | `ai-memory continue` / `ai-memory resume` | Claude ↔ Codex ↔ OpenCode ↔ agy share one workstream |
 | Where did we leave off | ask the agent: "catch me up" | Handoff + optional on-start brief |
 | Diagnose capture | `ai-memory doctor` | Reports marker routing, missing hooks, leftover configs |
@@ -166,14 +166,14 @@ Hooks spool locally when the server is unreachable (`ai-memory status` shows `pe
 Upgrade procedure 2.5 → 3.x (from upstream `upgrading-to-3.0.md`):
 
 ```bash
-ai-update --check --only ai-memory      # expect 2.5.2 → 3.2.5
+ai-update --check --only ai-memory      # expect 2.5.2 → 3.2.7
 ai-update --only ai-memory -y           # AUR upgrade + service restart
 ai-memory doctor && ai-memory status    # migrations V77–V80 run on first start
 ```
 
 Behavior changes that matter here: new installs create a root bearer token and turn auth on; `memory_query` now searches raw observations by default (set `[retrieval] observation_stream = false` to restore 2.x ranking); remote-backed projects are named by repository path. The `ai-memory user add/expire/rotate-token` commands are gone (use `api-key`); nothing in this repo scripts them.
 
-`ai-jail` still has the same hardcoded-latest pattern (`lat="1.16.0"` in `update-ai-workflow`); audit it next.
+`ai-jail` is resolved the same way (AUR `ai-jail-bin` for pacman installs, GitHub releases otherwise); the hardcoded `1.16.0` is gone.
 
 ---
 
