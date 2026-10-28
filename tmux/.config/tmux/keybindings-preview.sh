@@ -247,9 +247,31 @@ Changes the model or effort of the agent **in the current pane** without leaving
 
 - **Ergonomics**: `A` = **A**gent in place (sibling of `Prefix + a`, which launches a new one). `Prefix + A`, type `son`, `Enter` replaces `/model` `Space` `sonnet` `Enter` and works the same across CLIs.
 - **Rows**: Claude Code models (Fable, Opus, Sonnet, Haiku) and effort levels (`low` … `max`, `auto`) with `● now` on the current ones; Antigravity model families; Devin `/model <name>`; Codex opens its own model & effort picker (`/model`).
-- **Safety**: a half-typed prompt is never submitted: the switch stops with a status-line message. A pane without an agent gets a hint instead of a popup.
+- **Safety**: a half-typed prompt is never submitted: `ai-prompt` stashes it and puts it back after the switch (agents started before `$VISUAL=ai-prompt`: the switch stops with a status-line message). A pane without an agent gets a hint instead of a popup.
 - **Note**: Claude Code's `/model` and `/effort` also save the pick as the default for new sessions (`~/.claude/settings.json`); `ai-launch` always passes `--model`, so launcher-started sessions are unaffected.
 - **Controls**: type to filter, `Enter` switch, `Esc` cancel.
+EOF
+    ;;
+
+  tmux-ai-prompt)
+    cat <<'EOF'
+### 󰏫 AI Prompt Draft in Nvim Popup (`Prefix + v`, `75% × 60%`)
+Opens the draft of the agent **in the current pane** in Neovim, in a popup over it (`ai-prompt edit`). The agent hands over its own draft through its external-editor key and reads the file back, so multi-line text and Unicode stay exact.
+
+- **Ergonomics**: `v` = **v**im. Full Neovim motions on a long prompt; `ggI/compact ` puts a slash command first without deleting anything.
+- **Agents**: Claude Code (`Ctrl+X Ctrl+E`, since `Ctrl+G` is Lazygitrs), Codex, Antigravity and Devin (`Ctrl+G`), via `$VISUAL` / `$EDITOR` = `ai-prompt`. Agents started before that open their own editor in the pane.
+- **Controls**: `:wq` apply, `:cq` cancel (the draft stays as it was).
+EOF
+    ;;
+
+  tmux-ai-prompt-stash)
+    cat <<'EOF'
+### 󰆓 AI Prompt Draft Stash / Restore (`Prefix + V`)
+Toggle for the agent in the current pane (`ai-prompt stash`): the first press puts the draft aside and empties the prompt, so a `/command` can be the first word; the second press brings the draft back.
+
+- **Flow**: `Prefix + V`, type `/compact` `Enter`, `Prefix + V`. Works on every agent, also those without mid-prompt slash commands.
+- **Merge**: text typed in between and not sent stays, after the restored draft.
+- **Also**: `Prefix + A` (model / effort switch) uses the same stash, so a draft no longer blocks a switch.
 EOF
     ;;
 

@@ -154,6 +154,12 @@ ai-switch {{choice}}
 # Open the in-place AI model / effort switcher as a tmux popup over the current pane
 ~/.config/tmux/ai-switch-popup.sh
 
+# Edit the prompt draft of the AI agent in the current tmux pane in a Neovim popup (Prefix+v)
+ai-prompt edit
+
+# Stash the AI agent prompt draft to run a /command first, or bring the stash back (Prefix+V)
+ai-prompt stash
+
 # Start the quota-recommended AI agent and model directly
 ai-launch --auto
 

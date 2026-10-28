@@ -106,7 +106,7 @@ Selection walks `AI_AGENT_PREFERENCE` (default `claude agy agyy`) and picks the 
 
 `● now` marks the current Claude model (read from its status line) and effort (the transient `/effort` badge, else the per-model level Claude saves in `settings.json`); the cursor starts on the current model. The agent is found from the pane's foreground command, else the first agent process in its session (Claude under `ai-jail` / `ai-memory run`, `agy-bin` under the wrapper).
 
-A half-typed prompt is never submitted: when text that is not a dim placeholder follows the prompt marker (`❯`, `›`, `>`), the switch stops with a status-line message. Claude Code's `/model` and `/effort` also save the pick as the default for new sessions; `ai-launch` always passes `--model`, so sessions started from the launcher are unaffected. `ai-switch sonnet` / `ai-switch high` switch without the menu, `ai-switch --peek` prints the rows.
+A half-typed prompt is never submitted: when text that is not a dim placeholder follows the prompt marker (`❯`, `›`, `>`), [`ai-prompt`](../../utils/.local/bin/ai-prompt) takes the exact draft out through the agent's external-editor hook, the switch runs, and the draft is put back (Codex: after its picker, with `Prefix + V`). Agents started before `$VISUAL=ai-prompt` was set get a status-line message instead. The same tool backs `Prefix + v` (draft in a Neovim popup) and `Prefix + V` (draft stash toggle for any `/command`); see [utils](../utils.md). Claude Code's `/model` and `/effort` also save the pick as the default for new sessions; `ai-launch` always passes `--model`, so sessions started from the launcher are unaffected. `ai-switch sonnet` / `ai-switch high` switch without the menu, `ai-switch --peek` prints the rows.
 
 ## Standalone popups (`Prefix + a` / `Ctrl + Shift + A` and `Prefix + u`)
 
@@ -124,6 +124,7 @@ A half-typed prompt is never submitted: when text that is not a dim placeholder 
 - [`utils/.local/bin/ai-launch`](../../utils/.local/bin/ai-launch): launch menu and launcher used by Waymaker
 - [`utils/.local/bin/ai-switch`](../../utils/.local/bin/ai-switch): in-place model / effort switch for the agent in a pane
 - [`tmux/.config/tmux/ai-switch-popup.sh`](../../tmux/.config/tmux/ai-switch-popup.sh): `Prefix + A` popup over the current pane
+- [`utils/.local/bin/ai-prompt`](../../utils/.local/bin/ai-prompt): agent draft edit popup, stash and restore
 - [`waymaker/.config/waymaker/presets/ai-launch.toml`](../../waymaker/.config/waymaker/presets/ai-launch.toml): launch menu preset
 - [`waymaker/.config/waymaker/session.toml`](../../waymaker/.config/waymaker/session.toml): `startup_command = "ai-launch"`
 - [`waymaker/.config/waymaker/presets/session-picker.toml`](../../waymaker/.config/waymaker/presets/session-picker.toml): `r` / `a` / `A` / `c` / `u` binds

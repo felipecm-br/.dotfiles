@@ -10,7 +10,8 @@
 #
 # The window, scrollback and conversation stay: only the agent's own slash command runs. Commands:
 # Claude Code /model + /effort, Antigravity and Devin /model <name>, Codex /model (its own picker, which
-# also sets reasoning effort). A half-typed prompt is never submitted: the switch stops and says so.
+# also sets reasoning effort). A half-typed prompt is never submitted: ai-prompt sets it aside and brings
+# it back after the switch, or the switch stops and says so (agents started before $VISUAL=ai-prompt).
 # AI_SWITCH_AGENT=<agent> skips pane detection (tests).
 
 AGENT_RE='^(claude|agy|agy-bin|antigravity|devin|codex)$'
@@ -23,7 +24,7 @@ while [ $# -gt 0 ]; do
     -t) pane=${2:-}; shift 2 ;;
     --peek) mode=peek; shift ;;
     --agent) mode=agent; shift ;;
-    -h | --help) sed -n '2,15p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    -h | --help) sed -n '2,16p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
     *) break ;;
   esac
 done
@@ -165,15 +166,21 @@ if [ "$mode" = peek ]; then
 fi
 
 # Draft guard: text after the prompt marker (Claude ❯, Codex ›, others >) that is not a dim
-# placeholder would be submitted together with the slash command
+# placeholder would be submitted together with the slash command. ai-prompt sets it aside through the
+# agent's own editor hook and brings it back after the switch; without it the switch stops.
+draft=""
 prompt=$(grep -E $'^[[:space:]]*(\e\\[[0-9;]*m)*(❯|›|>)' <<<"$screen" | tail -1)
 if [ -n "$prompt" ]; then
   # Marker, then spaces or the no-break space Claude Code puts before its placeholder
   after=$(sed -E $'s/^[[:space:]]*(\e\\[[0-9;]*m)*(❯|›|>)([[:space:]]|\xc2\xa0)*//' <<<"$prompt")
   text=$(sed 's/\x1b\[[0-9;]*m//g' <<<"$after" | tr -d '[:space:]')
   if [ -n "$text" ] && ! [[ $after =~ ^$'\e'\[(2|90|38\;5\;24[0-9])m ]]; then
-    say "Draft in the $agent prompt: send or clear it, then switch again"
-    exit 3
+    if ai-prompt -t "$pane" --ready 2>/dev/null && ai-prompt -t "$pane" take 2>/dev/null; then
+      draft=kept
+    else
+      say "Draft in the $agent prompt: send or clear it, then switch again"
+      exit 3
+    fi
   fi
 fi
 
@@ -181,4 +188,13 @@ tmux send-keys -t "$pane" -l -- "$command"
 # Let the agent's input settle (slash-command autocomplete) before submitting
 sleep 0.1
 tmux send-keys -t "$pane" Enter
-say "$agent → $command"
+if [ "$draft" = kept ] && [ "$agent" = codex ]; then
+  # Codex's /model opens a picker: the draft waits until it closes
+  say "$agent → $command · draft kept, Prefix + V brings it back"
+elif [ "$draft" = kept ]; then
+  sleep 0.3
+  ai-prompt -t "$pane" put 2>/dev/null
+  say "$agent → $command · draft kept"
+else
+  say "$agent → $command"
+fi

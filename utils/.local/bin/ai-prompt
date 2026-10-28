@@ -1,0 +1,174 @@
+#!/usr/bin/env bash
+# ai-prompt — Edit, stash and restore the prompt draft of the AI agent in a tmux pane
+#
+#   ai-prompt [-t pane] edit     Open the agent's draft in nvim, in a tmux popup over the pane; :wq puts
+#                                it back, :cq leaves the draft untouched (Prefix + v)
+#   ai-prompt [-t pane] stash    Toggle: put the draft aside and empty the prompt, or bring it back when a
+#                                stash exists (Prefix + V; run a /command in between)
+#   ai-prompt [-t pane] take     Put the draft aside and empty the prompt (exit 1: nothing to take)
+#   ai-prompt [-t pane] put      Bring the stashed draft back, before any text typed since
+#   ai-prompt [-t pane] --ready  Exit 0 when the pane's agent was started with ai-prompt as its editor
+#   ai-prompt <file>             $VISUAL / $EDITOR entrypoint, called by the agent itself
+#
+# Every move goes through the agent's own "edit draft in external editor" key (Claude Code Ctrl+X Ctrl+E,
+# Codex / Antigravity / Devin Ctrl+G): the agent hands over the exact draft and reads the file back, so
+# nothing is scraped from the screen or retyped. Agents spawned with $VISUAL / $EDITOR set to ai-prompt
+# get the popup; every other caller (git, crontab…) gets $AI_PROMPT_EDITOR, else $EDITOR, unchanged.
+# AI_PROMPT_KEY_<agent>="C-g" overrides an agent's editor key.
+
+AGENT_RE='^(claude|agy|agy-bin|antigravity|devin|codex)$'
+RUN="${XDG_RUNTIME_DIR:-/tmp}/ai-prompt"
+SELF="$HOME/.local/bin/ai-prompt"
+
+say() { # Message in the tmux status line when there is one, always on stderr
+  [ -n "${TMUX:-}" ] && tmux display-message "$1" 2>/dev/null
+  echo "ai-prompt: $1" >&2
+}
+
+# ── Editor entrypoint: the agent runs `ai-prompt <file>` with the draft in <file> ──────────────────
+fallback_editor() {
+  local ed=${AI_PROMPT_EDITOR:-${EDITOR:-}}
+  [[ -z $ed || $ed == *ai-prompt* ]] && ed=nvim
+  # Unquoted on purpose: $EDITOR may carry flags ("omarchy-launch-editor --inline")
+  # shellcheck disable=SC2086
+  exec $ed "$@"
+}
+
+# Called on a terminal by the agent itself, or by a shell it ran us through. Git and other tools the
+# agent runs headless (no terminal, deeper in the tree) keep the plain editor.
+spawned_by_agent() {
+  local pid=$PPID comm i
+  [ -t 0 ] || return 1
+  for i in 1 2; do
+    [ "${pid:-0}" -gt 1 ] || return 1
+    comm=$(cat "/proc/$pid/comm" 2>/dev/null)
+    [[ $comm =~ $AGENT_RE ]] && return 0
+    [[ $comm =~ ^(sh|bash|zsh|dash)$ ]] || return 1
+    pid=$(awk '{print $4}' "/proc/$pid/stat" 2>/dev/null)
+  done
+  return 1
+}
+
+if [ $# -ge 1 ] && [[ $1 != -* && $1 != edit && $1 != stash && $1 != take && $1 != put ]]; then
+  file=${!#}
+  key=${TMUX_PANE#%}
+  { [ -n "${TMUX_PANE:-}" ] && [ -f "$file" ] && spawned_by_agent; } || fallback_editor "$@"
+  stash="$RUN/$key.stash"
+  # A pending take / put request from `ai-prompt take|put`: move the draft without opening anything
+  if [ -f "$RUN/$key.take" ]; then
+    cp "$file" "$stash" && : >"$file"
+    rm -f "$RUN/$key.take"
+    exit 0
+  fi
+  if [ -f "$RUN/$key.put" ]; then
+    # Stash first, then whatever was typed since (a /command already sent leaves nothing)
+    {
+      cat "$stash"
+      if [ -s "$file" ]; then printf '\n\n'; cat "$file"; fi
+    } >"$file.ai-prompt" && mv "$file.ai-prompt" "$file" && rm -f "$stash"
+    rm -f "$RUN/$key.put"
+    exit 0
+  fi
+  # Interactive edit: nvim in a popup over the agent pane. :cq (or a failed popup) restores the original
+  cp "$file" "$file.orig"
+  status="$RUN/$key.status"
+  rm -f "$status"
+  # shellcheck source=/dev/null
+  . "$HOME/.config/tmux/theme-helper.sh" 2>/dev/null
+  color=$(get_theme_color magenta "#cba6f7" 2>/dev/null || echo magenta)
+  title=" 󰏫 Prompt · :wq apply · :cq cancel "
+  mkdir -p "$RUN"
+  tmux display-popup -t "$TMUX_PANE" -S "fg=$color" -b rounded -T "$title" -E -w 75% -h 60% \
+    -d "$PWD" "nvim -c 'set filetype=markdown' -c 'normal! G\$' '$file'; echo \$? >'$status'" 2>/dev/null
+  rc=$(cat "$status" 2>/dev/null)
+  rm -f "$status"
+  if [ -z "$rc" ]; then
+    # No popup (no attached client): edit in place, the agent already handed over the terminal
+    rm -f "$file.orig"
+    nvim -c 'set filetype=markdown' "$file"
+    exit 0
+  fi
+  [ "$rc" -eq 0 ] || cp "$file.orig" "$file"
+  rm -f "$file.orig"
+  exit 0
+fi
+
+# ── Pane side: drive the agent's editor key ─────────────────────────────────────────────────────────
+pane=${TMUX_PANE:-}
+while [ $# -gt 0 ]; do
+  case $1 in
+    -t) pane=${2:-}; shift 2 ;;
+    -h | --help) sed -n '2,18p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    *) break ;;
+  esac
+done
+action=${1:-edit}
+key=${pane#%}
+
+# Agent CLI of the pane and its pid: the foreground command, else the first agent of its session
+agent_pid() {
+  local cmd pid
+  read -r cmd pid < <(tmux display-message -p -t "$pane" '#{pane_current_command} #{pane_pid}' 2>/dev/null) || return 1
+  ps -s "$pid" -o pid=,comm= 2>/dev/null | awk -v re="$AGENT_RE" '$2 ~ re {print $1, $2; exit}' | grep .
+}
+
+[ -n "$pane" ] && read -r pid agent < <(agent_pid) || { say "No AI agent in this pane · Prefix + a launches one"; exit 1; }
+case $agent in agy-bin | antigravity) agent=agy ;; esac
+
+# The agent took $VISUAL / $EDITOR at start: agents started before ai-prompt was set open their own editor
+ready() { tr '\0' '\n' <"/proc/$pid/environ" 2>/dev/null | grep -qE '^(VISUAL|EDITOR)=.*ai-prompt'; }
+[ "$action" = --ready ] && { ready; exit; }
+
+var="AI_PROMPT_KEY_$agent"
+case $agent in
+  claude) keys=${!var:-C-x C-e} ;; # Ctrl+G is the tmux Lazygitrs key; Claude Code binds both
+  *) keys=${!var:-C-g} ;;
+esac
+send_editor_key() {
+  # shellcheck disable=SC2086
+  tmux send-keys -t "$pane" $keys
+}
+
+# take / put: leave a request file for the editor entrypoint, press the key, wait for it to be served
+request() { # <take|put>
+  ready || { say "Restart $agent to let ai-prompt move its draft (it predates \$VISUAL=ai-prompt)"; return 2; }
+  mkdir -p "$RUN"
+  : >"$RUN/$key.$1"
+  send_editor_key
+  local i
+  for i in $(seq 30); do
+    [ -f "$RUN/$key.$1" ] || { sleep 0.15; return 0; } # served; let the agent redraw its prompt
+    sleep 0.1
+  done
+  rm -f "$RUN/$key.$1"
+  say "$agent did not open its editor: is it waiting on a dialog?"
+  return 2
+}
+
+case $action in
+  edit)
+    ready || say "$agent predates \$VISUAL=ai-prompt: it opens its own editor; restart it for the popup"
+    send_editor_key
+    ;;
+  take)
+    request take || exit
+    [ -s "$RUN/$key.stash" ] || { rm -f "$RUN/$key.stash"; exit 1; }
+    ;;
+  put)
+    [ -f "$RUN/$key.stash" ] || exit 1
+    request put
+    ;;
+  stash)
+    if [ -f "$RUN/$key.stash" ]; then
+      request put && say "Draft restored"
+    elif request take; then
+      if [ -s "$RUN/$key.stash" ]; then
+        say "Draft stashed · run your /command · Prefix + V brings it back"
+      else
+        rm -f "$RUN/$key.stash"
+        say "Prompt is empty: nothing to stash"
+      fi
+    fi
+    ;;
+  *) say "Unknown action '$action' (edit, stash, take, put)"; exit 2 ;;
+esac
