@@ -77,6 +77,27 @@ The files carry the `# glyph-stacking: gradient` marker, which tells the skill's
 flag the deliberately small contrast between neighboring gradient steps. Text contrast is still
 checked.
 
+### Kanagawa family
+
+Gradient takes on Hokusai's *The Great Wave off Kanagawa* (c. 1831), grown out of `aaa.toml`. All of
+them open on the wave emoji (U+1F30A) as the OS icon and keep a cinnabar hanko seal for errors. The
+`crest-*` files are versions of `1-kanagawa-chroma-crest`: each one changes the light, the composition,
+or the claw itself.
+
+| File | Idea | Glyph chain |
+|---|---|---|
+| `1-kanagawa-chroma-crest` | The Great Wave ramp (Prussian `#071e3d`, indigo, seafoam, lead-white, ochre) sampled at t 0, .25, .5, .75, 1; the aaa claw with **foam-lit** leading glyphs lightened toward white | `U+E0C7 U+E0C0 U+E0C4` |
+| `1-kanagawa-chroma-crest-aizuri` | **Aizuri-e blue print**: every fill sits on one OKLCH hue line, the foam is the bare paper, and the cinnabar seal (an `✗` stamp block on error) is the only warm color | `U+E0C7 U+E0C0 U+E0C4` |
+| `1-kanagawa-chroma-crest-nocturne` | **Moonlight**: highlights mix toward silver and brighten toward the crest; the bar breaks into the night and the time floats as a full moon inside a halo | claw, then `U+E0B6` x2 / `U+E0B4` x2 |
+| `1-kanagawa-chroma-crest-akebono` | **Daybreak**: night-blue water lit by warm dawn light (complementary highlights), ending in the vermilion of Red Fuji | `U+E0C7 U+E0C0 U+E0C4` |
+| `1-kanagawa-chroma-crest-storm` | **Storm claws**: a mirrored flame and a flame share one foam color, so each crest reaches back and forward like the print's claw-tipped foam; green storm water under an umber sky | `U+E0C7 U+E0C2 U+E0C0 U+E0C4` |
+| `1-kanagawa-chroma-crest-spindrift` | **Spindrift**: each crest lands on the next region and keeps flying as Braille droplets that thin out and fade into it | `U+E0C7 U+E0C0`, `⡵ ⠕ ⠂` |
+| `1-kanagawa-chroma-crest-breaker` | **One wave per seam**: the face rises as a wedge, pitches over as a foam-lit flame and lands as spray | `U+E0BA U+E0C0 U+E0C4` |
+| `1-kanagawa-chroma-crest-fuji` | **The print's composition**: the claws break into a bokashi sky and Fuji sits in the trough, an 18-cell concave silhouette whose summit is snow over rock | claw, eighths `▁ ▂ ▃ ▄ ▆`, `▀` x2 |
+| `1-kanagawa-chroma-crest-horizon` | **Full width**: after the crest the water falls to half height and the open sea runs across the terminal as sky-over-sea half blocks stretched by `$fill`; a far swell breaks into the time | claw, `▆ ▅`, `▀` + `$fill` x6, `▅ ▆ ▇ U+E0C0` |
+| `1-kanagawa-chroma-bokashi` | Woodblock **bokashi**: each seam's fg slides from the left segment while its bg slides to the right one, so dither density and color fade together | shades `▓ ▒ ░` |
+| `1-kanagawa-chroma-swell` | The next segment's color **rises from the floor** of the previous one, and the line ebbs back into the terminal at the end | eighth blocks `▂ ▄ ▆`, reversed at the tail |
+
 ## Regenerating colors
 
 ```sh

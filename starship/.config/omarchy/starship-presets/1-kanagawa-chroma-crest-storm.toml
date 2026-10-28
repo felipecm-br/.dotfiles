@@ -1,0 +1,143 @@
+# ==============================================================================
+#  Preset: Kanagawa Chroma Crest (Storm Claws Edition)
+#  Inspired by: Katsushika Hokusai (c. 1831) - Kanagawa-oki nami ura, the claw-tipped lip of the wave
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+# glyph-stacking: gradient
+# Each seam is the lip of the wave in cross-section: a mirrored flame (U+E0C2) and a flame
+# (U+E0C0) share one foam color, so the crest is a single body of foam with claws reaching
+# back over the dark water and forward over the next region, as in the print. A spray of
+# big pixels (U+E0C7) is torn off behind it and fine spray (U+E0C4) lands ahead.
+# Storm palette: the sea is greener and the sky is umber haze instead of clear ochre.
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# Storm trench -> swell -> green water under the lip -> foam -> umber storm sky
+format = """
+[](fg:color_s0)\
+$os\
+[](fg:color_w01s bg:color_s0)\
+[](fg:color_w01l bg:color_s0)\
+[](fg:color_w01l bg:color_w01m)\
+[](fg:color_w01m bg:color_s1)\
+
+$directory\
+[](fg:color_w12s bg:color_s1)\
+[](fg:color_w12l bg:color_s1)\
+[](fg:color_w12l bg:color_w12m)\
+[](fg:color_w12m bg:color_s2)\
+
+$git_branch$git_status\
+[](fg:color_w23s bg:color_s2)\
+[](fg:color_w23l bg:color_s2)\
+[](fg:color_w23l bg:color_w23m)\
+[](fg:color_w23m bg:color_s3)\
+
+$c$rust$golang$nodejs$deno$python\
+[](fg:color_w34s bg:color_s3)\
+[](fg:color_w34l bg:color_s3)\
+[](fg:color_w34l bg:color_w34m)\
+[](fg:color_w34m bg:color_s4)\
+
+$time\
+[](fg:color_w4xs bg:color_s4)\
+[](fg:color_w4xl bg:color_s4)\
+[](fg:color_w4xl bg:color_w4xm)\
+[](fg:color_w4xm bg:transparent)\
+
+\n$character"""
+
+palette = 'kanagawa_crest_storm'
+
+[palettes.kanagawa_crest_storm]
+color_s0   = '#0b1e28' # Storm trench (Prussian Blue cut with lamp-black)
+color_s1   = '#1e4653' # Storm swell (indigo-teal)
+color_s2   = '#4f8288' # Green water under the lip (verdigris glaze)
+color_s3   = '#edf2ea' # Lead-white foam
+color_s4   = '#b3a98c' # Storm sky (raw umber haze)
+color_t0   = '#f2f6f1' # text on s0 (15.6:1)
+color_t1   = '#f2f6f1' # text on s1 (9.4:1)
+color_t2   = '#000000' # text on s2 (4.9:1)
+color_t3   = '#08161d' # text on s3 (16.2:1)
+color_t4   = '#08161d' # text on s4 (7.8:1)
+color_seal = '#c84b31' # Cinnabar (Hokusai hanko seal)
+color_w01s = '#3c4e57' # seam 01: back-spray (OKLab t=.20, 21% light)
+color_w01l = '#5f717a' # seam 01: curling lip (OKLab t=.45, 35% light)
+color_w01m = '#14313d' # seam 01: body midpoint (OKLab t=.50)
+color_w12s = '#66838b' # seam 12: back-spray (OKLab t=.20, 30% light)
+color_w12l = '#96acb2' # seam 12: curling lip (OKLab t=.45, 50% light)
+color_w12m = '#36636d' # seam 12: body midpoint (OKLab t=.50)
+color_w23s = '#b7cccd' # seam 23: back-spray (OKLab t=.20, 51% light)
+color_w23l = '#eff3f3' # seam 23: curling lip (OKLab t=.45, 85% light)
+color_w23m = '#9db9b8' # seam 23: body midpoint (OKLab t=.50)
+color_w34s = '#e8eae1' # seam 34: back-spray (OKLab t=.20, 24% light)
+color_w34l = '#e4e3d8' # seam 34: curling lip (OKLab t=.45, 40% light)
+color_w34m = '#d0cdba' # seam 34: body midpoint (OKLab t=.50)
+color_w4xs = '#aea791' # seam 4x: back-spray (OKLab t=.20, 18% light)
+color_w4xl = '#a7a190' # seam 4x: curling lip (OKLab t=.45, 30% light)
+color_w4xm = '#7e765f' # seam 4x: body midpoint (OKLab t=.50)
+
+# 1. THE DEEP
+[os]
+disabled = false
+style = "bg:color_s0 fg:color_t0 bold"
+format = '[ 🌊 ]($style)'
+
+# 2. THE RISING SWELL
+[directory]
+style = "bg:color_s1 fg:color_t1 bold"
+format = "[ 󰲋 $path ]($style)"
+truncation_length = 3
+
+# 3. THE CURLING WATER
+[git_branch]
+symbol = " "
+style = "bg:color_s2 fg:color_t2 bold"
+format = '[ $symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_s2 fg:color_t2 bold"
+format = '([$all_status$ahead_behind ]($style))'
+
+# 4. THE CREST (languages ride the foam)
+[c]
+symbol = " "
+style = "bg:color_s3 fg:color_t3 bold"
+format = '[ $symbol($version) ]($style)'
+
+[rust]
+symbol = " "
+style = "bg:color_s3 fg:color_t3 bold"
+format = '[ $symbol($version) ]($style)'
+
+[golang]
+symbol = " "
+style = "bg:color_s3 fg:color_t3 bold"
+format = '[ $symbol($version) ]($style)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_s3 fg:color_t3 bold"
+format = '[ $symbol($version) ]($style)'
+
+[deno]
+symbol = " "
+style = "bg:color_s3 fg:color_t3 bold"
+format = '[ $symbol($version) ]($style)'
+
+[python]
+symbol = " "
+style = "bg:color_s3 fg:color_t3 bold"
+format = '[ $symbol($version) ]($style)'
+
+# 5. THE HORIZON
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_s4 fg:color_t4 bold"
+format = '[  $time ]($style)'
+
+# THE SEAL
+[character]
+success_symbol = "[≈](bold color_s2)[❯](bold color_s3)"
+error_symbol = "[≈❯](bold color_seal)"

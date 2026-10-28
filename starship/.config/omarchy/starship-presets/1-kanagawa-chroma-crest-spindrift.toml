@@ -1,0 +1,157 @@
+# ==============================================================================
+#  Preset: Kanagawa Chroma Crest (Spindrift Edition)
+#  Inspired by: Katsushika Hokusai (c. 1831) - The Great Wave off Kanagawa, the spray flung off the claws
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+# glyph-stacking: gradient
+# Spindrift is the spray the wind tears off a breaking crest. Each seam breaks once
+# (U+E0C7 torn spray, U+E0C0 crest landing on the next region) and then keeps flying:
+# three Braille cells (U+2875 U+2815 U+2802) thin from dense to sparse while their color
+# fades from lit foam into the region they fall on. The droplets deliberately do not hand
+# off: they are airborne over the next segment, not part of the water.
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# Abyss -> swell -> wall -> foam -> ochre sky, each seam trailing spray
+format = """
+[](fg:color_s0)\
+$os\
+[](fg:color_w01a bg:color_s0)\
+[](fg:color_w01b bg:color_s1)\
+[⡵](fg:color_w01d0 bg:color_s1)\
+[⠕](fg:color_w01d1 bg:color_s1)\
+[⠂](fg:color_w01d2 bg:color_s1)\
+
+$directory\
+[](fg:color_w12a bg:color_s1)\
+[](fg:color_w12b bg:color_s2)\
+[⡵](fg:color_w12d0 bg:color_s2)\
+[⠕](fg:color_w12d1 bg:color_s2)\
+[⠂](fg:color_w12d2 bg:color_s2)\
+
+$git_branch$git_status\
+[](fg:color_w23a bg:color_s2)\
+[](fg:color_w23b bg:color_s3)\
+[⡵](fg:color_w23d0 bg:color_s3)\
+[⠕](fg:color_w23d1 bg:color_s3)\
+[⠂](fg:color_w23d2 bg:color_s3)\
+
+$c$rust$golang$nodejs$deno$python\
+[](fg:color_w34a bg:color_s3)\
+[](fg:color_w34b bg:color_s4)\
+[⡵](fg:color_w34d0 bg:color_s4)\
+[⠕](fg:color_w34d1 bg:color_s4)\
+[⠂](fg:color_w34d2 bg:color_s4)\
+
+$time\
+[](fg:color_w4xa bg:color_s4)\
+[](fg:color_s4)\
+[⡵](fg:color_w4xd0)\
+[⠕](fg:color_w4xd1)\
+[⠂](fg:color_w4xd2)\
+
+\n$character"""
+
+palette = 'kanagawa_crest_spindrift'
+
+[palettes.kanagawa_crest_spindrift]
+color_s0    = '#071e3d' # Prussian Blue (the abyss)
+color_s1    = '#1f4e70' # Ai indigo (the swell)
+color_s2    = '#6d94a6' # Seafoam slate (the wall)
+color_s3    = '#f2f5f7' # Lead-white foam (the crest)
+color_s4    = '#c7ad7f' # Ochre sky (the horizon)
+color_t0    = '#ffffff' # text on s0 (16.6:1)
+color_t1    = '#ffffff' # text on s1 (8.8:1)
+color_t2    = '#051329' # text on s2 (5.7:1)
+color_t3    = '#051329' # text on s3 (16.9:1)
+color_t4    = '#051329' # text on s4 (8.6:1)
+color_seal  = '#c84b31' # Cinnabar (Hokusai hanko seal)
+color_w01a  = '#50667f' # seam 01: torn spray
+color_w01b  = '#798ea3' # seam 01: crest
+color_w01d0 = '#69829a' # seam 01: droplet 1 (fading into the next region)
+color_w01d1 = '#597791' # seam 01: droplet 2 (fading into the next region)
+color_w01d2 = '#496b87' # seam 01: droplet 3 (fading into the next region)
+color_w12a  = '#8ea6b8' # seam 12: torn spray
+color_w12b  = '#b6c7d2' # seam 12: crest
+color_w12d0 = '#a9beca' # seam 12: droplet 1 (fading into the next region)
+color_w12d1 = '#9cb4c2' # seam 12: droplet 2 (fading into the next region)
+color_w12d2 = '#8eabba' # seam 12: droplet 3 (fading into the next region)
+color_w23a  = '#e9eff2' # seam 23: torn spray
+color_w23b  = '#fcfcfd' # seam 23: crest
+color_w23d0 = '#fafbfc' # seam 23: droplet 1 (fading into the next region)
+color_w23d1 = '#f8f9fb' # seam 23: droplet 2 (fading into the next region)
+color_w23d2 = '#f7f8fa' # seam 23: droplet 3 (fading into the next region)
+color_w34a  = '#f1ede7' # seam 34: torn spray
+color_w34b  = '#efeadf' # seam 34: crest
+color_w34d0 = '#e8dfce' # seam 34: droplet 1 (fading into the next region)
+color_w34d1 = '#e1d4bc' # seam 34: droplet 2 (fading into the next region)
+color_w34d2 = '#d9c9ab' # seam 34: droplet 3 (fading into the next region)
+color_w4xa  = '#dbc9ab' # tail: torn spray
+color_w4xd0 = '#a28d68' # tail: droplet 1
+color_w4xd1 = '#7f6e52' # tail: droplet 2
+color_w4xd2 = '#5d513c' # tail: droplet 3
+
+# 1. THE DEEP
+[os]
+disabled = false
+style = "bg:color_s0 fg:color_t0 bold"
+format = '[ 🌊 ]($style)'
+
+# 2. THE RISING SWELL
+[directory]
+style = "bg:color_s1 fg:color_t1 bold"
+format = "[ 󰲋 $path ]($style)"
+truncation_length = 3
+
+# 3. THE CURLING WATER
+[git_branch]
+symbol = " "
+style = "bg:color_s2 fg:color_t2 bold"
+format = '[ $symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_s2 fg:color_t2 bold"
+format = '([$all_status$ahead_behind ]($style))'
+
+# 4. THE CREST (languages ride the foam)
+[c]
+symbol = " "
+style = "bg:color_s3 fg:color_t3 bold"
+format = '[ $symbol($version) ]($style)'
+
+[rust]
+symbol = " "
+style = "bg:color_s3 fg:color_t3 bold"
+format = '[ $symbol($version) ]($style)'
+
+[golang]
+symbol = " "
+style = "bg:color_s3 fg:color_t3 bold"
+format = '[ $symbol($version) ]($style)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_s3 fg:color_t3 bold"
+format = '[ $symbol($version) ]($style)'
+
+[deno]
+symbol = " "
+style = "bg:color_s3 fg:color_t3 bold"
+format = '[ $symbol($version) ]($style)'
+
+[python]
+symbol = " "
+style = "bg:color_s3 fg:color_t3 bold"
+format = '[ $symbol($version) ]($style)'
+
+# 5. THE HORIZON
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_s4 fg:color_t4 bold"
+format = '[  $time ]($style)'
+
+# THE SEAL
+[character]
+success_symbol = "[≈](bold color_s2)[❯](bold color_s4)"
+error_symbol = "[≈❯](bold color_seal)"

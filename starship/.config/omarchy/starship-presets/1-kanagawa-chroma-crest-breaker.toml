@@ -1,0 +1,137 @@
+# ==============================================================================
+#  Preset: Kanagawa Chroma Crest (Breaker Edition)
+#  Inspired by: Katsushika Hokusai (c. 1831) - The Great Wave off Kanagawa, read as the life of one wave
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+# glyph-stacking: gradient
+# Every seam is one whole wave: the face rises as a straight wedge (U+E0BA) out of the
+# region behind it, pitches over as a foam-lit flame (U+E0C0) and lands as spray (U+E0C4)
+# on the next region. The face takes the next segment's OKLab color as it rises, so the
+# bar still reads as one gradient. The tail breaks a last time onto wet sand.
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# Abyss -> swell -> wall -> foam -> ochre sky, each seam a full rise-break-land cycle
+format = """
+[](fg:color_s0)\
+$os\
+[](fg:color_w01f bg:color_s0)\
+[](fg:color_w01b bg:color_w01m)\
+[](fg:color_w01m bg:color_s1)\
+
+$directory\
+[](fg:color_w12f bg:color_s1)\
+[](fg:color_w12b bg:color_w12m)\
+[](fg:color_w12m bg:color_s2)\
+
+$git_branch$git_status\
+[](fg:color_w23f bg:color_s2)\
+[](fg:color_w23b bg:color_w23m)\
+[](fg:color_w23m bg:color_s3)\
+
+$c$rust$golang$nodejs$deno$python\
+[](fg:color_w34f bg:color_s3)\
+[](fg:color_w34b bg:color_w34m)\
+[](fg:color_w34m bg:color_s4)\
+
+$time\
+[](fg:color_w4xf bg:color_s4)\
+[](fg:color_w4xb bg:color_w4xm)\
+[](fg:color_w4xm)\
+
+\n$character"""
+
+palette = 'kanagawa_crest_breaker'
+
+[palettes.kanagawa_crest_breaker]
+color_s0   = '#071e3d' # Prussian Blue (the abyss)
+color_s1   = '#1f4e70' # Ai indigo (the swell)
+color_s2   = '#6d94a6' # Seafoam slate (the wall)
+color_s3   = '#f2f5f7' # Lead-white foam (the crest)
+color_s4   = '#c7ad7f' # Ochre sky (the horizon)
+color_t0   = '#ffffff' # text on s0 (16.6:1)
+color_t1   = '#ffffff' # text on s1 (8.8:1)
+color_t2   = '#051329' # text on s2 (5.7:1)
+color_t3   = '#051329' # text on s3 (16.9:1)
+color_t4   = '#051329' # text on s4 (8.6:1)
+color_seal = '#c84b31' # Cinnabar (Hokusai hanko seal)
+color_w01f = '#0f2e4e' # seam 01: wave face (OKLab t=.35)
+color_w01b = '#627a92' # seam 01: breaking crest
+color_w01m = '#153a5b' # seam 01: broken water (OKLab t=.60)
+color_w12f = '#3b6683' # seam 12: wave face (OKLab t=.35)
+color_w12b = '#a4b9c7' # seam 12: breaking crest
+color_w12m = '#4e7790' # seam 12: broken water (OKLab t=.60)
+color_w23f = '#9bb5c2' # seam 23: wave face (OKLab t=.35)
+color_w23b = '#f5f7f9' # seam 23: breaking crest
+color_w23m = '#bccdd6' # seam 23: broken water (OKLab t=.60)
+color_w34f = '#e3dccd' # seam 34: wave face (OKLab t=.35)
+color_w34b = '#e9e2d3' # seam 34: breaking crest
+color_w34m = '#d8caaf' # seam 34: broken water (OKLab t=.60)
+color_w4xf = '#a08963' # tail: last face
+color_w4xb = '#ddcdb2' # tail: last crest
+color_w4xm = '#957f5b' # tail: wet sand
+
+# 1. THE DEEP
+[os]
+disabled = false
+style = "bg:color_s0 fg:color_t0 bold"
+format = '[ 🌊 ]($style)'
+
+# 2. THE RISING SWELL
+[directory]
+style = "bg:color_s1 fg:color_t1 bold"
+format = "[ 󰲋 $path ]($style)"
+truncation_length = 3
+
+# 3. THE CURLING WATER
+[git_branch]
+symbol = " "
+style = "bg:color_s2 fg:color_t2 bold"
+format = '[ $symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_s2 fg:color_t2 bold"
+format = '([$all_status$ahead_behind ]($style))'
+
+# 4. THE CREST (languages ride the foam)
+[c]
+symbol = " "
+style = "bg:color_s3 fg:color_t3 bold"
+format = '[ $symbol($version) ]($style)'
+
+[rust]
+symbol = " "
+style = "bg:color_s3 fg:color_t3 bold"
+format = '[ $symbol($version) ]($style)'
+
+[golang]
+symbol = " "
+style = "bg:color_s3 fg:color_t3 bold"
+format = '[ $symbol($version) ]($style)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_s3 fg:color_t3 bold"
+format = '[ $symbol($version) ]($style)'
+
+[deno]
+symbol = " "
+style = "bg:color_s3 fg:color_t3 bold"
+format = '[ $symbol($version) ]($style)'
+
+[python]
+symbol = " "
+style = "bg:color_s3 fg:color_t3 bold"
+format = '[ $symbol($version) ]($style)'
+
+# 5. THE HORIZON
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_s4 fg:color_t4 bold"
+format = '[  $time ]($style)'
+
+# THE SEAL
+[character]
+success_symbol = "[≈](bold color_s2)[❯](bold color_s4)"
+error_symbol = "[≈❯](bold color_seal)"

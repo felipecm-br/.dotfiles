@@ -1,0 +1,154 @@
+# ==============================================================================
+#  Preset: Kanagawa Chroma Crest (Fuji in the Trough Edition)
+#  Inspired by: Katsushika Hokusai (c. 1831) - The Great Wave off Kanagawa, its whole composition
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+# glyph-stacking: gradient
+# The print in reading order: the wave rises out of the trough, its claws break white over
+# the shadowed foam and fall into the sky, and Fuji sits small in the trough beyond, snow-
+# capped, under a gofun-to-ochre bokashi sky. Fuji is eighteen cells: concave slopes in
+# eighth blocks (U+2581-U+2586) and a two-cell summit of upper half blocks (U+2580, snow over rock).
+# Git and the languages share the wave wall, so the crest is always drawn.
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# Trough -> swell -> wave wall -> claws breaking into the sky -> Fuji -> ochre horizon
+format = """
+[](fg:color_s0)\
+$os\
+[](fg:color_w01a bg:color_s0)\
+[](fg:color_w01b bg:color_w01m)\
+[](fg:color_w01m bg:color_s1)\
+
+$directory\
+[](fg:color_w12a bg:color_s1)\
+[](fg:color_w12b bg:color_w12m)\
+[](fg:color_w12m bg:color_s2)\
+
+$git_branch$git_status$c$rust$golang$nodejs$deno$python\
+[](fg:color_foam bg:color_s2)\
+[](fg:color_foam bg:color_shade)\
+[](fg:color_shade bg:color_sky0)\
+
+[▁](fg:color_fuji1 bg:color_sky0)\
+[▁](fg:color_fuji11 bg:color_sky0)\
+[▁](fg:color_fuji12 bg:color_sky0)\
+[▂](fg:color_fuji2 bg:color_sky1)\
+[▂](fg:color_fuji21 bg:color_sky1)\
+[▃](fg:color_fuji3 bg:color_sky1)\
+[▄](fg:color_fuji4 bg:color_sky2)\
+[▆](fg:color_fujirock bg:color_sky2)\
+[▀](fg:color_t0 bg:color_fujirock)\
+[▀](fg:color_t0 bg:color_fujirock)\
+[▆](fg:color_fujirock bg:color_sky3)\
+[▄](fg:color_fuji4 bg:color_sky3)\
+[▃](fg:color_fuji3 bg:color_sky4)\
+[▂](fg:color_fuji21 bg:color_sky4)\
+[▂](fg:color_fuji2 bg:color_sky4)\
+[▁](fg:color_fuji12 bg:color_sky5)\
+[▁](fg:color_fuji11 bg:color_sky5)\
+[▁](fg:color_fuji1 bg:color_sky5)\
+
+$time\
+[](fg:color_sky5)\
+
+\n$character"""
+
+palette = 'kanagawa_crest_fuji'
+
+[palettes.kanagawa_crest_fuji]
+color_s0       = '#0a2342' # Prussian Blue (the trough)
+color_s1       = '#1f4e70' # Ai indigo (the swell)
+color_s2       = '#6f97aa' # Pale Prussian (the wave wall, git and languages)
+color_t0       = '#fbf8f0' # text on s0 (14.9:1)
+color_t1       = '#fbf8f0' # text on s1 (8.3:1)
+color_t2       = '#0b1d36' # text on s2 (5.4:1)
+color_sky0     = '#efe6d0' # sky bokashi, step 0 (gofun white to ochre)
+color_sky1     = '#e9dcbf' # sky bokashi, step 1 (gofun white to ochre)
+color_sky2     = '#e3d1ad' # sky bokashi, step 2 (gofun white to ochre)
+color_sky3     = '#dcc59b' # sky bokashi, step 3 (gofun white to ochre)
+color_sky4     = '#d4b98a' # sky bokashi, step 4 (gofun white to ochre)
+color_sky5     = '#ccad7b' # sky bokashi, step 5 (gofun white to ochre)
+color_tsky     = '#0b1d36' # text on the sky (7.9:1)
+color_foam     = '#fbf8f0' # Gofun shell-white foam (the claws)
+color_shade    = '#c3d3db' # Foam in shadow (under the claws)
+color_seal     = '#c84b31' # Cinnabar (Hokusai hanko seal)
+color_w01a     = '#516780' # seam 01: lit spray (OKLab t=.25, 30% light)
+color_w01b     = '#47647f' # seam 01: lit crest (OKLab t=.60, 22% light)
+color_w01m     = '#143859' # seam 01: body midpoint (OKLab t=.50)
+color_w12a     = '#96adbd' # seam 12: lit spray (OKLab t=.25, 50% light)
+color_w12b     = '#93adbd' # seam 12: lit crest (OKLab t=.60, 40% light)
+color_w12m     = '#47728d' # seam 12: body midpoint (OKLab t=.50)
+color_fujirock = '#2e4a6a' # Fuji: Prussian rock under the snow
+color_fuji1    = '#5a7591' # Fuji: slope at 1/8, hazier toward the foot
+color_fuji11   = '#56728e' # Fuji: slope at 1/8, hazier toward the foot
+color_fuji12   = '#53708c' # Fuji: slope at 1/8, hazier toward the foot
+color_fuji2    = '#4b6886' # Fuji: slope at 2/8, hazier toward the foot
+color_fuji21   = '#476482' # Fuji: slope at 2/8, hazier toward the foot
+color_fuji3    = '#43607f' # Fuji: slope at 3/8, hazier toward the foot
+color_fuji4    = '#3b5878' # Fuji: slope at 4/8, hazier toward the foot
+
+# 1. THE DEEP
+[os]
+disabled = false
+style = "bg:color_s0 fg:color_t0 bold"
+format = '[ 🌊 ]($style)'
+
+# 2. THE RISING SWELL
+[directory]
+style = "bg:color_s1 fg:color_t1 bold"
+format = "[ 󰲋 $path ]($style)"
+truncation_length = 3
+
+# 3. THE CURLING WATER
+[git_branch]
+symbol = " "
+style = "bg:color_s2 fg:color_t2 bold"
+format = '[ $symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_s2 fg:color_t2 bold"
+format = '([$all_status$ahead_behind ]($style))'
+
+# 4. THE CREST (languages ride the foam)
+[c]
+symbol = " "
+style = "bg:color_s2 fg:color_t2 bold"
+format = '[ $symbol($version) ]($style)'
+
+[rust]
+symbol = " "
+style = "bg:color_s2 fg:color_t2 bold"
+format = '[ $symbol($version) ]($style)'
+
+[golang]
+symbol = " "
+style = "bg:color_s2 fg:color_t2 bold"
+format = '[ $symbol($version) ]($style)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_s2 fg:color_t2 bold"
+format = '[ $symbol($version) ]($style)'
+
+[deno]
+symbol = " "
+style = "bg:color_s2 fg:color_t2 bold"
+format = '[ $symbol($version) ]($style)'
+
+[python]
+symbol = " "
+style = "bg:color_s2 fg:color_t2 bold"
+format = '[ $symbol($version) ]($style)'
+
+# 5. THE HORIZON
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_sky5 fg:color_tsky bold"
+format = '[  $time ]($style)'
+
+# THE SEAL
+[character]
+success_symbol = "[≈](bold color_s2)[❯](bold color_sky3)"
+error_symbol = "[≈❯](bold color_seal)"

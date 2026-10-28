@@ -1,0 +1,139 @@
+# ==============================================================================
+#  Preset: Kanagawa Chroma Crest (Akebono Daybreak Edition)
+#  Inspired by: Katsushika Hokusai (c. 1831) - the Great Wave at first light, after Gaifu kaisei (Red Fuji)
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+# glyph-stacking: gradient
+# Akebono is the first light of day. The sea is still night-blue, but the sun is up behind
+# the horizon, so every claw highlight mixes toward warm dawn light (#ffd2ad) instead of
+# white: complementary orange on blue, strongest where the crest is highest (75%). The bar
+# ends in the vermilion of Red Fuji (Gaifu kaisei, same series) and fades into the terminal.
+# Claw per seam: U+E0C7 spray, U+E0C0 crest, U+E0C4 spray (aaa.toml signature).
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# Night abyss -> violet swell -> dawn-lit wall -> peach foam -> vermilion daybreak
+format = """
+[](fg:color_s0)\
+$os\
+[](fg:color_w01a bg:color_s0)\
+[](fg:color_w01b bg:color_w01m)\
+[](fg:color_w01m bg:color_s1)\
+
+$directory\
+[](fg:color_w12a bg:color_s1)\
+[](fg:color_w12b bg:color_w12m)\
+[](fg:color_w12m bg:color_s2)\
+
+$git_branch$git_status\
+[](fg:color_w23a bg:color_s2)\
+[](fg:color_w23b bg:color_w23m)\
+[](fg:color_w23m bg:color_s3)\
+
+$c$rust$golang$nodejs$deno$python\
+[](fg:color_w34a bg:color_s3)\
+[](fg:color_w34b bg:color_w34m)\
+[](fg:color_w34m bg:color_s4)\
+
+$time\
+[](fg:color_w4xa bg:color_s4)\
+[](fg:color_w4xb bg:color_w4xm)\
+[](fg:color_w4xm bg:transparent)\
+
+\n$character"""
+
+palette = 'kanagawa_crest_akebono'
+
+[palettes.kanagawa_crest_akebono]
+color_s0   = '#0c1c3e' # Prussian Blue before dawn (the abyss)
+color_s1   = '#283d74' # Indigo-violet half-light (the swell)
+color_s2   = '#6f78a3' # Dawn-lit slate (the wave wall)
+color_s3   = '#fde3d1' # Peach-lit foam (the crest catches the sun)
+color_s4   = '#e9693f' # Vermilion daybreak (beni-gara, the Red Fuji glow)
+color_t0   = '#fff7f0' # text on s0 (15.8:1)
+color_t1   = '#fff7f0' # text on s1 (9.9:1)
+color_t2   = '#000000' # text on s2 (4.9:1)
+color_t3   = '#1c0f0b' # text on s3 (15.2:1)
+color_t4   = '#1c0f0b' # text on s4 (5.8:1)
+color_tide = '#8fb4c9' # Cool seafoam (success: the sea is calm)
+color_seal = '#d9372b' # Cinnabar (Hokusai hanko seal)
+color_w01a = '#3c4560' # seam 01: lit spray (OKLab t=.25, 20% light)
+color_w01b = '#3a476c' # seam 01: lit crest (OKLab t=.60, 15% light)
+color_w01m = '#1a2c58' # seam 01: body midpoint (OKLab t=.50)
+color_w12a = '#848196' # seam 12: lit spray (OKLab t=.25, 40% light)
+color_w12b = '#86849c' # seam 12: lit crest (OKLab t=.60, 32% light)
+color_w12m = '#4b5a8c' # seam 12: body midpoint (OKLab t=.50)
+color_w23a = '#e3c2af' # seam 23: lit spray (OKLab t=.25, 75% light)
+color_w23b = '#eac9b5' # seam 23: lit crest (OKLab t=.60, 65% light)
+color_w23m = '#b4adbb' # seam 23: body midpoint (OKLab t=.50)
+color_w34a = '#fdcbad' # seam 34: lit spray (OKLab t=.25, 45% light)
+color_w34b = '#f9ac8b' # seam 34: lit crest (OKLab t=.60, 30% light)
+color_w34m = '#f7a88a' # seam 34: body midpoint (OKLab t=.50)
+color_w4xa = '#e18360' # seam 4x: lit spray (OKLab t=.25, 35% light)
+color_w4xb = '#b95d42' # seam 4x: lit crest (OKLab t=.60, 20% light)
+color_w4xm = '#b1462b' # seam 4x: body midpoint (OKLab t=.50)
+
+# 1. THE DEEP
+[os]
+disabled = false
+style = "bg:color_s0 fg:color_t0 bold"
+format = '[ 🌊 ]($style)'
+
+# 2. THE RISING SWELL
+[directory]
+style = "bg:color_s1 fg:color_t1 bold"
+format = "[ 󰲋 $path ]($style)"
+truncation_length = 3
+
+# 3. THE CURLING WATER
+[git_branch]
+symbol = " "
+style = "bg:color_s2 fg:color_t2 bold"
+format = '[ $symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_s2 fg:color_t2 bold"
+format = '([$all_status$ahead_behind ]($style))'
+
+# 4. THE CREST (languages ride the foam)
+[c]
+symbol = " "
+style = "bg:color_s3 fg:color_t3 bold"
+format = '[ $symbol($version) ]($style)'
+
+[rust]
+symbol = " "
+style = "bg:color_s3 fg:color_t3 bold"
+format = '[ $symbol($version) ]($style)'
+
+[golang]
+symbol = " "
+style = "bg:color_s3 fg:color_t3 bold"
+format = '[ $symbol($version) ]($style)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_s3 fg:color_t3 bold"
+format = '[ $symbol($version) ]($style)'
+
+[deno]
+symbol = " "
+style = "bg:color_s3 fg:color_t3 bold"
+format = '[ $symbol($version) ]($style)'
+
+[python]
+symbol = " "
+style = "bg:color_s3 fg:color_t3 bold"
+format = '[ $symbol($version) ]($style)'
+
+# 5. THE HORIZON
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_s4 fg:color_t4 bold"
+format = '[  $time ]($style)'
+
+# THE SEAL
+[character]
+success_symbol = "[≈](bold color_tide)[❯](bold color_s4)"
+error_symbol = "[≈❯](bold color_seal)"
