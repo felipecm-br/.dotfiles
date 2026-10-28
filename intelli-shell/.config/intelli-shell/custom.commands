@@ -148,7 +148,7 @@ ai-launch --pick
 # Start the quota-recommended AI agent and model directly
 ai-launch --auto
 
-# Start a specific AI agent CLI
+# Start a specific AI agent CLI (claude, agy, agyy, devin, codex)
 ai-launch {{agent}}
 
 # Start Claude inside the ai-jail sandbox with permission prompts off (the Claude Jailed menu row)

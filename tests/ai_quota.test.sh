@@ -164,3 +164,15 @@ rm -f "$XDG_RUNTIME_DIR/ai-launch.next"
 ai-launch --next shell
 [ "$(ai-launch --peek)" = "shell" ] && ok "armed shell choice" || bad "armed shell"
 rm -f "$XDG_RUNTIME_DIR/ai-launch.next"
+
+# 10. Machines without Claude or Antigravity: Devin/Codex choices pass through, and auto falls back
+# to whichever agent CLI is installed (system dirs only, so the host's own agents stay out of PATH)
+[ "$(ai-launch --peek devin)" = "devin" ] && ok "devin choice accepted" || bad "devin choice"
+[ "$(ai-launch --peek codex -m o4)" = "codex -m o4" ] && ok "codex args pass through" || bad "codex args"
+mkdir -p "$SANDBOX/only-codex"
+printf '#!/bin/sh\n' >"$SANDBOX/only-codex/codex"; chmod +x "$SANDBOX/only-codex/codex"
+# Stowed layout: the agy wrapper lives in ~/.local/bin, where ai-quota knows to skip it
+mkdir -p "$HOME/.local/bin"
+for b in ai-launch ai-quota agy; do ln -sf "$ROOT/utils/.local/bin/$b" "$HOME/.local/bin/$b"; done
+out=$(PATH="$SANDBOX/only-codex:$HOME/.local/bin:/usr/bin:/bin" AI_QUOTA_NO_API=1 ai-launch --peek --auto)
+[ "$out" = "codex" ] && ok "codex-only machine -> codex" || bad "codex-only: $out"

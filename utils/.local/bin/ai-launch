@@ -4,10 +4,12 @@
 #   ai-launch                  Menu of CLI × model with live quota, cursor on the recommended row
 #                              (non-interactive callers get --auto)
 #   ai-launch --auto           Start the recommended agent and model directly
-#   ai-launch <agent> [args]   Force claude | agy | agyy (extra args pass through, e.g. --model sonnet)
+#   ai-launch <agent> [args]   Force claude | agy | agyy | devin | codex (extra args pass through,
+#                              e.g. --model sonnet)
 #   ai-launch jail-claude [args]
 #                              Claude in the ai-jail sandbox with permission prompts off (the menu's
-#                              "Claude Jailed" row); falls back to plain claude where ai-jail cannot start
+#                              "Claude Jailed" row, listed only when ai-jail is installed); falls back
+#                              to plain claude where ai-jail cannot start
 #   ai-launch --next <choice> [args]
 #                              Arm a one-shot choice (agent | auto | shell, plus args such as
 #                              --model sonnet) for the next ai-launch (session picker)
@@ -18,6 +20,7 @@
 # Nothing armed: $AI_LAUNCH_AGENT (agent | auto | menu | shell), else menu.
 # Recommended model: Claude green → opus, yellow → sonnet, red → haiku; Antigravity → its default
 # model while that group has quota, otherwise the group with the most quota left.
+# Devin and Codex (no quota telemetry) get one default-model row each when installed.
 
 NEXT_FILE="${XDG_RUNTIME_DIR:-/tmp}/ai-launch.next"
 NEXT_TTL=30
@@ -32,7 +35,7 @@ case "${1:-}" in
     exit 0
     ;;
   -h | --help)
-    sed -n '2,20p' "$0" | sed 's/^# \{0,1\}//'
+    sed -n '2,23p' "$0" | sed 's/^# \{0,1\}//'
     exit 0
     ;;
 esac
@@ -83,7 +86,7 @@ fi
 if [ "$choice" = "menu" ] && ! { [ -t 0 ] && { $pick_only || [ -t 1 ]; }; }; then choice=auto; fi
 
 case "$choice" in
-  claude | agy | agyy)
+  claude | agy | agyy | devin | codex)
     if $peek; then echo "$choice${*:+ $*}"; exit 0; fi
     exec "$choice" "$@"
     ;;
@@ -96,7 +99,7 @@ case "$choice" in
     exec "${SHELL:-bash}"
     ;;
   auto | menu) ;;
-  *) echo "ai-launch: unknown choice '$choice' (claude | agy | agyy | jail-claude | auto | menu)" >&2; exit 2 ;;
+  *) echo "ai-launch: unknown choice '$choice' (claude | agy | agyy | devin | codex | jail-claude | auto | menu)" >&2; exit 2 ;;
 esac
 if $peek && [ "$choice" = "menu" ]; then echo menu; exit 0; fi
 
@@ -114,9 +117,14 @@ agy_models=$(cat "$AGY_MODELS" 2>/dev/null)
 snapshot=$(ai-quota --json 2>/dev/null)
 [ -n "$snapshot" ] || snapshot='{"recommend":"claude","agents":[]}'
 
+# CLIs without quota telemetry get one default-model row each, only where installed
+have() { command -v "$1" >/dev/null 2>&1 && echo 1 || echo 0; }
+
 # One row per CLI × model family: agent \t args \t plain text \t colored text \t recommended (0|1)
 rows=$(jq -r -n --argjson s "$snapshot" --arg models "$agy_models" \
-  --arg ic_claude "$(waymux icon claude 2>/dev/null || echo C)" --arg ic_agy "$(waymux icon agy 2>/dev/null || echo A)" '
+  --arg ic_claude "$(waymux icon claude 2>/dev/null || echo C)" --arg ic_agy "$(waymux icon agy 2>/dev/null || echo A)" \
+  --arg ic_devin "$(waymux icon devin 2>/dev/null || echo D)" --arg ic_codex "$(waymux icon codex 2>/dev/null || echo X)" \
+  --arg have_devin "$(have devin)" --arg have_codex "$(have codex)" --arg have_jail "$(have ai-jail)" '
 def fam: sub("-(low|medium|high)$"; "");
 def pad($n): . + (" " * ([$n - length, 1] | max));
 def clock: if (. - ($s.now // 0)) > 86400 then strflocaltime("%a %H:%M") else strflocaltime("%H:%M") end;
@@ -158,12 +166,17 @@ def tier: if test("fable|argon") then "$$$$" elif test("opus") then "$$$" elif t
           elif $best == "argon" then ($f | startswith("gemini-4-argon"))
           elif $best == "claude" then ($f | test("sonnet"))
           elif $best == "flash" then ($f | test("flash"))
-          else $f == ($families[0].id | fam) end))})
+          else $f == ($families[0].id | fam) end))}),
+    (["devin", "Devin", $ic_devin, $have_devin], ["codex", "Codex", $ic_codex, $have_codex]
+     | select(.[3] == "1")
+     | {agent: .[0], args: "", icon: .[2], cli: .[1], model: "default", tier: "-",
+        quota: "no quota data", level: "unknown", rec: false})
   ]
 | (if any(.[]; .rec) then . else (.[0].rec = true) end)
 # One sandboxed row, after the plain ones: the recommended Claude model (else the first), run in ai-jail
 | . + [(map(select(.agent == "claude" and .rec)) + map(select(.agent == "claude")) | first
-        | select(. != null) | .agent = "jail-claude" | .cli = "Claude Jailed" | .icon = "󰌾" | .rec = false)]
+        | select(. != null and $have_jail == "1")
+        | .agent = "jail-claude" | .cli = "Claude Jailed" | .icon = "󰌾" | .rec = false)]
 | .[]
 | ("\(.icon) " + (.cli | pad(14)) + (.model | pad(20)) + (.tier | pad(5))) as $head
 | [.agent, .args, "\($head)\(.quota)\(if .rec then "  ★" else "" end)",
@@ -199,8 +212,12 @@ if [ "$choice" = "menu" ]; then
 fi
 
 if [ "$pick" -lt 0 ]; then
-  # No rows (no quota data, no CLIs) or an unmatched selection: plain recommended agent
+  # No rows (no quota data, no CLIs) or an unmatched selection: plain recommended agent,
+  # else the first agent CLI this machine has
   agent=$(jq -r '.recommend // "claude"' <<<"$snapshot")
+  if ! command -v "$agent" >/dev/null 2>&1; then
+    for a in claude agy devin codex; do command -v "$a" >/dev/null 2>&1 && { agent=$a; break; }; done
+  fi
   if $peek || $pick_only; then echo "$agent"; exit 0; fi
   exec "$agent"
 fi
@@ -210,7 +227,7 @@ if [ "${agents[$pick]}" = shell ]; then
   if $peek || $pick_only; then echo shell; exit 0; fi
   exec "${SHELL:-bash}"
 fi
-if $peek || $pick_only; then echo "${agents[$pick]} ${args[*]}"; exit 0; fi
+if $peek || $pick_only; then echo "${agents[$pick]}${args[*]:+ ${args[*]}}"; exit 0; fi
 [ "$choice" = "auto" ] && printf '\033[90m%s\033[0m\n' "${plain[$pick]}"
 [ "${agents[$pick]}" = jail-claude ] && launch_jailed "${args[@]}"
 exec "${agents[$pick]}" "${args[@]}"
