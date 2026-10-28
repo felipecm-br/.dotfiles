@@ -93,6 +93,21 @@ Selection walks `AI_AGENT_PREFERENCE` (default `claude agy agyy`) and picks the 
 
 `ai-launch --peek` prints what would start (`<agent> [args]` or `menu`) without starting it. `ai-launch --pick` shows the menu and prints the chosen `<agent> [args]` without starting it; it backs the standalone popup below.
 
+## In-place model / effort switch (`ai-switch`, `Prefix + A`)
+
+`ai-launch` picks the model when an agent starts; [`ai-switch`](../../utils/.local/bin/ai-switch) changes it **while the agent runs**, without a new window. `Prefix + A` opens [`ai-switch-popup.sh`](../../tmux/.config/tmux/ai-switch-popup.sh) over the current pane, titled with the agent icon and current model, and the pick is typed into that agent as its own slash command, so scrollback and conversation stay:
+
+| Agent | Rows | Typed |
+|---|---|---|
+| Claude Code | Fable, Opus, Sonnet, Haiku · effort `low` … `max`, `auto` | `/model <alias>`, `/effort <level>` |
+| Antigravity | Model families (same cache as the launch menu) | `/model <id>` |
+| Devin | Opus, Sonnet, Codex, Fusion | `/model <name>` |
+| Codex | One row | `/model` (Codex's own model & reasoning-effort picker) |
+
+`● now` marks the current Claude model (read from its status line) and effort (the transient `/effort` badge, else the per-model level Claude saves in `settings.json`); the cursor starts on the current model. The agent is found from the pane's foreground command, else the first agent process in its session (Claude under `ai-jail` / `ai-memory run`, `agy-bin` under the wrapper).
+
+A half-typed prompt is never submitted: when text that is not a dim placeholder follows the prompt marker (`❯`, `›`, `>`), the switch stops with a status-line message. Claude Code's `/model` and `/effort` also save the pick as the default for new sessions; `ai-launch` always passes `--model`, so sessions started from the launcher are unaffected. `ai-switch sonnet` / `ai-switch high` switch without the menu, `ai-switch --peek` prints the rows.
+
 ## Standalone popups (`Prefix + a` / `Ctrl + Shift + A` and `Prefix + u`)
 
 [`ai-launch-popup.sh`](../../tmux/.config/tmux/ai-launch-popup.sh) opens the launch menu in a `75% × 60%` tmux popup from any pane, the same shape as the `awt` popup (badge ` 󰚩 `, magenta ephemeral frame, quota badge in the title). `Enter` opens the pick in a **new window** of the originating session, rooted at the pane directory; `Esc` closes with no side effect. It works in sessions that already exist, which the session picker cannot do for `startup_command`. `Prefix + o` ([`toggle-ai-split.sh`](../../tmux/.config/tmux/toggle-ai-split.sh)) toggles a 35% right split running `ai-launch --auto` (honoring `$AI_LAUNCH_AGENT` and ignoring Claude Code's `$AI_AGENT` identity marker).
@@ -107,6 +122,8 @@ Selection walks `AI_AGENT_PREFERENCE` (default `claude agy agyy`) and picks the 
 - [`tmux/.config/tmux/ai-quota-popup.sh`](../../tmux/.config/tmux/ai-quota-popup.sh): visual quota & burn telemetry tmux popup (`Prefix + u`)
 - [`tmux/.config/tmux/toggle-ai-split.sh`](../../tmux/.config/tmux/toggle-ai-split.sh): 35% right-side AI split pane toggle backed by `ai-launch --auto` (`Prefix + o`)
 - [`utils/.local/bin/ai-launch`](../../utils/.local/bin/ai-launch): launch menu and launcher used by Waymaker
+- [`utils/.local/bin/ai-switch`](../../utils/.local/bin/ai-switch): in-place model / effort switch for the agent in a pane
+- [`tmux/.config/tmux/ai-switch-popup.sh`](../../tmux/.config/tmux/ai-switch-popup.sh): `Prefix + A` popup over the current pane
 - [`waymaker/.config/waymaker/presets/ai-launch.toml`](../../waymaker/.config/waymaker/presets/ai-launch.toml): launch menu preset
 - [`waymaker/.config/waymaker/session.toml`](../../waymaker/.config/waymaker/session.toml): `startup_command = "ai-launch"`
 - [`waymaker/.config/waymaker/presets/session-picker.toml`](../../waymaker/.config/waymaker/presets/session-picker.toml): `r` / `a` / `A` / `c` / `u` binds

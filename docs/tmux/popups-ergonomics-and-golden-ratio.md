@@ -92,6 +92,7 @@ Whenever the system theme switches (`omarchy theme set <name>`), 100% of termina
 | **1. Ephemeral** | [`pr-picker.sh`](../../tmux/.config/tmux/pr-picker.sh) | `blue` / `cyan` | `#7aa2f7` | `  ` | `75% × 60%` | `Esc` (1 tap) |
 | **1. Ephemeral** | [`awt-popup.sh`](../../awt/.config/tmux/awt-popup.sh) | `orange` / `peach` | `#e84d31` | `  ` | `85% × 75%` | `Esc` / `q` |
 | **1. Ephemeral** | [`ai-launch-popup.sh`](../../tmux/.config/tmux/ai-launch-popup.sh) (`ai-launch.toml`) | `magenta` / `mauve` | `#cba6f7` | ` 󰚩 ` + quota badge | `75% × 60%` | `Esc` (1 tap) |
+| **1. Ephemeral** | [`ai-switch-popup.sh`](../../tmux/.config/tmux/ai-switch-popup.sh) (`ai-switch.toml`) | `magenta` / `mauve` | `#cba6f7` | agent icon + current model | `75% × 60%` | `Esc` (1 tap) |
 | **1. Ephemeral** | [`ai-quota-popup.sh`](../../tmux/.config/tmux/ai-quota-popup.sh) (`ai-quota --visual`) | `cyan` / `blue` | `#94e2d5` | ` 󰓅 ` + quota badge | `75% × 60%` | `u` / `q` / `Esc` |
 | **1. Ephemeral** | [`close-window.sh`](../../tmux/.config/tmux/close-window.sh) / [`close-session.sh`](../../tmux/.config/tmux/close-session.sh) | `yellow` / `orange` | `#e0af68` | `  ` | `68 × 11..18` | `y` / `n` / `Esc` |
 | **2. Persistent** | [`lazygitrs-popup.sh`](../../tmux/.config/tmux/lazygitrs-popup.sh)| `orange` / `peach` | `#e84d31` | ` 󰊢 ` | `90% × 88%` | `Esc` (Files) / `q` |
@@ -194,6 +195,7 @@ Every interactive popup, picker, and confirmation dialog has been harmonized und
 | **AWT PR Review** | [`awt-pr.toml`](../../awt/.config/waymaker/presets/awt-pr.toml) | `{cyan,bold:Enter} Checkout │ Tab Cycle Tab │ C-e Chrome │ C-d Diff │ p Preview │ Esc Exit` |
 | **AWT Sub-Wizards** | `awt-prompt`, `awt-ai`, `awt-base`, `awt-type` | `{cyan,bold:Enter} Confirm/Select │ Esc Back/Cancel` |
 | **AI Agent Launcher** | [`ai-launch.toml`](../../waymaker/.config/waymaker/presets/ai-launch.toml) | `{cyan,bold:Enter} Launch │ ★ Recommended │ type Filter │ Esc Shell` |
+| **AI Model / Effort Hot-Swap** | [`ai-switch.toml`](../../waymaker/.config/waymaker/presets/ai-switch.toml) | `{cyan,bold:Enter} Switch │ ● Current │ type Filter │ Esc Cancel` |
 | **AI Quota Telemetry** | [`ai-quota-popup.sh`](../../tmux/.config/tmux/ai-quota-popup.sh) | `{cyan,bold:Enter} Auto-Launch │ a Model Menu │ r Refresh │ Esc Exit` |
 | **Tmux Windows** | [`window-picker.toml`](../../waymaker/.config/waymaker/presets/window-picker.toml) | `{cyan,bold:Enter} Switch │ t Sessions │ / Filter │ n New │ d Kill │ ? Help │ Esc Exit` |
 | **Tmux Sessions** | [`session-picker.toml`](../../waymaker/.config/waymaker/presets/session-picker.toml) | `{cyan,bold:Enter} Menu │ r Auto │ a/c Agy/Claude │ u Quota │ s Cockpit │ Tab Cycle │ d Kill` |

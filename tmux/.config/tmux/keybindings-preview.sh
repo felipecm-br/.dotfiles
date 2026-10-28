@@ -240,6 +240,19 @@ Restores the last closed window or pane with its directory path, running command
 EOF
     ;;
 
+  tmux-ai-switch)
+    cat <<'EOF'
+### 󰑓 AI Model / Effort Hot-Swap (`Prefix + A`, `75% × 60%`)
+Changes the model or effort of the agent **in the current pane** without leaving it: the window, scrollback and conversation stay, and the pick is typed into the agent as its own slash command (`ai-switch`).
+
+- **Ergonomics**: `A` = **A**gent in place (sibling of `Prefix + a`, which launches a new one). `Prefix + A`, type `son`, `Enter` replaces `/model` `Space` `sonnet` `Enter` and works the same across CLIs.
+- **Rows**: Claude Code models (Fable, Opus, Sonnet, Haiku) and effort levels (`low` … `max`, `auto`) with `● now` on the current ones; Antigravity model families; Devin `/model <name>`; Codex opens its own model & effort picker (`/model`).
+- **Safety**: a half-typed prompt is never submitted: the switch stops with a status-line message. A pane without an agent gets a hint instead of a popup.
+- **Note**: Claude Code's `/model` and `/effort` also save the pick as the default for new sessions (`~/.claude/settings.json`); `ai-launch` always passes `--model`, so launcher-started sessions are unaffected.
+- **Controls**: type to filter, `Enter` switch, `Esc` cancel.
+EOF
+    ;;
+
   tmux-ai-quota)
     cat <<'EOF'
 ### 󰓅 AI Quota & Burn Telemetry Visual Popup (`Prefix + u`, `75% × 60%`)

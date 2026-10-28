@@ -145,6 +145,15 @@ ai-launch
 # Print the CLI × model choice from the launch menu without starting it
 ai-launch --pick
 
+# Switch the model or effort of the AI agent in the current tmux pane, in place (menu; Prefix+A)
+ai-switch
+
+# Switch the current pane's AI agent directly to a model or effort level (e.g. sonnet, high)
+ai-switch {{choice}}
+
+# Open the in-place AI model / effort switcher as a tmux popup over the current pane
+~/.config/tmux/ai-switch-popup.sh
+
 # Start the quota-recommended AI agent and model directly
 ai-launch --auto
 
