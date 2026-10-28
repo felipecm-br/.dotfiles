@@ -37,7 +37,7 @@ case "${1:-}" in
     ;;
 esac
 
-# Claude in ai-jail with --dangerously-skip-permissions: the project directory is the blast radius.
+# Claude in ai-jail via `ai-memory run --true-yolo` (bypassPermissions, ai-memory workstream/handoff): the project directory is the blast radius.
 # ai-jail fails closed when the global ~/.ai-jail resolves inside the project (the dotfiles repo
 # itself), so that case, and a missing ai-jail, start plain claude with prompts on instead.
 # --no-save-config keeps ai-jail from dropping a .ai-jail file into the project.
@@ -49,7 +49,7 @@ launch_jailed() {
   elif [ -n "$global" ] && [[ $global == "$(pwd -P)"/* ]]; then
     printf '\033[33m%s\033[0m\n' "ai-launch: ~/.ai-jail lives inside this project, ai-jail would refuse; starting claude unjailed (prompts on)" >&2
   else
-    exec ai-jail --no-save-config claude --dangerously-skip-permissions "$@"
+    exec ai-jail --no-save-config ai-memory run --true-yolo claude "$@"
   fi
   sleep 2
   exec claude "$@"

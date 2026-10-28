@@ -89,7 +89,7 @@ ai-memory install-instructions    # adds the marked ai-memory block to CLAUDE.md
 
 ```bash
 ai-memory run claude                 # outside the jail
-ai-jail                              # global ~/.ai-jail runs: ai-memory run opencode --yolo
+ai-jail                              # global ~/.ai-jail runs: ai-memory run claude --true-yolo
 ai-jail ai-memory run --new my_session opencode --yolo
 ai-memory run --jail opencode --yolo # ai-memory re-runs itself inside ai-jail
 ```

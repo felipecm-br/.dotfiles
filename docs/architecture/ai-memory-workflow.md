@@ -100,7 +100,7 @@ Per-repo markers win for repos you own; use home routes only for repos where you
 | Step | Command | Notes |
 | :--- | :--- | :--- |
 | Launch an agent | `ai-memory run claude` (or `opencode`, `agy`…) | Auto-wires hooks + MCP on first use; resumes the cross-harness workstream |
-| Launch inside the sandbox | `ai-jail …` (global `~/.ai-jail`: `ai-memory run opencode --yolo`) or `ai-memory run --jail …` | Server runs on the host; the jail needs `forward_ports = [49374]` in `~/.ai-jail` (`opencode.json` MCP URL `http://127.0.0.1:49374/mcp`). See [ai-jail-memory-guide-en.md](../articles/ai-jail-memory-guide-en.md) |
+| Launch inside the sandbox | `ai-jail …` (global `~/.ai-jail`: `ai-memory run claude --true-yolo`) or `ai-memory run --jail …` | Server runs on the host; the jail needs `forward_ports = [49374]` in `~/.ai-jail` (`opencode.json` MCP URL `http://127.0.0.1:49374/mcp`). See [ai-jail-memory-guide-en.md](../articles/ai-jail-memory-guide-en.md) |
 | Switch agent mid-task | `ai-memory continue` / `ai-memory resume` | Claude ↔ Codex ↔ OpenCode ↔ agy share one workstream |
 | Where did we leave off | ask the agent: "catch me up" | Handoff + optional on-start brief |
 | Diagnose capture | `ai-memory doctor` | Reports marker routing, missing hooks, leftover configs |

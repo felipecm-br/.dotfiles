@@ -5,6 +5,6 @@
 command = [
     "ai-memory",
     "run",
-    "opencode",
-    "--yolo",
+    "claude",
+    "--true-yolo",
 ]

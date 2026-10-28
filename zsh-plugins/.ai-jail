@@ -5,8 +5,8 @@
 command = [
     "ai-memory",
     "run",
-    "opencode",
-    "--yolo",
+    "claude",
+    "--true-yolo",
 ]
 
 # Relay the host ai-memory daemon (127.0.0.1:49374) into the jail's private
