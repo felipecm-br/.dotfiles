@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+# openbot — Run the local OpenBot checkout (CopilotKit template, cloned by .shell/install/packages/openbot.zsh)
+#
+#   openbot [dev]       Start app + server (bun run dev)
+#   openbot setup       Create .env from .env.example when missing
+#   openbot cd          Print the checkout path
+#   openbot <script>    Any other package.json script (test, build, typecheck, …)
+
+set -euo pipefail
+
+DIR="${OPENBOT_DIR:-$HOME/.local/share/openbot}"
+export PATH="$HOME/.bun/bin:$PATH"
+
+[ -d "$DIR/.git" ] || { echo "openbot: no checkout at $DIR (run the openbot installer)" >&2; exit 1; }
+command -v bun >/dev/null 2>&1 || { echo "openbot: bun not found (install it first)" >&2; exit 1; }
+
+cmd=${1:-dev}
+[ $# -gt 0 ] && shift
+
+case "$cmd" in
+  -h | --help) sed -n '2,8p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+  cd) echo "$DIR"; exit 0 ;;
+  setup)
+    if [ -f "$DIR/.env" ]; then echo "openbot: $DIR/.env already exists"; else cp "$DIR/.env.example" "$DIR/.env" && echo "openbot: created $DIR/.env (fill in your keys)"; fi
+    exit 0
+    ;;
+esac
+
+cd "$DIR"
+[ -f .env ] || { echo "openbot: missing .env, run 'openbot setup' first" >&2; exit 1; }
+exec bun run "$cmd" "$@"

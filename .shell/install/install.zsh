@@ -72,6 +72,7 @@ install_packages \
     devin \
     claude \
     hermes \
+    bun \
     openbot \
     ai-quota \
     waymux

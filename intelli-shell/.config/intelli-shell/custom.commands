@@ -627,3 +627,12 @@ border-gradient on {{palette}}
 
 # Turn popup gradient frames off (back to themed single-color borders)
 border-gradient off
+
+# Start the local OpenBot checkout (app + server)
+openbot dev
+
+# Create the OpenBot .env from .env.example
+openbot setup
+
+# Run an OpenBot package.json script (test, build, typecheck, ...)
+openbot {{script}}

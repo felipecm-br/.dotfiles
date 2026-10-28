@@ -34,3 +34,10 @@ unalias cd 2>/dev/null
 # >>> Codex installer >>>
 export PATH="/home/fecavmi/.local/bin:$PATH"
 # <<< Codex installer <<<
+
+# bun completions
+[ -s "/home/fecavmi/.bun/_bun" ] && source "/home/fecavmi/.bun/_bun"
+
+# bun
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
