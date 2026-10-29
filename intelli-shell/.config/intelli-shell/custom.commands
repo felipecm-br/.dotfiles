@@ -361,8 +361,11 @@ waymux queue rm {{pane}} {{id}}
 # Fan one prompt out to N agents in N worktrees (quota-gated by ai-quota)
 awt-fan new -n {{attempts:3}} -- {{prompt}}
 
-# Compare the attempts of the latest fan: Enter jump, J judge, S keep, d drop
+# Compare the attempts of the latest fan: Enter jump, T test, J judge, S keep, d drop, Ctrl+R reload
 awt-fan compare
+
+# Run the project's tests in every attempt of a fan (ai-jail, no network; shown as ✓/✗ in compare)
+awt-fan check {{fan_id}}
 
 # Keep one fan attempt: commit it, merge into the base, remove every attempt
 awt-fan keep {{fan_id}} {{attempt}}

@@ -5,12 +5,19 @@
 #   awt-fan ls [ID]               fans, or the attempts of one (TSV rows for the compare popup)
 #   awt-fan preview ID N          header + diff of attempt N against its base
 #   awt-fan compare [ID]          Waymaker popup: Enter jump │ J judge │ S keep │ d drop
+#   awt-fan check ID [--no-jail] [-- CMD]
+#                                 run the tests in every attempt, one after another, in the background
 #   awt-fan judge ID              read-only Claude compares the attempts and recommends one
 #   awt-fan keep ID N [--yes]     commit attempt N, merge it into BASE, remove every attempt
 #   awt-fan drop ID N [--yes]     remove attempt N (worktree, branch, session)
 #
 # Before a fan starts, `ai-quota --json` gates each agent: red is refused, yellow gets at most
 # one attempt (--force overrides both). No telemetry, no gate.
+#
+# Rows show the check result (✓ pass, ✗ fail, … running, ~ the attempt changed since) and the
+# tokens each agent spent in its worktree, read from its own session logs (Claude, Codex; cache
+# reads excluded). A check runs code the agent wrote, so it runs in ai-jail with no network
+# unless --no-jail says otherwise; Cargo builds share one target directory per fan.
 # Docs: docs/architecture/state-of-the-art-terminal-agent-workflow.md §8 (P2).
 set -euo pipefail
 
@@ -19,7 +26,7 @@ AWT="${AWT_FAN_AWT:-awt}"
 SELF="$(readlink -f "${BASH_SOURCE[0]}")"
 
 die() { echo "awt-fan: $*" >&2; exit 1; }
-usage() { sed -n '2,13p' "$SELF" | sed 's/^# \{0,1\}//'; }
+usage() { sed -n '2,15p' "$SELF" | sed 's/^# \{0,1\}//'; }
 
 # The agent's own way to start interactively with a first prompt (never typed into the pane).
 agent_cmd() { # <agent> <prompt>
@@ -68,6 +75,104 @@ field() { # <id> <python expression over m (manifest) and a (attempts list)>
 attempt() { # <id> <n> <key>
   field "$1" "next(x for x in a if x[\"n\"]==$2)[\"$3\"]"
 }
+checks() { echo "$STATE/$1.check"; }
+
+# What a check result belongs to: HEAD, the diff against it and the untracked file names.
+fingerprint() { # <dir>
+  { git -C "$1" rev-parse HEAD; git -C "$1" diff HEAD; git -C "$1" ls-files -o --exclude-standard; } 2>/dev/null | md5sum | cut -c1-12
+}
+
+# The project's own test command, from the files at the top of the repository.
+detect_check() { # <dir>
+  local d=$1
+  if [ -f "$d/Cargo.toml" ]; then echo "cargo test -q"
+  elif [ -f "$d/justfile" ] && grep -q '^test:' "$d/justfile"; then echo "just test"
+  elif [ -f "$d/package.json" ] && python3 -I -c 'import json,sys; sys.exit(0 if json.load(open(sys.argv[1])).get("scripts",{}).get("test") else 1)' "$d/package.json" 2>/dev/null; then echo "npm test --silent"
+  elif [ -f "$d/go.mod" ]; then echo "go test ./..."
+  elif [ -f "$d/Makefile" ] && grep -q '^test:' "$d/Makefile"; then echo "make test"
+  elif [ -f "$d/pyproject.toml" ]; then echo "pytest -q"
+  fi
+}
+
+# Tokens each attempt's agent spent in its worktree: "n<TAB>tokens" per attempt (empty when unknown).
+tokens() { # <id>
+  python3 -I - "$(manifest "$1")" <<'PY'
+import glob, json, os, re, sys, time
+m = json.load(open(sys.argv[1]))
+home = os.path.expanduser("~")
+
+def claude(d):
+    seen = {}
+    for f in glob.glob(f"{home}/.claude/projects/{re.sub(r'[^A-Za-z0-9]', '-', d)}/**/*.jsonl", recursive=True):
+        for line in open(f, errors="replace"):
+            if '"usage"' not in line:
+                continue
+            try:
+                msg = json.loads(line).get("message") or {}
+            except ValueError:
+                continue
+            u = msg.get("usage")
+            if isinstance(u, dict) and msg.get("id"):
+                seen[msg["id"]] = (u.get("input_tokens") or 0) + (u.get("cache_creation_input_tokens") or 0) + (u.get("output_tokens") or 0)
+    return sum(seen.values()) if seen else None
+
+def codex(d):
+    total, found = 0, False
+    day = time.strftime("%Y/%m/%d", time.localtime(m.get("created", 0)))
+    for f in sorted(glob.glob(f"{home}/.codex/sessions/*/*/*/*.jsonl")):
+        if f.split("/sessions/")[1][:10] < day:
+            continue
+        last = None
+        with open(f, errors="replace") as fh:
+            try:
+                meta = json.loads(fh.readline())
+            except ValueError:
+                continue
+            if (meta.get("payload") or {}).get("cwd") != d:
+                continue
+            for line in fh:
+                if '"token_count"' in line:
+                    try:
+                        info = (json.loads(line).get("payload") or {}).get("info")
+                    except ValueError:
+                        continue
+                    if info:
+                        last = info.get("total_token_usage") or last
+        if last:
+            found = True
+            total += (last.get("input_tokens") or 0) - (last.get("cached_input_tokens") or 0) + (last.get("output_tokens") or 0)
+    return total if found else None
+
+for a in m["attempts"]:
+    n = {"claude": claude, "codex": codex}.get(a["agent"], lambda d: None)(a["dir"])
+    print(f'{a["n"]}\t{"" if n is None else n}')
+PY
+}
+
+human() { # <tokens>: 9k, 412k, 1.2M
+  local t=${1:-}
+  [ -n "$t" ] || { echo "—"; return; }
+  if [ "$t" -lt 1000 ]; then echo "$t"
+  elif [ "$t" -lt 1000000 ]; then echo "$((t / 1000))k"
+  else awk -v t="$t" 'BEGIN{printf "%.1fM", t/1e6}'
+  fi
+}
+
+check_cell() { # <id> <n> <dir>: ✓ 41s, ✗ 3s, …, ~ (stale) or —
+  local f r secs fp
+  f="$(checks "$1")/$2.status"
+  [ -f "$f" ] || { echo "—"; return; }
+  read -r r secs fp <"$f" || true
+  case "$r" in
+    running) echo "…" ;;
+    pass | fail)
+      if [ "$fp" != "$(fingerprint "$3")" ]; then echo "~"
+      elif [ "$r" = pass ]; then echo "✓ ${secs}s"
+      else echo "✗ ${secs}s"; fi ;;
+    *) echo "—" ;;
+  esac
+}
+
 latest() { command ls -t "$STATE"/*.json 2>/dev/null | head -1 | xargs -r basename | sed 's/\.json$//'; }
 
 worktree_dir() { # <branch>: where git has it checked out
@@ -146,9 +251,12 @@ cmd_ls() {
   local base now states
   base=$(field "$id" 'm["base"]'); now=$(date +%s)
   states=$(waymux list 2>/dev/null || true)
+  local spent
+  spent=$(tokens "$id" 2>/dev/null || true)
   field "$id" '"\n".join("\t".join(str(x[k]) for k in ("n", "agent", "branch", "dir")) for x in a)' |
     while IFS=$'\t' read -r n agent branch dir; do
-      local st="·" age="—" diff="gone" ahead="" pane state
+      local st="·" age="—" diff="gone" ahead="" pane state test="—" tok
+      tok=$(human "$(awk -F'\t' -v n="$n" '$1==n{print $2}' <<<"$spent")")
       if [ -d "$dir" ]; then
         pane=$(pane_of "$dir")
         state=$(awk -v p="$pane" '$1==p{print $2}' <<<"$states")
@@ -160,9 +268,11 @@ cmd_ls() {
         [ -n "$diff" ] || diff="clean"
         ahead="↑$(git -C "$dir" rev-list --count "$base..HEAD" 2>/dev/null || echo 0)"
         age=$(( (now - $(stat -c %Y "$dir")) / 60 ))m
+        test=$(check_cell "$id" "$n" "$dir")
       fi
-      printf '%s %s %s %s %s %s\t%s\t%s\t%s\n' "$(pad "$st" 1)" "$(pad "$n" 2)" "$(pad "$agent" 7)" \
-        "$(pad "$ahead" 5)" "$(pad "$diff" 12)" "$(pad "$age" 5 right)" "$id" "$n" "$dir"
+      printf '%s %s %s %s %s %s %s %s\t%s\t%s\t%s\n' "$(pad "$st" 1)" "$(pad "$n" 2)" "$(pad "$agent" 7)" \
+        "$(pad "$ahead" 5)" "$(pad "$diff" 12)" "$(pad "$test" 7)" "$(pad "$tok" 5 right)" "$(pad "$age" 5 right)" \
+        "$id" "$n" "$dir"
     done
 }
 
@@ -198,6 +308,7 @@ cmd_drop() {
   fi
   confirm "Drop attempt $n ($branch)?" || { echo "kept"; return 0; }
   (cd "$(field "$id" 'm["repo"]')" && "$AWT" rm "$branch" --force >/dev/null 2>&1) || true
+  rm -f "$(checks "$id")/$n.status" "$(checks "$id")/$n.log"
   echo "dropped attempt $n"
 }
 
@@ -225,7 +336,72 @@ cmd_keep() {
     (cd "$repo" && "$AWT" rm "$(attempt "$id" "$other" branch)" --force >/dev/null 2>&1) || true
   done
   mv "$(manifest "$id")" "$(manifest "$id").kept-$n"
+  rm -rf "$(checks "$id")" "$STATE/$id.target"
   echo "kept attempt $n in $base ($target)"
+}
+
+# Starts the checks in the background and returns; rows show … until each one finishes.
+cmd_check() {
+  local id=${1:-} jail=1 cmd=""
+  [ -n "$id" ] && shift || die "usage: awt-fan check ID [--no-jail] [-- CMD]"
+  [ -e "$(manifest "$id")" ] || die "no fan $id"
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      --no-jail) jail=0; shift ;;
+      --) shift; cmd="$*"; break ;;
+      *) die "unknown option $1" ;;
+    esac
+  done
+  [ -n "$cmd" ] || cmd=$(field "$id" 'm.get("check", "")')
+  [ -n "$cmd" ] || cmd=$(detect_check "$(field "$id" 'm["repo"]')")
+  [ -n "$cmd" ] || die "no test command found; pass one: awt-fan check $id -- CMD"
+  if [ $jail -eq 1 ] && ! command -v ai-jail >/dev/null 2>&1; then
+    die "ai-jail not found; --no-jail runs code the agents wrote without a sandbox"
+  fi
+  python3 -I -c 'import json,sys; p=sys.argv[1]; m=json.load(open(p)); m["check"]=sys.argv[2]; json.dump(m,open(p,"w"),indent=1)' "$(manifest "$id")" "$cmd"
+  local dir n
+  mkdir -p "$(checks "$id")"
+  for n in $(field "$id" '" ".join(str(x["n"]) for x in a)'); do
+    dir=$(attempt "$id" "$n" dir)
+    [ -d "$dir" ] && echo "running 0 -" >"$(checks "$id")/$n.status"
+  done
+  AWT_FAN_JAIL=$jail setsid nohup "$SELF" check-run "$id" >/dev/null 2>&1 </dev/null &
+  echo "checking fan $id with: $cmd$([ $jail -eq 1 ] && echo " (ai-jail, no network)")"
+}
+
+# Cargo names a workspace crate by its path inside the workspace, so every attempt's crates share
+# one name in the shared target directory and a later attempt would run an earlier one's tests.
+# Cleaning the workspace's own crates first keeps the dependencies built once and nothing else.
+CARGO_OWN_CLEAN='cargo metadata --no-deps --format-version 1 --offline 2>/dev/null |
+  python3 -I -c "import json,sys; print(chr(10).join(p[\"name\"] for p in json.load(sys.stdin)[\"packages\"]))" |
+  while read -r p; do cargo clean -q --offline -p "$p" 2>/dev/null; done; '
+
+# One attempt after another, so Cargo builds reuse the fan's shared target directory.
+cmd_check_run() {
+  local id=$1 cmd dir n start rc fp out run
+  cmd=$(field "$id" 'm["check"]')
+  out=$(checks "$id")
+  export CARGO_TARGET_DIR="$STATE/$id.target"
+  mkdir -p "$CARGO_TARGET_DIR"
+  for n in $(field "$id" '" ".join(str(x["n"]) for x in a)'); do
+    dir=$(attempt "$id" "$n" dir)
+    [ -d "$dir" ] || continue
+    run=$cmd
+    [ -f "$dir/Cargo.toml" ] && run="$CARGO_OWN_CLEAN$cmd"
+    start=$(date +%s)
+    set +e
+    if [ "${AWT_FAN_JAIL:-1}" = 1 ]; then
+      (cd "$dir" && timeout 900 ai-jail --exec --no-save-config --no-status-bar --no-network \
+        --rw-map "$CARGO_TARGET_DIR" --env CARGO_TARGET_DIR -- sh -c "$run") >"$out/$n.log" 2>&1 </dev/null
+    else
+      (cd "$dir" && timeout 900 sh -c "$run") >"$out/$n.log" 2>&1 </dev/null
+    fi
+    rc=$?
+    set -e
+    # Taken after the run, so files the check itself writes (Cargo.lock) do not mark it stale.
+    fp=$(fingerprint "$dir")
+    echo "$([ $rc -eq 0 ] && echo pass || echo fail) $(($(date +%s) - start)) $fp" >"$out/$n.status"
+  done
 }
 
 cmd_judge() {
@@ -281,11 +457,13 @@ case "$sub" in
   compare) cmd_compare "$@" ;;
   jump) cmd_jump "$@" ;;
   judge) cmd_judge "$@" ;;
+  check) cmd_check "$@" ;;
+  check-run) cmd_check_run "$@" ;;
   keep | drop)
     args=(); YES=0
     for a in "$@"; do [ "$a" = --yes ] && YES=1 || args+=("$a"); done
     [ ${#args[@]} -eq 2 ] || die "usage: awt-fan $sub ID N [--yes]"
     "cmd_$sub" "${args[@]}" ;;
   -h | --help | help | "") usage ;;
-  *) die "unknown command $sub (new, ls, preview, compare, judge, keep, drop)" ;;
+  *) die "unknown command $sub (new, ls, preview, compare, check, judge, keep, drop)" ;;
 esac
