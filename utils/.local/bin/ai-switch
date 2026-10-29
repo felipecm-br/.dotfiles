@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 # ai-switch — Change the model or effort of the AI agent running in a tmux pane, in place
 #
-#   ai-switch [-t pane]             Menu of the pane agent's models (+ effort levels for Claude Code);
-#                                   the pick is typed into the agent as /model <id> or /effort <level>
+#   ai-switch [-t pane]             Menu of the pane agent's models (+ effort levels for Claude Code and
+#                                   Antigravity); typed into the agent as /model <id> or /effort <level>
+#                                   (Antigravity has no /effort: /model <family>-<level>)
 #   ai-switch [-t pane] <choice>    Switch directly, no menu (sonnet, high, gemini-3.8-flash-medium…)
 #   ai-switch [-t pane] --peek [choice]
 #                                   Print the menu rows, or the slash command for <choice>, typing nothing
@@ -70,6 +71,9 @@ if [ "$agent" = claude ]; then
   [ -z "$effort" ] && [ -n "$current" ] &&
     effort=$(jq -r --arg f "claude-$current-" 'first(.modelSettings // {} | to_entries[]
       | select(.key | startswith($f)) | .value.effortLevel // empty) // empty' "$HOME/.claude/settings.json" 2>/dev/null)
+elif [ "$agent" = agy ]; then
+  # Antigravity footer, right side: "<model name> · <effort>" (the effort is part of the model id)
+  IFS=$'\t' read -r current effort < <(sed -nE 's/.*  ([^ ].*[^ ]) · (low|medium|high)[[:space:]]*$/\1\t\2/p' <<<"$plain_screen" | tail -1)
 fi
 
 if [ "$mode" = agent ]; then
@@ -87,14 +91,23 @@ pad() { # <text> <width>: pad by visible characters, not bytes
 rows=()
 colored_rows=()
 row() { rows+=("$1"$'\t'"$2"$'\t'"$3"); colored_rows+=("${4:-$3}"); }
-model_row() { # <icon> <id> <name> <tier>
+model_row() { # <icon> <id> <name> <tier> [slash command]
   local gut=" " head col_name col_tier
   [ "$2" = "$current" ] && gut="⠛"
   head="$1 $(pad Model 8)"
   col_name=$(pad "$3" 22)
   col_tier=$(pad "$4" 5)
-  row "$2" "/model $2" "${gut}${head}${col_name}${col_tier}" \
+  row "$2" "${5:-/model $2}" "${gut}${head}${col_name}${col_tier}" \
     "$(printf '\033[97m%s\033[34m%s\033[0m%s\033[90m%s\033[0m' "$gut" "$head" "$col_name" "$col_tier")"
+}
+
+effort_row() { # <level> <slash command>
+  local gut=" " head col_name
+  [ "$1" = "$effort" ] && gut="⠛"
+  head="󱐋 $(pad Effort 8)"
+  col_name=$(pad "$1" 27)
+  row "$1" "$2" "${gut}${head}${col_name}" \
+    "$(printf '\033[97m%s\033[34m%s\033[0m%s' "$gut" "$head" "$col_name")"
 }
 
 icon() { waymux icon "$1" 2>/dev/null || echo "${1:0:1}"; }
@@ -106,27 +119,31 @@ case $agent in
     model_row "$ic" opus Opus '$$$'
     model_row "$ic" sonnet Sonnet '$$'
     model_row "$ic" haiku Haiku '$'
-    for e in low medium high xhigh max auto; do
-      gut=" "
-      [ "$e" = "$effort" ] && gut="⠛"
-      head="󱐋 $(pad Effort 8)"
-      col_name=$(pad "$e" 27)
-      row "$e" "/effort $e" "${gut}${head}${col_name}" \
-        "$(printf '\033[97m%s\033[34m%s\033[0m%s' "$gut" "$head" "$col_name")"
-    done
+    for e in low medium high xhigh max auto; do effort_row "$e" "/effort $e"; done
     ;;
   agy)
     ic=$(icon agy)
     # Same model families as the ai-launch menu: the daily `agy models` cache, else the known list
     models=$(cat "$AGY_MODELS" 2>/dev/null)
-    [ -n "$models" ] || models=$'gemini-4-argon-medium\tGemini 4 Argon (Medium)\ngemini-3.8-flash-medium\tGemini 3.8 Flash (Medium)\nclaude-opus-5-5-medium\tClaude Opus 5.5 (Medium)\nclaude-sonnet-5-5-medium\tClaude Sonnet 5.5 (Medium)\ngpt-oss-120b-medium\tGPT-OSS 120B (Medium)'
+    [ -n "$models" ] || models=$'gemini-4-argon-medium\tGemini 4 Argon (Medium)\ngemini-4-argon-high\tGemini 4 Argon (High)\ngemini-4-argon-low\tGemini 4 Argon (Low)\ngemini-3.8-flash-high\tGemini 3.8 Flash (High)\ngemini-3.8-flash-medium\tGemini 3.8 Flash (Medium)\ngemini-3.8-flash-low\tGemini 3.8 Flash (Low)\nclaude-opus-5-5-low\tClaude Opus 5.5 (Low)\nclaude-opus-5-5-medium\tClaude Opus 5.5 (Medium)\nclaude-opus-5-5-high\tClaude Opus 5.5 (High)\nclaude-sonnet-5-5-low\tClaude Sonnet 5.5 (Low)\nclaude-sonnet-5-5-medium\tClaude Sonnet 5.5 (Medium)\nclaude-sonnet-5-5-high\tClaude Sonnet 5.5 (High)\ngpt-oss-120b-medium\tGPT-OSS 120B (Medium)'
+    has() { grep -q "^$1"$'\t' <<<"$models"; }
+    # One row per family (its -medium id); a switch keeps the current effort where the family has it
+    cur_name=$current cur_fam=""
     while IFS=$'\t' read -r id name; do
       [ -n "$id" ] || continue
       case $id in *-low | *-high) continue ;; esac
       name=${name% (Medium)}
+      fam=${id%-medium}
+      [ "$name" = "$cur_name" ] && { current=$id; cur_fam=$fam; }
       case $id in *argon*) tier='$$$$' ;; *opus*) tier='$$$' ;; *sonnet*) tier='$$' ;; *) tier='$' ;; esac
-      model_row "$ic" "$id" "${name:-$id}" "$tier"
+      cmd="/model $id"
+      [ -n "$effort" ] && has "$fam-$effort" && cmd="/model $fam-$effort"
+      model_row "$ic" "$id" "${name:-$id}" "$tier" "$cmd"
     done <<<"$models"
+    # Effort = the current family at another level, for the levels `agy models` lists for it
+    if [ -n "$cur_fam" ]; then
+      for e in low medium high; do has "$cur_fam-$e" && effort_row "$e" "/model $cur_fam-$e"; done
+    fi
     ;;
   devin)
     ic=$(icon devin)

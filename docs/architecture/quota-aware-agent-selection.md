@@ -100,11 +100,11 @@ Selection walks `AI_AGENT_PREFERENCE` (default `claude agy agyy`) and picks the 
 | Agent | Rows | Typed |
 |---|---|---|
 | Claude Code | Fable, Opus, Sonnet, Haiku · effort `low` … `max`, `auto` | `/model <alias>`, `/effort <level>` |
-| Antigravity | Model families (same cache as the launch menu) | `/model <id>` |
+| Antigravity | Model families (same cache as the launch menu) · effort `low` / `medium` / `high` of the current family, where `agy models` lists it | `/model <family>-<level>` (Antigravity has no `/effort`: the effort is part of the model id, and a model switch keeps the current effort) |
 | Devin | Opus, Sonnet, Codex, Fusion | `/model <name>` |
 | Codex | One row | `/model` (Codex's own model & reasoning-effort picker) |
 
-`⠛` (upper $2\times2$ Braille superscript shoulder on the left of the row icon) marks the current Claude model (read from its status line) and effort (the transient `/effort` badge, else the per-model level Claude saves in `settings.json`); the cursor starts on the current model. The agent is found from the pane's foreground command, else the first agent process in its session (Claude under `ai-jail` / `ai-memory run`, `agy-bin` under the wrapper).
+`⠛` (upper $2\times2$ Braille superscript shoulder on the left of the row icon) marks the current Claude model (read from its status line) and effort (the transient `/effort` badge, else the per-model level Claude saves in `settings.json`), and the current Antigravity model and effort (read from its footer, `Gemini 4 Argon · high`); the cursor starts on the current model. The agent is found from the pane's foreground command, else the first agent process in its session (Claude under `ai-jail` / `ai-memory run`, `agy-bin` under the wrapper).
 
 A half-typed prompt is never submitted: when text that is not a dim placeholder follows the prompt marker (`❯`, `›`, `>`), [`ai-prompt`](../../utils/.local/bin/ai-prompt) takes the exact draft out through the agent's external-editor hook, the switch runs, and the draft is put back (Codex: after its picker, with `Prefix + V`). Agents started before `$VISUAL=ai-prompt` was set get a status-line message instead. The same tool backs `Prefix + v` (draft in a Neovim popup) and `Prefix + V` (draft stash toggle for any `/command`); see [utils](../utils.md). Claude Code's `/model` and `/effort` also save the pick as the default for new sessions; `ai-launch` always passes `--model`, so sessions started from the launcher are unaffected. `ai-switch sonnet` / `ai-switch high` switch without the menu, `ai-switch --peek` prints the rows.
 

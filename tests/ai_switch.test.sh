@@ -77,6 +77,28 @@ ai-switch -t "$H" high 2>/dev/null
 sleep 0.5
 [ "$(cat "$HOME/claude.in" 2>/dev/null)" = "/effort high" ] && ok "dim placeholder is not a draft" || bad "placeholder sent: $(cat "$HOME/claude.in" 2>/dev/null)"
 
+# 5b. Antigravity: the footer names the current model and effort; effort rows re-pick the family
+fakeagy="$HOME/.local/bin/agy"
+# The sandbox links utils/.local/bin/agy into the repo: drop the link, never write through it
+rm -f "$fakeagy"
+cat >"$fakeagy" <<'AGY'
+#!/bin/bash
+printf '>\n? for shortcuts                    Gemini 4 Argon · high\n'
+while IFS= read -r line; do printf '%s\n' "$line" >>"$HOME/agy.in"; done
+AGY
+chmod +x "$fakeagy"
+tmux new-session -d -s agy -x 120 -y 20 "HOME='$HOME' '$fakeagy'"
+G=$(tmux display-message -p -t agy: '#{pane_id}')
+sleep 0.5
+gpeek=$(ai-switch -t "$G" --peek)
+[ "$(ai-switch -t "$G" --agent)" = $'agy\tGemini 4 Argon' ] && ok "detects agy and its current model" || bad "agy agent: $(ai-switch -t "$G" --agent)"
+[[ "$(awk -F'\t' '$1=="gemini-4-argon-medium"{print $3}' <<<"$gpeek")" == ⠛* && "$(awk -F'\t' '$1=="high"{print $3}' <<<"$gpeek")" == ⠛* ]] &&
+  ok "agy: ⠛ marks the current model and effort" || bad "agy gutter: $gpeek"
+[ "$(cut -f1 <<<"$gpeek" | tail -3 | tr '\n' ' ')" = "low medium high " ] && ok "agy: effort rows for the current family" || bad "agy effort rows: $gpeek"
+[ "$(ai-switch -t "$G" --peek low)" = $'agy\t/model gemini-4-argon-low' ] && ok "agy effort -> /model <family>-<level>" || bad "agy low"
+[ "$(ai-switch -t "$G" --peek gemini-3.8-flash-medium)" = $'agy\t/model gemini-3.8-flash-high' ] && ok "agy model switch keeps the effort" || bad "agy keep effort"
+[ "$(ai-switch -t "$G" --peek gpt-oss-120b-medium)" = $'agy\t/model gpt-oss-120b-medium' ] && ok "agy: family without that effort keeps medium" || bad "agy gpt-oss"
+
 # 6. A pane without an agent: exit 1, nothing typed
 tmux new-session -d -s plain -x 120 -y 20 "sleep 30"
 set +e; ai-switch -t "$(tmux display-message -p -t plain: '#{pane_id}')" --agent; rc=$?; set -e
