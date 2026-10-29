@@ -25,6 +25,7 @@ spinner_prefix = "@SPIN@"
 spinner_inline = true
 current_prefix = ""
 unselected_prefix = ""
+current_nav_bar = "Plain"
 multi = false
 row_connection = "Full"
 column_spacing = 0
@@ -33,6 +34,7 @@ column_spacing = 0
 modifier = "DIM"
 
 [results.current_style]
+bg = "reset"
 modifier = "BOLD"
 
 [results.current_nav_bar_style]

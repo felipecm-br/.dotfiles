@@ -5,6 +5,19 @@
 [tui]
 percentage = 65
 
+[ui.nav]
+active = true
+color = "lightcyan"
+marker = "│"
+hints = false
+
+[results]
+row_connection = "Full"
+
+[results.current_style]
+bg = "reset"
+modifier = "BOLD"
+
 [query]
 status_inline = true
 prompt = "Kill Port/Process > "

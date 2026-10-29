@@ -61,9 +61,11 @@ All popup components adhere to the deterministic Triadic Cold-Color Architecture
 3. **Darkgray (`#585b70` / `darkgray`) — Low-Noise Metadata:** Action descriptions, vertical dividers (`│`), and inactive counts. Suppressed below the threshold of preattentive distraction.
 
 ### Clean Zero-Background Standard
-- **No Opaque Selection Strips:** Opaque background highlights (`bg = "darkgray"`, `bg = "black"`) are strictly eliminated across all pickers and modals.
+- **No Opaque Selection Strips:** Opaque background highlights (`bg = "darkgray"`, `bg = "black"`) are strictly eliminated across all pickers and modals. Always explicitly set `bg = "reset"` under `[results.current_style]` because Waymaker's `ResultsConfig::default()` defaults `current_style.bg` to `Color::Black`.
 - **Transparency with BOLD:** The active selection preserves the terminal's native transparency and indicates primacy through `modifier = "BOLD"`.
-- **Cyan Lateral Indicator:** A crisp 2-character cyan focus bar (`current_nav_bar_style fg = "cyan"`) anchors the selection at $X=1$.
+- **Cyan Lateral Indicator (`│` at $X=1$):**
+  - When `focus_on_start = "picker"`, use `ui.nav.bar = "Plain"`, `ui.nav.color = "black"`, `current_nav_bar = "Plain"`, and `[results.current_nav_bar_style] = { fg = "cyan", modifier = "BOLD" }`.
+  - When `focus_on_start = "filter"` (or omitted, since `NavFocus` defaults to `Filter`), `current_nav_bar_style` is suppressed while `Focus::Input` holds focus; omit `ui.nav.bar` and set `ui.nav.marker = "│"` + `ui.nav.color = "lightcyan"` so the single-row `│` focus cursor renders in both Filter and Nav focus without hijacking single-letter `[ui.nav.binds]`.
 
 ---
 

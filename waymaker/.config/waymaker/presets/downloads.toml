@@ -7,8 +7,8 @@ min = 15
 
 [ui.nav]
 active = true               # true (modo navegação habilitado) / false
-bar = "Plain"             # Estilo da barra na lista: "Plain" (│), "Thick" (█), "Double" (║), "Rounded" (│), "QuadrantOutside" (▌), "QuadrantInside" (▐)
-color = "black"           # Cor da barra: nomes ("black", "gray", "cyan", "lightblue", etc.) ou hex ("#000000", "#1e1e2e")
+color = "lightcyan"
+marker = "│"
 # bold = false            # true / false (barra em negrito)
 # blink = false           # true / false (barra piscando)
 # blink_rate = "Slow"     # "Slow", "Medium", "Fast"
@@ -23,6 +23,11 @@ prompt_style.modifier = "BOLD"
 [results]
 max = 15
 icons = true
+row_connection = "Full"
+
+[results.current_style]
+bg = "reset"
+modifier = "BOLD"
 
 [results.symlink]
 active = true

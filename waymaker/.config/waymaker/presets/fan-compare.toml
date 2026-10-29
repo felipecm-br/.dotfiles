@@ -34,10 +34,12 @@ max = 9999
 multi = false
 current_prefix = ""
 unselected_prefix = ""
+current_nav_bar = "Plain"
 row_connection = "Full"
 column_spacing = 0
 
 [results.current_style]
+bg = "reset"
 modifier = "BOLD"
 
 [results.current_nav_bar_style]

@@ -12,8 +12,8 @@ ansi = true
 [ui.nav]
 active = true
 focus_on_start = "filter"
-bar = "Plain"
-color = "black"
+color = "lightcyan"
+marker = "│"
 hints = false
 
 [ui.border]
@@ -48,8 +48,15 @@ scroll.index = "line"
 [preview.media]
 active = false
 
+[results]
+row_connection = "Full"
+
 [results.border]
 sides = ""
+
+[results.current_style]
+bg = "reset"
+modifier = "BOLD"
 
 # Layout 0: Standard 45/55 foveal split (45% list on left, 55% preview on right)
 [[preview.layout]]

@@ -12,8 +12,8 @@
 active = true
 profile = "list"
 focus_on_start = "filter"
-bar = "Plain"
-color = "black"
+color = "lightcyan"
+marker = "│"
 hints = false
 
 [ui.border]
@@ -55,6 +55,7 @@ row_connection = "Full"
 sides = ""
 
 [results.current_style]
+bg = "reset"
 modifier = "BOLD"
 
 [results.current_nav_bar_style]

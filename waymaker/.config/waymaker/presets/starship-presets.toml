@@ -3,8 +3,16 @@
 
 [ui.nav]
 active = true
-bar = "Plain"
-color = "Cyan"
+color = "lightcyan"
+marker = "│"
+hints = false
+
+[results]
+row_connection = "Full"
+
+[results.current_style]
+bg = "reset"
+modifier = "BOLD"
 
 [tui]
 percentage = 80

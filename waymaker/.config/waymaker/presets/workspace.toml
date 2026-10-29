@@ -7,8 +7,8 @@
 [ui.nav]
 active = true
 focus_on_start = "filter"
-bar = "Plain"
-color = "black"
+color = "lightcyan"
+marker = "│"
 hints = false
 
 [ui.border]
@@ -68,6 +68,7 @@ separator = "Underline"
 fg = "#555555"
 
 [results.current_style]
+bg = "reset"
 modifier = "BOLD"
 
 [results.current_nav_bar_style]

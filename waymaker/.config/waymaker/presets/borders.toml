@@ -1,7 +1,15 @@
 [ui.nav]
 active = true
-bar = "Plain"
-color = "Magenta"
+color = "lightcyan"
+marker = "│"
+hints = false
+
+[results]
+row_connection = "Full"
+
+[results.current_style]
+bg = "reset"
+modifier = "BOLD"
 
 [tui]
 percentage = 20 # height

@@ -99,6 +99,7 @@ icon = "󱋢"
 icon_style.fg = "#8999f1"
 
 [results.current_style]
+bg = "reset"
 modifier = "BOLD"
 
 [results.current_nav_bar_style]

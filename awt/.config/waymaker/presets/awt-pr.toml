@@ -44,6 +44,7 @@ threshold = "smart"
 
 [results]
 reverse = false
+current_nav_bar = "Plain"
 column_spacing = 2
 row_connection = "Full"
 
@@ -51,6 +52,7 @@ row_connection = "Full"
 sides = ""
 
 [results.current_style]
+bg = "reset"
 modifier = "BOLD"
 
 [results.current_nav_bar_style]

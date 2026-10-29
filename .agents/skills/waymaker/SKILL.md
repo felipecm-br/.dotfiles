@@ -112,19 +112,51 @@ Column references in commands use `{1}`, `{2}`, etc. (1-indexed).
 `{=}` = full line. `{=1}` = first column (alternative syntax). `{=#}` = 0-based row index.  
 `{item}` = item label (useful as a preview border title). `{+1}` = all selected items, column 1.
 
-### Nav Mode (keyboard-driven browsing)
+### Nav Mode & $X=1$ Cyan Focus-Bar Convention
+
+Always set `bg = "reset"` on `[results.current_style]` (Waymaker defaults `current_style.bg` to `Color::Black`, which otherwise draws an opaque black bar across the active row). Choose the focus-bar pattern matching `focus_on_start`:
 
 ```toml
-[ui]
-nav_mode = true
-nav_bar = "Plain"    # or "Double", "Rounded"
-nav_color = "Cyan"
+# Pattern 1: Picker-first (or passthrough menus with no conflicting single-letter nav binds)
+[ui.nav]
+active = true
+focus_on_start = "picker"   # add `passthrough = true` if typing should still filter live
+bar = "Plain"
+color = "black"
+hints = false
 
-[start]
-mode = "nav"         # start in nav mode
+[results]
+current_nav_bar = "Plain"
+row_connection = "Full"
+
+[results.current_style]
+bg = "reset"
+modifier = "BOLD"
+
+[results.current_nav_bar_style]
+fg = "lightcyan"
+modifier = "BOLD"
+```
+
+```toml
+# Pattern 2: Filter-first (`focus_on_start = "filter"` or omitted default)
+# `current_nav_bar_style` is hidden while Focus::Input holds focus, so omit `bar`
+# and use `marker = "│"` to render the cyan cursor on the active row in BOTH modes:
+[ui.nav]
+active = true
+focus_on_start = "filter"
+color = "lightcyan"
+marker = "│"
+hints = false
+
+[results]
+row_connection = "Full"
+
+[results.current_style]
+bg = "reset"
+modifier = "BOLD"
 
 [binds]
-# Prefix nav^^ for nav-mode-only binds
 "nav^^j"     = "Down"
 "nav^^k"     = "Up"
 "nav^^g"     = "Pos(0)"

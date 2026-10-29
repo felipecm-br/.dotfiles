@@ -7,8 +7,8 @@
 active = true
 profile = "list"
 focus_on_start = "filter"
-bar = "Plain"
-color = "black"
+color = "lightcyan"
+marker = "│"
 hints = false
 
 [ui.border]
@@ -41,6 +41,10 @@ row_connection = "Full"
 
 [results.border]
 sides = ""
+
+[results.current_style]
+bg = "reset"
+modifier = "BOLD"
 
 [columns]
 split = "\t"
