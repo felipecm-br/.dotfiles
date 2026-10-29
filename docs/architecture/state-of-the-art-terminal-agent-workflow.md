@@ -1,7 +1,7 @@
 # State-of-the-Art Terminal Agent Workflow: Architecture, Ergonomics & Competitor Benchmark
 
 > **Canonical Architectural Reference:** `docs/architecture/state-of-the-art-terminal-agent-workflow.md`  
-> **Status:** Production Standard (re-audited 29 Oct 2026) · **Comparative Score:** **8.35 / 10** (profile-weighted, see §1; TUIOS 8.05; 7.7 on 18 Oct) · **Zero-Churn Verified**
+> **Status:** Production Standard (re-audited 29 Oct 2026) · **Comparative Score:** **8.55 / 10** (profile-weighted, see §1; TUIOS 8.05; 7.7 on 18 Oct) · **Zero-Churn Verified**
 
 > [!NOTE]
 > This document was re-audited in Oct 2026. The previous revision claimed a self-assigned **9.94/10**, cited competitor latencies without a reproducible method, and referenced unverified benchmarks. Every number below is either **measured on this host** (aarch64 Linux, see §5) or explicitly marked as **unmeasured / reported by the vendor**. The 29 Oct re-audit re-read every competitor's repository (README, changelog, release notes), added TUIOS, agent-deck and Alethe to the scorecard, and lists the other new entrants in a radar (§2.2).
@@ -14,7 +14,7 @@ Modern agentic engineering demands orchestrating multiple concurrent AI coding s
 
 This repository implements a terminal-native agent orchestration stack:
 
-1. **`waymux`** ([felipecm-br/waymux](https://github.com/felipecm-br/waymux), v0.5.0): single Rust binary providing the async JSON-RPC 2.0 control plane (`agentState/wait`, `queue/*`, `agent/recap`, `tmux.*`), zero-latency lifecycle hooks (`waymux hook tmux|lazygit`), the Cockpit HUD data path (`cockpit-items|preview|diff`), delivery-safe prompt and review-note dispatch (`queue`, `review-notes`, `inject`), held approvals, turn checkpoints (`checkpoint`), triage (`triage`), and a native worktree orchestrator (`waymux wt`, mirrored by the `awt` entrypoint).
+1. **`waymux`** ([felipecm-br/waymux](https://github.com/felipecm-br/waymux), v0.6.0): single Rust binary providing the async JSON-RPC 2.0 control plane (`agentState/wait`, `queue/*`, `agent/recap`, `tmux.*`), zero-latency lifecycle hooks (`waymux hook tmux|lazygit`), the Cockpit HUD data path (`cockpit-items|preview|diff`), delivery-safe prompt and review-note dispatch (`queue`, `review-notes`, `inject`), held approvals, turn checkpoints (`checkpoint`), triage (`triage`), a phone page for held prompts (`/m`, `phone-token`), and a native worktree orchestrator (`waymux wt`, mirrored by the `awt` entrypoint).
 2. **`awt`** (Agent Worktree Orchestrator): worktree lifecycle management, hermetic environment provisioning, dirty-state migration (`-W`), quarantine-safe deletion, `rebase`/`ship`/`sweep`/`reap`.
 3. **`waymaker` / `wm`**: SIMD-accelerated (Nucleo) Ratatui fuzzy selector used as the Cockpit renderer.
 4. **`tmux`**: Golden Ratio ($\phi$) floating HUDs, event-driven status bars (`status-interval 0`), safe confirmation modals, and transaction-safe Undo Close Tab (`Prefix + u`).
@@ -57,26 +57,27 @@ Weights are calibrated for a **terminal-first, keyboard-only, Home-Row ($H=0$)**
 | Agent state awareness | 15 | 9.0 | **9.5** | 8.0 | 8.0 | **9.5** | 8.0 | 7.5 | 7.5 |
 | Persistence / crash isolation | 10 | 8.0 | 9.0 | 7.0 | 7.0 | **9.5** | 7.5 | 6.5 | 6.0 |
 | Review loop (diff → line note → agent) | 15 | **9.5** | 8.0 | 9.0 | 6.0 | 4.0 | 3.5 | 8.0 | 7.0 |
-| Remote / mobile | 10 | 5.0 | 8.5 | **9.5** | 4.0 | 9.0 | 7.5 | **9.5** | 6.5 |
+| Remote / mobile | 10 | 7.0 | 8.5 | **9.5** | 4.0 | 9.0 | 7.5 | **9.5** | 6.5 |
 | Ergonomics & latency (keyboard, $H=0$) | 15 | **10.0** | 6.5 | 3.0 | 7.5 | 6.5 | 8.0 | 3.0 | 4.0 |
 | Agent-callable API (`wait`, spawn, mail) | 5 | 9.0 | **10.0** | 7.5 | 6.0 | **10.0** | 8.0 | 6.5 | 8.5 |
 | Agent sandboxing | 5 | 7.5 | 3.0 | 4.0 | **9.0** | 3.0 | 8.0 | 3.0 | 4.0 |
 | Fan-out / compare N agents | 5 | 8.0 | **10.0** | **10.0** | 8.0 | 5.0 | 6.5 | 7.0 | 8.0 |
 | Ecosystem / bus factor | 5 | 4.0 | 7.0 | **10.0** | 7.0 | **10.0** | 5.5 | 9.0 | 6.0 |
-| **Composite (0–10)** | **100** | **8.35** | 8.05 | 7.58 | 7.25 | 7.15 | 7.10 | 6.85 | 6.48 |
+| **Composite (0–10)** | **100** | **8.55** | 8.05 | 7.58 | 7.25 | 7.15 | 7.10 | 6.85 | 6.48 |
 | Composite on 18 Oct | | 7.7 | — | 7.2 | 7.1 | 6.9 | — | 6.6 | — |
 
-**What moved since 18 Oct (+0.65 for this stack):**
+**What moved since 18 Oct (+0.85 for this stack):**
 
 - **State awareness 8.0 → 9.0:** triage by service class with the longest wait first, wait reasons, the `󰷋` done-not-reviewed state (a glance is not a review), the shared-repository badge, away recaps, alert bursts and the queued badge (§3.2, §3.3).
 - **Persistence 7.5 → 8.0:** every agent turn is a restorable checkpoint kept outside the repository (`waymux checkpoint`), and `ai-memory` carries the workstream across sessions and harnesses.
 - **Agent-callable API 8.5 → 9.0:** `queue/*` and `agent/recap` RPCs, and the `ai-memory` MCP tools.
 - **Sandboxing 3.0 → 7.5:** Claude can run jailed (`Claude Jailed` row in `ai-launch`); git run by the daemon and the Cockpit no longer runs programs named by the repository's config (§2.3); and [`agent-sudo`](../tmux/agent-sudo-popup.md) lets a jailed agent ask for a privileged command through a narrow bridge (`agent-sudod`, one endpoint, no tmux access) that only a `y` in a popup on your client can approve. Jailed agents launched from `ai-launch` stay supervised through a hook token scoped to their own pane (`waymux` 0.5.0, §2.3). Capped at 7.5 because the jail is opt-in and an agent can still replace `.git` (§8 P1b).
 - **Fan-out 4.0 → 8.0:** [`awt-fan`](../utils.md) starts one prompt in 1–8 worktrees across agents, gated by `ai-quota` (red refused, yellow capped at one attempt; neither TUIOS nor Orca checks quota before a fan), compares the attempts in a 40/60 Waymaker popup, asks a read-only Claude to judge, and keeps one (commit, merge into the base, remove every attempt after naming the ignored files it deletes). Short of TUIOS's 10: no checks or cost per attempt yet, and no Cockpit entry.
+- **Remote 5.0 → 7.0:** a phone page (`waymux` 0.6.0, `/m` behind `tailscale serve`) lists every agent with held prompts first and answers them with Allow or Deny, confirming risky calls. Its token reaches two methods only, checked against the three TUIOS advisories of 26 Oct ([Recipe 4](remote-agent-workflow-waymux.md#recipe-4-answer-held-prompts-from-the-phone-m-waymux-06)). Short of TUIOS and Orca: no typing a new prompt, no diff view, no push notification.
 - **Competitors:** TUIOS 0.11 (25–26 Oct) added a full-screen agent cockpit, threads for eight harnesses, fans of 1–8 attempts with compare and a read-only judge, and linked machines. Orca added diff-line annotations sent back to the agent, SSH worktrees and an Android app. herdr added machines over SSH and saves before the host shuts down. workmux added sidebar views and keeps finished agents marked until reviewed.
 
 > [!IMPORTANT]
-> **The lead holds on these weights (8.35 vs TUIOS 8.05) and survives halving the ergonomics weight (8.20 vs 8.19), but not doubling remote (TUIOS 8.10, this stack 7.98).** This stack leads on ergonomics and latency, the review loop, and quota-aware launch and fan-out. It trails on remote/mobile and ecosystem. The rest of the roadmap in §8 (pinning `.git` in the jail, checks and cost per fan attempt) brings it to 8.40 on the same weights; a phone surface (P3) to 8.60.
+> **The lead holds on these weights (8.55 vs TUIOS 8.05), when the ergonomics weight is halved (8.42 vs 8.19), and when the remote weight is doubled (8.38 vs 8.10).** This stack leads on ergonomics and latency, the review loop, and quota-aware launch and fan-out. It trails on remote/mobile and ecosystem. The rest of the roadmap in §8 (pinning `.git` in the jail, checks and cost per fan attempt) brings it to 8.60 on the same weights.
 
 ### Emerging Capabilities (not weighted)
 
@@ -105,7 +106,7 @@ Sources, read on 29 Oct 2026: [TUIOS](https://github.com/Gaurav-Gosain/tuios) RE
 | **Quota / cost** | `ai-quota` model, quota-ranked launch menu, in-place switch | Cost per fan attempt | Usage tracking, account switcher | None found | None found | Cost dashboard, context inspector | None found | Usage cards, quota-gated routing, hard budgets |
 | **Sandboxing** | `ai-jail` for Claude (opt-in row) and opencode; `agent-sudo` bridge for approved root commands | None of its own | Not documented | Container / Lima backends | None | Docker per session | Worktree isolation | Codex workspace-write sandbox in Ask mode |
 | **Crash model** | tmux owns PTYs; systemd-supervised daemon; turn checkpoints | Daemon owns PTYs; `restart-server` reattaches clients | Scrollback survives restarts | tmux owns PTYs | Server owns PTYs; saves before shutdown | tmux owns PTYs | Background service (`t3 service install`) | App owns PTYs; agents resume with `--resume` |
-| **Remote / mobile** | SSH, mosh, Tailscale | SSH hosts, tailnet, `tuios-web`, paired phone | iOS / Android, SSH worktrees | Terminal only | Saved machines over SSH | Web UI, remote decks, Telegram / Slack conductor | iOS / Android / web, several machines | LAN web view (plain HTTP), phone chat |
+| **Remote / mobile** | SSH, mosh, Tailscale, phone page for held prompts (`/m`) | SSH hosts, tailnet, `tuios-web`, paired phone | iOS / Android, SSH worktrees | Terminal only | Saved machines over SSH | Web UI, remote decks, Telegram / Slack conductor | iOS / Android / web, several machines | LAN web view (plain HTTP), phone chat |
 | **Keyboard model** | $H=0$, no `Alt`, modeless popups | Prefix; lock mode; tmux / zellij presets; `alt` drag | Mouse-first GUI | tmux prefix | Prefix (several allowed) | Single-key TUI | GUI | `Ctrl` chords, `Alt+←/→`, mouse board, voice |
 | **License · ★** | MIT (`waymux`) · personal | MIT · 6.2k | MIT · 109k | MIT · 3.0k | Apache-2.0 · 46k | MIT · 1.2k | MIT · 31k | AGPL-3.0 · 1.1k |
 | **Latency / memory** | **Measured** (§5) | Not measured | Not measured | Not measured | Not measured | Not measured | Not measured | Not measured |
@@ -116,7 +117,7 @@ Sources, read on 29 Oct 2026: [TUIOS](https://github.com/Gaurav-Gosain/tuios) RE
 2. **Fixed-grid HUD vs. list dashboards:** the Cockpit's fixed 6-column monospace grid supports ballistic vertical scanning. workmux now offers `dashboard.layout: side_by_side` (the preview gets the full content height), converging on the 40/60 split. This is a design argument (saccade model), **not** a measured user-study result.
 3. **The review loop alone is no longer the differentiator:** sending a per-line note back to the agent is now standard (Orca, Paradev, TUIOS, Conductor, and Vibe Kanban, which is shutting down). What remains distinctive is the cost and safety of the path: `Space` stages a hunk and advances, `Ctrl+N` anchors and sends a note in one action, notes go through the delivery queue so they never answer a prompt, and `󰷋` clears only after a real review.
 4. **Orchestration moved into the products:** Alethe's lead agent delegates to workers through MCP with quota-gated roles and hard budgets, agent-deck's conductor escalates to a phone, and TUIOS fans out up to 8 attempts with a read-only judge. Agent vendors are absorbing the same layer (reported: GitHub Copilot multi-agent features at GitHub Universe, the Codex app folded into the ChatGPT desktop app). The durable advantage of this stack is the composition (tmux, Rust tools, $H=0$, measured budgets), not any single feature.
-5. **Known gaps (honest):** no checks or cost per fan attempt (TUIOS shows both), no phone surface (TUIOS, Orca, T3 Code, agent-deck and Alethe have one), a jail that is opt-in and leaves supervision behind (§2.3), and a single-maintainer core (`waymux` 0.2.x).
+5. **Known gaps (honest):** no checks or cost per fan attempt (TUIOS shows both), a phone page that answers prompts but cannot start one or show a diff (TUIOS, Orca and T3 Code can), a jail that is opt-in with `.git` still writable (§8 P1b), and a single-maintainer core (`waymux` 0.6).
 
 ### 2.1 Alethe (`Kc1t/alethe-agents`) Deep Dive
 
@@ -425,8 +426,8 @@ Ranked by composite gain per unit of work. Keys follow the [Zero-Churn principle
 | **P1** | **Supervised jail.** Relay a hook-only endpoint into `ai-jail` (a socket, like the ai-memory forward) with a per-pane token that accepts `hook/*` and nothing else. Never relay the full RPC: its `tmux.*` and `inject` methods type into unjailed panes. Jailed agents regain state, held approvals, checkpoints and `󰷋`. `agent-sudod` already proves the pattern: one endpoint, shape-validated, no tmux. **Done:** `hook-token` in `waymux` 0.5.0 and `jail_supervision` in `ai-launch`. | §2.3 | Sandboxing 6.5 → 7.5 (done) |
 | **P1b** | **Pin `.git` in the jail.** Read-only `<git-dir>/config` and `hooks` (works today through `--map`) plus a way to stop the agent replacing `.git` itself: ai-jail drops a bind of a path already inside the project mount, and a directory holding read-only mounts can still be renamed. Needs an ai-jail option that binds `.git` onto itself (a mount point cannot be renamed) or a host check that the git dir did not change during the session. | §2.3 | Sandboxing 7.5 → 8.0 |
 | **P2** | **Quota-aware fan-out** (done 29 Oct as `awt-fan`; still missing: tests and cost per attempt, a Cockpit entry) (`awt fan N`, Tier B2 of the [TUIOS roadmap](tuios-benchmark-and-agent-inbox-roadmap.md#tier-b-when-the-workflow-needs-it)): N worktrees from one prompt, a compare popup on the 40/60 grid (attempt, time, diffstat, tests, quota spent), a read-only judge, keep one. Gate N with `ai-quota --json` (`projected_five`): neither TUIOS nor Orca checks quota before a fan. | Fan-out gap | Fan-out 4.0 → 8.0 (done), 8.5 with checks and cost |
-| **P3** | **Read-only phone surface** (built 29 Oct on `waymux` branch `feat/phone-surface`, ships with the next release; see [Recipe 4](remote-agent-workflow-waymux.md#recipe-4-answer-held-prompts-from-the-phone-m-waymux-06)). Cockpit rows and held-approval answers over Tailscale Serve, with one capability token per class (read, answer) and no file paths accepted from the client. The three TUIOS advisories of 26 Oct are the checklist. | Remote gap | Remote 5.0 → 7.0 (on release) |
+| **P3** | **Read-only phone surface** (done: released in `waymux` v0.6.0, 29 Oct; see [Recipe 4](remote-agent-workflow-waymux.md#recipe-4-answer-held-prompts-from-the-phone-m-waymux-06)). Cockpit rows and held-approval answers over Tailscale Serve, with one capability token per class (read, answer) and no file paths accepted from the client. The three TUIOS advisories of 26 Oct are the checklist. | Remote gap | Remote 5.0 → 7.0 (done) |
 | **P4** | **Absorb from Alethe:** an MCP inventory across `claude`, `agy`, `codex`, `opencode` and `devin` as a `wm` picker, and the leftover dev-server processes listed when a window closes. | Shared-config drift, orphan processes | Not scored |
 | **P5** | **Harden the `agent-sudo` popup** (done, 29 Oct): drain pending input and ignore keys for 400 ms after it opens (as `y`/`n` in the Cockpit); extend the red warning to build tools and to any executable inside the request's directory, since both run code the agent wrote. | §2.3 | Part of the 6.5 (done) |
 
-With P0, P1, P2 and P5 done, the composite is 8.35. P1b and the missing fan columns bring it to 8.40 on the unchanged weights; P3 adds 0.2 more.
+With P0, P1, P2, P3 and P5 done, the composite is 8.55. P1b and the missing fan columns bring it to 8.60 on the unchanged weights.
