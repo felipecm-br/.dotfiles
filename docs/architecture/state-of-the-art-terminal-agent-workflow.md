@@ -1,7 +1,7 @@
 # State-of-the-Art Terminal Agent Workflow: Architecture, Ergonomics & Competitor Benchmark
 
 > **Canonical Architectural Reference:** `docs/architecture/state-of-the-art-terminal-agent-workflow.md`  
-> **Status:** Production Standard (re-audited 29 Oct 2026) · **Comparative Score:** **8.0 / 10** (profile-weighted, see §1; tied with TUIOS at 8.05, up from 7.7 on 18 Oct) · **Zero-Churn Verified**
+> **Status:** Production Standard (re-audited 29 Oct 2026) · **Comparative Score:** **8.1 / 10** (profile-weighted, see §1; TUIOS 8.05; 7.7 on 18 Oct) · **Zero-Churn Verified**
 
 > [!NOTE]
 > This document was re-audited in Oct 2026. The previous revision claimed a self-assigned **9.94/10**, cited competitor latencies without a reproducible method, and referenced unverified benchmarks. Every number below is either **measured on this host** (aarch64 Linux, see §5) or explicitly marked as **unmeasured / reported by the vendor**. The 29 Oct re-audit re-read every competitor's repository (README, changelog, release notes), added TUIOS, agent-deck and Alethe to the scorecard, and lists the other new entrants in a radar (§2.2).
@@ -60,22 +60,22 @@ Weights are calibrated for a **terminal-first, keyboard-only, Home-Row ($H=0$)**
 | Remote / mobile | 10 | 5.0 | 8.5 | **9.5** | 4.0 | 9.0 | 7.5 | **9.5** | 6.5 |
 | Ergonomics & latency (keyboard, $H=0$) | 15 | **10.0** | 6.5 | 3.0 | 7.5 | 6.5 | 8.0 | 3.0 | 4.0 |
 | Agent-callable API (`wait`, spawn, mail) | 5 | 9.0 | **10.0** | 7.5 | 6.0 | **10.0** | 8.0 | 6.5 | 8.5 |
-| Agent sandboxing | 5 | 5.0 | 3.0 | 4.0 | **9.0** | 3.0 | 8.0 | 3.0 | 4.0 |
+| Agent sandboxing | 5 | 6.5 | 3.0 | 4.0 | **9.0** | 3.0 | 8.0 | 3.0 | 4.0 |
 | Fan-out / compare N agents | 5 | 4.0 | **10.0** | **10.0** | 8.0 | 5.0 | 6.5 | 7.0 | 8.0 |
 | Ecosystem / bus factor | 5 | 4.0 | 7.0 | **10.0** | 7.0 | **10.0** | 5.5 | 9.0 | 6.0 |
-| **Composite (0–10)** | **100** | 8.03 | **8.05** | 7.58 | 7.25 | 7.15 | 7.10 | 6.85 | 6.48 |
+| **Composite (0–10)** | **100** | **8.10** | 8.05 | 7.58 | 7.25 | 7.15 | 7.10 | 6.85 | 6.48 |
 | Composite on 18 Oct | | 7.7 | — | 7.2 | 7.1 | 6.9 | — | 6.6 | — |
 
-**What moved since 18 Oct (+0.33 for this stack):**
+**What moved since 18 Oct (+0.40 for this stack):**
 
 - **State awareness 8.0 → 9.0:** triage by service class with the longest wait first, wait reasons, the `󰷋` done-not-reviewed state (a glance is not a review), the shared-repository badge, away recaps, alert bursts and the queued badge (§3.2, §3.3).
 - **Persistence 7.5 → 8.0:** every agent turn is a restorable checkpoint kept outside the repository (`waymux checkpoint`), and `ai-memory` carries the workstream across sessions and harnesses.
 - **Agent-callable API 8.5 → 9.0:** `queue/*` and `agent/recap` RPCs, and the `ai-memory` MCP tools.
-- **Sandboxing 3.0 → 5.0:** Claude can run jailed (`Claude Jailed` row in `ai-launch`). Capped at 5 because the row is opt-in, jailed agents cannot reach the waymux hooks, and host-side git still runs in the agent-writable repository (§2.3).
+- **Sandboxing 3.0 → 6.5:** Claude can run jailed (`Claude Jailed` row in `ai-launch`); git run by the daemon and the Cockpit no longer runs programs named by the repository's config (§2.3); and [`agent-sudo`](../tmux/agent-sudo-popup.md) lets a jailed agent ask for a privileged command through a narrow bridge (`agent-sudod`, one endpoint, no tmux access) that only a `y` in a popup on your client can approve. Capped at 6.5 because the jail is opt-in, jailed agents still cannot reach the waymux hooks, and the `agent-sudo` popup has no dwell (§2.3).
 - **Competitors:** TUIOS 0.11 (25–26 Oct) added a full-screen agent cockpit, threads for eight harnesses, fans of 1–8 attempts with compare and a read-only judge, and linked machines. Orca added diff-line annotations sent back to the agent, SSH worktrees and an Android app. herdr added machines over SSH and saves before the host shuts down. workmux added sidebar views and keeps finished agents marked until reviewed.
 
 > [!IMPORTANT]
-> **The lead is gone: this stack and TUIOS are tied (8.03 vs 8.05).** TUIOS pulls ahead under any weighting that values remote work more or keyboard ergonomics less (remote 10 → 20: TUIOS 8.10, Orca 7.79, this stack 7.69; ergonomics 15 → 7.5: TUIOS 8.19, Orca 7.98, this stack 7.85). This stack still leads on ergonomics and latency, the review loop and quota-aware launch. It trails on fan-out, remote/mobile, sandboxing and ecosystem. The roadmap in §8 (git hardening, a supervised jail, quota-aware fan-out) brings it to 8.35 on the same weights.
+> **The lead is back, but only on these weights (8.10 vs TUIOS 8.05).** TUIOS stays ahead under any weighting that values remote work more or keyboard ergonomics less (remote 10 → 20: TUIOS 8.10, Orca 7.79, this stack 7.76; ergonomics 15 → 7.5: TUIOS 8.19, Orca 7.98, this stack 7.93). This stack leads on ergonomics and latency, the review loop and quota-aware launch. It trails on fan-out, remote/mobile and ecosystem, and sandboxing is now mid-pack. The rest of the roadmap in §8 (a supervised jail, quota-aware fan-out) brings it to 8.38 on the same weights.
 
 ### Emerging Capabilities (not weighted)
 
@@ -86,7 +86,7 @@ Capabilities that several competitors shipped since 18 Oct. They are kept out of
 | **Quota & cost-aware routing** | `ai-quota`: server-reported Claude 5h/7d, burn rate, projection at reset, weekly pace; Antigravity quota per model group; quota-ranked `ai-launch` menu; in-place `ai-switch` | Alethe: usage per provider, quota headroom in every orchestrator answer, routing rules gated on quota (critical at 80%), fallback roles, hard budgets for calls, wall time, tokens and cost | **Parity:** deeper telemetry here, automatic routing there |
 | **Cross-session memory & handoff** | `ai-memory` hooks and MCP; `ai-memory run` workstreams across Claude, Codex, OpenCode and Antigravity; Undo Close Tab with resume | Alethe: resume after a crash for four CLIs, recent chats per folder, Claude ↔ Codex redacted context packet, managed `ai-memory` install | **Parity** (same `ai-memory` backend) |
 | **Lead-agent orchestration** | None: agents are peers, chained by scripts with `agentState/wait` | Alethe Orchestration v2 board; agent-deck conductor escalating to Telegram or Slack; agtx orchestrator agent | **Gap**, acceptable for a single-human workflow |
-| **Control-plane safety** | Delivery queue, live re-check and 400 ms dwell, risk rules, held approvals, `Esc` deny, kill guard, ship confirmation | TUIOS: the same guards, plus four security fixes in Oct (git config, linked-machine file access, OSC 52 query, cross-pane approvals) | **Behind** until §8 P0 lands (§2.3) |
+| **Control-plane safety** | Delivery queue, live re-check and 400 ms dwell, risk rules, held approvals, `Esc` deny, kill guard, ship confirmation; hardened host-side git; `agent-sudo` approval popup | TUIOS: the same guards, plus four security fixes in Oct (git config, linked-machine file access, OSC 52 query, cross-pane approvals) | **Close behind:** P0 landed; the `agent-sudo` popup lacks the dwell the Cockpit has (§8 P5) |
 
 ---
 
@@ -102,7 +102,7 @@ Sources, read on 29 Oct 2026: [TUIOS](https://github.com/Gaurav-Gosain/tuios) RE
 | **Approvals** | Held `PermissionRequest`, 400 ms dwell, risk double-press | Same model (origin of ours) | Not verified | Focus the pane | Answer in the pane | Attach to the session | Not verified | Worker cards: once, session, decline, abort |
 | **Fan-out** | Manual (§8 P2) | 1–8 attempts, compare, read-only judge, keep | One prompt → N agents, compare, merge | Multi-worktree `add` | Manual | Fork, conductor workers | Parallel threads | Lead agent delegates to Claude / Codex workers |
 | **Quota / cost** | `ai-quota` model, quota-ranked launch menu, in-place switch | Cost per fan attempt | Usage tracking, account switcher | None found | None found | Cost dashboard, context inspector | None found | Usage cards, quota-gated routing, hard budgets |
-| **Sandboxing** | `ai-jail` for Claude (opt-in row) and opencode | None of its own | Not documented | Container / Lima backends | None | Docker per session | Worktree isolation | Codex workspace-write sandbox in Ask mode |
+| **Sandboxing** | `ai-jail` for Claude (opt-in row) and opencode; `agent-sudo` bridge for approved root commands | None of its own | Not documented | Container / Lima backends | None | Docker per session | Worktree isolation | Codex workspace-write sandbox in Ask mode |
 | **Crash model** | tmux owns PTYs; systemd-supervised daemon; turn checkpoints | Daemon owns PTYs; `restart-server` reattaches clients | Scrollback survives restarts | tmux owns PTYs | Server owns PTYs; saves before shutdown | tmux owns PTYs | Background service (`t3 service install`) | App owns PTYs; agents resume with `--resume` |
 | **Remote / mobile** | SSH, mosh, Tailscale | SSH hosts, tailnet, `tuios-web`, paired phone | iOS / Android, SSH worktrees | Terminal only | Saved machines over SSH | Web UI, remote decks, Telegram / Slack conductor | iOS / Android / web, several machines | LAN web view (plain HTTP), phone chat |
 | **Keyboard model** | $H=0$, no `Alt`, modeless popups | Prefix; lock mode; tmux / zellij presets; `alt` drag | Mouse-first GUI | tmux prefix | Prefix (several allowed) | Single-key TUI | GUI | `Ctrl` chords, `Alt+←/→`, mouse board, voice |
@@ -163,9 +163,10 @@ TUIOS 0.11.1 fixed [GHSA-qcx6-vr32-xr8q](https://github.com/Gaurav-Gosain/tuios/
 
 - `waymux` runs git in agent repositories from the daemon and the Cockpit: turn checkpoints (which include the repository's config on purpose, for filters) and the Cockpit diffstat. Both ran a command named in repository-local git config; `--no-ext-diff` alone does not prevent it.
 - `ai-jail` mounts the project read-write, so a jailed agent can change that config, and in a linked worktree the `.git` pointer file itself sits inside the writable mount. Any host-side git command in that directory, the daemon's included, then runs outside the jail.
+- **`agent-sudo`** (privileged commands for jailed agents, approved in a popup) runs the approved command as root **outside the jail, in the agent's own directory**. Interpreters get a red warning, but a build tool or a script in that directory (`make`, `npm`, `cargo`, `./x`) runs code the agent wrote, with root, and gets none. The popup also reads the first key it receives, so a `y` typed into another pane as it opens approves (§8 P5).
 - Jailed agents also lose supervision: the jail unshares the network and relays only the ai-memory port (49374), so `waymux hook` cannot reach the daemon, and the pane gets no hook state, held approvals, checkpoints or `󰷋`.
 
-**Status:** §8 P0 landed in the `waymux` working tree on 29 Oct (`src/git.rs`; built and installed locally, not yet released): daemon and Cockpit git no longer runs fsmonitor, hooks, or filter and diff drivers from local config. Still open: the `lazygitrs` audit and P1. Until P1 lands, treat the `Claude Jailed` row as accident prevention, which is how ai-jail describes itself, not as a boundary against a prompt-injected agent.
+**Status:** §8 P0 landed in `waymux` on 29 Oct (`e9392ec`, `src/git.rs`; installed, not yet released): git run by the daemon and the Cockpit no longer runs fsmonitor, hooks, or filter and diff drivers from local config (about +4 ms on the Cockpit data path). Still open: the `lazygitrs` audit, P1 and the `agent-sudo` popup (P5). Until P1 lands, treat the `Claude Jailed` row as accident prevention, which is how ai-jail describes itself, not as a boundary against a prompt-injected agent.
 
 ---
 
@@ -309,7 +310,8 @@ Canonical details live in [Quota-Aware Agent Selection](quota-aware-agent-select
 - **Switch in place (`ai-switch`, `Prefix + A`):** changes the running agent's model or effort with the agent's own slash command, so the window and conversation stay; a half-typed prompt is stashed and restored, never submitted.
 - **Draft in Neovim (`ai-prompt`, `Prefix + v` / `Prefix + V`):** the agent's prompt draft opens in a popup editor through the agent's own external-editor hook, or is stashed so a `/command` can go first.
 - **Memory (`ai-memory`):** lifecycle hooks capture sessions; MCP recall and `ai-memory run` hand one workstream across Claude, Codex, OpenCode and Antigravity.
-- **Sandbox (`ai-jail`):** the `Claude Jailed` launcher row runs Claude with prompts off inside bubblewrap + Landlock + seccomp, with a private home and the project directory as the blast radius. Limits in §2.3.
+- **Sandbox (`ai-jail`):** the `Claude Jailed` launcher row runs Claude with prompts off inside bubblewrap + Landlock + seccomp, with a private home and the project directory as the blast radius.
+- **Privileged commands (`agent-sudo`):** a jailed agent asks through `agent-sudod` (`127.0.0.1:49375`, one endpoint, no tmux access); the exact argv, directory and reason open in a reactive-layer popup on your client, `y` approves, any other key denies, and sudo asks for the password in the popup's own tty. See [agent-sudo](../tmux/agent-sudo-popup.md). Limits in §2.3.
 
 ---
 
@@ -348,6 +350,8 @@ Canonical details live in [Quota-Aware Agent Selection](quota-aware-agent-select
 | **Supervision Audit Oct 2026** (S12) | The Cockpit footer had 9 items (cap 7) and `r Review` named a different action than the `󰷋` review state; nothing showed which shortcuts were used or skipped | 7-item footer, `r Notes`; key telemetry (`waymux keylog`, `key-telemetry.py`) logs tmux and Cockpit presses and suggests shorter paths | `tests/key_telemetry.test.sh`, `cargo test` (`test_line_keeps_columns_aligned`) |
 | **Re-audit 29 Oct 2026** (R2) | §2 claimed that no surveyed tool sent per-line review notes back to the agent | Claim corrected: Orca, Paradev, TUIOS and Conductor ship it; the differentiator is restated as path cost, delivery safety and review state (§2, takeaway 3) | This document |
 | **Re-audit 29 Oct 2026** (R3) | Claude, the main agent, always ran unjailed | `Claude Jailed` row in `ai-launch` (`ai-launch jail-claude`), listed only when `ai-jail` is installed; partial, see §2.3 | `tests/ai_quota.test.sh` |
+| **Re-audit 29 Oct 2026** (R4) | Daemon and Cockpit git ran programs named by the agent-writable repository's config (the TUIOS GHSA-qcx6-vr32-xr8q class) | `waymux` `src/git.rs`: fsmonitor and hooks off, local filter and diff drivers disabled; checkpoints drop the repository config | `cargo test` (`git::tests`), `tests/cockpit_hud_perf.test.sh` |
+| **Re-audit 29 Oct 2026** (R5) | A jailed agent could not run anything privileged, and exposing the tmux socket would give it every pane | `agent-sudo` popup plus the `agent-sudod` bridge (one endpoint, no tmux); partial, see §8 P5 | `tests/agent_sudo.test.sh` |
 
 > [!NOTE]
 > **Waymux Migration:** all consumers (hooks, `waymux-cli`, Cockpit/triage scripts, `drift-doctor`) use native `waymux` paths (`$XDG_RUNTIME_DIR/waymux/token`), configuration is loaded from `~/.config/waymux/config.toml`, sounds are located in `~/.config/waymux/sounds/`, and the systemd unit runs under `waymux.service`.
@@ -410,10 +414,11 @@ Ranked by composite gain per unit of work. Keys follow the [Zero-Churn principle
 
 | ID | Item | Closes | Score effect |
 | :---: | :--- | :--- | :--- |
-| **P0** | **Harden host-side git in `waymux`** (done in the working tree, 29 Oct; `lazygitrs` audit open). One git constructor for every call site (checkpoints, Cockpit items, diff, notes and actions, `wt`): `-c core.fsmonitor=false -c core.hooksPath=/dev/null`, `--no-ext-diff --no-textconv` wherever a diff is produced, and an empty override for every `filter.*` and `diff.*` driver defined in the repository's local or worktree config (read with `git config --local --get-regexp`, which runs nothing), keeping global drivers such as Git LFS. Refuse a work tree whose resolved git dir is not the registered repository's. Then audit `lazygitrs` the same way. | §2.3 (the TUIOS GHSA-qcx6-vr32-xr8q class) | Sandboxing 5.0 → 6.0 |
-| **P1** | **Supervised jail.** Relay a hook-only endpoint into `ai-jail` (a socket, like the ai-memory forward) with a per-pane token that accepts `hook/*` and nothing else. Never relay the full RPC: its `tmux.*` and `inject` methods type into unjailed panes. Jailed agents regain state, held approvals, checkpoints and `󰷋`. | §2.3 | Sandboxing 6.0 → 7.0 |
+| **P0** | **Harden host-side git in `waymux`** (done: `waymux` `e9392ec`, installed 29 Oct; `lazygitrs` audit open). One git constructor for every call site (checkpoints, Cockpit items, diff, notes and actions, `wt`): `-c core.fsmonitor=false -c core.hooksPath=/dev/null`, `--no-ext-diff --no-textconv` wherever a diff is produced, and an empty override for every `filter.*` and `diff.*` driver defined in the repository's local or worktree config (read with `git config --local --get-regexp`, which runs nothing), keeping global drivers such as Git LFS. Refuse a work tree whose resolved git dir is not the registered repository's. Then audit `lazygitrs` the same way. | §2.3 (the TUIOS GHSA-qcx6-vr32-xr8q class) | Sandboxing 5.0 → 6.0 (done) |
+| **P1** | **Supervised jail.** Relay a hook-only endpoint into `ai-jail` (a socket, like the ai-memory forward) with a per-pane token that accepts `hook/*` and nothing else. Never relay the full RPC: its `tmux.*` and `inject` methods type into unjailed panes. Jailed agents regain state, held approvals, checkpoints and `󰷋`. `agent-sudod` already proves the pattern: one endpoint, shape-validated, no tmux. | §2.3 | Sandboxing 6.5 → 7.5 |
 | **P2** | **Quota-aware fan-out** (`awt fan N`, Tier B2 of the [TUIOS roadmap](tuios-benchmark-and-agent-inbox-roadmap.md#tier-b-when-the-workflow-needs-it)): N worktrees from one prompt, a compare popup on the 40/60 grid (attempt, time, diffstat, tests, quota spent), a read-only judge, keep one. Gate N with `ai-quota --json` (`projected_five`): neither TUIOS nor Orca checks quota before a fan. | Fan-out gap | Fan-out 4.0 → 8.5 |
 | **P3** | **Read-only phone surface.** Cockpit rows and held-approval answers over Tailscale Serve, with one capability token per class (read, answer) and no file paths accepted from the client. The three TUIOS advisories of 26 Oct are the checklist. | Remote gap | Remote 5.0 → 7.0 |
 | **P4** | **Absorb from Alethe:** an MCP inventory across `claude`, `agy`, `codex`, `opencode` and `devin` as a `wm` picker, and the leftover dev-server processes listed when a window closes. | Shared-config drift, orphan processes | Not scored |
+| **P5** | **Harden the `agent-sudo` popup:** drain pending input and ignore keys for 400 ms after it opens (as `y`/`n` in the Cockpit); extend the red warning to build tools and to any executable inside the request's directory, since both run code the agent wrote. | §2.3 | Part of the 6.5 |
 
-P0–P2 bring the composite from 8.03 to 8.35 on the unchanged weights; P3 adds about 0.2 more.
+With P0 done and `agent-sudo` in, the composite is 8.10. P1 and P2 bring it to 8.38 on the unchanged weights; P3 adds about 0.2 more.
