@@ -502,6 +502,9 @@ cockpit snapshot
 # Restore saved Tmux sessions, windows and panes after reboot, resuming each saved Claude conversation
 cockpit restore
 
+# Turn off the automatic cockpit restore on the first tmux session after a reboot
+tmux set -g @cockpit-auto-restore off
+
 # Check the service that snapshots the Tmux layout and agent sessions before shutdown
 systemctl --user status cockpit-shutdown-save.service
 

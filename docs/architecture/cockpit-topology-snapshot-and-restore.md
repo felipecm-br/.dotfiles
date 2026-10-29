@@ -91,6 +91,8 @@ A pane gets `resume` only when an agent is still running anywhere below it (a ja
 Both are checked when saved and again when restored, because restore types the command into a shell: the id must be 8 to 64 letters, digits, `-` or `_`, and each launch word a plain option. A launch tag from another harness is ignored (Devin runs Claude's hooks too), and so is the whole tag when the agent has exited.
 
 ### 3.2. Forensic Reconstruction (`cockpit restore`)
+**Automatic after a reboot:** the first tmux session after a boot runs `cockpit restore --auto` (the `session-created[42]` hook in `tmux.conf`). It acts only on a snapshot taken before this boot, so restarting tmux without a reboot never brings back sessions you closed; it restores once (a lock stops two terminals from both restoring), writes its output to `~/.local/state/cockpit/restore.log`, and shows `cockpit: restored N sessions, M agents resumed` in tmux. It stays in the session the terminal opened when the snapshot has it, and switches to the saved active session otherwise. `set -g @cockpit-auto-restore off` turns it off; `cockpit restore` still works by hand.
+
 When `cockpit restore` executes:
 1. Verifies Tmux server availability (`tmux start-server` if stopped).
 2. Reads `session-topology.previous.json` when an earlier server's snapshot is waiting there, else `session-topology.json` (`--file` picks another). After a restore from it, the file becomes `session-topology.restored.json`, so a second `cockpit restore` does not bring back windows closed since.
@@ -111,7 +113,8 @@ The unified `cockpit` binary (`utils/.local/bin/cockpit`) manages both the inter
 |:---|:---|
 | `cockpit` | Open Cockpit interactive HUD modal (85% × 75%) |
 | `cockpit snapshot` | Save current Tmux session topology & worktree states |
-| `cockpit restore` | Restore the sessions, windows, panes and agents of the last tmux server (run it once after a reboot) |
+| `cockpit restore` | Restore the sessions, windows, panes and agents of the last tmux server (runs by itself after a reboot; by hand after a tmux restart) |
+| `cockpit restore --auto` | What the `session-created` hook runs: restore once, only a snapshot from before this boot |
 | `cockpit restore --dry-run` | Simulate restoration without mutating Tmux state |
 | `cockpit status` | Display the snapshot `cockpit restore` would use, its age and sessions |
 | `cockpit-shutdown-save` | Hold the shutdown delay lock and snapshot on shutdown (run by `cockpit-shutdown-save.service`) |

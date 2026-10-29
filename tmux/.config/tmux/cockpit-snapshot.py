@@ -338,7 +338,7 @@ def default_restore_file() -> str:
     return PREVIOUS_SNAPSHOT_FILE if os.path.isfile(PREVIOUS_SNAPSHOT_FILE) else DEFAULT_SNAPSHOT_FILE
 
 
-def restore_snapshot(filepath: Optional[str] = None, dry_run: bool = False) -> bool:
+def restore_snapshot(filepath: Optional[str] = None, dry_run: bool = False, switch: bool = True) -> bool:
     c = load_theme_colors()
     filepath = filepath or default_restore_file()
     if not os.path.isfile(filepath):
@@ -478,7 +478,7 @@ def restore_snapshot(filepath: Optional[str] = None, dry_run: bool = False) -> b
     # Select active session/window if present
     act_sess = topo.get("active_session")
     act_win = topo.get("active_window")
-    if not dry_run and act_sess:
+    if not dry_run and switch and act_sess:
         try:
             target = f"{act_sess}:{act_win}" if act_win else act_sess
             subprocess.run(["tmux", "switch-client", "-t", target], capture_output=True)
@@ -490,6 +490,65 @@ def restore_snapshot(filepath: Optional[str] = None, dry_run: bool = False) -> b
         # Restored once: a second `cockpit restore` must not bring back windows closed since.
         os.replace(PREVIOUS_SNAPSHOT_FILE, RESTORED_SNAPSHOT_FILE)
     return True
+
+def boot_time() -> int:
+    try:
+        with open("/proc/stat", "r") as f:
+            for line in f:
+                if line.startswith("btime "):
+                    return int(line.split()[1])
+    except Exception:
+        pass
+    return 0
+
+
+def auto_restore(created_session: str = "") -> bool:
+    """`cockpit restore` on the first tmux session after a boot (the `session-created` hook).
+
+    Only a snapshot taken before this boot counts, so restarting tmux without a reboot never
+    brings back sessions closed on purpose; once restored, the snapshot is retired, so later
+    sessions do nothing. Output goes to restore.log; tmux shows a one-line summary."""
+    import fcntl
+    os.makedirs(DEFAULT_STATE_DIR, exist_ok=True)
+    lock = open(os.path.join(DEFAULT_STATE_DIR, "restore.lock"), "w")
+    try:
+        fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except OSError:
+        return False  # another terminal is restoring
+
+    def taken_at(path: str) -> int:
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                return int(json.load(f).get("timestamp") or 0)
+        except Exception:
+            return -1
+
+    boot = int(os.environ.get("COCKPIT_BOOT_TIME") or boot_time())  # override for tests
+    # The focus hook may not have set the old server's snapshot aside yet.
+    if 0 <= taken_at(DEFAULT_SNAPSHOT_FILE) < boot:
+        os.replace(DEFAULT_SNAPSHOT_FILE, PREVIOUS_SNAPSHOT_FILE)
+    if not 0 <= taken_at(PREVIOUS_SNAPSHOT_FILE) < boot:
+        return False
+
+    with open(PREVIOUS_SNAPSHOT_FILE, "r", encoding="utf-8") as f:
+        topo = json.load(f)
+    names = [s.get("name") for s in topo.get("sessions", [])]
+    agents = sum(1 for s in topo.get("sessions", []) for w in s.get("windows", []) for p in w.get("panes", []) if resume_command(p.get("resume")))
+    log = os.path.join(DEFAULT_STATE_DIR, "restore.log")
+    stdout = sys.stdout
+    with open(log, "w", encoding="utf-8") as out:
+        sys.stdout = out
+        try:
+            # Stay in the session the terminal opened when the snapshot has it; else go to the
+            # one that was active (the new terminal's session is then a spare shell).
+            done = restore_snapshot(PREVIOUS_SNAPSHOT_FILE, switch=created_session not in names)
+        finally:
+            sys.stdout = stdout
+    msg = f"cockpit: restored {len(names)} session{'s' if len(names) != 1 else ''}"
+    msg += f", {agents} agent{'s' if agents != 1 else ''} resumed" if agents else ""
+    subprocess.run(["tmux", "display-message", "-d", "5000", msg if done else f"cockpit: restore failed, see {log}"], capture_output=True)
+    return done
+
 
 def status_snapshot(filepath: Optional[str] = None):
     c = load_theme_colors()
@@ -541,6 +600,8 @@ def main():
     p_rest = subparsers.add_parser("restore", help="Restore Tmux sessions and windows from snapshot")
     p_rest.add_argument("--file", type=str, default=None)
     p_rest.add_argument("--dry-run", action="store_true")
+    p_rest.add_argument("--auto", action="store_true", help="once per boot, from the session-created hook")
+    p_rest.add_argument("--session", type=str, default="", help="with --auto: the session the hook fired for")
 
     p_stat = subparsers.add_parser("status", help="Show saved snapshot information")
     p_stat.add_argument("--file", type=str, default=None)
@@ -551,6 +612,9 @@ def main():
         success = save_snapshot(filepath=args.file, quiet=args.quiet)
         sys.exit(0 if success else 1)
     elif args.command == "restore":
+        if args.auto:
+            auto_restore(args.session)
+            sys.exit(0)
         success = restore_snapshot(filepath=args.file, dry_run=args.dry_run)
         sys.exit(0 if success else 1)
     elif args.command == "status":

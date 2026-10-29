@@ -116,3 +116,19 @@ tmux has-session -t zz-last 2>/dev/null && ok "restore uses the old server's sna
   && ok "restored once, then retired" || bad "previous still pending"
 python3 "$SNAP" snapshot --quiet
 [ ! -e "$STATE/session-topology.previous.json" ] && ok "same server: nothing set aside" || bad "set aside on the same server"
+
+# restore --auto (the session-created hook): once per boot, only for a snapshot from before it.
+now=$(date +%s)
+jq --argjson t $((now - 60)) '.timestamp = $t' "$TOPO" >"$STATE/session-topology.json"
+rm -f "$STATE/session-topology.previous.json"
+tmux kill-session -t work 2>/dev/null || true; tmux kill-session -t zz-last 2>/dev/null || true
+COCKPIT_BOOT_TIME=$((now - 30)) python3 "$SNAP" restore --auto --session fresh
+tmux has-session -t zz-last 2>/dev/null && ok "auto: snapshot from before the boot restored" || bad "auto did not restore"
+grep -q 'Restoration Complete' "$STATE/restore.log" && ok "auto: output in restore.log" || bad "restore.log"
+tmux kill-session -t zz-last
+COCKPIT_BOOT_TIME=$((now - 30)) python3 "$SNAP" restore --auto --session fresh
+! tmux has-session -t zz-last 2>/dev/null && ok "auto: once per boot" || bad "auto restored twice"
+# A tmux restart without a reboot: the snapshot is newer than the boot, nothing comes back.
+jq --argjson t "$now" '.timestamp = $t' "$TOPO" >"$STATE/session-topology.json"
+COCKPIT_BOOT_TIME=$((now - 30)) python3 "$SNAP" restore --auto --session fresh
+! tmux has-session -t zz-last 2>/dev/null && ok "auto: no restore after a plain tmux restart" || bad "auto restored without a reboot"
