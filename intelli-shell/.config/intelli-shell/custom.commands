@@ -373,6 +373,9 @@ waymux phone-token --url
 # Unpair every phone: replace the phone token
 waymux phone-token --rotate
 
+# Send a test alert to the phone through the [phone] ntfy topic (held prompts alert after 15 s)
+waymux phone-alert
+
 # Mint a hook token limited to one pane, for a sandboxed agent (ai-launch jail-claude does this)
 waymux hook-token {{pane}}
 

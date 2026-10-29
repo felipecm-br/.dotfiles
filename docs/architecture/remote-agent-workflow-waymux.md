@@ -191,6 +191,16 @@ waymux phone-token --url      # prints https://<host>.<tailnet>.ts.net/m#t=<toke
 
 Open the printed link on the phone once; the page keeps the token in local storage and drops it from the address bar. The token travels in the URL fragment, which a browser never sends to a server, and it reaches `phone/snapshot` and `approval/answer` only: it cannot type into a pane, push to the queue or pass a file path. It is saved 0600 in `$XDG_STATE_HOME/waymux/phone-token`, so pairing survives a daemon restart; `waymux phone-token --rotate` unpairs every device. Only prompts held by the hook can be answered from the phone; anything else waits for the keyboard.
 
+A prompt still held after 15 s, so one not answered at the desk, sends an [ntfy](https://ntfy.sh) alert (`api:2 build waits for you`, plus `(risky call)`) that opens `/m` when tapped. The config here sets `[phone] ntfy_file = "~/.local/state/waymux/ntfy-topic"`: the topic is the only secret and this repository is public, so the topic URL lives in that 0600 file, not in `config.toml`. Set up once:
+
+```bash
+(umask 077; echo "https://ntfy.sh/waymux-$(openssl rand -hex 12)" > ~/.local/state/waymux/ntfy-topic)
+cat ~/.local/state/waymux/ntfy-topic   # in the ntfy app: + and the topic name (the part after ntfy.sh/)
+waymux phone-alert                    # sends a test alert
+```
+
+The alert never carries the command: it passes through the ntfy server. The call itself is on the page, behind the token.
+
 ---
 
 ## 6. Related References

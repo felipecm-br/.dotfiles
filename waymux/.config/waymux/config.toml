@@ -27,6 +27,11 @@ error = "~/.local/share/sounds/ai/10-arcade-blip.wav"
 enabled = true
 hold_seconds = 120
 
+# A prompt still held after 15 s (not answered at the desk) alerts the phone through ntfy and
+# opens /m when tapped. The topic is a secret, so it lives outside this public repo, 0600.
+[phone]
+ntfy_file = "~/.local/state/waymux/ntfy-topic"
+
 [theme]
 active_spinner = "minidot"
 
