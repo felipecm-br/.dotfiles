@@ -195,9 +195,13 @@ def tier: if test("fable|argon") then "$$$$" elif test("opus") then "$$$" elif t
         | select(. != null and $have_jail == "1")
         | .agent = "jail-claude" | .cli = "Claude Jailed" | .icon = "󰌾" | .rec = false)]
 | .[]
-| ("\(.icon) " + (.cli | pad(14)) + (.model | pad(20)) + (.tier | pad(5))) as $head
-| [.agent, .args, "\($head)\(.quota)\(if .rec then "  ★" else "" end)",
-   "\($head)\u001b[\(code(.level))m\(.quota)\u001b[0m\(if .rec then "  \u001b[36m★\u001b[0m" else "" end)",
+| (if .rec then "⠛" else " " end) as $gut
+| ("\(.icon) " + (.cli | pad(14))) as $cli_col
+| (.model | pad(20)) as $mod_col
+| (.tier | pad(5)) as $tier_col
+| ($gut + $cli_col + $mod_col + $tier_col) as $head
+| [.agent, .args, "\($head)\(.quota)",
+   "\u001b[97m\($gut)\u001b[34m\($cli_col)\u001b[0m\($mod_col)\u001b[90m\($tier_col)\u001b[0m\u001b[\(code(.level))m\(.quota)\u001b[0m",
    (if .rec then 1 else 0 end)]
 | @tsv')
 
@@ -212,9 +216,9 @@ for i in "${!recs[@]}"; do [ "${recs[$i]}" = 1 ] && { pick=$i; break; }; done
 
 if [ "$choice" = "menu" ]; then
   # Last row, always: a plain terminal without an agent (same columns as the rows above)
-  shell_row="󰆍 Shell         Terminal            -    no agent"
+  shell_row=" 󰆍 Shell         Terminal            -    no agent"
   agents+=(shell); argv+=(""); plain+=("$shell_row"); recs+=(0)
-  colored+=("$(printf '\033[90m%s\033[0m' "$shell_row")")
+  colored+=("$(printf ' \033[90m󰆍 Shell         \033[0mTerminal            \033[90m-    no agent\033[0m')")
 fi
 
 if [ "$choice" = "menu" ]; then

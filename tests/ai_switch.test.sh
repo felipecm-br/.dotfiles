@@ -12,10 +12,19 @@ bad() { echo "FAIL: $*" >&2; exit 1; }
 POPUP="$ROOT/tmux/.config/tmux/ai-switch-popup.sh"
 CONF="$ROOT/tmux/.config/tmux/tmux.conf"
 
-# 1. Scripts parse, binding and preset exist
+# 1. Scripts parse, binding and preset exist (with Focus::Results passthrough nav bar contract)
 bash -n "$(command -v ai-switch)" && bash -n "$POPUP" && ok "scripts parse" || bad "syntax"
 grep -q "^bind-key A run-shell \"~/.config/tmux/ai-switch-popup.sh '#{pane_id}'" "$CONF" && ok "Prefix + A bound" || bad "binding"
 [ -f "$HOME/.config/waymaker/presets/ai-switch.toml" ] && ok "preset present" || bad "preset missing"
+for preset in "$ROOT/waymaker/.config/waymaker/presets/ai-launch.toml" "$ROOT/waymaker/.config/waymaker/presets/ai-switch.toml"; do
+  grep -q '^focus_on_start = "picker"$' "$preset" &&
+    grep -q '^passthrough = true$' "$preset" &&
+    grep -q '^current_nav_bar = "Plain"$' "$preset" &&
+    grep -q '^\[results\.current_nav_bar_style\]$' "$preset" &&
+    grep -q '^\[results\.style\]$' "$preset" &&
+    grep -q '{white,bold:⠛}' "$preset" &&
+    ok "${preset##*/} focus-bar, ⠛ marker & dim/bold hierarchy contract" || bad "${preset##*/} missing focus-bar or ⠛ contract"
+done
 
 # 2. Rows per agent (AI_SWITCH_AGENT skips pane detection)
 rows() { AI_SWITCH_AGENT=$1 ai-switch --peek | cut -f2 | tr '\n' ' '; }
@@ -47,6 +56,8 @@ tmux new-session -d -s agent -x 120 -y 20 "HOME='$HOME' '$fake'"
 P=$(tmux display-message -p -t agent: '#{pane_id}')
 sleep 0.5
 [ "$(ai-switch -t "$P" --agent)" = $'claude\topus' ] && ok "detects claude and its current model" || bad "agent: $(ai-switch -t "$P" --agent)"
+[[ "$(ai-switch -t "$P" --peek | awk -F'\t' '$1=="opus"{print $3}')" == ⠛* && "$(ai-switch -t "$P" --peek | awk -F'\t' '$1=="sonnet"{print $3}')" == " "* ]] &&
+  ok "⠛ left-of-icon gutter marks active model row" || bad "gutter: $(ai-switch -t "$P" --peek)"
 ai-switch -t "$P" haiku 2>/dev/null
 sleep 0.5
 [ "$(cat "$HOME/claude.in" 2>/dev/null)" = "/model haiku" ] && ok "types /model haiku and submits" || bad "sent: $(cat "$HOME/claude.in" 2>/dev/null)"

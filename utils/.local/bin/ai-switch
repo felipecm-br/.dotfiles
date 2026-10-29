@@ -83,13 +83,18 @@ pad() { # <text> <width>: pad by visible characters, not bytes
   printf '%s%*s' "$s" "$n" ""
 }
 
-# Rows: id \t slash command \t label
+# Rows: id \t slash command \t label (and parallel ANSI-styled menu rows)
 rows=()
-row() { rows+=("$1"$'\t'"$2"$'\t'"$3"); }
+colored_rows=()
+row() { rows+=("$1"$'\t'"$2"$'\t'"$3"); colored_rows+=("${4:-$3}"); }
 model_row() { # <icon> <id> <name> <tier>
-  local mark=""
-  [ "$2" = "$current" ] && mark="● now"
-  row "$2" "/model $2" "$1 $(pad Model 8)$(pad "$3" 22)$(pad "$4" 5)$mark"
+  local gut=" " head col_name col_tier
+  [ "$2" = "$current" ] && gut="⠛"
+  head="$1 $(pad Model 8)"
+  col_name=$(pad "$3" 22)
+  col_tier=$(pad "$4" 5)
+  row "$2" "/model $2" "${gut}${head}${col_name}${col_tier}" \
+    "$(printf '\033[97m%s\033[34m%s\033[0m%s\033[90m%s\033[0m' "$gut" "$head" "$col_name" "$col_tier")"
 }
 
 icon() { waymux icon "$1" 2>/dev/null || echo "${1:0:1}"; }
@@ -102,9 +107,12 @@ case $agent in
     model_row "$ic" sonnet Sonnet '$$'
     model_row "$ic" haiku Haiku '$'
     for e in low medium high xhigh max auto; do
-      mark=""
-      [ "$e" = "$effort" ] && mark="● now"
-      row "$e" "/effort $e" "󱐋 $(pad Effort 8)$(pad "$e" 27)$mark"
+      gut=" "
+      [ "$e" = "$effort" ] && gut="⠛"
+      head="󱐋 $(pad Effort 8)"
+      col_name=$(pad "$e" 27)
+      row "$e" "/effort $e" "${gut}${head}${col_name}" \
+        "$(printf '\033[97m%s\033[34m%s\033[0m%s' "$gut" "$head" "$col_name")"
     done
     ;;
   agy)
@@ -129,7 +137,9 @@ case $agent in
     ;;
   codex)
     # Codex takes no /model argument: open its own picker (model, then reasoning effort)
-    row picker "/model" "$(icon codex) $(pad Model 8)$(pad "Codex model & effort picker" 32)"
+    head="$(icon codex) $(pad Model 8)"
+    col_name=$(pad "Codex model & effort picker" 32)
+    row picker "/model" " ${head}${col_name}" "$(printf ' \033[34m%s\033[0m%s' "$head" "$col_name")"
     ;;
 esac
 
@@ -153,7 +163,7 @@ else
   done
   WM_BIN="$HOME/.local/bin/wm"
   [ -x "$WM_BIN" ] || WM_BIN=$(command -v wm)
-  sel=$(printf '%s\n' "${labels[@]}" | "$WM_BIN" -o "$HOME/.config/waymaker/presets/ai-switch.toml" --pos "$pos") || exit 0
+  sel=$(printf '%s\n' "${colored_rows[@]}" | "$WM_BIN" -o "$HOME/.config/waymaker/presets/ai-switch.toml" --pos "$pos") || exit 0
   sel=$(sed 's/\x1b\[[0-9;]*m//g' <<<"$sel")
   for i in "${!labels[@]}"; do [ "${labels[$i]}" = "$sel" ] && { pick=${rows[$i]}; break; }; done
   [ -n "$pick" ] || exit 0

@@ -1,10 +1,11 @@
 [ui.nav]
 active = true
 basic = true
+passthrough = true
 bar = "Plain"
 color = "black"
 prompt = ""
-focus_on_start = "filter"
+focus_on_start = "picker"
 hints = false
 
 [start]
@@ -26,12 +27,13 @@ threshold = false
 sides = ""
 
 [query]
-prompt = " "
+prompt = " "
+prompt_style.fg = "blue"
 status_inline = true
 show = true
 
 [footer]
-content = " {cyan,bold:Enter} {darkgray:Launch} {darkgray:│} {cyan,bold:★} {darkgray:Recommended} {darkgray:│} {cyan,bold:type} {darkgray:Filter} {darkgray:│} {cyan,bold:Esc} {darkgray:Shell}"
+content = " {cyan,bold:Enter} {darkgray:Launch} {darkgray:│} {white,bold:⠛} {darkgray:Recommended} {darkgray:│} {cyan,bold:type} {darkgray:Filter} {darkgray:│} {cyan,bold:Esc} {darkgray:Shell}"
 row_connection = "Full"
 match_indent = false
 separator = "light"
@@ -39,16 +41,23 @@ separator = "light"
 [results]
 multi = false
 spinner_inline = true
-current_prefix = " "
+current_prefix = ""
 unselected_prefix = "  "
+current_nav_bar = "Plain"
 row_connection = "Full"
 column_spacing = 1
 
-[results.prefix_style]
-fg = "cyan"
-modifier = "BOLD"
+[results.style]
+fg = "gray"
+modifier = "DIM"
 
 [results.current_style]
+fg = "white"
+bg = "reset"
+modifier = "BOLD"
+
+[results.current_nav_bar_style]
+fg = "lightcyan"
 modifier = "BOLD"
 
 [results.border]

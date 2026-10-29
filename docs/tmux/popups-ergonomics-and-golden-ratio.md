@@ -158,6 +158,8 @@ The Window Picker (`prefix + s` / [`window-picker.sh`](../../tmux/.config/tmux/w
    Waymaker supports stacked preview layouts with instant sub-1ms switching via `SwitchPreview(n)`. The Cockpit HUD keeps the 60% right panel focused on pure live terminal scrollback and telemetry, while delegating full-width interactive Git diffing/hunk staging to Lazygitrs (`g`, returning via `Esc`):
    - **Layout 0: Live Terminal Stream** ([`cockpit-picker-preview.sh`](../../tmux/.config/tmux/cockpit-picker-preview.sh)): Real-time pane scrollback with bottom tailing (`scroll.tail = true`), zero redundant metadata cards, and bottom-anchored pending Lazygitrs review notes.
    - **Layout 1: Deep Work Telemetry & Keybindings** ([`cockpit-picker-help.sh`](../../tmux/.config/tmux/cockpit-picker-help.sh)): Triggered via `?`, renders hourly deep work heatmap, focus metrics, and keyboard cheat sheet.
+9. **Passthrough Focus-Bar Architecture (`ai-launch.toml` & `ai-switch.toml`)**:
+   In Waymaker, the leftmost $X=1$ lateral navigation bar (`ui.nav.bar` + `[results.current_nav_bar_style]`) is gated on `Focus::Results`. Filter-first menus ([`ai-launch.toml`](../../waymaker/.config/waymaker/presets/ai-launch.toml), [`ai-switch.toml`](../../waymaker/.config/waymaker/presets/ai-switch.toml)) combine `focus_on_start = "picker"` with `passthrough = true` so `Focus::Results` stays active from frame 0 while printable keystrokes still stream directly into the live filter query. Together with `current_nav_bar = "Plain"` (`│`, `fg = "lightcyan"`, `modifier = "BOLD"`), peripheral row dimming (`[results.style] fg = "gray", modifier = "DIM"`), transparent bright-white active promotion (`[results.current_style] fg = "white", bg = "reset", modifier = "BOLD"`), and Triadic Cold-Color column partitioning (`blue` CLI/category, neutral model label, `darkgray` cost tier), the pre-selected row achieves immediate preattentive pop-out without breaking zero-background transparency.
 
 ### 3.2 The Hybrid Golden-Grid Architecture (Left 40% Columnar Table Precision)
 
@@ -195,8 +197,8 @@ Every interactive popup, picker, and confirmation dialog has been harmonized und
 | **AWT Worktrees** | [`awt.toml`](../../awt/.config/waymaker/presets/awt.toml) | `{cyan,bold:Enter} Connect │ Tab Cockpit │ c New │ S Ship │ m Merge │ R Rebase │ P PR │ d Delete │ p Preview │ Esc Exit` |
 | **AWT PR Review** | [`awt-pr.toml`](../../awt/.config/waymaker/presets/awt-pr.toml) | `{cyan,bold:Enter} Checkout │ Tab Cycle Tab │ C-e Chrome │ C-d Diff │ p Preview │ Esc Exit` |
 | **AWT Sub-Wizards** | `awt-prompt`, `awt-ai`, `awt-base`, `awt-type` | `{cyan,bold:Enter} Confirm/Select │ Esc Back/Cancel` |
-| **AI Agent Launcher** | [`ai-launch.toml`](../../waymaker/.config/waymaker/presets/ai-launch.toml) | `{cyan,bold:Enter} Launch │ ★ Recommended │ type Filter │ Esc Shell` |
-| **AI Model / Effort Hot-Swap** | [`ai-switch.toml`](../../waymaker/.config/waymaker/presets/ai-switch.toml) | `{cyan,bold:Enter} Switch │ ● Current │ type Filter │ Esc Cancel` |
+| **AI Agent Launcher** | [`ai-launch.toml`](../../waymaker/.config/waymaker/presets/ai-launch.toml) | `{cyan,bold:Enter} Launch │ ⠛ Recommended │ type Filter │ Esc Shell` |
+| **AI Model / Effort Hot-Swap** | [`ai-switch.toml`](../../waymaker/.config/waymaker/presets/ai-switch.toml) | `{cyan,bold:Enter} Switch │ ⠛ Current │ type Filter │ Esc Cancel` |
 | **AI Quota Telemetry** | [`ai-quota-popup.sh`](../../tmux/.config/tmux/ai-quota-popup.sh) | `{cyan,bold:Enter} Auto-Launch │ a Model Menu │ r Refresh │ Esc Exit` |
 | **Tmux Windows** | [`window-picker.toml`](../../waymaker/.config/waymaker/presets/window-picker.toml) | `{cyan,bold:Enter} Switch │ t Sessions │ / Filter │ n New │ d Kill │ ? Help │ Esc Exit` |
 | **Tmux Sessions** | [`session-picker.toml`](../../waymaker/.config/waymaker/presets/session-picker.toml) | `{cyan,bold:Enter} Menu │ r Auto │ a/c Agy/Claude │ u Quota │ s Cockpit │ Tab Cycle │ d Kill` |

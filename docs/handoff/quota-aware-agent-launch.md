@@ -52,14 +52,14 @@ Suggested commit: `feat(shell): add CLI × model launch menu with per-row quota 
 | `u` | Full `ai-quota` report |
 | `s` / `w` / `Ctrl+S` | Cockpit (`c` used to be Cockpit; the user asked for it to become Claude) |
 
-In the menu the rows keep a fixed order, the cursor starts on the `★` recommended row, typing filters, and `Esc` drops to a plain shell.
+In the menu the rows keep a fixed order, the cursor starts on the `⠛` recommended row (upper $2\times2$ Braille shoulder on the left of the agent icon), typing filters, and `Esc` drops to a plain shell.
 
 ## Verification
 
 Done:
 
 - `tests/ai_quota.test.sh`: all checks pass (sandboxed `HOME`, fixtures, no network).
-- Menu tested in a detached tmux pane with stub CLIs. `Enter` launches the `★` row; `code son` → `claude --model sonnet`; `haiku` → `claude --model haiku`; `² flash` → `agyy --model gemini-3.8-flash-medium`; `Esc` exits cleanly.
+- Menu tested in a detached tmux pane with stub CLIs. `Enter` launches the `⠛` row; `code son` → `claude --model sonnet`; `haiku` → `claude --model haiku`; `² flash` → `agyy --model gemini-3.8-flash-medium`; `Esc` exits cleanly.
 - Session picker preset parses; `r` emits `@agent=auto` + selection.
 - `./scripts/docs-lint.sh` passes. `./stow.sh -n` reports only the pre-existing `antigravity` and `temp` conflicts.
 - Latency: `ai-quota --json` ≈ 110 ms warm, ≈ 1.1 s on a cold Antigravity API cache (60 s TTL); statusLine path ≈ 30 ms.
@@ -72,7 +72,7 @@ Done:
 
 ## Open decisions (ask the user)
 
-1. **`unknown` ranks above `yellow`** in the recommender (`ai-quota`, selection block). The `★` can land on an account with no data, such as `agyy` before its first API read, while Claude is merely busy. Proposal: rank `unknown` below `yellow` for agents outside the top preference.
+1. **`unknown` ranks above `yellow`** in the recommender (`ai-quota`, selection block). The `⠛` can land on an account with no data, such as `agyy` before its first API read, while Claude is merely busy. Proposal: rank `unknown` below `yellow` for agents outside the top preference.
 2. **`Prefix + o` latent bug**, not fixed: `tmux.conf` runs `${AI_AGENT:-agy}`, but Claude Code exports `AI_AGENT=claude-code_<version>_agent`, so from a Claude-spawned shell it tries to execute that marker. Suggested fix: `ai-launch` (menu) or `ai-launch --auto`. Needs approval because it changes an established binding (zero-churn rule).
 3. Should `Enter` on an **existing** session offer the menu in a new window? Today it only switches.
 
@@ -80,7 +80,7 @@ Done:
 
 - `AI_AGENT` is **not** a user preference; never read it. Use `AI_LAUNCH_AGENT` (`claude | agy | agyy | auto | menu`).
 - `wm --pos` is a sticky cursor *index*, not an item. The menu preset binds `QueryChange = "Pos(0)"`; removing that bind breaks type-to-pick.
-- The menu maps the selection back by its ANSI-stripped line text, so rows must stay unique. Do not put fuzzy-matchable words in the `★` marker.
+- The menu maps the selection back by its ANSI-stripped line text, so rows must stay unique. Do not put fuzzy-matchable words in the `⠛` marker.
 - The Antigravity model list is cached daily in `~/.local/state/ai-quota/agy-models.tsv` (`agy models`, collapsed to the `-medium` effort per family). A hard-coded fallback list in `ai-launch` covers the first run.
 - Gemini 4 Argon has no per-model quota in the API. The menu shows `no quota data`; do not estimate one (skill rule).
 - New files in a stow package need `./stow.sh -r <package>` (done for `utils`, `waymaker`, `agents-skills`).

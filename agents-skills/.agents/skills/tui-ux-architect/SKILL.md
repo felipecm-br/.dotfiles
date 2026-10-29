@@ -13,7 +13,9 @@ description: >-
   cognitive load reduction (Hick-Hyman, Miller, Sweller), triadic cold-color architecture
   (blue passive architecture, cyan control trigger, darkgray metadata), Treisman preattentive
   hue reservation, CIE 1931 foveal photobiology, clean zero-background, Gestalt figure-ground contrast,
-  visual semiotics (pure Nerd Font icon badges, Tufte Data-Ink ratio), and zero-churn ergonomic stability.
+  visual semiotics (pure Nerd Font icon badges, Tufte Data-Ink ratio), typographic sub-cell physics
+  (superscript/upper-band badges, font glyph rasterization via Pillow/nerdsight, Braille & quadrant
+  geometry, semiotic spinner collision audits, BMP vs PUA-A portability), and zero-churn ergonomic stability.
 ---
 
 # Principal TUI UX Architect, Biomechanical Ergonomist & Systems Engineer
@@ -108,6 +110,14 @@ flowchart TD
   - **The $X=1$ Lateral Indicator:** Combined with a 2-character wide cyan lateral bar (`current_nav_bar_style fg = "cyan"`), this establishes an unshakeable foveal anchor at $X=1$ without obscuring text or jarring peripheral vision.
 
 *See detailed benchmarks and comparisons in [references/klm-goms-benchmarks.md](references/klm-goms-benchmarks.md).*
+
+### 1.4 Typographic Sub-Cell Physics, Vertical Channeling & Semiotic Collision Audit
+- **Sub-Pixel Rasterization over Guesswork:** Never guess how a Unicode or Nerd Font glyph sits in the cell. Rasterize candidates against the active terminal font (e.g. `JetBrainsMonoNerdFontPropo-Regular.ttf` at `64px`) to verify native `cmap` coverage (rejecting missing blocks like Latin superscripts `ᵃ…ᶻ` that trigger fallback font drift), exact vertical band (`y0..y1`), horizontal clearance, and pixel ink area (`px²`).
+- **Upper-Band ("Pseudo-Superscript") Channeling:** To mark recommended/default items without baseline crowding, choose glyphs whose ink sits strictly in the upper cell band (`y ≤ 62` vs baseline `81`), such as GPU-drawn Upper Quadrants (`▘`/`▝`, `U+2598`/`U+259D`), symmetric Upper Braille (`⠛` `U+281B`, `⠉` `U+2809`), or upper-band Nerd Font carets (`` `U+F0DE`). Prefer BMP codepoints (`≤ U+FFFF`) over Plane-15 PUA-A (`U+F0000+`) inside inline columns so markers survive clipboards, chat inputs, and `wcwidth` pipelines intact.
+- **Semiotic Collision Vetoes:** Reject any geometrically ideal glyph that collides with an active operational signifier — most notably `"⠋"` (`U+280B`), whose `y = 20..55` superscript band is ideal on paper, **but** is reserved as frame 0 of the Braille **AI Agent Busy/Working spinner** (`⠋ ⠙ ⠹ ⠸…`). Use symmetric 4-dot `⠛` (`U+281B`) instead.
+- **Invariant-$X$ Left Gutter vs. Ragged Word-Suffix:** Prefer a dedicated 1-cell column to the left of the row icon (`X = const`, empty `' '` on unmarked rows) over variable-X word suffixes (`Opus⠛` vs `Gemini 4 Argon⠛`), pairing vertical elevation with luminance/hue contrast (`white`/`cyan` marker next to `blue` icon) to prevent Bouma crowding.
+
+*See empirical measurements and Pillow audit script in [references/typographic-physics-and-glyph-audit.md](references/typographic-physics-and-glyph-audit.md).*
 
 ---
 
@@ -224,7 +234,7 @@ Whenever asked to **audit**, **design**, **refactor**, or **generate code** for 
 - Strict adherence to the Triadic Cold-Color Architecture: Blue for passive architecture/frames, Cyan for control triggers/focus/shortcuts, and Darkgray for metadata.
 - Clean Zero-Background compliance: No opaque rectangular background strips; active state conveyed via BOLD + cyan lateral indicator (`fg = "cyan"`).
 - Warm hue reservation: Red, yellow, orange, and magenta strictly isolated to operational state changes and urgency alerts.
-- Specification of pure Nerd Font glyph badges for preattentive decoding (<15ms) anchored at $X=1$.
+- Specification of pure Nerd Font glyph badges for preattentive decoding (<15ms) anchored at $X=1$, audited for native font coverage, sub-cell vertical band, BMP portability, and zero semiotic collision with spinner/alert glyphs.
 - Footer chromatic discipline: uniform bichromatic scheme with `│` separators, zero bracket clutter, and Treisman hue reservation.
 - Dynamic theme color integration bound to Omarchy `colors.toml`.
 
