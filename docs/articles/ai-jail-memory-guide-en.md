@@ -46,8 +46,11 @@ ai-memory setup            # data dir + token, systemd --user unit, MCP + hooks 
 
 Dotfiles state (already stowed in the `ai-memory` package):
 
-* Data dir: `ai-memory/.local/share/ai-memory` (symlinked into the repo)
-* Service unit: `ai-memory/.config/systemd/user/ai-memory.service` (`ExecStart=/usr/bin/ai-memory serve --transport http`)
+* Data dir: `~/.local/share/ai-memory`, a real directory that only ai-memory writes (3.2.9 refuses symlinks inside it)
+* Config: `ai-memory/.config/ai-memory/config.toml`, stowed to `~/.config/ai-memory/config.toml`
+* Service unit: `ai-memory/.config/systemd/user/ai-memory.service` (`ExecStart=/usr/bin/ai-memory serve --transport http --config %h/.config/ai-memory/config.toml`)
+
+See [ai-memory workflow §8](../architecture/ai-memory-workflow.md#8-stow-hygiene-config-outside-the-data-directory).
 
 ### Step 3: Let the jail reach the daemon (required)
 

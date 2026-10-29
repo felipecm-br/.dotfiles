@@ -72,7 +72,7 @@ Why this split:
 
 Committed on the `main` worktree of `dotfiles`, `waymux` and `waymaker` (local commits `chore: add ai-memory project marker`, not pushed). The `waymaker` `fecavmi` branch is already absorbed into `main`, so it needs no marker.
 
-**Exception, `lazygitrs`:** `main` tracks upstream and stays marker-free (reset to `origin/main`). Only the `fecavmi` worktree carries `.ai-memory.toml` (`workflow` / `fcmiranda.lazygitrs`), uncommitted and listed in the repo's shared `info/exclude` so it never reaches a commit. Sessions in `lazygitrs/main` are not captured under `workflow`.
+**`lazygitrs`:** since 29 Oct 2026 the fork's `main` is your own line (the former `fecavmi` work) and carries the committed marker (`workflow` / `fcmiranda.lazygitrs`) like the other repositories. The upstream line lives on `origin/upstream-main` (local `upstream-main`) and has no marker.
 
 ```toml
 # <repo>/.ai-memory.toml  (committed; every worktree inherits it)
@@ -177,13 +177,15 @@ Behavior changes that matter here: new installs create a root bearer token and t
 
 ---
 
-## 8. Stow Hygiene (data directory is a symlink into the repo)
+## 8. Stow Hygiene (config outside the data directory)
 
-`~/.local/share/ai-memory` is stowed as a **directory symlink** to `ai-memory/.local/share/ai-memory/`, so the server's runtime state (wiki, SQLite, logs, `auth-tokens/`) would be written inside the dotfiles worktree.
+ai-memory 3.2.9 refuses symbolic links anywhere in its data directory ("wiki path confinement refused … symbolic links and reparse points are not allowed"): with `config.toml` stowed into `~/.local/share/ai-memory`, the server failed at its pre-migration backup and restarted every 5 s, and hooks spooled events instead of sending them. The layout since 29 Oct 2026:
 
-- `.gitignore` now ignores everything under that directory except `config.toml`.
-- `config.toml` is tracked and contains `[auth] token_pepper`. It is only consumed once multi-user is enabled, but it is a secret in git history: rotate it before enabling multi-user, and upstream supports `AI_MEMORY_*` env overrides for config values (verify the exact key name with `ai-memory --help` before moving it to the service environment).
-- Better long-term: stow only the file (`--no-folding` for this package) or relocate the data dir with `AI_MEMORY_DATA_DIR=~/.local/share/ai-memory-data`, so the repo never sees runtime state. Back up with `ai-memory backup --to <file>` (SQLite online backup, safe while running).
+- `~/.local/share/ai-memory` is a real directory that only ai-memory writes (wiki, SQLite, logs, hook spool and state). Nothing in it is stowed.
+- The versioned config is `ai-memory/.config/ai-memory/config.toml`, stowed to `~/.config/ai-memory/config.toml` and passed to the server with `--config` in `ai-memory/.config/systemd/user/ai-memory.service`.
+- Agent hooks pass `--data-dir /home/fecavmi/.local/share/ai-memory` (`claude/.claude/settings.json`, `antigravity/.gemini/config/hooks.json`). `ai-memory setup` once wrote the package path there, which put the spool inside the dotfiles worktree; check for it after re-running `setup`.
+- `config.toml` contains `[auth] token_pepper`. It is only consumed once multi-user is enabled, but it is a secret in git history: rotate it before enabling multi-user.
+- Back up with `ai-memory backup --to <file>` (SQLite online backup, safe while running).
 
 ---
 

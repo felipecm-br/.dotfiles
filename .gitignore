@@ -12,6 +12,6 @@ tmux/.config/tmux/theme.path
 tmux/.config/tmux/theme.conf
 fcitx5/.config/fcitx5/profile
 
-# ai-memory runtime state (the data dir is stowed as a symlink into this repo; only config.toml is versioned)
-ai-memory/.local/share/ai-memory/*
-!ai-memory/.local/share/ai-memory/config.toml
+# Old ai-memory data-dir path: hooks of sessions started before 29 Oct 2026 may still spool here.
+# The data dir is ~/.local/share/ai-memory now and nothing in it is stowed (docs/architecture/ai-memory-workflow.md §8)
+ai-memory/.local/share/ai-memory/
