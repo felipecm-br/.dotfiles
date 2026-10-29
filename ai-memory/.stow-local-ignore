@@ -1,0 +1,20 @@
+# Old ai-memory data-dir path: agent sessions started before 29 Oct 2026 still spool hook
+# events here until they restart. Never stow it (docs/architecture/ai-memory-workflow.md §8).
+^/\.local
+# Stow's defaults (a package ignore list replaces them)
+RCS
+.+,v
+CVS
+\.\#.+
+\.cvsignore
+\.svn
+_darcs
+\.hg
+\.git
+\.gitignore
+\.gitmodules
+.+~
+\#.*\#
+^/README.*
+^/LICENSE.*
+^/COPYING
