@@ -93,7 +93,7 @@ Ranked by risk removed per unit of complexity. Keys stay as they are: per the [Z
 
 | ID | Feature | Notes |
 | :---: | :--- | :--- |
-| **B2** | **Quota-aware `awt fan` / `verify` / `keep`** | `awt` is `waymux wt`, so this lands in the `waymux` crate. Gate on `ai-quota --json` (`projected_five`). Only worth it for regular best-of-N runs. |
+| **B2** | **Quota-aware `awt fan` / `verify` / `keep`** (shipped 29 Oct as [`awt-fan`](../utils.md), in dotfiles rather than the `waymux` crate because the gate needs `ai-quota`) | `awt` is `waymux wt`, so this lands in the `waymux` crate. Gate on `ai-quota --json` (`projected_five`). Only worth it for regular best-of-N runs. |
 | **B3** | **Fenced inter-agent mail + wake** | High complexity for a single-human workflow. The untrusted-content fence (`│ ` gutter) can be adopted on its own wherever agent text is relayed to another agent. |
 
 ### Rejected

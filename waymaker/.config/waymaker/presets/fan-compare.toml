@@ -1,0 +1,83 @@
+# Waymaker fan compare (`awt-fan compare`): the attempts of one fan on the left (40%), the diff of
+# the selected attempt against the fan's base on the right (60%). Rows come from `awt-fan ls`,
+# which pads its columns by characters so the grid stays aligned (state, #, agent, commits, diff, age).
+
+[start]
+sort = false
+ansi = true
+
+[start.command]
+command = "awt-fan ls \"$AWT_FAN_ID\""
+
+[columns]
+split = '\t'
+names = [
+    { name = "display" },
+    { name = "id", hidden = true },
+    { name = "n", hidden = true },
+    { name = "dir", hidden = true },
+]
+
+[[preview.layout]]
+command = "awt-fan preview {2} {3}"
+side = "right"
+percentage = 60
+
+[preview.border]
+title = " Diff vs base "
+
+[tui]
+percentage = 100
+max = 9999
+
+[results]
+multi = false
+current_prefix = ""
+unselected_prefix = ""
+row_connection = "Full"
+column_spacing = 0
+
+[results.current_style]
+modifier = "BOLD"
+
+[results.current_nav_bar_style]
+fg = "cyan"
+modifier = "BOLD"
+
+[results.border]
+sides = ""
+
+[query]
+status_inline = true
+prompt = " "
+show = true
+
+[footer]
+content = " {cyan,bold:Enter} {darkgray:Jump} {darkgray:│} {cyan,bold:J} {darkgray:Judge} {darkgray:│} {cyan,bold:S} {darkgray:Keep} {darkgray:│} {cyan,bold:d} {darkgray:Drop} {darkgray:│} {cyan,bold:Esc} {darkgray:Close}"
+row_connection = "Full"
+match_indent = false
+separator = "light"
+
+[footer.separator_style]
+fg = "Darkgray"
+
+[ui.nav]
+active = true
+focus_on_start = "picker"
+bar = "Plain"
+color = "black"
+hints = false
+
+# Keep and Drop ask for confirmation in the popup and name the ignored files a removal deletes.
+[ui.nav.binds]
+"enter" = ["Execute(awt-fan jump {=id} {=n})", "Quit"]
+"J"     = ["Execute(awt-fan judge {=id})", "Quit"]
+"S"     = ["Execute(awt-fan keep {=id} {=n})", "Quit"]
+"d"     = ["Execute(awt-fan drop {=id} {=n})", "Reload(awt-fan ls \"$AWT_FAN_ID\")"]
+"esc"   = "Quit"
+"q"     = "Quit"
+
+[binds]
+"enter"  = ["Execute(awt-fan jump {=id} {=n})", "Quit"]
+"esc"    = "Quit"
+"ctrl-c" = "Quit"

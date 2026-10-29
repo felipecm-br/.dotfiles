@@ -355,6 +355,15 @@ waymux queue add {{pane}} {{prompt}}
 # Drop a queued or stalled prompt for an agent pane
 waymux queue rm {{pane}} {{id}}
 
+# Fan one prompt out to N agents in N worktrees (quota-gated by ai-quota)
+awt-fan new -n {{attempts:3}} -- {{prompt}}
+
+# Compare the attempts of the latest fan: Enter jump, J judge, S keep, d drop
+awt-fan compare
+
+# Keep one fan attempt: commit it, merge into the base, remove every attempt
+awt-fan keep {{fan_id}} {{attempt}}
+
 # Mint a hook token limited to one pane, for a sandboxed agent (ai-launch jail-claude does this)
 waymux hook-token {{pane}}
 

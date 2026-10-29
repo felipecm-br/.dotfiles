@@ -1,0 +1,291 @@
+#!/usr/bin/env bash
+# awt-fan: one prompt, N agents in N worktrees; compare the attempts, ask a judge, keep one.
+#
+#   awt-fan new [-n N] [-a claude,codex,agy] [-b BASE] [--force] [--] PROMPT...
+#   awt-fan ls [ID]               fans, or the attempts of one (TSV rows for the compare popup)
+#   awt-fan preview ID N          header + diff of attempt N against its base
+#   awt-fan compare [ID]          Waymaker popup: Enter jump │ J judge │ S keep │ d drop
+#   awt-fan judge ID              read-only Claude compares the attempts and recommends one
+#   awt-fan keep ID N [--yes]     commit attempt N, merge it into BASE, remove every attempt
+#   awt-fan drop ID N [--yes]     remove attempt N (worktree, branch, session)
+#
+# Before a fan starts, `ai-quota --json` gates each agent: red is refused, yellow gets at most
+# one attempt (--force overrides both). No telemetry, no gate.
+# Docs: docs/architecture/state-of-the-art-terminal-agent-workflow.md §8 (P2).
+set -euo pipefail
+
+STATE="${XDG_STATE_HOME:-$HOME/.local/state}/awt-fan"
+AWT="${AWT_FAN_AWT:-awt}"
+SELF="$(readlink -f "${BASH_SOURCE[0]}")"
+
+die() { echo "awt-fan: $*" >&2; exit 1; }
+usage() { sed -n '2,13p' "$SELF" | sed 's/^# \{0,1\}//'; }
+
+# The agent's own way to start interactively with a first prompt (never typed into the pane).
+agent_cmd() { # <agent> <prompt>
+  case "$1" in
+    claude | codex) printf '%s %q' "$1" "$2" ;;
+    agy | agyy) printf '%s -i %q' "$1" "$2" ;;
+    *) return 1 ;;
+  esac
+}
+
+# ai-quota levels → refusal lines on stdout ("" when every agent may run).
+gate() { # <agent>... (one per attempt)
+  local json
+  json=$(ai-quota --json 2>/dev/null) || return 0
+  [ -n "$json" ] || return 0
+  printf '%s' "$json" | python3 -I -c '
+import json, sys
+from collections import Counter
+q = json.load(sys.stdin)
+level = {a.get("agent"): a.get("level", "unknown") for a in q.get("agents", [])}
+for agent, n in Counter(sys.argv[1:]).items():
+    lv = level.get(agent, "unknown")
+    if lv == "red":
+        print(f"{agent}: quota red, refused")
+    elif lv == "yellow" and n > 1:
+        print(f"{agent}: quota yellow, {n} attempts asked, at most 1")
+rec = q.get("recommend")
+if rec:
+    print(f"recommended now: {rec}", file=sys.stderr)
+' "$@"
+}
+
+# Pads by characters, not bytes, so glyphs such as ↑ keep the columns aligned.
+pad() { # <text> <width> [right]
+  local s=$1 w=$2 fill
+  printf -v fill '%*s' $((w > ${#s} ? w - ${#s} : 0)) ''
+  if [ "${3:-}" = right ]; then printf '%s%s' "$fill" "$s"; else printf '%s%s' "$s" "$fill"; fi
+}
+
+slug() { printf '%s' "$*" | tr '[:upper:]' '[:lower:]' | tr -cs 'a-z0-9' '-' | sed 's/^-//; s/-$//' | cut -c1-24 | sed 's/-$//'; }
+
+manifest() { echo "$STATE/$1.json"; }
+field() { # <id> <python expression over m (manifest) and a (attempts list)>
+  python3 -I -c 'import json,sys; m=json.load(open(sys.argv[1])); a=m["attempts"]; print(eval(sys.argv[2]))' "$(manifest "$1")" "$2"
+}
+attempt() { # <id> <n> <key>
+  field "$1" "next(x for x in a if x[\"n\"]==$2)[\"$3\"]"
+}
+latest() { command ls -t "$STATE"/*.json 2>/dev/null | head -1 | xargs -r basename | sed 's/\.json$//'; }
+
+worktree_dir() { # <branch>: where git has it checked out
+  { git worktree list --porcelain 2>/dev/null || true; } | awk -v b="refs/heads/$1" '/^worktree /{w=substr($0,10)} $0=="branch "b{print w; exit}'
+}
+pane_of() { # <dir>: first tmux pane whose current path is dir
+  { tmux list-panes -a -F '#{pane_current_path}	#{pane_id}' 2>/dev/null || true; } | awk -F'\t' -v d="$1" '$1==d{print $2; exit}'
+}
+
+cmd_new() {
+  local n=3 agents="${AI_FAN_AGENTS:-}" base="" force=0
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      -n) n=$2; shift 2 ;;
+      -a) agents=$2; shift 2 ;;
+      -b) base=$2; shift 2 ;;
+      --force) force=1; shift ;;
+      --) shift; break ;;
+      -*) die "unknown option $1" ;;
+      *) break ;;
+    esac
+  done
+  local prompt="$*"
+  [ -n "$prompt" ] || die "a prompt is required (awt-fan new -- \"…\")"
+  [[ $n =~ ^[1-8]$ ]] || die "-n takes 1 to 8 attempts"
+  git rev-parse --is-inside-work-tree >/dev/null 2>&1 || die "not inside a git work tree"
+  [ -n "$base" ] || base=$(git rev-parse --abbrev-ref HEAD)
+  git rev-parse --verify -q "$base^{commit}" >/dev/null || die "unknown base $base"
+
+  if [ -z "$agents" ]; then
+    local a
+    for a in claude codex agy; do command -v "$a" >/dev/null 2>&1 && agents="${agents:+$agents,}$a"; done
+  fi
+  [ -n "$agents" ] || die "no agent CLI found (claude, codex, agy)"
+  local -a pool plan=()
+  IFS=, read -r -a pool <<<"$agents"
+  local i
+  for ((i = 0; i < n; i++)); do plan+=("${pool[i % ${#pool[@]}]}"); done
+  for a in "${plan[@]}"; do agent_cmd "$a" x >/dev/null || die "unsupported agent $a (claude, codex, agy, agyy)"; done
+
+  local refused
+  refused=$(gate "${plan[@]}")
+  if [ -n "$refused" ]; then
+    printf '%s\n' "$refused" >&2
+    [ $force -eq 1 ] || die "quota gate refused the fan (--force to start anyway, or pick agents with -a)"
+  fi
+
+  local id
+  id="$(date +%m%d-%H%M)-$(slug "$prompt")"
+  mkdir -p "$STATE"
+  local m
+  m=$(manifest "$id")
+  [ -e "$m" ] && die "fan $id exists"
+  python3 -I -c 'import json,sys,time; json.dump({"id":sys.argv[1],"prompt":sys.argv[2],"base":sys.argv[3],"repo":sys.argv[4],"created":int(time.time()),"attempts":[]},open(sys.argv[5],"w"),indent=1)' \
+    "$id" "$prompt" "$base" "$(git rev-parse --show-toplevel)" "$m"
+
+  for ((i = 1; i <= n; i++)); do
+    local agent=${plan[i - 1]} branch="fan/$id-$i"
+    echo "▸ attempt $i/$n: $agent on $branch"
+    "$AWT" -c "$branch" "$base" --no-connect -- "$(agent_cmd "$agent" "$prompt")" >/dev/null
+    python3 -I -c 'import json,sys; p=sys.argv[1]; m=json.load(open(p)); m["attempts"].append({"n":int(sys.argv[2]),"agent":sys.argv[3],"branch":sys.argv[4],"dir":sys.argv[5]}); json.dump(m,open(p,"w"),indent=1)' \
+      "$m" "$i" "$agent" "$branch" "$(worktree_dir "$branch")"
+  done
+  echo "fan $id: $n attempts. Compare with: awt-fan compare $id"
+}
+
+# Fixed-width rows; the visible part comes first, the fields the popup needs follow it.
+cmd_ls() {
+  local id=${1:-}
+  if [ -z "$id" ]; then
+    local f
+    for f in "$STATE"/*.json; do [ -e "$f" ] && field "$(basename "$f" .json)" 'm["id"] + "\t" + str(len(a)) + " attempts\t" + m["prompt"][:60]'; done
+    return 0
+  fi
+  [ -e "$(manifest "$id")" ] || die "no fan $id"
+  local base now states
+  base=$(field "$id" 'm["base"]'); now=$(date +%s)
+  states=$(waymux list 2>/dev/null || true)
+  field "$id" '"\n".join("\t".join(str(x[k]) for k in ("n", "agent", "branch", "dir")) for x in a)' |
+    while IFS=$'\t' read -r n agent branch dir; do
+      local st="·" age="—" diff="gone" ahead="" pane state
+      if [ -d "$dir" ]; then
+        pane=$(pane_of "$dir")
+        state=$(awk -v p="$pane" '$1==p{print $2}' <<<"$states")
+        case "$state" in
+          working) st="󰑮" ;; permission) st="󰳌" ;; question | awaiting_input) st="󱜻" ;;
+          stalled) st="󰔟" ;; error) st="" ;; idle) st="󰗡" ;;
+        esac
+        diff=$(git -C "$dir" diff --shortstat "$base" 2>/dev/null | awk '{printf "+%d -%d", $4, $6}')
+        [ -n "$diff" ] || diff="clean"
+        ahead="↑$(git -C "$dir" rev-list --count "$base..HEAD" 2>/dev/null || echo 0)"
+        age=$(( (now - $(stat -c %Y "$dir")) / 60 ))m
+      fi
+      printf '%s %s %s %s %s %s\t%s\t%s\t%s\n' "$(pad "$st" 1)" "$(pad "$n" 2)" "$(pad "$agent" 7)" \
+        "$(pad "$ahead" 5)" "$(pad "$diff" 12)" "$(pad "$age" 5 right)" "$id" "$n" "$dir"
+    done
+}
+
+cmd_preview() {
+  local id=$1 n=$2 dir base
+  dir=$(attempt "$id" "$n" dir); base=$(field "$id" 'm["base"]')
+  printf '\033[1mattempt %s · %s · %s\033[0m\n' "$n" "$(attempt "$id" "$n" agent)" "$(attempt "$id" "$n" branch)"
+  printf '\033[2m%s\033[0m\n\n' "$(field "$id" 'm["prompt"]')"
+  [ -d "$dir" ] || { echo "worktree removed"; return 0; }
+  git -C "$dir" add -N . 2>/dev/null || true
+  if command -v delta >/dev/null 2>&1; then
+    git -C "$dir" diff --stat --patch "$base" | delta --paging=never
+  else
+    git -C "$dir" diff --color=always --stat --patch "$base"
+  fi
+}
+
+confirm() { # <question>; --yes in the caller's args skips it
+  [ "${YES:-0}" = 1 ] && return 0
+  local ans
+  read -r -p "$1 [y/N] " ans </dev/tty || return 1
+  [[ $ans == [yY]* ]]
+}
+
+# Ignored files a worktree removal would delete (node_modules, .env…), so they are named first.
+ignored_in() { git -C "$1" status --ignored --porcelain 2>/dev/null | sed -n 's/^!! //p' | head -10; }
+
+cmd_drop() {
+  local id=$1 n=$2 branch dir
+  branch=$(attempt "$id" "$n" branch); dir=$(attempt "$id" "$n" dir)
+  if [ -d "$dir" ] && [ -n "$(ignored_in "$dir")" ]; then
+    echo "ignored files that removal deletes in attempt $n:"; ignored_in "$dir" | sed 's/^/  /'
+  fi
+  confirm "Drop attempt $n ($branch)?" || { echo "kept"; return 0; }
+  (cd "$(field "$id" 'm["repo"]')" && "$AWT" rm "$branch" --force >/dev/null 2>&1) || true
+  echo "dropped attempt $n"
+}
+
+cmd_keep() {
+  local id=$1 n=$2 base repo branch dir agent target
+  base=$(field "$id" 'm["base"]'); repo=$(field "$id" 'm["repo"]')
+  branch=$(attempt "$id" "$n" branch); dir=$(attempt "$id" "$n" dir); agent=$(attempt "$id" "$n" agent)
+  [ -d "$dir" ] || die "attempt $n was removed"
+  target=$(cd "$repo" && worktree_dir "$base")
+  [ -n "$target" ] || die "$base is not checked out in any worktree: check it out, then keep again"
+  [ -z "$(git -C "$target" status --porcelain --untracked-files=no)" ] || die "$target has uncommitted changes to $base"
+  echo "keep attempt $n ($agent): $(git -C "$dir" diff --shortstat "$base" | sed 's/^ //')"
+  local other
+  for other in $(field "$id" '" ".join(str(x["n"]) for x in a)'); do
+    [ "$other" = "$n" ] && continue
+    local odir; odir=$(attempt "$id" "$other" dir)
+    [ -d "$odir" ] && [ -n "$(ignored_in "$odir")" ] && { echo "attempt $other loses ignored files:"; ignored_in "$odir" | sed 's/^/  /'; }
+  done
+  confirm "Merge $branch into $base and remove all $(field "$id" 'len(a)') attempts?" || { echo "nothing changed"; return 0; }
+  if [ -n "$(git -C "$dir" status --porcelain)" ]; then
+    git -C "$dir" add -A && git -C "$dir" commit -q -m "fan($id): attempt $n by $agent"
+  fi
+  git -C "$target" merge --no-ff -q -m "Merge fan $id attempt $n ($agent)" "$branch" || die "merge stopped; resolve it in $target"
+  for other in $(field "$id" '" ".join(str(x["n"]) for x in a)'); do
+    (cd "$repo" && "$AWT" rm "$(attempt "$id" "$other" branch)" --force >/dev/null 2>&1) || true
+  done
+  mv "$(manifest "$id")" "$(manifest "$id").kept-$n"
+  echo "kept attempt $n in $base ($target)"
+}
+
+cmd_judge() {
+  local id=$1 base repo brief
+  base=$(field "$id" 'm["base"]'); repo=$(field "$id" 'm["repo"]')
+  brief="$STATE/$id.judge.md"
+  {
+    echo "# Task given to every attempt"; echo; field "$id" 'm["prompt"]'; echo
+    local n
+    for n in $(field "$id" '" ".join(str(x["n"]) for x in a)'); do
+      local dir; dir=$(attempt "$id" "$n" dir)
+      echo "## Attempt $n ($(attempt "$id" "$n" agent), $(attempt "$id" "$n" branch))"; echo
+      if [ -d "$dir" ]; then
+        git -C "$dir" add -N . 2>/dev/null || true
+        echo '```diff'; git -C "$dir" diff "$base" | head -1500; echo '```'
+      else
+        echo "(removed)"
+      fi
+      echo
+    done
+  } >"$brief"
+  local ask="Read $brief. It holds one task and the diff each attempt produced against $base. Judge which attempt best completes the task: correctness first, then tests, then simplicity and fit with the repository. Do not edit any file. Answer with the attempt number, a short reason, and what the winner still misses."
+  local sess="fan-judge-$id"
+  tmux new-session -d -s "$sess" -c "$repo" "claude --permission-mode plan $(printf '%q' "$ask")" 2>/dev/null ||
+    die "tmux session $sess exists"
+  if [ -n "${TMUX:-}" ]; then tmux switch-client -t "$sess"; else echo "judge running in tmux session $sess"; fi
+}
+
+cmd_jump() { # <id> <n>: the attempt's agent pane
+  local pane
+  pane=$(pane_of "$(attempt "$1" "$2" dir)")
+  [ -n "$pane" ] || die "attempt $2 has no tmux pane"
+  tmux switch-client -t "$pane"
+}
+
+cmd_compare() {
+  local id=${1:-$(latest)}
+  [ -n "$id" ] || die "no fans yet (awt-fan new -- \"…\")"
+  [ -e "$(manifest "$id")" ] || die "no fan $id"
+  if [ -n "${TMUX:-}" ] && [ -z "${AWT_FAN_IN_POPUP:-}" ]; then
+    tmux display-popup -w 85% -h 75% -b rounded -T " 󰓅 Fan $id " \
+      -E "AWT_FAN_IN_POPUP=1 awt-fan compare $(printf '%q' "$id")"
+    return 0
+  fi
+  AWT_FAN_ID="$id" wm -o fan-compare >/dev/null || true
+}
+
+sub=${1:-}; shift || true
+case "$sub" in
+  new) cmd_new "$@" ;;
+  ls) cmd_ls "$@" ;;
+  preview) cmd_preview "$@" ;;
+  compare) cmd_compare "$@" ;;
+  jump) cmd_jump "$@" ;;
+  judge) cmd_judge "$@" ;;
+  keep | drop)
+    args=(); YES=0
+    for a in "$@"; do [ "$a" = --yes ] && YES=1 || args+=("$a"); done
+    [ ${#args[@]} -eq 2 ] || die "usage: awt-fan $sub ID N [--yes]"
+    "cmd_$sub" "${args[@]}" ;;
+  -h | --help | help | "") usage ;;
+  *) die "unknown command $sub (new, ls, preview, compare, judge, keep, drop)" ;;
+esac
