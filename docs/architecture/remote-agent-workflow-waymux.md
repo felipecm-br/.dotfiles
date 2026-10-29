@@ -180,6 +180,17 @@ ssh user@my-desktop "waymux-cli capture %0 40"
 ssh user@my-desktop "waymux-cli send %0 y Enter"
 ```
 
+### Recipe 4: Answer Held Prompts From the Phone (`/m`, waymux 0.6)
+
+The daemon serves a mobile page at `/m`: every agent with its label, state, age and recap, and the prompts held through the `PermissionRequest` hook on top, with **Deny** and **Allow** (a risky call names its rules and asks for a confirmation). It is meant for a phone on the same tailnet:
+
+```bash
+tailscale serve --bg 4040     # once: HTTPS on the tailnet only (not Funnel)
+waymux phone-token --url      # prints https://<host>.<tailnet>.ts.net/m#t=<token>
+```
+
+Open the printed link on the phone once; the page keeps the token in local storage and drops it from the address bar. The token travels in the URL fragment, which a browser never sends to a server, and it reaches `phone/snapshot` and `approval/answer` only: it cannot type into a pane, push to the queue or pass a file path. It is saved 0600 in `$XDG_STATE_HOME/waymux/phone-token`, so pairing survives a daemon restart; `waymux phone-token --rotate` unpairs every device. Only prompts held by the hook can be answered from the phone; anything else waits for the keyboard.
+
 ---
 
 ## 6. Related References
