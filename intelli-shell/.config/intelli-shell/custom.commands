@@ -127,6 +127,9 @@ ai-quota --visual
 # Open visual AI quota & burn telemetry popup in Tmux (Prefix+u)
 ~/.config/tmux/ai-quota-popup.sh
 
+# Print the one-glyph quota badge (recommended agent, level-colored) used in the session picker title
+ai-quota --badge-min
+
 # Force a refresh of the AI quota caches (normally run every 2 min by ai-quota-refresh.timer)
 ai-quota --refresh
 

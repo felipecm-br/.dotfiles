@@ -29,13 +29,13 @@ The cursor starts on the recommended row (`★`), so `Enter` `Enter` from the se
 
 Recommended model: Claude green → Opus, yellow → Sonnet, red → Haiku. Antigravity → its default model while that group has quota, otherwise the group with the most quota left (Claude & GPT → Sonnet row, Gemini Flash → Flash row, Gemini 4 Argon → Argon row).
 
-The popup title shows a quota badge, for example `⚡  42·22% ↗ ×4 │  C100 G96 A10% │ ² C1 G100 A0% │ → `:
+Only the session picker popup carries quota in its title, and only one token: `⚡ → <icon>`, the agent a new session launches, colored by its level (green · yellow · red · gray for unknown; Tmux ANSI names, so they follow the Omarchy theme). Every other quota popup keeps a pure glyph title because its body already shows the numbers (the launch menu rows, the `Prefix + u` gauges). The full badge string stays available as `ai-quota --badge` for scripts:
 
 - Claude: 5h% · 7d% used, `↗` when burning ≥ 1 %/h, `×N` live sessions.
 - Antigravity: `C<n> G<n> A<n>%` = percent **left** for the Claude & GPT group, Gemini Flash, and Gemini 4 Argon (from the API), `⏳HH:MM` when every group is out; without a valid token, `~N%` of learned capacity or `Np` (prompts in the last 5h).
-- `→` shows the recommended agent (the `★` row in the menu, and what `r` starts). Icon color is the level: green · yellow · red · gray (unknown). These are Tmux ANSI names, so they follow the Omarchy theme.
+- `→` shows the recommended agent (the `★` row in the menu, and what `r` starts).
 
-The badge is cached in `~/.local/state/ai-quota/badge` and kept fresh by the refresh timer below, so the popup opens without waiting on telemetry. It is recomputed inline only when absent or older than an hour (about 90 ms).
+`ai-quota --badge-min` prints that one colored glyph. It is cached in `~/.local/state/ai-quota/badge-min` and kept fresh by the refresh timer below, so the popup opens without waiting on telemetry. It is recomputed inline only when absent or older than an hour (about 90 ms).
 
 ### Periodic refresh (no waiting in the popups)
 
@@ -110,13 +110,13 @@ A half-typed prompt is never submitted: when text that is not a dim placeholder 
 
 ## Standalone popups (`Prefix + a` / `Ctrl + Shift + A` and `Prefix + u`)
 
-[`ai-launch-popup.sh`](../../tmux/.config/tmux/ai-launch-popup.sh) opens the launch menu in a `75% × 60%` tmux popup from any pane, the same shape as the `awt` popup (badge ` 󰚩 `, magenta ephemeral frame, quota badge in the title). `Enter` opens the pick in a **new window** of the originating session, rooted at the pane directory; `Esc` closes with no side effect. It works in sessions that already exist, which the session picker cannot do for `startup_command`. `Prefix + o` ([`toggle-ai-split.sh`](../../tmux/.config/tmux/toggle-ai-split.sh)) toggles a 35% right split running `ai-launch --auto` (honoring `$AI_LAUNCH_AGENT` and ignoring Claude Code's `$AI_AGENT` identity marker).
+[`ai-launch-popup.sh`](../../tmux/.config/tmux/ai-launch-popup.sh) opens the launch menu in a `75% × 60%` tmux popup from any pane, the same shape as the `awt` popup (badge ` 󰚩 `, magenta ephemeral frame, pure glyph title: the menu rows already carry the quota). `Enter` opens the pick in a **new window** of the originating session, rooted at the pane directory; `Esc` closes with no side effect. It works in sessions that already exist, which the session picker cannot do for `startup_command`. `Prefix + o` ([`toggle-ai-split.sh`](../../tmux/.config/tmux/toggle-ai-split.sh)) toggles a 35% right split running `ai-launch --auto` (honoring `$AI_LAUNCH_AGENT` and ignoring Claude Code's `$AI_AGENT` identity marker).
 
 [`ai-quota-popup.sh`](../../tmux/.config/tmux/ai-quota-popup.sh) (`Prefix + u`, badge ` 󰓅 ` + quota badge, cyan frame, `75% × 60%`) renders `ai-quota --visual` (`-v`): 20-cell Stephen Few bullet gauges (`█` actual usage/headroom, `▒` projected 5h burn at reset, `│` cyan elapsed-week budget pace marker, `░` remaining headroom) and `10×30m` 5h prompt activity sparklines (`·▁▂▃▄▅▆▇█`) across `claude`, `agy`, and `agyy`. Inside the popup: `Enter` launches the recommended agent and model in a new window (`ai-launch --auto`), `a` switches in-place to the CLI × model launch menu (`ai-launch --pick`), `r` forces a live refresh (`ai-quota --refresh`), and `u` / `q` / `Esc` dismisses with no side effect.
 
 ## Files
 
-- [`utils/.local/bin/ai-quota`](../../utils/.local/bin/ai-quota): telemetry, model, badge, report, visual bullet gauges (`-v` / `--visual`), statusLine recorder
+- [`utils/.local/bin/ai-quota`](../../utils/.local/bin/ai-quota): telemetry, model, badge (`--badge`, `--badge-min`), report, visual bullet gauges (`-v` / `--visual`), statusLine recorder
 - [`utils/.config/systemd/user/ai-quota-refresh.timer`](../../utils/.config/systemd/user/ai-quota-refresh.timer) / [`.service`](../../utils/.config/systemd/user/ai-quota-refresh.service): 2-minute cache refresh
 - [`tmux/.config/tmux/ai-launch-popup.sh`](../../tmux/.config/tmux/ai-launch-popup.sh): tmux launcher popup (`Prefix + a`, `Ctrl + Shift + A`)
 - [`tmux/.config/tmux/ai-quota-popup.sh`](../../tmux/.config/tmux/ai-quota-popup.sh): visual quota & burn telemetry tmux popup (`Prefix + u`)
@@ -128,6 +128,6 @@ A half-typed prompt is never submitted: when text that is not a dim placeholder 
 - [`waymaker/.config/waymaker/presets/ai-launch.toml`](../../waymaker/.config/waymaker/presets/ai-launch.toml): launch menu preset
 - [`waymaker/.config/waymaker/session.toml`](../../waymaker/.config/waymaker/session.toml): `startup_command = "ai-launch"`
 - [`waymaker/.config/waymaker/presets/session-picker.toml`](../../waymaker/.config/waymaker/presets/session-picker.toml): `r` / `a` / `A` / `c` / `u` binds
-- [`tmux/.config/tmux/session-picker.sh`](../../tmux/.config/tmux/session-picker.sh): badge title, agent-aware connect
+- [`tmux/.config/tmux/session-picker.sh`](../../tmux/.config/tmux/session-picker.sh): recommended-agent glyph in the title, agent-aware connect
 - [`claude/.claude/settings.json`](../../claude/.claude/settings.json): `statusLine` → `ai-quota statusline`
 - Agent skill: `agents-skills/.agents/skills/ai-quota/SKILL.md`

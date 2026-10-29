@@ -157,6 +157,15 @@ pick=$(AI_QUOTA_FIXTURE_DIR="$FIX" ai-launch --pick </dev/null)
 [ -z "$(AI_QUOTA_NO_API=1 ai-quota --refresh 2>&1)" ] && ok "--refresh is silent" || bad "--refresh output"
 [ -s "$XDG_STATE_HOME/ai-quota/badge" ] && ok "--refresh writes the badge cache" || bad "badge cache missing"
 
+# 8b. --badge-min is a single level-colored glyph for the recommended agent, cached by --refresh
+bm=$(AI_QUOTA_FIXTURE_DIR="$FIX" ai-quota --badge-min)
+[[ "$bm" == "#[fg="*"]"*"#[default]" && "$bm" != *"%"* && "$bm" != *"│"* ]] &&
+  ok "--badge-min is one colored glyph, no numbers" || bad "badge-min: $bm"
+[ -s "$XDG_STATE_HOME/ai-quota/badge-min" ] && ok "--refresh writes the badge-min cache" || bad "badge-min cache missing"
+for f in tmux/.config/tmux/ai-launch-popup.sh tmux/.config/tmux/ai-quota-popup.sh; do
+  ! grep -q 'BADGE_FILE\|--badge' "$ROOT/$f" 2>/dev/null && ok "$f: pure glyph title" || bad "$f still reads the quota badge"
+done
+
 # 9. The pick armed by the session picker carries the model and a plain-terminal choice
 ai-launch --next claude --model sonnet
 [ "$(ai-launch --peek)" = "claude --model sonnet" ] && ok "armed pick keeps its model" || bad "armed args: $(ai-launch --peek)"

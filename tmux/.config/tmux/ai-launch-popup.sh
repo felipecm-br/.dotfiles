@@ -15,25 +15,12 @@ PROJECT_DIR="${1:-$PWD}"
 if [ -z "${TMUX_POPUP:-}" ]; then
     AI_POPUP_COLOR=$(get_theme_color magenta "#cba6f7")
 
-    # Quota badge in the title: cached so the popup opens instantly (same cache as session-picker.sh)
-    QUOTA_BIN="$HOME/.local/bin/ai-quota"
-    BADGE_FILE="${XDG_STATE_HOME:-$HOME/.local/state}/ai-quota/badge"
-    badge=""
-    if [ -x "$QUOTA_BIN" ]; then
-        if [ -n "$(find "$BADGE_FILE" -mmin -60 2>/dev/null)" ]; then
-            badge=$(cat "$BADGE_FILE")
-            [ -z "$(find "$BADGE_FILE" -mmin -2 2>/dev/null)" ] && "$QUOTA_BIN" --refresh >/dev/null 2>&1 &
-        else
-            badge=$("$QUOTA_BIN" --badge 2>/dev/null) && printf '%s' "$badge" >"$BADGE_FILE"
-        fi
-    fi
-
     ORIGIN_SESSION=$(tmux display-message -p '#{session_id}')
     exec tmux display-popup \
       -S "fg=$AI_POPUP_COLOR" \
       -s "fg=${TMUX_POPUP_TEXT_COLOR:-default}" \
       -b rounded \
-      -T " 󰚩 ${badge:+ $badge }" \
+      -T " 󰚩 " \
       $(popup_gradient_flags WM_BORDER_GRADIENT) -e "WM_BORDER_TITLE= 󰚩 " \
       -d "$PROJECT_DIR" \
       -E \

@@ -4,7 +4,8 @@
 #   ai-quota                 Human-readable report (default)
 #   ai-quota -v | --visual   Visual TUI dashboard with bullet gauges, pace markers & 5h sparklines
 #   ai-quota --json          Machine-readable snapshot (all agents, levels, recommendation)
-#   ai-quota --badge         Compact tmux-format badge (session picker popup title)
+#   ai-quota --badge         Compact tmux-format badge (all agents, percentages, recommendation)
+#   ai-quota --badge-min     One level-colored glyph: the agent a new session will launch (session picker title)
 #   ai-quota --recommend     Print the agent to launch: claude | agy | agyy
 #   ai-quota --refresh       Silently re-read the Antigravity API and rewrite the badge cache
 #                            (run every 2 min by ai-quota-refresh.timer so readers never wait)
@@ -67,6 +68,7 @@ MODE="report"
 case "${1:-}" in
   --json) MODE="json" ;;
   --badge) MODE="badge" ;;
+  --badge-min) MODE="badge-min" ;;
   --line) MODE="line" ;;
   --recommend) MODE="recommend" ;;
   -v | --visual | --chart | --tui) MODE="visual" ;;
@@ -80,9 +82,12 @@ case "${1:-}" in
     "$0" --badge >"$STATE_DIR/badge.tmp" 2>/dev/null && [ -s "$STATE_DIR/badge.tmp" ] &&
       mv -f "$STATE_DIR/badge.tmp" "$STATE_DIR/badge"
     rm -f "$STATE_DIR/badge.tmp"
+    "$0" --badge-min >"$STATE_DIR/badge-min.tmp" 2>/dev/null && [ -s "$STATE_DIR/badge-min.tmp" ] &&
+      mv -f "$STATE_DIR/badge-min.tmp" "$STATE_DIR/badge-min"
+    rm -f "$STATE_DIR/badge-min.tmp"
     exit 0
     ;;
-  -h | --help) sed -n '2,26p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+  -h | --help) sed -n '2,27p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
   "" | --report) ;;
   *) echo "ai-quota: unknown option '$1' (see --help)" >&2; exit 2 ;;
 esac
@@ -420,6 +425,8 @@ elif $mode == "recommend" then $rec
 elif $mode == "badge" then
   ([$agents[] | select(.available) | "#[fg=\(color)]\(tag)#[default] \(short)\(sess)"] | join(" │ "))
   + " │ → \([$agents[] | select(.agent == $rec) | tag] | first // $rec)"
+elif $mode == "badge-min" then
+  ([$agents[] | select(.agent == $rec and .available) | "#[fg=\(color)]\(tag)#[default]"] | first // $rec)
 elif $mode == "line" then
   ($agents[0]) as $c
   | if $c.five == null then empty else

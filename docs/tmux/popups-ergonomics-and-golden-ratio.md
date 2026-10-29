@@ -91,7 +91,7 @@ Whenever the system theme switches (`omarchy theme set <name>`), 100% of termina
 | **1. Ephemeral** | [`command-palette.sh`](../../tmux/.config/tmux/command-palette.sh) (`command-palette.toml`) | `cyan` | `#89dceb` | ` 󰘳 ` | `75% × 60%` | `Esc` (1 tap) |
 | **1. Ephemeral** | [`pr-picker.sh`](../../tmux/.config/tmux/pr-picker.sh) | `blue` / `cyan` | `#7aa2f7` | `  ` | `75% × 60%` | `Esc` (1 tap) |
 | **1. Ephemeral** | [`awt-popup.sh`](../../awt/.config/tmux/awt-popup.sh) | `orange` / `peach` | `#e84d31` | `  ` | `85% × 75%` | `Esc` / `q` |
-| **1. Ephemeral** | [`ai-launch-popup.sh`](../../tmux/.config/tmux/ai-launch-popup.sh) (`ai-launch.toml`) | `magenta` / `mauve` | `#cba6f7` | ` 󰚩 ` + quota badge | `75% × 60%` | `Esc` (1 tap) |
+| **1. Ephemeral** | [`ai-launch-popup.sh`](../../tmux/.config/tmux/ai-launch-popup.sh) (`ai-launch.toml`) | `magenta` / `mauve` | `#cba6f7` | ` 󰚩 ` (pure glyph: the rows carry the quota) | `75% × 60%` | `Esc` (1 tap) |
 | **1. Ephemeral** | [`ai-switch-popup.sh`](../../tmux/.config/tmux/ai-switch-popup.sh) (`ai-switch.toml`) | `magenta` / `mauve` | `#cba6f7` | agent icon + current model | `75% × 60%` | `Esc` (1 tap) |
 | **1. Ephemeral** | [`ai-prompt edit`](../../utils/.local/bin/ai-prompt) (Neovim on the agent draft) | `magenta` / `mauve` | `#cba6f7` | ` 󰏫 Prompt · :wq apply · :cq cancel ` | `75% × 60%` | `:wq` / `:cq` |
 | **1. Ephemeral** | [`ai-quota-popup.sh`](../../tmux/.config/tmux/ai-quota-popup.sh) (`ai-quota --visual`) | `cyan` / `blue` | `#94e2d5` | ` 󰓅 ` (pure glyph, no badge: body already shows the data) | `75% × 60%` | `u` / `q` / `Esc` |
@@ -315,7 +315,7 @@ To prevent accidental dismissal while inspecting a diff or composing a commit me
 * [`waymaker/.config/waymaker/presets/window-picker.toml`](../../waymaker/.config/waymaker/presets/window-picker.toml): Waymaker preset with dynamic group header and row styling.
 * [`tmux/.config/tmux/window-picker-items.sh`](../../tmux/.config/tmux/window-picker-items.sh): Session and window item generator with ANSI color mapping.
 * [`tmux/.config/tmux/window-picker-preview.sh`](../../tmux/.config/tmux/window-picker-preview.sh): Bottom-anchored pane preview generator with trailing whitespace trimming.
-* [`tmux/.config/tmux/session-picker.sh`](../../tmux/.config/tmux/session-picker.sh): Session picker with `⚡` badge and cyclic `Tab` source rotation.
+* [`tmux/.config/tmux/session-picker.sh`](../../tmux/.config/tmux/session-picker.sh): Session picker with `⚡` badge plus one level-colored glyph for the agent a new session launches (`ai-quota --badge-min`), and cyclic `Tab` source rotation.
 * [`waymaker/.config/waymaker/presets/session-picker.toml`](../../waymaker/.config/waymaker/presets/session-picker.toml): Waymaker preset with multi-mode prompt icons and cyclic reload binds.
 * [`tmux/.config/tmux/lazygitrs-popup.sh`](../../tmux/.config/tmux/lazygitrs-popup.sh): Lazygitrs popup with `󰊢` badge and Git orange theme.
 * [`tmux/.config/tmux/ai-agent-bell-popup.sh`](../../tmux/.config/tmux/ai-agent-bell-popup.sh): Reactive notification dispatcher with `󰮯` badge.

@@ -15,17 +15,18 @@ if [ "$1" = "--fullscreen" ]; then
 elif [ -z "${TMUX_POPUP:-}" ]; then
   SESSION_POPUP_COLOR=$(get_theme_color "cyan" "${TMUX_POPUP_BORDER_COLOR:-#89dceb}")
 
-  # Quota badge (Claude 5h·7d, Antigravity exhaustion, recommended agent): served from a
-  # cache so the popup opens instantly; recomputed inline only when absent or older than an hour (ai-quota-refresh.timer keeps it fresh)
+  # Title glyph: the agent a new session launches, colored by its quota level (green/yellow/red).
+  # Served from a cache so the popup opens instantly; recomputed inline only when absent or older
+  # than an hour (ai-quota-refresh.timer keeps it fresh). Full numbers live in the Prefix+u popup.
   QUOTA_BIN="$HOME/.local/bin/ai-quota"
-  BADGE_FILE="${XDG_STATE_HOME:-$HOME/.local/state}/ai-quota/badge"
+  BADGE_FILE="${XDG_STATE_HOME:-$HOME/.local/state}/ai-quota/badge-min"
   badge=""
   if [ -x "$QUOTA_BIN" ]; then
     if [ -n "$(find "$BADGE_FILE" -mmin -60 2>/dev/null)" ]; then
       badge=$(cat "$BADGE_FILE")
       [ -z "$(find "$BADGE_FILE" -mmin -2 2>/dev/null)" ] && "$QUOTA_BIN" --refresh >/dev/null 2>&1 &
     else
-      badge=$("$QUOTA_BIN" --badge 2>/dev/null) && printf '%s' "$badge" >"$BADGE_FILE"
+      badge=$("$QUOTA_BIN" --badge-min 2>/dev/null) && printf '%s' "$badge" >"$BADGE_FILE"
     fi
   fi
 
@@ -33,7 +34,7 @@ elif [ -z "${TMUX_POPUP:-}" ]; then
     -S "fg=$SESSION_POPUP_COLOR" \
     -s "fg=${TMUX_POPUP_TEXT_COLOR:-default}" \
     -b rounded \
-    -T " ⚡ ${badge:+ $badge }" \
+    -T " ⚡ ${badge:+→ $badge }" \
     -w 85% -h 75% \
     -E \
     "TMUX_POPUP=1 '$REAL_SCRIPT' || true" || true
