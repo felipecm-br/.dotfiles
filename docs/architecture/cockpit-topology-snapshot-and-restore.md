@@ -85,7 +85,7 @@ A pane gets `resume` only when an agent is still running anywhere below it (a ja
 
 | Option | Set by | Example |
 |:---|:---|:---|
-| `@ai_session` | `waymux` daemon, from the agent's `SessionStart` and `UserPromptSubmit` hooks (the daemon sets it, since a jailed hook cannot reach tmux) | `claude:0d5f3c1e-…` |
+| `@ai_session` | `waymux` daemon (0.7.0 and later), from the agent's `SessionStart` and `UserPromptSubmit` hooks (the daemon sets it, since a jailed hook cannot reach tmux) | `claude:0d5f3c1e-…` |
 | `@ai_launch` | `ai-launch`, before it starts the agent; a plain shell clears it | `jail-claude-ask --model opus` |
 
 Both are checked when saved and again when restored, because restore types the command into a shell: the id must be 8 to 64 letters, digits, `-` or `_`, and each launch word a plain option. A launch tag from another harness is ignored (Devin runs Claude's hooks too), and so is the whole tag when the agent has exited.

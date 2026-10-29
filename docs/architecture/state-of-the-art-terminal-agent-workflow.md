@@ -78,7 +78,7 @@ Weights are calibrated for a **terminal-first, keyboard-only, Home-Row ($H=0$)**
 - **Competitors:** TUIOS 0.11 (25–26 Oct) added a full-screen agent cockpit, threads for eight harnesses, fans of 1–8 attempts with compare and a read-only judge, and linked machines. Orca added diff-line annotations sent back to the agent, SSH worktrees and an Android app. herdr added machines over SSH and saves before the host shuts down. workmux added sidebar views and keeps finished agents marked until reviewed.
 
 > [!IMPORTANT]
-> **The lead holds on these weights (8.80 vs TUIOS 8.05), when the ergonomics weight is halved (8.70 vs 8.18), and when the remote weight is doubled (8.68 vs 8.09).** This stack leads on ergonomics and latency, the review loop, and quota-aware launch and fan-out. It trails on remote/mobile and ecosystem. The open roadmap in §8 (P1b, the rest of P6, P7–P11) brings it to about 9.20 on the same weights.
+> **The lead holds on these weights (8.80 vs TUIOS 8.05), when the ergonomics weight is halved (8.70 vs 8.18), and when the remote weight is doubled (8.68 vs 8.09).** This stack leads on ergonomics and latency, the review loop, and quota-aware launch and fan-out. It trails on remote/mobile and ecosystem. The roadmap in §8.3 brings it to 9.20 on the same weights in three phases (remote, then hookless agents and agent-to-agent, then finish and ship).
 
 ### Emerging Capabilities (not weighted)
 
@@ -118,7 +118,7 @@ Sources, read on 29 Oct 2026: [TUIOS](https://github.com/Gaurav-Gosain/tuios) RE
 2. **Fixed-grid HUD vs. list dashboards:** the Cockpit's fixed 6-column monospace grid supports ballistic vertical scanning. workmux now offers `dashboard.layout: side_by_side` (the preview gets the full content height), converging on the 40/60 split. This is a design argument (saccade model), **not** a measured user-study result.
 3. **The review loop alone is no longer the differentiator:** sending a per-line note back to the agent is now standard (Orca, Paradev, TUIOS, Conductor, and Vibe Kanban, which is shutting down). What remains distinctive is the cost and safety of the path: `Space` stages a hunk and advances, `Ctrl+N` anchors and sends a note in one action, notes go through the delivery queue so they never answer a prompt, and `󰷋` clears only after a real review.
 4. **Orchestration moved into the products:** Alethe's lead agent delegates to workers through MCP with quota-gated roles and hard budgets, agent-deck's conductor escalates to a phone, and TUIOS fans out up to 8 attempts with a read-only judge. Agent vendors are absorbing the same layer (reported: GitHub Copilot multi-agent features at GitHub Universe, the Codex app folded into the ChatGPT desktop app). The durable advantage of this stack is the composition (tmux, Rust tools, $H=0$, measured budgets), not any single feature.
-5. **Known gaps (honest):** tokens but no money per fan attempt (TUIOS shows cost), a phone page that answers prompts but cannot start one or show a diff (TUIOS, Orca and T3 Code can), a default jail with `.git` and `~/.claude` still writable inside it (§8 P1b), and a single-maintainer core (`waymux` 0.6).
+5. **Known gaps (honest):** tokens but no money per fan attempt (TUIOS shows cost), a phone page that answers prompts but cannot start one or show a diff (TUIOS, Orca and T3 Code can), a default jail with `.git` and `~/.claude` still writable inside it (§8.3 P1b), agents without hooks shown by process only (§8.3 P8), and a single-maintainer core (`waymux` 0.7).
 
 ### 2.1 Alethe (`Kc1t/alethe-agents`) Deep Dive
 
@@ -420,24 +420,74 @@ Suites that drive tmux source [`tests/lib/private_tmux.sh`](../../tests/lib/priv
 
 ---
 
-## 8. Roadmap from the 29 Oct 2026 Re-audit
+## 8. Roadmap to 9.2 (updated 29 Oct 2026)
 
-Ranked by composite gain per unit of work. Keys follow the [Zero-Churn principle](terminal-ergonomics-and-ux-manifesto.md): no existing chord is rebound.
+Keys follow the [Zero-Churn principle](terminal-ergonomics-and-ux-manifesto.md): no existing chord is rebound. Scores use the unchanged weights of §1.
 
-| ID | Item | Closes | Score effect |
+### 8.1 Where It Stands: 8.80
+
+| Dimension (weight) | This stack | Best competitor | Gap | Closed by |
+| :--- | :---: | :--- | :---: | :--- |
+| Worktree lifecycle (15) | 9.0 | workmux 9.5 | −0.5 | not planned: workmux's lead is its per-agent config, which `awt` does not need |
+| Agent state awareness (15) | 9.0 | TUIOS, herdr 9.5 | −0.5 | P8 |
+| Persistence / crash isolation (10) | 9.0 | herdr 9.5 | −0.5 | P6b |
+| Review loop (15) | **9.5** | Orca 9.0 | lead | — |
+| Remote / mobile (10) | 7.5 | Orca, T3 Code 9.5 | −2.0 | P7 (to 8.5); the rest is a native app, out of scope |
+| Ergonomics & latency (15) | **10.0** | agent-deck 8.0 | lead | — |
+| Agent-callable API (5) | 9.0 | TUIOS, herdr 10.0 | −1.0 | P9 |
+| Sandboxing (5) | 8.5 | workmux 9.0 | −0.5 | P1b |
+| Fan-out (5) | 9.0 | TUIOS, Orca 10.0 | −1.0 | P10 |
+| Ecosystem / bus factor (5) | 4.0 | Orca, herdr 10.0 | −6.0 | P11 (to 5.0); one maintainer caps it |
+
+### 8.2 Done
+
+| ID | Delivered | Release | Score effect |
 | :---: | :--- | :--- | :--- |
-| **P0** | **Harden host-side git in `waymux`** (done: released in `waymux` v0.4.0, 29 Oct; `lazygitrs` audited, see §2.3). One git constructor for every call site (checkpoints, Cockpit items, diff, notes and actions, `wt`): `-c core.fsmonitor=false -c core.hooksPath=/dev/null`, `--no-ext-diff --no-textconv` wherever a diff is produced, and an empty override for every `filter.*` and `diff.*` driver defined in the repository's local or worktree config (read with `git config --local --get-regexp`, which runs nothing), keeping global drivers such as Git LFS. Refuse a work tree whose resolved git dir is not the registered repository's. Then audit `lazygitrs` the same way. | §2.3 (the TUIOS GHSA-qcx6-vr32-xr8q class) | Sandboxing 5.0 → 6.0 (done) |
-| **P1** | **Supervised jail.** Relay a hook-only endpoint into `ai-jail` (a socket, like the ai-memory forward) with a per-pane token that accepts `hook/*` and nothing else. Never relay the full RPC: its `tmux.*` and `inject` methods type into unjailed panes. Jailed agents regain state, held approvals, checkpoints and `󰷋`. `agent-sudod` already proves the pattern: one endpoint, shape-validated, no tmux. **Done:** `hook-token` in `waymux` 0.5.0 and `jail_supervision` in `ai-launch`. | §2.3 | Sandboxing 6.5 → 7.5 (done) |
-| **P1b** | **Pin `.git` in the jail.** Read-only `<git-dir>/config` and `hooks` (works today through `--map`) plus a way to stop the agent replacing `.git` itself: ai-jail drops a bind of a path already inside the project mount, and a directory holding read-only mounts can still be renamed. Needs an ai-jail option that binds `.git` onto itself (a mount point cannot be renamed) or a host check that the git dir did not change during the session. | §2.3 | Sandboxing 7.5 → 8.0 |
-| **P2** | **Quota-aware fan-out** (done 29 Oct as `awt-fan`, with a check and tokens per attempt; the Cockpit entry moved to P10) (`awt fan N`, Tier B2 of the [TUIOS roadmap](tuios-benchmark-and-agent-inbox-roadmap.md#tier-b-when-the-workflow-needs-it)): N worktrees from one prompt, a compare popup on the 40/60 grid (attempt, time, diffstat, tests, quota spent), a read-only judge, keep one. Gate N with `ai-quota --json` (`projected_five`): neither TUIOS nor Orca checks quota before a fan. | Fan-out gap | Fan-out 4.0 → 9.0 (done) |
-| **P3** | **Read-only phone surface** (done: released in `waymux` v0.6.0, 29 Oct; see [Recipe 4](remote-agent-workflow-waymux.md#recipe-4-answer-held-prompts-from-the-phone-m-waymux-06)). Cockpit rows and held-approval answers over Tailscale Serve, with one capability token per class (read, answer) and no file paths accepted from the client. The three TUIOS advisories of 26 Oct are the checklist. | Remote gap | Remote 5.0 → 7.0 (done; the ntfy alert adds 0.5) |
-| **P4** | **Absorb from Alethe:** an MCP inventory across `claude`, `agy`, `codex`, `opencode` and `devin` as a `wm` picker, and the leftover dev-server processes listed when a window closes. | Shared-config drift, orphan processes | Not scored |
-| **P5** | **Harden the `agent-sudo` popup** (done, 29 Oct): drain pending input and ignore keys for 400 ms after it opens (as `y`/`n` in the Cockpit); extend the red warning to build tools and to any executable inside the request's directory, since both run code the agent wrote. | §2.3 | Part of the 6.5 (done) |
-| **P6** | **Survive a reboot** (done 29 Oct: resume, shutdown snapshot and automatic restore, `waymux` `@ai_session`, `cockpit-shutdown-save` and the `session-created` hook; still open: the delivery queue across a daemon restart, and Codex resume). Held approvals need nothing: when the daemon is gone the hook answers nothing and Claude asks in the pane. | Persistence gap | Persistence 8.0 → 9.0 (done); the queue adds 0.5 (+0.05) |
-| **P7** | **More from the phone:** type a prompt (through the delivery queue, so it never lands mid-turn, with a token scoped to that queue) and a read-only diff of the agent's last turn on `/m`. | Remote gap | Remote 7.5 → 8.5 (+0.10) |
-| **P8** | **State for agents without hooks** (`agy`, `devin`): read the pane to tell working, waiting and idle apart, as herdr does. | State gap | State 9.0 → 9.5 (+0.075) |
-| **P9** | **Agents start and message other agents** through the API (scoped tokens, delivered through the queue), as in TUIOS and herdr. | API gap | API 9.0 → 10.0 (+0.05) |
-| **P10** | **Finish fan-out:** a Cockpit entry for running fans, and money spent per attempt next to the tokens. | Fan-out gap | Fan-out 9.0 → 10.0 (+0.05) |
-| **P11** | **Packaging:** an AUR package and `cargo install` for `waymux`. | Ecosystem gap | Ecosystem 4.0 → 5.0 (+0.05) |
+| **P0** | Git run by the daemon and the Cockpit no longer runs fsmonitor, hooks, or filter and diff drivers from the repository's config; `lazygitrs` audited (§2.3, the TUIOS GHSA-qcx6-vr32-xr8q class) | `waymux` 0.4.0 | Sandboxing 5.0 → 6.0 |
+| **P1** | Supervised jail: `waymux hook-token` reaches `/api/status` and `approval/hold` for one pane only; `ai-launch` passes it into `ai-jail` through `--env`. Tokens survive a daemon restart (0.6.0) | `waymux` 0.5.0 | Sandboxing 6.5 → 7.5 |
+| **P2** | `awt-fan`: one prompt in 1–8 worktrees, gated on `ai-quota`, a 40/60 compare popup, a read-only judge, keep one; a test check (`T`, in `ai-jail` with no network) and the tokens each attempt spent | dotfiles | Fan-out 4.0 → 9.0 |
+| **P3** | Phone page `/m` behind `tailscale serve`: agents with held prompts first, Allow or Deny, risky calls confirmed; a phone token reaches two methods only; an ntfy alert for a prompt held over 15 s ([Recipe 4](remote-agent-workflow-waymux.md#recipe-4-answer-held-prompts-from-the-phone-m-waymux-06)) | `waymux` 0.6.0 | Remote 5.0 → 7.5 |
+| **P5** | `agent-sudo` popup ignores keys for 400 ms after it opens and flags build tools and executables inside the request's directory | dotfiles | part of Sandboxing 6.5 |
+| **P6** | Survive a reboot: `waymux` keeps each agent's session id on its pane (`@ai_session`), `ai-launch` records how it started it (`@ai_launch`), `cockpit-shutdown-save` snapshots when the host shuts down, and the first tmux session after the boot restores every pane and resumes each Claude, jailed as before ([details](cockpit-topology-snapshot-and-restore.md)) | `waymux` 0.7.0 | Persistence 8.0 → 9.0 |
+| — | Claude jailed by default in `ai-launch` (prompts on; `Claude YOLO` and `Claude Host` rows), with the real settings mapped read-only | dotfiles | Sandboxing 7.5 → 8.5 |
+| — | Popup UX audit: cyan `│` cursor from the first frame, no black selection strip, two-tier `DIM` (27 of 29 presets, §3.6) | dotfiles | keeps Ergonomics at 10.0 |
 
-With P0, P1, P2, P3 and P5 done, plus the phone alert, the fan's check and token columns, the default jail and agent resume after a reboot (P6), the composite is 8.80. The popup UX audit keeps ergonomics at its 10.0 cap. P1b and the rest of P6–P11 bring it to about 9.20 on the unchanged weights; ecosystem stays the weakest row with one maintainer.
+### 8.3 Open: Three Phases to 9.2
+
+Each phase is shippable on its own. "Done when" is the check that closes the item, in the style of §6.
+
+**Phase 1: close the remote gap (8.80 → 8.90).**
+
+| ID | Item | Done when | Score effect |
+| :---: | :--- | :--- | :--- |
+| **P7** | **More from the phone.** Type a prompt into an agent from `/m`: it goes through the delivery queue, so it never lands mid-turn, and needs a second, queue-scoped phone token. A read-only diff of the agent's last turn, from its checkpoint, with no file path accepted from the client. | A prompt typed on the phone reaches an idle agent and waits for a busy one; the phone token still gets 403 on `tmux.*`, `inject` and any path parameter (`cargo test`, plus the TUIOS advisory checklist) | Remote 7.5 → 8.5 (+0.10) |
+
+**Phase 2: every agent visible, agents that coordinate (8.90 → 9.03).**
+
+| ID | Item | Done when | Score effect |
+| :---: | :--- | :--- | :--- |
+| **P8** | **State for agents without hooks** (`agy`, `devin`): read the pane's last lines to tell working, waiting for input and idle apart, as herdr does, and feed the same triage, sounds and phone page. | An `agy` pane moves working → waiting → idle in the Cockpit with no hook installed; a hooked agent is never overridden by the screen reader | State 9.0 → 9.5 (+0.075) |
+| **P9** | **Agents start and message other agents** through the API: a scoped token per agent pane that may push to another pane's queue and start a worktree agent, never type into a pane directly (TUIOS and herdr have this). | A Claude asks a second agent for a review and gets its answer through the queue; the scoped token gets 403 on `tmux.*` and `inject` | API 9.0 → 10.0 (+0.05) |
+
+**Phase 3: finish and ship (9.03 → 9.20).**
+
+| ID | Item | Done when | Score effect |
+| :---: | :--- | :--- | :--- |
+| **P10** | **Finish fan-out:** running fans in the Cockpit, and money spent per attempt next to the tokens (model price table, Claude and Codex). | A fan shows in the Cockpit while it runs; the compare popup shows a cost column (`tests/awt_fan.test.sh`) | Fan-out 9.0 → 10.0 (+0.05) |
+| **P11** | **Packaging:** an AUR package and `cargo install waymux`. | `yay -S waymux` and `cargo install waymux` install a working daemon on a clean machine | Ecosystem 4.0 → 5.0 (+0.05) |
+| **P6b** | **Rest of P6:** queued prompts survive a daemon restart (saved like the hook tokens, tied to the tmux server); Codex resume once Codex reports to `waymux` instead of `workmux`. Held approvals need nothing: with the daemon gone, the hook answers nothing and Claude asks in the pane. | A prompt queued before `systemctl --user restart waymux` is still delivered | Persistence 9.0 → 9.5 (+0.05) |
+| **P1b** | **Pin `.git` and `~/.claude` in the jail:** an ai-jail option that binds `.git` onto itself (a mount point cannot be renamed), filed as an issue for its author; until then `ai-launch` warns when the settings link was replaced. | A jailed agent cannot rename `.git` or replace `~/.claude/settings.json` | Sandboxing 8.5 → 9.0 (+0.025) |
+
+**Not scored:** **P4**, from Alethe: an MCP inventory across `claude`, `agy`, `codex`, `opencode` and `devin` as a `wm` picker, and the leftover dev-server processes listed when a window closes.
+
+### 8.4 The 9.2 Ceiling
+
+After Phase 3 the scorecard reads: worktree 9.0, state 9.5, persistence 9.5, review 9.5, remote 8.5, ergonomics 10.0, API 10.0, sandboxing 9.0, fan-out 10.0, ecosystem 5.0, for **9.20** against TUIOS's current 8.05. What stays below the best competitor is structural rather than a missing feature: a native phone app (Orca, T3 Code), a community and several maintainers (ecosystem), and workmux's per-agent worktree config. Competitors also move: the next re-audit should re-read TUIOS, Orca and herdr before Phase 3 starts.
+
+### 8.5 Operator Steps (not code)
+
+| Step | Unlocks |
+| :--- | :--- |
+| Subscribe the ntfy app to the topic in `~/.local/state/waymux/ntfy-topic`, then `waymux phone-alert` | Phone alerts (P3) |
+| `tailscale serve --bg 4040`, then `waymux phone-token --url` on the phone | The phone page (P3, P7) |
+| Reboot with a Claude started from `ai-launch` and a split window, then open a terminal and start nothing | First live check of the automatic restore (P6); `restore.log` and `journalctl --user -u cockpit-shutdown-save -b -1` show what happened |
