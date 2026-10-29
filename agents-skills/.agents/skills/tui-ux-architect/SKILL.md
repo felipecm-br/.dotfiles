@@ -104,10 +104,10 @@ flowchart TD
   - Deep blue ($400\text{–}450\text{ nm}$) suffers from longitudinal chromatic aberration (myopic defocus on dark screens), causing deep blue text to appear blurry and hard to resolve when scanning at high speeds.
   - Cyan ($490\text{–}520\text{ nm}$) stimulates both S-cones and M-cones with high foveal sharpness, providing instantaneous pop-out contrast against dark terminal backdrops without triggering the sympathetic amygdalar threat response associated with warm wavelengths ($>600\text{ nm}$).
 
-- **Gestalt Figure-Ground Separation & Clean Zero-Background Standard:**
-  - **Elimination of Opaque Block Clutter:** Opaque rectangular selection backgrounds (`bg = "darkgray"`, `bg = "black"`) produce jarring horizontal "bars" that break terminal transparency, introduce high-contrast edges across entire rows, and cause cognitive clutter.
-  - **The Transparent BOLD Standard:** Active list items preserve the terminal's native background transparency and express hierarchical primacy via `modifier = "BOLD"`.
-  - **The $X=1$ Lateral Indicator:** Combined with a 2-character wide cyan lateral bar (`current_nav_bar_style fg = "cyan"`), this establishes an unshakeable foveal anchor at $X=1$ without obscuring text or jarring peripheral vision.
+- **Gestalt Figure-Ground Separation, Zero-Background & Two-Tier Peripheral Dimming:**
+  - **Elimination of Opaque Block Clutter (`bg = "reset"`):** Opaque rectangular selection backgrounds (`bg = "darkgray"`, `bg = "black"`) break terminal transparency and create horizontal bar noise. Because Waymaker's `ResultsConfig::default()` sets `current_style.bg = Color::Black`, every list preset MUST explicitly declare `[results.current_style] bg = "reset", modifier = "BOLD"`.
+  - **Two-Tier Peripheral Dimming (`[results.style] modifier = "DIM"`):** Single-target selection and action menus dim inactive rows via `modifier = "DIM"` (omitting hardcoded `fg` so dark and light Omarchy theme palettes remain intact), pushing unselected candidates into *Gestalt Ground* while the `BOLD` cursor row pops out as *Gestalt Figure*. Conversely, multi-row urgency HUDs (`cockpit-picker`, `awt`), parallel code search (`rg`), and colored-devicon file trees (`workspace`, `jump`, `downloads`) remain **un-dimmed** so peripheral `prio <= 3` alert luminance and syntax/icon color fidelity are never attenuated.
+  - **The $X=1$ `Plain` Cyan Hairline (`│`):** Prefer the 1px `Plain` hairline (`│`) over heavy half-cell blocks (`QuadrantOutside` `▌`): `│` matches the visual weight of `{darkgray:│}` footer dividers and `│` preview borders while preserving maximum Bouma horizontal clearance before column 1.
 
 *See detailed benchmarks and comparisons in [references/klm-goms-benchmarks.md](references/klm-goms-benchmarks.md).*
 
@@ -198,10 +198,10 @@ flowchart TD
   - **Uniform Key Palette:** All keys must share a single uniform accent (`cyan,bold` or `white,bold`), actions in `darkgray`, and delimiters in dimmed vertical hairlines (`{darkgray:│}`).
   - **Hue Reservation:** Never use a multi-colored "rainbow" footer (`green`, `yellow`, `magenta`, `red`, `blue`). Matiz is strictly reserved for real-time operational alerts in the list and preview.
   - **Chunk Cap ($\le 7$):** Strictly limit visible footer key-action pairs to 7 core items (Miller's $7 \pm 2$ / Cowan's $4 \pm 1$), offloading secondary actions to `? Help`.
-- **Clean Zero-Background & Cyan Lateral Focus Indicator Standard:**
-  - **Eliminating Opaque Block Clutter:** Avoid opaque rectangular selection bars (`bg = "darkgray"`, `bg = "black"`) across modal pickers. High-contrast background strips create cognitive noise, break terminal transparency, and visually crowd surrounding rows.
-  - **Transparency with BOLD Focus:** The active item inherits the terminal's native background transparency and asserts visual hierarchy through `modifier = "BOLD"`.
-  - **Cyan Lateral Indicator (`current_nav_bar_style`):** Anchor focus at the left boundary via a crisp cyan indicator (`fg = "cyan"`, `modifier = "BOLD"`), providing an instantaneous foveal anchor at $X=1$ without visual occlusion or cognitive friction.
+- **Clean Zero-Background, Dual Focus-Bar & Two-Tier Dimming Standard:**
+  - **Eliminating Opaque Block Clutter (`bg = "reset"`):** Always set `[results.current_style] bg = "reset", modifier = "BOLD"` to override Waymaker's default `Color::Black` selection strip and preserve terminal transparency.
+  - **Dual-Mode $X=1$ Cyan Hairline (`│`):** Because Waymaker gates `ui.nav.bar` + `[results.current_nav_bar_style]` on `Focus::Results`, picker-first and `passthrough = true` menus (`focus_on_start = "picker"`) use `bar = "Plain"`, `color = "black"`, `current_nav_bar = "Plain"`, and `[results.current_nav_bar_style] fg = "cyan"/"lightcyan", modifier = "BOLD"`, whereas filter-first menus (`focus_on_start = "filter"` or default, keeping single-letter `[ui.nav.binds]` gated behind `Esc`) omit `bar` and set `ui.nav.marker = "│"` + `ui.nav.color = "lightcyan"`.
+  - **Two-Tier Peripheral Dimming & Footer Inheritance:** Apply `[results.style] modifier = "DIM"` (without overriding `fg`) on single-target selection menus, leaving multi-row urgency HUDs (`cockpit-picker`, `awt`), `rg`, and file trees un-dimmed. In Tmux popups (`-s "fg=${TMUX_POPUP_TEXT_COLOR}"`), explicitly declare `{white,bold:...}` on neutral footer badges so they do not inherit popup cyan.
 - **Dynamic Semantic Color Palette:** Inherits dynamically from Omarchy system theme (`~/.local/state/omarchy/current/theme/colors.toml`):
   - *Ephemeral Layer* (Fast Pickers < 5s): Mauve / Magenta (`-T " 󱂬 "` or `-T " 󰆍 "`).
   - *Persistent Layer* (Lazygitrs / High-Density Workspaces): Git Orange (`-T " 󰊢 "`).

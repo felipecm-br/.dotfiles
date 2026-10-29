@@ -57,15 +57,16 @@ Border colors and titles dynamically synchronize with the current Omarchy system
 All popup components adhere to the deterministic Triadic Cold-Color Architecture and Clean Zero-Background standard:
 
 1. **Blue (`#89b4fa` / `blue`) — Passive Frame:** Modal boundary, headers, and tabs. Interpreted by the visual cortex as stable architectural ground without falsely signaling keyboard focus.
-2. **Cyan (`#94e2d5` / `cyan`) — Action Trigger:** The left lateral focus bar (`▌` at $X=1$) and interactive shortcut keys in the footer. Anchors foveal attention to actionable affordances in $<15\text{ ms}$.
+2. **Cyan (`#94e2d5` / `cyan`) — Action Trigger:** The left lateral focus hairline (`│` at $X=1$) and interactive shortcut keys in the footer. Anchors foveal attention to actionable affordances in $<15\text{ ms}$.
 3. **Darkgray (`#585b70` / `darkgray`) — Low-Noise Metadata:** Action descriptions, vertical dividers (`│`), and inactive counts. Suppressed below the threshold of preattentive distraction.
 
-### Clean Zero-Background Standard
+### Clean Zero-Background & Two-Tier Dimming Standard
 - **No Opaque Selection Strips:** Opaque background highlights (`bg = "darkgray"`, `bg = "black"`) are strictly eliminated across all pickers and modals. Always explicitly set `bg = "reset"` under `[results.current_style]` because Waymaker's `ResultsConfig::default()` defaults `current_style.bg` to `Color::Black`.
-- **Transparency with BOLD:** The active selection preserves the terminal's native transparency and indicates primacy through `modifier = "BOLD"`.
-- **Cyan Lateral Indicator (`│` at $X=1$):**
-  - When `focus_on_start = "picker"`, use `ui.nav.bar = "Plain"`, `ui.nav.color = "black"`, `current_nav_bar = "Plain"`, and `[results.current_nav_bar_style] = { fg = "cyan", modifier = "BOLD" }`.
+- **Two-Tier Peripheral Dimming (`[results.style] modifier = "DIM"`):** Single-target selection and action menus (`session-picker`, `window-picker`, `ai-launch`, `ai-switch`, `keybindings` / `command-palette`, `scrollback-picker`, `pr`, `fan-compare`, `awt-{pr,ai,base,type}`, `kill`, `memory`, `starship-presets`, `sounds`, `animations`, `borders`, `backgrounds`) set `modifier = "DIM"` without overriding `fg`, preserving dark/light Omarchy theme palettes while pushing unselected rows into *Gestalt Ground*. Multi-row urgency HUDs (`cockpit-picker`, `awt`), parallel code search (`rg`), and colored-devicon file trees (`workspace`, `jump`, `downloads`) remain **un-dimmed** to preserve peripheral `prio <= 3` alert luminance and syntax/icon color fidelity.
+- **Cyan Lateral Hairline (`│` at $X=1$, `Plain` over `QuadrantOutside`):**
+  - When `focus_on_start = "picker"` (including passthrough menus like `ai-launch` and `ai-switch` using `passthrough = true` where no single-letter nav binds conflict), use `ui.nav.bar = "Plain"`, `ui.nav.color = "black"`, `current_nav_bar = "Plain"` (`│`), and `[results.current_nav_bar_style] = { fg = "cyan"/"lightcyan", modifier = "BOLD" }`.
   - When `focus_on_start = "filter"` (or omitted, since `NavFocus` defaults to `Filter`), `current_nav_bar_style` is suppressed while `Focus::Input` holds focus; omit `ui.nav.bar` and set `ui.nav.marker = "│"` + `ui.nav.color = "lightcyan"` so the single-row `│` focus cursor renders in both Filter and Nav focus without hijacking single-letter `[ui.nav.binds]`.
+- **Tmux Popup Foreground Inheritance (`TMUX_POPUP_TEXT_COLOR`):** Tmux popups pass `-s "fg=${TMUX_POPUP_TEXT_COLOR}"` (`cyan`), so uncolored footer tokens like `{bold:⠛}` inherit `cyan`; explicitly declare `{white,bold:⠛}` whenever neutral high-luminance white is required in a footer legend.
 
 ---
 
@@ -75,7 +76,7 @@ All popup components adhere to the deterministic Triadic Cold-Color Architecture
 ╭── 󱂬  Waymaker Jump ────────────────────────────────────────────────────────╮
 │ > git                                                              8 matches │
 │──────────────────────────────────────────────────────────────────────────────│
-│▌󱅤  main/                                    │ commit bb603d9 (HEAD)          │
+││ 󱅤  main/                                    │ commit bb603d9 (HEAD)          │
 │  󱅤  feat-eval/                                │ Author: felipe                 │
 │  󱅤  pr-42/                                   │ Date:   Thu Sep 17 18:56:06    │
 │     .bare/                                   │                                │

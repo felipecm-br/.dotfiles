@@ -42,6 +42,7 @@ Reducing cognitive search time $T$ requires drastically minimizing $n$ (the numb
 - Depth penalty (`depth_penalty = 15`) favors shallow, high-level project roots over deeply nested files.
 - Visual tier separators categorize candidates cleanly.
 
-### 3.3 Visual Neuroscience & Preattentive Processing
-- Preattentive decoding (<15ms) occurs in early visual cortex prior to conscious focus.
-- Nerd Font icon badges (`󱂬`, `⚡`, `󰊢`, `󱅤`, ``) decode 10-15x faster than plain textual labels.
+### 3.3 Visual Neuroscience, Eye-Tracking & Preattentive Pop-Out
+- **Preattentive Feature Search (<50 ms) vs. Serial Row Scan (280–340 ms):** Without a lateral cursor bar or luminance contrast (e.g., when Waymaker's `current_nav_bar_style` is suppressed during `Focus::Input`), locating the active row across 10–16 uniform candidates degrades into a serial vertical scan ($\approx 28\text{–}35\text{ ms/row}$). Rendering a single-row cyan `│` hairline at $X=1$ from frame 0 (`current_nav_bar = "Plain"` in picker focus; `ui.nav.marker = "│"` in filter focus) paired with `BOLD`/`DIM` luminance separation triggers Treisman preattentive pop-out in $<50\text{ ms}$.
+- **Foveal Co-Location ($X=1..4$) vs. End-of-Line Saccade (+140–210 ms):** Trailing recommendation/current markers at the right edge of variable-length rows (`` / `● now` at $X=55..72$) force a second horizontal saccade outside the $2^\circ$ foveal cone. Anchoring an upper-band BMP glyph (`⠛` `U+281B`, `y = 20..55`) in a fixed 1-cell gutter at $X=3$ places both the live cursor (`│` at $X=1$) and the reference row (`⠛` at $X=3$) inside one initial fixation ($0\text{ ms}$ extra saccade).
+- **Icon Semiotics (<15 ms):** Nerd Font icon badges (`󱂬`, `⚡`, `󰊢`, `󱅤`, ``) decode preattentively in early visual cortex, provided they are audited against active operational spinners (`⠋` vetoed in favor of symmetric 4-dot `⠛`).
