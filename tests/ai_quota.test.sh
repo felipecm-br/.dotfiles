@@ -14,6 +14,8 @@ mkdir -p "$HOME/.claude/sessions" "$HOME/.gemini/antigravity-cli/log" "$XDG_RUNT
 for b in claude agy-bin; do printf '#!/bin/sh\n' >"$SANDBOX/bin/$b"; chmod +x "$SANDBOX/bin/$b"; done
 export PATH="$SANDBOX/bin:$ROOT/utils/.local/bin:$PATH"
 unset AI_AGENT_PREFERENCE AI_LAUNCH_AGENT AI_QUOTA_SESSION_RATE
+# The model and precedence checks read the plain rows; §6b covers the jailed default.
+export AI_LAUNCH_JAIL=0
 : >"$HOME/.claude/history.jsonl"
 : >"$HOME/.gemini/antigravity-cli/history.jsonl"
 
@@ -138,6 +140,18 @@ rm -f "$XDG_STATE_HOME/ai-quota/claude-samples.tsv"
 export AI_AGENT_PREFERENCE=claude # isolate the model mapping from the agent ranking
 feed 20 >/dev/null
 [ "$(ai-launch --peek --auto)" = "claude --model opus" ] && ok "claude green -> opus" || bad "green: $(ai-launch --peek --auto)"
+
+# 6b. With ai-jail, the Claude rows start jailed with prompts on; where ai-jail would refuse (the
+# global ~/.ai-jail inside the project) or with AI_LAUNCH_JAIL=0, plain claude starts.
+printf '#!/bin/sh\n' >"$SANDBOX/bin/ai-jail"; chmod +x "$SANDBOX/bin/ai-jail"
+mkdir -p "$SANDBOX/proj" "$SANDBOX/elsewhere" && : >"$SANDBOX/proj/.ai-jail" && ln -s "$SANDBOX/proj/.ai-jail" "$HOME/.ai-jail"
+out=$(cd "$SANDBOX/elsewhere" && AI_LAUNCH_JAIL=1 ai-launch --peek --auto)
+[ "$out" = "jail-claude-ask --model opus" ] && ok "claude rows start jailed with prompts on" || bad "jail default: $out"
+out=$(cd "$SANDBOX/proj" && AI_LAUNCH_JAIL=1 ai-launch --peek --auto)
+[ "$out" = "claude --model opus" ] && ok "project holding ~/.ai-jail starts plain claude" || bad "refused jail: $out"
+[ "$(cd "$SANDBOX/elsewhere" && ai-launch --peek --auto)" = "claude --model opus" ] && ok "AI_LAUNCH_JAIL=0 opts out" || bad "opt-out"
+[ "$(ai-launch --peek jail-claude-ask --model sonnet)" = "jail-claude-ask --model sonnet" ] && ok "jail-claude-ask choice accepted" || bad "ask choice"
+rm -f "$HOME/.ai-jail" "$SANDBOX/bin/ai-jail"
 feed 85 >/dev/null
 [ "$(ai-launch --peek --auto)" = "claude --model sonnet" ] && ok "claude yellow -> sonnet" || bad "yellow: $(ai-launch --peek --auto)"
 ai-launch --next auto
@@ -206,3 +220,15 @@ supervise=(); TMUX_PANE= jail_supervision
 printf '#!/bin/sh\nexit 1\n' >"$SANDBOX/bin/waymux"
 supervise=(); TMUX_PANE=%5 jail_supervision
 [ ${#supervise[@]} -eq 0 ] && ok "no daemon: unsupervised jail" || bad "no-daemon: ${supervise[*]}"
+
+# 12. The jail sees the real Claude settings (hooks, permission rules): the stow link's target is
+# mapped read-only at its own path; a plain file (not a link) is left alone.
+eval "$(sed -n '/^pin_settings() {$/,/^}$/p' "$ROOT/utils/.local/bin/ai-launch")"
+mkdir -p "$SANDBOX/dot/claude"; echo '{}' >"$SANDBOX/dot/claude/settings.json"
+ln -sf "$SANDBOX/dot/claude/settings.json" "$HOME/.claude/settings.json"
+supervise=(); pin_settings
+[ "${supervise[*]}" = "--map $(readlink -f "$SANDBOX/dot/claude/settings.json")" ] && ok "settings link target mapped read-only" || bad "pin: ${supervise[*]}"
+rm "$HOME/.claude/settings.json"; echo '{}' >"$HOME/.claude/settings.json"
+supervise=(); pin_settings
+[ ${#supervise[@]} -eq 0 ] && ok "plain settings file needs no map" || bad "pin plain: ${supervise[*]}"
+rm -f "$HOME/.claude/settings.json"

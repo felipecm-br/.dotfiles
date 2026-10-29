@@ -169,8 +169,14 @@ ai-launch --auto
 # Start a specific AI agent CLI (claude, agy, agyy, devin, codex)
 ai-launch {{agent}}
 
-# Start Claude inside the ai-jail sandbox with permission prompts off (the Claude Jailed menu row)
+# Start Claude inside the ai-jail sandbox with permission prompts on (the default Claude menu rows)
+ai-launch jail-claude-ask --model {{model}}
+
+# Start Claude inside the ai-jail sandbox with permission prompts off (the Claude YOLO menu row)
 ai-launch jail-claude --model {{model}}
+
+# Start Claude unjailed (the Claude Host menu row), for SSH, Docker or the open web
+ai-launch claude --model {{model}}
 
 # Gracefully terminate Tmux session with AI agent and multi-window safeguards
 ~/.config/tmux/close-session.sh
@@ -379,7 +385,7 @@ waymux phone-token --rotate
 # Send a test alert to the phone through the [phone] ntfy topic (held prompts alert after 15 s)
 waymux phone-alert
 
-# Mint a hook token limited to one pane, for a sandboxed agent (ai-launch jail-claude does this)
+# Mint a hook token limited to one pane, for a sandboxed agent (ai-launch jail-claude and jail-claude-ask do this)
 waymux hook-token {{pane}}
 
 # List the work-tree checkpoints each agent turn left in this pane

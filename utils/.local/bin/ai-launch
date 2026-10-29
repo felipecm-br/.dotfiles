@@ -6,10 +6,15 @@
 #   ai-launch --auto           Start the recommended agent and model directly
 #   ai-launch <agent> [args]   Force claude | agy | agyy | devin | codex (extra args pass through,
 #                              e.g. --model sonnet)
+#   ai-launch jail-claude-ask [args]
+#                              Claude in the ai-jail sandbox with permission prompts on: what the
+#                              menu's Claude rows (󰌾) start, and --auto, wherever ai-jail can run here
 #   ai-launch jail-claude [args]
 #                              Claude in the ai-jail sandbox with permission prompts off (the menu's
-#                              "Claude Jailed" row, listed only when ai-jail is installed); falls back
-#                              to plain claude where ai-jail cannot start
+#                              "Claude YOLO" row)
+#                              Both fall back to plain claude with prompts on where ai-jail cannot start.
+#                              "Claude Host" (`ai-launch claude`) is the unjailed row, for work that
+#                              needs SSH, Docker or the open web.
 #   ai-launch --next <choice> [args]
 #                              Arm a one-shot choice (agent | auto | shell, plus args such as
 #                              --model sonnet) for the next ai-launch (session picker)
@@ -18,6 +23,7 @@
 #                              tmux/.config/tmux/ai-launch-popup.sh starts it in a new window)
 #
 # Nothing armed: $AI_LAUNCH_AGENT (agent | auto | menu | shell), else menu.
+# AI_LAUNCH_JAIL=0 makes the Claude rows unjailed again (no Host row then).
 # Recommended model: Claude green → opus, yellow → sonnet, red → haiku; Antigravity → its default
 # model while that group has quota, otherwise the group with the most quota left.
 # Devin and Codex (no quota telemetry) get one default-model row each when installed.
@@ -35,7 +41,7 @@ case "${1:-}" in
     exit 0
     ;;
   -h | --help)
-    sed -n '2,23p' "$0" | sed 's/^# \{0,1\}//'
+    sed -n '2,30p' "$0" | sed 's/^# \{0,1\}//'
     exit 0
     ;;
 esac
@@ -52,25 +58,61 @@ jail_supervision() {
   WAYMUX_HOOK_TOKEN=$("$bin" hook-token "$TMUX_PANE" 2>/dev/null) || return 0
   [ -n "$WAYMUX_HOOK_TOKEN" ] || return 0
   export WAYMUX_HOOK_TOKEN WAYMUX_PORT="${WAYMUX_PORT:-4040}"
-  supervise=(--env TMUX_PANE --env WAYMUX_HOOK_TOKEN --env WAYMUX_PORT
+  supervise+=(--env TMUX_PANE --env WAYMUX_HOOK_TOKEN --env WAYMUX_PORT
     --forward-port "$WAYMUX_PORT" --map "$(readlink -f "$bin")")
 }
 
-# Claude in ai-jail via `ai-memory run --true-yolo` (bypassPermissions, ai-memory workstream/handoff): the project directory is the blast radius.
-# ai-jail fails closed when the global ~/.ai-jail resolves inside the project (the dotfiles repo
-# itself), so that case, and a missing ai-jail, start plain claude with prompts on instead.
-# --no-save-config keeps ai-jail from dropping a .ai-jail file into the project.
-launch_jailed() {
+# ai-jail binds ~/.claude read-write, but settings.json there is a stow symlink into this repo,
+# which the jail cannot see: Claude would start without its hooks (waymux, ai-memory) and
+# permission rules. Mapping the link's target read-only at its own path lets the link resolve,
+# and the agent cannot edit the file. (bwrap cannot mount onto the link itself.)
+pin_settings() {
+  local link="$HOME/.claude/settings.json" real
+  [ -L "$link" ] || return 0
+  real=$(readlink -f "$link" 2>/dev/null) || return 0
+  [ -f "$real" ] && supervise+=(--map "$real")
+}
+
+# The link itself sits in that read-write ~/.claude, so a jailed agent could still replace it
+# with a file of its own, whose hooks every later session would run on the host. Say so loudly.
+settings_guard() {
+  local link="$HOME/.claude/settings.json" pkg
+  pkg="$(dirname "$(readlink -f "$0")")/../../../claude/.claude/settings.json"
+  if [ -f "$pkg" ] && [ -e "$link" ] && [ ! -L "$link" ]; then
+    printf '\033[31m%s\033[0m\n' "ai-launch: ~/.claude/settings.json is no longer the dotfiles link; check it (diff it with claude/.claude/settings.json) before trusting its hooks, then restow claude" >&2
+    sleep 3
+  fi
+}
+
+# Why ai-jail cannot run here, or nothing. ai-jail fails closed when the global ~/.ai-jail
+# resolves inside the project (the dotfiles repo itself).
+jail_blocker() {
   local global
   global=$(readlink -f "$HOME/.ai-jail" 2>/dev/null)
   if ! command -v ai-jail >/dev/null 2>&1; then
-    printf '\033[33m%s\033[0m\n' "ai-launch: ai-jail not installed, starting claude unjailed (prompts on)" >&2
+    echo "ai-jail not installed"
   elif [ -n "$global" ] && [[ $global == "$(pwd -P)"/* ]]; then
-    printf '\033[33m%s\033[0m\n' "ai-launch: ~/.ai-jail lives inside this project, ai-jail would refuse; starting claude unjailed (prompts on)" >&2
-  else
-    jail_supervision
-    exec ai-jail --no-save-config "${supervise[@]}" ai-memory run --true-yolo claude "$@"
+    echo "~/.ai-jail lives inside this project, ai-jail would refuse"
   fi
+}
+
+# Claude in ai-jail through `ai-memory run` (ai-memory workstream/handoff): the project directory
+# is the blast radius. `ask` keeps permission prompts (held approvals, the phone page); `yolo`
+# turns them off (--true-yolo). Where ai-jail cannot run, plain claude starts with prompts on.
+# --no-save-config keeps ai-jail from dropping a .ai-jail file into the project.
+launch_jailed() { # <ask|yolo> [claude args]
+  local mode=$1 blocker
+  shift
+  blocker=$(jail_blocker)
+  if [ -z "$blocker" ]; then
+    pin_settings
+    jail_supervision
+    if [ "$mode" = yolo ]; then
+      exec ai-jail --no-save-config "${supervise[@]}" ai-memory run --true-yolo claude "$@"
+    fi
+    exec ai-jail --no-save-config "${supervise[@]}" ai-memory run claude "$@"
+  fi
+  printf '\033[33m%s\033[0m\n' "ai-launch: $blocker; starting claude unjailed (prompts on)" >&2
   sleep 2
   exec claude "$@"
 }
@@ -102,21 +144,23 @@ fi
 # (--pick runs with stdout captured by its caller, so it only needs a terminal on stdin)
 if [ "$choice" = "menu" ] && ! { [ -t 0 ] && { $pick_only || [ -t 1 ]; }; }; then choice=auto; fi
 
+case "$choice" in claude | jail-claude | jail-claude-ask | auto | menu) settings_guard ;; esac
+
 case "$choice" in
   claude | agy | agyy | devin | codex)
     if $peek; then echo "$choice${*:+ $*}"; exit 0; fi
     exec "$choice" "$@"
     ;;
-  jail-claude)
+  jail-claude | jail-claude-ask)
     if $peek; then echo "$choice${*:+ $*}"; exit 0; fi
-    launch_jailed "$@"
+    launch_jailed "$([ "$choice" = jail-claude ] && echo yolo || echo ask)" "$@"
     ;;
   shell)
     if $peek; then echo shell; exit 0; fi
     exec "${SHELL:-bash}"
     ;;
   auto | menu) ;;
-  *) echo "ai-launch: unknown choice '$choice' (claude | agy | agyy | devin | codex | jail-claude | auto | menu)" >&2; exit 2 ;;
+  *) echo "ai-launch: unknown choice '$choice' (claude | agy | agyy | devin | codex | jail-claude | jail-claude-ask | auto | menu)" >&2; exit 2 ;;
 esac
 if $peek && [ "$choice" = "menu" ]; then echo menu; exit 0; fi
 
@@ -136,12 +180,17 @@ snapshot=$(ai-quota --json 2>/dev/null)
 
 # CLIs without quota telemetry get one default-model row each, only where installed
 have() { command -v "$1" >/dev/null 2>&1 && echo 1 || echo 0; }
+# The Claude rows start jailed wherever ai-jail can run here, unless AI_LAUNCH_JAIL=0
+jail_ok=0
+[ -z "$(jail_blocker)" ] && jail_ok=1
+jail_default=0
+[ "$jail_ok" = 1 ] && [ "${AI_LAUNCH_JAIL:-1}" != 0 ] && jail_default=1
 
 # One row per CLI × model family: agent \t args \t plain text \t colored text \t recommended (0|1)
 rows=$(jq -r -n --argjson s "$snapshot" --arg models "$agy_models" \
   --arg ic_claude "$(waymux icon claude 2>/dev/null || echo C)" --arg ic_agy "$(waymux icon agy 2>/dev/null || echo A)" \
   --arg ic_devin "$(waymux icon devin 2>/dev/null || echo D)" --arg ic_codex "$(waymux icon codex 2>/dev/null || echo X)" \
-  --arg have_devin "$(have devin)" --arg have_codex "$(have codex)" --arg have_jail "$(have ai-jail)" '
+  --arg have_devin "$(have devin)" --arg have_codex "$(have codex)" --arg jail_ok "$jail_ok" --arg jail_default "$jail_default" '
 def fam: sub("-(low|medium|high)$"; "");
 def pad($n): . + (" " * ([$n - length, 1] | max));
 def clock: if (. - ($s.now // 0)) > 86400 then strflocaltime("%a %H:%M") else strflocaltime("%H:%M") end;
@@ -190,10 +239,15 @@ def tier: if test("fable|argon") then "$$$$" elif test("opus") then "$$$" elif t
         quota: "no quota data", level: "unknown", rec: false})
   ]
 | (if any(.[]; .rec) then . else (.[0].rec = true) end)
-# One sandboxed row, after the plain ones: the recommended Claude model (else the first), run in ai-jail
-| . + [(map(select(.agent == "claude" and .rec)) + map(select(.agent == "claude")) | first
-        | select(. != null and $have_jail == "1")
-        | .agent = "jail-claude" | .cli = "Claude Jailed" | .icon = "󰌾" | .rec = false)]
+# After the plain rows, for the recommended Claude model (else the first): YOLO (jailed, prompts
+# off) and, when the Claude rows are jailed, Host (unjailed). Then the Claude rows go jailed (󰌾).
+| (map(select(.agent == "claude" and .rec)) + map(select(.agent == "claude")) | first) as $c
+| . + [$c | select(. != null and $jail_ok == "1")
+        | .agent = "jail-claude" | .cli = "Claude YOLO" | .icon = "󰌾" | .rec = false]
+    + [$c | select(. != null and $jail_default == "1")
+        | .cli = "Claude Host" | .rec = false]
+| map(if $jail_default == "1" and .agent == "claude" and .cli == "Claude Code"
+      then .agent = "jail-claude-ask" | .cli = "Claude Code 󰌾" else . end)
 | .[]
 | (if .rec then "⠛" else " " end) as $gut
 | ("\(.icon) " + (.cli | pad(14))) as $cli_col
@@ -250,5 +304,6 @@ if [ "${agents[$pick]}" = shell ]; then
 fi
 if $peek || $pick_only; then echo "${agents[$pick]}${args[*]:+ ${args[*]}}"; exit 0; fi
 [ "$choice" = "auto" ] && printf '\033[90m%s\033[0m\n' "${plain[$pick]}"
-[ "${agents[$pick]}" = jail-claude ] && launch_jailed "${args[@]}"
+[ "${agents[$pick]}" = jail-claude ] && launch_jailed yolo "${args[@]}"
+[ "${agents[$pick]}" = jail-claude-ask ] && launch_jailed ask "${args[@]}"
 exec "${agents[$pick]}" "${args[@]}"
