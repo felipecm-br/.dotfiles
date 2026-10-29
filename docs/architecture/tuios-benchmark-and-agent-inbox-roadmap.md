@@ -2,7 +2,8 @@
 
 > **Canonical Architectural Reference:** `docs/architecture/tuios-benchmark-and-agent-inbox-roadmap.md`  
 > **Related Systems:** [`waymux`](remote-agent-workflow-waymux.md) · [`awt`](../GIT_WORKTREE_AGENTIC_WORKFLOW.md) · [`ai-quota` / `ai-launch`](quota-aware-agent-selection.md) · [`state-of-the-art-terminal-agent-workflow.md`](state-of-the-art-terminal-agent-workflow.md) · [Ergonomics manifesto](terminal-ergonomics-and-ux-manifesto.md)  
-> **Verified against:** upstream [`docs/AGENT_STATE.md`](https://github.com/Gaurav-Gosain/tuios/blob/main/docs/AGENT_STATE.md) for TUIOS `v0.10.1` (released 2026-10-17), read on 2026-10-24, and the `waymux` `0.2.4` source.
+> **Verified against:** upstream [`docs/AGENT_STATE.md`](https://github.com/Gaurav-Gosain/tuios/blob/main/docs/AGENT_STATE.md) for TUIOS `v0.10.1` (released 2026-10-17), read on 2026-10-24, and the `waymux` `0.2.4` source.  
+> **Since then:** TUIOS `v0.11.0` (2026-10-25) and `v0.11.1` (2026-10-26) added a full-screen agent cockpit, fans of 1–8 attempts with compare and a read-only judge, linked machines, and four security fixes, one of which applies to `waymux` too. The current comparison is in the [state-of-the-art benchmark §2](state-of-the-art-terminal-agent-workflow.md#2-competitor-matrix--architecture-analysis).
 
 ---
 

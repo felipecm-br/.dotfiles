@@ -42,11 +42,13 @@ flowchart LR
 | Capability | Current Stack (`waymux` + Tmux) | Herdr |
 | :--- | :--- | :--- |
 | **Control Plane** | Lightweight Rust daemon (`waymux` @ `127.0.0.1:4040`) | Monolithic terminal emulator & multiplexer |
-| **Multiplexer Freedom** | Native Tmux, Golden-Ratio Popups, Neovim navigation | Proprietary terminal backend |
+| **Multiplexer Freedom** | Native Tmux, Golden-Ratio Popups, Neovim navigation | Its own terminal backend (open source, Apache-2.0; the server owns the PTYs) |
 | **Code Review Loop** | Bidirectional inline diff reviews via `lazygitrs` | No git diff or review integration |
-| **Agent State Detection** | Structured hooks (`api/status`, Bearer token auth) | Screen scraping / PTY heuristics |
-| **Remote Ingress** | Zero-trust Tailscale SSH / Tailscale Serve | Requires exposing SSH profile or port |
-| **Ergonomics & Memory** | Home Row anchored ($H=0$), sub-100ms latency | Incompatible with Tmux/Vim chords |
+| **Agent State Detection** | Structured hooks (`api/status`, Bearer token auth) | Screen analysis plus agent integrations; agents can report their own status (v0.9.2+) |
+| **Remote Ingress** | Zero-trust Tailscale SSH / Tailscale Serve | SSH to saved machines (`herdr machine add`), which also works over Tailscale SSH |
+| **Ergonomics & Memory** | Home Row anchored ($H=0$), sub-100ms latency | Replaces tmux; its own prefix key (configurable, several allowed) |
+
+Competitor state as of 29 Oct 2026 (herdr 0.9.5 and seven other tools): [state-of-the-art benchmark §2](state-of-the-art-terminal-agent-workflow.md#2-competitor-matrix--architecture-analysis).
 
 ---
 
