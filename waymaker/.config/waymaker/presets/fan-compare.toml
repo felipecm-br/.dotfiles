@@ -38,6 +38,9 @@ current_nav_bar = "Plain"
 row_connection = "Full"
 column_spacing = 0
 
+[results.style]
+modifier = "DIM"
+
 [results.current_style]
 bg = "reset"
 modifier = "BOLD"

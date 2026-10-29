@@ -65,6 +65,9 @@ column_spacing = 1
 fg = "cyan"
 modifier = "BOLD"
 
+[results.style]
+modifier = "DIM"
+
 [results.current_style]
 bg = "reset"
 modifier = "BOLD"

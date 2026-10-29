@@ -114,7 +114,7 @@ Column references in commands use `{1}`, `{2}`, etc. (1-indexed).
 
 ### Nav Mode & $X=1$ Cyan Focus-Bar Convention
 
-Always set `bg = "reset"` on `[results.current_style]` (Waymaker defaults `current_style.bg` to `Color::Black`, which otherwise draws an opaque black bar across the active row). Choose the focus-bar pattern matching `focus_on_start`:
+Always set `bg = "reset"` on `[results.current_style]` (Waymaker defaults `current_style.bg` to `Color::Black`, which otherwise draws an opaque black bar across the active row). For single-target selection and action menus, add `[results.style] modifier = "DIM"` so inactive rows recede in luminance behind the `BOLD` focused row; leave multi-row urgency HUDs (`cockpit-picker`, `awt`), parallel code search (`rg`), and colored-devicon file trees (`workspace`, `jump`, `downloads`) un-dimmed. Choose the focus-bar pattern matching `focus_on_start`:
 
 ```toml
 # Pattern 1: Picker-first (or passthrough menus with no conflicting single-letter nav binds)
