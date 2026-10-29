@@ -295,8 +295,11 @@ if [ "$choice" = "menu" ]; then
   WM_BIN="$HOME/.local/bin/wm"
   [ -x "$WM_BIN" ] || WM_BIN=$(command -v wm)
   PRESET="$HOME/.config/waymaker/presets/ai-launch.toml"
+  # --pick callers own the Esc path (popup or picker closes), so the footer says Close, not Shell
+  overlay=()
+  $pick_only && overlay=(-o "$HOME/.config/waymaker/presets/ai-launch-pick.toml")
   # Esc leaves a plain shell in the pane
-  sel=$(printf '%s\n' "${colored[@]}" | "$WM_BIN" -o "$PRESET" --pos "$((pick < 0 ? 0 : pick))") || exit 0
+  sel=$(printf '%s\n' "${colored[@]}" | "$WM_BIN" -o "$PRESET" "${overlay[@]}" --pos "$((pick < 0 ? 0 : pick))") || exit 0
   sel=$(sed 's/\x1b\[[0-9;]*m//g' <<<"$sel")
   pick=-1
   for i in "${!plain[@]}"; do [ "${plain[$i]}" = "$sel" ] && { pick=$i; break; }; done

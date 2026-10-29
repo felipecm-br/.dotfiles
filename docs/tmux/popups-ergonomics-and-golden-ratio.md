@@ -200,9 +200,9 @@ Every interactive popup, picker, and confirmation dialog has been harmonized und
 | **AWT Worktrees** | [`awt.toml`](../../awt/.config/waymaker/presets/awt.toml) | `{cyan,bold:Enter} Connect │ Tab Cockpit │ c New │ S Ship │ m Merge │ R Rebase │ P PR │ d Delete │ p Preview │ Esc Exit` |
 | **AWT PR Review** | [`awt-pr.toml`](../../awt/.config/waymaker/presets/awt-pr.toml) | `{cyan,bold:Enter} Checkout │ Tab Cycle Tab │ C-e Chrome │ C-d Diff │ p Preview │ Esc Exit` |
 | **AWT Sub-Wizards** | `awt-prompt`, `awt-ai`, `awt-base`, `awt-type` | `{cyan,bold:Enter} Confirm/Select │ Esc Back/Cancel` |
-| **AI Agent Launcher** | [`ai-launch.toml`](../../waymaker/.config/waymaker/presets/ai-launch.toml) | `{cyan,bold:Enter} Launch │ ⠛ Recommended │ type Filter │ Esc Shell` |
-| **AI Model / Effort Hot-Swap** | [`ai-switch.toml`](../../waymaker/.config/waymaker/presets/ai-switch.toml) | `{cyan,bold:Enter} Switch │ ⠛ Current │ type Filter │ Esc Cancel` |
-| **AI Quota Telemetry** | [`ai-quota-popup.sh`](../../tmux/.config/tmux/ai-quota-popup.sh) | `{cyan,bold:Enter} Auto-Launch │ a Model Menu │ r Refresh │ Esc Exit` |
+| **AI Agent Launcher** | [`ai-launch.toml`](../../waymaker/.config/waymaker/presets/ai-launch.toml) | `{cyan,bold:Enter} Launch │ {white,bold:⠛} Recommended │ type Filter │ Esc Shell` (`Esc Close` under `--pick`, via [`ai-launch-pick.toml`](../../waymaker/.config/waymaker/presets/ai-launch-pick.toml)) |
+| **AI Model / Effort Hot-Swap** | [`ai-switch.toml`](../../waymaker/.config/waymaker/presets/ai-switch.toml) | `{cyan,bold:Enter} Switch │ {white,bold:⠛} Current │ type Filter │ Esc Cancel` |
+| **AI Quota Telemetry** | [`ai-quota-popup.sh`](../../tmux/.config/tmux/ai-quota-popup.sh) | `{cyan,bold:Enter} Launch │ {white,bold:⠛} Recommended │ a Models │ r Refresh │ Esc Close` |
 | **Tmux Windows** | [`window-picker.toml`](../../waymaker/.config/waymaker/presets/window-picker.toml) | `{cyan,bold:Enter} Switch │ t Sessions │ / Filter │ n New │ d Kill │ ? Help │ Esc Exit` |
 | **Tmux Sessions** | [`session-picker.toml`](../../waymaker/.config/waymaker/presets/session-picker.toml) | `{cyan,bold:Enter} Menu │ r Auto │ a/c Agy/Claude │ u Quota │ s Cockpit │ Tab Cycle │ d Kill` |
 | **Live Ripgrep** | [`rg.toml`](../../waymaker/.config/waymaker/presets/rg.toml) | `{cyan,bold:Enter} Nvim │ C-v Insert │ y Copy │ J/K Scroll │ C-/ Layout │ C-s Case │ C-w Word` |

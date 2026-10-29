@@ -437,6 +437,9 @@ elif $mode == "line" then
 elif $mode == "visual" then
   def rst: "\u001b[0m";
   def bold: "\u001b[1m";
+  # Recommended-row marker: the same bright-white ⠛ the launch and switch menus use
+  def mark: "\u001b[97m\(bold)⠛\(rst)";
+  def title: if . == "claude" then "Claude Code" elif . == "agyy" then "Antigravity ²" else "Antigravity" end;
   def lcol($l): if $l == "green" then $c_green elif $l == "yellow" then $c_yellow elif $l == "red" then $c_red else $c_muted end;
   def rpad($n): . + (" " * ([$n - length, 0] | max));
   def lpad($n): (" " * ([$n - length, 0] | max)) + .;
@@ -492,13 +495,12 @@ elif $mode == "visual" then
   "\($c_muted)  █ actual  ▒ proj  │ pace  ░ headroom\(rst)\n"
   + "\($c_muted)  ──────────────────────────────────────────────────────────────────────────\(rst)\n"
   + ([ $agents[] | select(.available) | . as $a |
-      (if $a.agent == $rec then "\($c_cyan)\(bold)⠛\(rst)" else "\(lcol($a.level))●\(rst)" end) as $gut
-      | (if $a.agent == "claude" then "Claude Code" elif $a.agent == "agyy" then "Antigravity ²" else "Antigravity" end) as $title
-      | "  \($gut) \($c_fg)\(bold)\(($a.icon + " " + $title) | rpad(16))\(rst)"
+      (if $a.agent == $rec then mark else " " end) as $gut
+      | "  \($gut) \($c_blue)\(bold)\(($a.icon + " " + ($a.agent | title)) | rpad(16))\(rst)"
         + "\(lcol($a.level))\(bold)\($a.level | rpad(8))\(rst)"
         + "\($c_muted)sessions:\(rst) \($c_fg)\($a.sessions)\(if $a.active != null then " (\($a.active) act)" else "" end)\(rst)"
         + "  \($c_muted)prompts 1h/5h:\(rst) \($c_fg)\($a.prompts_1h)/\($a.prompts_5h)\(rst)"
-        + (if $a.agent == $rec then "  \($c_cyan)\(bold)← recommended\(rst)" else "" end) + "\n"
+        + "\n"
       + (if $a.agent == "claude" then
           (if $a.five == null then "?% used" else "\($a.five | floor)% used" end | lpad(9)) as $p5s
           | (if $a.seven == null then "?% used" else "\($a.seven | floor)% used" end | lpad(9)) as $p7s
@@ -541,7 +543,7 @@ elif $mode == "visual" then
         end)
     ] | join("\n\n"))
   + "\n\($c_muted)  ──────────────────────────────────────────────────────────────────────────\(rst)\n"
-  + "  \($c_cyan)\(bold)→ recommend:\(rst) \($c_fg)\(bold)\($rec)\(rst)  \($c_muted)(\($why))\(rst)"
+  + "  \(mark) \($c_muted)Recommended\(rst) \($c_fg)\(bold)\($rec | title)\(rst)  \($c_muted)(\($why))\(rst)"
 else
   ( $agents[] | select(.available) |
     "\(ansi)● \(.agent)\u001b[0m  [\(.level)]  sessions: \(.sessions)\(if .active != null then " (\(.active) active)" else "" end)  prompts 1h/5h: \(.prompts_1h)/\(.prompts_5h)\n"

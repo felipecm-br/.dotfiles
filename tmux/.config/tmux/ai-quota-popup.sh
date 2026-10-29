@@ -47,6 +47,7 @@ fi
 
 c_cyan=$(_hex_to_ansi "$COLOR_CYAN")
 c_muted=$(_hex_to_ansi "$COLOR_MUTED")
+c_white=$'\033[97m'
 c_bold=$'\033[1m'
 c_reset=$'\033[0m'
 
@@ -97,7 +98,7 @@ while :; do
   fi
   [ "$w" -lt 10 ] && w=74
   sep_line=$(printf '─%.0s' $(seq 1 "$w"))
-  footer=" ${c_bold}${c_cyan}Enter${c_reset} ${c_muted}Auto-Launch${c_reset} ${c_muted}│${c_reset} ${c_bold}${c_cyan}a${c_reset} ${c_muted}Model Menu${c_reset} ${c_muted}│${c_reset} ${c_bold}${c_cyan}r${c_reset} ${c_muted}Refresh${c_reset} ${c_muted}│${c_reset} ${c_bold}${c_cyan}Esc${c_reset} ${c_muted}Exit${c_reset}"
+  footer=" ${c_bold}${c_cyan}Enter${c_reset} ${c_muted}Launch${c_reset} ${c_muted}│${c_reset} ${c_bold}${c_white}⠛${c_reset} ${c_muted}Recommended${c_reset} ${c_muted}│${c_reset} ${c_bold}${c_cyan}a${c_reset} ${c_muted}Models${c_reset} ${c_muted}│${c_reset} ${c_bold}${c_cyan}r${c_reset} ${c_muted}Refresh${c_reset} ${c_muted}│${c_reset} ${c_bold}${c_cyan}Esc${c_reset} ${c_muted}Close${c_reset}"
 
   # Pin Cockpit-style separator line and footer to the bottom of the popup
   printf '\033[%d;%dH%s%s%s\033[%d;%dH%s\033[%d;%dH' \

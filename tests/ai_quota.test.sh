@@ -79,8 +79,11 @@ report=$(AI_QUOTA_FIXTURE_DIR="$FIX" ai-quota)
 [[ "$report" == *"Gemini 4 Argon: no per-model quota in the API"* && "$report" == *"--model gemini-3.8-flash-high"* ]] &&
   ok "report explains Argon and the Gemini fallback" || bad "report: $report"
 vis=$(AI_QUOTA_FIXTURE_DIR="$FIX" ai-quota --visual)
-[[ "$vis" != *"AI Quota & Burn Telemetry"* && "$vis" == *"█"* && "$vis" == *"▒"* && "$vis" == *"│"* && "$vis" == *"⠛"* && "$vis" == *"Gemini 4 Argon: no per-model quota in the API"* && "$vis" == *"recommend:"*"agy"* ]] &&
+[[ "$vis" != *"AI Quota & Burn Telemetry"* && "$vis" == *"█"* && "$vis" == *"▒"* && "$vis" == *"│"* && "$vis" == *"⠛"* && "$vis" == *"Gemini 4 Argon: no per-model quota in the API"* && "$vis" == *"Recommended"*"Antigravity"* ]] &&
   ok "--visual renders bullet gauges, sparklines, Argon note and recommendation" || bad "visual: $vis"
+plain=$(sed 's/\x1b\[[0-9;]*m//g' <<<"$vis")
+[[ "$(grep -c '⠛' <<<"$plain")" -eq 2 && "$plain" != *"●"* && "$plain" != *"← recommended"* && "$vis" == *$'\e[97m\e[1m⠛'* ]] &&
+  ok "--visual: bright-white ⠛ in an empty left gutter, no dots or ragged suffix" || bad "visual marker: $plain"
 models 0 0 >"$FIX/agy.json"
 snap=$(AI_QUOTA_FIXTURE_DIR="$FIX" ai-quota --json)
 [ "$(jq -r '.agents[1].level' <<<"$snap")" = "red" ] && [ "$(jq -r '.agents[1].until' <<<"$snap")" = "$((now + 3600))" ] &&
