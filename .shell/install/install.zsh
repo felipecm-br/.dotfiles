@@ -75,6 +75,7 @@ install_packages \
     bun \
     openbot \
     ai-quota \
+    cockpit-shutdown-save \
     waymux
 
 install_plugins \

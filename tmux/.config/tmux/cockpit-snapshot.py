@@ -10,12 +10,73 @@ import os
 import json
 import time
 import argparse
+import re
 import subprocess
 from datetime import datetime
 from typing import Dict, Any, List, Optional
 
 DEFAULT_STATE_DIR = os.path.expanduser("~/.local/state/cockpit")
 DEFAULT_SNAPSHOT_FILE = os.path.join(DEFAULT_STATE_DIR, "session-topology.json")
+
+# Agent resume. waymux sets `@ai_session` (`claude:<id>`) from the agent's hooks and ai-launch
+# sets `@ai_launch` (`jail-claude-ask --model opus`); restore types the resume command into the
+# pane, so every part is checked against these patterns, both when saved and when restored.
+RESUMABLE = {"claude", "codex"}
+SESSION_ID = re.compile(r"^[A-Za-z0-9_-]{8,64}$")
+LAUNCH_WORD = re.compile(r"^[A-Za-z0-9._=:/-]{1,64}$")
+LAUNCH_CHOICES = {"claude": "claude", "jail-claude": "claude", "jail-claude-ask": "claude", "codex": "codex"}
+
+
+def process_children() -> Dict[str, List[tuple]]:
+    """ppid -> [(pid, comm)] for every process, from one `ps`."""
+    tree: Dict[str, List[tuple]] = {}
+    try:
+        r = subprocess.run(["ps", "-e", "-o", "pid=,ppid=,comm="], capture_output=True, text=True, timeout=2)
+        for line in r.stdout.splitlines():
+            parts = line.split(None, 2)
+            if len(parts) == 3:
+                tree.setdefault(parts[1], []).append((parts[0], parts[2].strip()))
+    except Exception:
+        pass
+    return tree
+
+
+def runs_under(tree: Dict[str, List[tuple]], pid: str, comm: str) -> bool:
+    """Whether a process named `comm` runs anywhere below `pid` (a jailed agent sits a few
+    levels down, under ai-jail, bwrap and ai-memory)."""
+    todo = [pid]
+    while todo:
+        for child, name in tree.get(todo.pop(), []):
+            if name == comm:
+                return True
+            todo.append(child)
+    return False
+
+
+def resume_of(session_tag: str, launch_tag: str) -> Optional[Dict[str, Any]]:
+    """The agent, session id and launch words to resume a pane with, when all are safe."""
+    agent, _, sid = session_tag.partition(":")
+    if agent not in RESUMABLE or not SESSION_ID.match(sid):
+        return None
+    words = launch_tag.split()
+    # The launch tag counts only for the same harness: Devin runs Claude's hooks too.
+    if not words or LAUNCH_CHOICES.get(words[0]) != agent or not all(LAUNCH_WORD.match(w) for w in words):
+        words = []
+    return {"agent": agent, "id": sid, "launch": words}
+
+
+def resume_command(resume: Optional[Dict[str, Any]]) -> Optional[str]:
+    """The command that resumes a saved agent: the way ai-launch started it, else the CLI."""
+    if not isinstance(resume, dict):
+        return None
+    r = resume_of(f"{resume.get('agent', '')}:{resume.get('id', '')}", " ".join(resume.get("launch") or []))
+    if not r:
+        return None
+    if r["agent"] == "codex":
+        return f"codex resume {r['id']}"
+    if r["launch"]:
+        return f"ai-launch {' '.join(r['launch'])} --resume {r['id']}"
+    return f"claude --resume {r['id']}"
 
 def load_theme_colors() -> Dict[str, str]:
     colors = {
@@ -78,7 +139,7 @@ def capture_topology() -> Optional[Dict[str, Any]]:
         "#{session_name}\t#{window_index}\t#{window_name}\t#{window_layout}\t"
         "#{pane_index}\t#{pane_id}\t#{pane_current_path}\t#{pane_current_command}\t"
         "#{pane_pid}\t#{session_attached}\t#{window_active}\t#{pane_active}\t"
-        "#{@ai_agent_state_raw}"
+        "#{@ai_agent_state_raw}\t#{@ai_session}\t#{@ai_launch}"
     )
     try:
         r = subprocess.run(
@@ -92,7 +153,8 @@ def capture_topology() -> Optional[Dict[str, Any]]:
     except Exception:
         return None
 
-    raw_lines = r.stdout.strip().split("\n")
+    # Only the newline: strip() would eat the empty trailing fields of the last pane.
+    raw_lines = r.stdout.rstrip("\n").split("\n")
     if not raw_lines or raw_lines == [""]:
         return None
 
@@ -116,12 +178,13 @@ def capture_topology() -> Optional[Dict[str, Any]]:
 
     sessions_map: Dict[str, Dict[str, Any]] = {}
     worktrees_seen: Dict[str, Dict[str, str]] = {}
+    tree = process_children()
 
     for line in raw_lines:
         if not line:
             continue
         parts = line.split("\t")
-        if len(parts) < 13:
+        if len(parts) < 15:
             continue
 
         (
@@ -138,7 +201,9 @@ def capture_topology() -> Optional[Dict[str, Any]]:
             w_act,
             p_act,
             agent_state,
-        ) = parts[:13]
+            session_tag,
+            launch_tag,
+        ) = parts[:15]
 
         # Ignore popup/internal sessions
         if s_name.startswith("_popups") or s_name == "_popups":
@@ -162,6 +227,10 @@ def capture_topology() -> Optional[Dict[str, Any]]:
 
         # Check for meaningful foreground command (e.g. nvim, lazygitrs)
         fg_cmd = inspect_pane_foreground_cmd(p_pid)
+        # Resume only an agent still running in the pane: the tags outlive it.
+        resume = resume_of(session_tag, launch_tag)
+        if resume and not runs_under(tree, p_pid, resume["agent"]):
+            resume = None
 
         sessions_map[s_name]["windows"][w_idx]["panes"].append({
             "index": int(p_idx),
@@ -170,6 +239,7 @@ def capture_topology() -> Optional[Dict[str, Any]]:
             "shell_cmd": p_cmd,
             "foreground_cmd": fg_cmd,
             "agent_state": agent_state if agent_state else None,
+            "resume": resume,
             "active": p_act == "1",
         })
 
@@ -258,6 +328,51 @@ def restore_snapshot(filepath: str = DEFAULT_SNAPSHOT_FILE, dry_run: bool = Fals
 
     restored_count = 0
     skipped_count = 0
+    home = os.path.expanduser("~")
+
+    def pane_path(pane: Dict[str, Any]) -> str:
+        path = pane.get("path") or home
+        return path if os.path.isdir(path) else home
+
+    def relaunch(target: str, pane: Dict[str, Any]) -> None:
+        cmd = resume_command(pane.get("resume"))
+        fg = pane.get("foreground_cmd")
+        if not cmd and fg and not fg.startswith(("bash", "zsh")):
+            cmd = fg
+        if cmd:
+            subprocess.run(["tmux", "send-keys", "-t", target, "-l", cmd])
+            subprocess.run(["tmux", "send-keys", "-t", target, "Enter"])
+
+    def window_size(w: Dict[str, Any]) -> List[str]:
+        # A detached session is 80x24 unless told otherwise, too small to split back.
+        m = re.match(r"^[0-9a-f]{4},(\d+)x(\d+),", w.get("layout") or "")
+        return ["-x", m.group(1), "-y", m.group(2)] if m else []
+
+    def build_window(create: List[str], w: Dict[str, Any]) -> None:
+        """Creates the window with `create` (new-session or new-window), splits it back into
+        its panes, applies the saved layout, then relaunches every pane."""
+        panes = w.get("panes") or [{}]
+        r = subprocess.run(create + ["-c", pane_path(panes[0]), "-P", "-F", "#{pane_id}"], capture_output=True, text=True)
+        first = r.stdout.strip()
+        if r.returncode != 0 or not first:
+            print(f"    {c['red']}✗ {r.stderr.strip()}{c['reset']}")
+            return
+        targets = [first]
+        for pane in panes[1:]:
+            # Split the last pane so panes keep their order; the layout then places them.
+            r = subprocess.run(["tmux", "split-window", "-d", "-t", targets[-1], "-c", pane_path(pane), "-P", "-F", "#{pane_id}"], capture_output=True, text=True)
+            if r.returncode == 0 and r.stdout.strip():
+                targets.append(r.stdout.strip())
+        if w.get("layout"):
+            subprocess.run(["tmux", "select-layout", "-t", first, w["layout"]], capture_output=True)
+        for target, pane in zip(targets, panes):
+            relaunch(target, pane)
+
+    def describe(w: Dict[str, Any]) -> str:
+        panes = w.get("panes") or []
+        resumed = sum(1 for p in panes if resume_command(p.get("resume")))
+        extra = f", {resumed} agent{'s' if resumed != 1 else ''} resumed" if resumed else ""
+        return f"[{w['index']}] '{w.get('name', '')}' ({len(panes)} pane{'s' if len(panes) != 1 else ''}{extra})"
 
     for s in sessions:
         s_name = s["name"]
@@ -268,7 +383,6 @@ def restore_snapshot(filepath: str = DEFAULT_SNAPSHOT_FILE, dry_run: bool = Fals
         if s_name in existing_sessions:
             print(f"  {c['yellow']}• Session '{s_name}' already active (checking missing windows)...{c['reset']}")
             skipped_count += 1
-            # Check missing windows
             try:
                 rw = subprocess.run(
                     ["tmux", "list-windows", "-t", s_name, "-F", "#{window_index}"],
@@ -280,66 +394,20 @@ def restore_snapshot(filepath: str = DEFAULT_SNAPSHOT_FILE, dry_run: bool = Fals
                 curr_w_indices = set()
 
             for w in windows:
-                w_idx = str(w["index"])
-                if w_idx not in curr_w_indices:
-                    w_name = w.get("name", "win")
-                    first_pane = w["panes"][0] if w.get("panes") else {}
-                    p_path = first_pane.get("path", os.path.expanduser("~"))
-                    if not os.path.isdir(p_path):
-                        p_path = os.path.expanduser("~")
-                    print(f"    {c['green']}+ Recreating window [{w_idx}] '{w_name}' in '{p_path}'{c['reset']}")
+                if str(w["index"]) not in curr_w_indices:
+                    print(f"    {c['green']}+ Recreating window {describe(w)}{c['reset']}")
                     if not dry_run:
-                        subprocess.run([
-                            "tmux", "new-window", "-d", "-t", f"{s_name}:{w_idx}",
-                            "-n", w_name, "-c", p_path
-                        ])
-                        if w.get("layout"):
-                            subprocess.run(["tmux", "select-layout", "-t", f"{s_name}:{w_idx}", w["layout"]])
+                        build_window(["tmux", "new-window", "-d", "-t", f"{s_name}:{w['index']}", "-n", w.get("name", "win")], w)
             continue
 
-        # Session does not exist -> create fresh session
-        first_win = windows[0]
-        first_pane = first_win["panes"][0] if first_win.get("panes") else {}
-        first_path = first_pane.get("path", os.path.expanduser("~"))
-        if not os.path.isdir(first_path):
-            first_path = os.path.expanduser("~")
-        first_name = first_win.get("name", "0")
-
-        print(f"  {c['green']}✓ Restoring session '{s_name}' ({len(windows)} windows) in '{first_path}'{c['reset']}")
-
+        print(f"  {c['green']}✓ Restoring session '{s_name}' ({len(windows)} windows){c['reset']}")
+        for w in windows:
+            print(f"    {c['dim']}{describe(w)}{c['reset']}")
         if not dry_run:
-            subprocess.run([
-                "tmux", "new-session", "-d", "-s", s_name,
-                "-n", first_name, "-c", first_path
-            ])
-            # Restore first window layout
-            if first_win.get("layout"):
-                subprocess.run(["tmux", "select-layout", "-t", f"{s_name}:{first_win['index']}", first_win["layout"]])
-
-            # Relaunch foreground command if present (e.g. lazygitrs)
-            if first_pane.get("foreground_cmd") and not first_pane["foreground_cmd"].startswith("bash") and not first_pane["foreground_cmd"].startswith("zsh"):
-                fg = first_pane["foreground_cmd"]
-                subprocess.run(["tmux", "send-keys", "-t", f"{s_name}:{first_win['index']}", fg, "Enter"])
-
-            # Create remaining windows in session
+            first = windows[0]
+            build_window(["tmux", "new-session", "-d", "-s", s_name, "-n", first.get("name", "0")] + window_size(first), first)
             for w in windows[1:]:
-                w_idx = w["index"]
-                w_name = w.get("name", str(w_idx))
-                w_pane = w["panes"][0] if w.get("panes") else {}
-                w_path = w_pane.get("path", os.path.expanduser("~"))
-                if not os.path.isdir(w_path):
-                    w_path = os.path.expanduser("~")
-
-                subprocess.run([
-                    "tmux", "new-window", "-d", "-t", f"{s_name}:{w_idx}",
-                    "-n", w_name, "-c", w_path
-                ])
-                if w.get("layout"):
-                    subprocess.run(["tmux", "select-layout", "-t", f"{s_name}:{w_idx}", w["layout"]])
-
-                if w_pane.get("foreground_cmd") and not w_pane["foreground_cmd"].startswith("bash") and not w_pane["foreground_cmd"].startswith("zsh"):
-                    fg = w_pane["foreground_cmd"]
-                    subprocess.run(["tmux", "send-keys", "-t", f"{s_name}:{w_idx}", fg, "Enter"])
+                build_window(["tmux", "new-window", "-d", "-t", f"{s_name}:{w['index']}", "-n", w.get("name", str(w["index"]))], w)
 
         restored_count += 1
 

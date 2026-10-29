@@ -10,8 +10,9 @@ These come from the [`utils`](../utils), [`awt`](../awt), [`waymux`](../waymux),
 | Command | Purpose |
 |---------|---------|
 | `cockpit` | Open the AI Fleet & Tmux Window Cockpit HUD (`cockpit-picker.sh`) from any terminal pane. |
-| `cockpit-snapshot [--quiet]` | Capture active Tmux sessions, windows, panes, CWDs, and running AI agent commands to `~/.local/state/cockpit/snapshot.json`. |
-| `cockpit-restore [--dry-run] [--resurrect-agents]` | Reconstruct Tmux session/window/pane topology from the latest Cockpit snapshot. |
+| `cockpit snapshot [--quiet]` | Capture active Tmux sessions, windows, panes, CWDs, running commands and the session of each live agent to `~/.local/state/cockpit/session-topology.json`. |
+| `cockpit restore [--dry-run]` | Rebuild every saved session, window and pane at its layout, and resume each saved Claude in its own conversation, started the way `ai-launch` started it ([details](architecture/cockpit-topology-snapshot-and-restore.md)). |
+| `cockpit-shutdown-save` | Run by `cockpit-shutdown-save.service`: holds a logind delay lock and runs `cockpit snapshot` when the host begins to shut down. |
 | `flow-telemetry` | Query `~/.local/state/waymux/telemetry.jsonl` to display deep work blocks, interruption heatmaps, and agent triage metrics. |
 | `waymux-cli <subcommand>` | CLI client for the `waymux` daemon (`health`, `list`, `approve`, `deny`, `input`, `kill`, `window-new`, `pane-split`, `pane-capture`, `pane-send`, `popup`, `status`). |
 | `awt` / `awc` / `awp` / `awtc` | Agent Worktree Orchestrator (`awt`), 5-step creation wizard (`awc`), floating worktree popup (`awp`), and `.bare` repository cloner (`awtc`). |

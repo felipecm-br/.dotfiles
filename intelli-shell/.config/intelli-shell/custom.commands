@@ -499,8 +499,11 @@ lazygitrs --patch
 # Snapshot active Tmux workspace sessions and worktrees for post-reboot recovery
 cockpit snapshot
 
-# Restore saved Tmux workspace sessions, windows and layouts after reboot
+# Restore saved Tmux sessions, windows and panes after reboot, resuming each saved Claude conversation
 cockpit restore
+
+# Check the service that snapshots the Tmux layout and agent sessions before shutdown
+systemctl --user status cockpit-shutdown-save.service
 
 # Display saved Cockpit topology snapshot details and age
 cockpit status

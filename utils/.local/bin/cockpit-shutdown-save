@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+# cockpit-shutdown-save — saves `cockpit snapshot` when the host starts to shut down, so
+# `cockpit restore` after the reboot sees the last layout and the agent sessions to resume.
+#
+# Holds a logind delay lock (InhibitDelayMaxSec, 5 s by default; a snapshot takes ~40 ms) and
+# waits for PrepareForShutdown(true). Exiting releases the lock and shutdown goes on.
+# Run by cockpit-shutdown-save.service.
+set -u
+export PATH="$HOME/.local/bin:$PATH"
+
+if [ "${1:-}" != --held ]; then
+  exec systemd-inhibit --what=shutdown --mode=delay --who=cockpit \
+    --why="Save the tmux layout and agent sessions" "$0" --held
+fi
+
+exec 3< <(exec gdbus monitor --system --dest org.freedesktop.login1 --object-path /org/freedesktop/login1)
+monitor=$!
+trap 'kill "$monitor" 2>/dev/null' EXIT
+while read -r line <&3; do
+  case $line in
+    *PrepareForShutdown*true*)
+      cockpit snapshot --quiet
+      exit 0
+      ;;
+  esac
+done
+# The monitor died (D-Bus restart): fail, so systemd starts a fresh lock holder.
+exit 1

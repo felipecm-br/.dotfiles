@@ -1,0 +1,15 @@
+[Unit]
+Description=cockpit-shutdown-save: snapshot the tmux layout and agent sessions before shutdown
+Documentation=file://%h/.dotfiles/main/docs/architecture/cockpit-topology-snapshot-and-restore.md
+
+[Service]
+Type=simple
+ExecStart=%h/.local/bin/cockpit-shutdown-save
+Restart=on-failure
+RestartSec=3s
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=cockpit-shutdown-save
+
+[Install]
+WantedBy=default.target

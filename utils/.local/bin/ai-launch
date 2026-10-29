@@ -117,6 +117,19 @@ launch_jailed() { # <ask|yolo> [claude args]
   exec claude "$@"
 }
 
+# Records how this pane's agent was started (`@ai_launch`, e.g. `jail-claude-ask --model opus`)
+# so `cockpit restore` can start it the same way and resume its session (`@ai_session`,
+# set by waymux). A plain shell clears it.
+mark_launch() { # <choice> [args]
+  [ -n "${TMUX_PANE:-}" ] || return 0
+  if [ "$1" = shell ]; then
+    tmux set-option -p -u -t "$TMUX_PANE" @ai_launch 2>/dev/null
+  else
+    tmux set-option -p -t "$TMUX_PANE" @ai_launch "$*" 2>/dev/null
+  fi
+  return 0
+}
+
 peek=false
 pick_only=false
 [ "${1:-}" = "--peek" ] && { peek=true; shift; }
@@ -149,14 +162,17 @@ case "$choice" in claude | jail-claude | jail-claude-ask | auto | menu) settings
 case "$choice" in
   claude | agy | agyy | devin | codex)
     if $peek; then echo "$choice${*:+ $*}"; exit 0; fi
+    mark_launch "$choice" "$@"
     exec "$choice" "$@"
     ;;
   jail-claude | jail-claude-ask)
     if $peek; then echo "$choice${*:+ $*}"; exit 0; fi
+    mark_launch "$choice" "$@"
     launch_jailed "$([ "$choice" = jail-claude ] && echo yolo || echo ask)" "$@"
     ;;
   shell)
     if $peek; then echo shell; exit 0; fi
+    mark_launch shell
     exec "${SHELL:-bash}"
     ;;
   auto | menu) ;;
@@ -294,16 +310,19 @@ if [ "$pick" -lt 0 ]; then
     for a in claude agy devin codex; do command -v "$a" >/dev/null 2>&1 && { agent=$a; break; }; done
   fi
   if $peek || $pick_only; then echo "$agent"; exit 0; fi
+  mark_launch "$agent"
   exec "$agent"
 fi
 
 read -r -a args <<<"${argv[$pick]}"
 if [ "${agents[$pick]}" = shell ]; then
   if $peek || $pick_only; then echo shell; exit 0; fi
+  mark_launch shell
   exec "${SHELL:-bash}"
 fi
 if $peek || $pick_only; then echo "${agents[$pick]}${args[*]:+ ${args[*]}}"; exit 0; fi
 [ "$choice" = "auto" ] && printf '\033[90m%s\033[0m\n' "${plain[$pick]}"
+mark_launch "${agents[$pick]}" "${args[@]}"
 [ "${agents[$pick]}" = jail-claude ] && launch_jailed yolo "${args[@]}"
 [ "${agents[$pick]}" = jail-claude-ask ] && launch_jailed ask "${args[@]}"
 exec "${agents[$pick]}" "${args[@]}"

@@ -232,3 +232,13 @@ rm "$HOME/.claude/settings.json"; echo '{}' >"$HOME/.claude/settings.json"
 supervise=(); pin_settings
 [ ${#supervise[@]} -eq 0 ] && ok "plain settings file needs no map" || bad "pin plain: ${supervise[*]}"
 rm -f "$HOME/.claude/settings.json"
+
+# 13. ai-launch tags the pane with how it started the agent (`@ai_launch`), so `cockpit restore`
+# can start it the same way; a plain shell clears the tag. tmux is a stub: never the live server.
+printf '#!/bin/sh\necho "$*" >>"%s/tmux.log"\n' "$SANDBOX" >"$SANDBOX/bin/tmux"; chmod +x "$SANDBOX/bin/tmux"
+TMUX_PANE=%9 ai-launch claude --model opus >/dev/null 2>&1
+[ "$(tail -1 "$SANDBOX/tmux.log")" = "set-option -p -t %9 @ai_launch claude --model opus" ] && ok "launch tagged on the pane" || bad "tag: $(tail -1 "$SANDBOX/tmux.log")"
+TMUX_PANE=%9 SHELL=/bin/true ai-launch shell >/dev/null 2>&1
+[ "$(tail -1 "$SANDBOX/tmux.log")" = "set-option -p -u -t %9 @ai_launch" ] && ok "shell clears the tag" || bad "untag: $(tail -1 "$SANDBOX/tmux.log")"
+: >"$SANDBOX/tmux.log"; TMUX_PANE= ai-launch claude >/dev/null 2>&1
+[ ! -s "$SANDBOX/tmux.log" ] && ok "outside tmux: no tag" || bad "tagged outside tmux"

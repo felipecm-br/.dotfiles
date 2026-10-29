@@ -46,6 +46,11 @@ The canonical topology manifest is stored at:
               "shell_cmd": "bash",
               "foreground_cmd": null,
               "agent_state": "busy",
+              "resume": {
+                "agent": "claude",
+                "id": "0d5f3c1e-8a2b-4c6d-9e0f-1a2b3c4d5e6f",
+                "launch": ["jail-claude-ask", "--model", "opus"]
+              },
               "active": true
             }
           ]
@@ -71,6 +76,18 @@ The canonical topology manifest is stored at:
 - Hooked in [`record-window-state.sh`](../../tmux/.config/tmux/record-window-state.sh) on `pane-focus-in` (`--track #{pane_id}`, run in the background with `run-shell -b` so focus changes never wait on it; a run whose pane already lost focus discards its result).
 - Protected by a **zero-fork timestamp debounce** (`~/.local/state/tmux/cockpit-snap-debounce.lock`), ensuring detached capture runs at most once every 30 seconds.
 - Internal sessions (such as `_popups`) are filtered out automatically.
+- **Before shutdown:** `cockpit-shutdown-save.service` (enabled by `.shell/install/packages/cockpit-shutdown-save.zsh`) holds a logind delay lock and runs `cockpit snapshot` on `PrepareForShutdown`, so the file holds the layout of the last second rather than of the last focus change. logind waits up to `InhibitDelayMaxSec` (5 s by default); a snapshot takes about 40 ms. Suspend does not trigger it.
+
+### 3.1b. Agent Sessions (`resume`)
+
+A pane gets `resume` only when an agent is still running anywhere below it (a jailed Claude sits under `ai-jail`, `bwrap` and `ai-memory`), from two pane options:
+
+| Option | Set by | Example |
+|:---|:---|:---|
+| `@ai_session` | `waymux` daemon, from the agent's `SessionStart` and `UserPromptSubmit` hooks (the daemon sets it, since a jailed hook cannot reach tmux) | `claude:0d5f3c1e-…` |
+| `@ai_launch` | `ai-launch`, before it starts the agent; a plain shell clears it | `jail-claude-ask --model opus` |
+
+Both are checked when saved and again when restored, because restore types the command into a shell: the id must be 8 to 64 letters, digits, `-` or `_`, and each launch word a plain option. A launch tag from another harness is ignored (Devin runs Claude's hooks too), and so is the whole tag when the agent has exited.
 
 ### 3.2. Forensic Reconstruction (`cockpit restore`)
 When `cockpit restore` executes:
@@ -78,9 +95,10 @@ When `cockpit restore` executes:
 2. Reads `session-topology.json`.
 3. Inspects currently running Tmux sessions:
    - For pre-existing sessions, missing windows are created without modifying existing active panes.
-   - For dead/unstarted sessions, creates the session detached, initializes window 0 at the exact path, applies the original Tmux layout, and spawns the recorded foreground application.
-4. Resumes subsequent windows with their exact indices (`-t <session>:<index>`).
-5. Switches client focus back to the saved `active_session`.
+   - For dead/unstarted sessions, creates the session detached at the saved window size, then every window at its exact index (`-t <session>:<index>`).
+4. Rebuilds each window pane by pane at the saved paths, in order, then applies the saved layout.
+5. Starts each pane again: a saved agent resumes its conversation (`ai-launch <launch words> --resume <id>`, or `claude --resume <id>` without a launch tag, `codex resume <id>`), any other recorded foreground application starts as before.
+6. Switches client focus back to the saved `active_session`.
 
 ---
 
@@ -95,5 +113,8 @@ The unified `cockpit` binary (`utils/.local/bin/cockpit`) manages both the inter
 | `cockpit restore` | Restore saved sessions, windows, paths and layouts post-reboot |
 | `cockpit restore --dry-run` | Simulate restoration without mutating Tmux state |
 | `cockpit status` | Display saved snapshot summary, timestamp, and age |
+| `cockpit-shutdown-save` | Hold the shutdown delay lock and snapshot on shutdown (run by `cockpit-shutdown-save.service`) |
+
+Contract test: [`tests/cockpit_restore.test.sh`](../../tests/cockpit_restore.test.sh) (pane order, layout, resume through `ai-launch`, dropped tags, a tampered snapshot, the shutdown watcher).
 
 All commands are cataloged in `intelli-shell/.config/intelli-shell/custom.commands` for instant discoverability (`Ctrl + T`).
