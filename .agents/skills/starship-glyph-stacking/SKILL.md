@@ -273,6 +273,20 @@ For each preset, in this order:
 4. **The TOML**: saved to the presets directory, with its path, and a pointer to `wm -o starship-presets`
    to try it.
 
+### Step 7: Publish to Starship Studio (when asked)
+
+Presets are published in the Starship Studio web editor (`~/dev/github/starship-studio/main`), whose
+`AGENTS.md` requires the preview to match the terminal. Do not hand-write its entries; run its importer,
+then check the rendered preview against the validator's ANSI preview:
+
+```sh
+cd ~/dev/github/starship-studio/main
+scripts/import-preset.py ~/.dotfiles/main/starship/.config/omarchy/starship-presets/<slug>.toml
+scripts/preview-sheet.sh -o /tmp/<slug>-sheet.png <preset_id>
+```
+
+Follow that repo's `AGENTS.md` for commits and for anything the importer cannot express yet.
+
 ## Hygiene
 
 - New preset = new file. Do not overwrite an existing preset unless asked, and look at it first.
