@@ -61,7 +61,16 @@ if [[ "${1:-}" == "--popup" ]]; then
   case "${argv[0]##*/}" in
     sh|bash|zsh|fish|dash|env|xargs|python*|perl|ruby|node|eval)
       warn="  ${c_b}${c_r}${BADGE}  interpreter: can run anything, read the arguments${c_0}" ;;
+    make|gmake|cmake|ninja|just|npm|npx|pnpm|yarn|bun|deno|cargo|go|pip|pip3|uv|poetry|mvn|gradle|meson|rake|bundle|composer)
+      warn="  ${c_b}${c_r}${BADGE}  build tool: runs files from dir, which the agent can write${c_0}" ;;
   esac
+  # A path into the request's directory runs a file the agent may have written.
+  if [[ -z "$warn" && "${argv[0]}" == */* ]]; then
+    req_dir="$(realpath -m -- "$(cat "$dir/cwd")")"
+    exe="$(cd "$req_dir" 2>/dev/null && realpath -m -- "${argv[0]}")"
+    [[ "$exe" == "$req_dir"/* ]] &&
+      warn="  ${c_b}${c_r}${BADGE}  runs a file inside dir, which the agent can write${c_0}"
+  fi
   body=$(
     printf '\n'
     printf '  %s%s%s  AGENT SUDO%s' "$c_b" "$c_y" "$BADGE" "$c_0"
@@ -77,6 +86,9 @@ if [[ "${1:-}" == "--popup" ]]; then
   print_modal_body "$body"
   [[ -n "${BORDER_GRADIENT:-}" ]] && { gradient_frame_draw "$BORDER_GRADIENT" " $BADGE " "$C_YELLOW_HEX" || true; }
   printf '\033[?25l'; trap 'printf "\033[?25h"' EXIT
+  # The popup takes focus while you may be typing elsewhere: ignore keys until 400 ms pass
+  # without one, so a y meant for another pane never approves (as y/n do in the Cockpit).
+  if [[ -t 0 ]]; then while IFS= read -rsn1 -t 0.4 _; do :; done; fi
   IFS= read -rsn1 ans
   [[ "$ans" == $'\e' ]] && read -rsn2 -t 0.05 _ 2>/dev/null
   if [[ "$ans" != [yY] ]]; then

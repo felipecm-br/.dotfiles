@@ -22,6 +22,12 @@ d="$(mk touch "$XDG_STATE_HOME/pwned")"
 printf 'n' | "$S" --popup "$d" >/dev/null
 [ "$(cat "$d/rc")" = 126 ] && [ ! -e "$XDG_STATE_HOME/pwned" ] && ok "deny does not run" || bad "deny ran command"
 
+# Commands that run files the agent can write get the red warning; plain ones do not.
+warned() { local d out; d="$(mk "$@")"; out="$(printf 'n' | "$S" --popup "$d")"; grep -q "$WARN" <<<"$out"; }
+WARN="build tool"; warned make install && ok "build tool warns" || bad "build tool not flagged"
+WARN="inside dir"; warned ./setup.sh && ok "repo-local executable warns" || bad "repo-local not flagged"
+WARN="can write"; ! warned /usr/bin/systemctl restart x && ok "system binary: no warning" || bad "false warning"
+
 # Approval runs argv without shell interpolation (metachars stay literal).
 d="$(mk echo 'a;touch pwned2')"
 printf 'y\n' | "$S" --popup "$d" >/dev/null

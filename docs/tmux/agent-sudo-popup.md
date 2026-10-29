@@ -7,8 +7,8 @@ opens a tmux popup on your client instead:
 agent-sudo [-r REASON] [--no-sudo] -- CMD [ARGS...]
 ```
 
-1. The popup follows the standard modal layout of [close-window.sh](../../tmux/.config/tmux/close-window.sh) (reactive layer: alert-yellow border and lock badge, Omarchy theme colors via `theme-helper.sh`, gradient frame, rounded border, 80 cols). Footer: `y approve │ n / Esc deny`, no brackets; after the run: `exit N │ Enter close`. It shows the exact argv, working directory and a reason; shells/interpreters get a red warning.
-2. Nothing runs until you press `y`. Any other key denies (exit 126).
+1. The popup follows the standard modal layout of [close-window.sh](../../tmux/.config/tmux/close-window.sh) (reactive layer: alert-yellow border and lock badge, Omarchy theme colors via `theme-helper.sh`, gradient frame, rounded border, 80 cols). Footer: `y approve │ n / Esc deny`, no brackets; after the run: `exit N │ Enter close`. It shows the exact argv, working directory and a reason. A red warning marks commands that can run anything: shells and interpreters, build tools (`make`, `npm`, `cargo`, `go`, `pip`, `uv` …), and any path that resolves inside the request's directory (`./setup.sh`), since the agent can write those files and the command runs with root outside the jail.
+2. Nothing runs until you press `y`. Any other key denies (exit 126). The popup takes focus while you may be typing in another pane, so it ignores keys until 400 ms pass without one (as `y`/`n` do in the Cockpit): a `y` meant for that pane never approves.
 3. sudo prompts for the password inside the popup's own pty. The agent never sees it.
 4. The agent receives the last 60 lines of output (`AGENT_SUDO_TAIL`) and the exit code.
 
