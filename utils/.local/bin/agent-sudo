@@ -1,0 +1,168 @@
+#!/usr/bin/env bash
+# agent-sudo — let an AI agent request a privileged command that YOU approve and authenticate.
+#
+#   agent-sudo [-r REASON] [--no-sudo] -- CMD [ARGS...]
+#
+# Opens a tmux popup on your client showing the exact argv. You press `y` to approve, type the
+# sudo password into the popup's own pty (never visible to the agent), and the agent receives the
+# command's output (tail) and exit code. Exit codes: command's own, 126 = denied/cancelled,
+# 125 = no tmux client / setup error, 124 = timed out waiting for you.
+#
+# Security model (see docs/tmux/agent-sudo-popup.md):
+#   - argv is passed as NUL-delimited data and exec'd directly: no shell interpolation.
+#   - nothing runs until you press `y` on the confirmation screen.
+#   - every request is logged to ${XDG_STATE_HOME:-~/.local/state}/agent-sudo/log.
+set -uo pipefail
+
+STATE="${XDG_STATE_HOME:-$HOME/.local/state}/agent-sudo"
+RUNTIME="${XDG_RUNTIME_DIR:-/tmp}/agent-sudo-$(id -u)"
+TIMEOUT="${AGENT_SUDO_TIMEOUT:-300}"
+TAIL_LINES="${AGENT_SUDO_TAIL:-60}"
+SELF="$(readlink -f "${BASH_SOURCE[0]}")"
+
+log() { mkdir -p "$STATE"; printf '%s %s\n' "$(date -Is)" "$*" >>"$STATE/log"; }
+
+# Shared popup chrome (theme colors, gradient frame). Falls back to plain ANSI when not stowed.
+TMUX_DIR="$HOME/.config/tmux"
+if [[ -r "$TMUX_DIR/theme-helper.sh" && -r "$TMUX_DIR/gradient-frame.sh" ]]; then
+  # shellcheck source=/dev/null
+  . "$TMUX_DIR/theme-helper.sh"; . "$TMUX_DIR/gradient-frame.sh"
+  C_YELLOW_HEX=$(get_theme_color yellow "#e0af68"); C_RED_HEX=$(get_theme_color red "#f7768e")
+  C_ACCENT_HEX=$(get_theme_color accent "#7aa2f7"); C_MUTED_HEX=$(get_theme_color dark_foreground "#565f89")
+  C_FG_HEX=$(get_theme_color foreground "#a9b1d6")
+else
+  C_YELLOW_HEX="#e0af68"; C_RED_HEX="#f7768e"; C_ACCENT_HEX="#7aa2f7"; C_MUTED_HEX="#565f89"; C_FG_HEX="#a9b1d6"
+  print_modal_body() { printf '%s\n' "$1"; }
+  popup_gradient_flags() { :; }
+  gradient_frame_draw() { return 1; }
+fi
+hex2ansi() { local h="${1#\#}"; printf '\033[38;2;%d;%d;%dm' "$((16#${h:0:2}))" "$((16#${h:2:2}))" "$((16#${h:4:2}))"; }
+BADGE=$'\uf023'   # nf-fa-lock: reactive layer (alert yellow), see docs/tmux/popups-ergonomics-and-golden-ratio.md
+
+usage() {
+  sed -n '2,13p' "$SELF" | sed 's/^# \{0,1\}//'
+}
+
+# ── Popup side: confirm, run, record ────────────────────────────────────────
+if [[ "${1:-}" == "--popup" ]]; then
+  dir="$2"
+  mapfile -d '' -t argv <"$dir/argv"
+  reason="$(cat "$dir/reason" 2>/dev/null || true)"
+  use_sudo=1; [[ -e "$dir/nosudo" ]] && use_sudo=0
+
+  local_cmd="$(printf '%q ' "${argv[@]}")"
+  c_y=$(hex2ansi "$C_YELLOW_HEX"); c_r=$(hex2ansi "$C_RED_HEX"); c_c=$(hex2ansi "$C_ACCENT_HEX")
+  c_m=$(hex2ansi "$C_MUTED_HEX"); c_f=$(hex2ansi "$C_FG_HEX"); c_0=$'\033[0m'; c_b=$'\033[1m'
+  footer() { # keys are cyan/bold (red for the privileged confirm), actions muted, │ separators
+    printf '  %s\n' "${c_m}────────────────────────────────────────────────────────────────${c_0}"
+    printf '  %s' "$1"; printf '\n'
+  }
+  warn=""
+  case "${argv[0]##*/}" in
+    sh|bash|zsh|fish|dash|env|xargs|python*|perl|ruby|node|eval)
+      warn="  ${c_b}${c_r}${BADGE}  interpreter: can run anything, read the arguments${c_0}" ;;
+  esac
+  body=$(
+    printf '\n'
+    printf '  %s%s%s  AGENT SUDO%s' "$c_b" "$c_y" "$BADGE" "$c_0"
+    [[ -n "$reason" ]] && printf ' %s·%s %s%s%s%s' "$c_m" "$c_0" "$c_b" "$c_f" "$reason" "$c_0"
+    printf '\n\n'
+    printf '  %sdir%s     %s%s%s\n' "$c_m" "$c_0" "$c_f" "$(cat "$dir/cwd")" "$c_0"
+    printf '  %srun as%s  %s%s%s\n\n' "$c_m" "$c_0" "$c_b" "$([[ $use_sudo == 1 ]] && echo root || echo "$USER")" "$c_0"
+    printf '%s\n' "${local_cmd% }" | fold -s -w 70 | sed "s/^/  ${c_b}${c_f}/; s/\$/${c_0}/"
+    printf '\n'
+    [[ -n "$warn" ]] && printf '%s\n\n' "$warn"
+    footer "${c_b}${c_r}y${c_0} ${c_m}approve${c_0}   ${c_m}│${c_0}   ${c_b}${c_c}n${c_0} ${c_m}/${c_0} ${c_b}${c_c}Esc${c_0} ${c_m}deny${c_0}"
+  )
+  print_modal_body "$body"
+  [[ -n "${BORDER_GRADIENT:-}" ]] && { gradient_frame_draw "$BORDER_GRADIENT" " $BADGE " "$C_YELLOW_HEX" || true; }
+  printf '\033[?25l'; trap 'printf "\033[?25h"' EXIT
+  IFS= read -rsn1 ans
+  [[ "$ans" == $'\e' ]] && read -rsn2 -t 0.05 _ 2>/dev/null
+  if [[ "$ans" != [yY] ]]; then
+    echo 126 >"$dir/rc"; log "DENIED $local_cmd"; exit 0
+  fi
+  printf '\033[2J\033[H\033[?25h'
+  log "APPROVED $(printf '%q ' "${argv[@]}")"
+  cd "$(cat "$dir/cwd")" 2>/dev/null || true
+  if [[ $use_sudo == 1 ]]; then cmd=(sudo --); else cmd=(); fi
+  "${cmd[@]}" "${argv[@]}" 2>&1 | tee "$dir/out"
+  rc=${PIPESTATUS[0]}
+  echo "$rc" >"$dir/rc"; log "EXIT $rc"
+  printf '\n'
+  footer "${c_m}exit${c_0} ${c_b}$([[ $rc == 0 ]] && echo "$c_f" || echo "$c_r")${rc}${c_0}   ${c_m}│${c_0}   ${c_b}${c_c}Enter${c_0} ${c_m}close${c_0}"
+  read -r _
+  exit 0
+fi
+
+# ── Agent side ──────────────────────────────────────────────────────────────
+reason=""; nosudo=0
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -h|--help) usage; exit 0 ;;
+    -r) reason="${2:-}"; shift 2 ;;
+    --no-sudo) nosudo=1; shift ;;
+    --) shift; break ;;
+    *) break ;;
+  esac
+done
+[[ $# -gt 0 ]] || { usage >&2; exit 125; }
+[[ "$1" == "sudo" ]] && shift   # we add sudo ourselves
+[[ $# -gt 0 ]] || { echo "agent-sudo: empty command" >&2; exit 125; }
+
+# Inside ai-jail there is no tmux socket: ask the host bridge (agent-sudod) instead.
+if [[ -z "${AGENT_SUDO_VIA_BRIDGE:-}" ]] && ! { command -v tmux >/dev/null && tmux list-clients >/dev/null 2>&1; }; then
+  command -v python3 >/dev/null || { echo "agent-sudo: no tmux and no python3 for the bridge" >&2; exit 125; }
+  exec python3 - "${AGENT_SUDO_PORT:-49375}" "$reason" "$PWD" "$@" <<'PY'
+import json, sys, urllib.request
+port, reason, cwd, *argv = sys.argv[1:]
+req = urllib.request.Request(f"http://127.0.0.1:{port}/run", method="POST",
+    data=json.dumps({"argv": argv, "cwd": cwd, "reason": reason}).encode(),
+    headers={"Content-Type": "application/json"})
+try:
+    r = json.load(urllib.request.urlopen(req, timeout=330))
+except urllib.error.HTTPError as e:
+    print("agent-sudo: bridge refused:", e.read().decode(), file=sys.stderr); sys.exit(125)
+except Exception as e:
+    print(f"agent-sudo: bridge unreachable on 127.0.0.1:{port} ({e}); is agent-sudod running and forwarded?", file=sys.stderr); sys.exit(125)
+sys.stdout.write(r["output"]); sys.exit(r["rc"])
+PY
+fi
+command -v tmux >/dev/null && tmux list-clients >/dev/null 2>&1 \
+  || { echo "agent-sudo: no tmux client available to show the approval popup" >&2; exit 125; }
+
+# Prefer the client viewing this pane's session; else the most recently active client.
+client=""
+if [[ -n "${TMUX_PANE:-}" ]]; then
+  sess="$(tmux display-message -p -t "$TMUX_PANE" '#{session_name}' 2>/dev/null || true)"
+  [[ -n "$sess" ]] && client="$(tmux list-clients -t "$sess" -F '#{client_activity} #{client_name}' 2>/dev/null | sort -rn | awk 'NR==1{print $2}')"
+fi
+[[ -n "$client" ]] || client="$(tmux list-clients -F '#{client_activity} #{client_name}' | sort -rn | awk 'NR==1{print $2}')"
+[[ -n "$client" ]] || { echo "agent-sudo: no attached tmux client" >&2; exit 125; }
+
+mkdir -p "$RUNTIME" && chmod 700 "$RUNTIME"
+dir="$(mktemp -d "$RUNTIME/req.XXXXXX")"
+trap 'rm -rf "$dir"' EXIT
+printf '%s\0' "$@" >"$dir/argv"
+printf '%s' "$reason" >"$dir/reason"
+pwd >"$dir/cwd"
+(( nosudo )) && : >"$dir/nosudo"
+: >"$dir/out"
+
+cmdlen=$(printf '%q ' "$@" | fold -s -w 70 | wc -l)
+popup_h=$(( 12 + cmdlen )); (( popup_h > 22 )) && popup_h=22
+timeout "$TIMEOUT" tmux display-popup -c "$client" -E -b rounded \
+  -s "bg=default,fg=default" -S "fg=$C_YELLOW_HEX,bg=default" -T " $BADGE " \
+  $(popup_gradient_flags BORDER_GRADIENT) -w 80 -h "$popup_h" \
+  "$(printf '%q' "$SELF") --popup $(printf '%q' "$dir")"
+prc=$?
+if [[ ! -s "$dir/rc" ]]; then
+  [[ $prc == 124 ]] && { tmux display-popup -C -c "$client" 2>/dev/null; echo "agent-sudo: timed out waiting for approval" >&2; exit 124; }
+  echo "agent-sudo: popup closed without approval" >&2; exit 126
+fi
+rc="$(cat "$dir/rc")"
+if [[ "$rc" == 126 ]] && ! [[ -s "$dir/out" ]]; then
+  echo "agent-sudo: denied by user" >&2; exit 126
+fi
+tail -n "$TAIL_LINES" "$dir/out"
+exit "$rc"

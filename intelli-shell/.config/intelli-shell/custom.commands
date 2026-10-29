@@ -651,3 +651,9 @@ openbot setup
 
 # Run an OpenBot package.json script (test, build, typecheck, ...)
 openbot {{script}}
+
+# Agent: run a privileged command through a tmux approval popup (you confirm + type the sudo password)
+agent-sudo -r {{reason}} -- {{command}}
+
+# Start/inspect the agent-sudo bridge daemon (loopback 49375, forwarded into ai-jail)
+systemctl --user enable --now agent-sudod

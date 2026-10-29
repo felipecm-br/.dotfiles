@@ -12,4 +12,9 @@ command = [
 # Relay the host ai-memory daemon (127.0.0.1:49374) into the jail's private
 # network namespace so MCP tools and lifecycle hooks work inside the sandbox.
 # Only the CLI and this global file can open forwards; project .ai-jail cannot.
-forward_ports = [49374]
+forward_ports = [49374, 49375]
+
+# agent-sudo bridge: 49375 is agent-sudod (host loopback), the ONLY way a jailed agent can ask you
+# to approve a privileged command in a tmux popup. The tmux socket itself stays unreachable.
+# The client script is mapped read-only; call it by its full path (~/.local/bin is not on PATH).
+ro_maps = ["/home/fecavmi/.local/bin/agent-sudo"]

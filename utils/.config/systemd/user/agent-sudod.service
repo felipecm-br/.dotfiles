@@ -1,0 +1,18 @@
+[Unit]
+Description=agent-sudod: loopback bridge for human-approved privileged commands (ai-jail agents)
+Documentation=file://%h/.dotfiles/main/docs/tmux/agent-sudo-popup.md
+
+[Service]
+Type=simple
+ExecStart=%h/.local/bin/agent-sudod
+Restart=on-failure
+RestartSec=3s
+NoNewPrivileges=yes
+LockPersonality=yes
+RestrictSUIDSGID=yes
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=agent-sudod
+
+[Install]
+WantedBy=default.target

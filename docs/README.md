@@ -30,6 +30,7 @@ Welcome to the central documentation index for this Arch Linux + Omarchy dotfile
 ### 🪟 2. Tmux & Multiplexer (`docs/tmux/`)
 - [**Popups Ergonomics, Biomechanics & Golden Ratio**](tmux/popups-ergonomics-and-golden-ratio.md): Golden Ratio ($\phi$) popup architecture, 40/60 column split, 1-touch Home Row navigation, uniform bichromatic footers, and sub-100ms non-blocking HUDs.
 - [**AI Agent Status in Status Bar**](tmux/ai-status-bar.md): Real-time per-pane AI agent state pills, animated spinners, color alerts, Vimium window hints (`Prefix + f`), and `waymux` daemon options.
+- [**agent-sudo: Human-Approved Privileged Commands**](tmux/agent-sudo-popup.md): Approval popup (`y` + password in the popup's own pty) for agent `sudo` requests, plus the `agent-sudod` loopback bridge that lets ai-jail agents ask without ever reaching the tmux socket.
 - [**Popup Isolation, Debounce & Event-Driven Architecture**](tmux/popup-isolation-and-debounce.md): Tmux 3.8 native floating popup isolation, 650ms idle debounce in Waymux, and 100% event-driven `status-interval 0`.
 - [**Clipboard & Scrollback Capture**](tmux/clipboard-and-scrollback.md): Click-and-hold drag-to-copy to system clipboard, `Prefix + E` Markdown/Mermaid scrollback view popup, and `Prefix + y` fuzzy scrollback token yanker.
 - [**Tmux Activity Monitoring**](tmux/tmux-activity.md): Activity alert and notification behavior (`monitor-activity off` in favor of `waymux` status pills).
