@@ -82,3 +82,21 @@ rm -f "$HOME/.local/bin/cockpit"; mv "$HOME/.local/bin/cockpit-stub" "$HOME/.loc
 PATH="$HOME/stub:$PATH" timeout 10 "$ROOT/utils/.local/bin/cockpit-shutdown-save" \
   && ok "watcher exits after the shutdown snapshot" || bad "watcher exit"
 [ "$(cat "$HOME/cockpit.log")" = "cockpit snapshot --quiet" ] && ok "one snapshot, on shutdown only" || bad "watcher: $(cat "$HOME/cockpit.log")"
+
+# After a reboot or a tmux restart, the new server's first automatic snapshot must not overwrite
+# the old server's last one: it is set aside, `cockpit restore` uses it once, then it is retired.
+STATE="$HOME/.local/state/cockpit"
+python3 "$SNAP" snapshot --quiet
+before=$(jq -r '[.sessions[].name] | sort | join(" ")' "$STATE/session-topology.json")
+tmux kill-server; sleep 0.3
+tmux new-session -d -s fresh -c "$WORK"
+python3 "$SNAP" snapshot --quiet
+[ "$(jq -r '[.sessions[].name] | sort | join(" ")' "$STATE/session-topology.previous.json")" = "$before" ] \
+  && ok "old server's snapshot set aside" || bad "previous: $(cat "$STATE/session-topology.previous.json" 2>/dev/null | head -c 200)"
+[ "$(jq -r '[.sessions[].name] | join(" ")' "$STATE/session-topology.json")" = fresh ] && ok "new server snapshots on its own" || bad "current"
+python3 "$SNAP" restore >/dev/null
+tmux has-session -t zz-last 2>/dev/null && ok "restore uses the old server's snapshot" || bad "not restored from previous"
+[ ! -e "$STATE/session-topology.previous.json" ] && [ -f "$STATE/session-topology.restored.json" ] \
+  && ok "restored once, then retired" || bad "previous still pending"
+python3 "$SNAP" snapshot --quiet
+[ ! -e "$STATE/session-topology.previous.json" ] && ok "same server: nothing set aside" || bad "set aside on the same server"

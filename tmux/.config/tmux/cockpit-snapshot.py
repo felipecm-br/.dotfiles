@@ -17,6 +17,11 @@ from typing import Dict, Any, List, Optional
 
 DEFAULT_STATE_DIR = os.path.expanduser("~/.local/state/cockpit")
 DEFAULT_SNAPSHOT_FILE = os.path.join(DEFAULT_STATE_DIR, "session-topology.json")
+# The last snapshot of an earlier tmux server (before a reboot or a tmux restart). The automatic
+# snapshot of the new server would overwrite it within seconds, so it is set aside here first,
+# and `cockpit restore` reads it until it has been restored once.
+PREVIOUS_SNAPSHOT_FILE = os.path.join(DEFAULT_STATE_DIR, "session-topology.previous.json")
+RESTORED_SNAPSHOT_FILE = os.path.join(DEFAULT_STATE_DIR, "session-topology.restored.json")
 
 # Agent resume. waymux sets `@ai_session` (`claude:<id>`) from the agent's hooks and ai-launch
 # sets `@ai_launch` (`jail-claude-ask --model opus`); restore types the resume command into the
@@ -133,6 +138,27 @@ def inspect_pane_foreground_cmd(pid: str) -> Optional[str]:
     except Exception:
         pass
     return None
+
+def tmux_server() -> Optional[Dict[str, int]]:
+    """The running tmux server's pid and start time, which tell one server from the next."""
+    try:
+        r = subprocess.run(["tmux", "display-message", "-p", "#{pid} #{start_time}"], capture_output=True, text=True, timeout=1)
+        pid, start = r.stdout.split()
+        return {"pid": int(pid), "start_time": int(start)}
+    except Exception:
+        return None
+
+
+def from_earlier_server(topo: Dict[str, Any], server: Optional[Dict[str, int]]) -> bool:
+    """Whether a saved snapshot was taken by a tmux server other than `server`."""
+    if not server:
+        return False
+    saved = topo.get("server")
+    if isinstance(saved, dict):
+        return saved != server
+    # Snapshots from before the server field: anything older than this server's start.
+    return int(topo.get("timestamp") or 0) < server["start_time"]
+
 
 def capture_topology() -> Optional[Dict[str, Any]]:
     format_str = (
@@ -266,6 +292,7 @@ def capture_topology() -> Optional[Dict[str, Any]]:
 
     return {
         "timestamp": int(time.time()),
+        "server": tmux_server(),
         "datetime": datetime.now().isoformat(),
         "active_session": active_session,
         "active_window": active_window,
@@ -281,6 +308,13 @@ def save_snapshot(filepath: str = DEFAULT_SNAPSHOT_FILE, quiet: bool = False) ->
         return False
 
     os.makedirs(os.path.dirname(filepath), exist_ok=True)
+    if filepath == DEFAULT_SNAPSHOT_FILE and os.path.isfile(filepath):
+        try:
+            with open(filepath, "r", encoding="utf-8") as f:
+                if from_earlier_server(json.load(f), topo.get("server")):
+                    os.replace(filepath, PREVIOUS_SNAPSHOT_FILE)
+        except Exception:
+            pass
     temp_file = f"{filepath}.tmp"
     with open(temp_file, "w", encoding="utf-8") as f:
         json.dump(topo, f, indent=2)
@@ -297,8 +331,14 @@ def save_snapshot(filepath: str = DEFAULT_SNAPSHOT_FILE, quiet: bool = False) ->
 
     return True
 
-def restore_snapshot(filepath: str = DEFAULT_SNAPSHOT_FILE, dry_run: bool = False) -> bool:
+def default_restore_file() -> str:
+    """The earlier server's snapshot while it has not been restored, else the current one."""
+    return PREVIOUS_SNAPSHOT_FILE if os.path.isfile(PREVIOUS_SNAPSHOT_FILE) else DEFAULT_SNAPSHOT_FILE
+
+
+def restore_snapshot(filepath: Optional[str] = None, dry_run: bool = False) -> bool:
     c = load_theme_colors()
+    filepath = filepath or default_restore_file()
     if not os.path.isfile(filepath):
         print(f"{c['red']}Error: Snapshot file not found: {filepath}{c['reset']}", file=sys.stderr)
         return False
@@ -422,10 +462,17 @@ def restore_snapshot(filepath: str = DEFAULT_SNAPSHOT_FILE, dry_run: bool = Fals
             pass
 
     print(f"\n{c['green']}{c['bold']}✓ Restoration Complete:{c['reset']} {restored_count} created, {skipped_count} updated.")
+    if not dry_run and filepath == PREVIOUS_SNAPSHOT_FILE:
+        # Restored once: a second `cockpit restore` must not bring back windows closed since.
+        os.replace(PREVIOUS_SNAPSHOT_FILE, RESTORED_SNAPSHOT_FILE)
     return True
 
-def status_snapshot(filepath: str = DEFAULT_SNAPSHOT_FILE):
+def status_snapshot(filepath: Optional[str] = None):
     c = load_theme_colors()
+    if filepath is None and os.path.isfile(PREVIOUS_SNAPSHOT_FILE):
+        print(f"\n{c['green']}{c['bold']}Not restored yet:{c['reset']} the snapshot below is from before the last reboot or tmux restart; `cockpit restore` uses it.")
+        filepath = PREVIOUS_SNAPSHOT_FILE
+    filepath = filepath or DEFAULT_SNAPSHOT_FILE
     if not os.path.isfile(filepath):
         print(f"{c['yellow']}No snapshot found at {filepath}{c['reset']}")
         return
@@ -468,11 +515,11 @@ def main():
     p_snap.add_argument("--quiet", action="store_true")
 
     p_rest = subparsers.add_parser("restore", help="Restore Tmux sessions and windows from snapshot")
-    p_rest.add_argument("--file", type=str, default=DEFAULT_SNAPSHOT_FILE)
+    p_rest.add_argument("--file", type=str, default=None)
     p_rest.add_argument("--dry-run", action="store_true")
 
     p_stat = subparsers.add_parser("status", help="Show saved snapshot information")
-    p_stat.add_argument("--file", type=str, default=DEFAULT_SNAPSHOT_FILE)
+    p_stat.add_argument("--file", type=str, default=None)
 
     args = parser.parse_args()
 
@@ -486,8 +533,8 @@ def main():
         status_snapshot(filepath=args.file)
     else:
         # Default action: status if exists, else save
-        if os.path.isfile(DEFAULT_SNAPSHOT_FILE):
-            status_snapshot(DEFAULT_SNAPSHOT_FILE)
+        if os.path.isfile(DEFAULT_SNAPSHOT_FILE) or os.path.isfile(PREVIOUS_SNAPSHOT_FILE):
+            status_snapshot()
         else:
             save_snapshot(filepath=DEFAULT_SNAPSHOT_FILE)
 

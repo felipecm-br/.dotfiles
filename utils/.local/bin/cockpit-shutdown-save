@@ -19,7 +19,7 @@ trap 'kill "$monitor" 2>/dev/null' EXIT
 while read -r line <&3; do
   case $line in
     *PrepareForShutdown*true*)
-      cockpit snapshot --quiet
+      if cockpit snapshot --quiet; then echo "saved the snapshot for cockpit restore"; else echo "snapshot failed"; fi
       exit 0
       ;;
   esac

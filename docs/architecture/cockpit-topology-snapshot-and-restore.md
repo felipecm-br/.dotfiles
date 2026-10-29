@@ -76,7 +76,8 @@ The canonical topology manifest is stored at:
 - Hooked in [`record-window-state.sh`](../../tmux/.config/tmux/record-window-state.sh) on `pane-focus-in` (`--track #{pane_id}`, run in the background with `run-shell -b` so focus changes never wait on it; a run whose pane already lost focus discards its result).
 - Protected by a **zero-fork timestamp debounce** (`~/.local/state/tmux/cockpit-snap-debounce.lock`), ensuring detached capture runs at most once every 30 seconds.
 - Internal sessions (such as `_popups`) are filtered out automatically.
-- **Before shutdown:** `cockpit-shutdown-save.service` (enabled by `.shell/install/packages/cockpit-shutdown-save.zsh`) holds a logind delay lock and runs `cockpit snapshot` on `PrepareForShutdown`, so the file holds the layout of the last second rather than of the last focus change. logind waits up to `InhibitDelayMaxSec` (5 s by default); a snapshot takes about 40 ms. Suspend does not trigger it.
+- **Before shutdown:** `cockpit-shutdown-save.service` (enabled by `.shell/install/packages/cockpit-shutdown-save.zsh`) holds a logind delay lock and runs `cockpit snapshot` on `PrepareForShutdown`, so the file holds the layout of the last second rather than of the last focus change. logind waits up to `InhibitDelayMaxSec` (5 s by default); a snapshot takes about 40 ms. Suspend does not trigger it; the journal (`journalctl --user -u cockpit-shutdown-save -b -1`) records each save.
+- **Kept until restored:** every snapshot records its tmux server (pid and start time). The first snapshot a new server takes (after a reboot or a tmux restart, usually from the focus hook within seconds) moves the old server's last snapshot to `session-topology.previous.json` instead of overwriting it.
 
 ### 3.1b. Agent Sessions (`resume`)
 
@@ -92,7 +93,7 @@ Both are checked when saved and again when restored, because restore types the c
 ### 3.2. Forensic Reconstruction (`cockpit restore`)
 When `cockpit restore` executes:
 1. Verifies Tmux server availability (`tmux start-server` if stopped).
-2. Reads `session-topology.json`.
+2. Reads `session-topology.previous.json` when an earlier server's snapshot is waiting there, else `session-topology.json` (`--file` picks another). After a restore from it, the file becomes `session-topology.restored.json`, so a second `cockpit restore` does not bring back windows closed since.
 3. Inspects currently running Tmux sessions:
    - For pre-existing sessions, missing windows are created without modifying existing active panes.
    - For dead/unstarted sessions, creates the session detached at the saved window size, then every window at its exact index (`-t <session>:<index>`).
@@ -110,9 +111,9 @@ The unified `cockpit` binary (`utils/.local/bin/cockpit`) manages both the inter
 |:---|:---|
 | `cockpit` | Open Cockpit interactive HUD modal (85% × 75%) |
 | `cockpit snapshot` | Save current Tmux session topology & worktree states |
-| `cockpit restore` | Restore saved sessions, windows, paths and layouts post-reboot |
+| `cockpit restore` | Restore the sessions, windows, panes and agents of the last tmux server (run it once after a reboot) |
 | `cockpit restore --dry-run` | Simulate restoration without mutating Tmux state |
-| `cockpit status` | Display saved snapshot summary, timestamp, and age |
+| `cockpit status` | Display the snapshot `cockpit restore` would use, its age and sessions |
 | `cockpit-shutdown-save` | Hold the shutdown delay lock and snapshot on shutdown (run by `cockpit-shutdown-save.service`) |
 
 Contract test: [`tests/cockpit_restore.test.sh`](../../tests/cockpit_restore.test.sh) (pane order, layout, resume through `ai-launch`, dropped tags, a tampered snapshot, the shutdown watcher).
