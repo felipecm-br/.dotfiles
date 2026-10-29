@@ -174,5 +174,26 @@ printf '#!/bin/sh\n' >"$SANDBOX/only-codex/codex"; chmod +x "$SANDBOX/only-codex
 # Stowed layout: the agy wrapper lives in ~/.local/bin, where ai-quota knows to skip it
 mkdir -p "$HOME/.local/bin"
 for b in ai-launch ai-quota agy; do ln -sf "$ROOT/utils/.local/bin/$b" "$HOME/.local/bin/$b"; done
-out=$(PATH="$SANDBOX/only-codex:$HOME/.local/bin:/usr/bin:/bin" AI_QUOTA_NO_API=1 ai-launch --peek --auto)
+# /usr/bin without agent CLIs: agy (Antigravity) installs there on some hosts
+mkdir -p "$SANDBOX/sysbin"
+for f in /usr/bin/*; do
+  case "${f##*/}" in agy | agy-bin | antigravity* | claude | codex | devin | opencode) ;; *) ln -s "$f" "$SANDBOX/sysbin/" ;; esac
+done
+out=$(PATH="$SANDBOX/only-codex:$HOME/.local/bin:$SANDBOX/sysbin" AI_QUOTA_NO_API=1 ai-launch --peek --auto)
 [ "$out" = "codex" ] && ok "codex-only machine -> codex" || bad "codex-only: $out"
+
+# 11. Jailed Claude stays supervised: jail_supervision passes a pane-scoped hook token, the pane
+# and the daemon port through --env (never argv), forwards the port and maps waymux read-only.
+eval "$(sed -n '/^supervise=()$/,/^}$/p' "$ROOT/utils/.local/bin/ai-launch")"
+printf '#!/bin/sh\n[ "$1" = hook-token ] && [ "$2" = "%%5" ] && echo tok123\n' >"$SANDBOX/bin/waymux"
+chmod +x "$SANDBOX/bin/waymux"
+supervise=(); TMUX_PANE=%5 jail_supervision
+got="${supervise[*]}"
+want="--env TMUX_PANE --env WAYMUX_HOOK_TOKEN --env WAYMUX_PORT --forward-port 4040 --map $(readlink -f "$SANDBOX/bin/waymux")"
+[ "$got" = "$want" ] && ok "jailed claude gets a scoped hook token" || bad "supervise: $got"
+[[ "$got" != *tok123* ]] && ok "hook token stays out of argv" || bad "token in argv"
+supervise=(); TMUX_PANE= jail_supervision
+[ ${#supervise[@]} -eq 0 ] && ok "outside tmux: unsupervised jail" || bad "no-tmux: ${supervise[*]}"
+printf '#!/bin/sh\nexit 1\n' >"$SANDBOX/bin/waymux"
+supervise=(); TMUX_PANE=%5 jail_supervision
+[ ${#supervise[@]} -eq 0 ] && ok "no daemon: unsupervised jail" || bad "no-daemon: ${supervise[*]}"

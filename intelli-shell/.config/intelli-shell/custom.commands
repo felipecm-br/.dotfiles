@@ -355,6 +355,9 @@ waymux queue add {{pane}} {{prompt}}
 # Drop a queued or stalled prompt for an agent pane
 waymux queue rm {{pane}} {{id}}
 
+# Mint a hook token limited to one pane, for a sandboxed agent (ai-launch jail-claude does this)
+waymux hook-token {{pane}}
+
 # List the work-tree checkpoints each agent turn left in this pane
 waymux checkpoint list
 
