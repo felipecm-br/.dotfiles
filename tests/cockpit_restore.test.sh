@@ -83,6 +83,22 @@ PATH="$HOME/stub:$PATH" timeout 10 "$ROOT/utils/.local/bin/cockpit-shutdown-save
   && ok "watcher exits after the shutdown snapshot" || bad "watcher exit"
 [ "$(cat "$HOME/cockpit.log")" = "cockpit snapshot --quiet" ] && ok "one snapshot, on shutdown only" || bad "watcher: $(cat "$HOME/cockpit.log")"
 
+# After a reboot a new terminal opens the same session with a fresh shell in window 0: restore
+# takes that window over (cd to the saved path, splits, layout, agents); a busy window is left alone.
+tmux kill-session -t work; : >"$LOG"
+tmux new-session -d -s work -c "$HOME" -x 200 -y 50
+python3 "$SNAP" restore --file "$TOPO" >/dev/null
+for _ in 1 2 3 4 5 6 7 8 9 10; do [ "$(wc -l <"$LOG")" -ge 2 ] && break; sleep 0.2; done
+sleep 0.5
+panes=$(tmux list-panes -t work:0 -F '#{b:pane_current_path}' | tr '\n' ' ')
+[ "$panes" = "proj proj work " ] && ok "fresh shell window taken over, cd to the saved path" || bad "adopted: $panes"
+[ "$(wc -l <"$LOG")" -eq 2 ] && ok "agents of the other windows resumed" || bad "adopt log: $(cat "$LOG")"
+tmux kill-session -t work
+tmux new-session -d -s work -c "$HOME" 'sleep 200'
+python3 "$SNAP" restore --file "$TOPO" >/dev/null
+[ "$(tmux list-panes -t work:0 | wc -l)" -eq 1 ] && ok "busy window left alone" || bad "busy window rebuilt"
+tmux kill-session -t work
+
 # After a reboot or a tmux restart, the new server's first automatic snapshot must not overwrite
 # the old server's last one: it is set aside, `cockpit restore` uses it once, then it is retired.
 STATE="$HOME/.local/state/cockpit"

@@ -11,6 +11,7 @@ import json
 import time
 import argparse
 import re
+import shlex
 import subprocess
 from datetime import datetime
 from typing import Dict, Any, List, Optional
@@ -29,6 +30,7 @@ RESTORED_SNAPSHOT_FILE = os.path.join(DEFAULT_STATE_DIR, "session-topology.resto
 RESUMABLE = {"claude", "codex"}
 SESSION_ID = re.compile(r"^[A-Za-z0-9_-]{8,64}$")
 LAUNCH_WORD = re.compile(r"^[A-Za-z0-9._=:/-]{1,64}$")
+SHELLS = {"zsh", "bash", "sh", "fish", "dash"}
 LAUNCH_CHOICES = {"claude": "claude", "jail-claude": "claude", "jail-claude-ask": "claude", "codex": "codex"}
 
 
@@ -374,11 +376,15 @@ def restore_snapshot(filepath: Optional[str] = None, dry_run: bool = False) -> b
         path = pane.get("path") or home
         return path if os.path.isdir(path) else home
 
-    def relaunch(target: str, pane: Dict[str, Any]) -> None:
+    def relaunch(target: str, pane: Dict[str, Any], cd: bool = False) -> None:
         cmd = resume_command(pane.get("resume"))
         fg = pane.get("foreground_cmd")
         if not cmd and fg and not fg.startswith(("bash", "zsh")):
             cmd = fg
+        if cd:
+            # An adopted pane started elsewhere: an agent resumes per project directory.
+            go = f"cd -- {shlex.quote(pane_path(pane))}"
+            cmd = f"{go} && {cmd}" if cmd else go
         if cmd:
             subprocess.run(["tmux", "send-keys", "-t", target, "-l", cmd])
             subprocess.run(["tmux", "send-keys", "-t", target, "Enter"])
@@ -388,15 +394,19 @@ def restore_snapshot(filepath: Optional[str] = None, dry_run: bool = False) -> b
         m = re.match(r"^[0-9a-f]{4},(\d+)x(\d+),", w.get("layout") or "")
         return ["-x", m.group(1), "-y", m.group(2)] if m else []
 
-    def build_window(create: List[str], w: Dict[str, Any]) -> None:
-        """Creates the window with `create` (new-session or new-window), splits it back into
-        its panes, applies the saved layout, then relaunches every pane."""
+    def build_window(create: List[str], w: Dict[str, Any], adopt: Optional[str] = None) -> None:
+        """Creates the window with `create` (new-session or new-window), or takes over the
+        lone shell pane `adopt`, splits it back into its panes, applies the saved layout, then
+        relaunches every pane."""
         panes = w.get("panes") or [{}]
-        r = subprocess.run(create + ["-c", pane_path(panes[0]), "-P", "-F", "#{pane_id}"], capture_output=True, text=True)
-        first = r.stdout.strip()
-        if r.returncode != 0 or not first:
-            print(f"    {c['red']}✗ {r.stderr.strip()}{c['reset']}")
-            return
+        if adopt:
+            first = adopt
+        else:
+            r = subprocess.run(create + ["-c", pane_path(panes[0]), "-P", "-F", "#{pane_id}"], capture_output=True, text=True)
+            first = r.stdout.strip()
+            if r.returncode != 0 or not first:
+                print(f"    {c['red']}✗ {r.stderr.strip()}{c['reset']}")
+                return
         targets = [first]
         for pane in panes[1:]:
             # Split the last pane so panes keep their order; the layout then places them.
@@ -405,8 +415,12 @@ def restore_snapshot(filepath: Optional[str] = None, dry_run: bool = False) -> b
                 targets.append(r.stdout.strip())
         if w.get("layout"):
             subprocess.run(["tmux", "select-layout", "-t", first, w["layout"]], capture_output=True)
-        for target, pane in zip(targets, panes):
-            relaunch(target, pane)
+        for n, (target, pane) in enumerate(zip(targets, panes)):
+            relaunch(target, pane, cd=bool(adopt) and n == 0)
+
+    def worth_rebuilding(w: Dict[str, Any]) -> bool:
+        panes = w.get("panes") or []
+        return len(panes) > 1 or any(resume_command(p.get("resume")) or (p.get("foreground_cmd") and not p["foreground_cmd"].startswith(("bash", "zsh"))) for p in panes)
 
     def describe(w: Dict[str, Any]) -> str:
         panes = w.get("panes") or []
@@ -423,21 +437,31 @@ def restore_snapshot(filepath: Optional[str] = None, dry_run: bool = False) -> b
         if s_name in existing_sessions:
             print(f"  {c['yellow']}• Session '{s_name}' already active (checking missing windows)...{c['reset']}")
             skipped_count += 1
+            # index -> the lone pane of a window that is only a fresh shell (the session a new
+            # terminal opens after a reboot), which restore may take over.
+            current: Dict[str, Optional[str]] = {}
             try:
                 rw = subprocess.run(
-                    ["tmux", "list-windows", "-t", s_name, "-F", "#{window_index}"],
+                    ["tmux", "list-windows", "-t", s_name, "-F", "#{window_index}\t#{window_panes}\t#{pane_current_command}\t#{pane_id}"],
                     capture_output=True,
                     text=True,
                 )
-                curr_w_indices = set(rw.stdout.strip().split("\n")) if rw.returncode == 0 else set()
+                for line in rw.stdout.splitlines():
+                    idx, n, cmd, pane_id = (line.split("\t") + ["", "", "", ""])[:4]
+                    current[idx] = pane_id if n == "1" and cmd in SHELLS else None
             except Exception:
-                curr_w_indices = set()
+                pass
 
             for w in windows:
-                if str(w["index"]) not in curr_w_indices:
+                idx = str(w["index"])
+                if idx not in current:
                     print(f"    {c['green']}+ Recreating window {describe(w)}{c['reset']}")
                     if not dry_run:
-                        build_window(["tmux", "new-window", "-d", "-t", f"{s_name}:{w['index']}", "-n", w.get("name", "win")], w)
+                        build_window(["tmux", "new-window", "-d", "-t", f"{s_name}:{idx}", "-n", w.get("name", "win")], w)
+                elif current[idx] and worth_rebuilding(w):
+                    print(f"    {c['green']}+ Rebuilding fresh window {describe(w)}{c['reset']}")
+                    if not dry_run:
+                        build_window([], w, adopt=current[idx])
             continue
 
         print(f"  {c['green']}✓ Restoring session '{s_name}' ({len(windows)} windows){c['reset']}")

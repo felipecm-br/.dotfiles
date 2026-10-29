@@ -95,7 +95,7 @@ When `cockpit restore` executes:
 1. Verifies Tmux server availability (`tmux start-server` if stopped).
 2. Reads `session-topology.previous.json` when an earlier server's snapshot is waiting there, else `session-topology.json` (`--file` picks another). After a restore from it, the file becomes `session-topology.restored.json`, so a second `cockpit restore` does not bring back windows closed since.
 3. Inspects currently running Tmux sessions:
-   - For pre-existing sessions, missing windows are created without modifying existing active panes.
+   - For pre-existing sessions, missing windows are created. A window that is only a fresh shell (one pane, nothing running: the session a new terminal opens after a reboot) is taken over: `cd` to the saved path, then rebuilt like a missing one. Any other window is left untouched.
    - For dead/unstarted sessions, creates the session detached at the saved window size, then every window at its exact index (`-t <session>:<index>`).
 4. Rebuilds each window pane by pane at the saved paths, in order, then applies the saved layout.
 5. Starts each pane again: a saved agent resumes its conversation (`ai-launch <launch words> --resume <id>`, or `claude --resume <id>` without a launch tag, `codex resume <id>`), any other recorded foreground application starts as before.
