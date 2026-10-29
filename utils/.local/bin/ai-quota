@@ -482,7 +482,7 @@ elif $mode == "visual" then
       + " \($c_muted)(10×30m)\(rst) ";
   def pr_for($ag): if $ag == "claude" then $c_pr elif $ag == "agy" then $a_pr else $y_pr end;
 
-  "\($c_blue)\(bold)  󰓅  AI Quota & Burn Telemetry\(rst)  \($c_muted)│  █ actual  ▒ proj  │ pace  ░ headroom\(rst)\n"
+  "\($c_muted)  █ actual  ▒ proj  │ pace  ░ headroom\(rst)\n"
   + "\($c_muted)  ──────────────────────────────────────────────────────────────────────────\(rst)\n"
   + ([ $agents[] | select(.available) | . as $a |
       (if $a.agent == $rec then "\($c_cyan)\(bold)★\(rst)" else "\(lcol($a.level))●\(rst)" end) as $gut

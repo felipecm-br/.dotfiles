@@ -77,7 +77,7 @@ report=$(AI_QUOTA_FIXTURE_DIR="$FIX" ai-quota)
 [[ "$report" == *"Gemini 4 Argon: no per-model quota in the API"* && "$report" == *"--model gemini-3.8-flash-high"* ]] &&
   ok "report explains Argon and the Gemini fallback" || bad "report: $report"
 vis=$(AI_QUOTA_FIXTURE_DIR="$FIX" ai-quota --visual)
-[[ "$vis" == *"AI Quota & Burn Telemetry"* && "$vis" == *"█"* && "$vis" == *"▒"* && "$vis" == *"│"* && "$vis" == *"Gemini 4 Argon: no per-model quota in the API"* && "$vis" == *"recommend:"*"agy"* ]] &&
+[[ "$vis" != *"AI Quota & Burn Telemetry"* && "$vis" == *"█"* && "$vis" == *"▒"* && "$vis" == *"│"* && "$vis" == *"Gemini 4 Argon: no per-model quota in the API"* && "$vis" == *"recommend:"*"agy"* ]] &&
   ok "--visual renders bullet gauges, sparklines, Argon note and recommendation" || bad "visual: $vis"
 models 0 0 >"$FIX/agy.json"
 snap=$(AI_QUOTA_FIXTURE_DIR="$FIX" ai-quota --json)

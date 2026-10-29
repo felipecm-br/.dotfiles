@@ -94,7 +94,7 @@ Whenever the system theme switches (`omarchy theme set <name>`), 100% of termina
 | **1. Ephemeral** | [`ai-launch-popup.sh`](../../tmux/.config/tmux/ai-launch-popup.sh) (`ai-launch.toml`) | `magenta` / `mauve` | `#cba6f7` | ` 󰚩 ` + quota badge | `75% × 60%` | `Esc` (1 tap) |
 | **1. Ephemeral** | [`ai-switch-popup.sh`](../../tmux/.config/tmux/ai-switch-popup.sh) (`ai-switch.toml`) | `magenta` / `mauve` | `#cba6f7` | agent icon + current model | `75% × 60%` | `Esc` (1 tap) |
 | **1. Ephemeral** | [`ai-prompt edit`](../../utils/.local/bin/ai-prompt) (Neovim on the agent draft) | `magenta` / `mauve` | `#cba6f7` | ` 󰏫 Prompt · :wq apply · :cq cancel ` | `75% × 60%` | `:wq` / `:cq` |
-| **1. Ephemeral** | [`ai-quota-popup.sh`](../../tmux/.config/tmux/ai-quota-popup.sh) (`ai-quota --visual`) | `cyan` / `blue` | `#94e2d5` | ` 󰓅 ` + quota badge | `75% × 60%` | `u` / `q` / `Esc` |
+| **1. Ephemeral** | [`ai-quota-popup.sh`](../../tmux/.config/tmux/ai-quota-popup.sh) (`ai-quota --visual`) | `cyan` / `blue` | `#94e2d5` | ` 󰓅 ` (pure glyph, no badge: body already shows the data) | `75% × 60%` | `u` / `q` / `Esc` |
 | **1. Ephemeral** | [`close-window.sh`](../../tmux/.config/tmux/close-window.sh) / [`close-session.sh`](../../tmux/.config/tmux/close-session.sh) | `yellow` / `orange` | `#e0af68` | `  ` | `68 × 11..18` | `y` / `n` / `Esc` |
 | **2. Persistent** | [`lazygitrs-popup.sh`](../../tmux/.config/tmux/lazygitrs-popup.sh)| `orange` / `peach` | `#e84d31` | ` 󰊢 ` | `90% × 88%` | `Esc` (Files) / `q` |
 | **2. Persistent** | Floating Agent Overlay | `accent` / `blue` | `#b4befe` | ` 󱜻 ` | `85% × 85%` | `Ctrl+C` / `exit` |

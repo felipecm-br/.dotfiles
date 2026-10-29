@@ -29,24 +29,12 @@ _hex_to_ansi() {
 }
 
 if [ -z "${TMUX_POPUP:-}" ] && [ -n "${TMUX:-}" ]; then
-  QUOTA_BIN="$HOME/.local/bin/ai-quota"
-  BADGE_FILE="${XDG_STATE_HOME:-$HOME/.local/state}/ai-quota/badge"
-  badge=""
-  if [ -x "$QUOTA_BIN" ]; then
-    if [ -n "$(find "$BADGE_FILE" -mmin -60 2>/dev/null)" ]; then
-      badge=$(cat "$BADGE_FILE")
-      [ -z "$(find "$BADGE_FILE" -mmin -2 2>/dev/null)" ] && "$QUOTA_BIN" --refresh >/dev/null 2>&1 &
-    else
-      badge=$("$QUOTA_BIN" --badge 2>/dev/null) && printf '%s' "$badge" >"$BADGE_FILE"
-    fi
-  fi
-
   ORIGIN_SESSION=$(tmux display-message -p '#{session_id}' 2>/dev/null || true)
   exec tmux display-popup \
     -S "fg=$POPUP_COLOR" \
     -s "fg=${TMUX_POPUP_TEXT_COLOR:-default}" \
     -b rounded \
-    -T " 󰓅 ${badge:+ $badge }" \
+    -T " 󰓅 " \
     $(popup_gradient_flags BORDER_GRADIENT) \
     -d "$PROJECT_DIR" \
     -E \
