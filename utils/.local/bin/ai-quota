@@ -492,7 +492,7 @@ elif $mode == "visual" then
   "\($c_muted)  █ actual  ▒ proj  │ pace  ░ headroom\(rst)\n"
   + "\($c_muted)  ──────────────────────────────────────────────────────────────────────────\(rst)\n"
   + ([ $agents[] | select(.available) | . as $a |
-      (if $a.agent == $rec then "\($c_cyan)\(bold)\(rst)" else "\(lcol($a.level))●\(rst)" end) as $gut
+      (if $a.agent == $rec then "\($c_cyan)\(bold)⠛\(rst)" else "\(lcol($a.level))●\(rst)" end) as $gut
       | (if $a.agent == "claude" then "Claude Code" elif $a.agent == "agyy" then "Antigravity ²" else "Antigravity" end) as $title
       | "  \($gut) \($c_fg)\(bold)\(($a.icon + " " + $title) | rpad(16))\(rst)"
         + "\(lcol($a.level))\(bold)\($a.level | rpad(8))\(rst)"
