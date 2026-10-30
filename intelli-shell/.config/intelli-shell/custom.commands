@@ -157,6 +157,9 @@ ai-switch
 # Switch the current pane's AI agent directly to a model or effort level (e.g. sonnet, high)
 ai-switch {{choice}}
 
+# Print the Antigravity switch rows (JSON) for the agy footer piped in, as waymux switch gets them from ai-switch-agy
+capture() { tmux capture-pane -p -t "$1"; }; capture {{pane}} | ai-switch-agy agy {{pane}}
+
 # Open the in-place AI model / effort switcher as a tmux popup over the current pane
 ~/.config/tmux/ai-switch-popup.sh
 

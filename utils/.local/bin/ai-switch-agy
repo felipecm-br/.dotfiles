@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+# ai-switch-agy — Antigravity rows for `waymux switch` (its [switch] rows_command, wired in by ai-switch)
+#
+#   ai-switch-agy <process> <pane>   (the bottom of the pane on stdin)
+#
+# Prints {"agent":"agy","current":"<model name>","rows":[...]}: one model row per family (its
+# -medium id) from the daily `agy models` cache that ai-quota-agy keeps, else the families known at
+# the time of writing. Antigravity has no /effort: the effort is part of the model id, so a model
+# switch keeps the current level where the family has it, and the effort rows re-pick the current
+# family at another level. The footer's right side names the current model and effort
+# ("<model name> · <effort>").
+
+AGY_MODELS="${WAYMUX_QUOTA_STATE_DIR:-${XDG_STATE_HOME:-$HOME/.local/state}/ai-quota}/agy-models.tsv"
+models=$(cat "$AGY_MODELS" 2>/dev/null)
+[ -n "$models" ] || models=$'gemini-4-argon-medium\tGemini 4 Argon (Medium)\ngemini-4-argon-high\tGemini 4 Argon (High)\ngemini-4-argon-low\tGemini 4 Argon (Low)\ngemini-3.8-flash-high\tGemini 3.8 Flash (High)\ngemini-3.8-flash-medium\tGemini 3.8 Flash (Medium)\ngemini-3.8-flash-low\tGemini 3.8 Flash (Low)\nclaude-opus-5-5-low\tClaude Opus 5.5 (Low)\nclaude-opus-5-5-medium\tClaude Opus 5.5 (Medium)\nclaude-opus-5-5-high\tClaude Opus 5.5 (High)\nclaude-sonnet-5-5-low\tClaude Sonnet 5.5 (Low)\nclaude-sonnet-5-5-medium\tClaude Sonnet 5.5 (Medium)\nclaude-sonnet-5-5-high\tClaude Sonnet 5.5 (High)\ngpt-oss-120b-medium\tGPT-OSS 120B (Medium)'
+
+IFS=$'\t' read -r current effort < <(sed -nE 's/.*  ([^ ].*[^ ]) · (low|medium|high)[[:space:]]*$/\1\t\2/p' | tail -1)
+
+jq -n -c --arg models "$models" --arg current "${current:-}" --arg effort "${effort:-}" '
+($models | split("\n") | map(select(length > 0) | split("\t") | {id: .[0], name: (.[1] // .[0])})) as $all
+| ($all | map(.id)) as $ids
+| def has($id): $ids | index($id) != null;
+  def tier: if test("argon") then "$$$$" elif test("opus") then "$$$" elif test("sonnet") then "$$" else "$" end;
+  [ $all[] | select(.id | test("-(low|high)$") | not)
+    | (.id | sub("-medium$"; "")) as $fam
+    | (.name | sub(" \\(Medium\\)$"; "")) as $name
+    | {id, kind: "model", name: $name, tier: (.id | tier), fam: $fam,
+       command: (if $effort != "" and has("\($fam)-\($effort)") then "/model \($fam)-\($effort)" else "/model \(.id)" end),
+       active: ($name == $current)} ] as $rows
+| ($rows | map(select(.active)) | first | .fam? // "") as $cur
+| {agent: "agy", current: $current,
+   rows: (($rows | map(del(.fam)))
+     + (if $cur == "" then [] else [("low", "medium", "high") | select(has("\($cur)-\(.)"))
+         | {id: ., kind: "effort", name: ., command: "/model \($cur)-\(.)", active: (. == $effort)}] end))}'

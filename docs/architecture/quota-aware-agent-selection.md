@@ -128,8 +128,9 @@ A half-typed prompt is never submitted: when text that is not a dim placeholder 
 - [`utils/.local/bin/ai-launch-rows`](../../utils/.local/bin/ai-launch-rows): `[launch] rows_filter` hook: the jail rows (`Claude Code 󰌾`, `Claude YOLO`, `Claude Host`)
 - [`utils/.local/bin/ai-launch-exec`](../../utils/.local/bin/ai-launch-exec): `[launch] exec` hook: starts `jail-claude` / `jail-claude-ask` through ai-jail and ai-memory (hook token, settings pin, settings guard)
 - [`waymux/.config/waymux/config.toml`](../../waymux/.config/waymux/config.toml) `[launch]`: Claude Code's model rows (`fable`, `opus`, `sonnet`, `haiku`); Antigravity's rows come from `ai-quota-agy` (`launch`)
-- [`utils/.local/bin/ai-switch`](../../utils/.local/bin/ai-switch): in-place model / effort switch for the agent in a pane
-- [`tmux/.config/tmux/ai-switch-popup.sh`](../../tmux/.config/tmux/ai-switch-popup.sh): `Prefix + A` popup over the current pane
+- [`utils/.local/bin/ai-switch`](../../utils/.local/bin/ai-switch): thin wrapper for `waymux switch` (in-place model / effort switch for the agent in a pane); adds the Antigravity rows, `ai-prompt` as the draft tool and the preset
+- [`utils/.local/bin/ai-switch-agy`](../../utils/.local/bin/ai-switch-agy): `[switch] rows_command` hook: Antigravity model families from the `agy models` cache, effort as the family at another level
+- [`tmux/.config/tmux/ai-switch-popup.sh`](../../tmux/.config/tmux/ai-switch-popup.sh): `Prefix + A` popup over the current pane (`ai-switch --popup`)
 - [`utils/.local/bin/ai-prompt`](../../utils/.local/bin/ai-prompt): agent draft edit popup, stash and restore
 - [`waymaker/.config/waymaker/presets/ai-launch.toml`](../../waymaker/.config/waymaker/presets/ai-launch.toml): launch menu preset
 - [`waymaker/.config/waymaker/presets/ai-launch-pick.toml`](../../waymaker/.config/waymaker/presets/ai-launch-pick.toml): `--pick` footer overlay (`Esc Close`)

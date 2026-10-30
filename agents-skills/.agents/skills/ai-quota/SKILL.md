@@ -31,6 +31,7 @@ Canonical design and policy: [docs/architecture/quota-aware-agent-selection.md](
 
 ## Data contract
 
+- Switch: `waymux switch`; `ai-switch` passes `ai-switch-agy` (Antigravity rows) and `ai-prompt` (draft tool).
 - Launcher: `waymux launch`; `ai-launch` passes the jail hooks `ai-launch-rows` (rows) and `ai-launch-exec` (start). Jail behavior changes there; the menu, row model and recommendation change in waymux.
 - Engine: `waymux quota` (Rust, in the waymux repo). `ai-quota` only sets `WAYMUX_QUOTA_STATE_DIR` (this repo's `ai-quota` state), `WAYMUX_QUOTA_PROVIDERS` (`ai-quota-agy`) and `WAYMUX_QUOTA_PREFERENCE` (`AI_AGENT_PREFERENCE`), then runs it. Antigravity changes go in `ai-quota-agy`; Claude, scoring, rendering and the popup change in waymux.
 
