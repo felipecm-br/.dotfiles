@@ -200,6 +200,7 @@ printf '#!/bin/sh\n' >"$SANDBOX/only-codex/codex"; chmod +x "$SANDBOX/only-codex
 # Stowed layout: the agy wrapper lives in ~/.local/bin, where ai-quota knows to skip it
 mkdir -p "$HOME/.local/bin"
 for b in ai-launch ai-quota agy; do ln -sf "$ROOT/utils/.local/bin/$b" "$HOME/.local/bin/$b"; done
+ln -sf "$(command -v waymux)" "$HOME/.local/bin/waymux"
 # /usr/bin without agent CLIs: agy (Antigravity) installs there on some hosts
 mkdir -p "$SANDBOX/sysbin"
 for f in /usr/bin/*; do
@@ -210,7 +211,7 @@ out=$(PATH="$SANDBOX/only-codex:$HOME/.local/bin:$SANDBOX/sysbin" AI_QUOTA_NO_AP
 
 # 11. Jailed Claude stays supervised: jail_supervision passes a pane-scoped hook token, the pane
 # and the daemon port through --env (never argv), forwards the port and maps waymux read-only.
-eval "$(sed -n '/^supervise=()$/,/^}$/p' "$ROOT/utils/.local/bin/ai-launch")"
+eval "$(sed -n '/^supervise=()$/,/^}$/p' "$ROOT/utils/.local/bin/ai-launch-exec")"
 printf '#!/bin/sh\n[ "$1" = hook-token ] && [ "$2" = "%%5" ] && echo tok123\n' >"$SANDBOX/bin/waymux"
 chmod +x "$SANDBOX/bin/waymux"
 supervise=(); TMUX_PANE=%5 jail_supervision
@@ -223,10 +224,11 @@ supervise=(); TMUX_PANE= jail_supervision
 printf '#!/bin/sh\nexit 1\n' >"$SANDBOX/bin/waymux"
 supervise=(); TMUX_PANE=%5 jail_supervision
 [ ${#supervise[@]} -eq 0 ] && ok "no daemon: unsupervised jail" || bad "no-daemon: ${supervise[*]}"
+rm -f "$SANDBOX/bin/waymux"
 
 # 12. The jail sees the real Claude settings (hooks, permission rules): the stow link's target is
 # mapped read-only at its own path; a plain file (not a link) is left alone.
-eval "$(sed -n '/^pin_settings() {$/,/^}$/p' "$ROOT/utils/.local/bin/ai-launch")"
+eval "$(sed -n '/^pin_settings() {$/,/^}$/p' "$ROOT/utils/.local/bin/ai-launch-exec")"
 mkdir -p "$SANDBOX/dot/claude"; echo '{}' >"$SANDBOX/dot/claude/settings.json"
 ln -sf "$SANDBOX/dot/claude/settings.json" "$HOME/.claude/settings.json"
 supervise=(); pin_settings
@@ -240,8 +242,8 @@ rm -f "$HOME/.claude/settings.json"
 # can start it the same way; a plain shell clears the tag. tmux is a stub: never the live server.
 printf '#!/bin/sh\necho "$*" >>"%s/tmux.log"\n' "$SANDBOX" >"$SANDBOX/bin/tmux"; chmod +x "$SANDBOX/bin/tmux"
 TMUX_PANE=%9 ai-launch claude --model opus >/dev/null 2>&1
-[ "$(tail -1 "$SANDBOX/tmux.log")" = "set-option -p -t %9 @ai_launch claude --model opus" ] && ok "launch tagged on the pane" || bad "tag: $(tail -1 "$SANDBOX/tmux.log")"
+[ "$(tail -1 "$SANDBOX/tmux.log")" = "-u set-option -p -t %9 @ai_launch claude --model opus" ] && ok "launch tagged on the pane" || bad "tag: $(tail -1 "$SANDBOX/tmux.log")"
 TMUX_PANE=%9 SHELL=/bin/true ai-launch shell >/dev/null 2>&1
-[ "$(tail -1 "$SANDBOX/tmux.log")" = "set-option -p -u -t %9 @ai_launch" ] && ok "shell clears the tag" || bad "untag: $(tail -1 "$SANDBOX/tmux.log")"
+[ "$(tail -1 "$SANDBOX/tmux.log")" = "-u set-option -p -u -t %9 @ai_launch" ] && ok "shell clears the tag" || bad "untag: $(tail -1 "$SANDBOX/tmux.log")"
 : >"$SANDBOX/tmux.log"; TMUX_PANE= ai-launch claude >/dev/null 2>&1
 [ ! -s "$SANDBOX/tmux.log" ] && ok "outside tmux: no tag" || bad "tagged outside tmux"

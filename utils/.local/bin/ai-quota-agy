@@ -172,16 +172,31 @@ else
   agyy_ev='[]'; agyy_pr='[]'; agyy_n=0
 fi
 
+# Antigravity models for the launch rows: `agy models`, cached for a day (refreshed in the
+# background); before the first cache, the families known at the time of writing
+AGY_MODELS="$STATE_DIR/agy-models.tsv"
+if $agy_bin && [ -z "$(find "$AGY_MODELS" -mtime -1 2>/dev/null)" ] && command -v agy-bin >/dev/null 2>&1; then
+  (timeout 20 agy-bin models 2>/dev/null | grep -P '^[a-z0-9.-]+\t' >"$AGY_MODELS.tmp" &&
+    [ -s "$AGY_MODELS.tmp" ] && mv -f "$AGY_MODELS.tmp" "$AGY_MODELS" || rm -f "$AGY_MODELS.tmp") >/dev/null 2>&1 &
+fi
+agy_models=$(cat "$AGY_MODELS" 2>/dev/null)
+[ -n "$agy_models" ] || agy_models=$'gemini-4-argon-medium\tGemini 4 Argon (Medium)\ngemini-3.8-flash-medium\tGemini 3.8 Flash (Medium)\nclaude-opus-5-5-medium\tClaude Opus 5.5 (Medium)\nclaude-sonnet-5-5-medium\tClaude Sonnet 5.5 (Medium)\ngpt-oss-120b-medium\tGPT-OSS 120B (Medium)'
+
 # Per-group quota from the API when it answered; otherwise exhausted-until from 429s and
 # capacity learned from the window that hit the cap
 jq -n -c \
-  --argjson now "$now" \
+  --argjson now "$now" --arg models "$agy_models" \
   --arg icon "$(waymux icon agy 2>/dev/null || echo A)" \
   --argjson a_bin "$agy_bin" --argjson a_ev "$agy_ev" --argjson a_pr "$agy_pr" --argjson a_n "$agy_n" \
   --argjson y_ok "$agyy_ok" --argjson y_ev "$agyy_ev" --argjson y_pr "$agyy_pr" --argjson y_n "$agyy_n" \
   --argjson a_api "${agy_api_json:-null}" --argjson y_api "${agyy_api_json:-null}" '
 def count_since($ts; $since): [$ts[] | select(. >= $since)] | length;
-def bins($pr): [range(0; 10) | ($now - (10 - .) * 1800) as $s | [$pr[] | select(. >= $s and . < $s + 1800)] | length];
+def fam: sub("-(low|medium|high)$"; "");
+def clock: if (. - $now) > 86400 then strflocaltime("%a %H:%M") else strflocaltime("%H:%M") end;
+# One launch row per model family (the -medium variant when there is one)
+($models | split("\n") | map(select(length > 0) | split("\t") | {id: .[0], name: (.[1] // .[0] | sub(" \\((Low|Medium|High)\\)$"; ""))})
+  | group_by(.id | fam) | map((map(select(.id | endswith("-medium"))) | first) // first)) as $families
+| def bins($pr): [range(0; 10) | ($now - (10 - .) * 1800) as $s | [$pr[] | select(. >= $s and . < $s + 1800)] | length];
 
 def agy_model($name; $title; $tag; $bin; $ev; $pr; $n; $api):
   ([$ev[] | select(.reset > $now)] | max_by(.reset)) as $active
@@ -209,6 +224,29 @@ def agy_model($name; $title; $tag; $bin; $ev; $pr; $n; $api):
      elif ($dgroup != null and ($dgroup.pct // 0) == 0) or ([$usable[] | select(.pct < 20)] | length) > 0 then "yellow"
      else "green" end) as $api_level
   | ($dgroup != null and ($dgroup.pct // 0) == 0) as $dex
+  | ($groups // [] | map(select(.key != "pro")) | map(select((.pct // 0) > 0)) | max_by(.pct) | .key? // null) as $best
+  | ($dm | fam) as $dfam
+  | ($families | map(.id | fam) | index($dfam)) as $has_default
+  | ($api_level // (if $active then "red" elif ($est // 0) >= 80 then "yellow" elif $cap == null then "unknown" else "green" end)) as $level
+  | ([$ev[] | select(.reset > $now)] | max_by(.reset) | .reset? // null) as $exhausted
+  # Launch rows: the group each family draws from, and `rec` on the model to start when this
+  # agent is the recommended one (its default while that has quota, else the fullest group)
+  | [ $families[] | (.id | fam) as $f
+      | (if ($f | startswith("claude-")) or ($f | startswith("gpt-oss")) then "claude"
+         elif ($f | startswith("gemini-4-argon")) then "argon"
+         elif ($f | test("flash")) then "flash" else "pro" end) as $key
+      | ($groups // [] | map(select(.key == $key and ($key != "pro" or ((.model // "") | fam) == $f))) | first) as $grp
+      | {args: "--model \(.id)", model: .name,
+         quota: (if $groups == null then (if $exhausted then "exhausted ⏳\($exhausted | clock)" else "quota ?" end)
+                 elif $grp == null then "no quota data"
+                 else "\($grp.pct)% left" + (if $grp.reset and $grp.pct < 100 then " ⟳\($grp.reset | clock)" else "" end) end),
+         level: (if $groups == null then $level elif $grp == null then "unknown"
+                 elif $grp.pct == 0 then "red" elif $grp.pct < 20 then "yellow" else "green" end),
+         rec: (if $groups != null and ($dex | not) and $has_default != null then $f == $dfam
+               elif $best == "argon" then ($f | startswith("gemini-4-argon"))
+               elif $best == "claude" then ($f | test("sonnet"))
+               elif $best == "flash" then ($f | test("flash"))
+               else $f == ($families[0].id | fam) end)} ] as $launch
   | {
       agent: $name, title: $title, available: $bin, icon: $icon, tag: $tag, sessions: $n,
       prompts_1h: count_since($pr; $now - 3600), prompts_5h: $p5, activity: bins($pr),
@@ -218,7 +256,7 @@ def agy_model($name; $title; $tag; $bin; $ev; $pr; $n; $api):
       until: (if $groups == null then ($active.reset // null)
               elif $api_level == "red" then ([$groups[].reset | select(. != null)] | min) else null end),
       window: (if $groups == null and $active then (if ($active.reset - $active.ts) > 21600 then "7d" else "5h" end) else null end),
-      level: ($api_level // (if $active then "red" elif ($est // 0) >= 80 then "yellow" elif $cap == null then "unknown" else "green" end)),
+      level: $level, launch: $launch,
       notes: (
         if $groups == null then [{text: "no live API data: the profile has no valid token; open \($name) once to refresh it"}]
         else

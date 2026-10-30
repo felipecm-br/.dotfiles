@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# ai-launch-rows — Jail rows for the `waymux launch` menu (its [launch] rows_filter, wired in by ai-launch)
+#
+# Reads the menu rows (JSON array) on stdin and prints them back with, for the recommended Claude
+# model (else the first): "Claude YOLO" (jail-claude, prompts off) wherever ai-jail can run here,
+# and "Claude Host" (plain claude) when the Claude rows go jailed. The Claude rows themselves start
+# jailed with prompts on (jail-claude-ask, 󰌾) unless AI_LAUNCH_JAIL=0.
+
+jail_ok=0
+[ -z "$("$(dirname "$(readlink -f "$0")")/ai-launch-exec" --blocker)" ] && jail_ok=1
+jail_default=0
+[ "$jail_ok" = 1 ] && [ "${AI_LAUNCH_JAIL:-1}" != 0 ] && jail_default=1
+
+jq -c --arg jail_ok "$jail_ok" --arg jail_default "$jail_default" '
+(map(select(.agent == "claude" and .rec)) + map(select(.agent == "claude")) | first) as $c
+| . + [$c | select(. != null and $jail_ok == "1")
+        | .agent = "jail-claude" | .cli = "Claude YOLO" | .icon = "󰌾" | .rec = false]
+    + [$c | select(. != null and $jail_default == "1")
+        | .cli = "Claude Host" | .rec = false]
+| map(if $jail_default == "1" and .agent == "claude" and .cli == "Claude Code"
+      then .agent = "jail-claude-ask" | .cli = "Claude Code 󰌾" else . end)'

@@ -124,7 +124,10 @@ A half-typed prompt is never submitted: when text that is not a dim placeholder 
 - [`tmux/.config/tmux/ai-launch-popup.sh`](../../tmux/.config/tmux/ai-launch-popup.sh): tmux launcher popup (`Prefix + a`, `Ctrl + Shift + A`)
 - [`tmux/.config/tmux/ai-quota-popup.sh`](../../tmux/.config/tmux/ai-quota-popup.sh): visual quota & burn telemetry tmux popup (`Prefix + u`)
 - [`tmux/.config/tmux/toggle-ai-split.sh`](../../tmux/.config/tmux/toggle-ai-split.sh): 35% right-side AI split pane toggle backed by `ai-launch --auto` (`Prefix + o`)
-- [`utils/.local/bin/ai-launch`](../../utils/.local/bin/ai-launch): launch menu and launcher used by Waymaker
+- [`utils/.local/bin/ai-launch`](../../utils/.local/bin/ai-launch): thin wrapper for `waymux launch` (menu, `--auto`, `--peek`, `--pick`, `--next`, `@ai_launch` tag) used by Waymaker; it adds ai-quota's providers, the presets below, `$AI_LAUNCH_AGENT` and the two hooks
+- [`utils/.local/bin/ai-launch-rows`](../../utils/.local/bin/ai-launch-rows): `[launch] rows_filter` hook: the jail rows (`Claude Code 󰌾`, `Claude YOLO`, `Claude Host`)
+- [`utils/.local/bin/ai-launch-exec`](../../utils/.local/bin/ai-launch-exec): `[launch] exec` hook: starts `jail-claude` / `jail-claude-ask` through ai-jail and ai-memory (hook token, settings pin, settings guard)
+- [`waymux/.config/waymux/config.toml`](../../waymux/.config/waymux/config.toml) `[launch]`: Claude Code's model rows (`fable`, `opus`, `sonnet`, `haiku`); Antigravity's rows come from `ai-quota-agy` (`launch`)
 - [`utils/.local/bin/ai-switch`](../../utils/.local/bin/ai-switch): in-place model / effort switch for the agent in a pane
 - [`tmux/.config/tmux/ai-switch-popup.sh`](../../tmux/.config/tmux/ai-switch-popup.sh): `Prefix + A` popup over the current pane
 - [`utils/.local/bin/ai-prompt`](../../utils/.local/bin/ai-prompt): agent draft edit popup, stash and restore

@@ -175,6 +175,9 @@ ai-launch {{agent}}
 # Start Claude inside the ai-jail sandbox with permission prompts on (the default Claude menu rows)
 ai-launch jail-claude-ask --model {{model}}
 
+# Show the launch menu rows after the jail filter (JSON), as waymux launch passes them through ai-launch-rows
+echo '[]' | ai-launch-rows
+
 # Start Claude inside the ai-jail sandbox with permission prompts off (the Claude YOLO menu row)
 ai-launch jail-claude --model {{model}}
 

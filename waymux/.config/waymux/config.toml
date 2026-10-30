@@ -38,6 +38,10 @@ ntfy_file = "~/.local/state/waymux/ntfy-topic"
 launch = "exec ~/.local/bin/ai-launch --auto"
 pick = 'c=$(~/.local/bin/ai-launch --pick) && [ -n "$c" ] && printf "exec ~/.local/bin/ai-launch %s\n" "$c"'
 
+# `waymux launch` (through ai-launch, which adds the jail rows and hook): Claude Code's model rows.
+[launch]
+claude_models = ["fable", "opus", "sonnet", "haiku"]
+
 [theme]
 active_spinner = "minidot"
 
