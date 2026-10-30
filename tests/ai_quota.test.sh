@@ -14,6 +14,9 @@ mkdir -p "$HOME/.claude/sessions" "$HOME/.gemini/antigravity-cli/log" "$XDG_RUNT
 for b in claude agy-bin; do printf '#!/bin/sh\n' >"$SANDBOX/bin/$b"; chmod +x "$SANDBOX/bin/$b"; done
 export PATH="$SANDBOX/bin:$ROOT/utils/.local/bin:$PATH"
 unset AI_AGENT_PREFERENCE AI_LAUNCH_AGENT AI_QUOTA_SESSION_RATE
+# A shell started through ai-launch carries the wrapper's WAYMUX_* settings; they would point
+# these tests at the real quota state and armed-choice file. Drop them.
+for _v in $(env | sed -n 's/^\(WAYMUX_\(QUOTA\|LAUNCH\|SWITCH\)_[A-Z_]*\)=.*/\1/p'); do unset "$_v"; done
 # The model and precedence checks read the plain rows; §6b covers the jailed default.
 export AI_LAUNCH_JAIL=0
 : >"$HOME/.claude/history.jsonl"

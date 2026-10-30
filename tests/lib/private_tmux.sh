@@ -35,6 +35,9 @@ unset TMUX_PANE
 export HOME="$_PT_HOME"
 export PATH="$_PT_HOME/.local/bin:$PATH"
 export WAYMUX_PORT=9
+# A shell started through ai-launch carries the wrapper's WAYMUX_* settings; they would point
+# these tests at the real quota state and armed-choice file. Drop them.
+for _v in $(env | sed -n 's/^\(WAYMUX_\(QUOTA\|LAUNCH\|SWITCH\)_[A-Z_]*\)=.*/\1/p'); do unset "$_v"; done
 
 private_tmux_cleanup() {
   command tmux -L "$_PT_SOCK" kill-server 2>/dev/null || true
