@@ -155,6 +155,21 @@ HELP
     exit 0
 }
 
+# 0. `awt <subcommand> --help` shows help and runs nothing: the helpers below take the first
+# non-flag argument as the branch, so a flag there must never reach them.
+for _arg in "${@:2}"; do
+    case "$_arg" in
+        -h|--help) show_help ;;
+        --) break ;;
+    esac
+done
+
+# A flag none of merge/ship/rm knows, where they would read it as the branch: refuse.
+reject_flag() { # <subcommand> <arg>
+    echo "awt $1: unknown flag '$2'; nothing was changed (awt --help)" >&2
+    exit 2
+}
+
 # 1. Subcommands routing
 case "$1" in
     -h|--help|help)
@@ -185,6 +200,9 @@ case "$1" in
             case "$arg" in
                 -f|--force|--no-delete-branch|--no-tmux|--no-hooks|--skip-pre-remove|-H)
                     flags+=("$arg")
+                    ;;
+                -*)
+                    reject_flag rm "$arg"
                     ;;
                 *)
                     [[ -z "$branch" ]] && branch="$arg" || flags+=("$arg")
@@ -237,6 +255,9 @@ case "$1" in
                     shift
                     flags+=("--into" "$1")
                     ;;
+                -*)
+                    reject_flag merge "$1"
+                    ;;
                 *)
                     [[ -z "$target" ]] && target="$1" || flags+=("$1")
                     ;;
@@ -273,6 +294,9 @@ case "$1" in
                 --into)
                     shift
                     flags+=("--into" "$1")
+                    ;;
+                -*)
+                    reject_flag ship "$1"
                     ;;
                 *)
                     [[ -z "$target" ]] && target="$1" || flags+=("$1")
