@@ -321,7 +321,7 @@ IMPORTANT: Modify ONLY the theme/color resolution logic in the files that exist 
    For every script that reads `colors.toml` or `tmux-style.sh`:
    - Ensure `SCRIPT_DIR` is defined at the top of the script and source `. "$SCRIPT_DIR/theme-helper.sh"` BEFORE any `if [ -z "${TMUX_POPUP:-}" ]` block.
    - Remove `_tmux_style=... / . "$_tmux_style"` boilerplate blocks (since `theme-helper.sh` already populates `TMUX_POPUP_BORDER_COLOR`, `TMUX_POPUP_TEXT_COLOR`, `TMUX_COLOR_SPEC`, `TMUX_SPINNER_NAME`, and `TMUX_SPINNER_COLOR`).
-   - Replace all inline `grep ... colors.toml | sed ...` pipelines, local `_get_color` functions (`close-session.sh`, `close-window.sh`), and `while IFS='=' read ... < "$_colors_toml"` loops (`cockpit-picker-items.sh`, `cockpit-picker-diff.sh`) with direct calls to `get_theme_color "<key>" "<fallback>"`.
+   - Replace all inline `grep ... colors.toml | sed ...` pipelines, local `_get_color` functions (`close-session.sh`, `close-window.sh`), and `while IFS='=' read ... < "$_colors_toml"` loops (`cockpit-picker-diff.sh`) with direct calls to `get_theme_color "<key>" "<fallback>"`.
    - In `grep-picker.sh` (`teal|cyan|green`), use:
      `BORDER_COLOR=$(get_theme_color teal "$(get_theme_color cyan "$(get_theme_color green "#94e2d5")")")`
    - In `pr-picker.sh` (if present), keep a comment `# Dynamic theme colors from colors.toml via theme-helper.sh` for test suite compatibility.

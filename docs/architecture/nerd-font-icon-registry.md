@@ -53,6 +53,6 @@ waymux icons --format tmux        # the plugin's `icons:` YAML section
 
 Picker-local UI chrome is not a name-to-glyph mapping, so it stays next to its UI: popup frame
 badges, menu entries, Waymaker prompts such as the sounds preset, and the Quickshell workspace
-pills (`Workspaces.qml`), which map Hyprland window classes, not processes. The legacy bash
-Cockpit fallback in `cockpit-picker-items.sh` keeps its own glyphs because it only runs when
-waymux is not installed.
+pills (`Workspaces.qml`), which map Hyprland window classes, not processes. The Cockpit
+(`cockpit-picker-items.sh` is now a thin entry point for `waymux cockpit-items`) reads the registry
+directly, so it keeps no glyphs of its own.
