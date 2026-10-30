@@ -130,6 +130,9 @@ ai-quota --visual
 # Print the one-glyph quota badge (recommended agent, level-colored) used in the session picker title
 ai-quota --badge-min
 
+# Print the Antigravity quota provider's agent JSON (agy, agyy) that ai-quota feeds to waymux quota
+ai-quota-agy
+
 # Force a refresh of the AI quota caches (normally run every 2 min by ai-quota-refresh.timer)
 ai-quota --refresh
 

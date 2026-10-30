@@ -32,6 +32,12 @@ hold_seconds = 120
 [phone]
 ntfy_file = "~/.local/state/waymux/ntfy-topic"
 
+# `waymux quota`: ai-quota (utils/.local/bin) sets the providers, preference and state dir through
+# WAYMUX_QUOTA_*; these are the keys of its popup (Prefix + u).
+[quota]
+launch = "exec ~/.local/bin/ai-launch --auto"
+pick = 'c=$(~/.local/bin/ai-launch --pick) && [ -n "$c" ] && printf "exec ~/.local/bin/ai-launch %s\n" "$c"'
+
 [theme]
 active_spinner = "minidot"
 

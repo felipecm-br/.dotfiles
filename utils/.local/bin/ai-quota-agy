@@ -1,0 +1,236 @@
+#!/usr/bin/env bash
+# ai-quota-agy — Antigravity quota provider for `waymux quota` (wired in by ai-quota)
+#
+# Prints a JSON array with one agent per Antigravity profile: agy, and agyy under the secondary
+# profile ($AGYY_HOME) when it has a token. See `waymux quota --help` for the agent fields.
+#
+# Data sources:
+#   percent left per group (Claude & GPT, Gemini Flash, Gemini 4 Argon) from fetchAvailableModels,
+#   with the profile's own token on curl's stdin, cached 60 s (a reader accepts up to 15 min of
+#   staleness and refreshes in the background); without a valid token, 429 "Individual quota
+#   reached ... Resets in XhYmZs" lines in antigravity-cli logs (exhausted-until + learned prompt
+#   capacity per 5h window); prompts in history.jsonl
+#
+# Environment (from waymux): WAYMUX_QUOTA_NOW, WAYMUX_QUOTA_STATE_DIR, WAYMUX_QUOTA_FORCE=1 (skip
+# the cache). Tunables: AI_QUOTA_NO_API=1 (logs and history only), AI_QUOTA_MAX_STALE (seconds a
+# cached answer may be served while a background refresh runs, default 900), AI_QUOTA_FIXTURE_DIR
+# (tests: recorded fetchAvailableModels answers instead of the network).
+
+set -uo pipefail
+
+STATE_DIR="${WAYMUX_QUOTA_STATE_DIR:-${XDG_STATE_HOME:-$HOME/.local/state}/ai-quota}"
+AGYY_HOME="${AGYY_HOME:-$HOME/.local/share/agy-profiles/secondary}"
+HERE=$(dirname "$(readlink -f "$0")")
+now="${WAYMUX_QUOTA_NOW:-$(date +%s)}"
+FORCE="${WAYMUX_QUOTA_FORCE:-${AI_QUOTA_FORCE:-0}}"
+
+mkdir -p "$STATE_DIR"
+
+prompt_times() { # <history.jsonl>: epoch-seconds of real prompts in the last 8 days
+  tail -n 6000 "$1" 2>/dev/null |
+    jq -c -s --argjson cut $((now - 691200)) \
+      '[.[] | select((.type // "prompt") != "slash_command") | (.timestamp / 1000 | floor) | select(. >= $cut)]' 2>/dev/null || echo '[]'
+}
+
+agy_events() { # <log dir>: [{ts, reset}] from 429 quota lines in logs touched in the last 8 days
+  local dir=$1 f line stamp y ts dur secs
+  [ -d "$dir" ] || { echo '[]'; return; }
+  {
+    find "$dir" -maxdepth 1 -name 'cli-*.log' -mtime -8 -print0 2>/dev/null |
+      xargs -0 -r grep -H -m 20 'Individual quota reached' 2>/dev/null | tail -n 40 |
+      while IFS= read -r line; do
+        f=${line%%:*}; y=${f##*/cli-}; y=${y:0:4}
+        stamp=$(sed -E 's/^[^:]*:[EWI]([0-9]{2})([0-9]{2}) ([0-9:]{8}).*/\1-\2 \3/' <<<"$line")
+        dur=$(grep -oE 'Resets in [0-9hms]+' <<<"$line" | cut -d' ' -f3)
+        ts=$(date -d "$y-$stamp" +%s 2>/dev/null) || continue
+        secs=0
+        [[ $dur =~ ([0-9]+)h ]] && secs=$((secs + BASH_REMATCH[1] * 3600))
+        [[ $dur =~ ([0-9]+)m ]] && secs=$((secs + BASH_REMATCH[1] * 60))
+        [[ $dur =~ ([0-9]+)s ]] && secs=$((secs + BASH_REMATCH[1]))
+        printf '{"ts":%s,"reset":%s}\n' "$ts" "$((ts + secs))"
+      done
+  } | jq -s -c 'unique_by(.reset)'
+}
+
+agy_sessions() { # <home>: live agy CLI processes (top-level agy-bin) running under that HOME
+  local home=$1 n=0 pid ppid env_home
+  for pid in $(pgrep -x 'agy|agy-bin' 2>/dev/null); do
+    ppid=$(awk '{print $4}' "/proc/$pid/stat" 2>/dev/null)
+    case "$(cat "/proc/$ppid/comm" 2>/dev/null)" in agy | agy-bin) continue ;; esac
+    env_home=$(tr '\0' '\n' <"/proc/$pid/environ" 2>/dev/null | sed -n 's/^HOME=//p')
+    [ "${env_home:-$HOME}" = "$home" ] && n=$((n + 1))
+  done
+  echo "$n"
+}
+
+# The three functions that touch the token run in a subshell `( … )` with xtrace off, so
+# `bash -x ai-quota-agy` never prints it and the rest of the script keeps its tracing.
+agy_token() ( # <home>: a valid Antigravity access token for that profile, or nothing
+  { set +x; } 2>/dev/null # never trace the token (bash -x would print it expanded)
+  # The primary profile keeps its live token in the keyring (service gemini), the secondary one
+  # in its token file; the keyring token is used only when its account matches the profile's.
+  local home=$1 file="$1/.gemini/antigravity-cli/antigravity-oauth-token" src tok exp email file_email="" best="" best_exp=0
+  local jwt_email='(.id_token_email // ((.id_token // "") | split(".") | .[1] // "" | gsub("-";"+") | gsub("_";"/")
+    | (. + ("=" * ((4 - length % 4) % 4))) | (@base64d | fromjson? | .email) // ""))'
+  [ -r "$file" ] && file_email=$(jq -r "$jwt_email" "$file" 2>/dev/null)
+  for src in file keyring; do
+    if [ "$src" = file ]; then
+      [ -r "$file" ] || continue
+      IFS=$'\t' read -r tok exp email < <(jq -r "[.token.access_token // \"\", .token.expiry // \"\", $jwt_email] | @tsv" "$file" 2>/dev/null)
+    else
+      IFS=$'\t' read -r tok exp email < <(secret-tool lookup service gemini 2>/dev/null |
+        jq -r "[.token.access_token // \"\", .token.expiry // \"\", $jwt_email] | @tsv" 2>/dev/null)
+      # No token file means no profile here (e.g. a sandboxed HOME): never borrow the keyring's.
+      [ -n "$file_email" ] && [ "$email" = "$file_email" ] || continue
+    fi
+    [ -n "$tok" ] && [ -n "$exp" ] || continue
+    exp=$(date -d "$exp" +%s 2>/dev/null) || continue
+    if [ "$exp" -gt $((now + 60)) ] && [ "$exp" -gt "$best_exp" ]; then best=$tok; best_exp=$exp; fi
+  done
+  printf '%s' "$best"
+)
+
+agy_post() ( # <token> <url> <json body>: POST with the token read from stdin, never from argv
+  { set +x; } 2>/dev/null # never trace the token (bash -x would print it expanded)
+  printf 'header = "Authorization: Bearer %s"\n' "$1" |
+    curl -sS --max-time 8 --config - -H 'Content-Type: application/json' \
+      -H 'User-Agent: antigravity/cli/2.0 (aidev_client; cl=9999999999)' \
+      -X POST --data "$3" "$2" 2>/dev/null
+)
+
+agy_api() ( # <home> <label>: per-model quota from fetchAvailableModels, cached 60 s; `null` when unavailable
+  { set +x; } 2>/dev/null # never trace the token (bash -x would print it expanded)
+  local home=$1 label=$2 cache="$STATE_DIR/agy-models-$2.json" proj_file="$STATE_DIR/agy-project-$2" tok proj resp age
+  if [ -n "${AI_QUOTA_FIXTURE_DIR:-}" ]; then
+    # Tests: a recorded fetchAvailableModels response instead of the network
+    resp=$(cat "$AI_QUOTA_FIXTURE_DIR/$label.json" 2>/dev/null) || { echo null; return; }
+  else
+    if [ -s "$cache" ] && [ "$FORCE" != 1 ]; then
+      age=$((now - $(stat -c %Y "$cache")))
+      [ "$age" -lt 60 ] && { cat "$cache"; return; }
+      if [ "$age" -lt "${AI_QUOTA_MAX_STALE:-900}" ]; then
+        # Stale-while-revalidate: answer from the cache now, refresh for the next reader
+        (setsid -f "$HERE/ai-quota" --refresh </dev/null >/dev/null 2>&1) 2>/dev/null
+        cat "$cache"; return
+      fi
+    fi
+    tok=$(agy_token "$home")
+    if [ -z "$tok" ]; then echo null; return; fi
+    proj=$(cat "$proj_file" 2>/dev/null)
+    if [ -z "$proj" ]; then
+      proj=$(agy_post "$tok" "https://cloudcode-pa.googleapis.com/v1internal:loadCodeAssist" \
+        '{"metadata":{"ideType":"ANTIGRAVITY"}}' | jq -r '.cloudaicompanionProject // empty' 2>/dev/null)
+      [ -n "$proj" ] && printf '%s\n' "$proj" >"$proj_file"
+    fi
+    resp=$(agy_post "$tok" "https://daily-cloudcode-pa.googleapis.com/v1internal:fetchAvailableModels" \
+      "$(jq -cn --arg p "$proj" 'if $p == "" then {} else {project: $p} end')")
+  fi
+  # A model with a resetTime but no remainingFraction is exhausted (the API omits zero).
+  jq -c --argjson now "$now" '
+    def epoch: if . == null then null else (sub("\\.[0-9]+"; "") | fromdateiso8601?) end;
+    select(.models) | . as $r
+    | def entry($id): ($r.models[$id] // null) as $m | if $m == null then null else {
+        model: $id, name: ($m.displayName // $id),
+        pct: (($m.quotaInfo.remainingFraction // (if $m.quotaInfo.resetTime then 0 else null end))
+              | if . == null then null else (. * 100 | round) end),
+        reset: ($m.quotaInfo.resetTime | epoch) } end;
+    .
+    | ([$r.models | keys[] | select(startswith("claude-") or startswith("gpt-oss"))] | map(entry(.)) | map(select(.pct != null))) as $cg
+    | ([$r.models | keys[] | select(startswith("gemini-4-argon"))] | map(entry(.)) | map(select(.pct != null))) as $ag
+    | {ts: $now, default_model: .defaultAgentModelId,
+       groups: [
+         (if ($cg | length) > 0 then {key: "claude", label: "Claude & GPT", pct: ($cg | map(.pct) | min),
+            reset: ($cg | map(.reset) | map(select(. != null)) | min)} else empty end),
+         (entry($r.tieredModelIds.flash[0]? // "") | select(. != null) | {key: "flash", label: "Gemini Flash"} + .),
+         (if ($ag | length) > 0 then {key: "argon", label: "Gemini 4 Argon", model: ($ag[0].model), name: "Gemini 4 Argon",
+            pct: ($ag | map(.pct) | min), reset: ($ag | map(.reset) | map(select(. != null)) | min)} else empty end),
+         (entry($r.tieredModelIds.pro[0]? // "") | select(. != null) | {key: "pro", label: "Gemini pro tier"} + .)
+       ]}' <<<"$resp" 2>/dev/null >"$cache.tmp" && [ -s "$cache.tmp" ] && mv -f "$cache.tmp" "$cache" || rm -f "$cache.tmp"
+  if [ -s "$cache" ]; then cat "$cache"; else echo null; fi
+)
+
+# Real Antigravity binary: agy-bin when present, else the first `agy` that is not our PATH wrapper
+agy_bin=false; { command -v agy-bin >/dev/null 2>&1 || [ -x "$HOME/.local/bin/agy-bin" ] ||
+  which -a agy 2>/dev/null | grep -qv "^$HOME/.local/bin/agy$"; } && agy_bin=true
+agyy_ok=false; $agy_bin && [ -s "$AGYY_HOME/.gemini/antigravity-cli/antigravity-oauth-token" ] && agyy_ok=true
+
+# Per-model quota from the API (cached 60 s). AI_QUOTA_NO_API=1 keeps the log heuristic only.
+agy_api_json=null; agyy_api_json=null
+if [ "${AI_QUOTA_NO_API:-0}" != 1 ] && command -v curl >/dev/null 2>&1; then
+  $agy_bin && agy_api_json=$(agy_api "$HOME" agy)
+  $agyy_ok && agyy_api_json=$(agy_api "$AGYY_HOME" agyy)
+fi
+
+if [ "${agy_api_json:-null}" = "null" ]; then agy_ev=$(agy_events "$HOME/.gemini/antigravity-cli/log"); else agy_ev='[]'; fi
+agy_pr=$(prompt_times "$HOME/.gemini/antigravity-cli/history.jsonl")
+agy_n=$(agy_sessions "$HOME")
+if $agyy_ok; then
+  if [ "${agyy_api_json:-null}" = "null" ]; then agyy_ev=$(agy_events "$AGYY_HOME/.gemini/antigravity-cli/log"); else agyy_ev='[]'; fi
+  agyy_pr=$(prompt_times "$AGYY_HOME/.gemini/antigravity-cli/history.jsonl")
+  agyy_n=$(agy_sessions "$AGYY_HOME")
+else
+  agyy_ev='[]'; agyy_pr='[]'; agyy_n=0
+fi
+
+# Per-group quota from the API when it answered; otherwise exhausted-until from 429s and
+# capacity learned from the window that hit the cap
+jq -n -c \
+  --argjson now "$now" \
+  --arg icon "$(waymux icon agy 2>/dev/null || echo A)" \
+  --argjson a_bin "$agy_bin" --argjson a_ev "$agy_ev" --argjson a_pr "$agy_pr" --argjson a_n "$agy_n" \
+  --argjson y_ok "$agyy_ok" --argjson y_ev "$agyy_ev" --argjson y_pr "$agyy_pr" --argjson y_n "$agyy_n" \
+  --argjson a_api "${agy_api_json:-null}" --argjson y_api "${agyy_api_json:-null}" '
+def count_since($ts; $since): [$ts[] | select(. >= $since)] | length;
+def bins($pr): [range(0; 10) | ($now - (10 - .) * 1800) as $s | [$pr[] | select(. >= $s and . < $s + 1800)] | length];
+
+def agy_model($name; $title; $tag; $bin; $ev; $pr; $n; $api):
+  ([$ev[] | select(.reset > $now)] | max_by(.reset)) as $active
+  | ([$ev[] | select(.reset - .ts <= 18000)] | max_by(.ts)) as $last5
+  | (if $last5 then count_since([$pr[] | select(. <= $last5.ts)]; $last5.reset - 18000) else null end) as $cap
+  | count_since($pr; $now - 18000) as $p5
+  | (if $cap != null and $cap > 0 then ($p5 * 100 / $cap) else null end) as $est
+  | (($api // {}).groups // null) as $raw
+  | (($api // {}).default_model // "") as $dm
+  | (if $raw then [$raw[] | select(.key == "flash")] | first else null end) as $flash
+  # Report shape: badge letters, the model next to Flash/pro, and the pro tier hidden when it is
+  # the Flash model again (its quota is the Flash row)
+  | (if $raw == null then null else [$raw[] | . + {
+        abbr: ({claude: "C", flash: "G", argon: "A"}[.key]),
+        detail: (if .key == "flash" or .key == "pro" then .model else null end),
+        hidden: (.key == "pro" and .model == ($flash.model // ""))}
+      | with_entries(select(.value != null))] end) as $groups
+  | (if ($dm | startswith("claude-")) or ($dm | startswith("gpt-oss")) then "claude"
+     elif ($dm | startswith("gemini-4-argon")) and ($groups != null) and ([$groups[] | select(.key == "argon")] | length > 0) then "argon"
+     else "flash" end) as $dkey
+  | (if $groups then [$groups[] | select(.key == $dkey)] | first else null end) as $dgroup
+  | (if $groups then [$groups[] | select((.pct // 0) > 0)] else null end) as $usable
+  | (if $groups == null then null
+     elif ($usable | length) == 0 then "red"
+     elif ($dgroup != null and ($dgroup.pct // 0) == 0) or ([$usable[] | select(.pct < 20)] | length) > 0 then "yellow"
+     else "green" end) as $api_level
+  | ($dgroup != null and ($dgroup.pct // 0) == 0) as $dex
+  | {
+      agent: $name, title: $title, available: $bin, icon: $icon, tag: $tag, sessions: $n,
+      prompts_1h: count_since($pr; $now - 3600), prompts_5h: $p5, activity: bins($pr),
+      capacity_5h: $cap, est_five: ($est | if . == null then null else round end),
+      source: (if $groups then "api" else "logs" end), groups: $groups, default_model: $dm,
+      default_exhausted: $dex,
+      until: (if $groups == null then ($active.reset // null)
+              elif $api_level == "red" then ([$groups[].reset | select(. != null)] | min) else null end),
+      window: (if $groups == null and $active then (if ($active.reset - $active.ts) > 21600 then "7d" else "5h" end) else null end),
+      level: ($api_level // (if $active then "red" elif ($est // 0) >= 80 then "yellow" elif $cap == null then "unknown" else "green" end)),
+      notes: (
+        if $groups == null then [{text: "no live API data: the profile has no valid token; open \($name) once to refresh it"}]
+        else
+          (if ([$groups[] | select(.key == "argon")] | length) > 0 then []
+           else [$groups[] | select(.key == "pro" and .hidden)
+                 | {text: "Gemini 4 Argon: no per-model quota in the API; its pro tier maps to \(.model) (the Gemini Flash quota above)"}] end)
+          + (if $dex and ([$groups[] | select(.key == "flash" and (.pct // 0) > 0)] | length) > 0
+             then [{text: "default model \($dm) is out of quota: start with --model gemini-3.8-flash-high", level: "warn"}]
+             else [] end)
+        end)
+    };
+
+[ agy_model("agy"; "Antigravity"; $icon; $a_bin; $a_ev; $a_pr; $a_n; $a_api),
+  (if $y_ok then agy_model("agyy"; "Antigravity ²"; "\($icon)²"; true; $y_ev; $y_pr; $y_n; $y_api) else empty end)
+]'
