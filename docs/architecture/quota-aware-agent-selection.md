@@ -121,7 +121,7 @@ A half-typed prompt is never submitted: when text that is not a dim placeholder 
 - [`utils/.local/bin/ai-quota-agy`](../../utils/.local/bin/ai-quota-agy): Antigravity provider for `waymux quota` (agy, agyy): `fetchAvailableModels` per profile with the 429-log fallback, printed as agent JSON; kept in the dotfiles because it reads an undocumented API with the profile's token
 - [`waymux/.config/waymux/config.toml`](../../waymux/.config/waymux/config.toml) `[quota]`: the popup's `Enter` (`ai-launch --auto`) and `a` (`ai-launch --pick`) commands
 - [`utils/.config/systemd/user/ai-quota-refresh.timer`](../../utils/.config/systemd/user/ai-quota-refresh.timer) / [`.service`](../../utils/.config/systemd/user/ai-quota-refresh.service): 2-minute cache refresh
-- [`tmux/.config/tmux/ai-launch-popup.sh`](../../tmux/.config/tmux/ai-launch-popup.sh): tmux launcher popup (`Prefix + a`, `Ctrl + Shift + A`)
+- [`tmux/.config/tmux/ai-launch-popup.sh`](../../tmux/.config/tmux/ai-launch-popup.sh): tmux launcher popup (`ai-launch --popup`, i.e. `waymux launch --popup`) (`Prefix + a`, `Ctrl + Shift + A`)
 - [`tmux/.config/tmux/ai-quota-popup.sh`](../../tmux/.config/tmux/ai-quota-popup.sh): visual quota & burn telemetry tmux popup (`Prefix + u`)
 - [`tmux/.config/tmux/toggle-ai-split.sh`](../../tmux/.config/tmux/toggle-ai-split.sh): 35% right-side AI split pane toggle backed by `ai-launch --auto` (`Prefix + o`)
 - [`utils/.local/bin/ai-launch`](../../utils/.local/bin/ai-launch): thin wrapper for `waymux launch` (menu, `--auto`, `--peek`, `--pick`, `--next`, `@ai_launch` tag) used by Waymaker; it adds ai-quota's providers, the presets below, `$AI_LAUNCH_AGENT` and the two hooks
