@@ -135,7 +135,7 @@ A half-typed prompt is never submitted: when text that is not a dim placeholder 
 - [`waymaker/.config/waymaker/presets/ai-launch.toml`](../../waymaker/.config/waymaker/presets/ai-launch.toml): launch menu preset
 - [`waymaker/.config/waymaker/presets/ai-launch-pick.toml`](../../waymaker/.config/waymaker/presets/ai-launch-pick.toml): `--pick` footer overlay (`Esc Close`)
 - [`waymaker/.config/waymaker/session.toml`](../../waymaker/.config/waymaker/session.toml): `startup_command = "ai-launch"`
-- [`waymaker/.config/waymaker/presets/session-picker.toml`](../../waymaker/.config/waymaker/presets/session-picker.toml): `r` / `a` / `A` / `c` / `u` binds
+- [`waymaker/.config/waymaker/presets/session-picker.toml`](../../waymaker/.config/waymaker/presets/session-picker-mine.toml): `r` / `a` / `A` / `c` / `u` binds
 - [`tmux/.config/tmux/session-picker.sh`](../../tmux/.config/tmux/session-picker.sh): recommended-agent glyph in the title, agent-aware connect
 - [`claude/.claude/settings.json`](../../claude/.claude/settings.json): `statusLine` → `ai-quota statusline`
 - Agent skill: `agents-skills/.agents/skills/ai-quota/SKILL.md`

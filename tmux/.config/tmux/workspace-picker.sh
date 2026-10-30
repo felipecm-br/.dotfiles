@@ -63,17 +63,12 @@ export MM_ORIGIN_CWD="$CWD"
 WM_BIN="$HOME/.local/bin/wm"
 [ -x "$WM_BIN" ] || WM_BIN="$(command -v wm 2>/dev/null || command -v mm 2>/dev/null || echo wm)"
 
-# Prefer dedicated workspace preset (with 60%/100% layouts and ctrl-v insert), fallback to jump
-if [ -f "$HOME/.config/waymaker/presets/workspace.toml" ]; then
-  PRESET="workspace"
-else
-  PRESET="jump"
-fi
 
 tmux set -p allow-passthrough all 2>/dev/null || true
 tmux set -g allow-passthrough all 2>/dev/null || true
 
-chosen="$(cd "$CWD" && "$WM_BIN" -o "$PRESET")" || exit 0
+# Waymaker's workspace preset (built in since 0.4) with the personal layer (scrollback-open.sh)
+chosen="$(cd "$CWD" && "$WM_BIN" -o workspace -o workspace-mine)" || exit 0
 [ -n "$chosen" ] || exit 0
 
 trap '' HUP

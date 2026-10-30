@@ -46,14 +46,6 @@ export PATH="$HOME/.local/bin:$PATH"
 WM_BIN="$HOME/.local/bin/wm"
 [ -x "$WM_BIN" ] || WM_BIN="$(command -v wm 2>/dev/null || command -v mm 2>/dev/null || echo "wm")"
 
-PRESET="$HOME/.config/waymaker/presets/session-picker.toml"
-if [ ! -f "$PRESET" ]; then
-  if [ -f "$SCRIPT_DIR/session-picker.toml" ]; then
-    PRESET="$SCRIPT_DIR/session-picker.toml"
-  else
-    PRESET="session-picker"
-  fi
-fi
 
 NEXT_FILE="${XDG_RUNTIME_DIR:-/tmp}/ai-launch.next"
 
@@ -76,7 +68,7 @@ creates_agent_session() {
 
 while :; do
   chosen=$("$WM_BIN" \
-    -o "$PRESET" \
+    -o session-picker -o session-picker-mine \
     --color "${TMUX_COLOR_SPEC:-}")
 
   # r / a / A / c binds emit "@agent=<auto|name>" before the selection; Enter emits only the selection

@@ -1,0 +1,13 @@
+# Personal layer over the bundled `workspace` preset (workspace-picker.sh runs
+# `wm -o workspace -o workspace-mine`): files open through scrollback-open.sh, which also sends
+# URLs to the browser. Everything else comes from Waymaker's `workspace`.
+
+[binds]
+ctrl-e = 'ExecuteSilent(~/.config/tmux/scrollback-open.sh {} "$MM_ORIGIN_CWD")'
+ctrl-o = 'ExecuteSilent(~/.config/tmux/scrollback-open.sh {} "$MM_ORIGIN_CWD")'
+
+[ui.nav.binds]
+e = 'ExecuteSilent(~/.config/tmux/scrollback-open.sh {} "$MM_ORIGIN_CWD")'
+o = 'ExecuteSilent(~/.config/tmux/scrollback-open.sh {} "$MM_ORIGIN_CWD")'
+ctrl-e = 'ExecuteSilent(~/.config/tmux/scrollback-open.sh {} "$MM_ORIGIN_CWD")'
+ctrl-o = 'ExecuteSilent(~/.config/tmux/scrollback-open.sh {} "$MM_ORIGIN_CWD")'

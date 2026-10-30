@@ -1,0 +1,15 @@
+# Personal layer over the bundled `rg` preset (grep-picker.sh runs `wm -o rg -o rg-mine`).
+# Enter opens nvim itself (not $EDITOR), and files open through scrollback-open.sh, which also
+# sends URLs to the browser. Everything else, toggles included, comes from Waymaker's `rg`.
+
+[binds]
+"enter" = "Become(nvim +{2} {1})"
+"ctrl-e" = 'ExecuteSilent(~/.config/tmux/scrollback-open.sh {1}:{2} "$MM_ORIGIN_CWD")'
+"ctrl-o" = 'ExecuteSilent(~/.config/tmux/scrollback-open.sh {1}:{2} "$MM_ORIGIN_CWD")'
+
+[ui.nav.binds]
+"enter" = "Become(nvim +{2} {1})"
+"e" = 'ExecuteSilent(~/.config/tmux/scrollback-open.sh {1}:{2} "$MM_ORIGIN_CWD")'
+"o" = 'ExecuteSilent(~/.config/tmux/scrollback-open.sh {1}:{2} "$MM_ORIGIN_CWD")'
+"ctrl-e" = 'ExecuteSilent(~/.config/tmux/scrollback-open.sh {1}:{2} "$MM_ORIGIN_CWD")'
+"ctrl-o" = 'ExecuteSilent(~/.config/tmux/scrollback-open.sh {1}:{2} "$MM_ORIGIN_CWD")'

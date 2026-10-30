@@ -2,6 +2,18 @@
 
 Waymaker (`wm`) uses TOML configuration presets located in `~/.config/waymaker/presets/<name>.toml` (and `~/.config/tmux/*.toml`) to render specialized, purpose-built TUI interfaces invoked via `wm -o <name>`.
 
+## Bundled presets with a personal layer
+
+`rg`, `workspace` and `session-picker` are Waymaker's built-in presets (bundled since Waymaker 0.5). This repo keeps only what is personal in a layer next to them, which the wrappers stack on top:
+
+| Preset | Wrapper runs | Personal layer |
+| :--- | :--- | :--- |
+| `rg` | `wm --no-read -o rg -o rg-mine` ([`grep-picker.sh`](../../tmux/.config/tmux/grep-picker.sh)) | [`rg-mine.toml`](../../waymaker/.config/waymaker/presets/rg-mine.toml): `Enter` opens `nvim` itself, files open through `scrollback-open.sh` |
+| `workspace` | `wm -o workspace -o workspace-mine` ([`workspace-picker.sh`](../../tmux/.config/tmux/workspace-picker.sh)) | [`workspace-mine.toml`](../../waymaker/.config/waymaker/presets/workspace-mine.toml): files open through `scrollback-open.sh` |
+| `session-picker` | `wm -o session-picker -o session-picker-mine` ([`session-picker.sh`](../../tmux/.config/tmux/session-picker.sh)) | [`session-picker-mine.toml`](../../waymaker/.config/waymaker/presets/session-picker-mine.toml): agent keys (`r`, `a`/`A`, `c`/`C`), `u` quota, `w`/`s` Cockpit, the footer |
+
+A layer must sit in the presets directory itself: bundled presets find their scripts next to the last file loaded (`$MM_OVERRIDE`). Fixes to the base presets arrive with Waymaker; `wm --dump-config -o rg -o rg-mine` shows the merged result, and `tests/picker_rg_files.test.sh` checks it.
+
 ## Available Presets
 
 | Preset | Invocation | Purpose | Key Actions |

@@ -64,4 +64,5 @@ WM_BIN="$HOME/.local/bin/wm"
 tmux set -p allow-passthrough all 2>/dev/null || true
 tmux set -g allow-passthrough all 2>/dev/null || true
 
-cd "$CWD" && exec "$WM_BIN" --no-read -o rg
+# Waymaker's rg preset with the personal layer (nvim on Enter, scrollback-open.sh) on top
+cd "$CWD" && exec "$WM_BIN" --no-read -o rg -o rg-mine

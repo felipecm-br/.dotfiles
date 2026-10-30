@@ -1,0 +1,22 @@
+# Personal layer over the bundled `session-picker` preset (session-picker.sh runs
+# `wm -o session-picker -o session-picker-mine`): agent keys that arm the new session's ai-launch
+# (r auto, a/A agy, c/C claude), u quota, w/s/Ctrl+S the Cockpit (handled by session-picker.sh).
+
+[footer]
+content = " {cyan,bold:Enter} {darkgray:Menu} {darkgray:│} {cyan,bold:r} {darkgray:Auto} {darkgray:│} {cyan,bold:a/c} {darkgray:Agy/Claude} {darkgray:│} {cyan,bold:u} {darkgray:Quota} {darkgray:│} {cyan,bold:s} {darkgray:Cockpit} {darkgray:│} {cyan,bold:Tab} {darkgray:Cycle} {darkgray:│} {cyan,bold:d} {darkgray:Kill}"
+
+[binds]
+"ctrl-s" = ["Print(__SWITCH_COCKPIT__)", "Quit"]
+
+[ui.nav.binds]
+"r" = ["Print(@agent=auto)", "Accept"]
+"a" = ["Print(@agent=agy)", "Accept"]
+"A" = ["Print(@agent=agyy)", "Accept"]
+"c" = ["Print(@agent=claude)", "Accept"]
+"C" = ["Print(@agent=claude)", "Accept"]
+"u" = "Execute(bash -c 'ai-quota --visual; read -rsn1')"
+"w" = ["Print(__SWITCH_COCKPIT__)", "Quit"]
+"W" = ["Print(__SWITCH_COCKPIT__)", "Quit"]
+"s" = ["Print(__SWITCH_COCKPIT__)", "Quit"]
+"S" = ["Print(__SWITCH_COCKPIT__)", "Quit"]
+"ctrl-s" = ["Print(__SWITCH_COCKPIT__)", "Quit"]

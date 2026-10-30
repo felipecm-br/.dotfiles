@@ -87,7 +87,7 @@ Browse workspace files and AI-generated code in a popup via `wm -o workspace` �
 Bind ([`tmux.conf`](../../tmux/.config/tmux/tmux.conf)):
 - `Prefix + e` / `Prefix + C-e`: Opens centered popup (`85% × 75%`, or `96% × 92%` in fullscreen mode) via inward roll (`e` = Explorer).
 
-Architecture ([`workspace-picker.sh`](../../tmux/.config/tmux/workspace-picker.sh) and canonical preset [`workspace.toml`](../../waymaker/.config/waymaker/presets/workspace.toml)):
+Architecture ([`workspace-picker.sh`](../../tmux/.config/tmux/workspace-picker.sh) and canonical preset [`workspace-mine.toml`](../../waymaker/.config/waymaker/presets/workspace-mine.toml)):
 1. **Themed Popup & Pure Icon Badge**: Uses theme blue/cyan border with pure icon badge ` 󰈞 `.
 2. **Native Markdown, Mermaid & Photos Rendering**: Automatically routes `.md`, `.markdown`, `.mmd`, `.png`, `.jpg`, `.webp` through native media and diagram pipelines with Kitty Graphics Protocol passthrough.
 3. **Diagram & Photo Zoom Controls & HUD Icons**:
@@ -117,7 +117,7 @@ Instant full-text workspace search using Waymaker and ripgrep, featuring debounc
 Bind ([`tmux.conf`](../../tmux/.config/tmux/tmux.conf)):
 - `Prefix + /`: Opens centered modal (`85% × 75%`) via universal `/` search mnemonic.
 
-Architecture ([`grep-picker.sh`](../../tmux/.config/tmux/grep-picker.sh) and preset [`rg.toml`](../../waymaker/.config/waymaker/presets/rg.toml)):
+Architecture ([`grep-picker.sh`](../../tmux/.config/tmux/grep-picker.sh) and preset [`rg-mine.toml`](../../waymaker/.config/waymaker/presets/rg-mine.toml)):
 1. **Live Query Reload**: Search updates in real-time as you type, aborting previous processes automatically on input changes.
 2. **45/55 Foveal Layout**: 45% candidate match column on the left and 55% syntax-highlighted code preview on the right.
 3. **Line-Synced `bat` Preview**: Automatically centers and highlights the matched line number using `bat --highlight-line`.
