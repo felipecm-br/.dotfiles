@@ -12,7 +12,7 @@
       {
         "hooks": [
           {
-            "command": "waymux hook tmux Notification codex",
+            "command": "codex-hook Notification",
             "type": "command"
           }
         ]
@@ -30,7 +30,7 @@
       {
         "hooks": [
           {
-            "command": "waymux hook tmux PostToolUse codex",
+            "command": "codex-hook PostToolUse",
             "type": "command"
           }
         ]
@@ -49,7 +49,7 @@
       {
         "hooks": [
           {
-            "command": "waymux hook tmux SessionStart codex",
+            "command": "codex-hook SessionStart",
             "type": "command"
           }
         ]
@@ -67,7 +67,7 @@
       {
         "hooks": [
           {
-            "command": "waymux hook tmux Stop codex",
+            "command": "codex-hook Stop",
             "type": "command"
           }
         ]
@@ -105,7 +105,7 @@
       {
         "hooks": [
           {
-            "command": "waymux hook tmux UserPromptSubmit codex",
+            "command": "codex-hook UserPromptSubmit",
             "type": "command"
           }
         ]
@@ -115,7 +115,7 @@
       {
         "hooks": [
           {
-            "command": "waymux hook tmux PreToolUse codex",
+            "command": "codex-hook PreToolUse",
             "type": "command"
           }
         ]
@@ -125,7 +125,7 @@
       {
         "hooks": [
           {
-            "command": "waymux hook tmux SessionEnd codex",
+            "command": "codex-hook SessionEnd",
             "type": "command"
           }
         ]

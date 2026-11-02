@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+# codex-hook — run `waymux hook tmux <Event> codex` for the pane the Codex session really runs in.
+#
+#   codex-hook <Event>     (from ~/.codex/hooks.json; the hook payload arrives on stdin)
+#
+# Codex runs every session through one shared app-server, and hooks run inside it. Its
+# TMUX_PANE is the pane of whichever session started that server, so `waymux hook` alone would
+# mark the wrong pane (or a pane that no longer exists) and leave the real one with no state.
+# This resolves the pane from the payload instead, in order:
+#   1. the pane whose @ai_session is already `codex:<session_id>` (set by waymux on the first hit);
+#   2. the only pane running `codex` in the payload's cwd;
+#   3. among several, the one whose screen shows the submitted prompt (UserPromptSubmit).
+# When none is certain it reports nothing: no state is better than another pane's state.
+# Prints `{}` for Codex either way, so a hook never decides a prompt.
+set -uo pipefail
+
+event=${1:?usage: codex-hook <Event>}
+payload=$(cat)
+if ! command -v waymux >/dev/null 2>&1 || ! command -v tmux >/dev/null 2>&1 || ! command -v jq >/dev/null 2>&1; then
+  echo '{}'
+  exit 0
+fi
+
+field() { jq -r --arg k "$1" '.[$k] // empty | strings' <<<"$payload" 2>/dev/null; }
+session=$(field session_id)
+cwd=$(field cwd)
+
+pane=""
+panes=$(tmux list-panes -a -F '#{pane_id}	#{pane_current_command}	#{@ai_session}	#{pane_current_path}' 2>/dev/null)
+if [ -n "$session" ]; then
+  pane=$(awk -F'\t' -v s="codex:$session" '$3 == s { print $1; exit }' <<<"$panes")
+fi
+if [ -z "$pane" ]; then
+  candidates=$(awk -F'\t' -v d="$cwd" '$2 == "codex" && (d == "" || $4 == d) { print $1 }' <<<"$panes")
+  if [ "$(grep -c . <<<"$candidates")" = 1 ]; then
+    pane=$candidates
+  elif [ -n "$candidates" ]; then
+    # Several Codex panes in one directory: the prompt just submitted is on exactly one screen.
+    prompt=$(field prompt | tr -s '[:space:]' ' ' | sed 's/^ //' | cut -c1-40)
+    if [ -n "$prompt" ]; then
+      matches=$(while read -r p; do
+        tmux capture-pane -p -J -t "$p" 2>/dev/null | tr -s '[:space:]' ' ' | grep -qF -- "$prompt" && echo "$p"
+      done <<<"$candidates")
+      [ "$(grep -c . <<<"$matches")" = 1 ] && pane=$matches
+    fi
+  fi
+fi
+
+if [ -z "$pane" ]; then
+  echo '{}'
+  exit 0
+fi
+TMUX_PANE=$pane waymux hook tmux "$event" codex <<<"$payload"

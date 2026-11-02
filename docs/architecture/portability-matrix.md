@@ -59,7 +59,7 @@ Stow a package with `./stow.sh <package>` (see [stow.sh](../../stow.sh)); everyt
 
 | Scripts | Tag | Needs |
 | :--- | :--- | :--- |
-| `ai-launch`, `ai-switch`, `ai-quota`, `ai-failover`, `ai-prompt`, `awt-fan`, `cockpit*` | `needs: waymux` | `waymux`; `wm` for menus; `ai-memory` for `ai-failover` continuity |
+| `ai-launch`, `ai-switch`, `ai-quota`, `ai-failover`, `ai-prompt`, `awt-fan`, `cockpit*`, `codex-hook` | `needs: waymux` | `waymux`; `wm` for menus; `ai-memory` for `ai-failover` continuity; `jq` for `codex-hook` |
 | `ai-launch-exec` jailed rows, `agent-sudo`, `agent-sudod` | `needs: ai-jail` · `agent-sudo` is `needs: root` by design | `ai-jail` (bubblewrap); `agent-sudo` runs what you approve with `sudo` |
 | `agy`, `agyy`, `ai-quota-agy`, `ai-switch-agy` | `host-only` | Antigravity accounts of this machine |
 | `dev-gc`, `stow-it`, `key-telemetry`, `flow-telemetry`, `chime-at-breakpoint` | `portable` | dev-gc: cargo-clean-all; telemetry: tmux |

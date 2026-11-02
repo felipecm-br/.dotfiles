@@ -169,6 +169,9 @@ ai-failover -t {{pane}}
 # Print which agent would take over from the current pane's agent at its usage limit, starting nothing
 ai-failover --peek
 
+# Replay a Codex hook payload through the pane resolver (what ~/.codex/hooks.json runs per event)
+echo '{{json}}' | codex-hook {{Stop|UserPromptSubmit|PreToolUse|PostToolUse|Notification|SessionStart|SessionEnd}}
+
 # Edit the prompt draft of the AI agent in the current tmux pane in a Neovim popup (Prefix+v)
 ai-prompt edit
 
