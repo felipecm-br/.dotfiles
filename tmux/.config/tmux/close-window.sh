@@ -42,6 +42,7 @@ AGENT_LABELS=()
 AGENT_DESCS=()
 AGENT_STATES=()
 AGENT_COLORS=()
+AGENT_ICONS=()
 
 analyze_target() {
   local target="${1:-}"
@@ -66,6 +67,7 @@ analyze_target() {
   AGENT_DESCS=()
   AGENT_STATES=()
 AGENT_COLORS=()
+AGENT_ICONS=()
 
   [ -z "$WIN_ID" ] && return 0
 
@@ -86,7 +88,7 @@ AGENT_COLORS=()
     query_target="$PANE_ID"
   fi
 
-  while IFS="|" read -r wid wnum wname pid pcmd ptitle raw_state raw_title raw_color; do
+  while IFS="|" read -r wid wnum wname pid pcmd ptitle raw_state raw_title raw_color pane_pid; do
     local is_agent=0
     local agent_label="agent"
     local agent_desc=""
@@ -112,7 +114,7 @@ AGENT_COLORS=()
     case "$pcmd" in
       agy|agy-bin|antigravity)
         is_agent=1
-        agent_label="antigravity"
+        agent_label="agy"
         [ -z "$st" ] && st="running"
         ;;
       opencode)
@@ -153,12 +155,14 @@ AGENT_COLORS=()
     esac
 
     # 4. Process tree inspection (descendants of pane PID)
-    if [ "$is_agent" -eq 0 ] && [ -n "$pid" ]; then
+    # Also when the pane is known but runs the agent under a wrapper (`agy` is a
+    # bash script around agy-bin, so tmux reports `bash`): it names the agent.
+    if [ "$agent_label" = "agent" ] && [ -n "$pane_pid" ]; then
       local matched_cmd
-      matched_cmd=$(ps -s "$pid" -o comm= 2>/dev/null | grep -m1 -E "^(agy|agy-bin|antigravity|opencode|claude|devin|codex|muse|gemini|aider)$" || true)
+      matched_cmd=$(ps -s "$pane_pid" -o comm= 2>/dev/null | grep -m1 -E "^(agy|agy-bin|antigravity|opencode|claude|devin|codex|muse|gemini|aider)$" || true)
       if [ -n "$matched_cmd" ]; then
         is_agent=1
-        agent_label="$matched_cmd"
+        agent_label="${matched_cmd%-bin}"
         [ -z "$st" ] && st="running"
       fi
     fi
@@ -170,6 +174,8 @@ AGENT_COLORS=()
       AGENT_DESCS+=("$agent_desc")
       AGENT_STATES+=("$curr_st")
       AGENT_COLORS+=("$raw_color")
+      # The tab's own icon when its name is one glyph (set by the agent's hooks).
+      if [ "${#wname}" -eq 1 ] && [[ "$wname" != [[:ascii:]] ]]; then AGENT_ICONS+=("$wname"); else AGENT_ICONS+=(""); fi
       AGENT_COUNT=$(( AGENT_COUNT + 1 ))
 
       case "$curr_st" in
@@ -180,7 +186,7 @@ AGENT_COLORS=()
           ;;
       esac
     fi
-  done < <(tmux list-panes -t "$query_target" -F "#{window_id}|#{window_index}|#{window_name}|#{pane_id}|#{pane_current_command}|#{pane_title}|#{@ai_agent_state_raw}|#{@ai_agent_title}|#{@ai_agent_state_color}" 2>/dev/null || true)
+  done < <(tmux list-panes -t "$query_target" -F "#{window_id}|#{window_index}|#{window_name}|#{pane_id}|#{pane_current_command}|#{pane_title}|#{@ai_agent_state_raw}|#{@ai_agent_title}|#{@ai_agent_state_color}|#{pane_pid}" 2>/dev/null || true)
 }
 
 # -----------------------------------------------------------------------------
@@ -242,7 +248,7 @@ run_confirm_modal() {
       case "${AGENT_STATES[$i]}" in idle|done|closed|inactive|completed) continue ;; esac
       desc="${AGENT_DESCS[$i]}"
       [ "$desc" = "$WIN_NAME" ] && desc="" # the window name is the agent's icon, not a task
-      modal_agent_row "${AGENT_STATES[$i]}" "${AGENT_COLORS[$i]}" "${AGENT_LABELS[$i]}" "${AGENT_LABELS[$i]}" "$desc"
+      modal_agent_row "${AGENT_STATES[$i]}" "${AGENT_COLORS[$i]}" "${AGENT_LABELS[$i]}" "${AGENT_LABELS[$i]}" "$desc" "${AGENT_ICONS[$i]}"
       shown=$(( shown + 1 ))
       [ "$shown" -ge 3 ] && break
     done

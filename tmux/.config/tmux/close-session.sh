@@ -39,6 +39,7 @@ analyze_session() {
   AGENT_STATES=()
   AGENT_LABELS=()
   AGENT_COLORS=()
+  AGENT_ICONS=()
   REASONS=()
 
   if ! tmux has-session -t "$target" 2>/dev/null; then
@@ -59,7 +60,7 @@ analyze_session() {
     done < <(waymux list 2>/dev/null || true)
   fi
 
-  while IFS="|" read -r wid wnum wname pid pcmd ptitle raw_state raw_title raw_color; do
+  while IFS="|" read -r wid wnum wname pid pcmd ptitle raw_state raw_title raw_color pane_pid; do
     local is_agent=0
     local agent_desc=""
     local agent_label="agent"
@@ -91,9 +92,11 @@ analyze_session() {
     esac
 
     # 4. Process tree inspection (descendants of pane PID)
-    if [ "$is_agent" -eq 0 ] && [ -n "$pid" ]; then
+    # Also when the pane is known but runs the agent under a wrapper (`agy` is a
+    # bash script around agy-bin, so tmux reports `bash`): it names the agent.
+    if [ "$agent_label" = "agent" ] && [ -n "$pane_pid" ]; then
       local matched_cmd
-      matched_cmd=$(ps -s "$pid" -o comm= 2>/dev/null | grep -m1 -E "^(agy|agy-bin|antigravity|opencode|claude|devin|codex|muse|gemini|aider)$" || true)
+      matched_cmd=$(ps -s "$pane_pid" -o comm= 2>/dev/null | grep -m1 -E "^(agy|agy-bin|antigravity|opencode|claude|devin|codex|muse|gemini|aider)$" || true)
       if [ -n "$matched_cmd" ]; then
         is_agent=1
         agent_label="${matched_cmd%-bin}"
@@ -116,8 +119,10 @@ analyze_session() {
       AGENT_STATES+=("${st:-active}")
       AGENT_LABELS+=("$agent_label")
       AGENT_COLORS+=("$raw_color")
+      # The tab's own icon when its name is one glyph (set by the agent's hooks).
+      if [ "${#wname}" -eq 1 ] && [[ "$wname" != [[:ascii:]] ]]; then AGENT_ICONS+=("$wname"); else AGENT_ICONS+=(""); fi
     fi
-  done < <(tmux list-panes -s -t "$target" -F "#{window_id}|#{window_index}|#{window_name}|#{pane_id}|#{pane_current_command}|#{pane_title}|#{@ai_agent_state_raw}|#{@ai_agent_title}|#{@ai_agent_state_color}" 2>/dev/null || true)
+  done < <(tmux list-panes -s -t "$target" -F "#{window_id}|#{window_index}|#{window_name}|#{pane_id}|#{pane_current_command}|#{pane_title}|#{@ai_agent_state_raw}|#{@ai_agent_title}|#{@ai_agent_state_color}|#{pane_pid}" 2>/dev/null || true)
 
   AGENT_COUNT="${#agent_windows[@]}"
 
@@ -200,7 +205,7 @@ run_confirm_modal() {
     for ((i=0; i<${#AGENT_STATES[@]}; i++)); do
       case "${AGENT_STATES[$i]}" in idle|done|closed|inactive|completed) continue ;; esac
       if [ "$shown" -lt 3 ]; then
-        modal_agent_row "${AGENT_STATES[$i]}" "${AGENT_COLORS[$i]}" "${AGENT_LABELS[$i]}" "tab ${AGENT_TABS[$i]}" "${AGENT_DESCS[$i]}"
+        modal_agent_row "${AGENT_STATES[$i]}" "${AGENT_COLORS[$i]}" "${AGENT_LABELS[$i]}" "tab ${AGENT_TABS[$i]}" "${AGENT_DESCS[$i]}" "${AGENT_ICONS[$i]}"
       fi
       shown=$(( shown + 1 ))
     done

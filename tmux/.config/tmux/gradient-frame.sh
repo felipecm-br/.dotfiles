@@ -29,7 +29,7 @@ print_modal_body() {
 # as `{cyan,bold:Key} {darkgray:Desc} {darkgray:│}` renders in the presets.
 modal_footer() {
   local size rows cols top=0 left=0 line="" sep="" rule
-  size=$(stty size < /dev/tty 2>/dev/null) || return 0
+  size=$(stty size 2>/dev/null < /dev/tty) || return 0
   rows="${size% *}"
   cols="${size#* }"
   if [ -n "${BORDER_GRADIENT:-}" ]; then
@@ -53,13 +53,13 @@ modal_head() {
   printf '\n  \033[1m%s\033[0m\n  \033[38;5;8m%s\033[0m\n\n' "$1" "$2"
 }
 
-# modal_agent_row STATE HEX AGENT LABEL DESC — one agent: its own icon at X=1
-# (the glyph its tab shows) tinted with the status bar's state color
+# modal_agent_row STATE HEX AGENT LABEL DESC [ICON] — one agent: ICON (the
+# glyph its tab shows, when known) or else `waymux icon AGENT` at X=1, tinted with the status bar's state color
 # (@ai_agent_state_color), the label, what it is doing (darkgray, cut to fit)
 # and the state word in the same color, in fixed columns.
 modal_agent_row() {
-  local state="$1" hex="$2" agent="$3" label="$4" desc="$5" glyph color="" pad
-  glyph=$(waymux icon "$agent" 2>/dev/null || waymux icon --state "$state" 2>/dev/null)
+  local state="$1" hex="$2" agent="$3" label="$4" desc="$5" glyph="${6:-}" color="" pad
+  [ -n "$glyph" ] || glyph=$(waymux icon "$agent" 2>/dev/null || waymux icon --state "$state" 2>/dev/null)
   [ -n "$glyph" ] || glyph="•"
   if [[ "$hex" =~ ^#[0-9a-fA-F]{6}$ ]]; then
     color=$(printf '\033[38;2;%d;%d;%dm' "$((16#${hex:1:2}))" "$((16#${hex:3:2}))" "$((16#${hex:5:2}))")
@@ -77,7 +77,7 @@ modal_agent_row() {
 gradient_frame_draw() {
   local palette="${1:-}" title="${2:-}" title_hex="${3:-}" size rows cols
   [ -n "$palette" ] || return 1
-  size=$(stty size < /dev/tty 2>/dev/null) || return 1
+  size=$(stty size 2>/dev/null < /dev/tty) || return 1
   rows="${size% *}"
   cols="${size#* }"
   [ "$rows" -ge 2 ] && [ "$cols" -ge 2 ] || return 1

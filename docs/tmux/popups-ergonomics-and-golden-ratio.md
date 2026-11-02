@@ -232,7 +232,7 @@ The close confirmations (`Prefix + w` / `x`, `Prefix + W`, `d` in the window pic
 ╰──────────────────────────────────────────────────────────────────╯
 ```
 
-- **One alarm glyph.** The border badge says "careful"; the body has no second warning icon and no section header. The only other glyph is each agent's own icon at $X=1$ (`waymux icon <agent>`), the glyph its tab shows as the window name, so the row is recognized against the tab bar rather than read.
+- **One alarm glyph.** The border badge says "careful"; the body has no second warning icon and no section header. The only other glyph is each agent's own icon at $X=1$: the tab's name when it is one glyph (the agent's hooks set it, so a custom icon carries over), else `waymux icon <agent>`; the agent is named from the process tree when a wrapper runs it (`agy` is a bash script around `agy-bin`, so tmux reports `bash`), so the row is recognized against the tab bar rather than read.
 - **State colors come from the status bar.** The icon and the state word use the pane's `@ai_agent_state_color`, the same color its tab shows, so a busy (blue) or permission (orange) agent reads the same in both places; the modal picks no warm hue of its own. The state is static: a spinner would add motion, the strongest preattentive cue, to a dialog whose only job is the `y`/`n` decision.
 - **Session rows** label each agent by its tab (`tab 3`), the number you would jump to; the icon already says which agent it is.
 - **Fixed columns:** glyph, agent (10), task title (darkgray, cut at 36 with `…`), state. The window name is not shown: it is the agent's icon.
