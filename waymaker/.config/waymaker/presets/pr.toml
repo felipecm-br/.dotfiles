@@ -177,3 +177,8 @@ output_template = "{=number}\t{=branch}"
 "nav^^b" = '''ExecuteSilent(~/.config/waymaker/scripts/pr-open-chrome.sh "{=number}")'''
 "nav^^w" = '''ExecuteSilent(~/.config/waymaker/scripts/pr-open-chrome.sh "{=number}")'''
 "nav^^d" = '''Execute(~/.config/waymaker/scripts/pr-diff.sh "{=number}")'''
+
+# No image previews here: skip the terminal graphics probe, which holds the first frame
+# for up to 100 ms inside tmux (tests/popup_render_perf.test.sh).
+[preview.media]
+active = false

@@ -49,3 +49,8 @@ enter = 'ExecuteSilent(~/.config/tmux/keybindings-run.sh {5} {2} {1} {4})'
 y = 'ExecuteSilent(printf "%s" {2} | (command -v wl-copy >/dev/null 2>&1 && wl-copy || xclip -in -selection clipboard 2>/dev/null || tmux load-buffer -))'
 ctrl-y = 'ExecuteSilent(printf "%s" {2} | (command -v wl-copy >/dev/null 2>&1 && wl-copy || xclip -in -selection clipboard 2>/dev/null || tmux load-buffer -))'
 ctrl-v = 'ExecuteSilent(test -n "$MM_ORIGIN_PANE" && tmux send-keys -t "$MM_ORIGIN_PANE" -l -- {2})'
+
+# No image previews here: skip the terminal graphics probe, which holds the first frame
+# for up to 100 ms inside tmux (tests/popup_render_perf.test.sh).
+[preview.media]
+active = false

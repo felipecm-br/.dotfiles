@@ -13,6 +13,8 @@ The commit hashes link each entry to the full change (`git show <hash>`). Weeks 
 
 ### tmux
 - After a reboot, an agent started with its permission prompts off (`Claude YOLO`) resumes with them on; start it again from `Prefix + a` to turn them off. `needs: waymux, ai-jail`
+- Pickers draw their first row in about 25 ms instead of about 135 ms inside tmux: 17 presets that never show images skip Waymaker's terminal-graphics probe. `needs: wm`
+- Tab completion (`ftb`) and the Neovim picker lose the black selection strip and get a bold cursor row. `needs: wm`
 - The keybindings HUD runs the real triage jump for `Ctrl+Shift+I` and `Prefix + I` (it named a script that no longer exists). `needs: waymux`
 
 ## 2026-W45 (2–8 Nov)

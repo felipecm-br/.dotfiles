@@ -91,3 +91,8 @@ separator = "light"
 "ctrl-h" = ["ExecuteSilent($OMARCHY_STARSHIP_CYCLE_SCRIPT $OMARCHY_MODE_FILE bwd)", '''Preview(omarchy-starship-preset --render-preview {path} {label})''']
 "d" = ["ExecuteSilent(omarchy-starship-preset --delete {path})", "Reload"]
 "ctrl-d" = ["ExecuteSilent(omarchy-starship-preset --delete {path})", "Reload"]
+
+# No image previews here: skip the terminal graphics probe, which holds the first frame
+# for up to 100 ms inside tmux (tests/popup_render_perf.test.sh).
+[preview.media]
+active = false

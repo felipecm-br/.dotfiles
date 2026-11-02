@@ -76,3 +76,8 @@ lsof -iTCP -sTCP:LISTEN -n -P 2>/dev/null | awk 'NR>1 {
 "ctrl-k" = "Up"
 "ctrl-x" = ["ExecuteSilent(kill -9 {=pid})", "Reload"]
 "ctrl-p" = "SwitchPreview"
+
+# No image previews here: skip the terminal graphics probe, which holds the first frame
+# for up to 100 ms inside tmux (tests/popup_render_perf.test.sh).
+[preview.media]
+active = false

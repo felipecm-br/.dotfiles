@@ -279,6 +279,17 @@ An opt-in, session-wide switch replaces the single-color popup border with a mul
 
 ---
 
+### 3.6 First Frame Under the Doherty Threshold (`[preview.media]`)
+
+Inside tmux, Waymaker queries the terminal for image support before its first frame and waits up to 100 ms for an answer. A picker that never shows images must skip the query:
+
+```toml
+[preview.media]
+active = false
+```
+
+Measured with [`tests/popup_render_perf.test.sh`](../../tests/popup_render_perf.test.sh) (2 Nov 2026): the first row appears after ~25 ms with the query off, ~135 ms with it on. Only the presets that can preview images keep it: `backgrounds`, `downloads`, `jump`, `nvim`, `scrollback-picker` (Mermaid) and the bundled `workspace`. A new preset gets the block unless it previews images, and the test's budget (p50 ≤ 100 ms) catches a regression.
+
 ## ⌨️ 4. Biomechanical Keymapping Architecture
 
 ### 4.1 Kernel Anchoring via `keyd` (Dual-Function Modifiers)

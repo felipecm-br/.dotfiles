@@ -40,6 +40,13 @@ column_spacing = 1
 [results.border]
 sides = ""
 
+# Popup rules (docs/tmux/popups-ergonomics-and-golden-ratio.md): no black selection strip and a
+# BOLD cursor row. Rows stay un-dimmed (colored file icons, like jump and workspace). The cyan │
+# cursor bar is left out on purpose: Waymaker draws it only in nav mode, which is off here.
+[results.current_style]
+bg = "reset"
+modifier = "BOLD"
+
 [results.autoscroll]
 indicator = ""
 indicator_style.fg = "blue"

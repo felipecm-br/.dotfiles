@@ -72,3 +72,8 @@ sides = ""
 "QueryChange" = "Pos(0)"
 "esc"    = "Quit"
 "ctrl-c" = "Quit"
+
+# No image previews here: skip the terminal graphics probe, which holds the first frame
+# for up to 100 ms inside tmux (tests/popup_render_perf.test.sh).
+[preview.media]
+active = false

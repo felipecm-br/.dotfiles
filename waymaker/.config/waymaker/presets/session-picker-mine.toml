@@ -20,3 +20,8 @@ content = " {cyan,bold:Enter} {darkgray:Menu} {darkgray:│} {cyan,bold:r} {dark
 "s" = ["Print(__SWITCH_COCKPIT__)", "Quit"]
 "S" = ["Print(__SWITCH_COCKPIT__)", "Quit"]
 "ctrl-s" = ["Print(__SWITCH_COCKPIT__)", "Quit"]
+
+# No image previews here: skip the terminal graphics probe, which holds the first frame
+# for up to 100 ms inside tmux (tests/popup_render_perf.test.sh).
+[preview.media]
+active = false

@@ -25,6 +25,16 @@ threshold = "smart"
 reverse = false
 icons = false
 
+# Popup rules (docs/tmux/popups-ergonomics-and-golden-ratio.md): no black selection strip, a BOLD
+# cursor row, unselected rows dimmed. The cyan │ cursor bar is left out on purpose: Waymaker draws
+# it only in nav mode, and nav mode would change what Esc does here.
+[results.style]
+modifier = "DIM"
+
+[results.current_style]
+bg = "reset"
+modifier = "BOLD"
+
 [columns]
 split = "\\x00"
 default = "candidate"
@@ -73,3 +83,8 @@ output_template = "{=}"
 "tab" = "Down"
 "shift-tab" = "Up"
 "ctrl-p" = "SwitchPreview"
+
+# No image previews here: skip the terminal graphics probe, which holds the first frame
+# for up to 100 ms inside tmux (tests/popup_render_perf.test.sh).
+[preview.media]
+active = false
