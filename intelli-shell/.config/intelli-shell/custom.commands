@@ -169,6 +169,12 @@ ai-failover -t {{pane}}
 # Print which agent would take over from the current pane's agent at its usage limit, starting nothing
 ai-failover --peek
 
+# Print the Codex and Devin model rows of the AI launch menu, with their effort levels (JSON)
+ai-launch-models | jq .
+
+# Launch menu with other Devin model families (slugs from `devin models`)
+AI_LAUNCH_DEVIN_FAMILIES="{{claude-opus-5.5 gpt-6-luna swe-2}}" ai-launch
+
 # Replay a Codex hook payload through the pane resolver (what ~/.codex/hooks.json runs per event)
 echo '{{json}}' | codex-hook {{Stop|UserPromptSubmit|PreToolUse|PostToolUse|Notification|SessionStart|SessionEnd}}
 

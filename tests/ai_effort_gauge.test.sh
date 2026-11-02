@@ -44,7 +44,7 @@ mkdir -p "$TMP/claude"
 echo '{"modelSettings":{"claude-opus-5-5":{"effortLevel":"medium"}}}' >"$TMP/claude/settings.json"
 
 ms() { local t; t=$(date +%s%N); while [ $(( ($(date +%s%N) - t) / 1000000 )) -lt "$1" ]; do :; done; }
-footer() { tmux capture-pane -p -t "$pane" | grep -o 'Effort .\{0,12\}' | sed 's/ *$//'; }
+footer() { tmux capture-pane -p -t "$pane" | grep -o 'Effort .\{0,14\}' | sed 's/ *$//'; }
 wait_footer() { # <text>
   for _ in $(seq 150); do [ "$(footer)" = "$1" ] && return 0; ms 20; done
   bad "footer: want '$1', got '$(footer)'"
@@ -59,15 +59,15 @@ start() {
 }
 
 start
-wait_footer "Effort ━●─── medium"
+wait_footer "Effort ━●───  medium"
 ok "opens on the cursor row's default (Claude Opus: medium)"
-tmux send-keys -t "$pane" C-l; wait_footer "Effort ━━●── high"
-tmux send-keys -t "$pane" Right Right Right; wait_footer "Effort ━━━━● max"
-tmux send-keys -t "$pane" Left; wait_footer "Effort ━━━●─ xhigh"
+tmux send-keys -t "$pane" C-l; wait_footer "Effort ━━●──  high"
+tmux send-keys -t "$pane" Right Right Right; wait_footer "Effort ━━━━●  max"
+tmux send-keys -t "$pane" Left; wait_footer "Effort ━━━●─  xhigh"
 ok "C-l / → step up and hold at max; ← steps down"
-tmux send-keys -t "$pane" Down; wait_footer "Effort ━●─   medium"
-ok "an agent with its own 3 levels starts at its args (medium), padded to the 5-level width"
-tmux send-keys -t "$pane" Down; wait_footer "Effort ───── none"
+tmux send-keys -t "$pane" Down; wait_footer "Effort ━●─    medium"
+ok "an agent with its own 3 levels starts at its args (medium), padded to the 6-cell track"
+tmux send-keys -t "$pane" Down; wait_footer "Effort ────── none"
 ok "an agent without levels shows an empty track"
 tmux send-keys -t "$pane" Up C-l Enter
 for _ in $(seq 150); do [ -s "$TMP/pick" ] && break; ms 20; done
@@ -75,14 +75,14 @@ for _ in $(seq 150); do [ -s "$TMP/pick" ] && break; ms 20; done
 ok "agy starts with the chosen level's model id"
 
 start
-wait_footer "Effort ━●─── medium"
+wait_footer "Effort ━●───  medium"
 tmux send-keys -t "$pane" C-h Enter
 for _ in $(seq 150); do [ -s "$TMP/pick" ] && break; ms 20; done
 [ "$(cat "$TMP/pick")" = "claude --model opus --effort low" ] || bad "claude pick: $(cat "$TMP/pick")"
 ok "Claude starts with --effort low"
 
 start
-wait_footer "Effort ━●─── medium"
+wait_footer "Effort ━●───  medium"
 tmux send-keys -t "$pane" Enter
 for _ in $(seq 150); do [ -s "$TMP/pick" ] && break; ms 20; done
 [ "$(cat "$TMP/pick")" = "claude --model opus" ] || bad "untouched pick: $(cat "$TMP/pick")"

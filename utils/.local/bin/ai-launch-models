@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+# ai-launch-models — Codex and Devin model rows for the `waymux launch` menu, with their efforts
+#
+#   ai-launch-models     prints {"codex": [rows], "devin": [rows]} (a missing CLI: no key)
+#
+# Each row is {model, args, tier, efforts: [{level, args}]} for ai-launch-rows to put in place of
+# the CLI's single "default" row; `efforts` drives the footer gauge (Ctrl+H / Ctrl+L) and `args`
+# is the level the agent starts at untouched.
+#
+#   Codex: the visible models of `codex debug models` (instant), by priority; effort through
+#          `--effort`, starting at config.toml's model_reasoning_effort when the model has it.
+#   Devin: the families in $AI_LAUNCH_DEVIN_FAMILIES (slugs from `devin models`), effort being
+#          part of the model id (`claude-opus-5-5-high`). `devin models` takes about a second,
+#          so its list is cached for a day and refreshed in the background.
+set -uo pipefail
+
+STATE_DIR="${WAYMUX_QUOTA_STATE_DIR:-${XDG_STATE_HOME:-$HOME/.local/state}/ai-quota}"
+FAMILIES=${AI_LAUNCH_DEVIN_FAMILIES:-claude-opus-5.5 claude-sonnet-5.5 gpt-6-luna gemini-4-argon swe-2}
+command -v jq >/dev/null 2>&1 || { echo '{}'; exit 0; }
+
+codex='null'
+if command -v codex >/dev/null 2>&1; then
+  home=${CODEX_HOME:-$HOME/.codex}
+  conf=$(sed -n 's/^model_reasoning_effort *= *"\([a-z]*\)".*/\1/p' "$home/config.toml" 2>/dev/null | head -1)
+  codex=$(timeout 3 codex debug models 2>/dev/null | jq -c --arg conf "$conf" '
+    [.models // [] | .[] | select(.visibility != "hide")] | sort_by(.priority) | map(
+      .slug as $s | [.supported_reasoning_levels[]?.effort] as $lv
+      | (if ($lv | index($conf)) then $conf else .default_reasoning_level end) as $def
+      | {model: .display_name, args: "--model \($s) --effort \($def)",
+         efforts: [$lv[] | {level: ., args: "--model \($s) --effort \(.)"}]})' 2>/dev/null)
+  [ -n "$codex" ] || codex='null'
+fi
+
+devin='null'
+if command -v devin >/dev/null 2>&1; then
+  cache="$STATE_DIR/devin-models.txt"
+  if [ -z "$(find "$cache" -mtime -1 2>/dev/null)" ]; then
+    mkdir -p "$STATE_DIR"
+    (timeout 20 devin models >"$cache.tmp" 2>/dev/null && grep -q '^Available models' "$cache.tmp" &&
+      mv -f "$cache.tmp" "$cache" || rm -f "$cache.tmp") >/dev/null 2>&1 &
+  fi
+  if [ -s "$cache" ]; then
+    # "Family Name (slug)" then indented ids: one TSV line per id of a wanted family
+    devin=$(awk -v want=" $FAMILIES " '
+      /^[^ ].*\([a-z0-9.-]+\)$/ { slug = $NF; gsub(/[()]/, "", slug); name = $0; sub(/ \([^)]*\)$/, "", name); next }
+      /^  +[a-z0-9]/ && slug != "" && index(want, " " slug " ") { print slug "\t" name "\t" $1 }
+    ' "$cache" | jq -R -s -c --arg fams "$FAMILIES" '
+      ["none", "low", "medium", "high", "xhigh", "max"] as $order
+      | [split("\n")[] | select(length > 0) | split("\t") | {slug: .[0], name: .[1], id: .[2]}
+         | (.id | capture("^(?<base>.+)-(?<level>none|low|medium|high|xhigh|max)$")) as $m
+         | select($m != null) | . + $m]
+      | group_by(.slug) | map({slug: .[0].slug, name: .[0].name,
+          efforts: (sort_by(.level as $l | $order | index($l)) | map({level, args: "--model \(.id)"}))})
+      | (($fams | split(" ")) as $f | sort_by(.slug as $s | $f | index($s)))
+      | map(select(.efforts | length > 0) | {model: .name,
+          args: ((.efforts | map(select(.level == "medium")) | first // .efforts[0]) | .args),
+          efforts: (if (.efforts | length) > 1 then .efforts else [] end)})' 2>/dev/null)
+    [ -n "$devin" ] || devin='null'
+  fi
+fi
+
+jq -n -c --argjson codex "$codex" --argjson devin "$devin" '
+  def tier: ascii_downcase | if test("fable|argon") then "$$$$" elif test("opus|ultra") then "$$$"
+    elif test("sonnet|gpt|swe|sol|terra|luna|astra") then "$$" else "$" end;
+  def rows: map(. + {tier: (.model | tier)});
+  {} + (if $codex then {codex: ($codex | rows)} else {} end)
+     + (if $devin then {devin: ($devin | rows)} else {} end)'
