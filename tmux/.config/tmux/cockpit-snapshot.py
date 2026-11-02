@@ -32,6 +32,10 @@ SESSION_ID = re.compile(r"^[A-Za-z0-9_-]{8,64}$")
 LAUNCH_WORD = re.compile(r"^[A-Za-z0-9._=:/-]{1,64}$")
 SHELLS = {"zsh", "bash", "sh", "fish", "dash"}
 LAUNCH_CHOICES = {"claude": "claude", "jail-claude": "claude", "jail-claude-ask": "claude", "codex": "codex"}
+# A restore runs unattended, often right after a boot: an agent started with its permission
+# prompts off comes back with them on (`Claude YOLO` resumes as the jailed row with prompts).
+# Start it again from the launcher to turn them off.
+RESUME_SAFER = {"jail-claude": "jail-claude-ask"}
 
 
 def process_children() -> Dict[str, List[tuple]]:
@@ -82,7 +86,8 @@ def resume_command(resume: Optional[Dict[str, Any]]) -> Optional[str]:
     if r["agent"] == "codex":
         return f"codex resume {r['id']}"
     if r["launch"]:
-        return f"ai-launch {' '.join(r['launch'])} --resume {r['id']}"
+        words = [RESUME_SAFER.get(r["launch"][0], r["launch"][0])] + r["launch"][1:]
+        return f"ai-launch {' '.join(words)} --resume {r['id']}"
     return f"claude --resume {r['id']}"
 
 def load_theme_colors() -> Dict[str, str]:

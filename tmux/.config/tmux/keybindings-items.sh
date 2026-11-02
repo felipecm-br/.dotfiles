@@ -32,9 +32,9 @@ emit_tmux() {
 󰓅  Prefix + u	AI Quota & Burn Telemetry Visual Popup	tmux	tmux-ai-quota	~/.config/tmux/ai-quota-popup.sh
 󰊢  Ctrl + G	Lazygitrs Floating Popup & Dual-Diff	tmux	tmux-lazygitrs	~/.config/tmux/lazygitrs-popup.sh
 󰙀  Ctrl + Shift + T	Undo Close Tab (Exact Index & AI Resume)	tmux	tmux-reopen	~/.config/tmux/reopen-window.sh
-󰒭  Ctrl + Shift + I	AI Attention Trampoline Direct Jump	tmux	tmux-triage	~/.config/tmux/ai-agent-bell-triage.sh
+󰒭  Ctrl + Shift + I	AI Attention Trampoline Direct Jump	tmux	tmux-triage	~/.config/tmux/ai-agent-triage-jump.sh
 󰘳  Prefix + i	AI Agent Bell / Alert HUD	tmux	tmux-bell	~/.config/tmux/ai-agent-bell-popup.sh
-󰒭  Prefix + I	AI Attention Trampoline Direct Jump	tmux	tmux-triage	~/.config/tmux/ai-agent-bell-triage.sh
+󰒭  Prefix + I	AI Attention Trampoline Direct Jump	tmux	tmux-triage	~/.config/tmux/ai-agent-triage-jump.sh
 󰄧  Prefix + o	AI Side-by-Side Split (35% Right)	tmux	tmux-ai-split	~/.config/tmux/toggle-ai-split.sh
 󰏫  Prefix + N	Neovim Floating Scratchpad (90%x90%)	tmux	tmux-scratchpad	~/.config/tmux/nvim-scratchpad.sh
 󰄧  Prefix + E	Scrollback & AI Mermaid Modal (90%x88%)	tmux	tmux-view-scrollback	~/.config/tmux/scrollback-view.sh

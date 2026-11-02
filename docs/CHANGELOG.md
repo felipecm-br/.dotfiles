@@ -11,6 +11,10 @@ The commit hashes link each entry to the full change (`git show <hash>`). Weeks 
 
 ## Unreleased
 
+### tmux
+- After a reboot, an agent started with its permission prompts off (`Claude YOLO`) resumes with them on; start it again from `Prefix + a` to turn them off. `needs: waymux, ai-jail`
+- The keybindings HUD runs the real triage jump for `Ctrl+Shift+I` and `Prefix + I` (it named a script that no longer exists). `needs: waymux`
+
 ## 2026-W45 (2–8 Nov)
 
 ### AI agents

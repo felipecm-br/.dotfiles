@@ -100,7 +100,7 @@ When `cockpit restore` executes:
    - For pre-existing sessions, missing windows are created. A window that is only a fresh shell (one pane, nothing running: the session a new terminal opens after a reboot) is taken over: `cd` to the saved path, then rebuilt like a missing one. Any other window is left untouched.
    - For dead/unstarted sessions, creates the session detached at the saved window size, then every window at its exact index (`-t <session>:<index>`).
 4. Rebuilds each window pane by pane at the saved paths, in order, then applies the saved layout.
-5. Starts each pane again: a saved agent resumes its conversation (`ai-launch <launch words> --resume <id>`, or `claude --resume <id>` without a launch tag, `codex resume <id>`), any other recorded foreground application starts as before.
+5. Starts each pane again: a saved agent resumes its conversation (`ai-launch <launch words> --resume <id>`, or `claude --resume <id>` without a launch tag, `codex resume <id>`), any other recorded foreground application starts as before. An agent started with its permission prompts off (`Claude YOLO`, `jail-claude`) resumes with them on (`jail-claude-ask`), since a restore runs unattended; start it again from `Prefix + a` to turn them off. (TUIOS 0.12 made the same choice.)
 6. Switches client focus back to the saved `active_session`.
 
 ---

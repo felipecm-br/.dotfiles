@@ -27,16 +27,20 @@ tmux split-window -h -t work:0 -c "$WORK/proj"
 tmux split-window -v -t work:0.1 -c "$WORK"
 tmux new-window -d -t work:1 -n jailed -c "$WORK/proj"
 tmux new-window -d -t work:2 -n host -c "$WORK/proj"
-J=$(tmux display -p -t work:1 '#{pane_id}'); H=$(tmux display -p -t work:2 '#{pane_id}')
-tmux send-keys -t "$J" claude Enter; tmux send-keys -t "$H" claude Enter
+tmux new-window -d -t work:3 -n yolo -c "$WORK/proj"
+J=$(tmux display -p -t work:1 '#{pane_id}'); H=$(tmux display -p -t work:2 '#{pane_id}'); Y=$(tmux display -p -t work:3 '#{pane_id}')
+tmux send-keys -t "$J" claude Enter; tmux send-keys -t "$H" claude Enter; tmux send-keys -t "$Y" claude Enter
 tmux set -p -t "$J" @ai_session claude:0d5f3c1e-8a2b-4c6d-9e0f-1a2b3c4d5e6f
 tmux set -p -t "$J" @ai_launch 'jail-claude-ask --model opus'
 tmux set -p -t "$H" @ai_session claude:11111111-2222-3333
 tmux set -p -t "$H" @ai_launch 'devin'                               # another harness: not used
+tmux set -p -t "$Y" @ai_session claude:55555555-yolo-6666
+tmux set -p -t "$Y" @ai_launch 'jail-claude --model opus'          # prompts off when started
 tmux set -p -t work:0.1 @ai_session claude:44444444-dead            # no agent running any more
 tmux set -p -t work:0.2 @ai_session 'claude:bad;id-touch-x'         # unsafe id
 for _ in 1 2 3 4 5 6 7 8 9 10; do
-  [ "$(tmux display -p -t "$H" '#{pane_current_command}')" = claude ] && break; sleep 0.2
+  [ "$(tmux display -p -t "$H" '#{pane_current_command}')" = claude ] &&
+    [ "$(tmux display -p -t "$Y" '#{pane_current_command}')" = claude ] && break; sleep 0.2
 done
 
 # The last pane tmux lists, with every tag empty, must not lose its trailing fields.
@@ -44,13 +48,13 @@ tmux new-session -d -s zz-last -c "$WORK"
 python3 "$SNAP" snapshot --file "$TOPO" --quiet
 jq -e '.sessions[] | select(.name == "zz-last")' "$TOPO" >/dev/null && ok "untagged last pane captured" || bad "last pane dropped"
 resumes=$(jq -c '[.sessions[] | select(.name == "work") | .windows[] | .panes[] | .resume]' "$TOPO")
-[ "$resumes" = '[null,null,null,{"agent":"claude","id":"0d5f3c1e-8a2b-4c6d-9e0f-1a2b3c4d5e6f","launch":["jail-claude-ask","--model","opus"]},{"agent":"claude","id":"11111111-2222-3333","launch":[]}]' ] \
+[ "$resumes" = '[null,null,null,{"agent":"claude","id":"0d5f3c1e-8a2b-4c6d-9e0f-1a2b3c4d5e6f","launch":["jail-claude-ask","--model","opus"]},{"agent":"claude","id":"11111111-2222-3333","launch":[]},{"agent":"claude","id":"55555555-yolo-6666","launch":["jail-claude","--model","opus"]}]' ] \
   && ok "live agents saved with their session; dead and unsafe tags dropped" || bad "resumes: $resumes"
 
 # Reboot: the session is gone; restore rebuilds it.
 tmux kill-session -t work
 python3 "$SNAP" restore --file "$TOPO" >/dev/null
-for _ in 1 2 3 4 5 6 7 8 9 10; do [ -f "$LOG" ] && [ "$(wc -l <"$LOG")" -ge 2 ] && break; sleep 0.2; done
+for _ in 1 2 3 4 5 6 7 8 9 10; do [ -f "$LOG" ] && [ "$(wc -l <"$LOG")" -ge 3 ] && break; sleep 0.2; done
 panes=$(tmux list-panes -t work:0 -F '#{b:pane_current_path}' | tr '\n' ' ')
 [ "$panes" = "proj proj work " ] && ok "every pane back, in order" || bad "panes: $panes"
 [ "$(tmux list-panes -t work:0 -F '#{pane_width}' | head -1)" = 100 ] && ok "layout applied at the saved size" || bad "layout"
@@ -58,12 +62,14 @@ grep -qx 'ai-launch jail-claude-ask --model opus --resume 0d5f3c1e-8a2b-4c6d-9e0
   && ok "jailed agent resumed through ai-launch" || bad "jailed resume: $(cat "$LOG")"
 grep -qx 'claude --resume 11111111-2222-3333' "$LOG" \
   && ok "another harness's launch tag ignored: plain claude --resume" || bad "host resume: $(cat "$LOG")"
+grep -qx 'ai-launch jail-claude-ask --model opus --resume 55555555-yolo-6666' "$LOG" \
+  && ok "YOLO agent resumes with prompts on" || bad "yolo resume: $(cat "$LOG")"
 
 # A window missing from a live session is rebuilt the same way (the last one: renumber-windows).
-: >"$LOG"; tmux kill-window -t work:2
+: >"$LOG"; tmux kill-window -t work:3
 python3 "$SNAP" restore --file "$TOPO" >/dev/null
 for _ in 1 2 3 4 5 6 7 8 9 10; do [ -s "$LOG" ] && break; sleep 0.2; done
-[ "$(cat "$LOG")" = 'claude --resume 11111111-2222-3333' ] \
+[ "$(cat "$LOG")" = 'ai-launch jail-claude-ask --model opus --resume 55555555-yolo-6666' ] \
   && ok "missing window rebuilt and resumed" || bad "missing window: $(cat "$LOG")"
 
 # A tampered snapshot never reaches the shell.
@@ -88,11 +94,11 @@ PATH="$HOME/stub:$PATH" timeout 10 "$ROOT/utils/.local/bin/cockpit-shutdown-save
 tmux kill-session -t work; : >"$LOG"
 tmux new-session -d -s work -c "$HOME" -x 200 -y 50
 python3 "$SNAP" restore --file "$TOPO" >/dev/null
-for _ in 1 2 3 4 5 6 7 8 9 10; do [ "$(wc -l <"$LOG")" -ge 2 ] && break; sleep 0.2; done
+for _ in 1 2 3 4 5 6 7 8 9 10; do [ "$(wc -l <"$LOG")" -ge 3 ] && break; sleep 0.2; done
 sleep 0.5
 panes=$(tmux list-panes -t work:0 -F '#{b:pane_current_path}' | tr '\n' ' ')
 [ "$panes" = "proj proj work " ] && ok "fresh shell window taken over, cd to the saved path" || bad "adopted: $panes"
-[ "$(wc -l <"$LOG")" -eq 2 ] && ok "agents of the other windows resumed" || bad "adopt log: $(cat "$LOG")"
+[ "$(wc -l <"$LOG")" -eq 3 ] && ok "agents of the other windows resumed" || bad "adopt log: $(cat "$LOG")"
 tmux kill-session -t work
 tmux new-session -d -s work -c "$HOME" 'sleep 200'
 python3 "$SNAP" restore --file "$TOPO" >/dev/null
