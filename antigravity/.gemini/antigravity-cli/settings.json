@@ -10,7 +10,7 @@
     }
   ],
   "artifactReviewPolicy": "always-proceed",
-  "model": "Gemini 4 Argon (Medium)",
+  "model": "Claude Sonnet 5.5 (High)",
   "notifications": true,
   "permissions": {
     "allow": [
@@ -18,14 +18,12 @@
       "command(cargo add async-trait)"
     ]
   },
-  "runningLightSpeed": "fast",
   "toolPermission": "always-proceed",
   "trustedWorkspaces": [
     "/home/fecavmi/.dotfiles/main",
     "/home/fecavmi",
     "/home/fecavmi/dev/github/lazygitrs/ai-notes",
-    "/home/fecavmi/dev/github/waymux",
-    "/home/fecavmi/dev/github/waymux/main",
+    "/home/fecavmi/dev/github/acpd",
     "/home/fecavmi/scratch-test-sesh",
     "/home/fecavmi/dev/github/speco",
     "/home/fecavmi/dev/github/ai-memory",
@@ -91,6 +89,16 @@
     "/home/fecavmi/dev/github/lazygitrs/feat-shell-prompt",
     "/home/fecavmi/dev/github/lazygitrs/feat-scrollbar-parity",
     "/home/fecavmi/dev/github/lazygitrs/feat-draggable-grab-column-hover",
-    "/home/fecavmi/.dotfiles/feat-ooi"
+    "/home/fecavmi/.dotfiles/feat-ooi",
+    "/home/fecavmi/dev/github/workmux",
+    "/home/fecavmi/.dotfiles/ls",
+    "/home/fecavmi/dev/github/starship-studio/main",
+    "/home/fecavmi/dev/github/starship-studio/refractory",
+    "/home/fecavmi/dev/github/akitaonrails.github.io/master",
+    "/home/fecavmi/dev/github/nerdsight/main",
+    "/home/fecavmi/dev/github/ls",
+    "/home/fecavmi/dev/github/waymux",
+    "/home/fecavmi/.dotfiles/main/.shell/install",
+    "/home/fecavmi/dev/github/second-brain"
   ]
 }
