@@ -304,6 +304,12 @@ wm session list
 # Audit documentation integrity, broken links, and root cleanliness
 ./scripts/docs-lint.sh
 
+# Draft docs/CHANGELOG.md entries (grouped by week and package, with portability tag hints) from commits since the last entry
+./scripts/changelog-draft.sh
+
+# Draft changelog entries from commits after a given revision or date
+./scripts/changelog-draft.sh --since {{rev}}
+
 # Read the live ZMK keymap from the keyboard (read-only) and redraw PDF/SVG/table
 ./scripts/zmk-keymap/run.sh
 

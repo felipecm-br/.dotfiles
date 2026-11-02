@@ -6,6 +6,9 @@ Welcome to the central documentation index for this Arch Linux + Omarchy dotfile
 
 ## 📚 Categorized Documentation
 
+- [**Changelog**](CHANGELOG.md): What changed week by week since October 2026, each entry tagged with whether it works without root or without a given app.
+- [**Portability Matrix**](architecture/portability-matrix.md): Every stow package and script with what it needs (`portable`, `needs: <app>`, `needs: root`, `host-only`), for adopting parts of these dotfiles on a restricted host.
+
 ### 🔬 0. Core Philosophy & Ergonomics Manifesto (`docs/architecture/`)
 - [**Terminal Ergonomics & UX Architecture Manifesto**](architecture/terminal-ergonomics-and-ux-manifesto.md): Core HCI principles, KLM/GOMS ($H=0$), Doherty threshold (<100ms), pure icon badges, universal Omarchy theme color synchronization, and the Ergonomic Stability Rule.
 - [**Workflow Keybindings & Ergonomic Reference Matrix**](architecture/workflow-keybindings-matrix.md): Complete multi-layer cheat-sheet and biomechanical audit of all global, Tmux, Zsh, Waymaker, and Lazygitrs shortcuts.
@@ -13,7 +16,7 @@ Welcome to the central documentation index for this Arch Linux + Omarchy dotfile
 - [**Neovim Visual Intelligence & Smart Image Clipboard Workflow**](architecture/neovim-visual-workflow.md): Architecture, safe Wayland clipboard isolation, Mermaid hover preview, and VS Code-parity smart image pasting with Select Mode captioning.
 - [**Smart & Context-Aware Patterns Roadmap**](architecture/smart-patterns-roadmap.md): Architectural catalog of active event-driven intelligence and future roadmap (semantic breadcrumbs, workspace indicators, command alerts, scratchpads, and Neovim LSP sync).
 - [**Universal Keyboard Ergonomics & Dual-Profile Architecture**](architecture/universal-keyboard-ergonomics-and-profiles.md): Detailed specification for standard/vanilla keyboards vs biomechanical `keyd` overload, Leader sequences, Vim Nav Mode, and open-source packaging strategy for Waymux and Waymaker.
-- [**State-of-the-Art Terminal Agent Workflow: Architecture, Ergonomics & Competitor Benchmark**](architecture/state-of-the-art-terminal-agent-workflow.md): The definitive canonical architecture document: 9.94/10 verdict, head-to-head competitor matrix (`workmux`, `herdr`, `zellij`), 6 engineered SOTA pillars, sub-50ms empirical benchmarks, and historical resolution ledger.
+- [**State-of-the-Art Terminal Agent Workflow: Architecture, Ergonomics & Competitor Benchmark**](architecture/state-of-the-art-terminal-agent-workflow.md): The canonical architecture document: profile-weighted scorecard against TUIOS, Orca, workmux, herdr, agent-deck, T3 Code and Alethe (8.75/10 on 2 Nov 2026), the 7 SOTA pillars, measured latency, the resolution ledger and the roadmap to 9.2.
 - [**Cockpit Topology Snapshot & Post-Reboot Restore**](architecture/cockpit-topology-snapshot-and-restore.md): Event-driven 30s debounced Tmux topology snapshots (`cockpit snapshot`), post-reboot workspace restoration (`cockpit restore`), and multi-agent continuation (`agy`, `claude`, `codex`, `muse`, `opencode`).
 - [**Quota-Aware Agent Selection (`ai-quota` / `ai-launch`)**](architecture/quota-aware-agent-selection.md): Session picker `a` / `c` agent keys, quota badge, Claude 5h/7d burn-rate projection, Antigravity exhaustion tracking, and smart `startup_command` launcher.
 - [**Evidence-Based Flow Telemetry & Deep Work Analytics**](architecture/evidence-based-telemetry-and-deep-work.md): Zero-latency TSV event logging (`flow-log.sh`), human-agent response latency metrics, 24h ASCII activity heatmaps, and `flow-telemetry` CLI.
