@@ -74,8 +74,8 @@ models() { # <claude remainingFraction or "none"> <flash remainingFraction>
 models none 1 >"$FIX/agy.json"
 snap=$(AI_QUOTA_FIXTURE_DIR="$FIX" ai-quota --json)
 [ "$(jq -r '.agents[1].source' <<<"$snap")" = "api" ] && ok "agy reads the API quota" || bad "agy source: $(jq -c '.agents[1]' <<<"$snap")"
-[ "$(jq -c '[.agents[1].groups[] | {key, pct}]' <<<"$snap")" = '[{"key":"claude","pct":0},{"key":"flash","pct":100},{"key":"pro","pct":100}]' ] &&
-  ok "Claude/GPT 0% (no remainingFraction), Gemini Flash 100%" || bad "groups: $(jq -c '.agents[1].groups' <<<"$snap")"
+[ "$(jq -c '[.agents[1].groups[] | {key, pct}]' <<<"$snap")" = '[{"key":"claude","pct":100},{"key":"flash","pct":0},{"key":"pro","pct":0}]' ] &&
+  ok "Claude/GPT 100% used (no remainingFraction), Gemini Flash 0% used" || bad "groups: $(jq -c '.agents[1].groups' <<<"$snap")"
 [ "$(jq -r '.agents[1].level' <<<"$snap")" = "yellow" ] && [ "$(jq -r '.agents[1].default_exhausted' <<<"$snap")" = "true" ] &&
   ok "default model out of quota -> yellow" || bad "agy api level: $(jq -r '.agents[1].level' <<<"$snap")"
 report=$(AI_QUOTA_FIXTURE_DIR="$FIX" ai-quota)
@@ -85,13 +85,13 @@ vis=$(AI_QUOTA_FIXTURE_DIR="$FIX" ai-quota --visual)
 [[ "$vis" != *"AI Quota & Burn Telemetry"* && "$vis" == *"█"* && "$vis" == *"▒"* && "$vis" == *"│"* && "$vis" == *"⠛"* && "$vis" == *"Gemini 4 Argon: no per-model quota in the API"* && "$vis" == *"Recommended"*"Antigravity"* ]] &&
   ok "--visual renders bullet gauges, sparklines, Argon note and recommendation" || bad "visual: $vis"
 plain=$(sed 's/\x1b\[[0-9;]*m//g' <<<"$vis")
-[[ "$(grep -c '⠛' <<<"$plain")" -eq 2 && "$plain" != *"●"* && "$plain" != *"← recommended"* && "$vis" == *$'\e[97m\e[1m⠛'* ]] &&
-  ok "--visual: bright-white ⠛ in an empty left gutter, no dots or ragged suffix" || bad "visual marker: $plain"
+[[ "$(grep -c '⠛' <<<"$plain")" -eq 2 && "$plain" != *"●"* && "$plain" != *"← recommended"* && "$plain" != *"% left"* && "$vis" == *$'\e[97m\e[1m⠛'* ]] &&
+  ok "--visual: bright-white ⠛ in an empty left gutter, unified % used, no dots or ragged suffix" || bad "visual marker: $plain"
 models 0 0 >"$FIX/agy.json"
 snap=$(AI_QUOTA_FIXTURE_DIR="$FIX" ai-quota --json)
 [ "$(jq -r '.agents[1].level' <<<"$snap")" = "red" ] && [ "$(jq -r '.agents[1].until' <<<"$snap")" = "$((now + 3600))" ] &&
   ok "every group exhausted -> red until the first reset" || bad "agy all exhausted: $(jq -c '.agents[1] | {level, until}' <<<"$snap")"
-[ "$(AI_QUOTA_FIXTURE_DIR="$FIX" ai-quota --badge | grep -c 'C0 G0%')" -eq 0 ] && ok "red badge shows the reset, not percentages" || bad "badge"
+[ "$(AI_QUOTA_FIXTURE_DIR="$FIX" ai-quota --badge | grep -c 'C100 G100%')" -eq 0 ] && ok "red badge shows the reset, not percentages" || bad "badge"
 
 # 4b-argon. With cli User-Agent (cl=...), fetchAvailableModels includes gemini-4-argon-* quotaInfo
 jq -n --arg rc "$(iso $((now + 3600)))" --arg rf "$(iso $((now + 18000)))" --arg ra "$(iso $((now + 500000)))" '{
@@ -103,12 +103,12 @@ jq -n --arg rc "$(iso $((now + 3600)))" --arg rf "$(iso $((now + 18000)))" --arg
     "gemini-4-argon-medium": {quotaInfo: {remainingFraction: 0.25, resetTime: $ra}}
   }}' >"$FIX/agy.json"
 snap=$(AI_QUOTA_FIXTURE_DIR="$FIX" ai-quota --json)
-[ "$(jq -c '[.agents[1].groups[] | select(.key == "argon") | {key, pct}]' <<<"$snap")" = '[{"key":"argon","pct":25}]' ] &&
-  ok "Gemini 4 Argon group parsed (25% left)" || bad "argon group: $(jq -c '.agents[1].groups' <<<"$snap")"
-[[ "$(AI_QUOTA_FIXTURE_DIR="$FIX" ai-quota)" == *"Gemini 4 Argon: 25% left"* ]] &&
+[ "$(jq -c '[.agents[1].groups[] | select(.key == "argon") | {key, pct}]' <<<"$snap")" = '[{"key":"argon","pct":75}]' ] &&
+  ok "Gemini 4 Argon group parsed (75% used)" || bad "argon group: $(jq -c '.agents[1].groups' <<<"$snap")"
+[[ "$(AI_QUOTA_FIXTURE_DIR="$FIX" ai-quota)" == *"Gemini 4 Argon: 75% used"* ]] &&
   ok "report shows Gemini 4 Argon quota" || bad "argon report"
-[[ "$(AI_QUOTA_FIXTURE_DIR="$FIX" ai-quota --badge)" == *"C100 G97 A25%"* ]] &&
-  ok "badge includes A25% for Gemini 4 Argon" || bad "argon badge: $(AI_QUOTA_FIXTURE_DIR="$FIX" ai-quota --badge)"
+[[ "$(AI_QUOTA_FIXTURE_DIR="$FIX" ai-quota --badge)" == *"C0 G3 A75%"* ]] &&
+  ok "badge includes A75% for Gemini 4 Argon" || bad "argon badge: $(AI_QUOTA_FIXTURE_DIR="$FIX" ai-quota --badge)"
 [ "$(AI_QUOTA_FIXTURE_DIR="$FIX" ai-launch --peek --auto)" = "agy --model gemini-4-argon-medium" ] &&
   ok "ai-launch recommends default Gemini 4 Argon when it has quota" || bad "argon launch: $(AI_QUOTA_FIXTURE_DIR="$FIX" ai-launch --peek --auto)"
 

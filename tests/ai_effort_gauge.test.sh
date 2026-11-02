@@ -32,8 +32,8 @@ command -v wm >/dev/null || { echo "skip: wm not installed"; exit 0; }
 TMP=$(mktemp -d)
 trap 'private_tmux_cleanup; rm -rf "$TMP"' EXIT
 cat >"$TMP/rows.json" <<'EOF'
-[{"agent":"claude","args":"--model opus","icon":"C","cli":"Claude Code","model":"Opus","tier":"$$$","quota":"5h 1%","level":"green","rec":true},
- {"agent":"agy","args":"--model gemini-4-argon-medium","icon":"A","cli":"Antigravity","model":"Gemini 4 Argon","tier":"$$$$","quota":"90% left","level":"green",
+ [{"agent":"claude","args":"--model opus","icon":"C","cli":"Claude Code","model":"Opus","tier":"$$$","quota":"5h 1%","level":"green","rec":true},
+ {"agent":"agy","args":"--model gemini-4-argon-medium","icon":"A","cli":"Antigravity","model":"Gemini 4 Argon","tier":"$$$$","quota":"10% used","level":"green",
   "efforts":[{"level":"low","args":"--model gemini-4-argon-low"},{"level":"medium","args":"--model gemini-4-argon-medium"},{"level":"high","args":"--model gemini-4-argon-high"}]},
  {"agent":"devin","args":"","icon":"D","cli":"Devin","model":"default","tier":"-","quota":"no quota data","level":"unknown"}]
 EOF

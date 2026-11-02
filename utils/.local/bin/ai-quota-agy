@@ -5,7 +5,7 @@
 # profile ($AGYY_HOME) when it has a token. See `waymux quota --help` for the agent fields.
 #
 # Data sources:
-#   percent left per group (Claude & GPT, Gemini Flash, Gemini 4 Argon) from fetchAvailableModels,
+#   percent used per group (Claude & GPT, Gemini Flash, Gemini 4 Argon) from fetchAvailableModels,
 #   with the profile's own token on curl's stdin, cached 60 s (a reader accepts up to 15 min of
 #   staleness and refreshes in the background); without a valid token, 429 "Individual quota
 #   reached ... Resets in XhYmZs" lines in antigravity-cli logs (exhausted-until + learned prompt
@@ -132,18 +132,18 @@ agy_api() ( # <home> <label>: per-model quota from fetchAvailableModels, cached 
     | def entry($id): ($r.models[$id] // null) as $m | if $m == null then null else {
         model: $id, name: ($m.displayName // $id),
         pct: (($m.quotaInfo.remainingFraction // (if $m.quotaInfo.resetTime then 0 else null end))
-              | if . == null then null else (. * 100 | round) end),
+              | if . == null then null else (100 - (. * 100 | round)) end),
         reset: ($m.quotaInfo.resetTime | epoch) } end;
     .
     | ([$r.models | keys[] | select(startswith("claude-") or startswith("gpt-oss"))] | map(entry(.)) | map(select(.pct != null))) as $cg
     | ([$r.models | keys[] | select(startswith("gemini-4-argon"))] | map(entry(.)) | map(select(.pct != null))) as $ag
     | {ts: $now, default_model: .defaultAgentModelId,
        groups: [
-         (if ($cg | length) > 0 then {key: "claude", label: "Claude & GPT", pct: ($cg | map(.pct) | min),
+         (if ($cg | length) > 0 then {key: "claude", label: "Claude & GPT", pct: ($cg | map(.pct) | max),
             reset: ($cg | map(.reset) | map(select(. != null)) | min)} else empty end),
          (entry($r.tieredModelIds.flash[0]? // "") | select(. != null) | {key: "flash", label: "Gemini Flash"} + .),
          (if ($ag | length) > 0 then {key: "argon", label: "Gemini 4 Argon", model: ($ag[0].model), name: "Gemini 4 Argon",
-            pct: ($ag | map(.pct) | min), reset: ($ag | map(.reset) | map(select(. != null)) | min)} else empty end),
+            pct: ($ag | map(.pct) | max), reset: ($ag | map(.reset) | map(select(. != null)) | min)} else empty end),
          (entry($r.tieredModelIds.pro[0]? // "") | select(. != null) | {key: "pro", label: "Gemini pro tier"} + .)
        ]}' <<<"$resp" 2>/dev/null >"$cache.tmp" && [ -s "$cache.tmp" ] && mv -f "$cache.tmp" "$cache" || rm -f "$cache.tmp"
   if [ -s "$cache" ]; then cat "$cache"; else echo null; fi
@@ -220,16 +220,16 @@ def agy_model($name; $title; $tag; $bin; $ev; $pr; $n; $api):
      elif ($dm | startswith("gemini-4-argon")) and ($groups != null) and ([$groups[] | select(.key == "argon")] | length > 0) then "argon"
      else "flash" end) as $dkey
   | (if $groups then [$groups[] | select(.key == $dkey)] | first else null end) as $dgroup
-  | (if $groups then [$groups[] | select((.pct // 0) > 0)] else null end) as $usable
+  | (if $groups then [$groups[] | select((.pct // 100) < 90)] else null end) as $usable
   | (if $groups == null then null
      elif ($usable | length) == 0 then "red"
-     elif ($dgroup != null and ($dgroup.pct // 0) == 0) or ([$usable[] | select(.pct < 20)] | length) > 0 then "yellow"
+     elif ($dgroup != null and ($dgroup.pct // 0) >= 70) or ([$usable[] | select(.pct >= 70)] | length) > 0 then "yellow"
      else "green" end) as $api_level
-  | ($dgroup != null and ($dgroup.pct // 0) == 0) as $dex
-  | ($groups // [] | map(select(.key != "pro")) | map(select((.pct // 0) > 0)) | max_by(.pct) | .key? // null) as $best
+  | ($dgroup != null and ($dgroup.pct // 0) >= 90) as $dex
+  | ($groups // [] | map(select(.key != "pro")) | map(select((.pct // 100) < 90)) | min_by(.pct) | .key? // null) as $best
   | ($dm | fam) as $dfam
   | ($families | map(.id | fam) | index($dfam)) as $has_default
-  | ($api_level // (if $active then "red" elif ($est // 0) >= 80 then "yellow" elif $cap == null then "unknown" else "green" end)) as $level
+  | ($api_level // (if $active then "red" elif ($est // 0) >= 90 then "red" elif ($est // 0) >= 70 then "yellow" elif $cap == null then "unknown" else "green" end)) as $level
   | ([$ev[] | select(.reset > $now)] | max_by(.reset) | .reset? // null) as $exhausted
   # Launch rows: the group each family draws from, and `rec` on the model to start when this
   # agent is the recommended one (its default while that has quota, else the fullest group)
@@ -242,9 +242,9 @@ def agy_model($name; $title; $tag; $bin; $ev; $pr; $n; $api):
       | {args: "--model \(.id)", model: .name,
          quota: (if $groups == null then (if $exhausted then "exhausted ⏳\($exhausted | clock)" else "quota ?" end)
                  elif $grp == null then "no quota data"
-                 else "\($grp.pct)% left" + (if $grp.reset and $grp.pct < 100 then " ⟳\($grp.reset | clock)" else "" end) end),
+                 else "\($grp.pct)% used" + (if $grp.reset and $grp.pct > 0 then " ⟳\($grp.reset | clock)" else "" end) end),
          level: (if $groups == null then $level elif $grp == null then "unknown"
-                 elif $grp.pct == 0 then "red" elif $grp.pct < 20 then "yellow" else "green" end),
+                 elif $grp.pct >= 90 then "red" elif $grp.pct >= 70 then "yellow" else "green" end),
          rec: (if $groups != null and ($dex | not) and $has_default != null then $f == $dfam
                elif $best == "argon" then ($f | startswith("gemini-4-argon"))
                elif $best == "claude" then ($f | test("sonnet"))
@@ -267,7 +267,7 @@ def agy_model($name; $title; $tag; $bin; $ev; $pr; $n; $api):
           (if ([$groups[] | select(.key == "argon")] | length) > 0 then []
            else [$groups[] | select(.key == "pro" and .hidden)
                  | {text: "Gemini 4 Argon: no per-model quota in the API; its pro tier maps to \(.model) (the Gemini Flash quota above)"}] end)
-          + (if $dex and ([$groups[] | select(.key == "flash" and (.pct // 0) > 0)] | length) > 0
+          + (if $dex and ([$groups[] | select(.key == "flash" and (.pct // 100) < 90)] | length) > 0
              then [{text: "default model \($dm) is out of quota: start with --model gemini-3.8-flash-high", level: "warn"}]
              else [] end)
         end)
