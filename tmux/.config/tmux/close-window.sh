@@ -242,7 +242,7 @@ run_confirm_modal() {
       case "${AGENT_STATES[$i]}" in idle|done|closed|inactive|completed) continue ;; esac
       desc="${AGENT_DESCS[$i]}"
       [ "$desc" = "$WIN_NAME" ] && desc="" # the window name is the agent's icon, not a task
-      modal_agent_row "${AGENT_STATES[$i]}" "${AGENT_COLORS[$i]}" "${AGENT_LABELS[$i]}" "$desc"
+      modal_agent_row "${AGENT_STATES[$i]}" "${AGENT_COLORS[$i]}" "${AGENT_LABELS[$i]}" "${AGENT_LABELS[$i]}" "$desc"
       shown=$(( shown + 1 ))
       [ "$shown" -ge 3 ] && break
     done

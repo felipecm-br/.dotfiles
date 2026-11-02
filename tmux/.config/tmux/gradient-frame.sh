@@ -53,12 +53,13 @@ modal_head() {
   printf '\n  \033[1m%s\033[0m\n  \033[38;5;8m%s\033[0m\n\n' "$1" "$2"
 }
 
-# modal_agent_row STATE HEX LABEL DESC — one agent: its state glyph at X=1 in
-# the status bar's own state color (@ai_agent_state_color), the agent, what it
-# is doing (darkgray, cut to fit) and the state word, in fixed columns.
+# modal_agent_row STATE HEX AGENT LABEL DESC — one agent: its own icon at X=1
+# (the glyph its tab shows) tinted with the status bar's state color
+# (@ai_agent_state_color), the label, what it is doing (darkgray, cut to fit)
+# and the state word in the same color, in fixed columns.
 modal_agent_row() {
-  local state="$1" hex="$2" label="$3" desc="$4" glyph color="" pad
-  glyph=$(waymux icon --state "$state" 2>/dev/null || waymux icon --state busy 2>/dev/null)
+  local state="$1" hex="$2" agent="$3" label="$4" desc="$5" glyph color="" pad
+  glyph=$(waymux icon "$agent" 2>/dev/null || waymux icon --state "$state" 2>/dev/null)
   [ -n "$glyph" ] || glyph="•"
   if [[ "$hex" =~ ^#[0-9a-fA-F]{6}$ ]]; then
     color=$(printf '\033[38;2;%d;%d;%dm' "$((16#${hex:1:2}))" "$((16#${hex:3:2}))" "$((16#${hex:5:2}))")

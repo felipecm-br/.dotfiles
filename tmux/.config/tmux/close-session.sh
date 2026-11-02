@@ -200,7 +200,7 @@ run_confirm_modal() {
     for ((i=0; i<${#AGENT_STATES[@]}; i++)); do
       case "${AGENT_STATES[$i]}" in idle|done|closed|inactive|completed) continue ;; esac
       if [ "$shown" -lt 3 ]; then
-        modal_agent_row "${AGENT_STATES[$i]}" "${AGENT_COLORS[$i]}" "${AGENT_TABS[$i]} ${AGENT_LABELS[$i]}" "${AGENT_DESCS[$i]}"
+        modal_agent_row "${AGENT_STATES[$i]}" "${AGENT_COLORS[$i]}" "${AGENT_LABELS[$i]}" "tab ${AGENT_TABS[$i]}" "${AGENT_DESCS[$i]}"
       fi
       shown=$(( shown + 1 ))
     done
