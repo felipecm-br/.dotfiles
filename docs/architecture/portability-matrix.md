@@ -34,7 +34,8 @@ Stow a package with `./stow.sh <package>` (see [stow.sh](../../stow.sh)); everyt
 | `waymux` | `needs: waymux` | `waymux` binary, user systemd (or a tmux window) | Agent states, Cockpit, triage, phone page, launcher, quota |
 | `awt` | `needs: wm` | git, `wm`; `waymux` for `waymux wt` | Worktree orchestrator; pure git underneath |
 | `starship` | `portable` | starship | The Omarchy preset switcher is `host-only`; the presets themselves are plain TOML |
-| `atuin`, `bat`, `eza`, `duf`, `procs`, `fed`, `figlet`, `lolcat`, `cargo`, `mise` | `portable` | the tool itself | One zsh snippet each, **not guarded**: `bat` aliases `cat`, `eza` aliases `ls`, so stowing the package without its tool breaks that command. Stow only the ones whose tool you have |
+| `atuin`, `duf`, `procs`, `figlet`, `lolcat`, `mise`, `fed`, `cargo` | `portable` | the tool itself | One zsh snippet each. [init.zsh](../../zsh/.zsh/init.zsh) loads them through `source_packages`, which skips a package whose command is missing, so stowing one without its tool is harmless (`fed` and `cargo` are sourced directly and only set paths) |
+| `bat`, `eza` | `portable` | the tool itself | **Not loaded**: they are not in the `source_packages` list. The `ls` → `eza` alias you see on Omarchy comes from Omarchy's own zsh defaults, so a host without Omarchy keeps plain `ls`. Add the name to the list to opt in |
 | `yazi` | `portable` | yazi | — |
 | `nvim` | `portable` | neovim (LazyVim) | Live theme reload watches Omarchy's theme dir; without it the configured colorscheme stays |
 | `git`, `gh` | `portable` | git, gh, gh-dash | `gc` / `sgc` need an AI CLI ([GC_SGC.md](../../git/GC_SGC.md)) |
