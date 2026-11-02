@@ -26,13 +26,17 @@ for preset in "$ROOT/waymaker/.config/waymaker/presets/ai-launch.toml" "$ROOT/wa
     ok "${preset##*/} focus-bar, ⠛ marker & dim/bold hierarchy contract" || bad "${preset##*/} missing focus-bar or ⠛ contract"
 done
 
-# 2. Rows per agent (AI_SWITCH_AGENT skips pane detection)
+# 2. Rows per agent (AI_SWITCH_AGENT skips pane detection). No `devin models` refresh in the
+# background: it would write into the sandbox while the test removes it.
+export AI_LAUNCH_MODELS_NO_REFRESH=1
 rows() { AI_SWITCH_AGENT=$1 ai-switch --peek | cut -f2 | tr '\n' ' '; }
 [[ "$(rows claude)" == "/model fable /model opus /model sonnet /model haiku /effort low "*"/effort auto " ]] &&
   ok "claude: 4 models + effort levels" || bad "claude rows: $(rows claude)"
 [[ "$(rows agy)" == "/model gemini-4-argon-medium "* ]] && ok "agy: model families" || bad "agy rows: $(rows agy)"
-[ "$(rows devin)" = "/model opus /model sonnet /model codex /model fusion " ] && ok "devin: /model <name>" || bad "devin rows"
-[ "$(rows codex)" = "/model " ] && ok "codex: its own picker" || bad "codex rows: $(rows codex)"
+# Devin and Codex: their listed models (ai-switch-rows, see tests/ai_launch_models.test.sh) when
+# the CLI lists them, else the built-in rows; the sandbox has no Devin cache.
+[ "$(rows devin)" = "/model opus /model sonnet /model codex /model fusion " ] && ok "devin: built-in rows without a model cache" || bad "devin rows: $(rows devin)"
+[[ "$(rows codex)" == "/model " || "$(rows codex)" == "/model gpt-"* ]] && ok "codex: its models, else its own picker" || bad "codex rows: $(rows codex)"
 
 # 3. Direct choices map to the agent's slash command; unknown ones fail without typing
 [ "$(AI_SWITCH_AGENT=claude ai-switch --peek high)" = $'claude\t/effort high' ] && ok "direct effort" || bad "direct effort"

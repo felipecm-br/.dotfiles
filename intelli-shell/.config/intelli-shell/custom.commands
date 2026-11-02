@@ -172,6 +172,9 @@ ai-failover --peek
 # Print the Codex and Devin model rows of the AI launch menu, with their effort levels (JSON)
 ai-launch-models | jq .
 
+# Print the model switch rows ai-switch would offer for a Codex or Devin pane (JSON)
+tmux capture-pane -p -t {{pane}} | ai-switch-rows {{codex|devin}} {{pane}} | jq .
+
 # Launch menu with other Devin model families (slugs from `devin models`)
 AI_LAUNCH_DEVIN_FAMILIES="{{claude-opus-5.5 gpt-6-luna swe-2}}" ai-launch
 

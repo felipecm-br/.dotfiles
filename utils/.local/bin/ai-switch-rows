@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+# ai-switch-rows — rows for `waymux switch` (its [switch] rows_command, wired in by ai-switch)
+#
+#   ai-switch-rows <process> <pane>   (the bottom of the pane on stdin)
+#
+# Antigravity goes to ai-switch-agy. Codex and Devin get one row per model from ai-launch-models
+# (the same list as the launch menu), each with its own effort levels for the footer gauge
+# (Ctrl+H / Ctrl+L), as `efforts: [{level, args}]` where args is the command typed for that level:
+#
+#   Codex  /model <slug> --reasoning=<level>   (session only; the bottom line "GPT-6-Luna high · …"
+#                                               names the current model and effort)
+#   Devin  /model <id>                         (the effort is part of the id; the bottom-left line
+#                                               names the current family, "Claude Opus 5.5 High")
+#
+# A model row types the current effort when that model has it, else the model's own default, so
+# switching model alone keeps the effort.
+set -uo pipefail
+
+here=$(dirname "$(readlink -f "$0")")
+process=${1:-}
+case "$process" in
+  codex | devin) ;;
+  *) exec "$here/ai-switch-agy" "$@" ;;
+esac
+
+screen=$(cat)
+models=$("$here/ai-launch-models" 2>/dev/null)
+[ -n "$models" ] || exit 1
+
+jq -n -c --arg agent "$process" --arg screen "$screen" --argjson m "$models" '
+  ["none", "low", "medium", "high", "xhigh", "max", "ultra"] as $order
+  | ($screen | split("\n") | map(gsub("^\\s+|\\s+$"; "")) | map(select(length > 0))) as $lines
+  | ($m[$agent] // []) as $rows
+  # The current model: the last screen line that starts with a row name, and the level after it
+  | ([ $lines[] as $l | $rows[] | .model as $n | select($l | startswith($n + " ") or . == $n)
+       | {name: $n, level: ($l[($n | length):] | ascii_downcase | capture("^\\s*(?<w>[a-z]+)").w? // "")} ]
+     | last) as $cur
+  | ($cur.level // "" | select($order | index(.))) as $curlevel
+  | {agent: $agent, current: ($cur.name // ""),
+     rows: [ $rows[]
+       | (if $agent == "codex" then
+            (.args | capture("--model (?<s>\\S+)").s) as $slug
+            | {id: $slug, efforts: [.efforts[] | {level, args: "/model \($slug) --reasoning=\(.level)"}]}
+          else
+            {id: (.args | capture("--model (?<s>\\S+)").s),
+             efforts: [.efforts[] | {level, args: (.args | sub("^--model "; "/model "))}]}
+          end) as $r
+       | ([$r.efforts[] | select(.level == ($curlevel // ""))] | first) as $keep
+       | (if $agent == "codex" then (.args | capture("--effort (?<l>\\S+)").l) else
+            (.args | capture("-(?<l>none|low|medium|high|xhigh|max)$").l? // "") end) as $deflevel
+       | {id: $r.id, kind: "model", name: .model, tier: .tier,
+          active: (.model == ($cur.name // "")),
+          command: ($keep.args // ([$r.efforts[] | select(.level == $deflevel)] | first | .args)
+                    // "/model \($r.id)"),
+          efforts: $r.efforts} ] }'

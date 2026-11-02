@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# tests/ai_launch_models.test.sh — Codex and Devin rows of the launch menu, with their effort levels.
+# tests/ai_launch_models.test.sh — Codex and Devin rows of the launch and switch menus, with their effort levels.
 #
 # A fake `codex` (temp dir on PATH, never under HOME) prints a fixed `debug models` list, and a
 # fixed `devin models` listing stands in for the daily cache, so the rows do not depend on the
@@ -11,6 +11,7 @@ BIN="$ROOT/utils/.local/bin"
 ok() { echo "ok: $*"; }
 bad() { echo "FAIL: $*" >&2; exit 1; }
 command -v jq >/dev/null 2>&1 || { echo "skip: jq not installed"; exit 0; }
+export AI_LAUNCH_MODELS_NO_REFRESH=1
 
 TMP=$(mktemp -d)
 trap 'rm -rf "$TMP"' EXIT
@@ -78,4 +79,22 @@ rows=$(echo '[{"agent":"codex","args":"","icon":"X","cli":"Codex","model":"defau
 [ "$(jq -r '.[0] | "\(.icon) \(.cli) \(.quota) \(.model)"' <<<"$rows")" = "X Codex no quota data GPT-6-Luna" ] ||
   bad "the model rows keep the default row's icon, title and quota: $rows"
 ok "ai-launch-rows replaces each default row with the model rows"
+sw() { # <agent> <screen>: ai-switch-rows for that agent with the fixtures above
+  printf '%s\n' "$2" | PATH="$TMP/bin:$PATH" CODEX_HOME="$TMP/codex" WAYMUX_QUOTA_STATE_DIR="$TMP/state" \
+    AI_LAUNCH_DEVIN_FAMILIES="claude-opus-5.5 swe-2" "$BIN/ai-switch-rows" "$1" %1
+}
+cx=$(sw codex "  GPT-5.6-Terra ultra · ~/src")
+[ "$(jq -r '.current' <<<"$cx")" = "GPT-5.6-Terra" ] || bad "codex switch: current from the status line: $cx"
+[ "$(jq -r '[.rows[] | select(.active) | .id] | join(",")' <<<"$cx")" = "gpt-5.6-terra" ] || bad "codex active row: $cx"
+[ "$(jq -r '.rows[1].command' <<<"$cx")" = "/model gpt-5.6-terra --reasoning=ultra" ] || bad "terra keeps ultra: $cx"
+[ "$(jq -r '.rows[0].command' <<<"$cx")" = "/model gpt-6-luna --reasoning=medium" ] ||
+  bad "a model without the current level types its own default: $cx"
+[ "$(jq -r '.rows[0].efforts[2].args' <<<"$cx")" = "/model gpt-6-luna --reasoning=high" ] || bad "codex level command: $cx"
+ok "switch: Codex rows type /model <slug> --reasoning=<level>, keeping the current effort where the model has it"
+dv=$(sw devin "Claude Opus 5.5 High        Use Shift+Tab")
+[ "$(jq -r '.current' <<<"$dv")" = "Claude Opus 5.5" ] || bad "devin current: $dv"
+[ "$(jq -r '.rows[0].command' <<<"$dv")" = "/model claude-opus-5-5-high" ] || bad "devin keeps high: $dv"
+[ "$(jq -r '.rows[1].command' <<<"$dv")" = "/model swe-2-high" ] || bad "swe keeps high: $dv"
+[ "$(jq -r '.rows[1].efforts[2].args' <<<"$dv")" = "/model swe-2-max" ] || bad "devin level command: $dv"
+ok "switch: Devin rows type /model <id>, the effort being part of the id"
 echo "ai_launch_models: all checks passed"

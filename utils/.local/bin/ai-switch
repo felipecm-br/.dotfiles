@@ -3,14 +3,15 @@
 #
 # Thin entry point for `waymux switch` (run `waymux switch --help`): [-t pane] [--peek | --agent]
 # [choice], typed into the agent as its own /model or /effort. This wrapper adds what is specific to
-# this machine: Antigravity's rows (ai-switch-agy, from the `agy models` cache), ai-prompt to keep a
+# this machine: Antigravity's, Codex's and Devin's rows (ai-switch-rows: ai-switch-agy from the `agy
+# models` cache, the others from ai-launch-models, with effort levels for the gauge), ai-prompt to keep a
 # half-typed draft aside during the switch, and the Waymaker preset. AI_SWITCH_AGENT=<agent> skips
 # pane detection (tests).
 
 here=$(dirname "$(readlink -f "$0")")
 export WAYMUX_QUOTA_STATE_DIR="${WAYMUX_QUOTA_STATE_DIR:-${XDG_STATE_HOME:-$HOME/.local/state}/ai-quota}"
-export WAYMUX_SWITCH_ROWS="$(printf '%q' "$here/ai-switch-agy")"
-export WAYMUX_SWITCH_AGENTS="agy agy-bin antigravity"
+export WAYMUX_SWITCH_ROWS="$(printf '%q' "$here/ai-switch-rows")"
+export WAYMUX_SWITCH_AGENTS="agy agy-bin antigravity codex devin"
 export WAYMUX_SWITCH_DRAFT="$(printf '%q' "$here/ai-prompt")"
 preset="$HOME/.config/waymaker/presets/ai-switch.toml"
 [ -f "$preset" ] && export WAYMUX_SWITCH_PRESET="$preset"

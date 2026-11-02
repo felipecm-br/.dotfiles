@@ -34,7 +34,8 @@ fi
 devin='null'
 if command -v devin >/dev/null 2>&1; then
   cache="$STATE_DIR/devin-models.txt"
-  if [ -z "$(find "$cache" -mtime -1 2>/dev/null)" ]; then
+  # AI_LAUNCH_MODELS_NO_REFRESH=1 (tests): read the cache as it is, start no refresh
+  if [ -z "${AI_LAUNCH_MODELS_NO_REFRESH:-}" ] && [ -z "$(find "$cache" -mtime -1 2>/dev/null)" ]; then
     mkdir -p "$STATE_DIR"
     (timeout 20 devin models >"$cache.tmp" 2>/dev/null && grep -q '^Available models' "$cache.tmp" &&
       mv -f "$cache.tmp" "$cache" || rm -f "$cache.tmp") >/dev/null 2>&1 &

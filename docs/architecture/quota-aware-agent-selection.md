@@ -116,8 +116,10 @@ Selection walks `AI_AGENT_PREFERENCE` (default `claude agy agyy`) and picks the 
 |---|---|---|
 | Claude Code | Fable, Opus, Sonnet, Haiku; effort on the footer gauge (`Ctrl + H` / `Ctrl + L`, opening on the current level) | `/model <alias>`, then `/effort <level>` when the gauge moved |
 | Antigravity | Model families (same cache as the launch menu) · effort `low` / `medium` / `high` of the current family, where `agy models` lists it | `/model <family>-<level>` (Antigravity has no `/effort`: the effort is part of the model id, and a model switch keeps the current effort) |
-| Devin | Opus, Sonnet, Codex, Fusion | `/model <name>` |
-| Codex | One row | `/model` (Codex's own model & reasoning-effort picker) |
+| Devin | The launch menu's families (`$AI_LAUNCH_DEVIN_FAMILIES`), effort on the gauge from the model ids; before the first `devin models` cache, Opus, Sonnet, Codex, Fusion | `/model <id>` (`/model swe-2-max`: the effort is part of the id) |
+| Codex | Its listed models (`codex debug models`), effort on the gauge with each model's own levels; without them, one row for Codex's own picker | `/model <slug> --reasoning=<level>` (this session only) |
+
+Codex and Devin rows come from [`ai-switch-rows`](../../utils/.local/bin/ai-switch-rows), the switch's rows hook (it hands Antigravity to `ai-switch-agy`), built from the same `ai-launch-models` list as the launch menu. Their current model and effort come from the bottom of the pane (Codex `GPT-5.6-Terra high · …`, Devin `Claude Opus 5.5 High`), and a model row types that effort when the model has it, so switching model alone keeps the effort.
 
 `⠛` (upper $2\times2$ Braille superscript shoulder on the left of the row icon) marks the current Claude model (read from its status line) and effort (the transient `/effort` badge, else the per-model level Claude saves in `settings.json`), and the current Antigravity model and effort (read from its footer, `Gemini 4 Argon · high`); the cursor starts on the current model. The agent is found from the pane's foreground command, else the first agent process in its session (Claude under `ai-jail` / `ai-memory run`, `agy-bin` under the wrapper).
 
