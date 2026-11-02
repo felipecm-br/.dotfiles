@@ -12,6 +12,7 @@ The commit hashes link each entry to the full change (`git show <hash>`). Weeks 
 ## Unreleased
 
 ### AI agents
+- `ai-launch` and `ai-switch` pick the effort too: `Ctrl + H` / `Ctrl + L` (or `←` / `→`) step a gauge in the footer for the agent under the cursor (`━━●── high`). Claude and Codex start with `--effort`, Antigravity with that model's `-low` / `-high` id, and `ai-switch` types `/effort` after `/model`, so its Claude menu lists only the models. `needs: waymux ≥ 0.10, wm ≥ 0.6`
 - Codex panes show working, waiting and idle in the status bar, Cockpit and triage like the other agents, and their session id is kept for `cockpit restore`: its hooks now call `waymux` as well as `workmux` through `codex-hook`, which finds the session's real pane because Codex runs every hook in one shared server (new `codex` package; Codex asks once to trust the new hooks). An idle Codex pane closes without the confirmation popup once it has reported. `needs: codex, waymux, jq`
 
 ### tmux

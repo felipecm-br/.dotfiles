@@ -33,7 +33,7 @@ status_inline = true
 show = true
 
 [footer]
-content = " {cyan,bold:Enter} {darkgray:Switch} {darkgray:│} {white,bold:⠛} {darkgray:Current} {darkgray:│} {cyan,bold:type} {darkgray:Filter} {darkgray:│} {cyan,bold:Esc} {darkgray:Cancel}"
+content = " {cyan,bold:Enter} {darkgray:Switch} {darkgray:│} {cyan,bold:C-h/l} {darkgray:Effort} {darkgray:│} {white,bold:⠛} {darkgray:Current} {darkgray:│} {cyan,bold:type} {darkgray:Filter} {darkgray:│} {cyan,bold:Esc} {darkgray:Cancel}"
 row_connection = "Full"
 match_indent = false
 separator = "light"
@@ -72,6 +72,13 @@ sides = ""
 "QueryChange" = "Pos(0)"
 "esc"    = "Quit"
 "ctrl-c" = "Quit"
+# Effort of the agent under the cursor: the gauge after "Effort" in the footer follows the
+# cursor; C-h/l (or ←/→) step it and Enter starts or switches with it (waymux switch --effort)
+"CursorChange" = "Transform(waymux switch --effort 0 {})"
+"ctrl-h" = "Transform(waymux switch --effort -1 {})"
+"left"   = "Transform(waymux switch --effort -1 {})"
+"ctrl-l" = "Transform(waymux switch --effort 1 {})"
+"right"  = "Transform(waymux switch --effort 1 {})"
 
 # No image previews here: skip the terminal graphics probe, which holds the first frame
 # for up to 100 ms inside tmux (tests/popup_render_perf.test.sh).

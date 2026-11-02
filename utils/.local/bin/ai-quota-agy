@@ -196,6 +196,8 @@ def clock: if (. - $now) > 86400 then strflocaltime("%a %H:%M") else strflocalti
 # One launch row per model family (the -medium variant when there is one)
 ($models | split("\n") | map(select(length > 0) | split("\t") | {id: .[0], name: (.[1] // .[0] | sub(" \\((Low|Medium|High)\\)$"; ""))})
   | group_by(.id | fam) | map((map(select(.id | endswith("-medium"))) | first) // first)) as $families
+# Every model id, for the effort variants of each family (Ctrl+H / Ctrl+L in the launch menu)
+| ($models | split("\n") | map(select(length > 0) | split("\t")[0])) as $ids
 | def bins($pr): [range(0; 10) | ($now - (10 - .) * 1800) as $s | [$pr[] | select(. >= $s and . < $s + 1800)] | length];
 
 def agy_model($name; $title; $tag; $bin; $ev; $pr; $n; $api):
@@ -236,6 +238,7 @@ def agy_model($name; $title; $tag; $bin; $ev; $pr; $n; $api):
          elif ($f | startswith("gemini-4-argon")) then "argon"
          elif ($f | test("flash")) then "flash" else "pro" end) as $key
       | ($groups // [] | map(select(.key == $key and ($key != "pro" or ((.model // "") | fam) == $f))) | first) as $grp
+      | [ ("low", "medium", "high") as $l | "\($f)-\($l)" as $v | select($ids | index($v)) | {level: $l, args: "--model \($v)"} ] as $efforts
       | {args: "--model \(.id)", model: .name,
          quota: (if $groups == null then (if $exhausted then "exhausted ⏳\($exhausted | clock)" else "quota ?" end)
                  elif $grp == null then "no quota data"
@@ -246,7 +249,8 @@ def agy_model($name; $title; $tag; $bin; $ev; $pr; $n; $api):
                elif $best == "argon" then ($f | startswith("gemini-4-argon"))
                elif $best == "claude" then ($f | test("sonnet"))
                elif $best == "flash" then ($f | test("flash"))
-               else $f == ($families[0].id | fam) end)} ] as $launch
+               else $f == ($families[0].id | fam) end)}
+        + (if ($efforts | length) > 1 then {efforts: $efforts} else {} end) ] as $launch
   | {
       agent: $name, title: $title, available: $bin, icon: $icon, tag: $tag, sessions: $n,
       prompts_1h: count_since($pr; $now - 3600), prompts_5h: $p5, activity: bins($pr),
