@@ -11,6 +11,9 @@ The commit hashes link each entry to the full change (`git show <hash>`). Weeks 
 
 ## Unreleased
 
+### AI agents
+- Codex panes show working, waiting and idle in the status bar, Cockpit and triage like the other agents, and their session id is kept for `cockpit restore`: its hooks now call `waymux` as well as `workmux` (new `codex` package; Codex asks once to trust the new hooks). `needs: codex, waymux`
+
 ### tmux
 - After a reboot, an agent started with its permission prompts off (`Claude YOLO`) resumes with them on; start it again from `Prefix + a` to turn them off. `needs: waymux, ai-jail`
 - Pickers draw their first row in about 25 ms instead of about 135 ms inside tmux: 17 presets that never show images skip Waymaker's terminal-graphics probe. `needs: wm`

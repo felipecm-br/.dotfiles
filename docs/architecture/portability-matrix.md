@@ -50,7 +50,7 @@ Stow a package with `./stow.sh <package>` (see [stow.sh](../../stow.sh)); everyt
 | Package | Tag | Needs | Without it / notes |
 | :--- | :--- | :--- | :--- |
 | `claude` | `needs: claude` | Claude Code; `waymux` and `ai-memory` for the hooks in `settings.json` | Remove hook entries for tools you lack, or they print errors each turn |
-| `opencode`, `devin`, `antigravity` | `needs: <that CLI>` | the agent CLI | `antigravity` also needs `waymux` for its hooks |
+| `opencode`, `devin`, `antigravity`, `codex` | `needs: <that CLI>` | the agent CLI | `antigravity`, `devin` and `codex` also need `waymux` for their hooks; `codex` keeps its `workmux` hooks beside them |
 | `agents-skills` | `portable` | an agent that reads skills | Skill text only |
 | `ai-memory` | `needs: ai-memory` | `ai-memory` server (user systemd) | Cross-session memory |
 | `ai_usagebar` | `host-only` | waybar | Desktop bar widget |
