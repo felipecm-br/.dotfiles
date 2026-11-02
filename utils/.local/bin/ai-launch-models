@@ -8,14 +8,17 @@
 # is the level the agent starts at untouched.
 #
 #   Codex: the visible models of `codex debug models` (instant), by priority; effort through
-#          `--effort`, starting at config.toml's model_reasoning_effort when the model has it.
+#          `-c model_reasoning_effort=<level>` (Codex has no --effort flag), starting at
+#          config.toml's model_reasoning_effort when the model has it.
 #   Devin: the families in $AI_LAUNCH_DEVIN_FAMILIES (slugs from `devin models`), effort being
 #          part of the model id (`claude-opus-5-5-high`). `devin models` takes about a second,
 #          so its list is cached for a day and refreshed in the background.
 set -uo pipefail
 
 STATE_DIR="${WAYMUX_QUOTA_STATE_DIR:-${XDG_STATE_HOME:-$HOME/.local/state}/ai-quota}"
-FAMILIES=${AI_LAUNCH_DEVIN_FAMILIES:-claude-opus-5.5 claude-sonnet-5.5 gpt-6-luna gemini-4-argon swe-2}
+# Devin's free plan starts only SWE-1.6 Slow ("Upgrade to Pro to access this model" for the rest);
+# on Pro, e.g. AI_LAUNCH_DEVIN_FAMILIES="claude-opus-5.5 claude-sonnet-5.5 gpt-6-luna gemini-4-argon swe-2"
+FAMILIES=${AI_LAUNCH_DEVIN_FAMILIES:-swe-1.6-slow}
 command -v jq >/dev/null 2>&1 || { echo '{}'; exit 0; }
 
 codex='null'
@@ -26,8 +29,8 @@ if command -v codex >/dev/null 2>&1; then
     [.models // [] | .[] | select(.visibility != "hide")] | sort_by(.priority) | map(
       .slug as $s | [.supported_reasoning_levels[]?.effort] as $lv
       | (if ($lv | index($conf)) then $conf else .default_reasoning_level end) as $def
-      | {model: .display_name, args: "--model \($s) --effort \($def)",
-         efforts: [$lv[] | {level: ., args: "--model \($s) --effort \(.)"}]})' 2>/dev/null)
+      | {model: .display_name, args: "--model \($s) -c model_reasoning_effort=\($def)",
+         efforts: [$lv[] | {level: ., args: "--model \($s) -c model_reasoning_effort=\(.)"}]})' 2>/dev/null)
   [ -n "$codex" ] || codex='null'
 fi
 
@@ -44,17 +47,18 @@ if command -v devin >/dev/null 2>&1; then
     # "Family Name (slug)" then indented ids: one TSV line per id of a wanted family
     devin=$(awk -v want=" $FAMILIES " '
       /^[^ ].*\([a-z0-9.-]+\)$/ { slug = $NF; gsub(/[()]/, "", slug); name = $0; sub(/ \([^)]*\)$/, "", name); next }
-      /^  +[a-z0-9]/ && slug != "" && index(want, " " slug " ") { print slug "\t" name "\t" $1 }
+      /^  +[a-z0-9]/ && $1 != "aliases:" && slug != "" && index(want, " " slug " ") { print slug "\t" name "\t" $1 }
     ' "$cache" | jq -R -s -c --arg fams "$FAMILIES" '
       ["none", "low", "medium", "high", "xhigh", "max"] as $order
       | [split("\n")[] | select(length > 0) | split("\t") | {slug: .[0], name: .[1], id: .[2]}
-         | (.id | capture("^(?<base>.+)-(?<level>none|low|medium|high|xhigh|max)$")) as $m
-         | select($m != null) | . + $m]
-      | group_by(.slug) | map({slug: .[0].slug, name: .[0].name,
-          efforts: (sort_by(.level as $l | $order | index($l)) | map({level, args: "--model \(.id)"}))})
+         | . + ((.id | capture("^(?<base>.+)-(?<level>none|low|medium|high|xhigh|max)$")) // {level: null})]
+      | group_by(.slug) | map({slug: .[0].slug, name: .[0].name, first: .[0].id,
+          efforts: (map(select(.level != null)) | sort_by(.level as $l | $order | index($l))
+                    | map({level, args: "--model \(.id)"}))})
       | (($fams | split(" ")) as $f | sort_by(.slug as $s | $f | index($s)))
-      | map(select(.efforts | length > 0) | {model: .name,
-          args: ((.efforts | map(select(.level == "medium")) | first // .efforts[0]) | .args),
+      # A family without effort variants (SWE-1.6 Slow) is one plain row
+      | map({model: .name,
+          args: (((.efforts | map(select(.level == "medium")) | first) // .efforts[0] // {args: "--model \(.first)"}) | .args),
           efforts: (if (.efforts | length) > 1 then .efforts else [] end)})' 2>/dev/null)
     [ -n "$devin" ] || devin='null'
   fi

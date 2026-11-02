@@ -46,7 +46,7 @@ jq -n -c --arg agent "$process" --arg screen "$screen" --argjson m "$models" '
              efforts: [.efforts[] | {level, args: (.args | sub("^--model "; "/model "))}]}
           end) as $r
        | ([$r.efforts[] | select(.level == ($curlevel // ""))] | first) as $keep
-       | (if $agent == "codex" then (.args | capture("--effort (?<l>\\S+)").l) else
+       | (if $agent == "codex" then (.args | capture("model_reasoning_effort=(?<l>\\S+)").l) else
             (.args | capture("-(?<l>none|low|medium|high|xhigh|max)$").l? // "") end) as $deflevel
        | {id: $r.id, kind: "model", name: .model, tier: .tier,
           active: (.model == ($cur.name // "")),

@@ -55,16 +55,18 @@ out=$(PATH="$TMP/bin:$PATH" CODEX_HOME="$TMP/codex" WAYMUX_QUOTA_STATE_DIR="$TMP
 [ "$(jq -r '[.codex[].model] | join(",")' <<<"$out")" = "GPT-6-Luna,GPT-5.6-Terra" ] ||
   bad "codex: visible models by priority: $(jq -c '.codex' <<<"$out")"
 ok "codex: visible models only, ordered by priority"
-[ "$(jq -r '.codex[1].args' <<<"$out")" = "--model gpt-5.6-terra --effort xhigh" ] || bad "terra args: $out"
-[ "$(jq -r '.codex[0].args' <<<"$out")" = "--model gpt-6-luna --effort medium" ] || bad "luna args: $out"
+[ "$(jq -r '.codex[1].args' <<<"$out")" = "--model gpt-5.6-terra -c model_reasoning_effort=xhigh" ] || bad "terra args: $out"
+[ "$(jq -r '.codex[0].args' <<<"$out")" = "--model gpt-6-luna -c model_reasoning_effort=medium" ] || bad "luna args: $out"
 ok "codex: starts at config.toml's effort when the model has it, else the model's default"
 [ "$(jq -r '[.codex[1].efforts[].level] | join(",")' <<<"$out")" = "low,medium,high,xhigh,max,ultra" ] || bad "terra levels"
-[ "$(jq -r '.codex[1].efforts[5].args' <<<"$out")" = "--model gpt-5.6-terra --effort ultra" ] || bad "terra ultra args"
+[ "$(jq -r '.codex[1].efforts[5].args' <<<"$out")" = "--model gpt-5.6-terra -c model_reasoning_effort=ultra" ] || bad "terra ultra args"
 ok "codex: each model keeps its own levels (Terra up to ultra)"
 
-[ "$(jq -r '[.devin[].model] | join(",")' <<<"$out")" = "Claude Opus 5.5,SWE-2" ] ||
-  bad "devin: families in the configured order, single-model families dropped: $(jq -c '.devin' <<<"$out")"
-ok "devin: configured families in order"
+[ "$(jq -r '[.devin[].model] | join(",")' <<<"$out")" = "Claude Opus 5.5,SWE-2,Kimi K3" ] ||
+  bad "devin: families in the configured order: $(jq -c '.devin' <<<"$out")"
+[ "$(jq -r '.devin[2] | "\(.args) \(.efforts | length)"' <<<"$out")" = "--model kimi-k3 0" ] ||
+  bad "devin: a single-model family is a plain row: $(jq -c '.devin[2]' <<<"$out")"
+ok "devin: configured families in order; a single-model family (free plan: SWE-1.6 Slow) is a plain row"
 [ "$(jq -r '[.devin[0].efforts[].level] | join(",")' <<<"$out")" = "low,medium,high" ] || bad "opus levels: $out"
 [ "$(jq -r '[.devin[1].efforts[].level] | join(",")' <<<"$out")" = "medium,high,max" ] || bad "swe levels: $out"
 ok "devin: levels in order from the model ids, -fast and -lightning variants left out"
