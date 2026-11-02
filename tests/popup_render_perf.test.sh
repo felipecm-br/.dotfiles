@@ -7,6 +7,11 @@
 # the numbers are an upper bound. A tmux popup adds its own frame on top; the picker inside it is
 # what this times.
 #
+# Each run waits for the previous picker to exit before starting the next one. A picker killed
+# with its pane takes up to ~800 ms to exit when nav mode starts focused on the results
+# (`ai-launch`); starting the next run on top of it measured that shutdown, not the render
+# (p95 1.7 s before this wait, ~30 ms after).
+#
 #   tests/popup_render_perf.test.sh              N=20 runs per preset, budget p50 ≤ 100 ms
 #   N=40 BUDGET_MS=80 tests/popup_render_perf.test.sh
 set -euo pipefail
@@ -29,9 +34,12 @@ tmux resize-window -t _test_bootstrap:bench -x 200 -y 50 2>/dev/null || true
 pane=$(tmux display-message -p -t _test_bootstrap:bench '#{pane_id}')
 
 first_frame_ms() { # <preset>: ms from respawn to the first candidate on screen
-  local preset=$1 start now
+  local preset=$1 start now old
+  old=$(tmux display-message -p -t "$pane" '#{pane_pid}')
+  tmux respawn-pane -k -t "$pane" "sleep 600"
+  while kill -0 "$old" 2>/dev/null; do :; done # let the previous picker finish exiting
   start=$(date +%s%N)
-  tmux respawn-pane -k -t "$pane" "wm -o $preset <'$ITEMS'"
+  tmux respawn-pane -k -t "$pane" "exec wm -o $preset <'$ITEMS'"
   while :; do
     if tmux capture-pane -p -t "$pane" 2>/dev/null | grep -q 'zzitem'; then
       now=$(date +%s%N)

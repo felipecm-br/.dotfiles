@@ -69,7 +69,7 @@ Weights are calibrated for a **terminal-first, keyboard-only, Home-Row ($H=0$)**
 
 **What moved on 2 Nov (−0.05 for this stack, +0.13 for TUIOS):**
 
-- **Ergonomics 10.0 → 9.5 (this stack).** A 10 claims nothing is left to fix, and three things are: `ftb` and `nvim` still miss the popup rules (2 of 29 presets, §3.6), the end-to-end popup render is unmeasured (§5), and key telemetry (23 Oct – 2 Nov, 1378 presses) shows 209 clicks on status-bar tabs. The clicks are a weaker signal than they look: all of them went to windows 0–3, which ``Ctrl + ` `` and `Ctrl + 1…3` already reach, 144 fell on 29 Oct (the popup audit day) and none came after 30 Oct; the 111 pane clicks all landed in the pane that was already active, so they are not navigation. The score falls for the open items, not for the clicks. Later on 2 Nov two of them closed: `ftb` and `nvim` lost the black selection strip (the `│` bar stays out by design, §3.6), and the first-frame time of the pickers is now measured (§5), which found and removed a 110 ms terminal-graphics probe from 17 presets. Still at 9.5: `ai-launch`, the second most-used popup, has a first-frame p95 of about 1.7 s in the benchmark.
+- **Ergonomics 10.0 → 9.5 (this stack).** A 10 claims nothing is left to fix, and three things are: `ftb` and `nvim` still miss the popup rules (2 of 29 presets, §3.6), the end-to-end popup render is unmeasured (§5), and key telemetry (23 Oct – 2 Nov, 1378 presses) shows 209 clicks on status-bar tabs. The clicks are a weaker signal than they look: all of them went to windows 0–3, which ``Ctrl + ` `` and `Ctrl + 1…3` already reach, 144 fell on 29 Oct (the popup audit day) and none came after 30 Oct; the 111 pane clicks all landed in the pane that was already active, so they are not navigation. The score falls for the open items, not for the clicks. Later on 2 Nov two of them closed: `ftb` and `nvim` lost the black selection strip (the `│` bar stays out by design, §3.6), and the first-frame time of the pickers is now measured (§5), which found and removed a 110 ms terminal-graphics probe from 17 presets. The `ai-launch` first-frame p95 of about 1.7 s was the benchmark's own fault: it started each run while the previous picker, killed with its pane, was still exiting, which takes about 800 ms when nav mode starts focused on the results. With the benchmark waiting for that exit, `ai-launch` draws in ~21 ms (p95 ~35 ms); closing it with `Esc` takes 2–5 ms. Still at 9.5: the slow exit after a kill is a Waymaker bug (rare in use, since popups close through `Esc` or `Enter`), and the Cockpit's own first frame is unmeasured.
 - **Ecosystem 4.0 → 4.5 (this stack).** `waymux` 0.8 carries the launcher, quota and switch, ships a tmux plugin that binds them, and its installer verifies a SHA-256 checksum (optionally the signed build provenance), so the stack runs without these dotfiles. Still one maintainer and no AUR package (P11).
 - **TUIOS 0.12.0 / 0.12.1 (30–31 Oct):** stage and unstage hunks from the review overlay with undo (review 8.0 → 8.5); bring back many agents after a restart with the flags they started with, never auto-resuming one with approvals off (persistence 9.0 → 9.5); a Settled shelf, agents silent for 10 minutes shown as `unknown`, a task board, `tuios tutor`, and a fix for a `tuios ssh` denial of service (GHSA-m75w-mvwc-578j).
 - **Orca 1.4.245 / 1.4.246 (30 Oct – 2 Nov):** Orchestrator V3 (coordinators sleep until workers report), follow-ups queued while an agent works (API 7.5 → 8.0), a usage-limited conversation continued on another account or harness, merge conflicts resolved from the phone.
@@ -394,9 +394,9 @@ Measured on this host (**Linux aarch64**), wall-clock including process spawn. R
 | `waymux wt ls` | ~10 ms | ~18 ms | earlier |
 | `Ctrl+G` up to the popup (`lazygitrs-popup.sh`, popup stubbed) | ~37 ms | ~43 ms | 29 Oct |
 | `waymux keylog` (per key press, in the background) | ~1 ms | ~1 ms | 29 Oct |
-| `wm -o <preset>` to the first drawn row (`ftb`, `keybindings`, `session-picker-mine`; [`tests/popup_render_perf.test.sh`](../../tests/popup_render_perf.test.sh), harness overhead ~10 ms included) | ~22–25 ms | ~31–34 ms | 2 Nov |
+| `wm -o <preset>` to the first drawn row (`ftb`, `keybindings`, `session-picker-mine`, `ai-launch`, 2,000 rows; [`tests/popup_render_perf.test.sh`](../../tests/popup_render_perf.test.sh), harness overhead ~10 ms included) | ~20–23 ms | ~28–35 ms | 2 Nov |
 | The same before 2 Nov (terminal-graphics probe on, inside tmux) | ~132–139 ms | ~141–145 ms | 2 Nov |
-| `wm -o ai-launch` to the first drawn row (2,000 rows) | ~31 ms | ~1.7 s (open) | 2 Nov |
+| `wm -o ai-launch` exit after its pane is killed (nav mode focused on the results; `Esc` takes 2–5 ms) | ~800 ms | ~850 ms | 2 Nov |
 | `wm --version` | ~2 ms | ~4 ms | earlier |
 | `lazygitrs --version` | ~2 ms | ~3 ms | earlier |
 
@@ -448,7 +448,7 @@ Keys follow the [Zero-Churn principle](terminal-ergonomics-and-ux-manifesto.md):
 | Persistence / crash isolation (10) | 9.0 | herdr, TUIOS 9.5 | −0.5 | P6b |
 | Review loop (15) | **9.5** | Orca 9.0, TUIOS 8.5 | lead | — (TUIOS closed 0.5 in 0.12) |
 | Remote / mobile (10) | 7.5 | Orca, T3 Code 9.5 | −2.0 | P7 (to 8.5); the rest is a native app, out of scope |
-| Ergonomics & latency (15) | **9.5** | agent-deck 8.0 | lead | `ftb` / `nvim` and the render measurement done on 2 Nov (§5); the `ai-launch` first-frame p95 (~1.7 s) brings it back |
+| Ergonomics & latency (15) | **9.5** | agent-deck 8.0 | lead | `ftb` / `nvim` and the render measurement done on 2 Nov (§5); the `ai-launch` p95 turned out to be a benchmark artifact (§5); the Waymaker exit lag after a kill and the Cockpit first frame remain |
 | Agent-callable API (5) | 9.0 | TUIOS, herdr 10.0 | −1.0 | P9 |
 | Sandboxing (5) | 8.5 | workmux 9.0 | −0.5 | P1b |
 | Fan-out (5) | 9.0 | TUIOS, Orca 10.0 | −1.0 | P10 |
