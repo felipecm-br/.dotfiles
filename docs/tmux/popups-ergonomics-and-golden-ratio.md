@@ -214,8 +214,8 @@ Every interactive popup, picker, and confirmation dialog has been harmonized und
 | **System Sounds** | [`sounds.toml`](../../waymaker/.config/waymaker/presets/sounds.toml) | `{cyan,bold:Enter} Set Sound │ p / Space Replay │ Esc / q Quit` |
 | **Hyprland Borders** | [`borders.toml`](../../waymaker/.config/waymaker/presets/borders.toml) | `{cyan,bold:Enter} Apply │ j/k Style │ h/l Speed │ r Angle │ Esc Exit` |
 | **Starship Presets** | [`starship-presets.toml`](../../waymaker/.config/waymaker/presets/starship-presets.toml) | `{cyan,bold:Enter} Select │ Tab Filter │ j/k Move │ C-l/h Vim Mode │ C-d Delete │ Esc Exit` |
-| **Guard Modals** | [`close-session.sh`](../../tmux/.config/tmux/close-session.sh), [`close-window.sh`](../../tmux/.config/tmux/close-window.sh) | `y Kill ... │ n / Esc Keep ...` (hairline `│` divider) |
-| **Picker Kill Confirm** | [`confirm-modal.sh`](../../tmux/.config/tmux/confirm-modal.sh) (called by `window-picker-delete.sh` for `d` on a session row or a multi-window selection; replaces `gum confirm`) | `y Kill ... │ n / Esc Keep ...` (same guard-modal look; exit 0 = confirmed) |
+| **Guard Modals** | [`close-session.sh`](../../tmux/.config/tmux/close-session.sh), [`close-window.sh`](../../tmux/.config/tmux/close-window.sh) | `{cyan,bold:y} Kill ... │ n/Esc Keep ...`, drawn by `modal_footer` in [`gradient-frame.sh`](../../tmux/.config/tmux/gradient-frame.sh): the same full-width `─` rule and bottom row as a Waymaker footer, in the same palette colors |
+| **Picker Kill Confirm** | [`confirm-modal.sh`](../../tmux/.config/tmux/confirm-modal.sh) (called by `window-picker-delete.sh` for `d` on a session row or a multi-window selection; replaces `gum confirm`) | `{cyan,bold:y} Confirm │ n/Esc Cancel` through `modal_footer` (same guard-modal look; exit 0 = confirmed) |
 
 ### 3.4 Omarchy Dynamic Theme Color Synchronization
 

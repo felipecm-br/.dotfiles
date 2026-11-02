@@ -228,11 +228,9 @@ run_confirm_modal() {
       printf "     ${c_muted}󱂬${c_reset}  ${c_fg}%d active windows in session${c_reset} ${c_muted}(>3 threshold)${c_reset}\n\n" "$WIN_COUNT"
     fi
 
-    # Divider & Hints (English Action Guide)
-    printf "  ${c_muted}────────────────────────────────────────────────────────────${c_reset}\n"
-    printf "  ${c_bold}${c_red}y${c_reset} ${c_muted}Kill Session${c_reset}   ${c_muted}│${c_reset}   ${c_bold}${c_cyan}n${c_reset} ${c_muted}/${c_reset} ${c_bold}${c_cyan}Esc${c_reset} ${c_muted}Keep Session${c_reset}\n"
   )
   print_modal_body "$body"
+  modal_footer y "Kill Session" n/Esc "Keep Session"
   if [ -n "${BORDER_GRADIENT:-}" ]; then
     gradient_frame_draw "$BORDER_GRADIENT" $' \uea6c ' "$COLOR_YELLOW" || true
   fi

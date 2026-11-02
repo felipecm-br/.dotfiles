@@ -292,13 +292,9 @@ run_confirm_modal() {
     if [ "$ACTIVE_AGENT_COUNT" -gt 3 ]; then
       printf "     ${c_muted}${agent_icon} ... and %d more active agent(s)${c_reset}\n" "$((ACTIVE_AGENT_COUNT - 3))"
     fi
-    printf "\n"
-
-    # Divider & Compact Action Keys (English Action Guide)
-    printf "  ${c_muted}────────────────────────────────────────────────────────────${c_reset}\n"
-    printf "  ${c_bold}${c_red}y${c_reset} ${c_muted}Kill Window${c_reset}   ${c_muted}│${c_reset}   ${c_bold}${c_cyan}n${c_reset} ${c_muted}/${c_reset} ${c_bold}${c_cyan}Esc${c_reset} ${c_muted}Keep Window${c_reset}\n"
   )
   print_modal_body "$body"
+  modal_footer y "Kill Window" n/Esc "Keep Window"
   if [ -n "${BORDER_GRADIENT:-}" ]; then
     gradient_frame_draw "$BORDER_GRADIENT" $' \uea6c ' "$COLOR_YELLOW" || true
   fi

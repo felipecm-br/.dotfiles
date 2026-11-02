@@ -53,11 +53,9 @@ run_modal() {
     else
       printf "  ${c_bold}${c_yellow}%s  %s${c_reset}\n\n" "$BADGE" "$title"
     fi
-    printf "  ${c_muted}────────────────────────────────────────${c_reset}\n"
-    printf "  ${c_bold}${c_red}y${c_reset} ${c_muted}%s${c_reset}   ${c_muted}│${c_reset}   ${c_bold}${c_cyan}n${c_reset} ${c_muted}/${c_reset} ${c_bold}${c_cyan}Esc${c_reset} ${c_muted}%s${c_reset}\n" \
-      "$yes_label" "$no_label"
   )
   print_modal_body "$body"
+  modal_footer y "$yes_label" n/Esc "$no_label"
   if [ -n "${BORDER_GRADIENT:-}" ]; then
     gradient_frame_draw "$BORDER_GRADIENT" " $BADGE " "$COLOR_YELLOW" || true
   fi

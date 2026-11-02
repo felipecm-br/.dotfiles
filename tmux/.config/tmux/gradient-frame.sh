@@ -23,6 +23,29 @@ print_modal_body() {
   fi
 }
 
+# modal_footer KEY DESC [KEY DESC ...] — the Waymaker preset footer on a bash
+# modal: a full-width `─` rule and ` Key Desc │ Key Desc` pinned to the last two
+# rows inside the frame, keys bold palette cyan and the rest palette darkgray,
+# as `{cyan,bold:Key} {darkgray:Desc} {darkgray:│}` renders in the presets.
+modal_footer() {
+  local size rows cols top=0 left=0 line="" sep="" rule
+  size=$(stty size < /dev/tty 2>/dev/null) || return 0
+  rows="${size% *}"
+  cols="${size#* }"
+  if [ -n "${BORDER_GRADIENT:-}" ]; then
+    top=1 left=1 rows=$((rows - 2)) cols=$((cols - 2))
+  fi
+  [ "$rows" -ge 3 ] && [ "$cols" -ge 2 ] || return 0
+  while [ $# -ge 2 ]; do
+    line+="${sep}\033[1;38;5;6m$1\033[0m \033[38;5;8m$2\033[0m"
+    sep=" \033[38;5;8m│\033[0m "
+    shift 2
+  done
+  printf -v rule '%*s' "$cols" ''
+  printf '\0337\033[%d;%dH\033[38;5;8m%s\033[0m\033[%d;%dH %b\0338' \
+    "$((top + rows - 1))" "$((left + 1))" "${rule// /─}" "$((top + rows))" "$((left + 1))" "$line"
+}
+
 # gradient_frame_draw PALETTE [TITLE] [TITLE_HEX]
 # Returns 1 (drawing nothing) when PALETTE is empty or invalid.
 gradient_frame_draw() {
