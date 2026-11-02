@@ -183,6 +183,16 @@
           }
         ]
       }
+    ],
+    "StopFailure": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "waymux hook tmux StopFailure"
+          }
+        ]
+      }
     ]
   },
   "statusLine": {

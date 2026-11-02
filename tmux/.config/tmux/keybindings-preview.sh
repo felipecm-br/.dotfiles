@@ -253,6 +253,18 @@ Changes the model or effort of the agent **in the current pane** without leaving
 EOF
     ;;
 
+  tmux-ai-failover)
+    cat <<'EOF'
+### 󰚩 AI Usage-Limit Failover (`Prefix + F`)
+Continues the agent **in the current pane** in the next agent that still has quota, when it hit its usage limit (`ai-failover`). Claude's `StopFailure` hook turns the pane red with the reason `usage limit`, so `Prefix + I` brings you there first.
+
+- **Ergonomics**: `F` = **F**ailover, beside `a` (launch) and `A` (switch in place). One chord replaces `Prefix + a`, reading the quota rows, `Enter`, and re-explaining the task.
+- **Pick**: `ai-launch`'s quota-ranked recommendation with the limited agent's family left out (Claude limited → Antigravity, which can still run Claude models on its own quota; Antigravity limited → Claude).
+- **Context**: the new agent starts through `ai-memory run`, so it continues the same workstream in the same directory.
+- **Layout**: a new window right after the limited one; the limited window stays (it resumes after the reset, and its scrollback holds the last turn).
+EOF
+    ;;
+
   tmux-ai-prompt)
     cat <<'EOF'
 ### 󰏫 AI Prompt Draft in Nvim Popup (`Prefix + v`, `75% × 60%`)

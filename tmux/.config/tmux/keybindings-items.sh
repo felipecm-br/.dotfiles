@@ -26,6 +26,7 @@ emit_tmux() {
 󰊢  Ctrl + Shift + G	AWT Autonomous Worktree Popup	tmux	tmux-awt	~/.config/tmux/awt-popup.sh
 󰚩  Prefix + a / Ctrl + Shift + A	AI Agent Launcher (CLI × Model + Quota)	tmux	tmux-ai-launch	~/.config/tmux/ai-launch-popup.sh
 󰑓  Prefix + A	AI Model / Effort Hot-Swap (In-Place)	tmux	tmux-ai-switch	~/.config/tmux/ai-switch-popup.sh
+󰚩  Prefix + F	AI Usage-Limit Failover (Next Agent, Same Workstream)	tmux	tmux-ai-failover	~/.local/bin/ai-failover
 󰏫  Prefix + v	AI Prompt Draft in Nvim Popup	tmux	tmux-ai-prompt	~/.local/bin/ai-prompt edit
 󰆓  Prefix + V	AI Prompt Draft Stash / Restore (for /commands)	tmux	tmux-ai-prompt-stash	~/.local/bin/ai-prompt stash
 󰓅  Prefix + u	AI Quota & Burn Telemetry Visual Popup	tmux	tmux-ai-quota	~/.config/tmux/ai-quota-popup.sh

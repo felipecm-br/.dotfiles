@@ -81,11 +81,35 @@ launch_jailed() { # <ask|yolo> [claude args]
 # --blocker: why ai-jail cannot run here (empty when it can), for ai-launch-rows
 [ "${1:-}" = --blocker ] && { jail_blocker; exit 0; }
 
+# AI_LAUNCH_CONTINUE=1 (set by ai-failover): start the agent through `ai-memory run`, so it
+# continues the workstream of the agent that hit its limit in this checkout. The jailed Claude
+# rows always go through ai-memory; this covers the rest. A second-account wrapper (agyy) keeps
+# its harness and runs as the executable.
+launch_continue() { # <agent> [args]
+  local agent=$1 harness exe
+  shift
+  case $agent in
+    agy*) harness=agy ;;
+    claude*) harness=claude ;;
+    *) harness=$agent ;;
+  esac
+  exe=$(command -v "$agent") || exe=$agent
+  if command -v ai-memory >/dev/null 2>&1; then
+    exec ai-memory run --executable "$exe" "$harness" "$@"
+  fi
+  printf '\033[33m%s\033[0m\n' "ai-launch: ai-memory not installed; starting $agent without the workstream" >&2
+  sleep 2
+  exec "$agent" "$@"
+}
+
 agent=${1:?usage: ai-launch-exec <agent> [args]}
 shift
+continue_run=${AI_LAUNCH_CONTINUE:-0}
+unset AI_LAUNCH_CONTINUE
 case "$agent" in claude | jail-claude | jail-claude-ask) settings_guard ;; esac
 case "$agent" in
   jail-claude) launch_jailed yolo "$@" ;;
   jail-claude-ask) launch_jailed ask "$@" ;;
-  *) exec "$agent" "$@" ;;
+  *) [ "$continue_run" = 1 ] && launch_continue "$agent" "$@"
+     exec "$agent" "$@" ;;
 esac

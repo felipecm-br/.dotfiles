@@ -362,6 +362,11 @@ def suggestions(presses: List[Press], inventory: Dict[str, str]) -> List[Tuple[i
         found.append((launch_cmds,
                       "`ai-launch` typed in the shell: Prefix + a (or Ctrl + Shift + A) opens the "
                       "CLI × model launch menu popup and starts the pick in a new window."))
+    failover_cmds = shell_prefix_count(since_ts, "^ai-failover$")
+    if failover_cmds >= 3:
+        found.append((failover_cmds,
+                      "`ai-failover` typed in the shell: Prefix + F continues the pane's agent "
+                      "in the next agent with quota, in the same workstream."))
     return sorted(found, reverse=True)
 
 

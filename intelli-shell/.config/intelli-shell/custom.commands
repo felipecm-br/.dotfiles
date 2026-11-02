@@ -163,6 +163,12 @@ capture() { tmux capture-pane -p -t "$1"; }; capture {{pane}} | ai-switch-agy ag
 # Open the in-place AI model / effort switcher as a tmux popup over the current pane
 ~/.config/tmux/ai-switch-popup.sh
 
+# Continue the AI agent that hit its usage limit in the next agent with quota, same workstream (Prefix+F)
+ai-failover -t {{pane}}
+
+# Print which agent would take over from the current pane's agent at its usage limit, starting nothing
+ai-failover --peek
+
 # Edit the prompt draft of the AI agent in the current tmux pane in a Neovim popup (Prefix+v)
 ai-prompt edit
 

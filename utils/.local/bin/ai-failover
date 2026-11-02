@@ -1,0 +1,85 @@
+#!/usr/bin/env bash
+# ai-failover — Continue an agent that hit its usage limit in the next agent with quota (Prefix + F)
+#
+#   ai-failover [-t pane]          Start the next agent in a new window beside the pane, same
+#                                  directory, in the same ai-memory workstream
+#   ai-failover [-t pane] --peek   Print "<failed agent>\t<choice>" and start nothing
+#
+# When Claude Code ends a turn on a rate limit, its StopFailure hook sets the pane to `error` with
+# the reason "usage limit" (waymux), so the status bar, triage and the phone page show it as waiting
+# on you. This picks what to continue with: `ai-launch`'s quota-ranked recommendation with the
+# limited agent's own family left out of the preference (Claude out leaves Antigravity, which can
+# still run Claude models on its own quota). The new window starts through `ai-launch` with
+# AI_LAUNCH_CONTINUE=1, so `ai-launch-exec` runs it as `ai-memory run <harness>` and the agent
+# picks up the workstream the limited one was in. The limited window stays: it resumes after the
+# reset, and its scrollback holds the last turn.
+#
+# AI_SWITCH_AGENT=<agent> skips pane detection (tests).
+
+set -u
+
+pane=${TMUX_PANE:-}
+peek=0
+while [ $# -gt 0 ]; do
+  case $1 in
+    -t) pane=${2:-}; shift 2 ;;
+    --peek) peek=1; shift ;;
+    -h | --help) sed -n '2,18p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    *) echo "ai-failover: unknown argument: $1" >&2; exit 2 ;;
+  esac
+done
+
+say() { # <message>: the status line inside tmux, stderr otherwise
+  if [ -n "${TMUX:-}" ] && [ "$peek" = 0 ]; then
+    tmux display-message -d 6000 "$1"
+  else
+    echo "ai-failover: $1" >&2
+  fi
+}
+
+here=$(dirname "$(readlink -f "$0")")
+
+# The agent in the pane: claude, agy, codex, ...
+if [ -n "${AI_SWITCH_AGENT:-}" ]; then
+  failed=$AI_SWITCH_AGENT
+else
+  [ -n "$pane" ] || { say "ai-failover: no pane (run it in tmux or pass -t)"; exit 1; }
+  failed=$("$here/ai-switch" -t "$pane" --agent 2>/dev/null | cut -f1)
+fi
+[ -n "$failed" ] || { say "󰚩 No agent in this pane to continue"; exit 1; }
+
+# Its family: claude covers the jailed rows; agy covers the agyy (second account) row too.
+case $failed in
+  claude* | jail-claude*) family='^(claude|jail-claude)' ;;
+  agy* | antigravity) family='^agy' ;;
+  *) family="^${failed}\$" ;;
+esac
+
+preference=${WAYMUX_QUOTA_PREFERENCE:-${AI_AGENT_PREFERENCE:-claude agy agyy}}
+rest=()
+for p in $preference; do [[ $p =~ $family ]] || rest+=("$p"); done
+[ ${#rest[@]} -gt 0 ] || { say "󰚩 No other agent in the preference ($preference) to continue $failed"; exit 1; }
+
+choice=$(WAYMUX_QUOTA_PREFERENCE="${rest[*]}" "$here/ai-launch" --peek --auto 2>/dev/null)
+case $choice in
+  "" | menu | shell) say "󰚩 No agent with quota to continue $failed"; exit 1 ;;
+esac
+if [[ ${choice%% *} =~ $family ]]; then
+  say "󰚩 Only $failed has quota left; wait for its reset (Prefix + u)"
+  exit 1
+fi
+
+if [ "$peek" = 1 ]; then
+  printf '%s\t%s\n' "$failed" "$choice"
+  exit 0
+fi
+
+IFS=$'\t' read -r window dir < <(tmux display-message -p -t "$pane" $'#{window_id}\t#{pane_current_path}')
+read -r -a words <<<"$choice"
+# -a: right after the limited window, so the two sit together in the status bar.
+new=$(tmux new-window -a -t "$window" -c "$dir" -P -F '#{pane_id}' \
+  -e AI_LAUNCH_CONTINUE=1 -- "$here/ai-launch" "${words[@]}") || { say "󰚩 Could not open a window"; exit 1; }
+model=${words[*]:1}
+say "󰚩 $failed hit its limit · continuing in ${words[0]}${model:+ ($model)} in the same workstream"
+[ -n "$new" ] && tmux select-pane -t "$new"
+exit 0
