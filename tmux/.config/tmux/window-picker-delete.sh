@@ -40,7 +40,7 @@ if printf '%s' "$first_line" | grep -qE '^#[[:space:]]*'; then
 
   # Regular session kill with confirmation
   confirmed=0
-  "$HOME/.config/tmux/confirm-modal.sh" --popup "KILL SESSION" "$sess_name" "Kill Session" "Keep Session" 2>/dev/null && confirmed=1
+  "$HOME/.config/tmux/confirm-modal.sh" --popup "Close session $sess_name?" "Closing ends all its tabs." Close Keep 2>/dev/null && confirmed=1
 
   if [ "$confirmed" -eq 1 ]; then
     cur_sess=$(tmux display-message -p '#{session_name}' 2>/dev/null || echo "")
@@ -72,7 +72,7 @@ unset IFS
 [ "$count" -eq 0 ] && exit 0
 
 if [ "$count" -gt 1 ]; then
-  "$HOME/.config/tmux/confirm-modal.sh" --popup "KILL WINDOWS" "$count windows" "Kill Windows" "Keep Windows" 2>/dev/null || exit 0
+  "$HOME/.config/tmux/confirm-modal.sh" --popup "Close $count tabs?" "Closing ends each selected tab." Close Keep 2>/dev/null || exit 0
 fi
 
 IFS='

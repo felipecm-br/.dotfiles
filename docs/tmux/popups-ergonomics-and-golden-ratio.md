@@ -214,8 +214,29 @@ Every interactive popup, picker, and confirmation dialog has been harmonized und
 | **System Sounds** | [`sounds.toml`](../../waymaker/.config/waymaker/presets/sounds.toml) | `{cyan,bold:Enter} Set Sound │ p / Space Replay │ Esc / q Quit` |
 | **Hyprland Borders** | [`borders.toml`](../../waymaker/.config/waymaker/presets/borders.toml) | `{cyan,bold:Enter} Apply │ j/k Style │ h/l Speed │ r Angle │ Esc Exit` |
 | **Starship Presets** | [`starship-presets.toml`](../../waymaker/.config/waymaker/presets/starship-presets.toml) | `{cyan,bold:Enter} Select │ Tab Filter │ j/k Move │ C-l/h Vim Mode │ C-d Delete │ Esc Exit` |
-| **Guard Modals** | [`close-session.sh`](../../tmux/.config/tmux/close-session.sh), [`close-window.sh`](../../tmux/.config/tmux/close-window.sh) | `{cyan,bold:y} Kill ... │ n/Esc Keep ...`, drawn by `modal_footer` in [`gradient-frame.sh`](../../tmux/.config/tmux/gradient-frame.sh): the same full-width `─` rule and bottom row as a Waymaker footer, in the same palette colors |
-| **Picker Kill Confirm** | [`confirm-modal.sh`](../../tmux/.config/tmux/confirm-modal.sh) (called by `window-picker-delete.sh` for `d` on a session row or a multi-window selection; replaces `gum confirm`) | `{cyan,bold:y} Confirm │ n/Esc Cancel` through `modal_footer` (same guard-modal look; exit 0 = confirmed) |
+| **Guard Modals** | [`close-session.sh`](../../tmux/.config/tmux/close-session.sh), [`close-window.sh`](../../tmux/.config/tmux/close-window.sh) | `{cyan,bold:y} Close │ n/Esc Keep`, drawn by `modal_footer` in [`gradient-frame.sh`](../../tmux/.config/tmux/gradient-frame.sh): the same full-width `─` rule and bottom row as a Waymaker footer, in the same palette colors. Body: see [Guard modal anatomy](#guard-modal-anatomy) |
+| **Picker Kill Confirm** | [`confirm-modal.sh`](../../tmux/.config/tmux/confirm-modal.sh) (called by `window-picker-delete.sh` for `d` on a session row or a multi-window selection; replaces `gum confirm`) | `{cyan,bold:y} Close │ n/Esc Keep` through `modal_footer`; `modal_head` asks `Close session NAME?` / `Close N tabs?` (exit 0 = confirmed) |
+
+#### Guard modal anatomy
+
+The close confirmations (`Prefix + w` / `x`, `Prefix + W`, `d` in the window picker) answer one question, so they carry one alarm glyph and no repeated words:
+
+```text
+╭  ─────────────────────────────────────────────────────────────╮   border badge: the only alarm icon
+│  Close tab 1?                                                    │   modal_head: the question (bold)
+│  Closing stops the agent below.                                  │   what yes costs (darkgray)
+│                                                                  │
+│  󰑮  claude      Refactor the hook payload parser fo…  working    │   modal_agent_row, busy agents only
+│ ──────────────────────────────────────────────────────────────── │
+│  y Close │ n/Esc Keep                                            │   modal_footer
+╰──────────────────────────────────────────────────────────────────╯
+```
+
+- **One alarm glyph.** The border badge says "careful"; the body has no second warning icon and no section header. The only other glyph is each agent's state glyph at $X=1$, which is data, not decoration.
+- **State colors come from the status bar.** The glyph and the state word use the pane's `@ai_agent_state_color`, the same color its tab shows, so a busy (blue) or permission (orange) agent reads the same in both places; the modal picks no warm hue of its own.
+- **Fixed columns:** glyph, agent (10), task title (darkgray, cut at 36 with `…`), state. The window name is not shown: it is the agent's icon.
+- **The object is named once**, in the question. The footer says `Close` / `Keep`, not `Kill Window` / `Keep Window`.
+- **Idle agents are not listed**; they lose nothing, and an all-idle window closes without asking.
 
 ### 3.4 Omarchy Dynamic Theme Color Synchronization
 

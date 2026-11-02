@@ -306,7 +306,7 @@ EOF
 ### 󰅖 Close Pane / Window (`Prefix + w` / `Prefix + x`)
 Guarded pane/window closure with AI agent safeguard.
 
-- **AI Safeguard**: If an active AI agent (OpenCode, Antigravity, Claude, Codex, Gemini, Aider) is running in the window/pane, prompts with an amber warning HUD modal (``) requiring `y` to confirm or `n`/`Esc` to keep.
+- **AI Safeguard**: If an AI agent (OpenCode, Antigravity, Claude, Codex, Gemini, Aider) is busy in the window/pane, asks `Close tab N?` and lists each busy agent with its state in the status bar's color; `y` closes, `n`/`Esc` keeps. Idle agents close without asking.
 - **Reopen Stack**: Records active path and command into the reopen stack before closing so `Prefix + T` / `Ctrl + Shift + T` can restore it anytime.
 EOF
     ;;
@@ -360,7 +360,7 @@ Gracefully closes the current tmux session with built-in safeguard heuristics:
 - **Active AI Agents**: If any window runs an AI agent (OpenCode, Antigravity, Claude, Codex, etc.), a confirmation popup is presented.
 - **Window Count**: If the session has more than 3 windows (>3 threshold), a confirmation popup is presented.
 - **Frictionless**: Sessions with <= 3 windows and 0 active agents close immediately without prompting.
-- **Home Row Navigation**: Tap `y` to confirm, `n` / `Esc` / `Enter` to cancel and keep session intact.
+- **One question**: `Close session NAME?`, one line saying what closing ends (its tabs, the busy agents), and one row per busy agent. Tap `y` to close, `n` / `Esc` / `Enter` to keep it.
 EOF
     ;;
 

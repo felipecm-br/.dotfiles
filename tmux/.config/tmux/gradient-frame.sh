@@ -46,6 +46,31 @@ modal_footer() {
     "$((top + rows - 1))" "$((left + 1))" "${rule// /─}" "$((top + rows))" "$((left + 1))" "$line"
 }
 
+# modal_head QUESTION NOTE — the two lines that open a guard modal: the question
+# in bold, then what answering yes costs, in palette darkgray. One icon only
+# (the border badge); the text carries the rest.
+modal_head() {
+  printf '\n  \033[1m%s\033[0m\n  \033[38;5;8m%s\033[0m\n\n' "$1" "$2"
+}
+
+# modal_agent_row STATE HEX LABEL DESC — one agent: its state glyph at X=1 in
+# the status bar's own state color (@ai_agent_state_color), the agent, what it
+# is doing (darkgray, cut to fit) and the state word, in fixed columns.
+modal_agent_row() {
+  local state="$1" hex="$2" label="$3" desc="$4" glyph color="" pad
+  glyph=$(waymux icon --state "$state" 2>/dev/null || waymux icon --state busy 2>/dev/null)
+  [ -n "$glyph" ] || glyph="•"
+  if [[ "$hex" =~ ^#[0-9a-fA-F]{6}$ ]]; then
+    color=$(printf '\033[38;2;%d;%d;%dm' "$((16#${hex:1:2}))" "$((16#${hex:3:2}))" "$((16#${hex:5:2}))")
+  fi
+  desc=$(printf '%s' "$desc" | tr '\n\r\t' '   ' | tr -s ' ')
+  [ "${#desc}" -gt 36 ] && desc="${desc:0:35}…"
+  printf -v pad '%*s' "$((38 - ${#desc}))" ''
+  [ "${#label}" -gt 10 ] && label="${label:0:10}"
+  printf '  %b%s\033[0m  \033[1m%-10s\033[0m  \033[38;5;8m%s\033[0m%s%b%s\033[0m\n' \
+    "$color" "$glyph" "$label" "$desc" "$pad" "$color" "$state"
+}
+
 # gradient_frame_draw PALETTE [TITLE] [TITLE_HEX]
 # Returns 1 (drawing nothing) when PALETTE is empty or invalid.
 gradient_frame_draw() {

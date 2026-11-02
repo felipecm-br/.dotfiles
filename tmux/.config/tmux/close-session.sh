@@ -24,24 +24,7 @@ SCRIPT_DIR=$(dirname "$REAL_SCRIPT")
 . "$SCRIPT_DIR/gradient-frame.sh"
 
 COLOR_YELLOW=$(get_theme_color "yellow" "#e0af68")
-COLOR_RED=$(get_theme_color "red" "#f7768e")
-COLOR_ORANGE=$(get_theme_color "orange" "#eb927b")
-COLOR_ACCENT=$(get_theme_color "accent" "#7aa2f7")
-COLOR_MAGENTA=$(get_theme_color "magenta" "#ad8ee6")
-COLOR_MUTED=$(get_theme_color "dark_foreground" "#565f89")
-COLOR_FG=$(get_theme_color "foreground" "#a9b1d6")
-COLOR_BG=$(get_theme_color "background" "#1a1b26")
 
-_hex_to_ansi() {
-  local h="${1#\#}"
-  if [[ ! "$h" =~ ^[0-9a-fA-F]{6}$ ]]; then
-    h="e0af68"
-  fi
-  local r=$(( 16#${h:0:2} ))
-  local g=$(( 16#${h:2:2} ))
-  local b=$(( 16#${h:4:2} ))
-  printf '\033[38;2;%d;%d;%dm' "$r" "$g" "$b"
-}
 
 # -----------------------------------------------------------------------------
 # 2. Session Analysis: Windows & AI Agent Detection
@@ -54,6 +37,8 @@ analyze_session() {
   AGENT_TABS=()
   AGENT_DESCS=()
   AGENT_STATES=()
+  AGENT_LABELS=()
+  AGENT_COLORS=()
   REASONS=()
 
   if ! tmux has-session -t "$target" 2>/dev/null; then
@@ -74,9 +59,10 @@ analyze_session() {
     done < <(waymux list 2>/dev/null || true)
   fi
 
-  while IFS="|" read -r wid wnum wname pid pcmd ptitle raw_state raw_title; do
+  while IFS="|" read -r wid wnum wname pid pcmd ptitle raw_state raw_title raw_color; do
     local is_agent=0
     local agent_desc=""
+    local agent_label="agent"
     local st=""
 
     # 1. Waymux registration check
@@ -99,14 +85,18 @@ analyze_session() {
     case "$pcmd" in
       agy|agy-bin|antigravity|opencode|claude|devin|codex|muse|gemini|aider)
         is_agent=1
+        agent_label="${pcmd%-bin}"
         [ -z "$st" ] && st="running"
         ;;
     esac
 
     # 4. Process tree inspection (descendants of pane PID)
     if [ "$is_agent" -eq 0 ] && [ -n "$pid" ]; then
-      if ps -s "$pid" -o comm= 2>/dev/null | grep -qE "^(agy|agy-bin|antigravity|opencode|claude|devin|codex|muse|gemini|aider)$"; then
+      local matched_cmd
+      matched_cmd=$(ps -s "$pid" -o comm= 2>/dev/null | grep -m1 -E "^(agy|agy-bin|antigravity|opencode|claude|devin|codex|muse|gemini|aider)$" || true)
+      if [ -n "$matched_cmd" ]; then
         is_agent=1
+        agent_label="${matched_cmd%-bin}"
         [ -z "$st" ] && st="running"
       fi
     fi
@@ -119,17 +109,15 @@ analyze_session() {
           agent_windows["$wid"]=1
           ;;
       esac
-      [ -z "$agent_desc" ] && agent_desc="${raw_title:-$wname}"
-      # Clean and truncate description if needed
-      agent_desc=$(printf '%s' "$agent_desc" | tr '\n\r\t' ' ' | sed -E 's/[[:space:]]+/ /g')
-      if [ "${#agent_desc}" -gt 30 ]; then
-        agent_desc="${agent_desc:0:27}..."
-      fi
+      # The task title only: the window name is the agent's icon.
+      [ -z "$agent_desc" ] && agent_desc="$raw_title"
       AGENT_TABS+=("$wnum")
       AGENT_DESCS+=("$agent_desc")
       AGENT_STATES+=("${st:-active}")
+      AGENT_LABELS+=("$agent_label")
+      AGENT_COLORS+=("$raw_color")
     fi
-  done < <(tmux list-panes -s -t "$target" -F "#{window_id}|#{window_index}|#{window_name}|#{pane_id}|#{pane_current_command}|#{pane_title}|#{@ai_agent_state_raw}|#{@ai_agent_title}" 2>/dev/null || true)
+  done < <(tmux list-panes -s -t "$target" -F "#{window_id}|#{window_index}|#{window_name}|#{pane_id}|#{pane_current_command}|#{pane_title}|#{@ai_agent_state_raw}|#{@ai_agent_title}|#{@ai_agent_state_color}" 2>/dev/null || true)
 
   AGENT_COUNT="${#agent_windows[@]}"
 
@@ -177,60 +165,51 @@ perform_kill() {
 # -----------------------------------------------------------------------------
 # 4. Confirmation Modal Runner (executed inside display-popup or terminal)
 # -----------------------------------------------------------------------------
+# busy_agent_count — agents that would lose work (not idle), one per pane.
+busy_agent_count() {
+  local n=0 st
+  for st in "${AGENT_STATES[@]}"; do
+    case "$st" in idle|done|closed|inactive|completed) ;; *) n=$((n + 1)) ;; esac
+  done
+  echo "$n"
+}
+
 run_confirm_modal() {
   local target="$1"
 
   analyze_session "$target"
 
-  local c_yellow c_red c_cyan c_magenta c_muted c_fg c_reset c_bold
-  c_yellow=$(_hex_to_ansi "$COLOR_YELLOW")
-  c_red=$(_hex_to_ansi "$COLOR_RED")
-  c_cyan=$(_hex_to_ansi "$COLOR_ACCENT")
-  c_magenta=$(_hex_to_ansi "$COLOR_MAGENTA")
-  c_muted=$(_hex_to_ansi "$COLOR_MUTED")
-  c_fg=$(_hex_to_ansi "$COLOR_FG")
-  c_reset="\033[0m"
-  c_bold="\033[1m"
-
   local body
   body=$(
-    printf "\n"
-    printf "  ${c_bold}${c_yellow}  KILL SESSION${c_reset} ${c_muted}·${c_reset} ${c_bold}${c_fg}%s${c_reset}\n\n" "$target"
+    # What closing costs, in one sentence: the tabs (when more than 3) and the busy agents.
+    local busy
+    busy=$(busy_agent_count)
+    local agents="the agent below" note
+    [ "$busy" -gt 1 ] && agents="the $busy agents below"
+    if [ "$busy" -gt 0 ] && [ "$WIN_COUNT" -gt 3 ]; then
+      note="Closing ends $WIN_COUNT tabs and stops $agents."
+    elif [ "$busy" -gt 0 ]; then
+      note="Closing stops $agents."
+    else
+      note="Closing ends all $WIN_COUNT tabs."
+    fi
+    modal_head "Close session $target?" "$note"
 
-    # Section 1: Active AI Agent Fleet
-    if [ "$AGENT_COUNT" -gt 0 ]; then
-      printf "  ${c_bold}${c_red}󰮯  Active AI Agents Detected (%d)${c_reset}\n" "$AGENT_COUNT"
-      local show_count=$(( AGENT_COUNT > 3 ? 3 : AGENT_COUNT )) agent_icon
-      agent_icon=$(waymux icon agent)
-      for ((i=0; i<show_count; i++)); do
-        local tab="${AGENT_TABS[$i]}"
-        local desc="${AGENT_DESCS[$i]}"
-        local st="${AGENT_STATES[$i]}"
-        local icon st_color="$c_yellow"
-        case "$st" in
-          idle) st_color="$c_cyan" ;;
-          question|permission|awaiting_input) st_color="$c_magenta" ;;
-          error) st_color="$c_red" ;;
-        esac
-        icon=$(waymux icon --state "$st" || waymux icon --state busy)
-        printf "     ${c_muted}${agent_icon}${c_reset} ${c_bold}Tab %-2s${c_reset}  ${c_fg}%-28s${c_reset}  ${st_color}%s %-7s${c_reset}\n" \
-          "$tab" "$desc" "$icon" "$st"
-      done
-      if [ "$AGENT_COUNT" -gt 3 ]; then
-        printf "     ${c_muted}${agent_icon} ... and %d more active agent window(s)${c_reset}\n" "$((AGENT_COUNT - 3))"
+    # One row per busy agent (idle ones lose nothing), the tab number in the label.
+    local shown=0
+    for ((i=0; i<${#AGENT_STATES[@]}; i++)); do
+      case "${AGENT_STATES[$i]}" in idle|done|closed|inactive|completed) continue ;; esac
+      if [ "$shown" -lt 3 ]; then
+        modal_agent_row "${AGENT_STATES[$i]}" "${AGENT_COLORS[$i]}" "${AGENT_TABS[$i]} ${AGENT_LABELS[$i]}" "${AGENT_DESCS[$i]}"
       fi
-      printf "\n"
+      shown=$(( shown + 1 ))
+    done
+    if [ "$shown" -gt 3 ]; then
+      printf '  \033[38;5;8m+ %d more\033[0m\n' "$((shown - 3))"
     fi
-
-    # Section 2: Session Window Layout Threshold
-    if [ "$WIN_COUNT" -gt 3 ]; then
-      printf "  ${c_bold}${c_cyan}󱂬  Layout Threshold Triggered${c_reset}\n"
-      printf "     ${c_muted}󱂬${c_reset}  ${c_fg}%d active windows in session${c_reset} ${c_muted}(>3 threshold)${c_reset}\n\n" "$WIN_COUNT"
-    fi
-
   )
   print_modal_body "$body"
-  modal_footer y "Kill Session" n/Esc "Keep Session"
+  modal_footer y Close n/Esc Keep
   if [ -n "${BORDER_GRADIENT:-}" ]; then
     gradient_frame_draw "$BORDER_GRADIENT" $' \uea6c ' "$COLOR_YELLOW" || true
   fi
@@ -367,19 +346,14 @@ EOF
   # 5. Condition triggered: show confirmation
   if [ -n "${TMUX:-}" ]; then
     # Calculate adaptive popup height (compact HUD)
-    local detail_lines=0
-    if [ "$AGENT_COUNT" -gt 0 ]; then
-      local show_agents=$(( AGENT_COUNT > 3 ? 3 : AGENT_COUNT ))
-      detail_lines=$(( detail_lines + show_agents + 2 ))
-      [ "$AGENT_COUNT" -gt 3 ] && detail_lines=$(( detail_lines + 1 ))
+    # Head (blank, question, note, blank) + rows + blank + rule + footer + frame.
+    local busy detail_lines=0
+    busy=$(busy_agent_count)
+    if [ "$busy" -gt 0 ]; then
+      detail_lines=$(( (busy > 3 ? 3 : busy) + 1 ))
+      [ "$busy" -gt 3 ] && detail_lines=$(( detail_lines + 1 ))
     fi
-    if [ "$WIN_COUNT" -gt 3 ]; then
-      detail_lines=$(( detail_lines + 3 ))
-    fi
-
     local popup_h=$(( 8 + detail_lines ))
-    [ "$popup_h" -lt 11 ] && popup_h=11
-    [ "$popup_h" -gt 18 ] && popup_h=18
     local popup_w=68
 
     # Warning theme: golden yellow border and nf-cod-warning badge

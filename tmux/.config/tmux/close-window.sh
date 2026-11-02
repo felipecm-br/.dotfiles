@@ -23,23 +23,7 @@ RECORD_SCRIPT="${SCRIPT_DIR}/record-window-state.sh"
 . "$SCRIPT_DIR/gradient-frame.sh"
 
 COLOR_YELLOW=$(get_theme_color "yellow" "#e0af68")
-COLOR_RED=$(get_theme_color "red" "#f7768e")
-COLOR_ACCENT=$(get_theme_color "accent" "#7aa2f7")
-COLOR_MAGENTA=$(get_theme_color "magenta" "#ad8ee6")
-COLOR_MUTED=$(get_theme_color "dark_foreground" "#565f89")
-COLOR_FG=$(get_theme_color "foreground" "#a9b1d6")
-COLOR_BG=$(get_theme_color "background" "#1a1b26")
 
-_hex_to_ansi() {
-  local h="${1#\#}"
-  if [[ ! "$h" =~ ^[0-9a-fA-F]{6}$ ]]; then
-    h="e0af68"
-  fi
-  local r=$(( 16#${h:0:2} ))
-  local g=$(( 16#${h:2:2} ))
-  local b=$(( 16#${h:4:2} ))
-  printf '\033[38;2;%d;%d;%dm' "$r" "$g" "$b"
-}
 
 # -----------------------------------------------------------------------------
 # 2. Window & Agent Analysis
@@ -57,6 +41,7 @@ ACTIVE_AGENT_COUNT=0
 AGENT_LABELS=()
 AGENT_DESCS=()
 AGENT_STATES=()
+AGENT_COLORS=()
 
 analyze_target() {
   local target="${1:-}"
@@ -80,6 +65,7 @@ analyze_target() {
   AGENT_LABELS=()
   AGENT_DESCS=()
   AGENT_STATES=()
+AGENT_COLORS=()
 
   [ -z "$WIN_ID" ] && return 0
 
@@ -100,9 +86,9 @@ analyze_target() {
     query_target="$PANE_ID"
   fi
 
-  while IFS="|" read -r wid wnum wname pid pcmd ptitle raw_state raw_title; do
+  while IFS="|" read -r wid wnum wname pid pcmd ptitle raw_state raw_title raw_color; do
     local is_agent=0
-    local agent_label="ai"
+    local agent_label="agent"
     local agent_desc=""
     local st=""
 
@@ -179,14 +165,11 @@ analyze_target() {
 
     if [ "$is_agent" -eq 1 ]; then
       [ -z "$agent_desc" ] && agent_desc="${raw_title:-$wname}"
-      agent_desc=$(printf '%s' "$agent_desc" | tr '\n\r\t' ' ' | sed -E 's/[[:space:]]+/ /g')
-      if [ "${#agent_desc}" -gt 28 ]; then
-        agent_desc="${agent_desc:0:25}..."
-      fi
       local curr_st="${st:-active}"
       AGENT_LABELS+=("$agent_label")
       AGENT_DESCS+=("$agent_desc")
       AGENT_STATES+=("$curr_st")
+      AGENT_COLORS+=("$raw_color")
       AGENT_COUNT=$(( AGENT_COUNT + 1 ))
 
       case "$curr_st" in
@@ -197,7 +180,7 @@ analyze_target() {
           ;;
       esac
     fi
-  done < <(tmux list-panes -t "$query_target" -F "#{window_id}|#{window_index}|#{window_name}|#{pane_id}|#{pane_current_command}|#{pane_title}|#{@ai_agent_state_raw}|#{@ai_agent_title}" 2>/dev/null || true)
+  done < <(tmux list-panes -t "$query_target" -F "#{window_id}|#{window_index}|#{window_name}|#{pane_id}|#{pane_current_command}|#{pane_title}|#{@ai_agent_state_raw}|#{@ai_agent_title}|#{@ai_agent_state_color}" 2>/dev/null || true)
 }
 
 # -----------------------------------------------------------------------------
@@ -247,54 +230,28 @@ run_confirm_modal() {
   local target="${1:-}"
   analyze_target "$target"
 
-  local c_yellow c_red c_cyan c_magenta c_muted c_fg c_reset c_bold
-  c_yellow=$(_hex_to_ansi "$COLOR_YELLOW")
-  c_red=$(_hex_to_ansi "$COLOR_RED")
-  c_cyan=$(_hex_to_ansi "$COLOR_ACCENT")
-  c_magenta=$(_hex_to_ansi "$COLOR_MAGENTA")
-  c_muted=$(_hex_to_ansi "$COLOR_MUTED")
-  c_fg=$(_hex_to_ansi "$COLOR_FG")
-  c_reset="\033[0m"
-  c_bold="\033[1m"
-
   local body
   body=$(
-    local tab_label="Tab ${WIN_INDEX:-?}"
-    [ -n "$WIN_NAME" ] && tab_label="${tab_label} (${WIN_NAME})"
+    local note="Closing stops the agent below."
+    [ "$ACTIVE_AGENT_COUNT" -gt 1 ] && note="Closing stops the $ACTIVE_AGENT_COUNT agents below."
+    modal_head "Close tab ${WIN_INDEX:-?}?" "$note"
 
-    printf "\n"
-    printf "  ${c_bold}${c_yellow}  KILL WINDOW${c_reset} ${c_muted}·${c_reset} ${c_bold}${c_fg}%s${c_reset}\n\n" "$tab_label"
-
-    printf "  ${c_bold}${c_red}󰮯  Active AI Agent in Window${c_reset}\n"
-    local shown=0 agent_icon
-    agent_icon=$(waymux icon agent)
+    # One row per busy agent; idle ones lose nothing and are not listed.
+    local shown=0 desc
     for ((i=0; i<AGENT_COUNT; i++)); do
-      local st="${AGENT_STATES[$i]}"
-      case "$st" in
-        idle|done|closed|inactive|completed)
-          continue
-          ;;
-      esac
-
-      local label="${AGENT_LABELS[$i]}"
-      local desc="${AGENT_DESCS[$i]}"
-      local icon st_color="$c_yellow"
-      case "$st" in
-        question|permission|awaiting_input) st_color="$c_magenta" ;;
-        error|stalled) st_color="$c_red" ;;
-      esac
-      icon=$(waymux icon --state "$st" || waymux icon --state busy)
-      printf "     ${c_muted}${agent_icon}${c_reset} ${c_bold}%-12s${c_reset}  ${c_fg}%-28s${c_reset}  ${st_color}%s %-7s${c_reset}\n" \
-        "$label" "$desc" "$icon" "$st"
+      case "${AGENT_STATES[$i]}" in idle|done|closed|inactive|completed) continue ;; esac
+      desc="${AGENT_DESCS[$i]}"
+      [ "$desc" = "$WIN_NAME" ] && desc="" # the window name is the agent's icon, not a task
+      modal_agent_row "${AGENT_STATES[$i]}" "${AGENT_COLORS[$i]}" "${AGENT_LABELS[$i]}" "$desc"
       shown=$(( shown + 1 ))
       [ "$shown" -ge 3 ] && break
     done
     if [ "$ACTIVE_AGENT_COUNT" -gt 3 ]; then
-      printf "     ${c_muted}${agent_icon} ... and %d more active agent(s)${c_reset}\n" "$((ACTIVE_AGENT_COUNT - 3))"
+      printf '  \033[38;5;8m+ %d more\033[0m\n' "$((ACTIVE_AGENT_COUNT - 3))"
     fi
   )
   print_modal_body "$body"
-  modal_footer y "Kill Window" n/Esc "Keep Window"
+  modal_footer y Close n/Esc Keep
   if [ -n "${BORDER_GRADIENT:-}" ]; then
     gradient_frame_draw "$BORDER_GRADIENT" $' \uea6c ' "$COLOR_YELLOW" || true
   fi
@@ -420,13 +377,13 @@ EOF
 
   # 5. Safeguard triggered: show confirmation popup
   if [ -n "${TMUX:-}" ]; then
+    # Head (blank, question, note, blank) + rows + blank + rule + footer + frame.
     local show_agents=$(( ACTIVE_AGENT_COUNT > 3 ? 3 : ACTIVE_AGENT_COUNT ))
-    local detail_lines=$(( show_agents + 2 ))
+    local detail_lines=$(( show_agents + 1 ))
     [ "$ACTIVE_AGENT_COUNT" -gt 3 ] && detail_lines=$(( detail_lines + 1 ))
 
     local popup_h=$(( 8 + detail_lines ))
-    [ "$popup_h" -lt 11 ] && popup_h=11
-    [ "$popup_h" -gt 15 ] && popup_h=15
+    [ "$popup_h" -gt 13 ] && popup_h=13
     local popup_w=68
 
     local border_color="$COLOR_YELLOW"

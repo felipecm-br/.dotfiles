@@ -6,7 +6,10 @@
 # Exit status: 0 when confirmed, 1 otherwise.
 #
 # Usage:
-#   confirm-modal.sh [--popup] TITLE [SUBJECT] [YES_LABEL] [NO_LABEL]
+#   confirm-modal.sh [--popup] QUESTION [COST] [YES_LABEL] [NO_LABEL]
+#
+# QUESTION is the bold first line ("Close session work?"), COST the darkgray
+# line under it saying what yes loses ("Closing ends all its tabs.").
 #
 # --popup opens the modal in a tmux display-popup (when inside tmux) and
 # returns the modal's exit status; without it the modal renders inline.
@@ -21,39 +24,15 @@ SCRIPT_DIR=$(dirname "$REAL_SCRIPT")
 . "$SCRIPT_DIR/gradient-frame.sh"
 
 COLOR_YELLOW=$(get_theme_color "yellow" "#e0af68")
-COLOR_RED=$(get_theme_color "red" "#f7768e")
-COLOR_ACCENT=$(get_theme_color "accent" "#7aa2f7")
-COLOR_MUTED=$(get_theme_color "dark_foreground" "#565f89")
-COLOR_FG=$(get_theme_color "foreground" "#a9b1d6")
 
 BADGE=$''
 
-_hex_to_ansi() {
-  local h="${1#\#}"
-  if [[ ! "$h" =~ ^[0-9a-fA-F]{6}$ ]]; then
-    h="e0af68"
-  fi
-  printf '\033[38;2;%d;%d;%dm' "$(( 16#${h:0:2} ))" "$(( 16#${h:2:2} ))" "$(( 16#${h:4:2} ))"
-}
 
 run_modal() {
   local title="$1" subject="${2:-}" yes_label="${3:-Confirm}" no_label="${4:-Cancel}"
-  local c_yellow c_red c_cyan c_muted c_fg c_reset="\033[0m" c_bold="\033[1m"
-  c_yellow=$(_hex_to_ansi "$COLOR_YELLOW")
-  c_red=$(_hex_to_ansi "$COLOR_RED")
-  c_cyan=$(_hex_to_ansi "$COLOR_ACCENT")
-  c_muted=$(_hex_to_ansi "$COLOR_MUTED")
-  c_fg=$(_hex_to_ansi "$COLOR_FG")
 
   local body
-  body=$(
-    printf "\n"
-    if [ -n "$subject" ]; then
-      printf "  ${c_bold}${c_yellow}%s  %s${c_reset} ${c_muted}·${c_reset} ${c_bold}${c_fg}%s${c_reset}\n\n" "$BADGE" "$title" "$subject"
-    else
-      printf "  ${c_bold}${c_yellow}%s  %s${c_reset}\n\n" "$BADGE" "$title"
-    fi
-  )
+  body=$(modal_head "$title" "$subject")
   print_modal_body "$body"
   modal_footer y "$yes_label" n/Esc "$no_label"
   if [ -n "${BORDER_GRADIENT:-}" ]; then

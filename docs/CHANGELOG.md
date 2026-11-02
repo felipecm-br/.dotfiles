@@ -15,7 +15,7 @@ The commit hashes link each entry to the full change (`git show <hash>`). Weeks 
 - Codex panes show working, waiting and idle in the status bar, Cockpit and triage like the other agents, and their session id is kept for `cockpit restore`: its hooks now call `waymux` as well as `workmux` through `codex-hook`, which finds the session's real pane because Codex runs every hook in one shared server (new `codex` package; Codex asks once to trust the new hooks). An idle Codex pane closes without the confirmation popup once it has reported. `needs: codex, waymux, jq`
 
 ### tmux
-- The close-window, close-session and picker kill confirmations end with the same footer as the Waymaker popups: a full-width rule and `y Kill … │ n/Esc Keep …` pinned to the bottom, keys in cyan. `portable`
+- The close confirmations (`Prefix + w` / `x` / `W`, `d` in the window picker) ask one question (`Close tab 1?`), say in one line what closing stops, and list only busy agents, each with its state glyph in the status bar's color: one warning icon instead of five, and the Waymaker popup footer `y Close │ n/Esc Keep`. `portable`
 - After a reboot, an agent started with its permission prompts off (`Claude YOLO`) resumes with them on; start it again from `Prefix + a` to turn them off. `needs: waymux, ai-jail`
 - Pickers draw their first row in about 25 ms instead of about 135 ms inside tmux: 17 presets that never show images skip Waymaker's terminal-graphics probe. `needs: wm`
 - Tab completion (`ftb`) and the Neovim picker lose the black selection strip and get a bold cursor row. `needs: wm`
