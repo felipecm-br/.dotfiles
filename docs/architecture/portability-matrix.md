@@ -66,6 +66,7 @@ Stow a package with `./stow.sh <package>` (see [stow.sh](../../stow.sh)); everyt
 | `killothers`, `memtop`, `gpucheck` | `portable` | Run as your user; they only *suggest* `sudo` for processes or settings you do not own |
 | `gpu-toggle` | `needs: root` | EnvyControl + reboot |
 | `update-ai-workflow` (`ai-update`) | `needs: root` | Installs through `yay` / `pacman` |
+| `ai-upstream`, `ai-scout` | `needs: gh` | Authenticated `gh`, `git`, Python ≥ 3.11 |
 | `hypr-anim`, `hypr-border`, `hypr-sound`, `border-gradient` | `host-only` | Hyprland |
 | User units in `utils/.config/systemd/user` | `portable` | user systemd (`ai-quota-refresh`, `dev-gc`, `cockpit-shutdown-save`, `agent-sudod`) |
 

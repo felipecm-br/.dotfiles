@@ -1,0 +1,433 @@
+# ai-upstream sources: what the AI workflow depends on, forks, and watches.
+#
+# Read by `ai-upstream watch` (what changed upstream, and how it could be adopted)
+# and `ai-upstream scout` (new repositories worth a look; everything listed here
+# is excluded from scout results). Docs: docs/architecture/upstream-watch-and-scout.md
+#
+# kind = "dependency"  a tool this stack runs. Releases newer than the installed
+#                      version (from `version_cmd`) are reported with their notes.
+# kind = "fork"        a local fork. Upstream commits not yet in `branch` are reported
+#                      with a cherry-pick dry run. Uses the `upstream` remote, or fetches
+#                      `upstream_url` into refs/ai-upstream/* without adding a remote.
+# kind = "reference"   a project one of ours learns from (credits, competitors).
+#                      Releases and commits since the last acknowledged run.
+# kind = "own"         this stack's own repositories; listed so scout skips them.
+#
+# feeds       which of our projects it informs: waymux, waymaker, lazygitrs, workflow
+#             (`ai-upstream --for waymaker`). Reports are grouped by it.
+# area        what it can improve there.
+# keywords    extra words for this source, added to the global list below.
+# license     checked live from GitHub; the value here is the fallback for licenses
+#             GitHub cannot detect.
+# commits     false: releases only (very busy repositories).
+# notes_url   release-notes page read when a release body is only a link
+#             ({major} {minor} {patch} {tag}).
+# tag_prefix  only tags with this prefix count (monorepos).
+# cargo_lock  with `crate`: read the installed version of a library from a Cargo.lock.
+
+# Words that mark a release-note line or commit as worth reading for this stack.
+keywords = [
+  "hook", "statusline", "status line", "osc", "effort", "permission", "approval",
+  "resume", "sandbox", "worktree", "tmux", "notification", "quota",
+  "usage limit", "rate limit", "mcp", "subagent", "headless", "json", "api",
+  "review", "diff", "checkpoint", "remote", "phone", "mobile", "security", "ghsa",
+  "cve", "performance", "latency", "keybind", "popup", "external editor",
+]
+
+# ════════════════════════════════════════════════════════════════════════════════
+# waymux: agent control plane (competitors from the SOTA benchmark, §2)
+# ════════════════════════════════════════════════════════════════════════════════
+
+[[source]]
+name = "workmux"
+repo = "raine/workmux"
+kind = "reference"
+feeds = "waymux"
+area = "worktree lifecycle, sandboxing (closest tool, waymux README)"
+
+[[source]]
+name = "tmux-agent-usage"
+repo = "raine/tmux-agent-usage"
+kind = "reference"
+feeds = "waymux"
+area = "quota in the tmux status bar"
+
+[[source]]
+name = "tuios"
+repo = "Gaurav-Gosain/tuios"
+kind = "reference"
+feeds = "waymux"
+area = "state, persistence, review, fan-out, API"
+
+[[source]]
+name = "herdr"
+repo = "herdrdev/herdr"
+kind = "reference"
+feeds = "waymux"
+area = "persistence, state, API"
+
+[[source]]
+name = "herdr-core"
+repo = "herdrdev/herdr-core"
+kind = "reference"
+feeds = "waymux"
+area = "agent-to-agent API (P9)"
+
+[[source]]
+name = "orca"
+repo = "stablyai/orca"
+kind = "reference"
+feeds = "waymux"
+area = "remote, review, fan-out"
+
+[[source]]
+name = "t3code"
+repo = "pingdotgg/t3code"
+kind = "reference"
+feeds = "waymux"
+area = "remote, quota routing"
+
+[[source]]
+name = "vscode"
+repo = "microsoft/vscode"
+kind = "reference"
+feeds = "waymux"
+commits = false
+notes_url = "https://code.visualstudio.com/updates/v{major}_{minor}"
+keywords = ["agent", "harness", "canvas", "terminal", "chat"]
+area = "agent sessions, remote agents, MCP (release notes only)"
+
+[[source]]
+name = "agent-deck"
+repo = "asheshgoplani/agent-deck"
+kind = "reference"
+feeds = "waymux"
+area = "ergonomics, conductor"
+
+[[source]]
+name = "alethe"
+repo = "Kc1t/alethe-agents"
+kind = "reference"
+feeds = "waymux"
+area = "orchestration, quota routing, MCP inventory"
+
+[[source]]
+name = "fut"
+repo = "mikker/fut"
+kind = "reference"
+feeds = "waymux"
+area = "OSC 7501 hookless state, SSH client"
+
+[[source]]
+name = "agtx"
+repo = "fynnfluegge/agtx"
+kind = "reference"
+feeds = "waymux"
+area = "orchestration"
+
+[[source]]
+name = "sheprd"
+repo = "sheprd-labs/sheprd"
+kind = "reference"
+feeds = "waymux"
+area = "review tab on herdr"
+
+[[source]]
+name = "kander"
+repo = "dualface/kander"
+kind = "reference"
+feeds = "waymux"
+area = "independent reviewer gate"
+
+# ════════════════════════════════════════════════════════════════════════════════
+# waymaker: picker / file manager / sessions (fork of matchmaker; credits in its README)
+# ════════════════════════════════════════════════════════════════════════════════
+
+[[source]]
+name = "matchmaker"
+repo = "Squirreljetpack/matchmaker"
+kind = "fork"
+feeds = "waymaker"
+path = "~/dev/github/waymaker/main"
+branch = "main"
+upstream_url = "https://github.com/Squirreljetpack/matchmaker.git"
+upstream_branch = "main"
+license = "AGPL-3.0"
+keywords = ["preview", "column", "nav", "matcher", "render", "config"]
+area = "the foundation waymaker forked"
+
+[[source]]
+name = "television"
+repo = "alexpasmantier/television"
+kind = "reference"
+feeds = "waymaker"
+keywords = ["preview", "channel", "source", "sort", "frecency"]
+area = "channels, preview pipeline, source switching"
+
+[[source]]
+name = "zoxide"
+repo = "ajeetdsouza/zoxide"
+kind = "reference"
+feeds = "waymaker"
+keywords = ["frecency", "score", "query", "exclude", "zsh"]
+area = "frecency (wm list --dirs, j)"
+
+[[source]]
+name = "mcat"
+repo = "Skardyy/mcat"
+kind = "reference"
+feeds = "waymaker"
+keywords = ["markdown", "mermaid", "image", "kitty", "zoom", "theme"]
+area = "Markdown and media preview"
+
+[[source]]
+name = "sesh"
+repo = "joshmedeski/sesh"
+kind = "reference"
+feeds = "waymaker"
+keywords = ["session", "window", "startup", "wildcard", "config"]
+area = "wm session / session.toml compatibility"
+
+[[source]]
+name = "yazi"
+repo = "sxyazi/yazi"
+kind = "reference"
+feeds = "waymaker"
+keywords = ["preview", "image", "async", "undo", "trash", "plugin"]
+area = "fm.rs file manager, async previews"
+
+[[source]]
+name = "fzf"
+repo = "junegunn/fzf"
+kind = "reference"
+feeds = "waymaker"
+keywords = ["preview", "bind", "action", "border", "header", "footer"]
+area = "picker behaviour users expect, ftb"
+
+[[source]]
+name = "nucleo"
+repo = "helix-editor/nucleo"
+kind = "dependency"
+feeds = "waymaker"
+tag_prefix = "nucleo-v"
+cargo_lock = "~/dev/github/waymaker/main/Cargo.lock"
+crate = "nucleo"
+area = "matcher"
+
+[[source]]
+name = "ratatui"
+repo = "ratatui/ratatui"
+kind = "dependency"
+feeds = "waymaker"
+tag_prefix = "ratatui-v"
+cargo_lock = "~/dev/github/waymaker/main/Cargo.lock"
+crate = "ratatui"
+area = "rendering (waymaker, waymux, lazygitrs)"
+
+[[source]]
+name = "redb"
+repo = "cberner/redb"
+kind = "dependency"
+feeds = "waymaker"
+cargo_lock = "~/dev/github/waymaker/main/Cargo.lock"
+crate = "redb"
+area = "frecency store"
+
+# ════════════════════════════════════════════════════════════════════════════════
+# lazygitrs: git TUI and review loop (fork of Blankeos/lazygitrs)
+# ════════════════════════════════════════════════════════════════════════════════
+
+[[source]]
+name = "lazygitrs"
+repo = "Blankeos/lazygitrs"
+kind = "fork"
+feeds = "lazygitrs"
+path = "~/dev/github/lazygitrs/main"
+branch = "main"
+upstream_branch = "main"
+keywords = ["diff", "hunk", "stage", "commit", "rebase"]
+area = "review loop"
+
+[[source]]
+name = "lazygit"
+repo = "jesseduffield/lazygit"
+kind = "reference"
+feeds = "lazygitrs"
+keywords = ["hunk", "stage", "rebase", "commit", "worktree", "branch", "graph"]
+area = "what lazygitrs re-implements"
+
+[[source]]
+name = "worktrunk"
+repo = "max-sixty/worktrunk"
+kind = "dependency"
+feeds = "lazygitrs"
+version_cmd = "wt --version"
+area = "awt engine, worktree lifecycle"
+
+[[source]]
+name = "git-graph"
+repo = "git-bahn/git-graph"
+kind = "reference"
+feeds = "lazygitrs"
+keywords = ["graph", "branch", "merge", "style"]
+area = "commit graph layout"
+
+[[source]]
+name = "keifu"
+repo = "trasta298/keifu"
+kind = "reference"
+feeds = "lazygitrs"
+keywords = ["graph", "branch", "color"]
+area = "commit graph TUI"
+
+[[source]]
+name = "serie"
+repo = "lusingander/serie"
+kind = "reference"
+feeds = "lazygitrs"
+keywords = ["graph", "image", "kitty", "refs"]
+area = "commit graph with terminal images"
+
+[[source]]
+name = "lumen"
+repo = "jnsahaj/lumen"
+kind = "reference"
+feeds = "lazygitrs"
+keywords = ["diff", "compare", "explain", "commit"]
+area = "diff navigation, compare tool (lazygitrs README credit)"
+
+[[source]]
+name = "gitui"
+repo = "gitui-org/gitui"
+kind = "reference"
+feeds = "lazygitrs"
+keywords = ["stage", "hunk", "blame", "log", "performance"]
+area = "Rust git TUI peer"
+
+[[source]]
+name = "delta"
+repo = "dandavison/delta"
+kind = "reference"
+feeds = "lazygitrs"
+keywords = ["side-by-side", "syntax", "hunk", "line number"]
+area = "diff rendering"
+
+[[source]]
+name = "gitlens"
+repo = "gitkraken/vscode-gitlens"
+kind = "reference"
+feeds = "lazygitrs"
+license = "NOASSERTION"
+commits = false
+keywords = ["rebase", "graph", "commit", "review", "agent"]
+area = "interactive rebase UI (lazygitrs README credit; mixed license: ideas only)"
+
+# ════════════════════════════════════════════════════════════════════════════════
+# workflow: the agents and tools around all three
+# ════════════════════════════════════════════════════════════════════════════════
+
+[[source]]
+name = "claude-code"
+repo = "anthropics/claude-code"
+kind = "dependency"
+version_cmd = "claude --version"
+area = "agent hooks, statusline, effort, StopFailure"
+
+[[source]]
+name = "codex"
+repo = "openai/codex"
+kind = "dependency"
+version_cmd = "codex --version"
+tag_prefix = "rust-v"
+area = "codex-hook, ai-launch rows, effort"
+
+[[source]]
+name = "opencode"
+repo = "anomalyco/opencode"
+kind = "dependency"
+version_cmd = "opencode --version"
+area = "hooker.ts plugin, ai-jail"
+
+[[source]]
+name = "tmux"
+repo = "tmux/tmux"
+kind = "dependency"
+version_cmd = "tmux -V"
+area = "popups, hooks, OSC passthrough"
+
+[[source]]
+name = "ai-memory"
+repo = "akitaonrails/ai-memory"
+kind = "dependency"
+version_cmd = "ai-memory --version"
+area = "cross-session memory, ai-failover continuity"
+
+[[source]]
+name = "ai-jail"
+repo = "akitaonrails/ai-jail"
+kind = "dependency"
+version_cmd = "ai-jail --version"
+area = "sandboxing (P1b: pin .git and ~/.claude)"
+
+[[source]]
+name = "ai-usagebar"
+repo = "akitaonrails/ai-usagebar"
+kind = "dependency"
+version_cmd = "ai-usagebar --version"
+area = "quota telemetry"
+
+# ── Own repositories (scout skips them) ─────────────────────────────────────────
+
+[[source]]
+name = "waymux"
+repo = "felipecm-br/waymux"
+kind = "own"
+
+[[source]]
+name = "waymaker"
+repo = "felipecm-br/waymaker"
+kind = "own"
+
+[[source]]
+name = "lazygitrs-fork"
+repo = "fcmiranda/lazygitrs"
+kind = "own"
+
+[[source]]
+name = "lazygitrs-own"
+repo = "felipecm-br/lazygitrs"
+kind = "own"
+
+# ── Scout ───────────────────────────────────────────────────────────────────────
+
+[scout]
+days = 45            # repositories created in the last N days
+min_stars = 40
+limit = 25
+# GitHub search queries; `created:>` and `stars:>=` are added unless present.
+queries = [
+  "agent-aware terminal multiplexer",
+  "coding agents tmux",
+  "coding agents worktree",
+  "claude code codex sessions",
+  "parallel coding agents",
+  "agent inbox terminal",
+  "claude code hooks",
+  "OSC 7501",
+  "agent sandbox bubblewrap",
+  "fuzzy finder rust tui",
+  "git tui diff review agent",
+  "git graph tui",
+  "terminal file manager rust",
+  "tmux session manager",
+]
+# Words that raise a repository's relevance (description, topics, name).
+relevance = [
+  "agent", "claude", "codex", "tmux", "worktree", "terminal", "multiplexer", "tui",
+  "review", "diff", "sandbox", "quota", "mcp", "hook", "orchestrat", "session",
+  "keyboard", "vim", "fuzzy", "rust", "git", "frecency", "picker", "file manager",
+]
+# Words that lower it (GUI-first, other platforms).
+penalty = ["electron", "vscode", "vs code", "macos only", "ios app", "windows only", "browser extension"]
+# Trending pages scraped best effort (no API exists).
+trending = ["", "rust", "go"]

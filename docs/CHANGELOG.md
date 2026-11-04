@@ -17,6 +17,7 @@ The commit hashes link each entry to the full change (`git show <hash>`). Weeks 
 - The launch menu lists Codex's and Devin's models instead of one `default` row each, each with its own effort scale on the gauge (Codex GPT-5.6-Terra up to `ultra`, Devin through the model id); `AI_LAUNCH_DEVIN_FAMILIES` picks the Devin families (default `swe-1.6-slow`, the only one Devin's free plan starts). `needs: waymux ≥ 0.10`
 - `Prefix + A` switches Codex and Devin the same way: their listed models, the effort on the gauge, typed as `/model <slug> --reasoning=<level>` (Codex, this session only) or `/model <id>` (Devin); Codex no longer opens its own picker. `needs: waymux ≥ 0.10`
 - Codex panes show working, waiting and idle in the status bar, Cockpit and triage like the other agents, and their session id is kept for `cockpit restore`: its hooks now call `waymux` as well as `workmux` through `codex-hook`, which finds the session's real pane because Codex runs every hook in one shared server (new `codex` package; Codex asks once to trust the new hooks). An idle Codex pane closes without the confirmation popup once it has reported. `needs: codex, waymux, jq`
+- `ai-upstream` reports what changed upstream of the AI workflow: dependency releases newer than what is installed, upstream lazygitrs commits with a cherry-pick dry run each, and what the benchmark competitors shipped, with an adoption mode from each license. `ai-scout` ranks new and trending GitHub repositories that could improve it. The `ai-upstream-watch` and `ai-scout` skills turn both reports into decisions. `needs: gh`
 
 ### tmux
 - The close confirmations (`Prefix + w` / `x` / `W`, `d` in the window picker) ask one question (`Close tab 1?`), say in one line what closing stops, and list only busy agents, each with its own agent icon in the status bar's state color: one warning icon instead of five, and the Waymaker popup footer `y Close │ n/Esc Keep`. `portable`
@@ -27,6 +28,9 @@ The commit hashes link each entry to the full change (`git show <hash>`). Weeks 
 
 ### Other
 - The Omarchy menu plugin moves the selection with `Ctrl + J` / `Ctrl + K` (and `Ctrl + N` / `Ctrl + P`) like Vim, besides the arrow keys. `host-only`
+
+### Docs
+- Agent workflow benchmark re-audited on 4 Nov: still 8.75 / 10 against TUIOS 8.18; fut added at 6.13, Orca 1.4.248 and T3 Code 0.1.7 re-scored, seven new entrants in the radar.
 
 ## 2026-W45 (2–8 Nov)
 

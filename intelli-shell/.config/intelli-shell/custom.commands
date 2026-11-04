@@ -661,6 +661,33 @@ update-ai-workflow --only {{component}}
 # Convenient shortcut to update AI workflow dependencies
 ai-update
 
+# What changed upstream of the AI workflow since the last acknowledged run (dependencies, fork, competitors)
+ai-upstream
+
+# Upstream changes for a few sources over a fixed window
+ai-upstream --only {{names}} --since {{14d}}
+
+# Forks (waymaker from matchmaker, lazygitrs): upstream commits not yet picked, with a cherry-pick dry run each
+ai-upstream --kind fork
+
+# Upstream changes for one project's references (waymux, waymaker, lazygitrs, workflow)
+ai-upstream --for {{project}} --since {{30d}}
+
+# Mark the upstream report as triaged so the next run starts from now
+ai-upstream --ack
+
+# New and trending GitHub repositories that could improve the AI workflow
+ai-scout
+
+# Widen the GitHub scout window
+ai-scout --days {{90}} --min-stars {{20}}
+
+# Track a scouted repository as a benchmark reference
+ai-scout --track {{owner/repo}} --area {{area}}
+
+# Never show a scouted repository again
+ai-scout --dismiss {{owner/repo}} --reason {{reason}}
+
 # Browse, hot-reload preview, and apply Starship prompt presets (listed first) and Omarchy themes interactively
 omarchy-starship-preset
 
