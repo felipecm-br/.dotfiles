@@ -23,3 +23,7 @@ keybinding:
 
 aiNotes:
   enabled: true
+
+os:
+  # Aliases/functions sourced before `:` and custom commands (was hardcoded).
+  shellFunctionsFile: "~/.dotfiles/main/git/.zsh/packages/git.zsh"
