@@ -25,6 +25,9 @@ The commit hashes link each entry to the full change (`git show <hash>`). Weeks 
 - Tab completion (`ftb`) and the Neovim picker lose the black selection strip and get a bold cursor row. `needs: wm`
 - The keybindings HUD runs the real triage jump for `Ctrl+Shift+I` and `Prefix + I` (it named a script that no longer exists). `needs: waymux`
 
+### Other
+- The Omarchy menu plugin moves the selection with `Ctrl + J` / `Ctrl + K` (and `Ctrl + N` / `Ctrl + P`) like Vim, besides the arrow keys. `host-only`
+
 ## 2026-W45 (2–8 Nov)
 
 ### AI agents
