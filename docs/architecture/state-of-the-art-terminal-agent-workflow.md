@@ -1,7 +1,7 @@
 # State-of-the-Art Terminal Agent Workflow: Architecture, Ergonomics & Competitor Benchmark
 
 > **Canonical Architectural Reference:** `docs/architecture/state-of-the-art-terminal-agent-workflow.md`  
-> **Status:** Production Standard (re-audited 4 Nov 2026; re-audit 2 Nov, full audit 29 Oct, popup UX audit the same day) · **Comparative Score:** **8.75 / 10** (profile-weighted, see §1; TUIOS 8.18; unchanged since 2 Nov; 8.80 on 29 Oct, 7.7 on 18 Oct) · **Zero-Churn Verified**
+> **Status:** Production Standard (re-audited 5 Nov 2026; re-audits 4 and 2 Nov, full audit 29 Oct, popup UX audit the same day) · **Comparative Score:** **8.79 / 10** (profile-weighted, see §1; TUIOS 8.18; 8.75 on 4 and 2 Nov, 8.80 on 29 Oct, 7.7 on 18 Oct) · **Zero-Churn Verified**
 
 > [!NOTE]
 > This document was re-audited in Oct 2026. The previous revision claimed a self-assigned **9.94/10**, cited competitor latencies without a reproducible method, and referenced unverified benchmarks. Every number below is either **measured on this host** (aarch64 Linux, see §5) or explicitly marked as **unmeasured / reported by the vendor**. The 29 Oct re-audit re-read every competitor's repository (README, changelog, release notes), added TUIOS, agent-deck and Alethe to the scorecard, and lists the other new entrants in a radar (§2.2). The 4 Nov re-audit adds [fut](https://github.com/mikker/fut) to the scorecard (§2.4) and seven new entrants to the radar.
@@ -14,7 +14,7 @@ Modern agentic engineering demands orchestrating multiple concurrent AI coding s
 
 This repository implements a terminal-native agent orchestration stack:
 
-1. **`waymux`** ([felipecm-br/waymux](https://github.com/felipecm-br/waymux), v0.11.0): single Rust binary providing the async JSON-RPC 2.0 control plane (`agentState/wait`, `queue/*`, `agent/recap`, `tmux.*`), zero-latency lifecycle hooks (`waymux hook tmux|lazygit`), the Cockpit HUD data path (`cockpit-items|preview|diff`), delivery-safe prompt and review-note dispatch (`queue`, `review-notes`, `inject`), held approvals, turn checkpoints (`checkpoint`), triage (`triage`), a phone page for held prompts (`/m`, `phone-token`), a native worktree orchestrator (`waymux wt`, mirrored by the `awt` entrypoint), and since 0.8.0 the agent launcher, quota report and in-place switch (`launch`, `quota`, `switch`) with a tmux plugin that binds them; 0.9.0 added the phone prompt and diff and the usage-limit hook, and 0.10 / 0.11 the effort gauge and quota in % used. The dotfiles scripts of the same names (`ai-launch`, `ai-quota`, `ai-switch`, `cockpit-picker.sh`, the triage scripts) are now thin wrappers that add this machine's hooks.
+1. **`waymux`** ([felipecm-br/waymux](https://github.com/felipecm-br/waymux), v0.12.2): single Rust binary providing the async JSON-RPC 2.0 control plane (`agentState/wait`, `queue/*`, `agent/recap`, `tmux.*`), zero-latency lifecycle hooks (`waymux hook tmux|lazygit`), the Cockpit HUD data path (`cockpit-items|preview|diff`), delivery-safe prompt and review-note dispatch (`queue`, `review-notes`, `inject`), held approvals, turn checkpoints (`checkpoint`), triage (`triage`), a phone page for held prompts (`/m`, `phone-token`), a native worktree orchestrator (`waymux wt`, mirrored by the `awt` entrypoint), and since 0.8.0 the agent launcher, quota report and in-place switch (`launch`, `quota`, `switch`) with a tmux plugin that binds them; 0.9.0 added the phone prompt and diff and the usage-limit hook, and 0.10 / 0.11 the effort gauge and quota in % used. The dotfiles scripts of the same names (`ai-launch`, `ai-quota`, `ai-switch`, `cockpit-picker.sh`, the triage scripts) are now thin wrappers that add this machine's hooks.
 2. **`awt`** (Agent Worktree Orchestrator): worktree lifecycle management, hermetic environment provisioning, dirty-state migration (`-W`), quarantine-safe deletion, `rebase`/`ship`/`sweep`/`reap`.
 3. **`waymaker` / `wm`**: SIMD-accelerated (Nucleo) Ratatui fuzzy selector used as the Cockpit renderer.
 4. **`tmux`**: Golden Ratio ($\phi$) floating HUDs, event-driven status bars (`status-interval 0`), safe confirmation modals, and transaction-safe Undo Close Tab (`Prefix + u`).
@@ -47,14 +47,14 @@ This repository implements a terminal-native agent orchestration stack:
                        └────────────────────────────────────────┘
 ```
 
-### Profile-Weighted Comparative Scorecard (4 Nov 2026)
+### Profile-Weighted Comparative Scorecard (5 Nov 2026)
 
 Weights are calibrated for a **terminal-first, keyboard-only, Home-Row ($H=0$)** profile and are unchanged since 18 Oct, so composites compare across audits. Scores are the author's **subjective judgment** from each competitor's repository and docs, read on 29 Oct 2026 and re-read from the release notes and commits published up to 4 Nov (versions in §2), plus local measurements. Where a capability could not be verified, it was scored conservatively. Bold marks the best score in each row.
 
 | Dimension | Weight | This Stack | TUIOS | Orca | workmux | herdr | agent-deck | T3 Code | Alethe | fut |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | Worktree lifecycle | 15 | 9.0 | 8.0 | 9.0 | **9.5** | 6.0 | 8.5 | 8.0 | 7.5 | 5.5 |
-| Agent state awareness | 15 | 9.0 | **9.5** | 8.0 | 8.0 | **9.5** | 8.0 | 8.0 | 7.5 | 8.5 |
+| Agent state awareness | 15 | 9.25 | **9.5** | 8.0 | 8.0 | **9.5** | 8.0 | 8.0 | 7.5 | 8.5 |
 | Persistence / crash isolation | 10 | 9.0 | **9.5** | 7.5 | 7.0 | **9.5** | 7.5 | 6.5 | 6.0 | 8.0 |
 | Review loop (diff → line note → agent) | 15 | **9.5** | 8.5 | 9.0 | 6.0 | 4.0 | 3.5 | 8.0 | 7.0 | 2.5 |
 | Remote / mobile | 10 | 7.5 | 8.5 | **9.5** | 6.5 | 9.0 | 7.5 | **9.5** | 6.5 | 7.0 |
@@ -63,10 +63,18 @@ Weights are calibrated for a **terminal-first, keyboard-only, Home-Row ($H=0$)**
 | Agent sandboxing | 5 | 8.5 | 3.0 | 4.0 | **9.0** | 3.0 | 8.0 | 3.0 | 4.0 | 3.0 |
 | Fan-out / compare N agents | 5 | 9.0 | **10.0** | **10.0** | 8.0 | 5.0 | 6.5 | 7.0 | 8.0 | 3.0 |
 | Ecosystem / bus factor | 5 | 4.5 | 7.0 | **10.0** | 7.0 | **10.0** | 5.5 | 9.0 | 6.0 | 5.5 |
-| **Composite (0–10)** | **100** | **8.75** | 8.18 | 7.65 | 7.50 | 7.15 | 7.10 | 6.93 | 6.48 | 6.13 |
+| **Composite (0–10)** | **100** | **8.79** | 8.18 | 7.65 | 7.50 | 7.15 | 7.10 | 6.93 | 6.48 | 6.13 |
+| Composite on 4 Nov | | 8.75 | 8.18 | 7.65 | 7.50 | 7.15 | 7.10 | 6.93 | 6.48 | 6.13 |
 | Composite on 2 Nov | | 8.75 | 8.18 | 7.60 | 7.25 | 7.15 | 7.10 | 6.85 | 6.48 | — |
 | Composite on 29 Oct | | 8.80 | 8.05 | 7.58 | 7.25 | 7.15 | 7.10 | 6.85 | 6.48 | — |
 | Composite on 18 Oct | | 7.7 | — | 7.2 | 7.1 | 6.9 | — | 6.6 | — | — |
+
+**What moved on 5 Nov (+0.04 for this stack; no competitor released a scored change):**
+
+- **State 9.0 → 9.25 (this stack): a `background` state.** Before `waymux` 0.12, an agent that ended its turn while its own build, test run or Monitor kept running looked exactly like an agent thinking, and the stall detector turned a quiet wait (a `sleep`, a CI watch: no output and no CPU for 20 s) into a red `stalled` alert with its bell. `Stop` now finds Claude Code tool shells still alive under the `claude` process (`/proc`) and reports `background`, with the command as the reason. Triage, the stall detector, the done chime and the review queue skip it; queued prompts wait for `idle`. The tab and the Cockpit animate it with a second, slow spinner (`hexfill`, 2.5 s a cycle, vs the 12 Hz working spinner) in the same blue: peripheral vision tells animation rates apart, not glyph shapes. Checked live: the pane went `busy` → `background` within 2.5 s of the turn ending and held it for the whole 45 s task, with no stall, and the Cockpit row cycled all six frames ([status bar doc](../tmux/ai-status-bar.md)). It is a quarter point because it closes a false-alarm class this audit did not find handled in the TUIOS or herdr docs; the other half of the gap (P8, Codex seen moving through the states) is still open.
+- **Portability fix (this stack, unweighted): `waymux` 0.12.2 works on tmux 3.4.** tmux 3.4 (Ubuntu 24.04, Debian) escapes its `-F` output, printing the 0x1f field separator as `\037`, so the Cockpit listed nothing and prompt injection found no pane on those hosts. Found because CI, which runs Ubuntu's tmux 3.4 and Rust 1.99, had been red since 0.11.2 while every local gate passed (tmux 3.8, Rust 1.95); checked in an `ubuntu:24.04` container. Ecosystem stays 4.5: the fix removes a blocker for new hosts, and three releases shipping on a red CI is the bus-factor risk that score already prices in.
+- **Waymaker 0.7.2 / 0.8.0 (this stack, unweighted):** `Ctrl + C` aborts every picker at once (`Abort`), an empty query keeps the input order like fzf, and a second spinner marker (`results.slow_spinner_prefix`) lets one list animate fast and slow busy rows.
+- **No release, main branch only:** TUIOS: `tuios hosts` sets up and picks tailnet machines (remote), the daemon keeps the machine awake while agents work and installs itself as a service, approvals that arrive while you type a reply are held and a key asks before it answers one, the cockpit can queue a reply or send it now, and a finished turn folds to one summary line. Remote stays 8.5 until a release. herdr-core reverted its hold on agent messages while the user has an unsent draft, the behavior backlog item U2 ports ([upstream watch](upstream-watch-and-scout.md)). Orca 1.4.249 / 1.4.250 and T3 Code changes are performance and mobile fixes.
 
 **What moved on 4 Nov (no change for this stack; +0.25 workmux, +0.05 Orca, +0.08 T3 Code, fut added at 6.13):**
 
@@ -424,6 +432,7 @@ Canonical details live in [Quota-Aware Agent Selection](quota-aware-agent-select
 | **Re-audit 2 Nov 2026** (R6) | The doc named `waymux` v0.6.0 and 0.7 while 0.8.2 ran, still described launch, quota, switch, Cockpit and triage as dotfiles scripts, and scored ergonomics 10.0 with open items | Versions and wrappers corrected (§1); ergonomics 9.5; competitor versions re-read (§2) | This document |
 | **Re-audit 2 Nov 2026** (R7) | A Claude turn ended by a usage limit looked like a finished turn (no `StopFailure` hook), and continuing elsewhere took a launch, a model pick and a re-explained task | `waymux hook tmux StopFailure` (`waymux` 0.9.0) sets `error` / `usage limit`; `ai-failover` (`Prefix + F`) continues in the next agent with quota through `ai-memory run` | `cargo test` (`test_stop_failure_names_a_usage_limit`), `tests/ai_failover.test.sh` |
 | **Re-audit 4 Nov 2026** (R8) | The doc named `waymux` 0.9.0 while 0.11.0 ran, did not mention the effort gauge or the Codex and Devin model rows, and had no entry for fut or the entrants created since September | `waymux` 0.11 in §1 and §3.7; fut scored (6.13, §2.4); Orca and T3 Code re-scored; seven entrants added to the radar (§2.2) | This document |
+| **Re-audit 5 Nov 2026** (R9) | An agent waiting on its own background task looked like one thinking and drew false stall alerts; the Cockpit listed nothing on tmux 3.4; CI had been red since `waymux` 0.11.2 unnoticed | `waymux` 0.12.0 `background` state (state 9.0 → 9.25), 0.12.1 Cockpit slow spinner (Waymaker 0.8.0), 0.12.2 tmux 3.4 decoding and CI green | This document |
 | **Popup UX Audit 29 Oct 2026** (P4) | Trailing `` / `● now` markers in `ai-launch` and `ai-switch` forced an end-of-line horizontal saccade; static `⠋` candidate collided with the busy spinner | Invariant $X=3$ upper-band `⠛` (`U+281B`, `y = 20..55`) shoulder gutter beside the row icon + Triadic Cold-Color column partitioning | `tests/ai_quota.test.sh`, Pillow font rasterization audit |
 
 > [!NOTE]
@@ -485,16 +494,16 @@ Suites that drive tmux source [`tests/lib/private_tmux.sh`](../../tests/lib/priv
 
 ---
 
-## 8. Roadmap to 9.2 (updated 4 Nov 2026)
+## 8. Roadmap to 9.2 (updated 5 Nov 2026)
 
 Keys follow the [Zero-Churn principle](terminal-ergonomics-and-ux-manifesto.md): no existing chord is rebound. Scores use the unchanged weights of §1.
 
-### 8.1 Where It Stands: 8.75
+### 8.1 Where It Stands: 8.79
 
 | Dimension (weight) | This stack | Best competitor | Gap | Closed by |
 | :--- | :---: | :--- | :---: | :--- |
 | Worktree lifecycle (15) | 9.0 | workmux 9.5 | −0.5 | not planned: workmux's lead is its per-agent config, which `awt` does not need |
-| Agent state awareness (15) | 9.0 | TUIOS, herdr 9.5 | −0.5 | P8 |
+| Agent state awareness (15) | 9.25 | TUIOS, herdr 9.5 | −0.25 | P8 (the `background` state closed a quarter on 5 Nov) |
 | Persistence / crash isolation (10) | 9.0 | herdr, TUIOS 9.5 | −0.5 | P6b |
 | Review loop (15) | **9.5** | Orca 9.0, TUIOS 8.5 | lead | — (TUIOS closed 0.5 in 0.12) |
 | Remote / mobile (10) | 7.5 | Orca, T3 Code 9.5 | −2.0 | P7 (to 8.5); the rest is a native app, out of scope |
@@ -541,6 +550,7 @@ Each phase is shippable on its own. "Done when" is the check that closes the ite
 | :---: | :--- | :--- | :--- |
 | **P10** | **Finish fan-out:** running fans in the Cockpit, and money spent per attempt next to the tokens (model price table, Claude and Codex). | A fan shows in the Cockpit while it runs; the compare popup shows a cost column (`tests/awt_fan.test.sh`) | Fan-out 9.0 → 10.0 (+0.05) |
 | **P11** | **Packaging:** an AUR package and `cargo install waymux`. | `yay -S waymux` and `cargo install waymux` install a working daemon on a clean machine | Ecosystem 4.0 → 5.0 (+0.05) |
+| **P13** | **Keep the machine awake while agents work** (seen in TUIOS `main`, 5 Nov; MIT): the daemon holds a `systemd-inhibit --what=idle:sleep` lock while any pane is `working` or `background`, and releases it when the last one goes `idle`. | A suspend timer does not fire during a 10-minute `background` task, and fires within a minute of the last agent going `idle` (`cargo test` on the lock's start and stop, a live check on this host) | unweighted (persistence: no lost turn to a laptop sleeping mid-task) |
 | **P6b** | **Rest of P6:** queued prompts survive a daemon restart (saved like the hook tokens, tied to the tmux server); Codex resume: since P8 Codex reports its session id to `waymux` and [`cockpit-snapshot.py`](../../tmux/.config/tmux/cockpit-snapshot.py) already resumes it with `codex resume`; unverified after a real reboot. Held approvals need nothing: with the daemon gone, the hook answers nothing and Claude asks in the pane. | A prompt queued before `systemctl --user restart waymux` is still delivered | Persistence 9.0 → 9.5 (+0.05) |
 | **P1b** | **Pin `.git` and `~/.claude` in the jail:** an ai-jail option that binds `.git` onto itself (a mount point cannot be renamed), filed as an issue for its author; until then `ai-launch` warns when the settings link was replaced. | A jailed agent cannot rename `.git` or replace `~/.claude/settings.json` | Sandboxing 8.5 → 9.0 (+0.025) |
 

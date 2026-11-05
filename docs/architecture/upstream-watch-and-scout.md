@@ -64,7 +64,7 @@ Both commands only read (except `--ack`, `--dismiss` and `--track`), so a weekly
 
 Re-scores, radar rows, deep dives and roadmap items go into the [SOTA benchmark](state-of-the-art-terminal-agent-workflow.md). Adopted options and ports go into the owning package's doc and [the changelog](../CHANGELOG.md).
 
-## Triaged Backlog (4 Nov 2026)
+## Triaged Backlog (4 Nov 2026, updated 5 Nov)
 
 Items gathered by `ai-upstream` across all four projects (`waymux`, `waymaker`, `lazygitrs`, `workflow`) and queued for implementation.
 
@@ -73,7 +73,7 @@ Items gathered by `ai-upstream` across all four projects (`waymux`, `waymaker`, 
 | # | Source → project | What | Verdict · license | Effort | Done when |
 | :---: | :--- | :--- | :--- | :---: | :--- |
 | **U1** | `workmux` 0.1.278 → `waymux` / `codex` | Start Codex with `--no-daemon` from `ai-launch` so hooks run with the session's own `TMUX_PANE` instead of the shared app-server's (fixes the wrong-pane bug at the root and avoids the `clamping Interrupt hook timeout` warning that caused `herdr` to drop Codex hooks; keep `codex-hook` as fallback) | **Adopt** · MIT | S | Two Codex panes in one directory report to their own panes with `--no-daemon`, and P8 passes on a live session |
-| **U2** | `herdr-core` → `waymux` | Hold a pane's queued message delivery while the user has an unsent prompt draft in that pane | **Port** · Apache-2.0 | M | A queued message waits while the target pane has an active draft and flushes once the draft clears (`cargo test`) |
+| **U2** | `herdr-core` → `waymux` | Hold a pane's queued message delivery while the user has an unsent prompt draft in that pane | **Port** · Apache-2.0 | M | A queued message waits while the target pane has an active draft and flushes once the draft clears (`cargo test`). On 5 Nov herdr-core reverted its own version (`4d133ea`, "drop the unsent-draft hold on agent messages"); read why before porting |
 | **U3** | `yazi` / `mcat` → `waymaker` | Run the terminal-image protocol probe early with a short timeout instead of blocking the first frame | **Port** · MIT | M | Image-capable presets keep previews without the ~110 ms first-frame cost |
 | **U4** | `matchmaker` → `waymaker` | Port upstream fixes from `refs/ai-upstream/main`: fewer idle CPU wakeups, preview ANSI resets no longer clearing pane backgrounds (protects transparent `bg = "reset"` popups), HScroll panic fix, and `results.delay_clear` (no blank flash on reload) | **Port** · AGPL-3.0 | M | Picked or reimplemented in `waymaker` with `cargo test` passing and no background flash in transparent popups |
 | **U5** | `sesh` 2.33 → `waymaker` | Escape `#` in `wm session` names and start directories so tmux does not expand `#` as a format string (`.` is already handled) | **Port** · MIT | S | A session or directory containing `#` opens without tmux format expansion |
@@ -81,6 +81,9 @@ Items gathered by `ai-upstream` across all four projects (`waymux`, `waymaker`, 
 | **U7** | `ratatui` 0.30.0 → 0.30.2 → `waymaker`, `waymux`, `lazygitrs` | Patch upgrade across the three Rust TUIs | **Upgrade** · MIT | S | `cargo update -p ratatui` and `cargo test` pass in each repository |
 | **U8** | `fzf` 0.74.3 → 0.74.5 → `workflow` | Two upstream security fixes (`fzf-tab` loads `fzf`) | **Upgrade** · MIT | S | `fzf --version` reports `≥ 0.74.5` |
 | **U9** | `worktrunk` 0.68 → 0.81 → `lazygitrs` / `awt` | `wt merge --branch`, prompting hooks, faster worktree removal (the 0.78 / 0.81 breaking renames do not affect `awt` or our config, which only uses `{{ repo_path }}`) | **Upgrade** · MIT | S | `wt --version` reports `≥ 0.81` and `tests/awt_*.test.sh` pass |
+| **U10** | `ai-memory` 3.3.3 → 3.4.1 → `workflow` | After a compaction (`SessionStart` with `source: "compact"`), it injects a post-compaction anchor instead of claiming an open handoff; this stack compacts long Claude sessions daily. The one breaking change, `[[llm_fallbacks]]` with `api_key_env` for `openai-oauth` / `codex` / `cursor`, is not in this config | **Upgrade** · MIT | S | `ai-memory --version` reports `≥ 3.4.1` and a compacted session resumes with its anchor |
+| **U11** | `ai-usagebar` 1.14 → 1.48 → `workflow` | 34 releases behind on the quota telemetry `ai-quota` reads | **Upgrade** · read the release notes first | S | `ai-usagebar --version` reports `≥ 1.48` and `ai-quota` still shows every agent's % used |
+| **U12** | `opencode` 1.19.5 → 2.2.5 → `workflow` | A major version on the `hooker.ts` plugin that reports state to `waymux`; check the 2.x plugin API before upgrading | **Upgrade** after a check · MIT | M | An opencode 2.x pane moves through `working` and `idle` in `waymux list` |
 
 ### Watched, deferred, or rejected
 
