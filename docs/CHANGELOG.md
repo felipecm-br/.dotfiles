@@ -30,6 +30,7 @@ The commit hashes link each entry to the full change (`git show <hash>`). Weeks 
 
 ### Other
 - The Omarchy menu plugin moves the selection with `Ctrl + J` / `Ctrl + K` (and `Ctrl + N` / `Ctrl + P`) like Vim, besides the arrow keys. `host-only`
+- Every `wm` picker exits on the first `Ctrl + C` (the new `Abort` action), and `?`, `shift-?` and `*` (help, switch preview, bookmark) act only in navigation mode, so they can be typed into the query; `F1` still opens help. `needs: wm ≥ 0.7.2`
 
 ### Docs
 - Agent workflow benchmark re-audited on 4 Nov: still 8.75 / 10 against TUIOS 8.18; fut added at 6.13, Orca 1.4.248 and T3 Code 0.1.7 re-scored, seven new entrants in the radar.

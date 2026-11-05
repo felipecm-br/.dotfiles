@@ -70,7 +70,6 @@ always_trigger = true
 
 [start.command]
 command = ""
-separator = "\\0"
 
 [start]
 ansi = false # don't set to true here
@@ -98,7 +97,7 @@ ansi = false # don't set to true here
 # --- Binds ---
 [binds]
 # Essentia
-"ctrl-c" = "Quit"
+"ctrl-c" = "Abort"
 "esc" = "Quit(1)"
 "enter" = "@accept"
 "ctrl-enter" = "@accept_2"
@@ -137,8 +136,6 @@ ansi = false # don't set to true here
 "shift+scrollup" = "PreviewUp"
 "shift+scrolldown" = "PreviewDown"
 "ctrl-p" = "SwitchPreview"
-"?" = "Help"
-"shift-?" = "SwitchPreview"
 "ctrl-/" = "CyclePreview" # cycle preview layouts
 "ctrl-shift-/" = "CyclePreview"
 
@@ -180,7 +177,6 @@ ansi = false # don't set to true here
 "@next" = "ReloadNext"
 "@prev" = "ReloadPrev"
 "@cycle" = "ReloadNext"
-"*" = "@bookmark"
 "@help" = "Help"
 "@break" = "Redraw" # invalid unicode or unsupported emoji can break rendering
 
@@ -193,3 +189,10 @@ ansi = false # don't set to true here
 "@copy" = "CopyAsync(printf '%s\n' {+1})"
 "@copy_all" = "CopyAsync(printf {})"
 "@copy_active" = "CopyAsync(printf '%s\n' {+!})"
+
+# Plain characters bound here only act once focus has left the query, so they can still be
+# typed into it (wm warns about plain characters under [binds]). F1 opens help everywhere.
+[ui.nav.binds]
+"?" = "Help"
+"shift-?" = "SwitchPreview"
+"*" = "@bookmark"
