@@ -1,0 +1,3 @@
+**/.claude/settings.local.json
+# lazygitrs writes its ACP port at the worktree root while it runs (runtime state)
+.lazygitrs.port
