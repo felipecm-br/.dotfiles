@@ -137,7 +137,6 @@ percentage = 60
 "backtab" = "@reloadprev"
 "ctrl-f" = "@dirs"
 "ctrl-b" = "@bookmarks"
-"*" = "@bookmark"
 "esc" = "ToggleFocus"
 "ctrl-j" = "Down"
 "ctrl-k" = "Up"

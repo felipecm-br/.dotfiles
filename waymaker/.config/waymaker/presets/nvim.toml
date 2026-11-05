@@ -91,7 +91,7 @@ additional = [
 ansi = false
 
 [binds]
-"ctrl-c" = "Quit"
+"ctrl-c" = "Abort"
 "esc" = "Quit"
 "enter" = "@accept"
 "ctrl-j" = "Down"

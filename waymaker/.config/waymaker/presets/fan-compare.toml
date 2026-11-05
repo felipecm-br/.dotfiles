@@ -89,7 +89,7 @@ hints = false
 "enter"  = ["Execute(awt-fan jump {=id} {=n})", "Quit"]
 "ctrl-r" = "Reload(awt-fan ls \"$AWT_FAN_ID\")"
 "esc"    = "Quit"
-"ctrl-c" = "Quit"
+"ctrl-c" = "Abort"
 
 # No image previews here: skip the terminal graphics probe, which holds the first frame
 # for up to 100 ms inside tmux (tests/popup_render_perf.test.sh).

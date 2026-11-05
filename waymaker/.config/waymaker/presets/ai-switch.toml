@@ -71,7 +71,7 @@ sides = ""
 # --pos parks the cursor on the current model; typing must jump back to the best match
 "QueryChange" = "Pos(0)"
 "esc"    = "Quit"
-"ctrl-c" = "Quit"
+"ctrl-c" = "Abort"
 # Effort of the agent under the cursor: the gauge after "Effort" in the footer follows the
 # cursor; C-h/l (or ←/→) step it and Enter starts or switches with it (waymux switch --effort)
 "CursorChange" = "Transform(waymux switch --effort 0 {})"
