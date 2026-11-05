@@ -1,8 +1,6 @@
 
-understand how prefix I (triage works, when a session left the triage, after review (stay for some seconds?), after answer new prompt?)
 
 some times the ai finish but says its building something, and theres no action for me to do
-
 
 exemple:
  ai: I've launched cargo mutants -F "delete match arm AgentState::Idle in on_state" to verify that this mutant is now caught. Waiting for the mutant test to complete.
@@ -14,10 +12,6 @@ exemple:
 I'm watching the CI runs for 2d3aa16 and will report when they finish.
 
 ✻ Cooked for 55s · done 12:39 PM · 1 monitor still runningq
-
--------------------
-menu omarchy
-ctrl k, ctrl j - navigate down up (like vim)
 
 waymux
 stage feature (like claude)
