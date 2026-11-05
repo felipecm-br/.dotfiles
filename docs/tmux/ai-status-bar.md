@@ -14,6 +14,7 @@ State colors are **semantic constants**, not theme slots: `waymux` picks them fr
 | State | Glyph | Dark | Light |
 | :--- | :---: | :---: | :---: |
 | `busy` / `working` (animated spinner `⠋`) | `󰑮` | `#89b4fa` blue | `#2563eb` |
+| `background` (slow spinner `󰫃`→`󰫈`→`󰫃`, 2.5 s) | `󰫈` | `#89b4fa` blue | `#2563eb` |
 | `question` / `awaiting_input` | `󱜻` | `#f9e2af` gold | `#7c6a00` |
 | `permission` | `󰳌` | `#ff9e57` orange | `#c2410c` |
 | `stalled` | `󰔟` | `#f5c2e7` pink | `#a21caf` |
@@ -21,6 +22,8 @@ State colors are **semantic constants**, not theme slots: `waymux` picks them fr
 | `idle` (done, waiting for your next prompt) | `󰗡` | `#8aa4b8` slate | `#4f6b5f` |
 
 Glyphs are set in `[theme.states.*]` of [`config.toml`](../../waymux/.config/waymux/config.toml) and each state that needs you has its own silhouette, so the gutter reads without color: question is the only plain speech bubble, permission a shield, stalled an hourglass, error the codicon chat-sparkle-error (AI chat that failed). `idle` is a low-ink check circle with no notification dot, since it shows on every agent tab. Before Oct 2026 idle (`message_badge_outline`) and stalled (`message_badge`) differed only by fill.
+
+`background` is an agent whose turn ended while its own build, test run or Monitor still runs (`Stop` finds Claude Code tool shells still alive). It is busy but waits on nothing from you: no done chime, no stall alert, and `Prefix + I` skips it. It shares working's blue and differs in rate, not shape: the status bar sits in peripheral vision, which tells a 12 Hz spinner from a 0.4 Hz fill but not one glyph from another. The fill is a honeycomb cell growing and shrinking (`hexfill`, `[theme] background_spinner` to change it); the Cockpit and the window picker show the full cell `󰫈`.
 
 A new, resumed or cleared session starts `idle`: `SessionStart` only renames the window and sets the title, and the spinner starts on `UserPromptSubmit`. A `compact` `SessionStart` (which can fire mid-turn) leaves the state untouched.
 

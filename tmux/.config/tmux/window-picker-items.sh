@@ -113,6 +113,14 @@ tmux list-sessions -F '#S' | grep -Ev '^(_lazygitrs|_popups|\.)' | while IFS= re
         ai_ico="${c_st}@SPIN@${R} "
         title="$idx $name $icon ${ai_search}"
         ;;
+      background)
+        # Waiting on its own build or test run: working color, but the still full-cell glyph
+        # (the picker animates one spinner, and the tab's icon is a moment of the slow one).
+        c_st=${c_st:-$C_BUSY}
+        icon=${ICON_STATE_BACKGROUND:-$state_icon}
+        ai_ico="${c_st}${icon}${R} "
+        title="$idx $name $icon ${ai_search}"
+        ;;
       idle)
         c_st=${c_st:-$C_IDLE}
         icon=${state_icon:-$ICON_STATE_IDLE}
