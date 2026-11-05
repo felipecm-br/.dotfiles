@@ -99,7 +99,7 @@ abort_empty = true
 [binds]
 enter = "Accept"
 esc = "ToggleFocus"
-ctrl-c = "Quit"
+ctrl-c = "Abort"
 ctrl-j = "Down"
 ctrl-k = "Up"
 ctrl-shift-j = "PreviewDown(5)"
@@ -154,7 +154,7 @@ ctrl-y = "Accept"
 esc = "Quit"
 q = "Quit"
 "/" = "FocusFilter"
-ctrl-c = "Quit"
+ctrl-c = "Abort"
 ctrl-v = 'ExecuteSilent(test -n "$MM_ORIGIN_PANE" && tmux send-keys -t "$MM_ORIGIN_PANE" -l -- {})'
 j = "Down"
 k = "Up"

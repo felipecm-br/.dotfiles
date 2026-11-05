@@ -99,7 +99,7 @@ ctrl-K = "PreviewUp(5)"
 ctrl-d = "PreviewHalfPageDown"
 ctrl-u = "PreviewHalfPageUp"
 esc = "Quit"
-ctrl-c = "Quit"
+ctrl-c = "Abort"
 
 # Filter modes: Tab advances, Shift-Tab goes back.
 tab = ["SetPrompt(tmux> )", "SetQuery()", "Reload(~/.config/tmux/keybindings-items.sh tmux)", "SetMode(tmux)", "Pos(0)"]
@@ -140,7 +140,7 @@ ctrl-v = 'ExecuteSilent(test -n "$MM_ORIGIN_PANE" && tmux send-keys -t "$MM_ORIG
 esc = "Quit"
 q = "Quit"
 "/" = "FocusFilter"
-ctrl-c = "Quit"
+ctrl-c = "Abort"
 j = "Down"
 k = "Up"
 up = "Up"

@@ -177,7 +177,7 @@ Presets like `scrollback-picker.toml`, `workspace.toml`, and `keybindings.toml` 
 ctrl-b = 'ExecuteSilent(~/.config/tmux/scrollback-chrome.sh {})'
 ctrl-w = 'ExecuteSilent(~/.config/tmux/scrollback-chrome.sh {})'
 ctrl-e = 'ExecuteSilent(~/.config/tmux/scrollback-open.sh {} "$MM_ORIGIN_CWD")'
-ctrl-c = "Quit"
+ctrl-c = "Abort"
 esc = "Quit"
 
 [ui.nav.binds]

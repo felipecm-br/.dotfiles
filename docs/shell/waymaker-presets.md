@@ -14,11 +14,22 @@ Waymaker (`wm`) uses TOML configuration presets located in `~/.config/waymaker/p
 
 A layer must sit in the presets directory itself: bundled presets find their scripts next to the last file loaded (`$MM_OVERRIDE`). Fixes to the base presets arrive with Waymaker; `wm --dump-config -o rg -o rg-mine` shows the merged result, and `tests/picker_rg_files.test.sh` checks it.
 
+## Keys shared by every picker
+
+The global [`config.toml`](../../waymaker/.config/waymaker/config.toml) and every preset bind these the same way (Waymaker ≥ 0.7.2):
+
+| Key | Action |
+| :--- | :--- |
+| `Ctrl + C` | `Abort`: exits at once (exit code 130), even with items selected or a message box open |
+| `Esc` | `Quit`: unwinds one step per press (close the action box, clear selections, clear yank and cut marks), then exits; presets with a navigation mode use it to toggle focus |
+| `F1` | Help, in the query and in navigation mode |
+| `?` / `Shift + ?` / `*` | Help, switch preview, bookmark: navigation mode only (`[ui.nav.binds]`), so the query accepts them as text |
+
 ## Available Presets
 
 | Preset | Invocation | Purpose | Key Actions |
 | :--- | :--- | :--- | :--- |
-| **jump** | `wm -o jump` | Frecency directory & file navigation with tree view, `nav_mode` (`h`/`l`), File Manager operations, and editor integration. | `Enter`: `cd` to directory or insert path<br>`e` / `Ctrl+E`: Open selected item(s) in Neovim (`Execute(nvim {+})`) with frecency boost<br>`Tab` / `Shift+Tab`: Cycle data sources (Local -> Frecency -> Bookmarks)<br>`Space`: Multi-select files/directories<br>`l` / `Ctrl+L`: Drill down into child directory<br>`h` / `Ctrl+H`: Jump to parent directory<br>`u`: `@undo` (File Manager UndoStack)<br>`Ctrl+U`: Ancestor hierarchy jump (up to `/`)<br>`y` / `x` / `p` / `P`: Yank, Cut, Paste, Paste into |
+| **jump** | `wm -o jump` | Frecency directory & file navigation with tree view, `nav_mode` (`h`/`l`), File Manager operations, and editor integration. | `Enter`: `cd` to directory or insert path<br>`e` / `Ctrl+E`: Open selected item(s) in Neovim (`Execute(nvim {+})`) with frecency boost<br>`Tab` / `Shift+Tab`: Cycle data sources (Local -> Frecency -> Bookmarks)<br>`Space`: Multi-select files/directories<br>`l` / `Ctrl+L`: Drill down into child directory<br>`h` / `Ctrl+H`: Jump to parent directory<br>`*` (navigation mode): Bookmark the item under the cursor<br>`u`: `@undo` (File Manager UndoStack)<br>`Ctrl+U`: Ancestor hierarchy jump (up to `/`)<br>`y` / `x` / `p` / `P`: Yank, Cut, Paste, Paste into |
 | **workspace** | `wm -o workspace` / `workspace-picker.sh` | Fast workspace file picker & inspection for markdown, code, media, and Mermaid diagrams with borderless inline rendering. | `Enter`: Toggle 60% / 100% fullscreen preview<br>`Tab` / `Shift+Tab`: Cycle data sources (Local -> Frecency -> Bookmarks)<br>`s` (nav) / `Ctrl+S`: Toggle modal diagram preview (nearest diagram focus)<br>`Ctrl+Shift+J` / `Ctrl+Shift+K` (or `J` / `K`): Preview scroll<br>`Ctrl+V`: Insert file path into origin tmux pane<br>`e` / `o` / `Ctrl+E`: Open in Golden Ratio split Neovim pane (62% × 38%) beside AI session<br>`y` / `Ctrl+Y`: Copy selected path to clipboard |
 | **scrollback-picker** | `wm -o scrollback-picker` / `scrollback-picker.sh` | Fast regex token and command extraction from Tmux scrollback (extrakto-style) with bottom-up recency order and multi-filter tabs. | `Enter`: Copy to clipboard<br>`Ctrl+V`: Insert directly into origin pane<br>`e` / `Ctrl+E`: Open file/line token in `$EDITOR`<br>`b` / `w` / `Ctrl+B`: Open link directly in Google Chrome<br>`Tab` / `Shift-Tab`: Cycle filter modes (all → cmd → path → url → sha → all)<br>`Space`: Multi-select |
 | **rg** | `wm -o rg` / `grep-picker.sh` | Live workspace full-text search with ripgrep, debounced query reload, and line-synced `bat` preview. Default: always case-insensitive. | `Enter`: Open in Neovim at line (`nvim +{line} {file}`)<br>`Ctrl+V`: Insert `{file}:{line}` into origin tmux pane<br>`Ctrl+/`: Toggle 55% / 100% fullscreen preview<br>`y` / `Ctrl+Y`: Copy `{file}:{line}` to clipboard<br>`Ctrl+S`: Toggle **Match Case** (`[Aa]` badge, yellow prompt — S for Sensitive)<br>`Ctrl+W`: Toggle **Whole Word** (`[W]` badge — W for Word)<br>Modes: default `ic` (ignore-case) → `cs` (case-sensitive) → `ww` (word+ic) → `cs+ww` (word+case). Toggles persist across query reloads via `WM_STORE`. |
