@@ -153,15 +153,39 @@
       // tick frame
       let frame = 0;
       let timer;
+      // optional color: "colors" holds one map per frame, same layout as the frame,
+      // each character a key into "palette" (space = default color)
+      const render = (i) => {
+        const text = spinner.frames[i];
+        const map = spinner.colors && spinner.colors[i];
+        preview.replaceChildren();
+        if (!map) {
+          preview.innerText = text;
+          return;
+        }
+        for (let j = 0; j < text.length; j++) {
+          const span = document.createElement("span");
+          span.textContent = text[j];
+          const color = spinner.palette[map[j]];
+          if (color) span.style.color = color;
+          preview.append(span);
+        }
+      };
+
       const tick = () => {
         frame = (frame + 1) % spinner.frames.length;
-        preview.innerText = spinner.frames[frame];
+        render(frame);
       };
+
+      // multi-line frames are separated by a blank line in the textarea
+      const separator = () =>
+        spinner.frames.some((f) => f.includes("\n")) ? "\n\n" : "\n";
 
       const onDesignChange = (event) => {
         spinner = spinners[design.value];
         interval.value = spinner.interval;
-        frames.value = spinner.frames.join("\n");
+        frames.value = spinner.frames.join(separator());
+        frames.style.height = spinner.frames[0].includes("\n") ? "30lh" : "";
         onIntervalChange();
       };
 
@@ -182,8 +206,14 @@
       onStyleChange();
 
       const onFramesChange = () => {
-        spinner.frames = frames.value.split("\n");
-        onDesignChange();
+        const edited = frames.value.split(separator());
+        // hand-edited frames no longer line up with their color maps
+        if (spinner.colors && edited.join() !== spinner.frames.join()) {
+          delete spinner.colors;
+        }
+        spinner.frames = edited;
+        interval.value = spinner.interval;
+        onIntervalChange();
       };
     </script>
   </body>

@@ -191,6 +191,60 @@
       "⠧", "⠏", "⠛", "⠹", "⠼"
     ]
   },
+  "helix": {
+    "interval": 80,
+    "frames": [
+      "⠶⣉⣏⡱⠶⣉⣏⡱",
+      "⢎⣹⣉⠶⢎⣹⣉⠶",
+      "⣉⣏⡱⠶⣉⣏⡱⠶",
+      "⣹⣉⠶⢎⣹⣉⠶⢎",
+      "⣏⡱⠶⣉⣏⡱⠶⣉",
+      "⣉⠶⢎⣹⣉⠶⢎⣹",
+      "⡱⠶⣉⣏⡱⠶⣉⣏",
+      "⠶⢎⣹⣉⠶⢎⣹⣉"
+    ]
+  },
+  "helixVertical": {
+      "interval": 100,
+      "frames": [
+        "      ●      \n   •━━━━━●   \n •━━━━━━━━━● \n•━━━━━━━━━━━●\n ●━━━━━━━━━• \n   ●━━━━━•   \n      ●      \n   •━━━━━●   \n •━━━━━━━━━● \n•━━━━━━━━━━━●\n ●━━━━━━━━━• \n   ●━━━━━•   ",
+        "   •━━━━━●   \n •━━━━━━━━━● \n•━━━━━━━━━━━●\n ●━━━━━━━━━• \n   ●━━━━━•   \n      ●      \n   •━━━━━●   \n •━━━━━━━━━● \n•━━━━━━━━━━━●\n ●━━━━━━━━━• \n   ●━━━━━•   \n      ●      ",
+        " •━━━━━━━━━● \n•━━━━━━━━━━━●\n ●━━━━━━━━━• \n   ●━━━━━•   \n      ●      \n   •━━━━━●   \n •━━━━━━━━━● \n•━━━━━━━━━━━●\n ●━━━━━━━━━• \n   ●━━━━━•   \n      ●      \n   •━━━━━●   ",
+        "•━━━━━━━━━━━●\n ●━━━━━━━━━• \n   ●━━━━━•   \n      ●      \n   •━━━━━●   \n •━━━━━━━━━● \n•━━━━━━━━━━━●\n ●━━━━━━━━━• \n   ●━━━━━•   \n      ●      \n   •━━━━━●   \n •━━━━━━━━━● ",
+        " ●━━━━━━━━━• \n   ●━━━━━•   \n      ●      \n   •━━━━━●   \n •━━━━━━━━━● \n•━━━━━━━━━━━●\n ●━━━━━━━━━• \n   ●━━━━━•   \n      ●      \n   •━━━━━●   \n •━━━━━━━━━● \n•━━━━━━━━━━━●",
+        "   ●━━━━━•   \n      ●      \n   •━━━━━●   \n •━━━━━━━━━● \n•━━━━━━━━━━━●\n ●━━━━━━━━━• \n   ●━━━━━•   \n      ●      \n   •━━━━━●   \n •━━━━━━━━━● \n•━━━━━━━━━━━●\n ●━━━━━━━━━• ",
+        "      ●      \n   •━━━━━●   \n •━━━━━━━━━● \n•━━━━━━━━━━━●\n ●━━━━━━━━━• \n   ●━━━━━•   \n      ●      \n   •━━━━━●   \n •━━━━━━━━━● \n•━━━━━━━━━━━●\n ●━━━━━━━━━• \n   ●━━━━━•   ",
+        "   •━━━━━●   \n •━━━━━━━━━● \n•━━━━━━━━━━━●\n ●━━━━━━━━━• \n   ●━━━━━•   \n      ●      \n   •━━━━━●   \n •━━━━━━━━━● \n•━━━━━━━━━━━●\n ●━━━━━━━━━• \n   ●━━━━━•   \n      ●      ",
+        " •━━━━━━━━━● \n•━━━━━━━━━━━●\n ●━━━━━━━━━• \n   ●━━━━━•   \n      ●      \n   •━━━━━●   \n •━━━━━━━━━● \n•━━━━━━━━━━━●\n ●━━━━━━━━━• \n   ●━━━━━•   \n      ●      \n   •━━━━━●   ",
+        "•━━━━━━━━━━━●\n ●━━━━━━━━━• \n   ●━━━━━•   \n      ●      \n   •━━━━━●   \n •━━━━━━━━━● \n•━━━━━━━━━━━●\n ●━━━━━━━━━• \n   ●━━━━━•   \n      ●      \n   •━━━━━●   \n •━━━━━━━━━● ",
+        " ●━━━━━━━━━• \n   ●━━━━━•   \n      ●      \n   •━━━━━●   \n •━━━━━━━━━● \n•━━━━━━━━━━━●\n ●━━━━━━━━━• \n   ●━━━━━•   \n      ●      \n   •━━━━━●   \n •━━━━━━━━━● \n•━━━━━━━━━━━●",
+        "   ●━━━━━•   \n      ●      \n   •━━━━━●   \n •━━━━━━━━━● \n•━━━━━━━━━━━●\n ●━━━━━━━━━• \n   ●━━━━━•   \n      ●      \n   •━━━━━●   \n •━━━━━━━━━● \n•━━━━━━━━━━━●\n ●━━━━━━━━━• "
+      ],
+      "colors": [
+        "      X      \n   yCCGGGX   \n yAAAATTTTTX \nyGGGGGCCCCCCX\n YTTTTAAAAAx \n   YGGCCCx   \n      Y      \n   xTTAAAY   \n xAAAATTTTTY \nxGGGGGCCCCCCY\n XCCCCGGGGGy \n   XTTAAAy   ",
+        "   yTTAAAX   \n yCCCCGGGGGX \nyAAAAATTTTTTX\n YGGGGCCCCCx \n   YTTAAAx   \n      Y      \n   xGGCCCY   \n xTTTTAAAAAY \nxAAAAATTTTTTY\n XGGGGCCCCCy \n   XCCGGGy   \n      X      ",
+        " yTTTTAAAAAX \nyCCCCCGGGGGGX\n YAAAATTTTTx \n   YGGCCCx   \n      Y      \n   xCCGGGY   \n xGGGGCCCCCY \nxTTTTTAAAAAAY\n XAAAATTTTTy \n   XGGCCCy   \n      X      \n   yAATTTX   ",
+        "yTTTTTAAAAAAX\n YCCCCGGGGGx \n   YAATTTx   \n      Y      \n   xAATTTY   \n xCCCCGGGGGY \nxGGGGGCCCCCCY\n XTTTTAAAAAy \n   XAATTTy   \n      X      \n   yGGCCCX   \n yAAAATTTTTX ",
+        " YTTTTAAAAAx \n   YCCGGGx   \n      Y      \n   xCCGGGY   \n xAAAATTTTTY \nxCCCCCGGGGGGY\n XGGGGCCCCCy \n   XTTAAAy   \n      X      \n   yCCGGGX   \n yGGGGCCCCCX \nyAAAAATTTTTTX",
+        "   YTTAAAx   \n      Y      \n   xTTAAAY   \n xCCCCGGGGGY \nxAAAAATTTTTTY\n XCCCCGGGGGy \n   XGGCCCy   \n      X      \n   yTTAAAX   \n yCCCCGGGGGX \nyGGGGGCCCCCCX\n YAAAATTTTTx ",
+        "      Y      \n   xGGCCCY   \n xTTTTAAAAAY \nxCCCCCGGGGGGY\n XAAAATTTTTy \n   XCCGGGy   \n      X      \n   yAATTTX   \n yTTTTAAAAAX \nyCCCCCGGGGGGX\n YGGGGCCCCCx \n   YAATTTx   ",
+        "   xAATTTY   \n xGGGGCCCCCY \nxTTTTTAAAAAAY\n XCCCCGGGGGy \n   XAATTTy   \n      X      \n   yCCGGGX   \n yAAAATTTTTX \nyTTTTTAAAAAAX\n YCCCCGGGGGx \n   YGGCCCx   \n      Y      ",
+        " xAAAATTTTTY \nxGGGGGCCCCCCY\n XTTTTAAAAAy \n   XCCGGGy   \n      X      \n   yGGCCCX   \n yCCCCGGGGGX \nyAAAAATTTTTTX\n YTTTTAAAAAx \n   YCCGGGx   \n      Y      \n   xTTAAAY   ",
+        "xAAAAATTTTTTY\n XGGGGCCCCCy \n   XTTAAAy   \n      X      \n   yTTAAAX   \n yGGGGCCCCCX \nyCCCCCGGGGGGX\n YAAAATTTTTx \n   YTTAAAx   \n      Y      \n   xCCGGGY   \n xTTTTAAAAAY ",
+        " XAAAATTTTTy \n   XGGCCCy   \n      X      \n   yGGCCCX   \n yTTTTAAAAAX \nyGGGGGCCCCCCX\n YCCCCGGGGGx \n   YAATTTx   \n      Y      \n   xGGCCCY   \n xCCCCGGGGGY \nxTTTTTAAAAAAY",
+        "   XAATTTy   \n      X      \n   yAATTTX   \n yGGGGCCCCCX \nyTTTTTAAAAAAX\n YGGGGCCCCCx \n   YCCGGGx   \n      Y      \n   xAATTTY   \n xGGGGCCCCCY \nxCCCCCGGGGGGY\n XTTTTAAAAAy "
+      ],
+      "palette": {
+        "X": "#7dcfff",
+        "x": "#2f5f7f",
+        "Y": "#bb9af7",
+        "y": "#4f3f72",
+        "A": "#f7768e",
+        "T": "#e0af68",
+        "G": "#9ece6a",
+        "C": "#7aa2f7"
+      }
+  },
   "train": {
     "interval": 100,
     "frames": [
