@@ -1,6 +1,8 @@
 git:
   commit:
-    generateCommand: "lazycommit commit --message-only --silent-empty"
+    # Title + body from the staged diff (stdin); fastest-first chain: claude haiku → agy flash → opencode.
+    # lazycommit's single-line output and stale model list are why this replaced it (see the script header).
+    generateCommand: "ai-commit-msg"
 
 gui:
   border: "rounded"
@@ -15,8 +17,9 @@ keybinding:
     quit-alt1: "<c-c>"
     return: "<escape>"
   files:
-    generateAICommit: "G"
-    commitChanges: "C"
+    # c opens the commit popup pre-filled by AI; G opens it empty (manual message)
+    generateAICommit: "c"
+    commitChanges: "G"
   commitMessage:
     commitMenu: "<c-o>"
     aiGenerate: "<c-a>"

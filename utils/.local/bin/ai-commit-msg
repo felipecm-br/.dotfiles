@@ -1,0 +1,96 @@
+#!/usr/bin/env bash
+# ai-commit-msg — Commit title + body from a staged diff on stdin, via the fastest agent CLI available
+#
+#   git diff --cached | ai-commit-msg     Prints "type(scope): title\n\nbody"
+#   LAZYGITRS_AI_COMMIT_INPUT=prompt      stdin is a complete prompt (lazygitrs smart
+#                                         commit / sgc); it is sent verbatim and the raw
+#                                         answer (JSON plan) is printed untouched.
+#
+# Used as lazygitrs git.commit.generateCommand (lazygitrs pipes `git diff --cached` on stdin).
+# Benchmarked 2026-11-13 on a 12 KB diff (one-shot, same prompt):
+#   claude haiku 4.4–6.6s · agy gemini-3.8-flash-low 6.4s · opencode mimo-v2.6-flash-free 12.8s
+#   opencode glm-5.3-flash-free 13.0s · deepseek-v4.1-flash-free 18.7s · lazycommit (stale models) failed
+#   muse: billing error · devin: refuses untrusted workspaces in print mode
+# Order: AI_COMMIT_CHAIN="claude agy opencode" (first that succeeds wins).
+# Overrides: AI_COMMIT_CLAUDE_MODEL, AI_COMMIT_AGY_MODEL, AI_COMMIT_OPENCODE_MODEL, AI_COMMIT_TIMEOUT,
+#            LAZYGITRS_AI_PROVIDER / LAZYGITRS_AI_MODEL (set by lazygitrs gc/sgc -P / -m).
+
+set -uo pipefail
+
+MODE=${LAZYGITRS_AI_COMMIT_INPUT:-stdin-diff}
+MAX_BYTES=${AI_COMMIT_MAX_BYTES:-60000}
+CHAIN=${AI_COMMIT_CHAIN:-claude agy opencode}
+# lazygitrs gc/sgc -P/--provider and -m/--model: pin one agent and/or its model.
+if [ -n "${LAZYGITRS_AI_PROVIDER:-}" ]; then
+  CHAIN=$LAZYGITRS_AI_PROVIDER
+elif [ -n "${LAZYGITRS_AI_MODEL:-}" ]; then
+  CHAIN=${CHAIN%% *}   # a model name only makes sense for one agent
+fi
+if [ -n "${LAZYGITRS_AI_MODEL:-}" ]; then
+  AI_COMMIT_CLAUDE_MODEL=$LAZYGITRS_AI_MODEL
+  AI_COMMIT_AGY_MODEL=$LAZYGITRS_AI_MODEL
+  AI_COMMIT_OPENCODE_MODEL=$LAZYGITRS_AI_MODEL
+fi
+if [ "$MODE" = prompt ]; then
+  # Planning a whole working tree is a bigger job than one message.
+  TIMEOUT=${AI_COMMIT_TIMEOUT:-120}
+  MAX_BYTES=${AI_COMMIT_MAX_BYTES:-120000}
+else
+  TIMEOUT=${AI_COMMIT_TIMEOUT:-45}
+fi
+
+diff=$(head -c "$MAX_BYTES")
+if [ -z "${diff//[[:space:]]/}" ]; then
+  echo "ai-commit-msg: no input on stdin" >&2
+  exit 1
+fi
+
+if [ "$MODE" = prompt ]; then
+  prompt=$diff
+else
+prompt="Write a git commit message for the staged diff below. Output ONLY the message: no preamble, no code fences, no trailers (no Co-Authored-By).
+Line 1: conventional-commit title, type(scope): summary, imperative mood, max 72 chars.
+Line 2: blank.
+Then a concise body of 1-5 '-' bullets explaining what changed and why. Wrap at 72 columns.
+
+$diff"
+fi
+
+# Agents print into a scratch dir so they never pick up repo context or need workspace trust
+work=$(mktemp -d)
+trap 'rm -rf "$work"' EXIT
+cd "$work" || exit 1
+
+try() {
+  case $1 in
+    claude) command -v claude >/dev/null &&
+      timeout "$TIMEOUT" claude -p --model "${AI_COMMIT_CLAUDE_MODEL:-haiku}" "$prompt" ;;
+    agy) command -v agy >/dev/null &&
+      timeout "$TIMEOUT" agy --model "${AI_COMMIT_AGY_MODEL:-gemini-3.8-flash-low}" \
+        --disable-slash-commands -p="$prompt" ;;
+    opencode) command -v opencode >/dev/null &&
+      timeout "$TIMEOUT" opencode run -m "${AI_COMMIT_OPENCODE_MODEL:-opencode/mimo-v2.6-flash-free}" "$prompt" ;;
+    *) return 1 ;;
+  esac
+}
+
+clean() { # Drop code fences, trailers and leading/trailing blank lines
+  sed -E '/^```/d; /^(Co-Authored-By|Signed-off-by|Generated with):?/Id' |
+    awk 'NF{found=1} found' | sed -e :a -e '/^\n*$/{$d;N;ba' -e '}'
+}
+
+for agent in $CHAIN; do
+  if [ "$MODE" = prompt ]; then
+    out=$(try "$agent" 2>/dev/null)   # lazygitrs parses the JSON itself
+  else
+    out=$(try "$agent" 2>/dev/null | clean)
+  fi
+  if [ -n "$out" ]; then
+    printf '%s\n' "$out"
+    exit 0
+  fi
+  echo "ai-commit-msg: $agent failed, trying next" >&2
+done
+
+echo "ai-commit-msg: every agent in '$CHAIN' failed" >&2
+exit 1
