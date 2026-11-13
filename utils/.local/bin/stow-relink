@@ -1,0 +1,79 @@
+#!/usr/bin/env bash
+# stow-relink — put back stow symlinks that an app replaced with a plain file.
+#
+# Some apps save their config atomically (write a temp file, rename it over
+# the target). That replaces the stow symlink with a regular file, so the
+# change never reaches the dotfiles repo and the next stow conflicts.
+# Omarchy's shell does this to ~/.config/omarchy/shell.json whenever the bar
+# is changed from the UI or `omarchy bar`.
+#
+# For each watched path that is now a regular file, stow-relink copies its
+# content into the repo file it used to link to, then restores the symlink.
+# The change shows up as a normal `git diff` in ~/.dotfiles/main.
+#
+# Usage:
+#   stow-relink            # check every watched path once
+#   stow-relink --list     # print the watched paths and their state
+#
+# Runs by itself through stow-relink.path (systemd user unit). To watch
+# another file, add it to WATCHED below and a PathChanged= line to
+# stow-relink.path.
+
+set -euo pipefail
+
+DOTFILES="${DOTFILES:-$HOME/.dotfiles/main}"
+
+# <stow package>:<path relative to $HOME>
+WATCHED=(
+  "omarchy:.config/omarchy/shell.json"
+)
+
+log() { printf 'stow-relink: %s\n' "$*"; }
+
+relink() {
+  local pkg="${1%%:*}" rel="${1#*:}"
+  local target="$HOME/$rel" source="$DOTFILES/$pkg/$rel"
+
+  [[ -L $target ]] && return 0       # still a link: nothing to do
+  [[ -f $target ]] || return 0       # gone or not a file: leave it alone
+  if [[ ! -f $source ]]; then
+    log "no repo file for $rel at $source, skipping"
+    return 0
+  fi
+
+  if cmp -s "$target" "$source"; then
+    log "$rel replaced with identical content, relinking"
+  else
+    # Write into the existing repo file so it keeps its mode and git sees an edit.
+    cat "$target" >"$source"
+    log "$rel changed outside the repo, saved to $pkg/$rel"
+  fi
+
+  # Same relative link stow creates, swapped in with a rename so there is no
+  # moment where the path is missing for the app that is watching it.
+  local link tmp
+  link=$(realpath --relative-to="$(dirname "$target")" "$source")
+  tmp="$(dirname "$target")/.stow-relink.$$"
+  ln -s "$link" "$tmp"
+  mv -T "$tmp" "$target"
+}
+
+case "${1:-}" in
+  --list)
+    for entry in "${WATCHED[@]}"; do
+      rel="${entry#*:}"
+      if [[ -L $HOME/$rel ]]; then state="link"; elif [[ -f $HOME/$rel ]]; then state="FILE (needs relink)"; else state="missing"; fi
+      printf '%-45s %s\n' "~/$rel" "$state"
+    done
+    ;;
+  -h|--help)
+    sed -n '2,20p' "$0" | sed 's/^# \{0,1\}//'
+    ;;
+  "")
+    for entry in "${WATCHED[@]}"; do relink "$entry"; done
+    ;;
+  *)
+    echo "Unknown option: $1" >&2
+    exit 1
+    ;;
+esac

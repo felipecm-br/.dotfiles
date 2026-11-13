@@ -78,7 +78,8 @@ zsh .shell/install/install.zsh
    ./stow.sh -n && ./stow.sh -s
    ```
 6. **User services:** `systemctl --user daemon-reload`, then enable `waymux`, `ai-memory`,
-   `dev-gc.timer`, `ai-quota-refresh.timer`, `cockpit-shutdown-save` and `agent-sudod`.
+   `dev-gc.timer`, `ai-quota-refresh.timer`, `cockpit-shutdown-save`, `agent-sudod` and `stow-relink.path`
+   (Omarchy's shell saves `shell.json` over its symlink; this puts the link back).
 7. **Restore and log in:** extract the backup, then sign in again to `gh auth login`, Claude, Codex, Bitwarden and `sudo tailscale up`.
 8. **Finish:** `~/.config/tmux/key-telemetry.py install`, `ai-update --check`.
 

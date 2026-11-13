@@ -1,0 +1,10 @@
+[Unit]
+Description=stow-relink: watch stowed configs that apps save over their symlink
+Documentation=file://%h/.dotfiles/main/docs/utils.md
+
+[Path]
+# One line per entry in WATCHED in ~/.local/bin/stow-relink.
+PathChanged=%h/.config/omarchy/shell.json
+
+[Install]
+WantedBy=default.target

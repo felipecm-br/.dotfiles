@@ -62,7 +62,7 @@ Stow a package with `./stow.sh <package>` (see [stow.sh](../../stow.sh)); everyt
 | `ai-launch`, `ai-switch`, `ai-quota`, `ai-failover`, `ai-prompt`, `awt-fan`, `cockpit*`, `codex-hook`, `ai-launch-models`, `ai-switch-rows` | `needs: waymux` | `waymux`; `wm` for menus; `ai-memory` for `ai-failover` continuity; `jq` for `codex-hook` and `ai-prompt`'s stash stack |
 | `ai-launch-exec` jailed rows, `agent-sudo`, `agent-sudod` | `needs: ai-jail` · `agent-sudo` is `needs: root` by design | `ai-jail` (bubblewrap); `agent-sudo` runs what you approve with `sudo` |
 | `agy`, `agyy`, `ai-quota-agy`, `ai-switch-agy` | `host-only` | Antigravity accounts of this machine |
-| `dev-gc`, `stow-it`, `key-telemetry`, `flow-telemetry`, `chime-at-breakpoint` | `portable` | dev-gc: cargo-clean-all; telemetry: tmux |
+| `dev-gc`, `stow-it`, `stow-relink`, `key-telemetry`, `flow-telemetry`, `chime-at-breakpoint` | `portable` | dev-gc: cargo-clean-all; telemetry: tmux |
 | `killothers`, `memtop`, `gpucheck` | `portable` | Run as your user; they only *suggest* `sudo` for processes or settings you do not own |
 | `gpu-toggle` | `needs: root` | EnvyControl + reboot |
 | `update-ai-workflow` (`ai-update`) | `needs: root` | Installs through `yay` / `pacman` |
@@ -70,7 +70,7 @@ Stow a package with `./stow.sh <package>` (see [stow.sh](../../stow.sh)); everyt
 | `ai-inventory` | `portable` | `jq`; `wm` for `--picker` |
 | `hypr-anim`, `hypr-border`, `hypr-sound`, `border-gradient` | `host-only` | Hyprland |
 | `omarchy-clean` | `host-only` · `needs: root` | Omarchy (`/etc/skel`, `omarchy-provision-user`); `sudo` for `useradd` / `userdel` |
-| User units in `utils/.config/systemd/user` | `portable` | user systemd (`ai-quota-refresh`, `dev-gc`, `cockpit-shutdown-save`, `agent-sudod`) |
+| User units in `utils/.config/systemd/user` | `portable` | user systemd (`ai-quota-refresh`, `dev-gc`, `cockpit-shutdown-save`, `agent-sudod`, `stow-relink.path`) |
 
 ### Desktop & hardware
 

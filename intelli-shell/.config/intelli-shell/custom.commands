@@ -828,3 +828,9 @@ omarchy-clean status
 
 # Delete the clean stock Omarchy test user and its home
 omarchy-clean remove
+
+# Restore stow symlinks that apps replaced with plain files (saves their content to the repo first)
+stow-relink
+
+# Show whether each watched stowed config is still a symlink
+stow-relink --list

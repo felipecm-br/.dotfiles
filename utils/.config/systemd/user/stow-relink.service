@@ -1,0 +1,10 @@
+[Unit]
+Description=stow-relink: copy app-saved configs into the dotfiles repo and restore their symlinks
+Documentation=file://%h/.dotfiles/main/docs/utils.md
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/stow-relink
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=stow-relink

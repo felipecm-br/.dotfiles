@@ -10,6 +10,8 @@
           "id": "omarchy.system-update"
         }
       ],
+      "centerBegin": [],
+      "centerEnd": [],
       "left": [
         {
           "id": "fecavmi.menu"
@@ -31,9 +33,9 @@
         {
           "id": "akitaonrails.ai-usagebar",
           "lastSelectedEntryId": "antigravity",
-          "showValue": true,
+          "showAll": false,
           "showProvider": false,
-          "showAll": false
+          "showValue": true
         },
         {
           "format": "dddd HH:mm",
@@ -66,16 +68,16 @@
     },
     "position": "top"
   },
+  "cloneSourceRestores": [
+    "fecavmi.menu"
+  ],
+  "disabledPlugins": [
+    "omarchy.menu"
+  ],
   "idle": {
     "lock": 300,
     "screensaver": 150
   },
   "plugins": [],
-  "version": 1,
-  "disabledPlugins": [
-    "omarchy.menu"
-  ],
-  "cloneSourceRestores": [
-    "fecavmi.menu"
-  ]
+  "version": 1
 }
