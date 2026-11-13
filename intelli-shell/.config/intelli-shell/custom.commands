@@ -187,10 +187,10 @@ ai-prompt edit
 # Stash the AI agent prompt draft to run a /command first, or bring the stash back (Prefix+V)
 ai-prompt stash
 
-# Stash the draft and bring it back by itself once the /command ran (busy, then idle)
-ai-prompt stash --after-cmd
+# Stash the draft and bring it back by itself once the /command ran, busy then idle (Ctrl+S)
+ai-prompt key
 
-# Open the prompt stash & presets picker: every stash from any agent, presets 0-9, the delivery queue
+# Open the prompt stash & presets picker: every stash from any agent, presets 0-9, the delivery queue (Prefix+S)
 ai-prompt picker
 
 # List the persistent prompt stash stack and presets (slot, agent, age, lines, where, text, id)

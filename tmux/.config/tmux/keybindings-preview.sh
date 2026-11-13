@@ -278,10 +278,11 @@ EOF
 
   tmux-ai-prompt-stash)
     cat <<'EOF'
-### 󰆓 AI Prompt Draft Stash / Restore (`Prefix + V`)
-Toggle for the agent in the current pane (`ai-prompt stash`): the first press puts the draft aside and empties the prompt, so a `/command` can be the first word; the second press brings the draft back.
+### 󰆓 AI Prompt Draft Stash / Restore (`Ctrl + S`, `Prefix + V`)
+Toggle for the agent in the current pane: the first press puts the draft aside and empties the prompt, so a `/command` can be the first word; the second press brings the draft back.
 
-- **Flow**: `Prefix + V`, type `/compact` `Enter`, `Prefix + V`. Works on every agent, also those without mid-prompt slash commands.
+- **Ergonomics**: `Ctrl + S` (`CapsLock + S`, one inward roll, no prefix) is Claude Code's own stash key, now on every agent; it shows in ~30–80 ms. On a pane with no agent (shell, Neovim) `Ctrl + S` is passed through untouched, and popups never see it. `Prefix + V` stays as the same toggle.
+- **Flow**: `Ctrl + S`, type `/compact` `Enter`: the draft comes back by itself once the command ran (busy, then idle; `AI_PROMPT_AUTO_RESTORE=0` turns that off). Or press `Ctrl + S` again. `Prefix + V` never restores by itself.
 - **Merge**: text typed in between and not sent stays, after the restored draft.
 - **Also**: `Prefix + A` (model / effort switch) uses the same stash, so a draft no longer blocks a switch.
 - **Persistent**: every stash is also kept on a stack (`~/.local/state/waymux/prompt-stash.jsonl`, 50 entries, `0600`), so it survives a tmux or host restart: the Command Palette's *AI Prompt Stash & Presets* puts it back into any pane.
@@ -313,13 +314,14 @@ EOF
 EOF
     ;;
 
-  cmd-prompt-stash)
+  tmux-prompt-stash)
     cat <<'EOF'
-### 󰆓 AI Prompt Stash & Presets (`75% × 60%`)
-Every draft `Prefix + V` stashed, from any agent, and the presets pinned at `0`–`9` (Codex `chat.open_presets` parity). `Tab` switches to the pane's `waymux` delivery queue.
+### 󰆓 AI Prompt Stash & Presets (`Prefix + S`, `75% × 60%`)
+Every draft `Ctrl + S` / `Prefix + V` stashed, from any agent, and the presets pinned at `0`–`9` (Codex `chat.open_presets` parity). `Tab` switches to the pane's `waymux` delivery queue.
 
-- **Controls**: `Enter` put the entry into the pane's prompt (also one stashed from another agent) · `0`–`9` put a preset · `e` edit in Neovim · `s` pin as preset · `u` unpin · `d` drop (a preset asks first).
-- **Queue tab**: `Enter` / `e` edit a held prompt (it moves to the end of the queue) · `d` drop it.
+- **Ergonomics**: `S` = **S**tash, the browsing twin of `Ctrl + S`. `Prefix + S` `3` puts preset 3 in three keys.
+- **Controls**: `Enter` put the entry into the pane's prompt (also one stashed from another agent) · `0`–`9` put a preset · `e` edit in Neovim · `p` pin as a preset, or unpin · `d` drop (a preset asks first).
+- **Queue tab**: `Enter` type the queued prompt now, over a draft hold · `e` edit it · `d` drop it.
 - **CLI**: `ai-prompt list | send <id> | preset <0-9> | save <0-9> [text]`.
 EOF
     ;;

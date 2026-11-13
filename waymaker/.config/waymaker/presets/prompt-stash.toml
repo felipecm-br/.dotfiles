@@ -1,6 +1,7 @@
 # Waymaker Prompt Stash & Presets (`wm -o prompt-stash`, opened by prompt-stash-picker.sh).
-# Rows: every draft stashed with Prefix + V (any agent, persistent) and the presets pinned at 0–9.
-# Tab switches to the pane's waymux delivery queue. Enter puts the entry into the pane's prompt.
+# Rows: every draft stashed with Ctrl+S / Prefix + V (any agent, persistent) and the presets pinned
+# at 0–9. Tab switches to the pane's waymux delivery queue. Enter puts the entry into the pane's
+# prompt (queue tab: types the queued prompt now, over a draft hold). p pins / unpins a preset slot.
 
 [tui]
 percentage = 100
@@ -28,7 +29,7 @@ style.fg = "Cyan"
 style.modifier = "BOLD"
 
 [footer]
-content = " {cyan,bold:Enter} {darkgray:Put} {darkgray:│} {cyan,bold:0-9} {darkgray:Preset} {darkgray:│} {cyan,bold:e} {darkgray:Edit} {darkgray:│} {cyan,bold:s} {darkgray:Pin} {darkgray:│} {cyan,bold:d} {darkgray:Drop} {darkgray:│} {cyan,bold:S} {darkgray:Send Queued Now} {darkgray:│} {cyan,bold:Tab} {darkgray:Queue} {darkgray:│} {cyan,bold:Esc} {darkgray:Close}"
+content = " {cyan,bold:Enter} {darkgray:Put · Send Queued} {darkgray:│} {cyan,bold:0-9} {darkgray:Preset} {darkgray:│} {cyan,bold:e} {darkgray:Edit} {darkgray:│} {cyan,bold:p} {darkgray:Pin} {darkgray:│} {cyan,bold:d} {darkgray:Drop} {darkgray:│} {cyan,bold:Tab} {darkgray:Queue} {darkgray:│} {cyan,bold:Esc} {darkgray:Close}"
 row_connection = "Full"
 match_indent = false
 separator = "light"
@@ -122,9 +123,7 @@ output_template = "{7}"
 "nav^^q" = "Quit"
 "nav^^esc" = "Quit"
 "nav^^e" = ["Execute(~/.config/tmux/prompt-stash-picker.sh --act edit {7})", "Reload"]
-"nav^^s" = ["Execute(~/.config/tmux/prompt-stash-picker.sh --act pin {7})", "Reload"]
-"nav^^S" = ["Execute(~/.config/tmux/prompt-stash-picker.sh --act send {7})", "Reload"]
-"nav^^u" = ["ExecuteSilent(~/.config/tmux/prompt-stash-picker.sh --act unpin {7})", "Reload"]
+"nav^^p" = ["Execute(~/.config/tmux/prompt-stash-picker.sh --act pin {7})", "Reload"]
 "nav^^d" = ["Execute(~/.config/tmux/prompt-stash-picker.sh --act drop {7})", "Reload"]
 "nav^^0" = ["ExecuteSilent(~/.config/tmux/prompt-stash-picker.sh --act preset 0)", "Quit"]
 "nav^^1" = ["ExecuteSilent(~/.config/tmux/prompt-stash-picker.sh --act preset 1)", "Quit"]

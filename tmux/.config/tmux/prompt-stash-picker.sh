@@ -2,7 +2,8 @@
 # prompt-stash-picker.sh — Prompt Stash & Presets popup (Golden Ratio 75% × 60%, 40/60 split).
 # Every draft Prefix + V stashed, from any agent, plus the presets pinned at 0–9; Tab switches to
 # the waymux delivery queue of the pane. Enter puts the entry into the pane's prompt (even one
-# stashed from another agent), 0–9 put a preset, e edits, s pins, d drops.
+# stashed from another agent; queue tab: types it now), 0–9 put a preset, e edits, p pins or
+# unpins, d drops. Opened by Prefix + S.
 #   prompt-stash-picker.sh ['#{pane_id}']        open the popup over the pane
 #   prompt-stash-picker.sh --rows <stash|queue>  rows for wm (Reload)
 #   prompt-stash-picker.sh --act <verb> <id>     a key's action, run by wm inside the popup
@@ -16,7 +17,7 @@ WAYMUX=$(command -v waymux 2>/dev/null || echo "$HOME/.local/bin/waymux")
 rows() { # <stash|queue>: slot, agent, age, lines, where, text, id
   case $1 in
     queue)
-      printf ' 󰇮\tQUEUE\t%s\t\t\t%s\t\n' "${WM_ORIGIN_PANE:-}" "Tab: stash & presets"
+      printf ' 󰇮\tQUEUE\t%s\t\t\t%s\t\n' "${WM_ORIGIN_PANE:-}" "Enter: send now · Tab: stash & presets"
       "$WAYMUX" queue ls "${WM_ORIGIN_PANE:-}" 2>/dev/null |
         while IFS=$'\t' read -r pane id status by text; do
           printf 'Q%s\t%s\t%s\t%s\t%s\t%s\tq:%s:%s\n' "$id" "$by" "$status" "" "$pane" "$text" "$pane" "$id"
@@ -63,6 +64,11 @@ act() { # <verb> <id>
     preset) "$AI_PROMPT" -t "$pane" preset "$id" ;;
     edit) "$AI_PROMPT" edit-entry "$id" ;;
     pin)
+      # A pinned preset unpins; anything else asks for its slot
+      if "$AI_PROMPT" list | awk -F'\t' -v id="$id" '$7 == id && $1 ~ /^\[/ {f = 1} END {exit !f}'; then
+        "$AI_PROMPT" unpin "$id"
+        return 0
+      fi
       printf '\n  󰐃 Pin as preset · slot 0-9 (Esc cancels): '
       read -rsn1 slot
       [[ $slot =~ ^[0-9]$ ]] && "$AI_PROMPT" pin "$id" "$slot" 2>/dev/null
@@ -115,7 +121,5 @@ id=$("$WM_BIN" -o prompt-stash 2>/dev/null)
 id=${id#\'}
 id=${id%\'}
 [ -n "$id" ] || exit 0
-case $id in
-  q:*) act edit "$id" ;;
-  *) act send "$id" ;;
-esac
+# Enter: put a stash into the prompt; on the queue tab, type the queued prompt now
+act send "$id"

@@ -189,3 +189,21 @@ if command -v wm >/dev/null 2>&1; then
 else
   echo "skip: wm not installed (picker end to end)"
 fi
+
+# 17. Ctrl+S: root binding guarded to agent panes, Prefix + S opens the picker
+grep -q "^bind-key -n C-s if-shell -F '#{||:#{@ai_session},#{m/r:^(claude|codex|opencode|agy|agy-bin|antigravity|devin)\$,#{pane_current_command}}}'" "$CONF" &&
+  grep -q "ai-prompt -t '#{pane_id}' key" "$CONF" && grep -q "'send-keys C-s'\$" "$CONF" &&
+  ok "Ctrl+S bound on agent panes, passed through elsewhere" || bad "C-s binding"
+grep -q "^bind-key S run-shell \"~/.local/bin/ai-prompt -t '#{pane_id}' picker" "$CONF" && ok "Prefix + S opens the picker" || bad "S binding"
+# key on a pane with no agent passes Ctrl+S through
+tmux new-session -d -s raw -x 80 -y 10 "stty raw -echo; cat -v"
+sleep 0.3
+W=$(tmux display-message -p -t raw: '#{pane_id}')
+ai-prompt -t "$W" key; sleep 0.3
+tmux capture-pane -p -t "$W" | grep -qF '^S' && ok "key: no agent -> Ctrl+S passed through" || bad "passthrough: $(tmux capture-pane -p -t "$W")"
+# key on an agent: stash, then back on its own after busy -> idle (fake waymux wait)
+tmux send-keys -t "$O" Enter; sleep 0.2
+tmux send-keys -t "$O" -l "ctrl s draft"; sleep 0.2
+PATH="$HOME/fakebin:$PATH" ai-prompt -t "$O" key 2>/dev/null
+for _ in $(seq 30); do [ "$(line "$O")" = "› ctrl s draft" ] && break; sleep 0.1; done
+[ "$(line "$O")" = "› ctrl s draft" ] && ok "key: stash comes back on its own after the /command" || bad "key autorestore: $(line "$O")"

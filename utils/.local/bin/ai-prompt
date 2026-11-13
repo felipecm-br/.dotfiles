@@ -5,6 +5,9 @@
 #                                it back, :cq leaves the draft untouched (Prefix + v)
 #   ai-prompt [-t pane] stash    Toggle: put the draft aside and empty the prompt, or bring it back when a
 #                                stash exists (Prefix + V; run a /command in between)
+#   ai-prompt [-t pane] key      Ctrl+S: stash toggle that comes back on its own after the /command;
+#                                no agent in the pane passes Ctrl+S through, an agent started before
+#                                $VISUAL=ai-prompt gets its own Ctrl+S (Claude Code's stash)
 #   ai-prompt [-t pane] take     Put the draft aside and empty the prompt (exit 1: nothing to take)
 #   ai-prompt [-t pane] put      Bring the stashed draft back, before any text typed since
 #   ai-prompt [-t pane] --ready  Exit 0 when the pane's agent was started with ai-prompt as its editor
@@ -62,7 +65,7 @@ spawned_by_agent() {
   return 1
 }
 
-ACTIONS=' edit stash take put picker send preset list show pin unpin drop edit-entry save _autorestore _carry '
+ACTIONS=' edit stash key take put picker send preset list show pin unpin drop edit-entry save _autorestore _carry '
 if [ $# -ge 1 ] && [[ $1 != -* && $ACTIONS != *" $1 "* ]]; then
   file=${!#}
   key=${TMUX_PANE#%}
@@ -117,7 +120,7 @@ after_cmd=${AI_PROMPT_AUTO_RESTORE:-0}
 while [ $# -gt 0 ]; do
   case $1 in
     -t) pane=${2:-}; shift 2 ;;
-    -h | --help) sed -n '2,29p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    -h | --help) sed -n '2,32p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
     *) break ;;
   esac
 done
@@ -238,7 +241,12 @@ agent_pid() {
   ps -s "$pid" -o pid=,comm= 2>/dev/null | awk -v re="$AGENT_RE" '$2 ~ re {print $1, $2; exit}' | grep .
 }
 
-[ -n "$pane" ] && read -r pid agent < <(agent_pid) || { say "No AI agent in this pane · Prefix + a launches one"; exit 1; }
+if ! { [ -n "$pane" ] && read -r pid agent < <(agent_pid); }; then
+  # Ctrl+S outside an agent (shell, nvim, a pane whose agent exited) keeps its own meaning
+  [ "$action" = key ] && { tmux send-keys -t "$pane" C-s; exit 0; }
+  say "No AI agent in this pane · Prefix + a launches one"
+  exit 1
+fi
 case $agent in agy-bin | antigravity) agent=agy ;; esac
 
 # The agent took $VISUAL / $EDITOR at start: agents started before ai-prompt was set open their own editor
@@ -263,9 +271,10 @@ request() { # <take|put> [source file for put]
   printf '%s' "${2:-}" >"$RUN/$key.$1"
   send_editor_key
   local i
-  for i in $(seq 30); do
-    [ -f "$RUN/$key.$1" ] || { sleep 0.15; return 0; } # served; let the agent redraw its prompt
-    sleep 0.1
+  # 10 ms polls: the agent serves a request in ~30-80 ms, and a key binding waits on this
+  for i in $(seq 300); do
+    [ -f "$RUN/$key.$1" ] || { sleep "${AI_PROMPT_SETTLE:-0.15}"; return 0; } # served; let the agent redraw
+    sleep 0.01
   done
   rm -f "$RUN/$key.$1"
   say "$agent did not open its editor: is it waiting on a dialog?"
@@ -316,6 +325,16 @@ case $action in
   put)
     [ -f "$RUN/$key.stash" ] || exit 1
     put_back
+    ;;
+  key)
+    # An agent that took $EDITOR before ai-prompt: Claude Code has a native stash on the same key
+    if ! ready; then
+      [ "$agent" = claude ] && { tmux send-keys -t "$pane" C-s; exit 0; }
+      say "Restart $agent to let ai-prompt move its draft (it predates \$VISUAL=ai-prompt)"
+      exit 2
+    fi
+    AI_PROMPT_SETTLE=${AI_PROMPT_SETTLE:-0.03} AI_PROMPT_AUTO_RESTORE=${AI_PROMPT_AUTO_RESTORE:-1} \
+      exec "$SELF" -t "$pane" stash
     ;;
   stash)
     if [ -f "$RUN/$key.stash" ]; then

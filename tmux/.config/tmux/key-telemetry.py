@@ -362,6 +362,11 @@ def suggestions(presses: List[Press], inventory: Dict[str, str]) -> List[Tuple[i
         found.append((launch_cmds,
                       "`ai-launch` typed in the shell: Prefix + a (or Ctrl + Shift + A) opens the "
                       "CLI × model launch menu popup and starts the pick in a new window."))
+    stash_v = [p for p in presses if p.ctx == "tmux" and p.key == "prefix:V"]
+    if len(stash_v) >= 3:
+        found.append((len(stash_v),
+                      "Prefix + V to stash an agent's draft: Ctrl + S does it in one chord, and "
+                      "brings the draft back by itself once the /command ran."))
     checkpoint_cmds = shell_prefix_count(since_ts, "^waymux checkpoint( +(list|ls|diff|restore).*)?$")
     if checkpoint_cmds >= 3:
         found.append((checkpoint_cmds,

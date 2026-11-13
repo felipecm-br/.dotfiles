@@ -12,6 +12,7 @@ The commit hashes link each entry to the full change (`git show <hash>`). Weeks 
 ## Unreleased
 
 ### AI agents
+- `Ctrl + S` (no prefix) stashes an agent's draft on every agent, like Claude Code's own `Ctrl + S`, and brings it back by itself once the `/command` ran; shells, Neovim and popups keep their `Ctrl + S`. `Prefix + S` opens the stash & presets picker, where `p` now pins or unpins and `Enter` on the queue tab sends the queued prompt now. Stash moves return in ~90 ms instead of ~280 ms. (`tmux`, `utils`, `waymaker`) `needs: waymux, wm`
 - `Prefix + V` stashes now persist: every stash also goes on a stack (`~/.local/state/waymux/prompt-stash.jsonl`, 50 entries, `0600`) that survives a tmux or host restart, and the Command Palette's *AI Prompt Stash & Presets* puts any of them, or a preset pinned at `0`–`9`, into any agent's prompt; `Tab` there shows the pane's delivery queue to edit or drop. `stash --after-cmd` (or `AI_PROMPT_AUTO_RESTORE=1`) brings the draft back by itself once the `/command` ran. (`utils`, `tmux`, `waymaker`) `needs: waymux, wm, jq`
 - `ai-prompt` (`Prefix + v` / `V`, `Prefix + A`) now drives OpenCode too, through its `Ctrl+X E` editor key. (`utils`) `needs: waymux`
 - `Prefix + F` carries an unsent draft from the limited agent into the replacement agent's prompt. (`utils`) `needs: waymux`

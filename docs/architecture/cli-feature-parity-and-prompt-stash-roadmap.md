@@ -12,7 +12,7 @@
 | :--- | :--- | :--- |
 | `W1` Turn checkpoints & rewind | **Shipped** · `Prefix + Z` (`Prefix + R` is tmux-sensible's reload, not free) | [`checkpoint-picker.sh`](../../tmux/.config/tmux/checkpoint-picker.sh), `checkpoint.toml`; ages need `waymux checkpoint list --time` (waymux > 0.13) |
 | `W2a` OpenCode in `ai-prompt` | **Shipped** · `Ctrl+X E` | [`ai-prompt`](../../utils/.local/bin/ai-prompt) |
-| `W2b` Persistent stash + presets `0–9` | **Shipped** · Command Palette *AI Prompt Stash & Presets* (no new chord) | `ai-prompt list\|send\|preset\|save\|pin\|drop`, [`prompt-stash-picker.sh`](../../tmux/.config/tmux/prompt-stash-picker.sh) |
+| `W2b` Persistent stash + presets `0–9` | **Shipped** · `Ctrl + S` toggle on agent panes (Claude parity, ~30–80 ms visible), `Prefix + S` picker | `ai-prompt list\|send\|preset\|save\|pin\|drop`, [`prompt-stash-picker.sh`](../../tmux/.config/tmux/prompt-stash-picker.sh) |
 | `W2c` Auto-restore after a `/command` | **Shipped** · opt-in `stash --after-cmd` / `AI_PROMPT_AUTO_RESTORE=1` (waymux's `Config` rejects unknown keys, so no `[prompt_stash]` section) | `ai-prompt _autorestore` (`waymux wait` busy → idle) |
 | `W2d` Failover draft carryover | **Shipped** | [`ai-failover`](../../utils/.local/bin/ai-failover) → `ai-prompt _carry` |
 | `W3` Draft-aware hold, queue inspect / edit / send now | **Built, unreleased** (waymux branch `feat/cli-parity`): `held` status, `queue/send`, `queue/edit`, Cockpit preview lists the queue; dotfiles queue tab falls back to drop + re-add on 0.13 | `src/api/queue.rs`, `tests/tmux.rs` |
