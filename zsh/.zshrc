@@ -9,9 +9,10 @@ source ~/.zsh/init.zsh
 # All the default Omarchy aliases and functions
 # (don't mess with these directly, just overwrite them here!)
 # source from Omarchy
-source ~/.local/share/omarchy/default/bash/aliases
-source ~/.local/share/omarchy/default/bash/functions
-source ~/.local/share/omarchy/default/bash/envs
+: "${OMARCHY_PATH:=/usr/share/omarchy}"
+source "$OMARCHY_PATH/default/bash/aliases"
+source "$OMARCHY_PATH/default/bash/functions"
+source "$OMARCHY_PATH/default/bash/envs"
 
 # Locale settings (added by us-intl-locale.sh)
 export LANG=en_US.UTF-8

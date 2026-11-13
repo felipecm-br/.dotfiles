@@ -38,6 +38,7 @@ The commit hashes link each entry to the full change (`git show <hash>`). Weeks 
 - The keybindings HUD runs the real triage jump for `Ctrl+Shift+I` and `Prefix + I` (it named a script that no longer exists). `needs: waymux`
 
 ### Other
+- `.zshrc` loads Omarchy's default aliases, functions and envs from `$OMARCHY_PATH` (`/usr/share/omarchy`), where Omarchy now installs them, instead of the removed `~/.local/share/omarchy/default`. (`zsh`) `host-only`
 - `stow-relink` (with `stow-relink.path`) puts back the `shell.json` symlink that Omarchy's shell replaces with a plain file on every bar change, after saving the new content into the repo. (`utils`, `omarchy`) `portable`
 - `shell.json` follows the Omarchy 4.5 bar schema: the bar is `glassy` (the `background` key replaces `transparent`), the removed `centerAnchor` is gone, the `ai-usagebar` widget (never installed as an Omarchy plugin) is off the bar, and the Superwhisper panel stays in the tray's drawer as Omarchy ships it, beside Bitwarden, which now starts at login straight to the tray (`hypr`); `hyprland.lua` gains the stock `omarchy_default_gestures` hint. (`omarchy`, `hypr`) `host-only`
 - `omarchy-clean reset | status | remove` keeps a stock Omarchy test user, created like the installer creates the owner (`/etc/skel` + `omarchy-provision-user`), to try each update's new defaults without these dotfiles. (`utils`, `intelli-shell`) `host-only`, `needs: root`
