@@ -25,16 +25,13 @@
       ],
       "right": [
         {
-          "id": "omarchy.tray"
-        },
-        {
-          "id": "superwhisper.panel"
-        },
-        {
           "format": "dddd HH:mm",
           "formatAlt": "d MMMM 'W'ww yyyy",
           "id": "omarchy.clock",
           "verticalFormat": "HH\n—\nmm"
+        },
+        {
+          "id": "omarchy.tray"
         },
         {
           "id": "omarchy.elsewhen"
@@ -56,6 +53,11 @@
         },
         {
           "id": "omarchy.power"
+        }
+      ],
+      "tray": [
+        {
+          "id": "superwhisper.panel"
         }
       ]
     },
