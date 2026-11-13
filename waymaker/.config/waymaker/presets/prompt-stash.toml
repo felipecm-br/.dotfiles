@@ -1,0 +1,143 @@
+# Waymaker Prompt Stash & Presets (`wm -o prompt-stash`, opened by prompt-stash-picker.sh).
+# Rows: every draft stashed with Prefix + V (any agent, persistent) and the presets pinned at 0–9.
+# Tab switches to the pane's waymux delivery queue. Enter puts the entry into the pane's prompt.
+
+[tui]
+percentage = 100
+max = 9999
+restore_fullscreen = false
+
+[ui.nav]
+active = true
+focus_on_start = "picker"
+bar = "Plain"
+color = "black"
+hints = false
+
+[ui.border]
+sides = ""
+
+[query]
+status_inline = true
+prompt = " "
+show = true
+
+[header]
+header_lines = 1
+style.fg = "Cyan"
+style.modifier = "BOLD"
+
+[footer]
+content = " {cyan,bold:Enter} {darkgray:Put} {darkgray:│} {cyan,bold:0-9} {darkgray:Preset} {darkgray:│} {cyan,bold:e} {darkgray:Edit} {darkgray:│} {cyan,bold:s} {darkgray:Pin} {darkgray:│} {cyan,bold:d} {darkgray:Drop} {darkgray:│} {cyan,bold:S} {darkgray:Send Queued Now} {darkgray:│} {cyan,bold:Tab} {darkgray:Queue} {darkgray:│} {cyan,bold:Esc} {darkgray:Close}"
+row_connection = "Full"
+match_indent = false
+separator = "light"
+
+[results]
+current_nav_bar = "Plain"
+column_spacing = 2
+row_connection = "Full"
+
+[results.border]
+sides = ""
+
+[results.style]
+modifier = "DIM"
+
+[results.current_style]
+bg = "reset"
+modifier = "BOLD"
+
+[results.current_nav_bar_style]
+fg = "cyan"
+modifier = "BOLD"
+
+[columns]
+split = "\t"
+default = "text"
+max_columns = 7
+names = [
+  { name = "slot" },
+  { name = "agent" },
+  { name = "age" },
+  { name = "lines" },
+  { name = "where" },
+  { name = "text" },
+  { name = "id", hidden = true },
+]
+
+[previewer]
+debounce_ms = 20
+delay_clear = true
+
+[preview]
+show = true
+wrap = true
+
+[preview.border]
+sides = "LEFT"
+color = "Darkgray"
+
+[[preview.layout]]
+command = '''
+case {7} in
+  q:*) id={7}; id="${id##*:}"; pane={5}
+       waymux api call queue/list "{\"pane_id\":\"$pane\"}" 2>/dev/null | jq -r --argjson id "$id" '.[] | .[]? | select(.id == $id) | .text' ;;
+  "") ;;
+  *) ~/.local/bin/ai-prompt show {7} ;;
+esac
+'''
+side = "right"
+percentage = 60
+
+[exit]
+abort_empty = false
+
+[start.command]
+command = "~/.config/tmux/prompt-stash-picker.sh --rows stash"
+additional = ["~/.config/tmux/prompt-stash-picker.sh --rows queue"]
+
+[start]
+mode = "nav"
+output_template = "{7}"
+
+[binds]
+"ctrl-j" = "Down"
+"ctrl-k" = "Up"
+"tab" = "ReloadNext"
+"shift-tab" = "ReloadPrev"
+"backtab" = "ReloadPrev"
+"ctrl-p" = "SwitchPreview"
+
+"nav^^tab" = "ReloadNext"
+"nav^^shift-tab" = "ReloadPrev"
+"nav^^backtab" = "ReloadPrev"
+"nav^^j" = "Down"
+"nav^^k" = "Up"
+"nav^^J" = "PreviewDown(5)"
+"nav^^K" = "PreviewUp(5)"
+"nav^^g" = "Pos(0)"
+"nav^^G" = "Pos(-1)"
+"nav^^enter" = "Accept"
+"nav^^q" = "Quit"
+"nav^^esc" = "Quit"
+"nav^^e" = ["Execute(~/.config/tmux/prompt-stash-picker.sh --act edit {7})", "Reload"]
+"nav^^s" = ["Execute(~/.config/tmux/prompt-stash-picker.sh --act pin {7})", "Reload"]
+"nav^^S" = ["Execute(~/.config/tmux/prompt-stash-picker.sh --act send {7})", "Reload"]
+"nav^^u" = ["ExecuteSilent(~/.config/tmux/prompt-stash-picker.sh --act unpin {7})", "Reload"]
+"nav^^d" = ["Execute(~/.config/tmux/prompt-stash-picker.sh --act drop {7})", "Reload"]
+"nav^^0" = ["ExecuteSilent(~/.config/tmux/prompt-stash-picker.sh --act preset 0)", "Quit"]
+"nav^^1" = ["ExecuteSilent(~/.config/tmux/prompt-stash-picker.sh --act preset 1)", "Quit"]
+"nav^^2" = ["ExecuteSilent(~/.config/tmux/prompt-stash-picker.sh --act preset 2)", "Quit"]
+"nav^^3" = ["ExecuteSilent(~/.config/tmux/prompt-stash-picker.sh --act preset 3)", "Quit"]
+"nav^^4" = ["ExecuteSilent(~/.config/tmux/prompt-stash-picker.sh --act preset 4)", "Quit"]
+"nav^^5" = ["ExecuteSilent(~/.config/tmux/prompt-stash-picker.sh --act preset 5)", "Quit"]
+"nav^^6" = ["ExecuteSilent(~/.config/tmux/prompt-stash-picker.sh --act preset 6)", "Quit"]
+"nav^^7" = ["ExecuteSilent(~/.config/tmux/prompt-stash-picker.sh --act preset 7)", "Quit"]
+"nav^^8" = ["ExecuteSilent(~/.config/tmux/prompt-stash-picker.sh --act preset 8)", "Quit"]
+"nav^^9" = ["ExecuteSilent(~/.config/tmux/prompt-stash-picker.sh --act preset 9)", "Quit"]
+
+# No image previews here: skip the terminal graphics probe, which holds the first frame
+# for up to 100 ms inside tmux (tests/popup_render_perf.test.sh).
+[preview.media]
+active = false

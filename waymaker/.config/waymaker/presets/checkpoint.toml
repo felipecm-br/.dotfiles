@@ -1,0 +1,115 @@
+# Waymaker Turn Checkpoints (`wm -o checkpoint`, opened by checkpoint-picker.sh, Prefix + Z).
+# Rows: `waymux checkpoint list` for the pane, newest turn first; preview: that turn's diff.
+# Enter / r restore (confirm modal, safety checkpoint first), g lazygitrs, J / K scroll the diff.
+
+[tui]
+percentage = 100
+max = 9999
+restore_fullscreen = false
+
+[ui.nav]
+active = true
+focus_on_start = "picker"
+bar = "Plain"
+color = "black"
+hints = false
+
+[ui.border]
+sides = ""
+
+[query]
+status_inline = true
+prompt = " "
+show = true
+
+[header]
+header_lines = 1
+style.fg = "Cyan"
+style.modifier = "BOLD"
+
+[footer]
+content = " {cyan,bold:Enter/r} {darkgray:Restore} {darkgray:│} {cyan,bold:J/K} {darkgray:Scroll Diff} {darkgray:│} {cyan,bold:g} {darkgray:Lazygitrs} {darkgray:│} {cyan,bold:Esc} {darkgray:Close}"
+row_connection = "Full"
+match_indent = false
+separator = "light"
+
+[results]
+current_nav_bar = "Plain"
+column_spacing = 2
+row_connection = "Full"
+
+[results.border]
+sides = ""
+
+[results.style]
+modifier = "DIM"
+
+[results.current_style]
+bg = "reset"
+modifier = "BOLD"
+
+[results.current_nav_bar_style]
+fg = "cyan"
+modifier = "BOLD"
+
+[columns]
+split = "\t"
+default = "state"
+names = [
+  { name = "turn" },
+  { name = "age" },
+  { name = "commit" },
+  { name = "state" },
+]
+
+[previewer]
+debounce_ms = 20
+delay_clear = true
+
+[preview]
+show = true
+wrap = false
+
+[preview.border]
+sides = "LEFT"
+color = "Darkgray"
+
+[[preview.layout]]
+command = "~/.config/tmux/checkpoint-picker.sh --diff {1}"
+side = "right"
+percentage = 60
+
+[exit]
+abort_empty = false
+
+[start.command]
+command = "~/.config/tmux/checkpoint-picker.sh --rows"
+
+[start]
+ansi = true
+mode = "nav"
+output_template = "{1}"
+
+[binds]
+"ctrl-j" = "Down"
+"ctrl-k" = "Up"
+"ctrl-p" = "SwitchPreview"
+"ctrl-shift-j" = "PreviewDown(5)"
+"ctrl-shift-k" = "PreviewUp(5)"
+
+"nav^^j" = "Down"
+"nav^^k" = "Up"
+"nav^^J" = "PreviewDown(5)"
+"nav^^K" = "PreviewUp(5)"
+"nav^^G" = "Pos(-1)"
+"nav^^q" = "Quit"
+"nav^^esc" = "Quit"
+"nav^^p" = "SwitchPreview"
+"nav^^enter" = ["Execute(~/.config/tmux/checkpoint-picker.sh --restore {1})", "Reload"]
+"nav^^r" = ["Execute(~/.config/tmux/checkpoint-picker.sh --restore {1})", "Reload"]
+"nav^^g" = 'Execute(cd "$WM_ORIGIN_CWD" && "$(command -v lazygitrs || echo ~/.local/bin/lazygitrs)")'
+
+# No image previews here: skip the terminal graphics probe, which holds the first frame
+# for up to 100 ms inside tmux (tests/popup_render_perf.test.sh).
+[preview.media]
+active = false

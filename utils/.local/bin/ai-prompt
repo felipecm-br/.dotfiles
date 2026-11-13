@@ -10,15 +10,28 @@
 #   ai-prompt [-t pane] --ready  Exit 0 when the pane's agent was started with ai-prompt as its editor
 #   ai-prompt <file>             $VISUAL / $EDITOR entrypoint, called by the agent itself
 #
+# Stash stack & presets (persistent, cross-agent: $XDG_STATE_HOME/waymux/prompt-stash.jsonl, 0600,
+# 50 unpinned entries kept; every take is recorded, so a stash survives a tmux or host restart):
+#   ai-prompt [-t pane] picker        Stash & Presets popup over the pane (Command Palette)
+#   ai-prompt [-t pane] send <id>     Put an entry into the pane's prompt (any agent); history pops
+#   ai-prompt [-t pane] preset <0-9>  Put the preset pinned at a slot (it stays pinned)
+#   ai-prompt list | show <id>        Picker rows (TSV) / the entry's text
+#   ai-prompt pin <id> <0-9> | unpin <id> | drop <id> | edit-entry <id>
+#   ai-prompt save <0-9> [text]       Pin a new preset from text or stdin
+# `stash --after-cmd` (or AI_PROMPT_AUTO_RESTORE=1) brings the draft back by itself once the
+# /command ran: the pane goes busy, then idle, and the stash is put back (Claude Code Ctrl+S parity).
+#
 # Every move goes through the agent's own "edit draft in external editor" key (Claude Code Ctrl+X Ctrl+E,
-# Codex / Antigravity / Devin Ctrl+G): the agent hands over the exact draft and reads the file back, so
+# Codex / Antigravity / Devin Ctrl+G, OpenCode <leader>e = Ctrl+X E): the agent hands over the exact draft and reads the file back, so
 # nothing is scraped from the screen or retyped. Agents spawned with $VISUAL / $EDITOR set to ai-prompt
 # get the popup; every other caller (git, crontab…) gets $AI_PROMPT_EDITOR, else $EDITOR, unchanged.
 # AI_PROMPT_KEY_<agent>="C-g" overrides an agent's editor key.
 
-AGENT_RE='^(claude|agy|agy-bin|antigravity|devin|codex)$'
+AGENT_RE='^(claude|agy|agy-bin|antigravity|devin|codex|opencode)$'
 RUN="${XDG_RUNTIME_DIR:-/tmp}/ai-prompt"
 SELF="$HOME/.local/bin/ai-prompt"
+STORE=${AI_PROMPT_STORE:-${XDG_STATE_HOME:-$HOME/.local/state}/waymux/prompt-stash.jsonl}
+STASH_CAP=${AI_PROMPT_STASH_CAP:-50}
 
 say() { # Message in the tmux status line when there is one, always on stderr
   [ -n "${TMUX:-}" ] && tmux display-message "$1" 2>/dev/null
@@ -49,7 +62,8 @@ spawned_by_agent() {
   return 1
 }
 
-if [ $# -ge 1 ] && [[ $1 != -* && $1 != edit && $1 != stash && $1 != take && $1 != put ]]; then
+ACTIONS=' edit stash take put picker send preset list show pin unpin drop edit-entry save _autorestore _carry '
+if [ $# -ge 1 ] && [[ $1 != -* && $ACTIONS != *" $1 "* ]]; then
   file=${!#}
   key=${TMUX_PANE#%}
   { [ -n "${TMUX_PANE:-}" ] && [ -f "$file" ] && spawned_by_agent; } || fallback_editor "$@"
@@ -61,11 +75,15 @@ if [ $# -ge 1 ] && [[ $1 != -* && $1 != edit && $1 != stash && $1 != take && $1 
     exit 0
   fi
   if [ -f "$RUN/$key.put" ]; then
-    # Stash first, then whatever was typed since (a /command already sent leaves nothing)
+    # The request names its source (a stack entry), else it is the pane's stash
+    src=$(cat "$RUN/$key.put")
+    [ -n "$src" ] || src=$stash
+    # Source first, then whatever was typed since (a /command already sent leaves nothing)
     {
-      cat "$stash"
+      cat "$src"
       if [ -s "$file" ]; then printf '\n\n'; cat "$file"; fi
-    } >"$file.ai-prompt" && mv "$file.ai-prompt" "$file" && rm -f "$stash"
+    } >"$file.ai-prompt" && mv "$file.ai-prompt" "$file"
+    [ "$src" = "$stash" ] && rm -f "$stash" "$stash.id"
     rm -f "$RUN/$key.put"
     exit 0
   fi
@@ -95,15 +113,123 @@ fi
 
 # ── Pane side: drive the agent's editor key ─────────────────────────────────────────────────────────
 pane=${TMUX_PANE:-}
+after_cmd=${AI_PROMPT_AUTO_RESTORE:-0}
 while [ $# -gt 0 ]; do
   case $1 in
     -t) pane=${2:-}; shift 2 ;;
-    -h | --help) sed -n '2,18p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    -h | --help) sed -n '2,29p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
     *) break ;;
   esac
 done
 action=${1:-edit}
+shift 2>/dev/null
+[ "${1:-}" = --after-cmd ] && { after_cmd=1; shift; }
 key=${pane#%}
+
+# ── Stash stack: one JSON object per line, newest last; pinned entries hold a 0-9 slot ─────────────
+store_lock() { # <jq filter> [jq args…]: rewrite the store under a lock, owner-only
+  local filter=$1
+  shift
+  mkdir -p "$(dirname "$STORE")"
+  (
+    umask 077
+    flock 9
+    [ -f "$STORE" ] || : >"$STORE"
+    jq -c -s "$@" "$filter" "$STORE" >"$STORE.tmp" && mv "$STORE.tmp" "$STORE"
+  ) 9>"$STORE.lock"
+}
+# Zero-width and bidi controls never reach an agent prompt (same set as waymux delivery)
+strip_invisible() {
+  if command -v perl >/dev/null 2>&1; then
+    perl -CSD -pe 's/[\x{200B}-\x{200F}\x{202A}-\x{202E}\x{2060}-\x{2064}\x{2066}-\x{2069}\x{FEFF}]//g'
+  else
+    cat
+  fi
+}
+new_id() { printf '%x%04x' "$(date +%s)" "$RANDOM"; }
+record() { # <text file> <slot|null> <agent> [id]: append an entry, prints its id
+  local id=${4:-$(new_id)} cwd branch
+  cwd=$(tmux display-message -p -t "$pane" '#{pane_current_path}' 2>/dev/null || echo "$PWD")
+  branch=$(git -C "$cwd" branch --show-current 2>/dev/null || true)
+  strip_invisible <"$1" >"$1.clean"
+  # A new pin takes the slot; unpinned history keeps the newest $STASH_CAP
+  store_lock '(map(if $slot != null and .pinned_slot == $slot then .pinned_slot = null else . end)
+      + [{id: $id, ts: now | floor, pane: $pane, agent: $agent, cwd: $cwd, branch: $branch,
+          pinned_slot: $slot, text: $text, lines: ($text | split("\n") | length)}])
+    | (map(select(.pinned_slot != null))) + (map(select(.pinned_slot == null)) | .[-($cap):])
+    | .[]' \
+    --arg id "$id" --argjson slot "$2" --arg pane "$pane" --arg agent "$3" --arg cwd "$cwd" \
+    --arg branch "$branch" --rawfile text "$1.clean" --argjson cap "$STASH_CAP"
+  rm -f "$1.clean"
+  echo "$id"
+}
+entry() { # <id> [field]: one entry's field (text by default)
+  [ -f "$STORE" ] || return 1
+  jq -j -s --arg id "$1" --arg f "${2:-text}" 'map(select(.id == $id)) | first | .[$f] // empty' "$STORE"
+}
+pop() { # <id>: remove an entry unless it is a pinned preset
+  store_lock 'map(select(.id != $id or .pinned_slot != null)) | .[]' --arg id "$1"
+}
+
+case $action in
+  list)
+    [ -f "$STORE" ] || exit 0
+    now=$(date +%s)
+    # slot · agent · age · lines · where · first line · id (hidden)
+    jq -r -s --argjson now "$now" '
+      def age: ($now - .ts) as $d | if $d < 60 then "now" elif $d < 3600 then "\($d / 60 | floor)m"
+        elif $d < 86400 then "\($d / 3600 | floor)h" else "\($d / 86400 | floor)d" end;
+      (map(select(.pinned_slot != null)) | sort_by(.pinned_slot))
+        + (map(select(.pinned_slot == null)) | reverse)
+      | .[] | [ (if .pinned_slot != null then "[\(.pinned_slot)]" else " · " end),
+                .agent, age, "~\(.lines)L",
+                ((.cwd | split("/") | last) + (if (.branch // "") != "" then ":" + .branch else "" end)),
+                (.text | split("\n") | map(select(test("\\S"))) | first // "" | .[0:100]),
+                .id ] | @tsv' "$STORE"
+    exit 0 ;;
+  show) entry "${1:?id}"; exit ;;
+  drop) store_lock 'map(select(.id != $id)) | .[]' --arg id "${1:?id}"; exit 0 ;;
+  pin)
+    [[ ${2:-} =~ ^[0-9]$ ]] || { say "pin <id> <0-9>"; exit 2; }
+    store_lock 'map(if .pinned_slot == $s then .pinned_slot = null else . end
+      | if .id == $id then .pinned_slot = $s else . end) | .[]' --arg id "${1:?id}" --argjson s "$2"
+    say "󰐃 Preset $2 saved"
+    exit 0 ;;
+  unpin) store_lock 'map(if .id == $id then .pinned_slot = null else . end) | .[]' --arg id "${1:?id}"; exit 0 ;;
+  save)
+    [[ ${1:-} =~ ^[0-9]$ ]] || { say "save <0-9> [text]"; exit 2; }
+    tmp=$(mktemp)
+    if [ $# -ge 2 ]; then printf '%s' "${*:2}" >"$tmp"; else cat >"$tmp"; fi
+    [ -s "$tmp" ] && record "$tmp" "$1" "${AI_PROMPT_AGENT:-any}" >/dev/null
+    rm -f "$tmp"
+    exit 0 ;;
+  edit-entry)
+    tmp=$(mktemp --suffix=.md)
+    entry "${1:?id}" >"$tmp" || exit 1
+    ed=${AI_PROMPT_EDITOR:-nvim}
+    [[ $ed == *ai-prompt* ]] && ed=nvim
+    # shellcheck disable=SC2086
+    if $ed "$tmp"; then
+      strip_invisible <"$tmp" >"$tmp.clean"
+      store_lock 'map(if .id == $id then .text = $t | .lines = ($t | split("\n") | length) else . end) | .[]' \
+        --arg id "$1" --rawfile t "$tmp.clean"
+    fi
+    rm -f "$tmp" "$tmp.clean"
+    exit 0 ;;
+  picker)
+    [ -n "$pane" ] || pane=$(tmux display-message -p '#{pane_id}' 2>/dev/null)
+    exec "$HOME/.config/tmux/prompt-stash-picker.sh" "$pane"
+    ;;
+  _carry)
+    # ai-failover: the draft of the limited pane follows into the new agent once it is up and idle
+    id=${1:?id}
+    for _ in $(seq "${AI_PROMPT_CARRY_TRIES:-180}"); do "$SELF" -t "$pane" --ready 2>/dev/null && break; sleep 0.5; done
+    command -v waymux >/dev/null && waymux wait "$pane" --for 60s >/dev/null 2>&1
+    sleep "${AI_PROMPT_CARRY_SETTLE:-1}"
+    # Not ready: send pastes it; no agent at all: it stays on the stack for the picker
+    "$SELF" -t "$pane" send "$id" 2>/dev/null || say "󰆓 Draft kept in the stash (Command Palette: Prompt Stash)"
+    ;;
+esac
 
 # Agent CLI of the pane and its pid: the foreground command, else the first agent of its session
 agent_pid() {
@@ -122,6 +248,7 @@ ready() { tr '\0' '\n' <"/proc/$pid/environ" 2>/dev/null | grep -qE '^(VISUAL|ED
 var="AI_PROMPT_KEY_$agent"
 case $agent in
   claude) keys=${!var:-C-x C-e} ;; # Ctrl+G is the tmux Lazygitrs key; Claude Code binds both
+  opencode) keys=${!var:-C-x e} ;; # <leader>e, leader = Ctrl+X (opencode/.config/opencode/tui.json)
   *) keys=${!var:-C-g} ;;
 esac
 send_editor_key() {
@@ -130,10 +257,10 @@ send_editor_key() {
 }
 
 # take / put: leave a request file for the editor entrypoint, press the key, wait for it to be served
-request() { # <take|put>
+request() { # <take|put> [source file for put]
   ready || { say "Restart $agent to let ai-prompt move its draft (it predates \$VISUAL=ai-prompt)"; return 2; }
   mkdir -p "$RUN"
-  : >"$RUN/$key.$1"
+  printf '%s' "${2:-}" >"$RUN/$key.$1"
   send_editor_key
   local i
   for i in $(seq 30); do
@@ -145,30 +272,84 @@ request() { # <take|put>
   return 2
 }
 
+# take, recorded on the persistent stack too: the runtime file is the pane's toggle, the stack keeps it
+take() {
+  request take || return
+  [ -s "$RUN/$key.stash" ] || { rm -f "$RUN/$key.stash"; return 1; }
+  record "$RUN/$key.stash" null "$agent" >"$RUN/$key.stash.id"
+}
+# put back the pane's own stash, popping its stack entry
+put_back() {
+  local id
+  id=$(cat "$RUN/$key.stash.id" 2>/dev/null)
+  request put || return
+  [ -n "$id" ] && pop "$id"
+  return 0
+}
+
+# Any text into the prompt: through the editor key when the agent is ready, else a bracketed paste
+put_text() { # <file>
+  if ready; then
+    request put "$1"
+  else
+    tmux load-buffer -b ai-prompt-send "$1" && tmux paste-buffer -p -d -b ai-prompt-send -t "$pane"
+  fi
+}
+
+# Bring the stash back on its own after the /command: busy, then idle, the stash still the same one
+autorestore() { # <stash id>
+  local wm
+  wm=$(command -v waymux) || return 0
+  "$wm" wait "$pane" --state working --for 120s >/dev/null 2>&1 || return 0
+  "$wm" wait "$pane" --for 30m >/dev/null 2>&1 || return 0
+  sleep 0.35
+  [ "$(cat "$RUN/$key.stash.id" 2>/dev/null)" = "$1" ] || return 0
+  put_back && say "󰏫 Draft restored"
+}
+
 case $action in
   edit)
     ready || say "$agent predates \$VISUAL=ai-prompt: it opens its own editor; restart it for the popup"
     send_editor_key
     ;;
-  take)
-    request take || exit
-    [ -s "$RUN/$key.stash" ] || { rm -f "$RUN/$key.stash"; exit 1; }
-    ;;
+  take) take || exit ;;
   put)
     [ -f "$RUN/$key.stash" ] || exit 1
-    request put
+    put_back
     ;;
   stash)
     if [ -f "$RUN/$key.stash" ]; then
-      request put && say "Draft restored"
-    elif request take; then
-      if [ -s "$RUN/$key.stash" ]; then
-        say "Draft stashed · run your /command · Prefix + V brings it back"
+      put_back && say "Draft restored"
+    elif take; then
+      if [ "$after_cmd" = 1 ]; then
+        say "Draft stashed · run your /command · it comes back on its own"
+        setsid "$SELF" -t "$pane" _autorestore "$(cat "$RUN/$key.stash.id")" </dev/null >/dev/null 2>&1 &
       else
-        rm -f "$RUN/$key.stash"
-        say "Prompt is empty: nothing to stash"
+        say "Draft stashed · run your /command · Prefix + V brings it back"
       fi
+    elif [ $? -eq 1 ]; then
+      say "Prompt is empty: nothing to stash"
     fi
     ;;
-  *) say "Unknown action '$action' (edit, stash, take, put)"; exit 2 ;;
+  send | preset)
+    if [ "$action" = preset ]; then
+      [[ ${1:-} =~ ^[0-9]$ ]] || { say "preset <0-9>"; exit 2; }
+      id=$([ -f "$STORE" ] && jq -r -s --argjson s "$1" 'map(select(.pinned_slot == $s)) | first | .id // empty' "$STORE")
+      [ -n "$id" ] || { say "󰐃 No preset in slot $1 · s in the stash picker pins one"; exit 1; }
+    else
+      id=${1:?id}
+    fi
+    tmp=$(mktemp)
+    entry "$id" >"$tmp" && [ -s "$tmp" ] || { rm -f "$tmp"; say "No stash entry $id"; exit 1; }
+    # The pane's own pending stash entry: put it back through the toggle so the toggle stays in step
+    if [ "$(cat "$RUN/$key.stash.id" 2>/dev/null)" = "$id" ]; then
+      rm -f "$tmp"
+      put_back
+      exit
+    fi
+    put_text "$tmp" && pop "$id"
+    rm -f "$tmp"
+    ;;
+  _autorestore) autorestore "${1:-}" ;;
+  *) say "Unknown action '$action' (edit, stash, take, put, picker, send, preset, list, show, pin, unpin, drop, save)"; exit 2 ;;
 esac

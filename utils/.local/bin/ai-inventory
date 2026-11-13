@@ -1,0 +1,139 @@
+#!/usr/bin/env bash
+# ai-inventory — MCP servers and skills configured across the agent CLIs, with what they cost
+#
+#   ai-inventory [dir]          TSV: kind, cli, name, source (command / url / path), flags, context cost
+#   ai-inventory --picker       The same in a Waymaker popup (Command Palette: AI MCP & Skill Inventory)
+#   ai-inventory --show <cli> <kind> <name>   Preview: the server's definition or the skill's SKILL.md
+#
+# Covers Claude Code (~/.claude.json, the project's .mcp.json, ~/.claude/skills, .claude/skills),
+# Codex (~/.codex/config.toml, ~/.codex/skills), OpenCode (~/.config/opencode/opencode.json,
+# skills) and Antigravity (~/.gemini/*/mcp_config.json, ~/.agents/skills). Flags:
+#   dup      the same skill name loads twice in one CLI (two roots), or a server twice in one CLI
+#   shared   the same server or skill is configured in more than one CLI (expected, informative)
+#   missing  the server's command is not on PATH; broken: a skill symlink points nowhere
+# Context cost is the skill description's size in tokens (~4 bytes each): what every session pays
+# up front for the skill to be discoverable. Servers show "-" (their tool list is only known live).
+
+set -u
+dir=${1:-$PWD}
+case $dir in
+  --picker | --show)
+    dir=$PWD
+    # From a tmux binding or the palette: the active pane's directory (run-shell starts in ~)
+    [ -n "${TMUX:-}" ] && [ -z "${TMUX_POPUP:-}" ] && dir=$(tmux display-message -p '#{pane_current_path}' 2>/dev/null || echo "$PWD") ;;
+esac
+
+rows() {
+  local cli f name src
+  # ── MCP servers ──
+  mcp_json() { # <cli> <file> <jq path to the server map>
+    [ -s "$2" ] || return 0
+    jq -r --arg cli "$1" "($3 // {}) | to_entries[] |
+      [\"mcp\", \$cli, .key, ((.value.command // .value.url // .value.serverUrl // \"\") |
+        if type == \"array\" then join(\" \") else . end) + (if .value.args then \" \" + (.value.args | join(\" \")) else \"\" end)] | @tsv" \
+      "$2" 2>/dev/null
+  }
+  mcp_json claude "$HOME/.claude.json" '.mcpServers'
+  mcp_json claude "$HOME/.claude.json" ".projects[\"$dir\"].mcpServers"
+  mcp_json claude "$dir/.mcp.json" '.mcpServers'
+  mcp_json opencode "$HOME/.config/opencode/opencode.json" '.mcp'
+  for f in "$HOME"/.gemini/*/mcp_config.json "$HOME/.gemini/settings.json"; do
+    mcp_json agy "$f" '.mcpServers'
+  done
+  if [ -f "$HOME/.codex/config.toml" ]; then
+    awk '/^\[mcp_servers\.[^.\]]+\]/ { if (n) print "mcp\tcodex\t" n "\t" c; n = $0; sub(/^\[mcp_servers\./, "", n); sub(/\].*/, "", n); gsub(/"/, "", n); c = ""; next }
+         /^\[/ { if (n) print "mcp\tcodex\t" n "\t" c; n = ""; next }
+         n && /^(command|url)[[:space:]]*=/ { c = $0; sub(/^[^=]*=[[:space:]]*/, "", c); gsub(/"/, "", c) }
+         END { if (n) print "mcp\tcodex\t" n "\t" c }' "$HOME/.codex/config.toml"
+  fi
+  # ── Skills: one row per root a CLI loads from ──
+  skills() { # <cli> <root>
+    [ -d "$2" ] || return 0
+    for f in "$2"/*/; do
+      f=${f%/}
+      [ -e "$f" ] || [ -L "$f" ] || continue
+      printf 'skill\t%s\t%s\t%s\n' "$1" "${f##*/}" "$f"
+    done
+    # A dangling symlink is not a directory: list those too
+    for f in "$2"/*; do
+      [ -L "$f" ] && [ ! -e "$f" ] && printf 'skill\t%s\t%s\t%s\n' "$1" "${f##*/}" "$f"
+    done
+  }
+  skills claude "$HOME/.claude/skills"
+  [ "$dir" != "$HOME" ] && skills claude "$dir/.claude/skills"
+  skills codex "$HOME/.codex/skills"
+  skills codex "$HOME/.agents/skills"
+  skills opencode "$HOME/.config/opencode/skills"
+  skills opencode "$HOME/.agents/skills"
+  skills agy "$HOME/.agents/skills"
+}
+
+describe_bytes() { # <skill dir>: bytes of the description frontmatter
+  awk '/^---/ { n++; next } n == 1 && /^description:/ { d = 1 } n == 1 && d { b += length($0) } n >= 2 { exit } END { print b + 0 }' \
+    "$1/SKILL.md" 2>/dev/null || echo 0
+}
+
+annotate() {
+  local kind cli name src flags cost first cmd
+  # One pass for the counts: rows per (kind, cli, name) and CLIs per (kind, name)
+  rows | sort -u | awk -F'\t' '
+    { line[NR] = $0; k = $1 SUBSEP $2 SUBSEP $3; same[k]++
+      if (!((($1 SUBSEP $3), $2) in seen)) { seen[($1 SUBSEP $3), $2] = 1; clis[$1 SUBSEP $3]++ } }
+    END { for (i = 1; i <= NR; i++) { split(line[i], f, "\t")
+            printf "%s\t%d\t%d\n", line[i], same[f[1] SUBSEP f[2] SUBSEP f[3]], clis[f[1] SUBSEP f[3]] } }' |
+  while IFS=$'\t' read -r kind cli name src nsame nclis; do
+    [ -n "$kind" ] || continue
+    flags=()
+    [ "$nsame" -gt 1 ] && flags+=(dup)
+    [ "$nclis" -gt 1 ] && flags+=(shared)
+    cost=-
+    if [ "$kind" = mcp ]; then
+      first=${src%% *}
+      case $first in
+        http://* | https://* | "") ;;
+        *) cmd=${first/#\~/$HOME}; command -v "$cmd" >/dev/null 2>&1 || [ -x "$cmd" ] || flags+=(missing) ;;
+      esac
+    elif [ ! -e "$src" ]; then
+      flags+=(broken)
+    elif [ ! -f "$src/SKILL.md" ]; then
+      flags+=(no-skill-md)
+    else
+      cost="~$(( ($(describe_bytes "$src") + 3) / 4 ))t"
+    fi
+    printf '%s\t%s\t%s\t%s\t%s\t%s\n' "$kind" "$cli" "$name" "${flags[*]:-}" "$cost" "${src/#$HOME/\~}"
+  done
+}
+
+case ${1:-} in
+  --show)
+    cli=${2:-} kind=${3:-} name=${4:-}
+    if [ "$kind" = skill ]; then
+      src=$(rows | awk -F'\t' -v c="$cli" -v n="$name" '$1 == "skill" && $2 == c && $3 == n {print $4; exit}')
+      printf '%s\n%s\n\n' "$src" "→ $(readlink -f "$src" 2>/dev/null || echo 'broken link')"
+      sed -n '1,60p' "$src/SKILL.md" 2>/dev/null
+    else
+      rows | awk -F'\t' -v c="$cli" -v n="$name" '$1 == "mcp" && $2 == c && $3 == n {print $4}'
+      echo
+      for f in "$HOME/.claude.json" "$dir/.mcp.json" "$HOME/.config/opencode/opencode.json" "$HOME"/.gemini/*/mcp_config.json; do
+        [ -s "$f" ] || continue
+        jq --arg n "$name" '[.. | objects | to_entries[]? | select(.key == $n and (.value | type) == "object")] | first | .value // empty' "$f" 2>/dev/null |
+          sed "1s|^|# ${f/#$HOME/\~}\n|"
+      done | head -60
+    fi
+    exit 0 ;;
+  --picker)
+    if [ -z "${TMUX_POPUP:-}" ] && [ -n "${TMUX:-}" ]; then
+      # shellcheck source=/dev/null
+      . "$HOME/.config/tmux/theme-helper.sh"
+      color=$(get_theme_color cyan "#89dceb")
+      # shellcheck disable=SC2046
+      tmux display-popup -S "fg=$color" -s "fg=default" -b rounded -T " 󰡀 " \
+        $(popup_gradient_flags WM_BORDER_GRADIENT) -e "WM_BORDER_TITLE= 󰡀 " \
+        -d "$dir" -w 75% -h 60% -E "TMUX_POPUP=1 '$(readlink -f "$0")' --picker" || true
+      exit 0
+    fi
+    { printf 'KIND\tCLI\tNAME\tFLAGS\tCOST\tSOURCE\n'; annotate; } | "${WM_BIN:-wm}" -o ai-inventory >/dev/null
+    exit 0 ;;
+esac
+
+annotate

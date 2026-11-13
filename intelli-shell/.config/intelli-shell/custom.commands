@@ -187,6 +187,36 @@ ai-prompt edit
 # Stash the AI agent prompt draft to run a /command first, or bring the stash back (Prefix+V)
 ai-prompt stash
 
+# Stash the draft and bring it back by itself once the /command ran (busy, then idle)
+ai-prompt stash --after-cmd
+
+# Open the prompt stash & presets picker: every stash from any agent, presets 0-9, the delivery queue
+ai-prompt picker
+
+# List the persistent prompt stash stack and presets (slot, agent, age, lines, where, text, id)
+ai-prompt list
+
+# Put a stashed prompt into the AI agent in a tmux pane, also one stashed from another agent
+ai-prompt -t {{pane}} send {{id}}
+
+# Put the prompt preset pinned at a slot 0-9 into the AI agent in the current pane
+ai-prompt preset {{slot}}
+
+# Pin a reusable prompt preset at a slot 0-9 from text
+ai-prompt save {{slot}} {{text}}
+
+# Ask a side question (/btw) about what a pane is doing, without touching its agent (Prefix+b)
+~/.config/tmux/btw-popup.sh
+
+# List an agent pane's turn checkpoints with each diff and restore one (Prefix+Z)
+~/.config/tmux/checkpoint-picker.sh
+
+# List the MCP servers and skills of Claude Code, Codex, OpenCode and Antigravity, flag duplicates
+ai-inventory
+
+# Open the MCP & skill inventory picker with each definition or SKILL.md in the preview
+ai-inventory --picker
+
 # Start the quota-recommended AI agent and model directly
 ai-launch --auto
 
@@ -396,6 +426,15 @@ waymux queue add {{pane}} {{prompt}}
 
 # Drop a queued or stalled prompt for an agent pane
 waymux queue rm {{pane}} {{id}}
+
+# Type a queued prompt now, over the hold kept while you have a draft in that agent's prompt
+waymux queue send {{pane}} {{id}}
+
+# Replace the text of a queued prompt not typed yet (read from stdin)
+waymux queue edit {{pane}} {{id}} -
+
+# Keep an agent working until a check passes (/goal for any agent): nudges with the failing output
+waymux goal {{pane}} --check {{cargo test}} --max {{5}}
 
 # Run a command in a split below this pane, wait for it and get its exit status and last screen (focus stays put)
 waymux run --split below --ratio 30 --wait --capture -- {{command}}

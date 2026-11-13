@@ -102,3 +102,90 @@ set +e; ai-switch -t "$R" opus 2>/dev/null; rc=$?; set -e
 tmux new-session -d -s plain -x 120 -y 20 "sleep 30"
 set +e; ai-prompt -t "$(tmux display-message -p -t plain: '#{pane_id}')" stash 2>/dev/null; rc=$?; set -e
 [ "$rc" -eq 1 ] && ok "no agent -> exit 1" || bad "plain pane rc=$rc"
+
+# 9. Persistent stash stack: every take is recorded (0600), the toggle pops it, presets stay pinned
+STORE="$HOME/.local/state/waymux/prompt-stash.jsonl"
+rm -f "$STORE"
+tmux send-keys -t "$P" Enter; sleep 0.2         # submit what is there: empty composer
+tmux send-keys -t "$P" -l "first stash"; sleep 0.2
+ai-prompt -t "$P" stash 2>/dev/null
+[ "$(jq -s length "$STORE")" = 1 ] && [ "$(jq -r -s '.[0].text' "$STORE")" = "first stash" ] &&
+  [ "$(stat -c %a "$STORE")" = 600 ] && ok "take is recorded on the stack, 0600" || bad "stack: $(cat "$STORE")"
+id=$(jq -r -s '.[0].id' "$STORE")
+ai-prompt -t "$P" stash 2>/dev/null
+[ "$(line "$P")" = "› first stash" ] && [ "$(jq -s length "$STORE")" = 0 ] &&
+  ok "the toggle restores and pops the entry" || bad "pop: $(cat "$STORE") line=$(line "$P")"
+
+# 10. A stash survives the runtime dir (reboot) and goes into another agent's pane
+ai-prompt -t "$P" take
+id=$(jq -r -s '.[-1].id' "$STORE")
+rm -rf "$RUN"
+O=$(start other "$HOME/.local/bin/ai-prompt")
+ai-prompt -t "$O" send "$id"
+[ "$(line "$O")" = "› first stash" ] && [ "$(jq -s length "$STORE")" = 0 ] &&
+  ok "send puts a persisted stash into another pane and pops it" || bad "send: line=$(line "$O")"
+
+# 11. Presets 0-9: save, list first, put without popping; a new pin takes the slot
+printf 'run the tests\nthen summarize' | ai-prompt save 3
+ai-prompt save 3 "replaced preset" 2>/dev/null
+ai-prompt save 1 "review the diff" 2>/dev/null
+[ "$(ai-prompt list | cut -f1 | head -2 | tr '\n' ' ')" = "[1] [3] " ] && ok "presets list first, by slot" || bad "list: $(ai-prompt list)"
+[ "$(jq -r -s 'map(select(.pinned_slot == 3)) | length' "$STORE")" = 1 ] && ok "one entry per slot" || bad "slot dup"
+tmux send-keys -t "$O" Enter; sleep 0.2
+ai-prompt -t "$O" preset 1
+[ "$(line "$O")" = "› review the diff" ] && [ "$(jq -r -s 'map(select(.pinned_slot == 1)) | length' "$STORE")" = 1 ] &&
+  ok "preset puts the text and stays pinned" || bad "preset: $(line "$O")"
+set +e; ai-prompt -t "$O" preset 7 2>/dev/null; rc=$?; set -e
+[ "$rc" -eq 1 ] && ok "empty slot -> exit 1" || bad "empty slot rc=$rc"
+
+# 12. Invisible characters never reach the stack; the cap keeps 50 unpinned entries
+printf 'a​b‮c' | ai-prompt save 5
+[ "$(jq -r -s 'map(select(.pinned_slot == 5)) | .[0].text' "$STORE")" = "abc" ] && ok "invisible chars stripped" || bad "strip"
+for i in $(seq 55); do printf 'h%s' "$i" >"$HOME/h"; AI_PROMPT_STASH_CAP=50 ai-prompt save 9 "x" 2>/dev/null; done
+before=$(jq -s 'map(select(.pinned_slot == null)) | length' "$STORE")
+[ "$before" -le 50 ] && ok "unpinned history capped ($before)" || bad "cap $before"
+
+# 13. Picker rows: header per mode, stash rows carry the id in column 7
+"$HOME/.config/tmux/prompt-stash-picker.sh" --rows stash | head -1 | grep -q 'STASH' && ok "picker stash header" || bad "picker header"
+[ "$("$HOME/.config/tmux/prompt-stash-picker.sh" --rows stash | sed -n 2p | awk -F'\t' '{print NF}')" = 7 ] &&
+  ok "picker rows have 7 columns" || bad "picker cols"
+
+# 14. OpenCode: <leader>e = Ctrl+X E hands the draft to $VISUAL
+oc="$HOME/.local/bin/opencode"
+sed 's/\$'"'"'\\a'"'"') "\$VISUAL" "\$f" ;;/$'"'"'\\x18'"'"') read -rsn1 c2; [ "$c2" = e ] \&\& "$VISUAL" "$f" ;;/' "$fake" >"$oc"
+chmod +x "$oc"
+tmux new-session -d -s oc -x 120 -y 20 "HOME='$HOME' XDG_RUNTIME_DIR='$XDG_RUNTIME_DIR' VISUAL='$HOME/.local/bin/ai-prompt' '$oc'"
+sleep 0.4
+C=$(tmux display-message -p -t oc: '#{pane_id}')
+tmux send-keys -t "$C" -l "oc draft"; sleep 0.2
+ai-prompt -t "$C" take && [ "$(line "$C")" = "›" ] && ai-prompt -t "$C" put && [ "$(line "$C")" = "› oc draft" ] &&
+  ok "opencode: take / put through Ctrl+X E" || bad "opencode: line=$(line "$C")"
+
+# 15. stash --after-cmd: once waymux sees the pane busy then idle, the draft comes back by itself
+mkdir -p "$HOME/fakebin"
+printf '#!/bin/sh\n[ "$1" = wait ] && exit 0\nexit 1\n' >"$HOME/fakebin/waymux"
+chmod +x "$HOME/fakebin/waymux"
+tmux send-keys -t "$O" Enter; sleep 0.2
+tmux send-keys -t "$O" -l "auto back"; sleep 0.2
+PATH="$HOME/fakebin:$PATH" ai-prompt -t "$O" stash --after-cmd 2>/dev/null
+for _ in $(seq 30); do [ "$(line "$O")" = "› auto back" ] && break; sleep 0.1; done
+[ "$(line "$O")" = "› auto back" ] && [ ! -e "$RUN/${O#%}.stash" ] && ok "--after-cmd restores after busy -> idle" ||
+  bad "autorestore: line=$(line "$O")"
+
+# 16. Stash picker end to end: Enter on the first stash row puts it into the origin pane
+if command -v wm >/dev/null 2>&1; then
+  : >"$STORE"
+  printf 'picked from the list' >"$HOME/pick"
+  tmux send-keys -t "$O" Enter; sleep 0.2
+  tmux send-keys -t "$O" -l "picked from the list"; sleep 0.2
+  ai-prompt -t "$O" take
+  rm -rf "$RUN"   # a restart: only the stack has it
+  tmux new-window -d -t other: -n picker "HOME='$HOME' XDG_RUNTIME_DIR='$XDG_RUNTIME_DIR' TMUX_POPUP=1 '$HOME/.config/tmux/prompt-stash-picker.sh' '$O'"
+  sleep 1.2
+  tmux send-keys -t other:picker Enter
+  for _ in $(seq 30); do [ "$(line "$O")" = "› picked from the list" ] && [ "$(jq -s length "$STORE")" = 0 ] && break; sleep 0.1; done
+  [ "$(line "$O")" = "› picked from the list" ] && [ "$(jq -s length "$STORE")" = 0 ] &&
+    ok "picker: Enter puts the stash into the pane and pops it" || bad "picker enter: line=$(line "$O") pane=$(tmux capture-pane -p -t "$O" | tail -3) store=$(cat "$STORE") picker=$(tmux capture-pane -p -t other:picker 2>&1 | head -5)"
+else
+  echo "skip: wm not installed (picker end to end)"
+fi

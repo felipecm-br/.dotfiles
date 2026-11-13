@@ -362,6 +362,16 @@ def suggestions(presses: List[Press], inventory: Dict[str, str]) -> List[Tuple[i
         found.append((launch_cmds,
                       "`ai-launch` typed in the shell: Prefix + a (or Ctrl + Shift + A) opens the "
                       "CLI × model launch menu popup and starts the pick in a new window."))
+    checkpoint_cmds = shell_prefix_count(since_ts, "^waymux checkpoint( +(list|ls|diff|restore).*)?$")
+    if checkpoint_cmds >= 3:
+        found.append((checkpoint_cmds,
+                      "`waymux checkpoint` typed in the shell: Prefix + Z lists the pane's turns "
+                      "with each diff and restores one behind a confirm."))
+    stash_cmds = shell_prefix_count(since_ts, "^ai-prompt( +-t +[^ ]+)? +(list|send|preset|picker).*$")
+    if stash_cmds >= 3:
+        found.append((stash_cmds,
+                      "`ai-prompt list/send/preset` typed in the shell: the Command Palette's "
+                      "AI Prompt Stash & Presets puts any stash or preset 0-9 into the pane."))
     failover_cmds = shell_prefix_count(since_ts, "^ai-failover$")
     if failover_cmds >= 3:
         found.append((failover_cmds,

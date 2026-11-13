@@ -46,6 +46,8 @@ Prefer these over `curl` and `waymux-cli` when you need a result to branch on:
 
 - `waymux run [--split below|right|left|above] [--ratio <pct>] --wait [--capture] [--for <dur>] -- <command>`: runs the command in a new window (or a split of your own pane) without taking the user's focus and exits with the command's own status; `--capture` prints the last 200 lines of its screen. Without `--wait` it prints the new pane id and returns (a dev server: `waymux run --name server -- npm run dev`).
 - `waymux wait <pane> [--state <state>] [--for <dur>]`: blocks until that pane's agent is idle; exit 1 on timeout (default 5 minutes).
+- `waymux goal <pane> --check "<command>" [--max <rounds>] [--for <dur>]` (waymux > 0.13): keeps that pane's agent going until the check passes; each failed check queues a nudge with the end of its output. Exit 0 when it passes, 1 when it gives up.
+- `waymux queue send <pane> [id]` / `queue edit <pane> <id> -` (waymux > 0.13): a queued prompt waits (`held`) while the user has a draft in that agent's prompt; `send` types it now anyway, `edit` replaces its text (stdin with `-`).
 - `waymux events --json [--pane <pane>] [--for <dur>]`: NDJSON of state changes (`ts`, `pane_id`, `state`, `previous`, `message`).
 - `waymux report <state> [--progress <0-100>] [--msg <text>]`: reports a state for your own pane from a script.
 - `waymux api list` / `api describe <method>` / `api call <method> '<json>'`: the JSON-RPC methods without `curl`.

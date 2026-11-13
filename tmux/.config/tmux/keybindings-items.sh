@@ -29,6 +29,8 @@ emit_tmux() {
 󰚩  Prefix + F	AI Usage-Limit Failover (Next Agent, Same Workstream)	tmux	tmux-ai-failover	~/.local/bin/ai-failover
 󰏫  Prefix + v	AI Prompt Draft in Nvim Popup	tmux	tmux-ai-prompt	~/.local/bin/ai-prompt edit
 󰆓  Prefix + V	AI Prompt Draft Stash / Restore (for /commands)	tmux	tmux-ai-prompt-stash	~/.local/bin/ai-prompt stash
+󰭹  Prefix + b	AI Side Question (/btw, Pane Untouched)	tmux	tmux-btw	~/.config/tmux/btw-popup.sh
+󰁯  Prefix + Z	AI Turn Checkpoints & Rewind (Per-Turn Diff)	tmux	tmux-checkpoint	~/.config/tmux/checkpoint-picker.sh
 󰓅  Prefix + u	AI Quota & Burn Telemetry Visual Popup	tmux	tmux-ai-quota	~/.config/tmux/ai-quota-popup.sh
 󰊢  Ctrl + G	Lazygitrs Floating Popup & Dual-Diff	tmux	tmux-lazygitrs	~/.config/tmux/lazygitrs-popup.sh
 󰙀  Ctrl + Shift + T	Undo Close Tab (Exact Index & AI Resume)	tmux	tmux-reopen	~/.config/tmux/reopen-window.sh
@@ -101,6 +103,8 @@ EOF
 emit_cmd() {
   # Palette-only commands: no shortcut (empty key column); actions run through `tmux run-shell`.
   cat <<'EOF'
+󰆓  	AI Prompt Stash & Presets (0-9, Queue)	cmd	cmd-prompt-stash	~/.local/bin/ai-prompt picker
+󰡀  	AI MCP & Skill Inventory (Duplicates, Cost)	cmd	cmd-ai-inventory	~/.local/bin/ai-inventory --picker
 󰐕  	New Session (prompt for name)	cmd	cmd-new-session	tmux command-prompt -p 'New session:' 'new-session -d -s "%%" ; switch-client -t "%%"'
 󰑕  	Rename Window	cmd	cmd-rename-window	tmux command-prompt -I '#W' -p 'Rename window:' 'rename-window -- "%%"'
 󰑕  	Rename Session	cmd	cmd-rename-session	tmux command-prompt -I '#S' -p 'Rename session:' 'rename-session -- "%%"'

@@ -1,0 +1,108 @@
+# Waymaker AI MCP & Skill Inventory (`ai-inventory --picker`, Command Palette).
+# Rows piped from `ai-inventory`: kind, cli, name, flags (dup / shared / missing / broken /
+# no-skill-md), context cost of the skill description, source. Preview: the definition or SKILL.md.
+
+[tui]
+percentage = 100
+max = 9999
+restore_fullscreen = false
+
+[ui.nav]
+active = true
+focus_on_start = "picker"
+bar = "Plain"
+color = "black"
+hints = false
+
+[ui.border]
+sides = ""
+
+[query]
+status_inline = true
+prompt = " "
+show = true
+
+[header]
+header_lines = 1
+style.fg = "Cyan"
+style.modifier = "BOLD"
+
+[footer]
+content = " {cyan,bold:type} {darkgray:Filter (dup, missing, codex…)} {darkgray:│} {cyan,bold:y} {darkgray:Copy Source} {darkgray:│} {cyan,bold:J/K} {darkgray:Scroll} {darkgray:│} {cyan,bold:Esc} {darkgray:Close}"
+row_connection = "Full"
+match_indent = false
+separator = "light"
+
+[results]
+current_nav_bar = "Plain"
+column_spacing = 2
+row_connection = "Full"
+
+[results.border]
+sides = ""
+
+[results.style]
+modifier = "DIM"
+
+[results.current_style]
+bg = "reset"
+modifier = "BOLD"
+
+[results.current_nav_bar_style]
+fg = "cyan"
+modifier = "BOLD"
+
+[columns]
+split = "\t"
+max_columns = 6
+names = [
+  { name = "kind" },
+  { name = "cli" },
+  { name = "name" },
+  { name = "flags" },
+  { name = "cost" },
+  { name = "source" },
+]
+
+[previewer]
+debounce_ms = 20
+delay_clear = true
+
+[preview]
+show = true
+wrap = true
+
+[preview.border]
+sides = "LEFT"
+color = "Darkgray"
+
+[[preview.layout]]
+command = "~/.local/bin/ai-inventory --show {2} {1} {3}"
+side = "right"
+percentage = 55
+
+[exit]
+abort_empty = false
+
+[start]
+mode = "nav"
+
+[binds]
+"ctrl-j" = "Down"
+"ctrl-k" = "Up"
+"ctrl-p" = "SwitchPreview"
+"nav^^j" = "Down"
+"nav^^k" = "Up"
+"nav^^J" = "PreviewDown(5)"
+"nav^^K" = "PreviewUp(5)"
+"nav^^g" = "Pos(0)"
+"nav^^G" = "Pos(-1)"
+"nav^^q" = "Quit"
+"nav^^esc" = "Quit"
+"nav^^enter" = "Quit"
+"nav^^y" = 'ExecuteSilent(printf "%s" {6} | (command -v wl-copy >/dev/null 2>&1 && wl-copy || tmux load-buffer -))'
+
+# No image previews here: skip the terminal graphics probe, which holds the first frame
+# for up to 100 ms inside tmux (tests/popup_render_perf.test.sh).
+[preview.media]
+active = false

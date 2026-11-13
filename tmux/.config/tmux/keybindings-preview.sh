@@ -271,7 +271,7 @@ EOF
 Opens the draft of the agent **in the current pane** in Neovim, in a popup over it (`ai-prompt edit`). The agent hands over its own draft through its external-editor key and reads the file back, so multi-line text and Unicode stay exact.
 
 - **Ergonomics**: `v` = **v**im. Full Neovim motions on a long prompt; `ggI/compact ` puts a slash command first without deleting anything.
-- **Agents**: Claude Code (`Ctrl+X Ctrl+E`, since `Ctrl+G` is Lazygitrs), Codex, Antigravity and Devin (`Ctrl+G`), via `$VISUAL` / `$EDITOR` = `ai-prompt`. Agents started before that open their own editor in the pane.
+- **Agents**: Claude Code (`Ctrl+X Ctrl+E`, since `Ctrl+G` is Lazygitrs), OpenCode (`<leader>e` = `Ctrl+X E`), Codex, Antigravity and Devin (`Ctrl+G`), via `$VISUAL` / `$EDITOR` = `ai-prompt`. Agents started before that open their own editor in the pane.
 - **Controls**: `:wq` apply, `:cq` cancel (the draft stays as it was).
 EOF
     ;;
@@ -284,6 +284,54 @@ Toggle for the agent in the current pane (`ai-prompt stash`): the first press pu
 - **Flow**: `Prefix + V`, type `/compact` `Enter`, `Prefix + V`. Works on every agent, also those without mid-prompt slash commands.
 - **Merge**: text typed in between and not sent stays, after the restored draft.
 - **Also**: `Prefix + A` (model / effort switch) uses the same stash, so a draft no longer blocks a switch.
+- **Persistent**: every stash is also kept on a stack (`~/.local/state/waymux/prompt-stash.jsonl`, 50 entries, `0600`), so it survives a tmux or host restart: the Command Palette's *AI Prompt Stash & Presets* puts it back into any pane.
+- **Auto-restore**: with `AI_PROMPT_AUTO_RESTORE=1` the draft comes back by itself once the `/command` ran (the pane goes busy, then idle), like Claude Code's `Ctrl+S`.
+- **Failover**: `Prefix + F` carries an unsent draft into the replacement agent.
+EOF
+    ;;
+
+  tmux-btw)
+    cat <<'EOF'
+### 󰭹 AI Side Question (`Prefix + b`, `75% × 60%`)
+A harness-agnostic `/btw`: ask a one-off question about what the pane is doing while its agent keeps working. Nothing is typed into the pane and no session is saved.
+
+- **Ergonomics**: `b` = **b**y the way. One chord, one line, `Enter`; the answer renders in the popup.
+- **Context (read-only)**: the pane's last 120 lines, `git status -sb` and the branch.
+- **Answer**: a headless, hook-free run of the agent with quota: `claude -p` on Haiku, `codex exec --ephemeral -s read-only`, or `agy -p` (`BTW_AGENT` / `BTW_MODEL` override).
+- **Controls**: `y` yank the answer · `i` queue it into the pane's agent (`waymux queue`) · `Enter` ask again · `Esc` close.
+EOF
+    ;;
+
+  tmux-checkpoint)
+    cat <<'EOF'
+### 󰁯 AI Turn Checkpoints & Rewind (`Prefix + Z`, `85% × 75%`)
+`/rewind` for every agent: `waymux checkpoint` records the work tree each agent turn left; this lists the pane's turns newest first with each turn's diff (`delta`) on the right.
+
+- **Ergonomics**: `Z` = undo, as in `Ctrl+Z`.
+- **Controls**: `Enter` / `r` restore the turn (confirm first; mid-turn asks again to force) · `J` / `K` scroll the diff · `g` lazygitrs · `Esc` close.
+- **Safety**: waymux saves the current tree as a new checkpoint before restoring, so a restore is itself undoable. The index, `HEAD` and ignored files are not touched.
+EOF
+    ;;
+
+  cmd-prompt-stash)
+    cat <<'EOF'
+### 󰆓 AI Prompt Stash & Presets (`75% × 60%`)
+Every draft `Prefix + V` stashed, from any agent, and the presets pinned at `0`–`9` (Codex `chat.open_presets` parity). `Tab` switches to the pane's `waymux` delivery queue.
+
+- **Controls**: `Enter` put the entry into the pane's prompt (also one stashed from another agent) · `0`–`9` put a preset · `e` edit in Neovim · `s` pin as preset · `u` unpin · `d` drop (a preset asks first).
+- **Queue tab**: `Enter` / `e` edit a held prompt (it moves to the end of the queue) · `d` drop it.
+- **CLI**: `ai-prompt list | send <id> | preset <0-9> | save <0-9> [text]`.
+EOF
+    ;;
+
+  cmd-ai-inventory)
+    cat <<'EOF'
+### 󰡀 AI MCP & Skill Inventory (`75% × 60%`)
+The MCP servers and skills Claude Code, Codex, OpenCode and Antigravity load, in one list (`ai-inventory`).
+
+- **Flags**: `dup` loads twice in one CLI · `shared` configured in more than one CLI · `missing` command not on `PATH` · `broken` dangling skill link · `no-skill-md`.
+- **Cost**: tokens each skill's description takes in every session (~4 bytes per token).
+- **Controls**: type to filter (`dup`, `codex`…) · `y` copy the source path · `J` / `K` scroll · `Esc` close.
 EOF
     ;;
 

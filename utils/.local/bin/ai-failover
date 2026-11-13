@@ -12,7 +12,8 @@
 # still run Claude models on its own quota). The new window starts through `ai-launch` with
 # AI_LAUNCH_CONTINUE=1, so `ai-launch-exec` runs it as `ai-memory run <harness>` and the agent
 # picks up the workstream the limited one was in. The limited window stays: it resumes after the
-# reset, and its scrollback holds the last turn.
+# reset, and its scrollback holds the last turn. An unsent draft in the limited agent's prompt
+# moves with it (ai-prompt take, then `ai-prompt _carry` once the new agent is idle).
 #
 # AI_SWITCH_AGENT=<agent> skips pane detection (tests).
 
@@ -74,6 +75,15 @@ if [ "$peek" = 1 ]; then
   exit 0
 fi
 
+# The limited agent's unsent draft follows into the new one (ai-prompt take records it on the stash
+# stack; the new pane gets it once its agent is idle). Its pane toggle is cleared: the draft moved.
+draft=""
+run="${XDG_RUNTIME_DIR:-/tmp}/ai-prompt/${pane#%}"
+if "$here/ai-prompt" -t "$pane" --ready 2>/dev/null && "$here/ai-prompt" -t "$pane" take 2>/dev/null; then
+  draft=$(cat "$run.stash.id" 2>/dev/null)
+  rm -f "$run.stash" "$run.stash.id"
+fi
+
 IFS=$'\t' read -r window dir < <(tmux display-message -p -t "$pane" $'#{window_id}\t#{pane_current_path}')
 read -r -a words <<<"$choice"
 # -a: right after the limited window, so the two sit together in the status bar.
@@ -82,4 +92,7 @@ new=$(tmux new-window -a -t "$window" -c "$dir" -P -F '#{pane_id}' \
 model=${words[*]:1}
 say "󰚩 $failed hit its limit · continuing in ${words[0]}${model:+ ($model)} in the same workstream"
 [ -n "$new" ] && tmux select-pane -t "$new"
+if [ -n "$new" ] && [ -n "$draft" ]; then
+  setsid "$here/ai-prompt" -t "$new" _carry "$draft" </dev/null >/dev/null 2>&1 &
+fi
 exit 0

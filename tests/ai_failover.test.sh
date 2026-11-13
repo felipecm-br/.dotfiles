@@ -27,6 +27,7 @@ if [ "\$1" = --peek ]; then
   exit 0
 fi
 printf '%s|%s|%s\n' "\$*" "\${AI_LAUNCH_CONTINUE:-}" "\$PWD" >"$SANDBOX/started"
+[ -x "$SANDBOX/next-agent" ] && exec "$SANDBOX/next-agent"
 exec sleep 30
 EOF
 chmod +x "$SANDBOX/bin/ai-launch"
@@ -72,5 +73,40 @@ PATH="$SANDBOX/bin:$PATH" AI_LAUNCH_CONTINUE=1 "$X" agyy --model m
   ok "continue runs ai-memory run with the agy harness" || bad "continue: $(cat "$SANDBOX/exec")"
 PATH="$SANDBOX/bin:$PATH" "$X" agyy --model m
 [ "$(cat "$SANDBOX/exec")" = "agyy --model m" ] && ok "without AI_LAUNCH_CONTINUE: plain start" || bad "plain: $(cat "$SANDBOX/exec")"
+
+# 4. An unsent draft in the limited agent's prompt moves into the new agent's prompt.
+#    Fake agents: `devin` (process name in ai-prompt's AGENT_RE), Ctrl+G hands the draft to $VISUAL.
+mkdir -p "$SANDBOX/agents"
+cat >"$SANDBOX/agents/devin" <<'AGENT'
+#!/bin/bash
+f=$(mktemp)
+draw() { printf '\r\e[K› %s' "$(tr '\n' '|' <"$f")"; }
+draw
+while IFS= read -rsn1 c; do
+  case $c in
+    $'\a') "$VISUAL" "$f" ;;
+    '') : >"$f" ;;
+    *) printf '%s' "$c" >>"$f" ;;
+  esac
+  draw
+done
+AGENT
+chmod +x "$SANDBOX/agents/devin"
+cp "$ROOT/utils/.local/bin/ai-prompt" "$SANDBOX/bin/"
+export XDG_RUNTIME_DIR="$SANDBOX/run" VISUAL="$HOME/.local/bin/ai-prompt" AI_PROMPT_CARRY_SETTLE=0.2
+printf '#!/bin/sh\nVISUAL="%s" XDG_RUNTIME_DIR="%s" exec "%s/agents/devin"\n' "$VISUAL" "$XDG_RUNTIME_DIR" "$SANDBOX" >"$SANDBOX/next-agent"
+chmod +x "$SANDBOX/next-agent"
+tmux new-window -d -t _test_bootstrap: -n drafty "VISUAL='$VISUAL' XDG_RUNTIME_DIR='$XDG_RUNTIME_DIR' '$SANDBOX/agents/devin'"
+sleep 0.4
+dp=$(tmux display-message -p -t _test_bootstrap:drafty '#{pane_id}')
+tmux send-keys -t "$dp" -l "carry me over"
+sleep 0.2
+AI_SWITCH_AGENT=claude "$F" -t "$dp" 2>/dev/null
+np=$(tmux display-message -p -t "_test_bootstrap:$(( $(tmux display-message -p -t "$dp" '#{window_index}') + 1 ))" '#{pane_id}')
+for _ in $(seq 60); do tmux capture-pane -p -t "$np" | grep -q '› carry me over' && break; sleep 0.1; done
+tmux capture-pane -p -t "$np" | grep -q '› carry me over' && ok "draft carried into the new agent" ||
+  bad "carry: new='$(tmux capture-pane -p -t "$np" | grep '›')'"
+tmux capture-pane -p -t "$dp" | grep -q '› *$' && [ ! -e "$XDG_RUNTIME_DIR/ai-prompt/${dp#%}.stash" ] &&
+  ok "limited prompt emptied, no stale toggle left" || bad "limited: '$(tmux capture-pane -p -t "$dp" | grep '›')'"
 
 echo "ai_failover: all checks passed"
