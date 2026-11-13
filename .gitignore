@@ -18,3 +18,6 @@ ai-memory/.local/share/ai-memory/
 
 # Antigravity CLI runtime state (binaries, caches, logs, conversation DB)
 antigravity/.gemini/antigravity-cli/
+
+# Downloaded by .shell/install/packages/nerd-font-propo.zsh (stow folds ~/.local/share/fonts into the repo)
+fonts/.local/share/fonts/JetBrainsMonoNerdFontPropo/

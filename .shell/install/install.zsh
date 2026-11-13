@@ -13,6 +13,7 @@ install_packages \
     battery \
     atuin \
     ghostty \
+    nerd-font-propo \
     keyd \
     yazi \
     chafa \
