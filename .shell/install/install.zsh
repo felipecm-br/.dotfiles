@@ -47,6 +47,8 @@ install_packages \
     cross \
     cargo-zigbuild \
     cargo-clean-all \
+    waymaker \
+    lazygitrs \
     ffmpegthumbnailer \
     poppler \
     mediainfo \

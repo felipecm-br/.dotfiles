@@ -59,6 +59,7 @@ pkg_is_installed() {
     bitwarden-cli) command -v bw &>/dev/null && return 0 ;;
     aws-cli-v2) command -v aws &>/dev/null && return 0 ;;
     obs-studio) command -v obs &>/dev/null && return 0 ;;
+    waymaker) command -v wm &>/dev/null && return 0 ;;
   esac
 
   # If the binary exists in PATH, consider it installed
