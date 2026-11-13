@@ -26,6 +26,9 @@
           "id": "omarchy.tray"
         },
         {
+          "id": "superwhisper.panel"
+        },
+        {
           "id": "akitaonrails.ai-usagebar",
           "lastSelectedEntryId": "antigravity",
           "showValue": true,
@@ -58,11 +61,6 @@
         },
         {
           "id": "omarchy.power"
-        }
-      ],
-      "tray": [
-        {
-          "id": "superwhisper.panel"
         }
       ]
     },

@@ -38,7 +38,7 @@ The commit hashes link each entry to the full change (`git show <hash>`). Weeks 
 - The keybindings HUD runs the real triage jump for `Ctrl+Shift+I` and `Prefix + I` (it named a script that no longer exists). `needs: waymux`
 
 ### Other
-- `shell.json` follows the Omarchy 4.5 bar schema: `background: "none"` replaces `transparent`, the removed `centerAnchor` is gone, and the new `tray` section holds the Superwhisper panel; `hyprland.lua` gains the stock `omarchy_default_gestures` hint. (`omarchy`, `hypr`) `host-only`
+- `shell.json` follows the Omarchy 4.5 bar schema: `background: "none"` replaces `transparent`, the removed `centerAnchor` is gone, and the Superwhisper panel sits on the bar next to the tray instead of inside its drawer; `hyprland.lua` gains the stock `omarchy_default_gestures` hint. (`omarchy`, `hypr`) `host-only`
 - `omarchy-clean reset | status | remove` keeps a stock Omarchy test user, created like the installer creates the owner (`/etc/skel` + `omarchy-provision-user`), to try each update's new defaults without these dotfiles. (`utils`, `intelli-shell`) `host-only`, `needs: root`
 - `install.zsh` now builds `wm` (waymaker) and `lazygitrs` from GitHub with cargo, so a fresh machine gets every picker and `Ctrl + G` without hand-built binaries; the [bootstrap README](../.shell/install/README.md#3-fresh-omarchy-install) has a fresh Omarchy 4.5 install checklist. (`.shell/install`) `needs: cargo`
 - The Omarchy menu plugin moves the selection with `Ctrl + J` / `Ctrl + K` (and `Ctrl + N` / `Ctrl + P`) like Vim, besides the arrow keys. `host-only`
