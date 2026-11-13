@@ -38,6 +38,7 @@ The commit hashes link each entry to the full change (`git show <hash>`). Weeks 
 - The keybindings HUD runs the real triage jump for `Ctrl+Shift+I` and `Prefix + I` (it named a script that no longer exists). `needs: waymux`
 
 ### Other
+- `omarchy-clean reset | status | remove` keeps a stock Omarchy test user, created like the installer creates the owner (`/etc/skel` + `omarchy-provision-user`), to try each update's new defaults without these dotfiles. (`utils`, `intelli-shell`) `host-only`, `needs: root`
 - `install.zsh` now builds `wm` (waymaker) and `lazygitrs` from GitHub with cargo, so a fresh machine gets every picker and `Ctrl + G` without hand-built binaries; the [bootstrap README](../.shell/install/README.md#3-fresh-omarchy-install) has a fresh Omarchy 4.5 install checklist. (`.shell/install`) `needs: cargo`
 - The Omarchy menu plugin moves the selection with `Ctrl + J` / `Ctrl + K` (and `Ctrl + N` / `Ctrl + P`) like Vim, besides the arrow keys. `host-only`
 - Every `wm` picker exits on the first `Ctrl + C` (the new `Abort` action), and `?`, `shift-?` and `*` (help, switch preview, bookmark) act only in navigation mode, so they can be typed into the query; `F1` still opens help. `needs: wm ≥ 0.7.2`

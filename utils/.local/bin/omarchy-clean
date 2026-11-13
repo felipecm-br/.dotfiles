@@ -1,0 +1,117 @@
+#!/bin/bash
+# omarchy-clean — keep a "clean" Omarchy user around to test the stock
+# defaults of the installed version, without dotfiles or customizations.
+#
+# The user is created exactly like the installer creates the machine owner:
+#   useradd -m (copies /etc/skel)  +  omarchy-provision-user --first-install
+#
+# Usage:
+#   omarchy-clean reset    # (re)create the user from scratch — run after every `omarchy update`
+#   omarchy-clean status   # show whether it exists and which Omarchy version created it
+#   omarchy-clean remove   # delete the user and its home directory
+#
+# To test: log out (Super+Esc → Logout) and sign in as the clean user in SDDM.
+#
+# Environment:
+#   OMARCHY_CLEAN_USER    name of the clean user (default: omarchy)
+#   OMARCHY_CLEAN_GROUPS  supplementary groups (default: wheel; "" for no sudo)
+
+set -euo pipefail
+
+CLEAN_USER="${OMARCHY_CLEAN_USER:-omarchy}"
+CLEAN_GROUPS="${OMARCHY_CLEAN_GROUPS-wheel}"
+OMARCHY_PATH="${OMARCHY_PATH:-/usr/share/omarchy}"
+STAMP=".local/state/omarchy-clean/created"
+
+die() { echo "Error: $*" >&2; exit 1; }
+exists() { getent passwd "$CLEAN_USER" >/dev/null; }
+home_of() { getent passwd "$CLEAN_USER" | cut -d: -f6; }
+
+confirm() {
+  local answer
+  read -rp "$1 [y/N] " answer
+  [[ $answer =~ ^[yYsS]$ ]]
+}
+
+guard() {
+  [[ $CLEAN_USER != "$USER" ]] || die "the clean user cannot be yourself ($USER)."
+  (( EUID != 0 )) || die "run as your normal user; the script calls sudo when needed."
+}
+
+logged_in() {
+  loginctl list-users --no-legend 2>/dev/null | awk '{print $2}' | grep -qx "$CLEAN_USER"
+}
+
+remove_user() {
+  exists || return 0
+  logged_in && die "'$CLEAN_USER' has an active session. Log it out first."
+  echo "→ Removing user '$CLEAN_USER' and its home directory..."
+  sudo userdel -r "$CLEAN_USER" 2>/dev/null || sudo userdel -r -f "$CLEAN_USER"
+}
+
+create_user() {
+  echo "→ Creating '$CLEAN_USER' from /etc/skel..."
+  if [[ -n $CLEAN_GROUPS ]]; then
+    sudo useradd -m -G "$CLEAN_GROUPS" -s /bin/bash "$CLEAN_USER"
+  else
+    sudo useradd -m -s /bin/bash "$CLEAN_USER"
+  fi
+
+  echo "→ Set a password for '$CLEAN_USER' (used for SDDM login and sudo):"
+  sudo passwd "$CLEAN_USER"
+
+  local home
+  home=$(home_of)
+
+  echo "→ Running the official Omarchy user provisioning as '$CLEAN_USER'..."
+  sudo runuser -u "$CLEAN_USER" -- env -i \
+    HOME="$home" USER="$CLEAN_USER" LOGNAME="$CLEAN_USER" SHELL=/bin/bash \
+    PATH="$OMARCHY_PATH/bin:/usr/local/bin:/usr/bin:/bin" \
+    LANG="${LANG:-C.UTF-8}" \
+    OMARCHY_PATH="$OMARCHY_PATH" \
+    OMARCHY_INSTALL="$OMARCHY_PATH/install" \
+    OMARCHY_SETUP_CONTEXT=provision-owner \
+    "$OMARCHY_PATH/bin/omarchy-provision-user" --force --first-install
+
+  sudo runuser -u "$CLEAN_USER" -- bash -c \
+    "mkdir -p \"\$(dirname ~/$STAMP)\" && printf '%s\n%s\n' \"\$(omarchy-version 2>/dev/null || cat $OMARCHY_PATH/version)\" \"\$(date -Is)\" > ~/$STAMP"
+
+  echo
+  echo "✓ Done. Log out (Super+Esc → Logout) and sign in as '$CLEAN_USER' in SDDM."
+}
+
+status() {
+  if ! exists; then
+    echo "'$CLEAN_USER' does not exist. Create it with: omarchy-clean reset"
+    return 0
+  fi
+  local stamp
+  stamp=$(sudo cat "$(home_of)/$STAMP" 2>/dev/null || true)
+  echo "User:             $CLEAN_USER ($(home_of))"
+  echo "Created with:     $(sed -n 1p <<<"$stamp")"
+  echo "Created at:       $(sed -n 2p <<<"$stamp")"
+  echo "Current Omarchy:  $(omarchy version 2>/dev/null)"
+  if logged_in; then echo "Session:          active"; else echo "Session:          none"; fi
+}
+
+usage() { sed -n '2,18p' "$0" | sed 's/^# \{0,1\}//'; }
+
+guard
+case "${1:-}" in
+  reset|create)
+    if exists; then
+      confirm "Delete and recreate '$CLEAN_USER' from scratch?" || exit 1
+      remove_user
+    fi
+    create_user
+    ;;
+  remove)
+    exists || { echo "'$CLEAN_USER' does not exist."; exit 0; }
+    confirm "Delete '$CLEAN_USER' and its entire home directory?" || exit 1
+    remove_user
+    echo "✓ Removed."
+    ;;
+  status) status ;;
+  -h|--help|help) usage ;;
+  *) usage; exit 1 ;;
+esac

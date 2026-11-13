@@ -819,3 +819,12 @@ agent-sudo -r {{reason}} -- {{command}}
 
 # Start/inspect the agent-sudo bridge daemon (loopback 49375, forwarded into ai-jail)
 systemctl --user enable --now agent-sudod
+
+# Recreate the clean stock Omarchy test user from /etc/skel (run after omarchy update)
+omarchy-clean reset
+
+# Show which Omarchy version created the clean test user
+omarchy-clean status
+
+# Delete the clean stock Omarchy test user and its home
+omarchy-clean remove

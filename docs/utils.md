@@ -38,6 +38,7 @@ These come from the [`utils`](../utils), [`awt`](../awt), [`waymux`](../waymux),
 | `stow-it <path> [package]` | Adopt an existing file or dir into the dotfiles repo and stow it. Resolves the real path, moves it under `~/.dotfiles/main/<package>/...`, and runs `stow.sh -a <package>`. |
 | `battery-threshold [pct]` | Set hardware battery charge threshold (e.g., `80`) to extend battery lifespan (`battery` package). |
 | `perf-toggle` | Toggle CPU energy performance profile between performance, balanced, and power-saver (`battery` package). |
+| `omarchy-clean [reset\|status\|remove]` | Keep a stock Omarchy test user (`omarchy` by default) created exactly like the installer does (`useradd -m` from `/etc/skel` + `omarchy-provision-user --first-install`), with no dotfiles. Run `reset` after every `omarchy update`, then log out and sign in as that user to try new defaults. `OMARCHY_CLEAN_USER` / `OMARCHY_CLEAN_GROUPS` (default `wheel`, `""` for no sudo). |
 | `battery-health` | Display battery health stats, current capacity, and cycle count (`battery` package). |
 | `gpucheck [--fix] [--watch]` | NVIDIA / Intel GPU, driver, and energy-performance diagnostics. |
 | `gpu-toggle` | Switch between NVIDIA dedicated and Intel integrated GPU via EnvyControl. Requires sudo and a reboot. |
