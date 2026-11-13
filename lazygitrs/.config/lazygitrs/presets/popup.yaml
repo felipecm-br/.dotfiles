@@ -31,7 +31,7 @@ git:
     signOff: false
     autoWrapCommitMessage: true
     autoWrapWidth: 72
-    generateCommand: 'lazycommit commit --message-only --silent-empty'
+    generateCommand: 'ai-commit-msg'
   merging:
     manualCommit: false
     args: ''
