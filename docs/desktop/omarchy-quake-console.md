@@ -21,12 +21,16 @@ Stock definitions (read-only, owned by the `omarchy` package):
 
 | Stock key | Stock action | What these dotfiles do instead |
 | :--- | :--- | :--- |
-| `Super + `` ` `` | Toggle the Quake console | `Super + code:49` → switch to workspace 0 ([`bindings.lua`](../../hypr/.config/hypr/bindings.lua)) |
-| `Super + Shift + `` ` `` | Move window to the console | `Super + Shift + code:49` → move window to workspace 0 |
+| `Super + `` ` `` | Toggle the Quake console | `Super + dead_grave` → switch to workspace 0 ([`bindings.lua`](../../hypr/.config/hypr/bindings.lua)) |
+| `Super + Shift + `` ` `` | Move window to the console | `Super + Shift + dead_tilde` (or `dead_grave`) → move window to workspace 0 |
 
 Two things collide on the same physical key (`<TLDE>`, keycode 49):
 
-1. The workspace-0 bindings target the **keycode** directly, so they win.
+1. [`bindings.lua`](../../hypr/.config/hypr/bindings.lua) `hl.unbind`s
+   Omarchy's `SUPER + grave` and `SUPER + SHIFT + grave` and binds workspace 0
+   to the `dead_grave` / `dead_tilde` **keysyms**, not to keycode 49: on the
+   Apple ISO keyboard the key is `<LSGT>` (keycode 94), and `fixgrave` gives
+   both keys the same keysyms.
 2. The [`fixgrave`](../../xkb/.config/xkb/symbols/fixgrave) xkb symbol (loaded by
    `kb_layout = "us(intl)+fixgrave"` in [`input.lua`](../../hypr/.config/hypr/input.lua))
    turns that key into `dead_grave` / `dead_tilde`. Omarchy binds the
@@ -61,13 +65,13 @@ dotfiles. Following the repo's convention of a home-row `Ctrl` chord
 
 ```lua
 -- Quake console (stock Super + ` is taken by workspace 0)
-o.bind("SUPER + CTRL + code:49", "Toggle Quake console", hl.dsp.workspace.toggle_special("qconsole"))
-o.bind("SUPER + ALT + code:49", "Toggle Quake console", hl.dsp.workspace.toggle_special("qconsole"))
-o.bind("SUPER + CTRL + SHIFT + code:49", "Move window to Quake console", hl.dsp.window.move({ workspace = "special:qconsole", follow = false }))
-o.bind("SUPER + ALT + SHIFT + code:49", "Move window to Quake console", hl.dsp.window.move({ workspace = "special:qconsole", follow = false }))
+o.bind("SUPER + CTRL + dead_grave", "Toggle Quake console", hl.dsp.workspace.toggle_special("qconsole"))
+o.bind("SUPER + ALT + dead_grave", "Toggle Quake console", hl.dsp.workspace.toggle_special("qconsole"))
+o.bind("SUPER + CTRL + SHIFT + dead_tilde", "Move window to Quake console", hl.dsp.window.move({ workspace = "special:qconsole", follow = false }))
+o.bind("SUPER + ALT + SHIFT + dead_tilde", "Move window to Quake console", hl.dsp.window.move({ workspace = "special:qconsole", follow = false }))
 ```
 
-Bind by `code:49` (not `grave`) so it keeps working with `fixgrave`. Validate
+Bind the `dead_grave` / `dead_tilde` keysyms (not `grave` or `code:49`) so it works with `fixgrave` on both `<TLDE>` and the Apple ISO `<LSGT>` key. Validate
 with `hyprctl reload && hyprctl configerrors`, and confirm with
 `omarchy menu keybindings --print | grep -i quake`.
 

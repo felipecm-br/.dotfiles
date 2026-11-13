@@ -89,8 +89,15 @@ o.bind("SUPER + SHIFT + F2", "Keyboard brightness 100%", "bash -c 'brightnessctl
 -- ==============================================================================
 -- Workspace Shortcuts
 -- ==============================================================================
-o.bind("SUPER + code:49", "Switch to workspace 0", hl.dsp.focus({ workspace = "name:0" }))
-o.bind("SUPER + SHIFT + code:49", "Move app to workspace 0", hl.dsp.window.move({ workspace = "name:0" }))
+-- Omarchy's stock SUPER + grave (Quake console) and SUPER + SHIFT + grave
+-- (move window to it) take the key first; replace them with workspace 0.
+hl.unbind("SUPER + grave")
+hl.unbind("SUPER + SHIFT + grave")
+-- fixgrave puts dead_grave / dead_tilde on both <TLDE> and <LSGT> (the Apple
+-- ISO key), so bind the keysym rather than one keycode.
+o.bind("SUPER + dead_grave", "Switch to workspace 0", hl.dsp.focus({ workspace = "name:0" }))
+o.bind("SUPER + SHIFT + dead_tilde", "Move app to workspace 0", hl.dsp.window.move({ workspace = "name:0" }))
+o.bind("SUPER + SHIFT + dead_grave", "Move app to workspace 0", hl.dsp.window.move({ workspace = "name:0" }))
 
 -- ==============================================================================
 -- Window Management
