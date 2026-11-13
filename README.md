@@ -31,7 +31,7 @@ scripts in `.shell/install/packages/` and plugin scripts in `.shell/install/plug
 `agents-skills`, `ai-memory`, `ai_usagebar`, `alacritty`, `antigravity`, `atuin`, `awt`,
 `bat`, `battery`, `bluetui`, `cargo`, `claude`, `desktop`, `duf`, `eza`, `fcitx5`, `fed`, `figlet`,
 `fonts`, `foot`, `gh`, `ghostty`, `git`, `herdr`, `hibiki`, `hypr`, `intelli-shell`, `kitty`,
-`lazycommit`, `lazygitrs`, `lolcat`, `mise`, `nvim`, `omarchy`, `omarchy-antigravity`, `opencode`,
+`lazygitrs`, `lolcat`, `mise`, `nvim`, `omarchy`, `omarchy-antigravity`, `opencode`,
 `procs`, `sounds`, `starship`, `tmux`, `tuikit`, `upscayl`, `utils`, `vimium`, `waymaker`, `waymux`,
 `worktrunk`, `xcompose`, `xkb`, `yazi`, `zsh`, `zsh-plugins`.
 

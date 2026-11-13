@@ -40,7 +40,7 @@ Stow a package with `./stow.sh <package>` (see [stow.sh](../../stow.sh)); everyt
 | `nvim` | `portable` | neovim (LazyVim) | Live theme reload watches Omarchy's theme dir; without it the configured colorscheme stays |
 | `git`, `gh` | `portable` | git, gh, gh-dash | `gc` / `sgc` need an AI CLI ([GC_SGC.md](../../git/GC_SGC.md)) |
 | `lazygitrs` | `needs: lazygitrs` | lazygitrs | — |
-| `lazycommit`, `worktrunk`, `herdr`, `intelli-shell` | `portable` | the tool itself | `intelli-shell` holds the command palette catalog |
+| `worktrunk`, `herdr`, `intelli-shell` | `portable` | the tool itself | `intelli-shell` holds the command palette catalog |
 | `ghostty`, `kitty`, `foot`, `alacritty` | `portable` | that terminal | GUI terminals may be the "forbidden app" on a managed machine; tmux config does not depend on which terminal runs it |
 | `fonts` | `portable` | — | Installs into `~/.local/share/fonts` (no root) |
 | `xcompose`, `xkb` | `portable` | X11/Wayland input that reads them | User-level keyboard tweaks |
