@@ -29,6 +29,7 @@ install_packages \
     gh \
     gh-dash \
     zen-browser-bin \
+    google-chrome \
     opencode-bin \
     gum \
     crush-bin \

@@ -39,6 +39,7 @@ The commit hashes link each entry to the full change (`git show <hash>`). Weeks 
 - The keybindings HUD runs the real triage jump for `Ctrl+Shift+I` and `Prefix + I` (it named a script that no longer exists). `needs: waymux`
 
 ### Other
+- `install.zsh` installs Google Chrome (`google-chrome` from the AUR, which builds for aarch64). (`.shell`) `host-only`, `needs: root`
 - `install.zsh` installs `JetBrainsMono Nerd Font Propo`, which Ghostty and Kitty use, into `~/.local/share/fonts`, since Omarchy's `ttf-jetbrains-mono-nerd-basic` dropped the Propo faces. (`ghostty`, `kitty`) `portable`
 - `.zshrc` loads Omarchy's default aliases, functions and envs from `$OMARCHY_PATH` (`/usr/share/omarchy`), where Omarchy now installs them, instead of the removed `~/.local/share/omarchy/default`. (`zsh`) `host-only`
 - `stow-relink` (with `stow-relink.path`) puts back the `shell.json` symlink that Omarchy's shell replaces with a plain file on every bar change, after saving the new content into the repo. (`utils`, `omarchy`) `portable`
