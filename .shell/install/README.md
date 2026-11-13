@@ -61,23 +61,26 @@ git clone --bare https://github.com/felipecm-br/.dotfiles.git ~/.dotfiles/.bare
 git -C ~/.dotfiles/.bare worktree add ../main main
 cd ~/.dotfiles/main
 
-# 2. Packages, custom builds (tmux 3.8, wm, lazygitrs, waymux), zsh + tmux plugins
+# 2. zsh is not part of a fresh Omarchy: install it and make it the login shell
+bash .shell/sh/zsh.sh
+
+# 3. Packages, custom builds (tmux 3.8, wm, lazygitrs, waymux), zsh + tmux plugins
 zsh .shell/install/install.zsh
 ```
 
-3. **Compare before stowing.** `hypr/.config/hypr/hyprland.lua` loads Omarchy's own modules
+4. **Compare before stowing.** `hypr/.config/hypr/hyprland.lua` loads Omarchy's own modules
    (`default/hypr/bootstrap.lua`, `default.hypr.omarchy`, `default.hypr.toggles`,
    `default.hypr.require_optional`). Diff the fresh `~/.config/hypr/hyprland.lua` and
    `~/.config/omarchy/shell.json` against this repo, and port any renamed module or new key.
-4. **Stow.** Omarchy has already written files at the link targets. Either delete them, or adopt and then restore the repo copies:
+5. **Stow.** Omarchy has already written files at the link targets. Either delete them, or adopt and then restore the repo copies:
    ```zsh
    ./stow.sh -a && git restore .   # adopt copies Omarchy's defaults in; restore puts yours back
    ./stow.sh -n && ./stow.sh -s
    ```
-5. **User services:** `systemctl --user daemon-reload`, then enable `waymux`, `ai-memory`,
+6. **User services:** `systemctl --user daemon-reload`, then enable `waymux`, `ai-memory`,
    `dev-gc.timer`, `ai-quota-refresh.timer`, `cockpit-shutdown-save` and `agent-sudod`.
-6. **Restore and log in:** extract the backup, then sign in again to `gh auth login`, Claude, Codex, Bitwarden and `sudo tailscale up`.
-7. **Finish:** `~/.config/tmux/key-telemetry.py install`, `ai-update --check`.
+7. **Restore and log in:** extract the backup, then sign in again to `gh auth login`, Claude, Codex, Bitwarden and `sudo tailscale up`.
+8. **Finish:** `~/.config/tmux/key-telemetry.py install`, `ai-update --check`.
 
 ### Omarchy 4.5 notes
 
