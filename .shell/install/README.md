@@ -57,7 +57,7 @@ Checked against Omarchy 4.5 on aarch64 (Apple Silicon).
 
 ```zsh
 # 1. Clone in the bare + worktree layout (see docs/GIT_WORKTREE_AGENTIC_WORKFLOW.md)
-git clone --bare https://github.com/fcmiranda/.dotfiles.git ~/.dotfiles/.bare
+git clone --bare https://github.com/felipecm-br/.dotfiles.git ~/.dotfiles/.bare
 git -C ~/.dotfiles/.bare worktree add ../main main
 cd ~/.dotfiles/main
 
