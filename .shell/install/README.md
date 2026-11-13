@@ -43,7 +43,7 @@ ai-update --only waymux,agy  # Target specific components
 
 ## 3. Fresh Omarchy Install
 
-Checked against Omarchy 4.5 on aarch64 (Apple Silicon).
+Checked against Omarchy 4.5 on aarch64 (Apple Silicon). On a Mac, start with [Omarchy 4.5 Fresh Install on Apple Silicon](../../docs/desktop/omarchy-mac-fresh-install.md): disk split, removing the old install, macOS 15.
 
 ### Before wiping
 

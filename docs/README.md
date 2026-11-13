@@ -45,6 +45,7 @@ Welcome to the central documentation index for this Arch Linux + Omarchy dotfile
 - [**Dynamic Context-Aware Workspace Pills**](desktop/quickshell-workspace-pills.md): Reactive Quickshell workspace pills with real-time app icon rewriting and title-aware webapp detection (YouTube, GitHub, Google Photos, etc.).
 - [**System, Displays & Hardware**](desktop/system-and-hardware.md): Ghostty terminal enhancements (CSI u escapes, epoll, custom shaders) and battery charge thresholds / CPU power profiles.
 - [**Hyprland Animations Configuration**](desktop/hyprland-animations.md): Active animation rules, cubic Bézier curve presets, tree speeds, and override methods.
+- [**Omarchy 4.5 Fresh Install on Apple Silicon**](desktop/omarchy-mac-fresh-install.md): How to split the disk between macOS and Linux (with recommended sizes), remove the old Asahi-based install, and run the native Mac installer before restoring the dotfiles.
 - [**MacBook Display Notch Adaptation**](desktop/macbook-notch.md): Linux kernel GRUB parameters and status bar layout adaptation for Apple Silicon MacBook notch screens.
 - [**Nerd Fonts Configuration**](desktop/nerd-fonts.md): Font glyph setup and symbol rendering.
 - [**Hyprland Crash Recovery**](desktop/hyprland-crash-fix.md): Crash triage and stability fixes.
