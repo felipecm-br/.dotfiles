@@ -1,6 +1,6 @@
 {
   "bar": {
-    "centerAnchor": "",
+    "background": "none",
     "layout": {
       "center": [
         {
@@ -59,10 +59,14 @@
         {
           "id": "omarchy.power"
         }
+      ],
+      "tray": [
+        {
+          "id": "superwhisper.panel"
+        }
       ]
     },
-    "position": "top",
-    "transparent": true
+    "position": "top"
   },
   "idle": {
     "lock": 300,
