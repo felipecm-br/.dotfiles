@@ -40,7 +40,7 @@ All raw HTTP requests must be valid JSON-RPC 2.0 payloads with the Bearer token 
 - `agentState/wait`: Waits synchronously for a pane to reach a target state (`pane_id`, `target_state`, `timeout_secs`).
 - `agentState/dismiss`: Dismisses attention badge and notification on a pane (`pane_id`).
 
-### Verbs with exit statuses (waymux ≥ the `feat/cli-contract` build, 12 Nov 2026)
+### Verbs with exit statuses (waymux ≥ 0.13)
 
 Prefer these over `curl` and `waymux-cli` when you need a result to branch on:
 
