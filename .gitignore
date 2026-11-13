@@ -15,3 +15,6 @@ fcitx5/.config/fcitx5/profile
 # Old ai-memory data-dir path: hooks of sessions started before 29 Oct 2026 may still spool here.
 # The data dir is ~/.local/share/ai-memory now and nothing in it is stowed (docs/architecture/ai-memory-workflow.md §8)
 ai-memory/.local/share/ai-memory/
+
+# Antigravity CLI runtime state (binaries, caches, logs, conversation DB)
+antigravity/.gemini/antigravity-cli/
