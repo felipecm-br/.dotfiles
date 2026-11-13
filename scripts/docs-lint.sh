@@ -64,7 +64,18 @@ repo_root = os.environ.get("REPO_ROOT", ".")
 broken = []
 link_pattern = re.compile(r"(?<!`)\[([^\]]+)\]\(([^)]+)\)(?!`)")
 
-for dirpath, _, filenames in os.walk(repo_root):
+import subprocess
+# Tracked and untracked-but-not-ignored files only, so app runtime dirs that
+# .gitignore drops (e.g. antigravity-cli's bundled docs) are not linted.
+listed = subprocess.run(
+    ["git", "-C", repo_root, "ls-files", "--cached", "--others", "--exclude-standard", "*.md"],
+    capture_output=True, text=True,
+).stdout.split("\n")
+by_dir = {}
+for rel in filter(None, listed):
+    by_dir.setdefault(os.path.dirname(os.path.join(repo_root, rel)), []).append(os.path.basename(rel))
+
+for dirpath, filenames in by_dir.items():
     # Ignore git internals and apm modules
     if any(p in dirpath for p in ["/.git", "/.bare", "/apm_modules"]):
         continue
