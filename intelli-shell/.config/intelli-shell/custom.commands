@@ -397,6 +397,30 @@ waymux queue add {{pane}} {{prompt}}
 # Drop a queued or stalled prompt for an agent pane
 waymux queue rm {{pane}} {{id}}
 
+# Run a command in a split below this pane, wait for it and get its exit status and last screen (focus stays put)
+waymux run --split below --ratio 30 --wait --capture -- {{command}}
+
+# Start a command in a new background window and print its pane id
+waymux run --name {{label}} -- {{command}}
+
+# Block until an agent pane is idle (exit 1 on timeout, 3 unknown pane, 4 daemon down)
+waymux wait {{pane}} --for {{10m}}
+
+# Stream AI agent state changes as NDJSON (pane, state, previous, message)
+waymux events --json
+
+# Report a state for this pane from a script, shown in the status bar and Cockpit like an agent
+waymux report {{working|idle|error}} --progress {{percent}} --msg {{text}}
+
+# List the waymux daemon's JSON-RPC methods
+waymux api list
+
+# Show the parameters of a waymux JSON-RPC method
+waymux api describe {{method}}
+
+# Call a waymux JSON-RPC method without curl
+waymux api call {{method}} '{{json}}'
+
 # Fan one prompt out to N agents in N worktrees (quota-gated by ai-quota)
 awt-fan new -n {{attempts:3}} -- {{prompt}}
 

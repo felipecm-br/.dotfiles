@@ -40,6 +40,17 @@ All raw HTTP requests must be valid JSON-RPC 2.0 payloads with the Bearer token 
 - `agentState/wait`: Waits synchronously for a pane to reach a target state (`pane_id`, `target_state`, `timeout_secs`).
 - `agentState/dismiss`: Dismisses attention badge and notification on a pane (`pane_id`).
 
+### Verbs with exit statuses (waymux ≥ the `feat/cli-contract` build, 12 Nov 2026)
+
+Prefer these over `curl` and `waymux-cli` when you need a result to branch on:
+
+- `waymux run [--split below|right|left|above] [--ratio <pct>] --wait [--capture] [--for <dur>] -- <command>`: runs the command in a new window (or a split of your own pane) without taking the user's focus and exits with the command's own status; `--capture` prints the last 200 lines of its screen. Without `--wait` it prints the new pane id and returns (a dev server: `waymux run --name server -- npm run dev`).
+- `waymux wait <pane> [--state <state>] [--for <dur>]`: blocks until that pane's agent is idle; exit 1 on timeout (default 5 minutes).
+- `waymux events --json [--pane <pane>] [--for <dur>]`: NDJSON of state changes (`ts`, `pane_id`, `state`, `previous`, `message`).
+- `waymux report <state> [--progress <0-100>] [--msg <text>]`: reports a state for your own pane from a script.
+- `waymux api list` / `api describe <method>` / `api call <method> '<json>'`: the JSON-RPC methods without `curl`.
+- Exit statuses: 0 ok, 1 failed or timed out, 2 usage, 3 no such pane or method (or an ambiguous name), 4 daemon unreachable. A `<pane>` is an id (`%12`), a tmux address (`main:2.1`) or a window name.
+
 ## Recipes
 
 ### 1. Select a Window or Pane
