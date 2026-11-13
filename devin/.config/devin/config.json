@@ -1,73 +1,70 @@
 {
-  "version": 1,
+  "agent": {
+    "model": "swe-2-flash-medium",
+    "preferred_family_models": {
+      "swe-2-flash": "swe-2-flash-medium"
+    }
+  },
+  "devin": {
+    "org_id": "org-d4289c3026bd43a7afe09b3f0feabe85"
+  },
   "hooks": {
-    "SessionStart": [
+    "PermissionRequest": [
       {
         "hooks": [
           {
-            "type": "command",
-            "command": "waymux hook tmux SessionStart"
-          },
-          {
-            "type": "command",
-            "command": "waymux hook lazygit SessionStart"
+            "command": "waymux hook tmux PermissionRequest",
+            "type": "command"
           }
-        ]
-      }
-    ],
-    "UserPromptSubmit": [
+        ],
+        "matcher": ".*"
+      },
       {
         "hooks": [
           {
-            "type": "command",
-            "command": "waymux hook tmux UserPromptSubmit"
-          },
-          {
-            "type": "command",
-            "command": "waymux hook lazygit UserPromptSubmit"
-          }
-        ]
-      }
-    ],
-    "PreToolUse": [
-      {
-        "matcher": ".*",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "waymux hook tmux PreToolUse"
+            "command": "bash '/home/fecavmi/.config/devin/herdr-agent-state.sh' session",
+            "timeout": 10,
+            "type": "command"
           }
         ]
       }
     ],
     "PostToolUse": [
       {
-        "matcher": ".*",
         "hooks": [
           {
-            "type": "command",
-            "command": "waymux hook tmux PostToolUse"
+            "command": "waymux hook tmux PostToolUse",
+            "type": "command"
+          }
+        ],
+        "matcher": ".*"
+      },
+      {
+        "hooks": [
+          {
+            "command": "bash '/home/fecavmi/.config/devin/herdr-agent-state.sh' session",
+            "timeout": 10,
+            "type": "command"
           }
         ]
       }
     ],
-    "PermissionRequest": [
+    "PreToolUse": [
       {
-        "matcher": ".*",
         "hooks": [
           {
-            "type": "command",
-            "command": "waymux hook tmux PermissionRequest"
+            "command": "waymux hook tmux PreToolUse",
+            "type": "command"
           }
-        ]
-      }
-    ],
-    "Stop": [
+        ],
+        "matcher": ".*"
+      },
       {
         "hooks": [
           {
-            "type": "command",
-            "command": "waymux hook tmux Stop"
+            "command": "bash '/home/fecavmi/.config/devin/herdr-agent-state.sh' session",
+            "timeout": 10,
+            "type": "command"
           }
         ]
       }
@@ -76,28 +73,85 @@
       {
         "hooks": [
           {
-            "type": "command",
-            "command": "waymux hook tmux SessionEnd"
+            "command": "waymux hook tmux SessionEnd",
+            "type": "command"
           },
           {
-            "type": "command",
-            "command": "waymux hook lazygit SessionEnd"
+            "command": "waymux hook lazygit SessionEnd",
+            "type": "command"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "command": "waymux hook tmux SessionStart",
+            "type": "command"
+          },
+          {
+            "command": "waymux hook lazygit SessionStart",
+            "type": "command"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "command": "bash '/home/fecavmi/.config/devin/herdr-agent-state.sh' session",
+            "timeout": 10,
+            "type": "command"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "command": "waymux hook tmux Stop",
+            "type": "command"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "command": "bash '/home/fecavmi/.config/devin/herdr-agent-state.sh' session",
+            "timeout": 10,
+            "type": "command"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "command": "waymux hook tmux UserPromptSubmit",
+            "type": "command"
+          },
+          {
+            "command": "waymux hook lazygit UserPromptSubmit",
+            "type": "command"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "command": "bash '/home/fecavmi/.config/devin/herdr-agent-state.sh' session",
+            "timeout": 10,
+            "type": "command"
           }
         ]
       }
     ]
   },
-  "devin": {
-    "org_id": "org-d4289c3026bd43a7afe09b3f0feabe85"
-  },
   "shell": {
     "setup_complete": true
   },
   "theme_mode": "dark",
-  "agent": {
-    "model": "swe-2-flash-medium",
-    "preferred_family_models": {
-      "swe-2-flash": "swe-2-flash-medium"
-    }
-  }
+  "version": 1
 }
