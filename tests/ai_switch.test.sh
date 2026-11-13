@@ -103,6 +103,22 @@ gpeek=$(ai-switch -t "$G" --peek)
 [ "$(ai-switch -t "$G" --peek gemini-3.8-flash-medium)" = $'agy\t/model gemini-3.8-flash-high' ] && ok "agy model switch keeps the effort" || bad "agy keep effort"
 [ "$(ai-switch -t "$G" --peek gpt-oss-120b-medium)" = $'agy\t/model gpt-oss-120b-medium' ] && ok "agy: family without that effort keeps medium" || bad "agy gpt-oss"
 
+# 5c. Antigravity Hydrogen: supports xhigh in footer & effort gauge without leaking a duplicate model row
+cat >"$fakeagy" <<'AGYH'
+#!/bin/bash
+printf '>\n? for shortcuts                    Gemini 4 Hydrogen · xhigh\n'
+while IFS= read -r line; do printf '%s\n' "$line" >>"$HOME/agyh.in"; done
+AGYH
+chmod +x "$fakeagy"
+tmux new-session -d -s agyh -x 120 -y 20 "HOME='$HOME' '$fakeagy'"
+GH=$(tmux display-message -p -t agyh: '#{pane_id}')
+sleep 0.5
+ghpeek=$(ai-switch -t "$GH" --peek)
+[ "$(ai-switch -t "$GH" --agent)" = $'agy\tGemini 4 Hydrogen' ] && ok "detects agy Hydrogen and xhigh footer" || bad "agyh agent: $(ai-switch -t "$GH" --agent)"
+[ "$(cut -f1 <<<"$ghpeek" | tail -4 | tr '\n' ' ')" = "low medium high xhigh " ] && ok "agy Hydrogen: 4 effort rows including xhigh" || bad "agyh effort rows: $ghpeek"
+[ "$(ai-switch -t "$GH" --peek xhigh)" = $'agy\t/model gemini-4-hydrogen-xhigh' ] && ok "agy Hydrogen: xhigh -> /model gemini-4-hydrogen-xhigh" || bad "agyh xhigh"
+! grep -q '^gemini-4-hydrogen-xhigh	' <<<"$ghpeek" && ok "agy Hydrogen: -xhigh collapsed into single family row" || bad "agyh duplicate row"
+
 # 6. A pane without an agent: exit 1, nothing typed
 tmux new-session -d -s plain -x 120 -y 20 "sleep 30"
 set +e; ai-switch -t "$(tmux display-message -p -t plain: '#{pane_id}')" --agent; rc=$?; set -e
