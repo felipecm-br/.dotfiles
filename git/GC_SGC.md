@@ -1,245 +1,78 @@
-# gc & sgc — AI-Powered Git Commit Helpers
+# gc & sgc — AI commits
 
-> Shell functions defined in `git/.zsh/packages/git.zsh`, built on top of conventional commits and any AI provider available in your terminal.
+> Implemented natively in [lazygitrs](https://github.com/felipecm-br/lazygitrs) (`lazygitrs gc`, `lazygitrs sgc`, and `M` in its Files panel).
+> `git/.zsh/packages/git.zsh` only keeps thin wrappers. No Python, `gum` or temp scripts.
 
----
+| | `gc` | `sgc` |
+|---|---|---|
+| Input | staged changes (wrapper stages all unless `-s`) | every staged, unstaged and untracked change |
+| Output | one Conventional Commit (title + bulleted body) | N atomic commits, reviewed before committing |
+| Review | message pre-filled as `git commit -m …` in the prompt | TUI popup: toggle, edit, reorder, merge, per-group diff |
+| Cache | — | plan cached by content hash; leftovers survive partial commits |
 
-## Table of Contents
-
-- [Overview](#overview)
-- [gc — Generate a commit message](#gc--generate-a-commit-message)
-- [sgc — Smart multi-commit planner](#sgc--smart-multi-commit-planner)
-- [Shared Infrastructure](#shared-infrastructure)
-- [Configuration](#configuration)
-- [Comparison with Alternatives](#comparison-with-alternatives)
-
----
-
-## Overview
-
-| Feature | `gc` | `sgc` | `gtest` |
-|---|---|---|---|
-| Scope | Working tree / staged diff → one commit | All unstaged changes → N atomic commits | Run test suite & append `Test-Status` trailer |
-| Interaction | Auto-fills readline buffer (or outputs via `-o`) | Interactive multi-select via `gum` | Amends `HEAD` with `Test-Status: pass (...)` |
-| Provider support | opencode, claude, crush, copilot | same (`-P / --provider`) | N/A (auto-detects `just check`, `cargo test`, `npm test`, `pytest`, `go test`) |
-| Commitlint aware | yes | yes | N/A |
-| Gitmoji | optional (`-e`) | optional (`-e`) | N/A |
-| Multi-language | optional (`-l`) | optional (`-l`) | N/A |
-| Result caching | no | yes (content-hash based) | N/A |
-
----
-
-## gc — Generate a commit message
-
-Analyses the repository diff and outputs a single [Conventional Commit](https://www.conventionalcommits.org/) message. By default, `gc` automatically stages all changes (`git add --all`) unless `-s / --staged-only` is passed. The generated message is pre-filled into the zsh readline buffer so you can review or edit before pressing Enter.
-
-### Usage
+## gc
 
 ```zsh
-gc                          # default provider (opencode), stage all & generate single message
-gc -s                       # use only currently staged changes (skip git add --all)
-gc -p claude                # use claude CLI
-gc -p crush                 # use crush CLI
-gc -p copilot               # use gh copilot CLI
-gc -m opencode/minimax-m2.5-free  # override model (opencode only)
-gc -g 3                     # generate 3 candidates, pick one interactively
-gc -l es                    # commit message in Spanish
-gc -e                       # prepend a gitmoji emoji
-gc -o                       # output only the generated commit message (no readline pre-fill)
-gc -q                       # disable loading spinner
-gc hook install             # install prepare-commit-msg hook in the repo
-gc hook uninstall           # remove the gc-managed hook
-gc hook status              # show hook installation status
+gc                 # stage all, generate, pre-fill `git commit -m "…"` for review
+gc -s              # only what is already staged
+gc -o              # print the message only
+gc -g 3            # 3 candidates, numbered picker
+gc -e -l pt        # gitmoji, Portuguese
+gc -P claude -m haiku   # pin agent / model (also -p, GC_PROVIDER, GC_MODEL)
+gc -t              # title line only
+gc -n              # silent when nothing is staged
+gc -d              # print prompt and raw AI output
+gc hook install    # prepare-commit-msg: bare `git commit` opens with an AI message
+gc hook status | uninstall   # uninstall also removes the old zsh hook block
 ```
 
-### Flags
+Raw binary: `lazygitrs gc [-a] [-c]` prints the message (`-a` stages all, `-c` commits it).
 
-| Flag | Description |
-|---|---|
-| `-p / --provider` | AI backend: `opencode` (default), `claude`, `crush`, `copilot` |
-| `-m / --model` | Model ID passed to opencode (e.g. `opencode/minimax-m2.5-free`) |
-| `-g N / --generate N` | Generate N distinct candidates; presents a `gum choose` picker |
-| `-l / --lang` | ISO 639-1 language code for the output message |
-| `-e / --emoji` | Prepend a gitmoji matching the commit type |
-| `-s / --staged-only` | Analyze only currently staged changes (do not run `git add --all`) |
-| `-o / --message-only` | Print only the generated commit message to stdout |
-| `-q / --no-loading` | Disable interactive loading spinner / title output |
-| `-n / --silent-empty` | Exit silently when there are no changes to commit |
-| `-d / --debug` | Enable verbose debug output |
-
-### Environment overrides
+## sgc
 
 ```zsh
-GC_PROVIDER=claude gc
-GC_MODEL=github-copilot/gpt-5 gc
-GC_FALLBACK_MODELS=opencode/minimax-m2.5-free,opencode/ling-2.6-flash-free gc
-GC_EMOJI=1 gc
+sgc                # open the review popup (TUI)
+sgc -y             # commit the whole plan, no review
+sgc -n / --json    # print the plan only
+sgc -g fine        # granularity: coarse | medium (default) | fine
+sgc -f             # ignore the cached plan
+sgc -e -l pt -H "scope everything under tui"
+sgc -P claude -m haiku -d
 ```
 
-### Workflow
+Review keys: `space` toggle · `a` all · `e` edit (ctrl-s save) · `J`/`K` reorder · `m` merge with next ·
+`g` cycle granularity · `r` regenerate · `pgup`/`pgdn` scroll diff · `enter` commit · `esc` close (plan kept).
 
-1. Unless `-s / --staged-only` is specified, `gc` stages all modified and untracked files via `git add --all`.
-2. The staged diff is filtered through `.sgcignore` rules (lock files, minified assets, etc.) and compressed to reduce token count without losing signal.
-3. If a `commitlint` config exists in the repo root, its rules (allowed types, scopes, max length, casing) are injected into the prompt.
-4. The AI prompt enforces Conventional Commits format, 72-char subject limit, and optional gitmoji/language rules.
-5. The result is printed and pre-filled into the readline buffer: `git commit -m "feat(scope): ..."` (or printed directly when `-o` is used).
+## How it works
 
-### Git hook integration
+1. **Context**: `git status` + `git diff HEAD` + untracked contents. Diffs are compressed (metadata stripped,
+   one context line per run, hunks capped at 80 changed lines) and fitted to a 48 KB budget by collapsing the
+   largest files to a `+A/-D` summary.
+2. **`.sgcignore`** (built-ins `*-lock.*`, `*.lock`, `go.sum`, `*.min.js`, `*.min.css`, `*.map`, then
+   `~/.sgcignore`, then the repo's; gitignore syntax incl. `!`, `/anchored`, `dir/`): matching files stay in the
+   plan and get committed with the change that produced them — only their content is hidden from the model.
+3. **commitlint** (`.commitlintrc*`, `commitlint.config.{js,cjs,mjs,ts}`, `package.json`): allowed types and
+   scopes, header length, subject/scope case go into the prompt and into title validation.
+4. **Repair**: unknown paths dropped, directories expanded, duplicates removed, bodies wrapped at 72 columns.
+   Unassigned files or invalid titles trigger a corrective retry (3 attempts); anything still unassigned lands
+   in a flagged `chore` group.
+5. **Commit**: `git commit --only -- <files>` per group, so anything else you staged is untouched; rename
+   sources travel with their destination.
 
-```zsh
-gc hook install    # writes prepare-commit-msg to .git/hooks/
-gc hook uninstall  # removes only the gc-managed block, leaving other hooks intact
-gc hook status     # check if installed
+## AI command
+
+lazygitrs runs `git.commit.smartCommitCommand` (falls back to `generateCommand`, here `ai-commit-msg`) with the
+full prompt on stdin and `LAZYGITRS_AI_COMMIT_INPUT=prompt`; `-P`/`-m` arrive as `LAZYGITRS_AI_PROVIDER` /
+`LAZYGITRS_AI_MODEL`. `ai-commit-msg` (`utils/.local/bin/`) tries `claude` haiku → `agy` flash → `opencode`.
+
+```yml
+# ~/.config/lazygitrs/config.yml
+git:
+  commit:
+    generateCommand: "ai-commit-msg"
+    smartCommitGranularity: medium
 ```
 
-When installed, the hook runs `gc` automatically whenever `git commit` is called without a `-m` message (e.g. bare `git commit`).
+## gtest
 
----
-
-## sgc — Smart multi-commit planner
-
-Analyses **all unstaged and untracked changes** at once and asks the AI to group them into logical, atomic commits. You then select which ones to execute via a multi-select `gum` UI.
-
-### Usage
-
-```zsh
-sgc                          # default provider (medium granularity)
-sgc -P claude                # use claude CLI (-P / --provider)
-sgc -m opencode/minimax-m2.5-free  # override model
-sgc -g fine                  # granularity: coarse | medium | fine
-sgc -f                       # force regeneration (bypass content-hash cache)
-sgc -l es                    # messages in Spanish
-sgc -e                       # gitmoji prefixes
-sgc -d                       # debug mode
-```
-
-### Flags
-
-| Flag | Description |
-|---|---|
-| `-P / --provider` | AI backend: `opencode` (default), `claude`, `crush`, `copilot` |
-| `-m / --model` | Model ID passed to opencode |
-| `-g / --granularity` | Grouping granularity: `coarse`, `medium` (default), or `fine` |
-| `-f / --force` | Ignore cached commit plan and force a fresh AI call |
-| `-l / --lang` | ISO 639-1 language code for output messages |
-| `-e / --emoji` | Prepend a gitmoji matching each commit type |
-| `-d / --debug` | Enable verbose debug output |
-
-### Workflow
-
-1. Collects all unstaged diffs and untracked file contents (filtered through `.sgcignore`).
-2. Sends a single prompt asking the AI to group changes into atomic commits, each with a `message` and a `files` list.
-3. Result is cached by a content hash — if you re-run `sgc` without changing any files, it reuses the previous plan instantly.
-4. Presents a `gum choose --no-limit` picker (all pre-selected). Space to toggle, Enter to confirm.
-5. For each selected commit: stages the specified files and runs `git commit -m "..."`.
-6. Updates the cache to retain any un-selected commits for the next run.
-
-### Caching
-
-The cache lives in `${XDG_CACHE_HOME:-~/.cache}/sgc/<repo-hash>/`. It stores:
-
-- `last.hash` — MD5 of the content fingerprint (status + diff + untracked + options)
-- `last.json` — the AI-generated commit plan
-
-If the working tree changes between runs, the cache is invalidated and a fresh AI call is made.
-
----
-
-## Shared Infrastructure
-
-These internal helpers are used by both `gc` and `sgc`:
-
-| Helper | Purpose |
-|---|---|
-| `_gc_load_ignore_patterns` | Loads `.sgcignore` (repo-local) or `~/.sgcignore` (global) plus built-in defaults |
-| `_gc_filter_ignored_files` | Filters filenames via Python `fnmatch`, matching both basename and full path |
-| `_gc_filter_diff_by_ignore` | Strips ignored files' hunks from a unified diff |
-| `_gc_compress_diff` | Reduces token count: strips index/mode metadata, trims context lines, caps large hunks at 80 changed lines |
-| `_gc_load_commitlint_rules` | Parses commitlint config (JSON/YAML/JS) and emits constraint lines for the prompt |
-| `_gc_emoji_rule` | Returns the gitmoji instruction block mapping types to emojis |
-| `_gc_hook_script` | Emits the `prepare-commit-msg` hook body |
-| `_gc_hook` | Manages hook install/uninstall/status |
-
-### `.sgcignore`
-
-Create a `.sgcignore` file in your repo root (or `~/.sgcignore` globally) to exclude files from AI analysis. Same glob syntax as `.gitignore` basenames.
-
-Built-in defaults always applied:
-
-```
-*-lock.*
-*.lock
-*.min.js
-*.min.css
-*.map
-```
-
----
-
-## Configuration
-
-### Commitlint integration
-
-If your repo has a commitlint config (`commitlint.config.js`, `.commitlintrc.json`, `.commitlintrc.yml`, etc., or a `commitlint` key in `package.json`), `gc`/`sgc` will automatically:
-
-- Restrict types to the allowed `type-enum` list
-- Restrict scopes to the allowed `scope-enum` list
-- Enforce subject/header max-length
-- Enforce subject-case and scope-case rules
-
-No setup required — it's detected automatically.
-
-### Gitmoji map
-
-| Type | Emoji |
-|---|---|
-| feat | ✨ |
-| fix | 🐛 |
-| refactor | ♻️ |
-| perf | ⚡️ |
-| docs | 📝 |
-| style | 🎨 |
-| test | 🧪 |
-| chore | 🔧 |
-| ci | 👷 |
-| build | 📦 |
-| revert | ⏪️ |
-| security | 🔒️ |
-
----
-
-## Comparison with Alternatives
-
-| Feature | `gc` / `sgc` | [opencommit](https://github.com/di-sukharev/opencommit) | [aicommits](https://github.com/Nutlope/aicommits) | [commitgpt](https://github.com/RomanHotsiy/commitgpt) | [cz-git](https://github.com/Zhengqbbb/cz-git) |
-|---|---|---|---|---|---|
-| **Language** | zsh (no install) | Node.js global CLI | Node.js global CLI | Node.js global CLI | Node.js (commitizen adapter) |
-| **Setup** | Source the file | `npm i -g opencommit` | `npm i -g aicommits` | `npm i -g commitgpt` | `npm i -g cz-git` |
-| **Provider flexibility** | opencode, claude, crush, copilot | OpenAI, Anthropic, Azure, Ollama | OpenAI | OpenAI | OpenAI (via commitizen) |
-| **Local/offline models** | via opencode or crush | Ollama support | no | no | no |
-| **Multi-commit planning** | `sgc` splits changes into atomic commits | no | no | no | no |
-| **Commitlint aware** | auto-detected from repo config | yes (oc config) | no | no | yes (native) |
-| **Result caching** | yes (sgc, content-hash) | no | no | no | no |
-| **Staged-only / all changes** | both (`gc` = staged, `sgc` = all) | staged only | staged only | staged only | staged only |
-| **Interactive file picker** | yes (gum) | no | no | no | no |
-| **Candidate selection** | yes (`gc -g N`) | yes (`oco -g N`) | no | no | no |
-| **Gitmoji** | optional (`-e`) | optional | no | no | optional |
-| **Multi-language output** | yes (`-l ISO`) | yes (`oco config set language`) | no | no | no |
-| **Git hook** | `gc hook install` | `oco hook set` | no | no | via commitizen |
-| **Diff compression** | yes (custom Python pipeline) | no | no | no | no |
-| **File ignore rules** | `.sgcignore` / `~/.sgcignore` | `.opencommitignore` | no | no | no |
-| **Readline pre-fill** | yes (review before committing) | commits directly | commits directly | commits directly | via prompt |
-| **Dependencies** | `gum`, `python3`, one AI CLI | Node.js, API key | Node.js, API key | Node.js, API key | Node.js, commitizen |
-
-### Key differentiators
-
-**`gc` vs opencommit**
-Both follow the same spirit (staged diff → Conventional Commit). `gc` lives entirely in your shell with no Node.js dependency, supports any AI CLI (including fully local models via `crush`/opencode), and pre-fills readline instead of committing directly — giving you a review step. opencommit has a wider provider matrix and a richer config system.
-
-**`sgc` — unique capability**
-No mainstream tool offers automated multi-commit splitting. `sgc` analyses the full working tree and proposes an atomic commit plan, which you approve interactively. This is especially useful after long coding sessions where you want a clean history without manually staging hunks.
-
-**Diff compression**
-`gc`/`sgc` run the diff through a custom Python pipeline that strips git metadata noise, trims repeated context lines, and caps large hunks — significantly reducing token usage and cost on large changesets, while preserving all signal the AI needs.
-
-**No global install, no Node.js**
-Everything is plain zsh + Python 3 (stdlib only). If you already have `gum` and one AI CLI in your PATH, `gc`/`sgc` work immediately.
+Unchanged: runs the project's tests and amends HEAD with a `Test-Status` trailer (see `git.zsh`).
