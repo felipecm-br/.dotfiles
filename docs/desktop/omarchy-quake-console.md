@@ -30,7 +30,8 @@ Two things collide on the same physical key (`<TLDE>`, keycode 49):
    Omarchy's `SUPER + grave` and `SUPER + SHIFT + grave` and binds workspace 0
    to the `dead_grave` / `dead_tilde` **keysyms**, not to keycode 49: on the
    Apple ISO keyboard the key is `<LSGT>` (keycode 94), and `fixgrave` gives
-   both keys the same keysyms.
+   both keys the same keysyms. The workspace itself is named `zero`, since
+   Hyprland rejects `name:0`; the bar's `fecavmi.workspaces` widget labels it `0`.
 2. The [`fixgrave`](../../xkb/.config/xkb/symbols/fixgrave) xkb symbol (loaded by
    `kb_layout = "us(intl)+fixgrave"` in [`input.lua`](../../hypr/.config/hypr/input.lua))
    turns that key into `dead_grave` / `dead_tilde`. Omarchy binds the

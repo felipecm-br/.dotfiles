@@ -95,9 +95,9 @@ hl.unbind("SUPER + grave")
 hl.unbind("SUPER + SHIFT + grave")
 -- fixgrave puts dead_grave / dead_tilde on both <TLDE> and <LSGT> (the Apple
 -- ISO key), so bind the keysym rather than one keycode.
-o.bind("SUPER + dead_grave", "Switch to workspace 0", hl.dsp.focus({ workspace = "name:0" }))
-o.bind("SUPER + SHIFT + dead_tilde", "Move app to workspace 0", hl.dsp.window.move({ workspace = "name:0" }))
-o.bind("SUPER + SHIFT + dead_grave", "Move app to workspace 0", hl.dsp.window.move({ workspace = "name:0" }))
+o.bind("SUPER + dead_grave", "Switch to workspace 0", hl.dsp.focus({ workspace = "name:zero" }))
+o.bind("SUPER + SHIFT + dead_tilde", "Move app to workspace 0", hl.dsp.window.move({ workspace = "name:zero" }))
+o.bind("SUPER + SHIFT + dead_grave", "Move app to workspace 0", hl.dsp.window.move({ workspace = "name:zero" }))
 
 -- ==============================================================================
 -- Window Management

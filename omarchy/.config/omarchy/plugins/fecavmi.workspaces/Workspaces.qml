@@ -14,7 +14,7 @@ BarWidget {
   function workspaceById(id) {
     var values = Hyprland.workspaces.values
     for (var i = 0; i < values.length; i++) {
-      if (values[i].id === id || values[i].name === String(id) || (id === 0 && (values[i].name === "0" || values[i].name === "name:0"))) return values[i]
+      if (values[i].id === id || values[i].name === String(id) || (id === 0 && (values[i].name === "zero" || values[i].name === "0"))) return values[i]
     }
 
     return null
@@ -27,7 +27,7 @@ BarWidget {
     for (var i = 0; i < values.length; i++) {
       var w = values[i]
       var id = w.id
-      if ((w.name === "0" || w.name === "name:0" || id === 0) && ids.indexOf(0) === -1) {
+      if ((w.name === "zero" || w.name === "0" || id === 0) && ids.indexOf(0) === -1) {
         ids.push(0)
       } else if (id > 0 && id <= 10 && ids.indexOf(id) === -1) {
         ids.push(id)
@@ -40,7 +40,7 @@ BarWidget {
 
   function focusWorkspace(id) {
     if (!root.bar) return
-    var target = (id === 0) ? "name:0" : String(id)
+    var target = (id === 0) ? "name:zero" : String(id)
     root.bar.run("hyprctl dispatch " + Util.shellQuote("hl.dsp.focus({ workspace = \"" + target + "\" })"))
   }
 
@@ -350,7 +350,7 @@ BarWidget {
         readonly property bool focused: {
           if (Hyprland.focusedWorkspace === null) return false
           if (Hyprland.focusedWorkspace.id === modelData) return true
-          if (modelData === 0 && (Hyprland.focusedWorkspace.name === "0" || Hyprland.focusedWorkspace.name === "name:0")) return true
+          if (modelData === 0 && (Hyprland.focusedWorkspace.name === "zero" || Hyprland.focusedWorkspace.name === "0")) return true
           return Hyprland.focusedWorkspace.name === String(modelData)
         }
 
