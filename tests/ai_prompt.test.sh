@@ -191,7 +191,7 @@ else
 fi
 
 # 17. Ctrl+S: root binding guarded to agent panes, Prefix + S opens the picker
-grep -q "^bind-key -n C-s if-shell -F '#{||:#{@ai_session},#{m/r:^(claude|codex|opencode|agy|agy-bin|antigravity|devin)\$,#{pane_current_command}}}'" "$CONF" &&
+grep -q "^bind-key -n C-s if-shell -F '#{||:#{@ai_session},#{m/r:^(claude|codex|opencode|agy|agy-bin|antigravity|devin|bash|sh)\$,#{pane_current_command}}}'" "$CONF" &&
   grep -q "ai-prompt -t '#{pane_id}' key" "$CONF" && grep -q "'send-keys C-s'\$" "$CONF" &&
   ok "Ctrl+S bound on agent panes, passed through elsewhere" || bad "C-s binding"
 grep -q "^bind-key S run-shell \"~/.local/bin/ai-prompt -t '#{pane_id}' picker" "$CONF" && ok "Prefix + S opens the picker" || bad "S binding"
