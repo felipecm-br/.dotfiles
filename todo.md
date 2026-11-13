@@ -1,8 +1,4 @@
 
-waymux
-stage feature (like claude)
-
-
 my site v1 - create a blog v1 post
 
 readme waymaker
@@ -19,9 +15,6 @@ tmux
 workflow features
 - move tab tmux
 
-
-ideas
- - create a suggestion notification usage for keyindings like plugin for intellig 
 
 revisar atalhos
 prefix space
