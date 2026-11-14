@@ -48,5 +48,6 @@ Configurations in [`ghostty/.config/ghostty/config`](../../ghostty/.config/ghost
 Hardware battery health and CPU energy management scripts shipped in the [`battery`](../../battery) stow package (`battery/.local/bin/`):
 
 - **Charging Thresholds (`battery-threshold`)**: Sets hardware battery charge limits (e.g. `80%`) to minimize battery degradation when plugged in long-term.
+- **Bar label**: The bar uses `fecavmi.power`, a clone of Omarchy's power widget ([`omarchy/.config/omarchy/plugins/fecavmi.power`](../../omarchy/.config/omarchy/plugins/fecavmi.power)) with one change in `Model.js`: a battery UPower reports as fully charged reads "Fully charged". The stock widget wants exactly 100%, and the Apple gauge stops at about 99.96%, so on the charger it showed "Charging" at 0 W.
 - **CPU Performance Toggle (`perf-toggle`)**: Switches CPU energy-performance hints between `performance`, `balanced`, and `power-saver` modes on the fly.
 - **Waybar Status (`perf-waybar`)**: Integrates live power state and battery condition into the Waybar status bar.
