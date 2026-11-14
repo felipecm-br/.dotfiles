@@ -83,6 +83,16 @@
             "command": "/usr/bin/ai-memory --data-dir /home/fecavmi/.local/share/ai-memory hook --event session-start --agent claude-code --server-url http://127.0.0.1:49374"
           }
         ]
+      },
+      {
+        "matcher": "^(startup|resume|clear|compact|fork)$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash '/home/fecavmi/.claude/hooks/herdr-agent-state.sh' session",
+            "timeout": 10
+          }
+        ]
       }
     ],
     "Stop": [
