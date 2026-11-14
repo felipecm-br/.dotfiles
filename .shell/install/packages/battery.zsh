@@ -2,16 +2,19 @@
 # Install battery management tools for Asahi Linux on Apple Silicon (M1/M2/M3).
 #
 # Sets up:
-#   - battery-charge-threshold systemd service: persists charge limits across reboots
-#   - /etc/battery-charge-threshold.conf: configurable start/end thresholds (default 20/80)
+#   - Omarchy's 80% charge limit (omarchy-battery-charge-limit), kept across
+#     reboots by asahi-scripts and omarchy-mac; removes the old
+#     battery-charge-threshold service that did the same
+#   - sudoers drop-in for passwordless limit writes, and the monthly calibration timer
 #
 # Only applies on aarch64 (Apple Silicon). On x86_64 it installs tlp instead.
 
 set -euo pipefail
 
 BATTERY_PATH="/sys/class/power_supply/macsmc-battery"
-CHARGE_THRESHOLD_CONF="/etc/battery-charge-threshold.conf"
-CHARGE_THRESHOLD_SERVICE="/etc/systemd/system/battery-charge-threshold.service"
+OLD_THRESHOLD_CONF="/etc/battery-charge-threshold.conf"
+OLD_THRESHOLD_SERVICE="/etc/systemd/system/battery-charge-threshold.service"
+SAVED_LIMIT_FILE="/etc/udev/macsmc-battery.conf"
 
 ARCH="$(uname -m)"
 
@@ -25,70 +28,39 @@ _write_system_file() {
 }
 
 # ══════════════════════════════════════════════════════════════════════════════
-# 2. Charge threshold systemd service (Apple Silicon only)
+# 2. Charge limit (Apple Silicon only): Omarchy's, not a service of our own
 # ══════════════════════════════════════════════════════════════════════════════
 if [[ "$ARCH" == "aarch64" ]] && [[ -d "$BATTERY_PATH" ]]; then
 
-  # Write the threshold config (default: start=20, end=80)
-  if [[ ! -f "$CHARGE_THRESHOLD_CONF" ]]; then
-    _write_system_file "$CHARGE_THRESHOLD_CONF" \
-'# Battery charge threshold configuration for Apple Silicon (Asahi Linux)
-# Charging starts when battery drops below CHARGE_START%
-# Charging stops when battery reaches CHARGE_END%
-#
-# Profile: plugged-in desk use (recommended when AC most of the time)
-#   CHARGE_START=60 / CHARGE_END=85  — battery stays in the 60-85% sweet spot
-#
-# Profile: mixed use (frequent battery operation)
-#   CHARGE_START=20 / CHARGE_END=80  — wider range for longer unplugged sessions
-#
-# Change with: battery-threshold set-custom <start> <end>
-CHARGE_START=60
-CHARGE_END=85
-'
-    print -P "  %F{green}✓%f Charge threshold config written (20%% → 80%%)"
-  else
-    print -P "  %F{cyan}✓%f Charge threshold config already exists at %B${CHARGE_THRESHOLD_CONF}%b"
+  # The old service wrote the same limit at boot. Its ExecStop lifts the limit
+  # to 100%, so it is stopped first and the limit is set after.
+  migrated=false
+  if [[ -f "$OLD_THRESHOLD_SERVICE" ]]; then
+    migrated=true
+    print -P "  %F{blue}→%f Removing the old battery-charge-threshold service..."
+    sudo systemctl disable --now battery-charge-threshold 2>/dev/null || true
+    sudo rm -f "$OLD_THRESHOLD_SERVICE" "$OLD_THRESHOLD_CONF"
+    sudo systemctl daemon-reload
+    print -P "  %F{green}✓%f Old service removed"
   fi
 
-  # Write the systemd service
-  if [[ ! -f "$CHARGE_THRESHOLD_SERVICE" ]]; then
-    _write_system_file "$CHARGE_THRESHOLD_SERVICE" \
-'[Unit]
-Description=Set battery charge thresholds (Apple Silicon / Asahi Linux)
-After=local-fs.target
-DefaultDependencies=no
-
-[Service]
-Type=oneshot
-RemainAfterExit=yes
-EnvironmentFile=/etc/battery-charge-threshold.conf
-ExecStart=/bin/bash -c "echo ${CHARGE_START} > /sys/class/power_supply/macsmc-battery/charge_control_start_threshold && echo ${CHARGE_END} > /sys/class/power_supply/macsmc-battery/charge_control_end_threshold"
-ExecStop=/bin/bash -c "echo 95 > /sys/class/power_supply/macsmc-battery/charge_control_start_threshold && echo 100 > /sys/class/power_supply/macsmc-battery/charge_control_end_threshold"
-
-[Install]
-WantedBy=multi-user.target
-'
-    print -P "  %F{green}✓%f Charge threshold systemd service written"
+  # Set the limit on a fresh install or right after the migration; a limit the
+  # user chose since (even 100%) is left alone.
+  if [[ $migrated == true ]] || ! grep -qE '^CHARGE_CONTROL_END_THRESHOLD=[0-9]+$' "$SAVED_LIMIT_FILE" 2>/dev/null; then
+    if command -v omarchy-battery-charge-limit &>/dev/null; then
+      print -P "  %F{blue}→%f Setting Omarchy's 80%% charge limit..."
+      omarchy-battery-charge-limit 80
+    else
+      print -P "  %F{yellow}⚠%f omarchy-battery-charge-limit not found (omarchy-mac). Skipping the charge limit."
+    fi
   else
-    print -P "  %F{cyan}✓%f Charge threshold service already exists"
-  fi
-
-  # Enable and start the service
-  sudo systemctl daemon-reload
-  if ! systemctl is-enabled battery-charge-threshold &>/dev/null; then
-    print -P "  %F{blue}→%f Enabling battery-charge-threshold service..."
-    sudo systemctl enable --now battery-charge-threshold
-    print -P "  %F{green}✓%f battery-charge-threshold enabled and started"
-  else
-    print -P "  %F{cyan}✓%f battery-charge-threshold already enabled"
-    sudo systemctl restart battery-charge-threshold
+    print -P "  %F{cyan}✓%f Charge limit already set: %B$(cat "$BATTERY_PATH/charge_control_end_threshold")%%%b"
   fi
 
 elif [[ "$ARCH" != "aarch64" ]]; then
-  print -P "  %F{yellow}⚠%f Charge threshold service is Apple Silicon only (aarch64). Skipping."
+  print -P "  %F{yellow}⚠%f The charge limit is Apple Silicon only (aarch64). Skipping."
 else
-  print -P "  %F{yellow}⚠%f Battery sysfs path %B${BATTERY_PATH}%b not found. Skipping threshold service."
+  print -P "  %F{yellow}⚠%f Battery sysfs path %B${BATTERY_PATH}%b not found. Skipping the charge limit."
   print -P "    This is expected if you are not on Asahi Linux."
 fi
 
@@ -96,10 +68,10 @@ fi
 # 3. Sudoers drop-in — passwordless sysfs threshold writes
 # ══════════════════════════════════════════════════════════════════════════════
 # Required by battery-calibrate-auto running as a systemd user service (no TTY).
-SUDOERS_SRC="${0:A:h}/../../battery/etc/sudoers.d/10-battery-threshold"
+SUDOERS_SRC="${0:A:h}/../../../battery/etc/sudoers.d/10-battery-threshold"
 SUDOERS_DEST="/etc/sudoers.d/10-battery-threshold"
 
-if [[ ! -f "$SUDOERS_DEST" ]]; then
+if ! sudo cmp -s "$SUDOERS_SRC" "$SUDOERS_DEST" 2>/dev/null; then
   print -P "  %F{blue}→%f Installing sudoers drop-in for battery threshold writes..."
   # visudo -c validates syntax before writing; fail loudly if the file is broken
   if sudo visudo -c -f "$SUDOERS_SRC" &>/dev/null; then
@@ -109,7 +81,7 @@ if [[ ! -f "$SUDOERS_DEST" ]]; then
     print -P "  %F{red}✗%f Sudoers syntax check failed — skipping install"
   fi
 else
-  print -P "  %F{cyan}✓%f Sudoers drop-in already present"
+  print -P "  %F{cyan}✓%f Sudoers drop-in up to date"
 fi
 
 # ══════════════════════════════════════════════════════════════════════════════

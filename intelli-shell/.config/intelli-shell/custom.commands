@@ -649,6 +649,15 @@ hypr-anim
 # Live Custom Glassy tuner: top bar look, blur presets, opacity/blur values and per-app blur/transparent/opaque looks (h/l change, Space cycle app, Enter keep, Esc undo)
 glassy-tune
 
+# Set the battery charge limit to Omarchy's 80% (resumes charging at 75%)
+battery-threshold set 80
+
+# Show the battery charge limit
+battery-threshold show
+
+# Battery health, cycles, saved charge limit and calibration status
+battery-health
+
 # Adopt an existing file or directory into dotfiles and stow it
 stow-it {{path}} {{package}}
 

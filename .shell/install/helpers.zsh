@@ -49,7 +49,7 @@ pkg_is_installed() {
     mpv-wallpaper) command -v mpvpaper &>/dev/null && return 0 ;;
     upscayl-bin) command -v upscayl &>/dev/null && return 0 ;;
     apm-unix) command -v apm &>/dev/null && return 0 ;;
-    battery) [[ -f /etc/battery-charge-threshold.conf ]] && return 0 ;;
+    battery) [[ ! -f /etc/systemd/system/battery-charge-threshold.service ]] && grep -qE '^CHARGE_CONTROL_END_THRESHOLD=[0-9]{2}$' /etc/udev/macsmc-battery.conf 2>/dev/null && return 0 ;;
     opencode-bin) command -v opencode &>/dev/null && return 0 ;;
     zen-browser-bin) command -v zen-browser &>/dev/null && return 0 ;;
     crush-bin) command -v crush &>/dev/null && return 0 ;;

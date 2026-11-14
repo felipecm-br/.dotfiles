@@ -4,9 +4,8 @@
 
 %wheel ALL=(ALL) NOPASSWD: /usr/bin/tee /sys/class/power_supply/macsmc-battery/charge_control_start_threshold
 %wheel ALL=(ALL) NOPASSWD: /usr/bin/tee /sys/class/power_supply/macsmc-battery/charge_control_end_threshold
-%wheel ALL=(ALL) NOPASSWD: /usr/bin/systemctl stop battery-charge-threshold
-%wheel ALL=(ALL) NOPASSWD: /usr/bin/systemctl start battery-charge-threshold
-%wheel ALL=(ALL) NOPASSWD: /usr/bin/systemctl restart battery-charge-threshold
+# omarchy-battery-charge-limit saves the limit here for the next boot.
+%wheel ALL=(ALL) NOPASSWD: /usr/bin/tee /etc/udev/macsmc-battery.conf
 %wheel ALL=(ALL) NOPASSWD: /usr/bin/tee /sys/devices/system/cpu/cpufreq/policy0/scaling_governor
 %wheel ALL=(ALL) NOPASSWD: /usr/bin/tee /sys/devices/system/cpu/cpufreq/policy2/scaling_governor
 %wheel ALL=(ALL) NOPASSWD: /usr/bin/tee /sys/devices/system/cpu/cpufreq/policy5/scaling_governor

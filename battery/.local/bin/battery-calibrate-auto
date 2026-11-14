@@ -20,7 +20,6 @@ set -euo pipefail
 BATTERY_PATH="/sys/class/power_supply/macsmc-battery"
 STATE_DIR="$HOME/.local/share/battery"
 STATE_FILE="$STATE_DIR/last-calibration"
-CONF_FILE="/etc/battery-charge-threshold.conf"
 CALIBRATION_INTERVAL_DAYS=30
 POLL_INTERVAL=300   # seconds between battery status checks while waiting for Full
 
@@ -68,19 +67,14 @@ if (( ! ac_online )); then
 fi
 
 # ── Save previous threshold ───────────────────────────────────────────────────
-prev_end=80
-if [[ -f "$CONF_FILE" ]]; then
-  prev_end=$(grep '^CHARGE_END=' "$CONF_FILE" 2>/dev/null | cut -d= -f2 || echo 80)
-fi
-prev_start=$(( prev_end - 5 ))
-(( prev_start < 10 )) && prev_start=10
+prev_end=$(_read_sysfs "charge_control_end_threshold")
+[[ "$prev_end" =~ ^[0-9]+$ ]] && (( prev_end < 99 )) || prev_end=80
 
 # ── Lift threshold to 100% ────────────────────────────────────────────────────
 print -P "  %F{blue}→%f Calibration: lifting limit to 100%..."
-echo 95 | sudo tee "$BATTERY_PATH/charge_control_start_threshold" > /dev/null
+# asahi-scripts saves this 100% too, so a reboot mid-calibration keeps charging
+# to full; the restore below saves the previous limit again.
 echo 100 | sudo tee "$BATTERY_PATH/charge_control_end_threshold" > /dev/null
-# Stop the boot-time service so it does not fight us (CONF_FILE unchanged)
-sudo systemctl stop battery-charge-threshold 2>/dev/null || true
 
 _notify "Calibration started — charging to 100%. Limit will restore automatically." "normal"
 
@@ -101,10 +95,8 @@ _notify "Battery at 100%. Holding 1 hour to recalibrate capacity reading." "low"
 sleep 3600
 
 # ── Restore threshold ─────────────────────────────────────────────────────────
-print -P "  %F{blue}→%f Restoring charge threshold to ${prev_start}%% → ${prev_end}%%..."
-echo "$prev_start" | sudo tee "$BATTERY_PATH/charge_control_start_threshold" > /dev/null
-echo "$prev_end"   | sudo tee "$BATTERY_PATH/charge_control_end_threshold"   > /dev/null
-sudo systemctl start battery-charge-threshold 2>/dev/null || true
+print -P "  %F{blue}→%f Restoring charge limit to ${prev_end}%%..."
+echo "$prev_end" | sudo tee "$BATTERY_PATH/charge_control_end_threshold" > /dev/null
 
 # ── Record date ───────────────────────────────────────────────────────────────
 mkdir -p "$STATE_DIR"

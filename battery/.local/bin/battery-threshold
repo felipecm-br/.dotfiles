@@ -1,27 +1,27 @@
 #!/usr/bin/env zsh
-# battery-threshold — get or set the charge threshold for Apple Silicon (Asahi Linux)
+# battery-threshold — get or set the charge limit for Apple Silicon (Asahi Linux)
 #
 # Usage:
-#   battery-threshold                      # show current thresholds
-#   battery-threshold set <N>              # set end to N%, start to N-5 (quick)
-#   battery-threshold set-custom <S> <E>   # set start and end independently
-#   battery-threshold reset                # restore to 100% (remove limits)
+#   battery-threshold                      # show the current limit
+#   battery-threshold set <N>              # stop charging at N% (80 = Omarchy's limit)
+#   battery-threshold reset                # remove the limit (100%)
 #   battery-threshold calibrate            # temporarily lift limit for a calibration full charge
 #
-# Recommended profiles:
-#   Mostly plugged in (desk use):  battery-threshold set-custom 60 85
-#   Mixed use (on battery often):  battery-threshold set 80
+# Recommended: battery-threshold set 80 (Omarchy's charge limit; the SMC resumes
+# charging at 75%). The driver derives the start threshold from the end one and
+# ignores writes to it.
+#
+# Persistence needs no service of its own: asahi-scripts saves every change of
+# charge_control_end_threshold to /etc/udev/macsmc-battery.conf, and its udev rule
+# plus omarchy-mac's battery-charge-limit-restore write it back at boot.
 #
 # Calibration state is tracked in ~/.local/share/battery/last-calibration.
 # The battery-calibrate systemd user timer runs this workflow automatically each month.
-#
-# Requires the battery-charge-threshold systemd service to persist across reboots.
-# The service reads /etc/battery-charge-threshold.conf on start.
 
 set -euo pipefail
 
 BATTERY_PATH="/sys/class/power_supply/macsmc-battery"
-CONF_FILE="/etc/battery-charge-threshold.conf"
+END_FILE="$BATTERY_PATH/charge_control_end_threshold"
 
 if [[ ! -d "$BATTERY_PATH" ]]; then
   print -P "%F{red}✗%f Battery not found at %B${BATTERY_PATH}%b"
@@ -33,71 +33,39 @@ cmd="${1:-show}"
 case "$cmd" in
   show|"")
     start=$(cat "$BATTERY_PATH/charge_control_start_threshold" 2>/dev/null || echo "N/A")
-    end=$(cat "$BATTERY_PATH/charge_control_end_threshold" 2>/dev/null || echo "N/A")
-    print -P "  Charge threshold: %F{yellow}%B${start}%% – ${end}%%%b%f"
-    if [[ "$end" != "N/A" && "$end" -le 85 && "$start" -ge 55 ]]; then
-      print -P "  %F{green}✓ Plugged-in profile active (start ≥60%, end ≤85%)%f"
-    elif [[ "$end" != "N/A" && "$end" -le 80 ]]; then
-      print -P "  %F{green}✓ Battery protection active (limit ≤ 80%)%f"
+    end=$(cat "$END_FILE" 2>/dev/null || echo "N/A")
+    print -P "  Charge limit: %F{yellow}%B${end}%%%b%f (charging resumes at ${start}%%)"
+    if [[ "$end" != "N/A" && "$end" -le 85 ]]; then
+      print -P "  %F{green}✓ Battery protection active (limit ≤ 85%)%f"
     else
       print -P "  %F{red}⚠ No charge limit set — battery health at risk%f"
     fi
     ;;
 
-  # ── _apply_thresholds: shared logic for set and set-custom ────────────────
   set|set-custom)
-    local t_start t_end
-
-    if [[ "$cmd" == "set" ]]; then
-      t_end="${2:-85}"
-      if ! [[ "$t_end" =~ ^[0-9]+$ ]] || (( t_end < 20 || t_end > 100 )); then
-        print -P "%F{red}✗%f Invalid threshold. Must be a number between 20 and 100."
-        exit 1
-      fi
-      t_start=$(( t_end - 5 ))
-      (( t_start < 10 )) && t_start=10
-    else
-      # set-custom <start> <end>
-      t_start="${2:-60}"
-      t_end="${3:-85}"
-      if ! [[ "$t_start" =~ ^[0-9]+$ && "$t_end" =~ ^[0-9]+$ ]]; then
-        print -P "%F{red}✗%f Usage: battery-threshold set-custom <start> <end>"
-        exit 1
-      fi
-      if (( t_start < 10 || t_start > 99 || t_end < 11 || t_end > 100 )); then
-        print -P "%F{red}✗%f start must be 10–99, end must be 11–100."
-        exit 1
-      fi
-      if (( t_start >= t_end )); then
-        print -P "%F{red}✗%f start (%B${t_start}%%%b) must be less than end (%B${t_end}%%%b)."
-        exit 1
-      fi
+    # set-custom <start> <end> is kept for old muscle memory; the start is ignored.
+    if [[ "$cmd" == "set" ]]; then t_end="${2:-80}"; else t_end="${3:-80}"; fi
+    if ! [[ "$t_end" =~ ^[0-9]+$ ]] || (( t_end < 20 || t_end > 100 )); then
+      print -P "%F{red}✗%f Invalid limit. Must be a number between 20 and 100."
+      exit 1
     fi
 
     # Detect if we are restoring from a calibration (previous end was 100%)
-    prev_end=$(cat "$BATTERY_PATH/charge_control_end_threshold" 2>/dev/null || echo 0)
+    prev_end=$(cat "$END_FILE" 2>/dev/null || echo 0)
     coming_from_calibration=0
     (( prev_end >= 99 )) && coming_from_calibration=1
 
-    print -P "  %F{blue}→%f Setting charge thresholds: start=%B${t_start}%%%b end=%B${t_end}%%%b"
-
-    # Apply immediately
-    echo "$t_start" | sudo tee "$BATTERY_PATH/charge_control_start_threshold" > /dev/null
-    echo "$t_end"   | sudo tee "$BATTERY_PATH/charge_control_end_threshold"   > /dev/null
-
-    # Persist in conf file for the systemd service
-    printf 'CHARGE_START=%d\nCHARGE_END=%d\n' "$t_start" "$t_end" | sudo tee "$CONF_FILE" > /dev/null
-
-    # Restart the service so it reflects new values
-    if systemctl is-active battery-charge-threshold &>/dev/null; then
-      sudo systemctl restart battery-charge-threshold
+    print -P "  %F{blue}→%f Setting charge limit to %B${t_end}%%%b"
+    if (( t_end == 80 || t_end == 100 )) && command -v omarchy-battery-charge-limit >/dev/null; then
+      omarchy-battery-charge-limit "$t_end"
+    else
+      echo "$t_end" | sudo tee "$END_FILE" > /dev/null
     fi
-
-    print -P "  %F{green}✓%f Thresholds applied and persisted."
+    print -P "  %F{green}✓%f Limit applied; asahi-scripts keeps it across reboots."
 
     # If restoring from calibration, record the date
-    if (( coming_from_calibration )); then
-      local state_dir="$HOME/.local/share/battery"
+    if (( coming_from_calibration && t_end < 100 )); then
+      state_dir="$HOME/.local/share/battery"
       mkdir -p "$state_dir"
       date +%Y-%m-%d > "$state_dir/last-calibration"
       print -P "  %F{green}✓%f Calibration date recorded: %B$(date +%Y-%m-%d)%b"
@@ -106,10 +74,11 @@ case "$cmd" in
 
   reset)
     print -P "  %F{yellow}→%f Removing charge limit (setting to 100%)..."
-    echo 95 | sudo tee "$BATTERY_PATH/charge_control_start_threshold" > /dev/null
-    echo 100 | sudo tee "$BATTERY_PATH/charge_control_end_threshold" > /dev/null
-    printf 'CHARGE_START=95\nCHARGE_END=100\n' | sudo tee "$CONF_FILE" > /dev/null
-    sudo systemctl restart battery-charge-threshold 2>/dev/null || true
+    if command -v omarchy-battery-charge-limit >/dev/null; then
+      omarchy-battery-charge-limit 100
+    else
+      echo 100 | sudo tee "$END_FILE" > /dev/null
+    fi
     print -P "  %F{cyan}✓%f Charge limit removed."
     ;;
 
@@ -121,13 +90,11 @@ case "$cmd" in
     # need to trigger it manually — roughly once every 1–3 months is sufficient.
     #
     # After the battery reaches 100% and the laptop has been idle for a few hours,
-    # run: battery-threshold set 80   (or reboot — the systemd service will restore it)
+    # run: battery-threshold set 80   (asahi-scripts saved 100%, so a reboot keeps 100%)
 
-    # Save the current configured end threshold so we can remind the user
-    prev_end=80
-    if [[ -f "$CONF_FILE" ]]; then
-      prev_end=$(grep '^CHARGE_END=' "$CONF_FILE" | cut -d= -f2 || echo 80)
-    fi
+    # Remember the current limit so we can remind the user
+    prev_end=$(cat "$END_FILE" 2>/dev/null || echo 80)
+    (( prev_end >= 99 )) && prev_end=80
 
     print -P ""
     print -P "  %F{blue}%B Calibration cycle — Apple Silicon battery%b%f"
@@ -138,10 +105,7 @@ case "$cmd" in
     print -P "  %F{yellow}⚠  Do this roughly once every 1–3 months.%f"
     print -P ""
 
-    echo 95 | sudo tee "$BATTERY_PATH/charge_control_start_threshold" > /dev/null
-    echo 100 | sudo tee "$BATTERY_PATH/charge_control_end_threshold" > /dev/null
-    # Do NOT update CONF_FILE — the service will restore the real limit on next boot
-    sudo systemctl stop battery-charge-threshold 2>/dev/null || true
+    echo 100 | sudo tee "$END_FILE" > /dev/null
 
     print -P "  %F{green}✓%f Limit lifted. Plug in the charger and let the battery reach 100%."
     print -P ""
@@ -153,7 +117,7 @@ case "$cmd" in
 
   *)
     print -P "%F{red}✗%f Unknown command: %B${cmd}%b"
-    print "Usage: battery-threshold [show|set <N>|set-custom <S> <E>|reset|calibrate]"
+    print "Usage: battery-threshold [show|set <N>|reset|calibrate]"
     exit 1
     ;;
 esac

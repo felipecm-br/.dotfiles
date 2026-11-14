@@ -77,7 +77,7 @@ Stow a package with `./stow.sh <package>` (see [stow.sh](../../stow.sh)); everyt
 | Package | Tag | Why |
 | :--- | :--- | :--- |
 | `hypr`, `omarchy`, `omarchy-antigravity`, `desktop`, `tuikit`, `upscayl`, `sounds`, `fcitx5`, `bluetui` | `host-only` | Omarchy / Hyprland desktop, its menus and icons |
-| `battery` | `needs: root` | `etc/sudoers.d/10-battery-threshold` and charge-threshold scripts |
+| `battery` | `needs: root` | `etc/sudoers.d/10-battery-threshold`; the charge limit uses `omarchy-mac` and `asahi-scripts` (Asahi on Apple Silicon) |
 | `vimium` | `portable` | Browser extension shortcut list, imported by hand |
 
 ### Outside the stow packages

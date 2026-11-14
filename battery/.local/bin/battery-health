@@ -100,12 +100,12 @@ if command -v auto-cpufreq &>/dev/null; then
   print -P "  auto-cpufreq   %F{${acf_color}}%B${acf_state}%b%f"
 fi
 
-# ── charge threshold service status ──────────────────────────────────────────
-svc_state=$(systemctl is-active battery-charge-threshold 2>&1 || true)
-[[ -z "$svc_state" ]] && svc_state="inactive"
-svc_color="red"
-[[ "$svc_state" == "active" ]] && svc_color="green"
-print -P "  threshold-svc  %F{${svc_color}}%B${svc_state}%b%f"
+# ── charge limit persistence (asahi-scripts saves it, udev restores it at boot) ─
+saved_limit=$(sed -n 's/^CHARGE_CONTROL_END_THRESHOLD=//p' /etc/udev/macsmc-battery.conf 2>/dev/null || true)
+[[ -z "$saved_limit" ]] && saved_limit="none"
+saved_color="red"
+[[ "$saved_limit" =~ ^[0-9]+$ ]] && (( saved_limit < 100 )) && saved_color="green"
+print -P "  saved-limit    %F{${saved_color}}%B${saved_limit}%b%f"
 
 # ── calibration status ────────────────────────────────────────────────────────
 state_file="$HOME/.local/share/battery/last-calibration"
