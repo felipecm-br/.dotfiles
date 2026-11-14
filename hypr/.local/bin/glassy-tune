@@ -1,0 +1,270 @@
+#!/usr/bin/env bash
+# glassy-tune — live Waymaker (wm) tuner for the Custom Glassy window mode.
+#
+#   glassy-tune              open the tuner (j/k pick, h/l change, Space cycle an app, Enter keep, Esc undo)
+#   glassy-tune list         print the rows wm shows
+#   glassy-tune inc|dec ROW  step a row (mode, top bar, preset, a value, or an app's look) and reload Hyprland
+#   glassy-tune toggle ROW   cycle an app row: blur -> transparent -> opaque
+#
+# Values live in ~/.config/hypr/glassy-values.lua and the per-app looks in
+# ~/.config/hypr/glassy-apps.list (both stowed from the hypr package), read by
+# ~/.config/hypr/glassy.lua, which only applies them while the window mode is
+# Glassy.
+
+set -euo pipefail
+
+VALUES="$HOME/.config/hypr/glassy-values.lua"
+APPS="$HOME/.config/hypr/glassy-apps.list"
+APP_LOOKS=(blur transparent opaque)
+# Top bar looks, in the same order, as `omarchy bar background` names them.
+BAR_LOOKS=(glassy none opaque)
+PRESET="$HOME/.config/waymaker/presets/glassy.toml"
+
+# key|label|step|min|max|decimals
+PARAMS=(
+  "opacity_active|Opacity (active)|0.05|0.30|1.00|2"
+  "opacity_inactive|Opacity (inactive)|0.05|0.30|1.00|2"
+  "blur_size|Blur size|1|1|20|0"
+  "blur_passes|Blur passes|1|1|6|0"
+  "blur_brightness|Blur brightness|0.05|0.00|2.00|2"
+  "blur_contrast|Blur contrast|0.05|0.00|2.00|2"
+  "blur_vibrancy|Blur vibrancy|0.05|0.00|1.00|2"
+  "blur_vibrancy_darkness|Vibrancy darkness|0.05|0.00|1.00|2"
+  "blur_noise|Blur noise|0.01|0.00|0.20|2"
+)
+MODES=(opaque transparent glassy)
+
+# name|opacity_active opacity_inactive size passes brightness contrast vibrancy vibrancy_darkness noise
+# "omarchy" is Omarchy's own Glassy (toggles/window-glassy.lua + default/hypr/glass.lua).
+PRESETS=(
+  "omarchy|0.75 0.75 4 2 0.75 1.00 0.35 0.35 0.01"
+  "strong|0.75 0.75 8 3 0.75 1.00 0.35 0.35 0.01"
+  "frosted|0.80 0.75 10 4 0.85 1.00 0.40 0.30 0.03"
+  "crystal|0.85 0.80 3 1 0.90 1.00 0.20 0.20 0.00"
+  "deep|0.70 0.65 12 4 0.60 1.10 0.30 0.50 0.02"
+)
+PRESET_KEYS=(opacity_active opacity_inactive blur_size blur_passes blur_brightness blur_contrast blur_vibrancy blur_vibrancy_darkness blur_noise)
+
+# Apps offered even when no window of theirs is open: binary|window class.
+KNOWN_APPS=(
+  "ghostty|com.mitchellh.ghostty"
+  "foot|foot"
+  "alacritty|Alacritty"
+  "kitty|kitty"
+  "google-chrome-stable|google-chrome"
+  "chromium|chromium"
+  "zen-browser|zen"
+  "code|code"
+  "nautilus|org.gnome.Nautilus"
+  "obsidian|obsidian"
+  "mpv|mpv"
+  "antigravity|antigravity-ide"
+)
+
+get_value() {
+  sed -n -E "s/^[[:space:]]*$1[[:space:]]*=[[:space:]]*([0-9.]+).*/\1/p" "$VALUES"
+}
+
+# Edit in place through the stow symlink (plain sed -i would replace the link).
+set_value() {
+  sed -i --follow-symlinks -E "s/^([[:space:]]*$1[[:space:]]*=[[:space:]]*)[0-9.]+/\1$2/" "$VALUES"
+}
+
+reload() { hyprctl reload >/dev/null 2>&1 || true; }
+
+bar_look() { omarchy-bar background 2>/dev/null || echo "opaque"; }
+
+current_mode() {
+  omarchy-hyprland-window-transparency 2>/dev/null || echo "transparent"
+}
+
+# Name of the preset the current values match, or "custom".
+current_preset() {
+  local p name vals i now=() want
+  for p in "${PRESET_KEYS[@]}"; do now+=("$(get_value "$p")"); done
+  for p in "${PRESETS[@]}"; do
+    name=${p%%|*}
+    read -ra want <<<"${p#*|}"
+    for i in "${!want[@]}"; do
+      awk -v a="${now[$i]}" -v b="${want[$i]}" 'BEGIN { exit !((a - b) ^ 2 < 1e-6) }' || continue 2
+    done
+    echo "$name"
+    return
+  done
+  echo "custom"
+}
+
+apply_preset() {
+  local p want i
+  for p in "${PRESETS[@]}"; do
+    [[ ${p%%|*} == "$1" ]] || continue
+    read -ra want <<<"${p#*|}"
+    for i in "${!PRESET_KEYS[@]}"; do set_value "${PRESET_KEYS[$i]}" "${want[$i]}"; done
+  done
+}
+
+# Look of one app: blur (not listed), transparent or opaque.
+app_look() {
+  local look
+  look=$(awk -v c="$1" '$1 == c { print $2; exit }' "$APPS" 2>/dev/null)
+  echo "${look:-blur}"
+}
+
+# Classes to list: open windows, apps already unticked, and installed known apps.
+app_classes() {
+  {
+    hyprctl clients -j 2>/dev/null | jq -r '.[].class | select(. != "")' 2>/dev/null || true
+    awk '!/^[[:space:]]*(#|$)/ { print $1 }' "$APPS" 2>/dev/null || true
+    local a
+    for a in "${KNOWN_APPS[@]}"; do
+      command -v "${a%%|*}" >/dev/null 2>&1 && echo "${a#*|}"
+    done
+  } | awk '!seen[$0]++' | sort -f
+}
+
+# Ten-cell gauge of value within [min, max].
+gauge() {
+  awk -v v="$1" -v lo="$2" -v hi="$3" 'BEGIN {
+    n = (hi > lo) ? int((v - lo) / (hi - lo) * 10 + 0.5) : 0
+    if (n < 0) n = 0; if (n > 10) n = 10
+    s = ""; for (i = 0; i < 10; i++) s = s (i < n ? "━" : "─")
+    print s
+  }'
+}
+
+list() {
+  local mode p key label step lo hi dec val note="" class box
+  mode=$(current_mode)
+  [[ $mode == glassy ]] || note="  (applies only in glassy)"
+  printf '%-20s %-11s %s%s\tmode\n' "Window mode" "$mode" "h/l switch" "$note"
+  local bar
+  case $(bar_look) in
+    none) bar="󰂵 transparent" ;;
+    opaque) bar="󰝤 opaque     " ;;
+    *) bar="󰃟 blur       " ;;
+  esac
+  printf '%-20s %s %s\tbar\n' "Top bar" "$bar" "h/l blur · transparent · opaque (works in every mode)"
+  printf '%-20s %-11s %s\tpreset\n' "Blur preset" "$(current_preset)" "h/l omarchy · strong · frosted · crystal · deep"
+  for p in "${PARAMS[@]}"; do
+    IFS='|' read -r key label step lo hi dec <<<"$p"
+    val=$(get_value "$key")
+    printf '%-20s %-11s %s\t%s\n' "$label" "$val" "$(gauge "$val" "$lo" "$hi")" "$key"
+  done
+  while IFS= read -r class; do
+    # Padded by hand: printf widths count bytes, and the glyphs are 4 bytes each.
+    case $(app_look "$class") in
+      transparent) box="󰂵 transparent" ;;
+      opaque) box="󰝤 opaque     " ;;
+      *) box="󰃟 blur       " ;;
+    esac
+    printf '%-20s %s %s\tapp:%s\n' "App" "$box" "$class" "$class"
+  done < <(app_classes)
+}
+
+set_app_look() {
+  local class="$1" dir="$2" look idx=0 i n=${#APP_LOOKS[@]} tmp
+  look=$(app_look "$class")
+  for i in "${!APP_LOOKS[@]}"; do [[ ${APP_LOOKS[$i]} == "$look" ]] && idx=$i; done
+  if [[ $dir == inc ]]; then idx=$(( (idx + 1) % n )); else idx=$(( (idx + n - 1) % n )); fi
+  # Rewrite through the stow symlink: drop the app's line, then add its new look.
+  tmp=$(mktemp)
+  awk -v c="$class" '$1 != c' "$APPS" >"$tmp" || true
+  [[ ${APP_LOOKS[$idx]} == blur ]] || printf '%s %s\n' "$class" "${APP_LOOKS[$idx]}" >>"$tmp"
+  cat "$tmp" >"$APPS"
+  rm -f "$tmp"
+}
+
+step() {
+  local dir="$1" target="$2" p key label step lo hi dec val new i
+  case "$target" in
+    app:*)
+      set_app_look "${target#app:}" "$dir"
+      ;;
+    bar)
+      local look idx=0 n=${#BAR_LOOKS[@]}
+      look=$(bar_look)
+      for i in "${!BAR_LOOKS[@]}"; do [[ ${BAR_LOOKS[$i]} == "$look" ]] && idx=$i; done
+      if [[ $dir == inc ]]; then idx=$(( (idx + 1) % n )); else idx=$(( (idx + n - 1) % n )); fi
+      omarchy-bar background "${BAR_LOOKS[$idx]}" >/dev/null 2>&1 || true
+      return
+      ;;
+    mode)
+      local mode idx=0
+      mode=$(current_mode)
+      for i in "${!MODES[@]}"; do [[ ${MODES[$i]} == "$mode" ]] && idx=$i; done
+      if [[ $dir == inc ]]; then idx=$(( (idx + 1) % 3 )); else idx=$(( (idx + 2) % 3 )); fi
+      omarchy-hyprland-window-transparency "${MODES[$idx]}" >/dev/null 2>&1 || true
+      ;;
+    preset)
+      local cur n=${#PRESETS[@]} idx=-1
+      cur=$(current_preset)
+      for i in "${!PRESETS[@]}"; do [[ ${PRESETS[$i]%%|*} == "$cur" ]] && idx=$i; done
+      if (( idx < 0 )); then
+        idx=0
+      elif [[ $dir == inc ]]; then
+        idx=$(( (idx + 1) % n ))
+      else
+        idx=$(( (idx + n - 1) % n ))
+      fi
+      apply_preset "${PRESETS[$idx]%%|*}"
+      ;;
+    *)
+      for p in "${PARAMS[@]}"; do
+        IFS='|' read -r key label step lo hi dec <<<"$p"
+        [[ $key == "$target" ]] || continue
+        val=$(get_value "$key")
+        new=$(awk -v v="$val" -v s="$step" -v lo="$lo" -v hi="$hi" -v d="$dec" -v dir="$dir" 'BEGIN {
+          n = (dir == "inc") ? v + s : v - s
+          if (n < lo) n = lo; if (n > hi) n = hi
+          printf "%.*f", d, n
+        }')
+        set_value "$key" "$new"
+      done
+      ;;
+  esac
+  reload
+}
+
+case "${1:-}" in
+  list) list ;;
+  inc | dec | toggle)
+    dir=$1
+    [[ $dir == toggle ]] && dir=inc
+    row=${2:?row}
+    # Space only cycles apps; on other rows it does nothing.
+    if [[ $1 != toggle || $row == app:* ]]; then step "$dir" "$row"; fi
+    # Redraw the rows in place, keeping the cursor on the edited row.
+    printf 'Reload\n'
+    ;;
+  "")
+    WM_BIN=$(command -v wm || echo "$HOME/.local/bin/wm")
+    [[ -x $WM_BIN ]] || { echo "glassy-tune: waymaker (wm) not found" >&2; exit 1; }
+    [[ -f $VALUES ]] || { echo "glassy-tune: $VALUES not found" >&2; exit 1; }
+    [[ -f $APPS ]] || printf '# Per-app Custom Glassy look: <window class> <transparent|opaque>.\n' >"$APPS"
+
+    # Both files are stow symlinks into the repo, so a cancelled session
+    # restores their content, not the links.
+    values_backup=$(mktemp)
+    apps_backup=$(mktemp)
+    mode_before=$(current_mode)
+    bar_before=$(bar_look)
+    cp "$VALUES" "$values_backup"
+    cp "$APPS" "$apps_backup"
+    trap 'rm -f "$values_backup" "$apps_backup"' EXIT
+
+    if [[ -n $("$WM_BIN" --no-read --config "$PRESET" || true) ]]; then
+      echo "Glassy settings kept in $VALUES and $APPS"
+    else
+      cat "$values_backup" >"$VALUES"
+      cat "$apps_backup" >"$APPS"
+      [[ $(bar_look) == "$bar_before" ]] || omarchy-bar background "$bar_before" >/dev/null 2>&1 || true
+      [[ $(current_mode) == "$mode_before" ]] || omarchy-hyprland-window-transparency "$mode_before" >/dev/null 2>&1 || true
+      reload
+      echo "Glassy settings restored"
+    fi
+    ;;
+  *)
+    echo "Usage: glassy-tune [list | inc ROW | dec ROW | toggle ROW]" >&2
+    exit 2
+    ;;
+esac

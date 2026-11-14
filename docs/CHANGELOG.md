@@ -39,6 +39,7 @@ The commit hashes link each entry to the full change (`git show <hash>`). Weeks 
 - The keybindings HUD runs the real triage jump for `Ctrl+Shift+I` and `Prefix + I` (it named a script that no longer exists). `needs: waymux`
 
 ### Other
+- Omarchy's Glassy window mode blurs harder (`size 8`, `passes 3` instead of 4 and 2) through `hypr/glassy.lua`, and `glassy-tune` opens a Waymaker tuner to change the window mode and the top bar background (`blur`, `transparent`, `opaque`), pick a blur preset (`omarchy`, `strong`, `frosted`, `crystal`, `deep`), change opacity and every blur value live (`h`/`l`), set each app to `blur`, `transparent` or `opaque` (`Space`), keep them (`Enter`) or undo (`Esc`). (`hypr`, `waymaker`) `host-only`, `needs: wm`
 - `install.zsh` installs Google Chrome (`google-chrome` from the AUR, which builds for aarch64). (`.shell`) `host-only`, `needs: root`
 - `install.zsh` installs `JetBrainsMono Nerd Font Propo`, which Ghostty and Kitty use, into `~/.local/share/fonts`, since Omarchy's `ttf-jetbrains-mono-nerd-basic` dropped the Propo faces. (`ghostty`, `kitty`) `portable`
 - `.zshrc` loads Omarchy's default aliases, functions and envs from `$OMARCHY_PATH` (`/usr/share/omarchy`), where Omarchy now installs them, instead of the removed `~/.local/share/omarchy/default`. (`zsh`) `host-only`

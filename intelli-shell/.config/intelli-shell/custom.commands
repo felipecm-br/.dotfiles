@@ -646,6 +646,9 @@ hypr-border
 # Interactive Hyprland window animation curve switcher
 hypr-anim
 
+# Live Custom Glassy tuner: top bar look, blur presets, opacity/blur values and per-app blur/transparent/opaque looks (h/l change, Space cycle app, Enter keep, Esc undo)
+glassy-tune
+
 # Adopt an existing file or directory into dotfiles and stow it
 stow-it {{path}} {{package}}
 

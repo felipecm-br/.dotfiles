@@ -68,7 +68,7 @@ Stow a package with `./stow.sh <package>` (see [stow.sh](../../stow.sh)); everyt
 | `update-ai-workflow` (`ai-update`) | `needs: root` | Installs through `yay` / `pacman` |
 | `ai-upstream`, `ai-scout` | `needs: gh` | Authenticated `gh`, `git`, Python ≥ 3.11 |
 | `ai-inventory` | `portable` | `jq`; `wm` for `--picker` |
-| `hypr-anim`, `hypr-border`, `hypr-sound`, `border-gradient` | `host-only` | Hyprland |
+| `hypr-anim`, `hypr-border`, `hypr-sound`, `border-gradient`, `glassy-tune` | `host-only` | Hyprland |
 | `omarchy-clean` | `host-only` · `needs: root` | Omarchy (`/etc/skel`, `omarchy-provision-user`); `sudo` for `useradd` / `userdel` |
 | User units in `utils/.config/systemd/user` | `portable` | user systemd (`ai-quota-refresh`, `dev-gc`, `cockpit-shutdown-save`, `agent-sudod`, `stow-relink.path`) |
 

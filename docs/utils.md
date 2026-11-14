@@ -35,6 +35,7 @@ These come from the [`utils`](../utils), [`awt`](../awt), [`waymux`](../waymux),
 | `ai-sound-switcher` / `ai-sound-pack-install` / `ai-sound-generate` | Interactive TUI switcher (`wm -o sounds`), pack installer, and synthesizer for Waymux auditory telemetry alerts. |
 | `chime-at-breakpoint` | Emit an auditory chime when a debugger or background pipeline hits a breakpoint. |
 | `hypr-border` / `hypr-anim` | Live interactive Hyprland border gradient (`wm -o borders`) and window animation curve (`wm -o animations`) switchers. |
+| `glassy-tune` | Live opacity and blur tuner for the Custom Glassy window mode (`wm --config glassy.toml`); see [Custom Glassy](desktop/hyprland-aesthetics-and-performance.md#6-custom-glassy). |
 | `stow-it <path> [package]` | Adopt an existing file or dir into the dotfiles repo and stow it. Resolves the real path, moves it under `~/.dotfiles/main/<package>/...`, and runs `stow.sh -a <package>`. |
 | `stow-relink [--list]` | Restore stow symlinks that an app saved over with a plain file (atomic writes), first copying its content into the repo file, so the change shows as a `git diff`. Watches `~/.config/omarchy/shell.json`, which Omarchy's shell rewrites on every bar change from the UI or `omarchy bar`; runs by itself through `stow-relink.path`. Add a path to `WATCHED` in the script and a `PathChanged=` line in the unit to watch more. |
 | `battery-threshold [pct]` | Set hardware battery charge threshold (e.g., `80`) to extend battery lifespan (`battery` package). |
@@ -77,6 +78,7 @@ Specialized TUI pickers configured in [`waymaker/.config/waymaker/presets/`](../
 * `wm -o memory` — AI memory, `AGENTS.md`, and project rules explorer.
 * `wm -o borders` / `hypr-border` — Interactive Hyprland border gradient switcher with real-time live preview (`SUPER + ALT + B`).
 * `wm -o animations` / `hypr-anim` — Interactive Hyprland window animation switcher (`SUPER + SHIFT + A`).
+* `glassy-tune` (preset `glassy`) — Live Custom Glassy opacity and blur tuner.
 * `wm -o sounds` / `ai-sound-switcher` — Interactive Waymux audio pack & sound alert switcher.
 * `wm -o backgrounds` — Interactive Omarchy wallpaper switcher.
 * `wm -o starship-presets` / `omarchy-starship-preset` — Interactive Starship prompt preset & Omarchy theme switcher (presets listed first, hot-reloading preview).

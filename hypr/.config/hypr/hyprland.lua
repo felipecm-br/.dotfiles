@@ -29,6 +29,9 @@ require("default.hypr.require_optional").module("hypr.animations")
 -- Toggle config flags dynamically.
 require("default.hypr.toggles")
 
+-- Stronger blur while the Glassy window mode is on (after toggles so it wins).
+require("hypr.glassy")
+
 -- Add any other personal Hyprland configuration below.
 -- o.window("qemu", { workspace = "5" })
 

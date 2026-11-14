@@ -1,0 +1,5 @@
+# Per-app Custom Glassy look, edited by glassy-tune: <window class> <transparent|opaque>.
+# Apps not listed keep the default: blur.
+chromium transparent
+antigravity-ide transparent
+google-chrome opaque

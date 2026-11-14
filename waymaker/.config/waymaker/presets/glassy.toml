@@ -1,0 +1,81 @@
+# glassy-tune: live opacity and blur tuner for the Custom Glassy window mode.
+# j/k pick a row, h/l (or -/+) change it live, Space cycles an app (blur, transparent, opaque), Enter keeps, Esc undoes.
+
+[ui.nav]
+active = true
+color = "lightcyan"
+marker = "│"
+hints = false
+
+[results]
+row_connection = "Full"
+
+[results.style]
+modifier = "DIM"
+
+[results.current_style]
+bg = "reset"
+modifier = "BOLD"
+
+[tui]
+percentage = 20
+min = 20
+max = 85
+
+[footer]
+content = " {cyan,bold:Enter} {darkgray:Keep} {darkgray:│} {cyan,bold:j/k} {darkgray:Value} {darkgray:│} {cyan,bold:h/l} {darkgray:Change} {darkgray:│} {cyan,bold:Space} {darkgray:App look} {darkgray:│} {cyan,bold:Esc} {darkgray:Undo}"
+row_connection = "Full"
+match_indent = false
+separator = "light"
+
+[preview]
+show = false
+
+[columns]
+split = "\t"
+names = [
+  "label",
+  { name = "param", hidden = true }
+]
+
+[start.command]
+cmd = "glassy-tune list"
+
+[query]
+prompt = ">"
+status_inline = true
+
+[start]
+mode = "nav"
+
+[binds]
+"ctrl-j" = "Down"
+"ctrl-k" = "Up"
+"up" = "Up"
+"down" = "Down"
+"right" = "Transform(glassy-tune inc {2})"
+"left" = "Transform(glassy-tune dec {2})"
+"enter" = "Accept"
+"esc" = "Quit"
+
+"nav^^j" = "Down"
+"nav^^k" = "Up"
+"nav^^up" = "Up"
+"nav^^down" = "Down"
+"nav^^g" = "Pos(0)"
+"nav^^G" = "Pos(-1)"
+"nav^^l" = "Transform(glassy-tune inc {2})"
+"nav^^h" = "Transform(glassy-tune dec {2})"
+"nav^^right" = "Transform(glassy-tune inc {2})"
+"nav^^left" = "Transform(glassy-tune dec {2})"
+"nav^^+" = "Transform(glassy-tune inc {2})"
+"nav^^=" = "Transform(glassy-tune inc {2})"
+"nav^^-" = "Transform(glassy-tune dec {2})"
+"nav^^space" = "Transform(glassy-tune toggle {2})"
+"nav^^q" = "Quit"
+"nav^^esc" = "Quit"
+"nav^^enter" = "Accept"
+
+# No image previews: skip the terminal graphics probe that holds the first frame.
+[preview.media]
+active = false
