@@ -39,7 +39,7 @@ An audit of native features across the four supported AI CLIs (**Claude Code**, 
 
 | Harness | Mechanism | Storage & Payload | Killer Detail to Absorb | Current Gap |
 | :--- | :--- | :--- | :--- | :--- |
-| **This Stack (`Prefix + V`)** | [`ai-prompt`](../../utils/.local/bin/ai-prompt) `stash` (`take`/`put` over `$VISUAL`) + `WAYMUX_SWITCH_DRAFT` in `waymux switch` | Single ephemeral file per pane (`$XDG_RUNTIME_DIR/ai-prompt/<pane>.stash`) | Works across harnesses (`claude`, `codex`, `agy`, `devin`), paired with `Prefix + v` floating Neovim edit | Single slot overwrites prior stash; lost on kill/reboot; manual restore `Prefix + V`; `opencode` omitted from `AGENT_RE` |
+| **This Stack (`Ctrl + S`)** | [`ai-prompt`](../../utils/.local/bin/ai-prompt) `stash` (`take`/`put` over `$VISUAL`) + `WAYMUX_SWITCH_DRAFT` in `waymux switch` | Single ephemeral file per pane (`$XDG_RUNTIME_DIR/ai-prompt/<pane>.stash`) | Works across harnesses (`claude`, `codex`, `agy`, `devin`), paired with `Prefix + v` floating Neovim edit | Single slot overwrites prior stash; lost on kill/reboot; manual restore `Ctrl + S`; `opencode` omitted from `AGENT_RE` |
 | **Claude Code (`Ctrl+S`)** | `chat:stash` action toggles draft stash | In-session `{value, cursorOffset, mode, pastedContents}`; persisted in `CLAUDE_JOB_DIR` for `--bg` | **Auto-restores after submit** with `"Draft restored"` toast right after a `/command` finishes | Single slot; locked inside one Claude session |
 | **OpenCode** | `PromptStash` (`prompt.stash`, `prompt.stash.pop`, `prompt.stash.list`) | Persistent JSONL stack (`<state>/prompt-stash.jsonl`, cap 50) with `{input, parts, timestamp}` | **Searchable Stash modal** (title, timestamp, `~N lines`, `ctrl+d` double-press delete); `v2.2.5` diff comment `Ctrl+Enter` preserves draft | Default keybinds `"none"` (opened via `ctrl+p` Command Palette unless customized) |
 | **Codex CLI** | **No** `Ctrl+S` prompt stash; has `chat.open_presets` (`tui.keymap.*`) | Saved `tui.presets.0`..`9` prompt slots | **`0–9` single-key run**, `s` save, `d` delete reusable prompts + `chat.edit_queued_message` | Manual templates rather than instant transient draft stashing |
@@ -93,7 +93,7 @@ All work items obey the [Ergonomics Manifesto](terminal-ergonomics-and-ux-manife
 - **`W2b` — Persistent JSONL Stash Store + Pinned `0–9` Presets (`waymux` / `ai-prompt`):**
   - Store `$XDG_STATE_HOME/waymux/prompt-stash.jsonl` (capped at `50` entries, `0600` perms, invisible chars stripped via `delivery::strip_invisible`):
     `{ "id", "ts", "pane", "agent", "cwd", "pinned_slot": 0..9 | null, "text", "lines" }`.
-  - Keep `Prefix + V` as zero-popup fast toggle: if current pane has a non-empty draft, `take` pushes to the JSONL stack and clears input; if empty and pane has a recent stash, `put` restores and removes/marks popped (preserving exact current UX).
+  - Keep `Ctrl + S` as zero-popup fast toggle: if current pane has a non-empty draft, `take` pushes to the JSONL stack and clears input; if empty and pane has a recent stash, `put` restores and removes/marks popped (preserving exact current UX).
   - Add a **Prompt Stash & Presets Picker** (`75% × 60%` `wm` popup via Command Palette & `ai-prompt list` / `ai-prompt presets`):
     - Top/pinned rows `[0]`–`[9]` act like Codex's `chat.open_presets` (instant `0–9` key injection via `ai-prompt put` or `waymux inject`).
     - History rows show agent icon, relative timestamp, cwd/branch, and `~N lines`, with multi-line preview on the right (60%).
@@ -104,7 +104,7 @@ All work items obey the [Ergonomics Manifesto](terminal-ergonomics-and-ux-manife
   - Before `ai-failover` opens the fallback agent (`agy`, `agyy`, `codex`) with `AI_LAUNCH_CONTINUE=1`, run `ai-prompt -t "$pane" --ready && ai-prompt -t "$pane" take`.
   - Pass the captured stash id to the spawned pane (or queue `waymux inject` / `ai-prompt put` once the failover pane reaches initial `idle`).
 - **Done when:**
-  - `Prefix + V` works across `claude`, `codex`, `agy`, and `opencode`; multiple stashes persist across tmux/host restarts; presets `0–9` insert cleanly; and triggering `Prefix + F` on a Claude pane with an active draft carries that draft into the replacement agent without manual retyping.
+  - `Ctrl + S` works across `claude`, `codex`, `agy`, and `opencode`; multiple stashes persist across tmux/host restarts; presets `0–9` insert cleanly; and triggering `Prefix + F` on a Claude pane with an active draft carries that draft into the replacement agent without manual retyping.
 
 ---
 

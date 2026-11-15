@@ -226,7 +226,7 @@ set -g @ergonomic_profile "universal"
 %else
   # Biomechanical Profile: Requires keyd overload(control, esc)
   set -g prefix C-Space
-  bind C-Space send-prefix
+  bind C-Space run-shell "waymux cockpit"   # = Prefix + Space, CapsLock still held
   
   # Zero-prefix direct jumps (Ctrl = CapsLock)
   bind-key -n 'C-`' select-window -t 0

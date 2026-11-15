@@ -14,7 +14,7 @@ if [ -n "$TMUX_PANE" ]; then
   ' EXIT INT TERM
   tmux rename-window -t "$TMUX_PANE" "$(waymux icon agy)" > /dev/null 2>&1 || true
   # Antigravity opens its prompt draft (Ctrl+G) in $EDITOR only: route it through ai-prompt for the
-  # Prefix + v popup and Prefix + V stash; ai-prompt hands any other caller to the previous $EDITOR
+  # Prefix + v popup and Ctrl + S stash; ai-prompt hands any other caller to the previous $EDITOR
   if [ -x "$HOME/.local/bin/ai-prompt" ]; then
     export AI_PROMPT_EDITOR="${AI_PROMPT_EDITOR:-$EDITOR}" EDITOR="$HOME/.local/bin/ai-prompt"
   fi

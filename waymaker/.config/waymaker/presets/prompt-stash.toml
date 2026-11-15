@@ -1,5 +1,5 @@
 # Waymaker Prompt Stash & Presets (`wm -o prompt-stash`, opened by prompt-stash-picker.sh).
-# Rows: every draft stashed with Ctrl+S / Prefix + V (any agent, persistent) and the presets pinned
+# Rows: every draft stashed with Ctrl+S (any agent, persistent) and the presets pinned
 # at 0–9. Tab switches to the pane's waymux delivery queue. Enter puts the entry into the pane's
 # prompt (queue tab: types the queued prompt now, over a draft hold). p pins / unpins a preset slot.
 

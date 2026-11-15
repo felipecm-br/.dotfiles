@@ -16,8 +16,9 @@ RUN="$XDG_RUNTIME_DIR/ai-prompt"
 # 1. Script parses, bindings exist, $VISUAL is exported
 bash -n "$(command -v ai-prompt)" && ok "script parses" || bad "syntax"
 grep -q "^bind-key v run-shell \"~/.local/bin/ai-prompt -t '#{pane_id}' edit" "$CONF" && ok "Prefix + v bound" || bad "v binding"
-grep -q "^bind-key V run-shell \"~/.local/bin/ai-prompt -t '#{pane_id}' stash" "$CONF" && ok "Prefix + V bound" || bad "V binding"
-! grep -qE "^unbind(-key)? +'?[vV]'?\$" "$CONF" && ok "no later unbind drops v / V" || bad "v / V unbound later in tmux.conf"
+! grep -qE "^bind-key V " "$CONF" && ok "Prefix + V gone (Ctrl + S is the only stash key)" || bad "Prefix + V still bound"
+grep -q "^bind-key -n C-s if-shell" "$CONF" && ok "Ctrl + S bound" || bad "Ctrl + S binding"
+! grep -qE "^unbind(-key)? +'?v'?\$" "$CONF" && ok "no later unbind drops v" || bad "v unbound later in tmux.conf"
 grep -q 'export VISUAL="$HOME/.local/bin/ai-prompt"' "$ROOT/zsh/.zshenv" && ok "VISUAL exported" || bad "zshenv"
 
 # 2. A caller that is not an agent on a terminal (git, crontab…) gets $EDITOR untouched

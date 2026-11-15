@@ -4,7 +4,7 @@
 #   ai-prompt [-t pane] edit     Open the agent's draft in nvim, in a tmux popup over the pane; :wq puts
 #                                it back, :cq leaves the draft untouched (Prefix + v)
 #   ai-prompt [-t pane] stash    Toggle: put the draft aside and empty the prompt, or bring it back when a
-#                                stash exists (Prefix + V; run a /command in between)
+#                                stash exists (Command Palette / CLI; run a /command in between)
 #   ai-prompt [-t pane] key      Ctrl+S: stash toggle that comes back on its own after the /command;
 #                                no agent in the pane passes Ctrl+S through, an agent started before
 #                                $VISUAL=ai-prompt gets its own Ctrl+S (Claude Code's stash)
@@ -344,7 +344,7 @@ case $action in
         say "Draft stashed · run your /command · it comes back on its own"
         setsid "$SELF" -t "$pane" _autorestore "$(cat "$RUN/$key.stash.id")" </dev/null >/dev/null 2>&1 &
       else
-        say "Draft stashed · run your /command · Prefix + V brings it back"
+        say "Draft stashed · run your /command · Ctrl + S brings it back"
       fi
     elif [ $? -eq 1 ]; then
       say "Prompt is empty: nothing to stash"

@@ -32,6 +32,10 @@ The commit hashes link each entry to the full change (`git show <hash>`). Weeks 
 - `ai-upstream` reports what changed upstream of the AI workflow: dependency releases newer than what is installed, upstream lazygitrs commits with a cherry-pick dry run each, and what the benchmark competitors shipped, with an adoption mode from each license. `ai-scout` ranks new and trending GitHub repositories that could improve it. The `ai-upstream-watch` and `ai-scout` skills turn both reports into decisions. `needs: gh`
 
 ### tmux
+- `Ctrl + H/J/K/L` reach the app in a single-pane window (zsh history search on `Ctrl + K/J`, clear on `Ctrl + L`, Claude Code's `Ctrl + J` newline) instead of being taken by vim-tmux-navigator with no pane to move to; with a split they still move between panes. (`tmux`) `portable`
+- `Prefix + C-Space` opens the Cockpit like `Prefix + Space`, so CapsLock still held on the second tap is no longer a dead `send-prefix`; nested tmux in a popup keeps `C-Space` from the popup table. (`tmux`) `needs: waymux`
+- `Prefix + j` is the only triage jump to the next agent waiting on you (no Shift): `Prefix + I` and `Ctrl + Shift + I` are gone. (`tmux`) `needs: waymux`
+- `Ctrl + S` is the only key that stashes an agent's draft: `Prefix + V` is gone; `ai-prompt stash` (no auto-restore) stays in the `Ctrl + T` palette and the CLI. (`tmux`, `utils`) `needs: waymux`
 - The close confirmations (`Prefix + w` / `x` / `W`, `d` in the window picker) ask one question (`Close tab 1?`), say in one line what closing stops, and list only busy agents, each with its own agent icon in the status bar's state color: one warning icon instead of five, and the Waymaker popup footer `y Close │ n/Esc Keep`. `portable`
 - After a reboot, an agent started with its permission prompts off (`Claude YOLO`) resumes with them on; start it again from `Prefix + a` to turn them off. `needs: waymux, ai-jail`
 - Pickers draw their first row in about 25 ms instead of about 135 ms inside tmux: 17 presets that never show images skip Waymaker's terminal-graphics probe. `needs: wm`

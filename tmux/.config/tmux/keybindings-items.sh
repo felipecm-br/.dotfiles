@@ -18,7 +18,7 @@ emit_tmux() {
 󰅍  Prefix + y	Scrollback Picker (Tokens, Links & Yank)	tmux	tmux-scrollback	~/.config/tmux/scrollback-picker.sh
 󰍉  Prefix + /	Workspace Ripgrep Live Search	tmux	tmux-grep	~/.config/tmux/grep-picker.sh
 󰓩  Prefix + s	Session Workspace / Task Picker	tmux	tmux-sesh	~/.config/tmux/session-picker.sh
-󱂬  Prefix + Space	AI Fleet Cockpit & Window Manager	tmux	tmux-cockpit	~/.config/tmux/cockpit-picker.sh
+󱂬  Prefix + Space / C-Space	AI Fleet Cockpit & Window Manager	tmux	tmux-cockpit	~/.config/tmux/cockpit-picker.sh
 󰌌  Prefix + f	Vimium Window Hints (1-touch Jump)	tmux	tmux-hints	tmux switch-client -T window_hints
 󰌌  Ctrl + `	Direct Jump to Window 0 (Zero-Prefix)	tmux	tmux-select-0	tmux select-window -t 0
 󰌌  Ctrl + 1 .. 9	Direct Jump to Window 1 .. 9 (Zero-Prefix)	tmux	tmux-select-win	tmux select-window -t 1
@@ -28,16 +28,15 @@ emit_tmux() {
 󰑓  Prefix + A	AI Model / Effort Hot-Swap (In-Place)	tmux	tmux-ai-switch	~/.config/tmux/ai-switch-popup.sh
 󰚩  Prefix + F	AI Usage-Limit Failover (Next Agent, Same Workstream)	tmux	tmux-ai-failover	~/.local/bin/ai-failover
 󰏫  Prefix + v	AI Prompt Draft in Nvim Popup	tmux	tmux-ai-prompt	~/.local/bin/ai-prompt edit
-󰆓  Ctrl + S / Prefix + V	AI Prompt Draft Stash / Restore (for /commands)	tmux	tmux-ai-prompt-stash	~/.local/bin/ai-prompt stash
+󰆓  Ctrl + S	AI Prompt Draft Stash / Restore (for /commands)	tmux	tmux-ai-prompt-stash	~/.local/bin/ai-prompt stash
 󰆓  Prefix + S	AI Prompt Stash & Presets (0-9, Queue)	tmux	tmux-prompt-stash	~/.local/bin/ai-prompt picker
 󰭹  Prefix + b	AI Side Question (/btw, Pane Untouched)	tmux	tmux-btw	~/.config/tmux/btw-popup.sh
 󰁯  Prefix + Z	AI Turn Checkpoints & Rewind (Per-Turn Diff)	tmux	tmux-checkpoint	~/.config/tmux/checkpoint-picker.sh
 󰓅  Prefix + u	AI Quota & Burn Telemetry Visual Popup	tmux	tmux-ai-quota	~/.config/tmux/ai-quota-popup.sh
 󰊢  Ctrl + G	Lazygitrs Floating Popup & Dual-Diff	tmux	tmux-lazygitrs	~/.config/tmux/lazygitrs-popup.sh
 󰙀  Ctrl + Shift + T	Undo Close Tab (Exact Index & AI Resume)	tmux	tmux-reopen	~/.config/tmux/reopen-window.sh
-󰒭  Ctrl + Shift + I	AI Attention Trampoline Direct Jump	tmux	tmux-triage	~/.config/tmux/ai-agent-triage-jump.sh
 󰘳  Prefix + i	AI Agent Bell / Alert HUD	tmux	tmux-bell	~/.config/tmux/ai-agent-bell-popup.sh
-󰒭  Prefix + I	AI Attention Trampoline Direct Jump	tmux	tmux-triage	~/.config/tmux/ai-agent-triage-jump.sh
+󰒭  Prefix + j	AI Attention Trampoline Direct Jump	tmux	tmux-triage	~/.config/tmux/ai-agent-triage-jump.sh
 󰄧  Prefix + o	AI Side-by-Side Split (35% Right)	tmux	tmux-ai-split	~/.config/tmux/toggle-ai-split.sh
 󰏫  Prefix + N	Neovim Floating Scratchpad (90%x90%)	tmux	tmux-scratchpad	~/.config/tmux/nvim-scratchpad.sh
 󰄧  Prefix + E	Scrollback & AI Mermaid Modal (90%x88%)	tmux	tmux-view-scrollback	~/.config/tmux/scrollback-view.sh

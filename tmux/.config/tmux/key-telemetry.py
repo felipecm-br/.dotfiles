@@ -33,7 +33,7 @@ COCKPIT_TOML = os.path.join(
     os.path.join(_RUNTIME, "waymux") if _RUNTIME else f"/tmp/waymux-{os.getuid()}", "cockpit-picker.toml"
 )
 
-# States where the agent waits on you: Prefix + I reaches them without the Cockpit.
+# States where the agent waits on you: Prefix + j reaches them without the Cockpit.
 WAITING = {"permission", "question", "awaiting_input", "error", "stalled", "hanging", "review"}
 GIT_KEYS = {"g", "G", "gg", "ctrl-g", "p", "P", "ctrl-p"}
 BIND_RE = re.compile(r"^bind-key\s+((?:-\w\s+)*)-T\s+(\S+)\s+(\S+)\s+(.*)$")
@@ -260,7 +260,7 @@ def action_label(key: str, command: str) -> str:
 
 
 def key_name(key: str) -> str:
-    """`tmux:prefix:I` -> `Prefix + I`, `cockpit-filter:ctrl-g` -> `Cockpit ctrl-g`."""
+    """`tmux:prefix:j` -> `Prefix + j`, `cockpit-filter:ctrl-g` -> `Cockpit ctrl-g`."""
     ctx, _, rest = key.partition(":")
     if ctx == "tmux":
         table, _, k = rest.partition(":")
@@ -285,7 +285,7 @@ def suggestions(presses: List[Press], inventory: Dict[str, str]) -> List[Tuple[i
     waiting_jumps = [p for p in cockpit if p.key == "enter" and p.state in WAITING]
     if waiting_jumps:
         found.append((len(waiting_jumps),
-                      "Cockpit → Enter on an agent waiting for you: Prefix + I (or Ctrl + Shift + I) "
+                      "Cockpit → Enter on an agent waiting for you: Prefix + j "
                       "goes there in one chord, no list to scan."))
 
     own_git = [p for p in cockpit if p.key in GIT_KEYS and p.target and p.target == p.origin]
@@ -302,7 +302,7 @@ def suggestions(presses: List[Press], inventory: Dict[str, str]) -> List[Tuple[i
     ordered = sorted(presses, key=lambda p: p.ts)
     peeks, opened = 0, False
     for p in ordered:
-        if p.ctx == "tmux" and p.key == "prefix:Space":
+        if p.ctx == "tmux" and p.key in ("prefix:Space", "prefix:C-Space"):
             opened = True
         elif p.ctx.startswith("cockpit"):
             if opened and p.key == "esc":
@@ -311,7 +311,7 @@ def suggestions(presses: List[Press], inventory: Dict[str, str]) -> List[Tuple[i
     if peeks >= 3:
         found.append((peeks,
                       "Cockpit opened and closed with Esc, nothing else: the status bar shows each "
-                      "agent's state, and Prefix + I jumps only when one needs you."))
+                      "agent's state, and Prefix + j jumps only when one needs you."))
 
     # The same tmux key pressed 3+ times within 3 s: stepping through windows one by one.
     repeat_ok = {
@@ -362,11 +362,6 @@ def suggestions(presses: List[Press], inventory: Dict[str, str]) -> List[Tuple[i
         found.append((launch_cmds,
                       "`ai-launch` typed in the shell: Prefix + a (or Ctrl + Shift + A) opens the "
                       "CLI × model launch menu popup and starts the pick in a new window."))
-    stash_v = [p for p in presses if p.ctx == "tmux" and p.key == "prefix:V"]
-    if len(stash_v) >= 3:
-        found.append((len(stash_v),
-                      "Prefix + V to stash an agent's draft: Ctrl + S does it in one chord, and "
-                      "brings the draft back by itself once the /command ran."))
     checkpoint_cmds = shell_prefix_count(since_ts, "^waymux checkpoint( +(list|ls|diff|restore).*)?$")
     if checkpoint_cmds >= 3:
         found.append((checkpoint_cmds,

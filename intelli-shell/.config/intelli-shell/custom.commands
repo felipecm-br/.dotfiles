@@ -184,7 +184,7 @@ echo '{{json}}' | codex-hook {{Stop|UserPromptSubmit|PreToolUse|PostToolUse|Noti
 # Edit the prompt draft of the AI agent in the current tmux pane in a Neovim popup (Prefix+v)
 ai-prompt edit
 
-# Stash the AI agent prompt draft to run a /command first, or bring the stash back (Prefix+V)
+# Stash the AI agent prompt draft to run a /command first, or bring the stash back (no auto-restore; Ctrl+S is the shortcut)
 ai-prompt stash
 
 # Stash the draft and bring it back by itself once the /command ran, busy then idle (Ctrl+S)

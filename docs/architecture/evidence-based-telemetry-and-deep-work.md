@@ -123,7 +123,7 @@ Which shortcuts you use, which you never press, and where a shorter path existed
 |:---|:---|:---|
 | epoch | `1792809841` | Seconds |
 | context | `tmux`, `cockpit`, `cockpit-filter` | Where the key was pressed (Cockpit filter mode is separate) |
-| key | `prefix:I`, `g`, `enter`, `esc` | tmux `<table>:<key>`, or the Cockpit key |
+| key | `prefix:j`, `g`, `enter`, `esc` | tmux `<table>:<key>`, or the Cockpit key |
 | state | `permission`, `review`, `pane` | Agent state of the Cockpit row the key acted on; for a tmux click, where it landed: `same` (the focused pane), `pane` (another pane), `window` (another window) |
 | target | `dotfiles/main:2` | That row's `session:window` (tmux: the current window) |
 | origin | `dotfiles/main:0` | The window the Cockpit was opened from |
@@ -136,10 +136,10 @@ Which shortcuts you use, which you never press, and where a shorter path existed
 1. **Most used:** presses per action, aliases merged (`g`, `G`, `gg`, `ctrl-g` count as one).
 2. **Never used:** actions bound in `tmux.conf` or the Cockpit with no press in the window; tmux and plugin defaults are only counted.
 3. **Faster paths:** habits where a shorter route existed:
-   - `Enter` in the Cockpit on an agent waiting for you → `Prefix + I`
+   - `Enter` in the Cockpit on an agent waiting for you → `Prefix + j`
    - `g` in the Cockpit on the window it was opened from → `Ctrl + G`
    - `s` in the Cockpit to reach sessions → `Prefix + s`
-   - Cockpit opened and closed with `Esc` only (3+ times) → status bar icons and `Prefix + I`
+   - Cockpit opened and closed with `Esc` only (3+ times) → status bar icons and `Prefix + j`
    - the same tmux key 3+ times within 3 s (resize, pane moves, and popups/pickers excluded) → `Prefix + f` or the window number
    - a click on a window tab → `Prefix + f` or `Prefix + <number>`
    - a click that focuses another pane → `Ctrl + h/j/k/l`

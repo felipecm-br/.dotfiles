@@ -90,7 +90,7 @@ mkdir -p "$XDG_STATE_HOME/flow"
   printf '%s\ttmux\troot:MouseDown1Pane\tsame\ts:0\t\n' "$now"
 } > "$XDG_STATE_HOME/flow/keys.tsv"
 out=$(python3 "$KT" report --days 1)
-grep -q "1× Cockpit → Enter on an agent waiting for you: Prefix + I" <<<"$out" || { echo "FAIL: no Prefix + I tip:\n$out" >&2; exit 1; }
+grep -q "1× Cockpit → Enter on an agent waiting for you: Prefix + j" <<<"$out" || { echo "FAIL: no Prefix + j tip:\n$out" >&2; exit 1; }
 grep -q "1× Cockpit → g on the window you came from: Ctrl + G" <<<"$out" || { echo "FAIL: no Ctrl + G tip:\n$out" >&2; exit 1; }
 grep -q "tmux and plugin defaults never pressed" <<<"$out" || { echo "FAIL: unused defaults not counted:\n$out" >&2; exit 1; }
 grep -q "Mouse: 3 clicks, 2 of them to change pane or window" <<<"$out" || { echo "FAIL: no click summary:\n$out" >&2; exit 1; }

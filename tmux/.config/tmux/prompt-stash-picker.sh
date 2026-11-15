@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # prompt-stash-picker.sh — Prompt Stash & Presets popup (Golden Ratio 75% × 60%, 40/60 split).
-# Every draft Prefix + V stashed, from any agent, plus the presets pinned at 0–9; Tab switches to
+# Every draft Ctrl + S stashed, from any agent, plus the presets pinned at 0–9; Tab switches to
 # the waymux delivery queue of the pane. Enter puts the entry into the pane's prompt (even one
 # stashed from another agent; queue tab: types it now), 0–9 put a preset, e edits, p pins or
 # unpins, d drops. Opened by Prefix + S.
