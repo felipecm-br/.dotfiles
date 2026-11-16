@@ -37,8 +37,9 @@ if list then
   list:close()
 end
 
--- Same guard as default/hypr/glass.lua: blur costs every frame on CPU rendering.
-if o.software_rendering_defaults() then
+-- Blur costs every frame on CPU rendering. Older Omarchy releases exposed this
+-- guard; current ones dropped it, so only honour it when it exists.
+if type(o.software_rendering_defaults) == "function" and o.software_rendering_defaults() then
   return
 end
 
