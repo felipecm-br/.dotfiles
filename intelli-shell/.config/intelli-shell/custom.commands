@@ -73,8 +73,11 @@ awt rm {{branch}}
 # Delete worktree bypassing pre-remove validation hooks
 awt rm --no-hooks {{branch}}
 
-# Force delete dirty worktree, Git branch, and Tmux session
+# Force delete dirty worktree, Git branch, and Tmux session (unmerged or uncommitted work is backed up to refs/awt-backup/<branch> first)
 awt rm -f {{branch}}
+
+# List the awt rm backups and the command that restores each one
+cat ~/.local/state/awt/backups.log
 
 # Batch sweep and prune merged Git worktrees and dead sessions
 awt sweep
@@ -87,6 +90,15 @@ awt sweep --all --clean-targets
 
 # Preview worktrees eligible for sweep without deleting
 awt sweep --dry-run
+
+# Also list clean worktrees nobody touched for N days (no tmux pane inside them)
+awt sweep --dry-run --idle {{days}}
+
+# Keep branches matching these globs out of every awt sweep in this repository
+git config awt.sweepKeep {{globs}}
+
+# Make awt sweep in this repository also list clean worktrees idle for N days
+git config awt.sweepIdleDays {{days}}
 
 # Read-only inventory of Rust target/, AUR cache, Trash, and Docker storage hygiene
 dev-gc --dry-run
@@ -405,6 +417,30 @@ waymux status
 
 # Check health of Waymux control plane daemon
 waymux health
+
+# Mute or unmute this window's agent sounds and bells (its state still shows; Cockpit m)
+waymux mute
+
+# Install the Waymux skill for every installed agent CLI (Claude Code, Codex, opencode, Pi)
+waymux skill setup
+
+# Check whether each agent's Waymux skill is current, outdated, missing or foreign
+waymux skill status
+
+# Open a remote agent's dev server port on this machine over its pane's ssh
+waymux forward {{pane}} {{port}}
+
+# List the TCP ports listening on the host a pane's ssh reaches
+waymux forward ports {{pane}}
+
+# List open port forwards (closes those whose pane is gone)
+waymux forward list
+
+# Copy the clipboard image to a pane's host (over its ssh) and type its path into the agent's prompt
+waymux send-file {{pane}} --clipboard
+
+# Copy a local file to a pane's host (over its ssh) and type its path into the agent's prompt
+waymux send-file {{pane}} {{file}}
 
 # List active AI agent pane states in TSV format
 waymux list

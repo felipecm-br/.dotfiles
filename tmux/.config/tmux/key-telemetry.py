@@ -237,6 +237,7 @@ COCKPIT_ACTIONS = [
     ("agent-action deny", "deny agent"),
     ("agent-action prompt", "prompt agent"),
     ("window-delete", "close window"),
+    (" mute '", "mute window"),
     ("LiveInput", "live input to agent"),
     ("PreviewDown", "scroll preview"),
     ("PreviewUp", "scroll preview"),
