@@ -10,7 +10,7 @@
     }
   ],
   "artifactReviewPolicy": "always-proceed",
-  "model": "Claude Sonnet 5.5 (High)",
+  "model": "Gemini 3.8 Flash (Low)",
   "notifications": true,
   "permissions": {
     "allow": [
