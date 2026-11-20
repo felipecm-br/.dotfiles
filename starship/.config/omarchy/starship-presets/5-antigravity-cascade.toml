@@ -1,0 +1,102 @@
+# ==============================================================================
+#  Preset: Antigravity Cascade (Spectrum Edition)
+#  Inspired by: the antigravity.google particle colors, laid out as one continuous spectrum
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+
+# glyph-stacking: gradient
+# Glyph chain: no ground between the bodies. Each body rains straight into the next one:
+# the joint is U+28FF U+2877 U+2815 U+2802 drawn in fg:prev_bg over the new body, so the
+# previous color thins out dot by dot until only the new color is left. Because it uses
+# prev_bg, the joint is always right whichever modules render (no language body: the teal
+# rains straight into the yellow). The bar is condensed out of the terminal at the start
+# and rains away at the end, and its fills step through an indigo to yellow spectrum.
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# The modules cascade through: Indigo -> Liftoff Blue -> Teal -> Lime -> Yellow
+format = """
+[⠂⠕⡷⣿](fg:color_os)$os\
+$directory\
+$git_branch$git_status\
+$c$rust$golang$nodejs$deno$python\
+$time\
+[⣿⡷⠕⠂](fg:prev_bg)[⠁](fg:color_lang)[ ⠈](fg:color_time)
+$character"""
+
+palette = 'antigravity_cascade'
+
+[palettes.antigravity_cascade]
+color_os     = '#3b47d6' # Indigo (spectrum t=0.00)
+color_dir    = '#318bf7' # Liftoff blue (spectrum t=0.25)
+color_git    = '#2fc6c8' # Teal (spectrum t=0.50)
+color_lang   = '#bada4c' # Lime (spectrum t=0.75)
+color_time   = '#ffcf03' # Yellow (spectrum t=1.00)
+color_red    = '#f84242' # Red (reserved for errors)
+color_paper  = '#f5f7ff' # Paper (text on indigo)
+color_ink    = '#121317' # Ink (text on light bodies)
+
+# 1. INDIGO (the source)
+[os]
+disabled = false
+style = "bg:color_os fg:color_paper bold"
+format = '[ 󰑣 ]($style)'
+
+# 2. LIFTOFF BLUE (where you are)
+[directory]
+style = "bg:color_dir fg:color_ink bold"
+format = "[⣿⡷⠕⠂](fg:prev_bg bg:color_dir)[ 󰲋 $path ]($style)"
+truncation_length = 3
+
+# 3. TEAL (history)
+[git_branch]
+symbol = " "
+style = "bg:color_git fg:color_ink bold"
+format = '[⣿⡷⠕⠂](fg:prev_bg bg:color_git)[ $symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_git fg:color_ink bold"
+format = '([$all_status$ahead_behind ]($style))'
+
+# 4. LIME (the toolchain, when needed)
+[c]
+symbol = " "
+style = "bg:color_lang fg:color_ink bold"
+format = '[⣿⡷⠕⠂](fg:prev_bg bg:color_lang)[ $symbol($version) ]($style)'
+
+[rust]
+symbol = " "
+style = "bg:color_lang fg:color_ink bold"
+format = '[⣿⡷⠕⠂](fg:prev_bg bg:color_lang)[ $symbol($version) ]($style)'
+
+[golang]
+symbol = " "
+style = "bg:color_lang fg:color_ink bold"
+format = '[⣿⡷⠕⠂](fg:prev_bg bg:color_lang)[ $symbol($version) ]($style)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_lang fg:color_ink bold"
+format = '[⣿⡷⠕⠂](fg:prev_bg bg:color_lang)[ $symbol($version) ]($style)'
+
+[deno]
+symbol = " "
+style = "bg:color_lang fg:color_ink bold"
+format = '[⣿⡷⠕⠂](fg:prev_bg bg:color_lang)[ $symbol($version) ]($style)'
+
+[python]
+symbol = " "
+style = "bg:color_lang fg:color_ink bold"
+format = '[⣿⡷⠕⠂](fg:prev_bg bg:color_lang)[ $symbol($version) ]($style)'
+
+# 5. YELLOW (the clock, the brightest drop)
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_time fg:color_ink bold"
+format = '[⣿⡷⠕⠂](fg:prev_bg bg:color_time)[ $time ]($style)'
+
+# 6. THE LAST DROPS (a red cloud on error)
+[character]
+success_symbol = "[⠂](color_dir)[⠕](color_git)[⡷](color_lang)[ ❯](bold color_time)"
+error_symbol = "[⠂⠕⡷](color_red)[ ✗](bold color_red)"

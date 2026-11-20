@@ -1,0 +1,102 @@
+# ==============================================================================
+#  Preset: Antigravity Ascent (Liftoff Edition)
+#  Inspired by: the antigravity.google particle field, turned vertical: a launch, read left to right
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+
+# Glyph chain: the original rains sideways; this one rises. Each body gathers out of the
+# ground from the bottom up (U+28C0 U+28E4 U+28F6 U+28FF, the Braille water level filling)
+# and evaporates from the top (U+28FF U+283F U+281B U+2809: the lower dots leave first, so
+# what is left hangs in the upper rows). The free particles between bodies sit only in the
+# top row (U+2801 U+2808 U+2809), as if they had already lifted off. The palette climbs
+# with altitude: ignition yellow, exhaust lime, scattered blue, periwinkle, orbit haze.
+# Each module carries its own chains, so a missing module leaves no orphaned glyphs.
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# The modules cascade through: Ignition -> Exhaust -> Upper Atmosphere -> Mesosphere -> Orbit
+format = """
+$os\
+$directory\
+$git_branch$git_status\
+$c$rust$golang$nodejs$deno$python\
+$time\
+[⠈](fg:color_peri)[ ⠁](fg:color_space)[  ⠈](fg:color_sky)
+$character"""
+
+palette = 'antigravity_ascent'
+
+[palettes.antigravity_ascent]
+color_ground = '#0e1016' # Launch-night ground
+color_ignite = '#ffcf03' # Ignition yellow (the engines light)
+color_lime   = '#bada4c' # Exhaust lime (the plume cooling)
+color_sky    = '#8ab4f8' # Upper-atmosphere blue (Rayleigh scatter)
+color_peri   = '#7189ff' # Mesosphere periwinkle (the sky thinning to space)
+color_space  = '#c9d6ff' # Orbit haze (the calm above everything)
+color_red    = '#f84242' # Abort red (reserved for errors)
+color_ink    = '#0e1016' # Ink (text on every body)
+
+# 1. IGNITION (the engines light on the pad)
+[os]
+disabled = false
+style = "bg:color_ignite fg:color_ink bold"
+format = '[⣀](fg:#7b682c bg:color_ground)[⣤](fg:#a5892b bg:color_ground)[⣶](fg:#d1ab23 bg:color_ground)[⣿](fg:#ffcf03 bg:color_ground)[ 󰑣 ]($style)[⣿](fg:#ffcf03 bg:color_ground)[⠿](fg:#d1ab23 bg:color_ground)[⠛](fg:#a5892b bg:color_ground)[⠉](fg:#7b682c bg:color_ground)[⠈](fg:color_lime bg:color_ground)[ ](fg:color_lime bg:color_ground)[⠁](fg:color_sky bg:color_ground)'
+
+# 2. EXHAUST (where you are: the plume)
+[directory]
+style = "bg:color_sky fg:color_ink bold"
+format = "[⣀](fg:#475b7d bg:color_ground)[⣤](fg:#5c77a4 bg:color_ground)[⣶](fg:#7395cd bg:color_ground)[⣿](fg:#8ab4f8 bg:color_ground)[ 󰲋 $path ]($style)[⣿](fg:#8ab4f8 bg:color_ground)[⠿](fg:#7395cd bg:color_ground)[⠛](fg:#5c77a4 bg:color_ground)[⠉](fg:#475b7d bg:color_ground)[⠈](fg:color_lime bg:color_ground)[ ](fg:color_lime bg:color_ground)[⠁](fg:color_sky bg:color_ground)"
+truncation_length = 3
+
+# 3. UPPER ATMOSPHERE (history streaming past)
+[git_branch]
+symbol = " "
+style = "bg:color_lime fg:color_ink bold"
+format = '[⣀](fg:#5c6c38 bg:color_ground)[⣤](fg:#7a8f40 bg:color_ground)[⣶](fg:#99b447 bg:color_ground)[⣿](fg:#bada4c bg:color_ground)[ $symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_lime fg:color_ink bold"
+format = '([$all_status$ahead_behind ]($style))[⣿](fg:#bada4c bg:color_ground)[⠿](fg:#99b447 bg:color_ground)[⠛](fg:#7a8f40 bg:color_ground)[⠉](fg:#5c6c38 bg:color_ground)[⠉](fg:color_sky bg:color_ground)[⠈](fg:color_peri bg:color_ground)'
+
+# 4. MESOSPHERE (the toolchain, when needed)
+[c]
+symbol = " "
+style = "bg:color_peri fg:color_ink bold"
+format = '[⣀](fg:#3c4980 bg:color_ground)[⣤](fg:#4d5ea9 bg:color_ground)[⣶](fg:#5f73d3 bg:color_ground)[⣿](fg:#7189ff bg:color_ground)[ $symbol($version) ]($style)[⣿](fg:#7189ff bg:color_ground)[⠿](fg:#5f73d3 bg:color_ground)[⠛](fg:#4d5ea9 bg:color_ground)[⠉](fg:#3c4980 bg:color_ground)[⠁](fg:color_peri bg:color_ground)[ ](fg:color_peri bg:color_ground)[⠈](fg:color_space bg:color_ground)'
+
+[rust]
+symbol = " "
+style = "bg:color_peri fg:color_ink bold"
+format = '[⣀](fg:#3c4980 bg:color_ground)[⣤](fg:#4d5ea9 bg:color_ground)[⣶](fg:#5f73d3 bg:color_ground)[⣿](fg:#7189ff bg:color_ground)[ $symbol($version) ]($style)[⣿](fg:#7189ff bg:color_ground)[⠿](fg:#5f73d3 bg:color_ground)[⠛](fg:#4d5ea9 bg:color_ground)[⠉](fg:#3c4980 bg:color_ground)[⠁](fg:color_peri bg:color_ground)[ ](fg:color_peri bg:color_ground)[⠈](fg:color_space bg:color_ground)'
+
+[golang]
+symbol = " "
+style = "bg:color_peri fg:color_ink bold"
+format = '[⣀](fg:#3c4980 bg:color_ground)[⣤](fg:#4d5ea9 bg:color_ground)[⣶](fg:#5f73d3 bg:color_ground)[⣿](fg:#7189ff bg:color_ground)[ $symbol($version) ]($style)[⣿](fg:#7189ff bg:color_ground)[⠿](fg:#5f73d3 bg:color_ground)[⠛](fg:#4d5ea9 bg:color_ground)[⠉](fg:#3c4980 bg:color_ground)[⠁](fg:color_peri bg:color_ground)[ ](fg:color_peri bg:color_ground)[⠈](fg:color_space bg:color_ground)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_peri fg:color_ink bold"
+format = '[⣀](fg:#3c4980 bg:color_ground)[⣤](fg:#4d5ea9 bg:color_ground)[⣶](fg:#5f73d3 bg:color_ground)[⣿](fg:#7189ff bg:color_ground)[ $symbol($version) ]($style)[⣿](fg:#7189ff bg:color_ground)[⠿](fg:#5f73d3 bg:color_ground)[⠛](fg:#4d5ea9 bg:color_ground)[⠉](fg:#3c4980 bg:color_ground)[⠁](fg:color_peri bg:color_ground)[ ](fg:color_peri bg:color_ground)[⠈](fg:color_space bg:color_ground)'
+
+[deno]
+symbol = " "
+style = "bg:color_peri fg:color_ink bold"
+format = '[⣀](fg:#3c4980 bg:color_ground)[⣤](fg:#4d5ea9 bg:color_ground)[⣶](fg:#5f73d3 bg:color_ground)[⣿](fg:#7189ff bg:color_ground)[ $symbol($version) ]($style)[⣿](fg:#7189ff bg:color_ground)[⠿](fg:#5f73d3 bg:color_ground)[⠛](fg:#4d5ea9 bg:color_ground)[⠉](fg:#3c4980 bg:color_ground)[⠁](fg:color_peri bg:color_ground)[ ](fg:color_peri bg:color_ground)[⠈](fg:color_space bg:color_ground)'
+
+[python]
+symbol = " "
+style = "bg:color_peri fg:color_ink bold"
+format = '[⣀](fg:#3c4980 bg:color_ground)[⣤](fg:#4d5ea9 bg:color_ground)[⣶](fg:#5f73d3 bg:color_ground)[⣿](fg:#7189ff bg:color_ground)[ $symbol($version) ]($style)[⣿](fg:#7189ff bg:color_ground)[⠿](fg:#5f73d3 bg:color_ground)[⠛](fg:#4d5ea9 bg:color_ground)[⠉](fg:#3c4980 bg:color_ground)[⠁](fg:color_peri bg:color_ground)[ ](fg:color_peri bg:color_ground)[⠈](fg:color_space bg:color_ground)'
+
+# 5. ORBIT (the calm clock above it all)
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_space fg:color_ink bold"
+format = '[⣀](fg:#636a80 bg:color_ground)[⣤](fg:#848ca9 bg:color_ground)[⣶](fg:#a6b1d3 bg:color_ground)[⣿](fg:#c9d6ff bg:color_ground)[ $time ]($style)[⣿](fg:#c9d6ff bg:color_ground)[⠿](fg:#a6b1d3 bg:color_ground)[⠛](fg:#848ca9 bg:color_ground)[⠉](fg:#636a80 bg:color_ground)'
+
+# 6. LIFTOFF (dots rising to the cursor; abort red on error)
+[character]
+success_symbol = "[⣀](color_lime)[⣤](color_sky)[⣶](color_peri)[ ❯](bold color_sky)"
+error_symbol = "[⣀⣤⣶](color_red)[ ✗](bold color_red)"

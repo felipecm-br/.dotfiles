@@ -1,0 +1,102 @@
+# ==============================================================================
+#  Preset: Antigravity Daylight (Paper Edition)
+#  Inspired by: the light theme of the antigravity.google particle field: colored dots on white paper
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+
+# Glyph chain: the same condense and rain as Antigravity Particles (U+2802 U+2815 U+2877
+# U+28FF and back), but the ground is paper. On a dark terminal the whole status line
+# becomes a white pill (rounded caps U+E0B6 / U+E0B4) holding colored particle bodies, with
+# each dot fading toward white instead of toward black, so the bodies look printed and
+# the free dots between them read like confetti. Past the pill, a few loose particles
+# float out into the dark.
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# The modules cascade through: Graphite -> Blue -> Yellow -> Pale Blue -> Grey
+format = """
+[](fg:color_ground)$os\
+$directory\
+$git_branch$git_status\
+$c$rust$golang$nodejs$deno$python\
+$time\
+[](fg:color_ground)[⠁](fg:color_blue)[ ⡀](fg:color_yolk)[ ⠈](fg:color_pale)
+$character"""
+
+palette = 'antigravity_daylight'
+
+[palettes.antigravity_daylight]
+color_ground = '#f8f9fc' # Paper (antigravity.google light surface)
+color_graphite= '#3c4043' # Graphite (light theme text grey)
+color_blue   = '#2c64ed' # Blue particle (hero field, light theme color 1)
+color_yolk   = '#ffcf03' # Yellow particle (hero field, light theme color 3)
+color_pale   = '#93bbfc' # Pale blue particle (morphing field default)
+color_grey   = '#676a72' # Grey particle (morphing field, light theme color 1)
+color_red    = '#ff4641' # Red particle (morphing field, light theme color 2: reserved for errors)
+color_paper  = '#ffffff' # White (text on dark bodies)
+color_ink    = '#202124' # Ink (text on light bodies)
+
+# 1. GRAPHITE (the anchor)
+[os]
+disabled = false
+style = "bg:color_graphite fg:color_paper bold"
+format = '[⠂](fg:#94979a bg:color_ground)[⠕](fg:#75797c bg:color_ground)[⡷](fg:#585c5f bg:color_ground)[⣿](fg:#3c4043 bg:color_ground)[ 󰑣 ]($style)[⣿](fg:#3c4043 bg:color_ground)[⡷](fg:#585c5f bg:color_ground)[⠕](fg:#75797c bg:color_ground)[⠂](fg:#94979a bg:color_ground)[⠁](fg:color_yolk bg:color_ground)[ ](fg:color_yolk bg:color_ground)[⡀](fg:color_blue bg:color_ground)'
+
+# 2. BLUE (where you are)
+[directory]
+style = "bg:color_blue fg:color_paper bold"
+format = "[⠂](fg:#90b2fa bg:color_ground)[⠕](fg:#6e9af7 bg:color_ground)[⡷](fg:#4d80f2 bg:color_ground)[⣿](fg:#2c64ed bg:color_ground)[ 󰲋 $path ]($style)[⣿](fg:#2c64ed bg:color_ground)[⡷](fg:#4d80f2 bg:color_ground)[⠕](fg:#6e9af7 bg:color_ground)[⠂](fg:#90b2fa bg:color_ground)[⠄](fg:color_grey bg:color_ground)[ ](fg:color_grey bg:color_ground)[⠈](fg:color_pale bg:color_ground)"
+truncation_length = 3
+
+# 3. YELLOW (history)
+[git_branch]
+symbol = " "
+style = "bg:color_yolk fg:color_ink bold"
+format = '[⠂](fg:#fce6a4 bg:color_ground)[⠕](fg:#fddf82 bg:color_ground)[⡷](fg:#fed75a bg:color_ground)[⣿](fg:#ffcf03 bg:color_ground)[ $symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_yolk fg:color_ink bold"
+format = '([$all_status$ahead_behind ]($style))[⣿](fg:#ffcf03 bg:color_ground)[⡷](fg:#fed75a bg:color_ground)[⠕](fg:#fddf82 bg:color_ground)[⠂](fg:#fce6a4 bg:color_ground)[⢀](fg:color_blue bg:color_ground)[⠂](fg:color_yolk bg:color_ground)'
+
+# 4. PALE BLUE (the toolchain, when needed)
+[c]
+symbol = " "
+style = "bg:color_pale fg:color_ink bold"
+format = '[⠂](fg:#c5dafd bg:color_ground)[⠕](fg:#b4d0fd bg:color_ground)[⡷](fg:#a4c5fd bg:color_ground)[⣿](fg:#93bbfc bg:color_ground)[ $symbol($version) ]($style)[⣿](fg:#93bbfc bg:color_ground)[⡷](fg:#a4c5fd bg:color_ground)[⠕](fg:#b4d0fd bg:color_ground)[⠂](fg:#c5dafd bg:color_ground)[⢀](fg:color_blue bg:color_ground)[⠂](fg:color_yolk bg:color_ground)'
+
+[rust]
+symbol = " "
+style = "bg:color_pale fg:color_ink bold"
+format = '[⠂](fg:#c5dafd bg:color_ground)[⠕](fg:#b4d0fd bg:color_ground)[⡷](fg:#a4c5fd bg:color_ground)[⣿](fg:#93bbfc bg:color_ground)[ $symbol($version) ]($style)[⣿](fg:#93bbfc bg:color_ground)[⡷](fg:#a4c5fd bg:color_ground)[⠕](fg:#b4d0fd bg:color_ground)[⠂](fg:#c5dafd bg:color_ground)[⢀](fg:color_blue bg:color_ground)[⠂](fg:color_yolk bg:color_ground)'
+
+[golang]
+symbol = " "
+style = "bg:color_pale fg:color_ink bold"
+format = '[⠂](fg:#c5dafd bg:color_ground)[⠕](fg:#b4d0fd bg:color_ground)[⡷](fg:#a4c5fd bg:color_ground)[⣿](fg:#93bbfc bg:color_ground)[ $symbol($version) ]($style)[⣿](fg:#93bbfc bg:color_ground)[⡷](fg:#a4c5fd bg:color_ground)[⠕](fg:#b4d0fd bg:color_ground)[⠂](fg:#c5dafd bg:color_ground)[⢀](fg:color_blue bg:color_ground)[⠂](fg:color_yolk bg:color_ground)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_pale fg:color_ink bold"
+format = '[⠂](fg:#c5dafd bg:color_ground)[⠕](fg:#b4d0fd bg:color_ground)[⡷](fg:#a4c5fd bg:color_ground)[⣿](fg:#93bbfc bg:color_ground)[ $symbol($version) ]($style)[⣿](fg:#93bbfc bg:color_ground)[⡷](fg:#a4c5fd bg:color_ground)[⠕](fg:#b4d0fd bg:color_ground)[⠂](fg:#c5dafd bg:color_ground)[⢀](fg:color_blue bg:color_ground)[⠂](fg:color_yolk bg:color_ground)'
+
+[deno]
+symbol = " "
+style = "bg:color_pale fg:color_ink bold"
+format = '[⠂](fg:#c5dafd bg:color_ground)[⠕](fg:#b4d0fd bg:color_ground)[⡷](fg:#a4c5fd bg:color_ground)[⣿](fg:#93bbfc bg:color_ground)[ $symbol($version) ]($style)[⣿](fg:#93bbfc bg:color_ground)[⡷](fg:#a4c5fd bg:color_ground)[⠕](fg:#b4d0fd bg:color_ground)[⠂](fg:#c5dafd bg:color_ground)[⢀](fg:color_blue bg:color_ground)[⠂](fg:color_yolk bg:color_ground)'
+
+[python]
+symbol = " "
+style = "bg:color_pale fg:color_ink bold"
+format = '[⠂](fg:#c5dafd bg:color_ground)[⠕](fg:#b4d0fd bg:color_ground)[⡷](fg:#a4c5fd bg:color_ground)[⣿](fg:#93bbfc bg:color_ground)[ $symbol($version) ]($style)[⣿](fg:#93bbfc bg:color_ground)[⡷](fg:#a4c5fd bg:color_ground)[⠕](fg:#b4d0fd bg:color_ground)[⠂](fg:#c5dafd bg:color_ground)[⢀](fg:color_blue bg:color_ground)[⠂](fg:color_yolk bg:color_ground)'
+
+# 5. GREY (the quiet clock)
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_grey fg:color_paper bold"
+format = '[⠂](fg:#adafb5 bg:color_ground)[⠕](fg:#95979e bg:color_ground)[⡷](fg:#7e8088 bg:color_ground)[⣿](fg:#676a72 bg:color_ground)[ $time ]($style)[⣿](fg:#676a72 bg:color_ground)[⡷](fg:#7e8088 bg:color_ground)[⠕](fg:#95979e bg:color_ground)[⠂](fg:#adafb5 bg:color_ground)'
+
+# 6. THE CURSOR (confetti at the prompt; red on error)
+[character]
+success_symbol = "[⠂](color_yolk)[⠕](color_pale)[⡷](color_blue)[ ❯](bold color_blue)"
+error_symbol = "[⠂⠕⡷](color_red)[ ✗](bold color_red)"

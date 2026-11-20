@@ -1,0 +1,99 @@
+# ==============================================================================
+#  Preset: Antigravity Stardust (Zero Background Edition)
+#  Inspired by: the antigravity.google particle field with the bodies taken away: only the dust is left
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+
+# Glyph chain: no fills at all. Each module is colored text standing in a small cloud of
+# its own dust (U+2802 U+2815 U+2877 before, U+2877 U+2815 U+2802 after), every dot one
+# shade dimmer as it moves away from the text, and a single grey dust mote U+2804 drifts
+# between modules. It is the lightest preset in the set: it sits on any terminal
+# background and Omarchy theme, and keeps the full-color text of the field's particles.
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# The modules cascade through: Periwinkle -> Blue -> Lime -> Yellow -> Pale Blue
+format = """
+$os\
+$directory\
+$git_branch$git_status\
+$c$rust$golang$nodejs$deno$python\
+$time
+$character"""
+
+palette = 'antigravity_stardust'
+
+[palettes.antigravity_stardust]
+color_ground = '#121317' # Assumed terminal background (dust fades toward it)
+color_peri   = '#7189ff' # Periwinkle (hero field)
+color_blue   = '#4f9bff' # Liftoff blue, lifted for text on a dark terminal
+color_lime   = '#bada4c' # Lime (morphing field)
+color_yolk   = '#ffcf03' # Yellow (hero field, light theme)
+color_sky    = '#aecbfa' # Pale blue (morphing field)
+color_dust   = '#676a72' # Grey dust
+color_red    = '#f84242' # Red (reserved for errors)
+
+# 1. PERIWINKLE (the first mote)
+[os]
+disabled = false
+style = "fg:color_peri bold"
+format = '[⠂](fg:#3e4b81)[⠕](fg:#5769be)[⡷](fg:#7189ff)[ 󰑣 ]($style)[⡷](fg:#7189ff)[⠕](fg:#5769be)[⠂](fg:#3e4b81)[⠄](fg:color_dust)'
+
+# 2. BLUE (where you are)
+[directory]
+style = "fg:color_blue bold"
+format = "[⠂](fg:#315281)[⠕](fg:#4076be)[⡷](fg:#4f9bff)[ 󰲋 $path ]($style)[⡷](fg:#4f9bff)[⠕](fg:#4076be)[⠂](fg:#315281)[⠄](fg:color_dust)"
+truncation_length = 3
+
+# 3. LIME (history)
+[git_branch]
+symbol = " "
+style = "fg:color_lime bold"
+format = '[⠂](fg:#5f6e37)[⠕](fg:#8ba243)[⡷](fg:#bada4c)[ $symbol$branch ]($style)'
+
+[git_status]
+style = "fg:color_lime bold"
+format = '([$all_status$ahead_behind ]($style))[⡷](fg:#bada4c)[⠕](fg:#8ba243)[⠂](fg:#5f6e37)[⠄](fg:color_dust)'
+
+# 4. YELLOW (the toolchain, when needed)
+[c]
+symbol = " "
+style = "fg:color_yolk bold"
+format = '[⠂](fg:#7d6a2b)[⠕](fg:#bc9b27)[⡷](fg:#ffcf03)[ $symbol($version) ]($style)[⡷](fg:#ffcf03)[⠕](fg:#bc9b27)[⠂](fg:#7d6a2b)[⠄](fg:color_dust)'
+
+[rust]
+symbol = " "
+style = "fg:color_yolk bold"
+format = '[⠂](fg:#7d6a2b)[⠕](fg:#bc9b27)[⡷](fg:#ffcf03)[ $symbol($version) ]($style)[⡷](fg:#ffcf03)[⠕](fg:#bc9b27)[⠂](fg:#7d6a2b)[⠄](fg:color_dust)'
+
+[golang]
+symbol = " "
+style = "fg:color_yolk bold"
+format = '[⠂](fg:#7d6a2b)[⠕](fg:#bc9b27)[⡷](fg:#ffcf03)[ $symbol($version) ]($style)[⡷](fg:#ffcf03)[⠕](fg:#bc9b27)[⠂](fg:#7d6a2b)[⠄](fg:color_dust)'
+
+[nodejs]
+symbol = " "
+style = "fg:color_yolk bold"
+format = '[⠂](fg:#7d6a2b)[⠕](fg:#bc9b27)[⡷](fg:#ffcf03)[ $symbol($version) ]($style)[⡷](fg:#ffcf03)[⠕](fg:#bc9b27)[⠂](fg:#7d6a2b)[⠄](fg:color_dust)'
+
+[deno]
+symbol = " "
+style = "fg:color_yolk bold"
+format = '[⠂](fg:#7d6a2b)[⠕](fg:#bc9b27)[⡷](fg:#ffcf03)[ $symbol($version) ]($style)[⡷](fg:#ffcf03)[⠕](fg:#bc9b27)[⠂](fg:#7d6a2b)[⠄](fg:color_dust)'
+
+[python]
+symbol = " "
+style = "fg:color_yolk bold"
+format = '[⠂](fg:#7d6a2b)[⠕](fg:#bc9b27)[⡷](fg:#ffcf03)[ $symbol($version) ]($style)[⡷](fg:#ffcf03)[⠕](fg:#bc9b27)[⠂](fg:#7d6a2b)[⠄](fg:color_dust)'
+
+# 5. PALE BLUE (the clock)
+[time]
+disabled = false
+time_format = "%R"
+style = "fg:color_sky bold"
+format = '[⠂](fg:#5a677f)[⠕](fg:#8397bb)[⡷](fg:#aecbfa)[ $time ]($style)[⡷](fg:#aecbfa)[⠕](fg:#8397bb)[⠂](fg:#5a677f)[](fg:color_dust)'
+
+# 6. THE CURSOR (dust settling on the prompt; red on error)
+[character]
+success_symbol = "[⠂⠕](color_dust)[ ❯](bold color_blue)"
+error_symbol = "[⠂⠕](color_red)[ ✗](bold color_red)"

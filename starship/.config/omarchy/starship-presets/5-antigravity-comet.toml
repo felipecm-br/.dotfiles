@@ -1,0 +1,101 @@
+# ==============================================================================
+#  Preset: Antigravity Comet (Coma Edition)
+#  Inspired by: the antigravity.google particle field as a comet shower: Braille particles streaming past
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+
+# Glyph chain: every segment is a comet head with its own tail. In front, a bow shock curls
+# up diagonally (U+28E0 U+28F4 U+28FE). Behind, a seven-cell tail thins out through the
+# Braille dither U+28FF U+28F7 U+2877 U+2875 U+2815 U+2805 U+2802, and its color runs from
+# white-hot at the nucleus, through the comet's own color, to the dark of space. The
+# colors are the real emission of a comet: CO+ ion cyan, C2 Swan-band green, sunlit ice,
+# dust-scattered violet. The last tail streams off the ground into the terminal.
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# The modules cascade through: Ion Tail -> Coma -> Ice -> Dust -> Nucleus Haze
+format = """
+$os\
+$directory\
+$git_branch$git_status\
+$c$rust$golang$nodejs$deno$python\
+$time
+$character"""
+
+palette = 'antigravity_comet'
+
+[palettes.antigravity_comet]
+color_ground = '#0a0f1f' # Deep space (the dark between comets)
+color_ion    = '#5ee0ff' # Ion tail cyan (CO+ fluorescence)
+color_teal   = '#3dd6b5' # Coma teal (C2 Swan bands glowing green)
+color_ice    = '#9cc8ff' # Ice blue (sunlit water ice)
+color_violet = '#a48bff' # Violet dust (scattered sunlight)
+color_pale   = '#dbe6ff' # Pale nucleus haze
+color_hot    = '#ffffff' # White-hot (the nucleus, first dots of every tail)
+color_red    = '#ff5a5a' # Red (reserved for errors)
+color_ink    = '#0a0f1f' # Ink (text on every head)
+
+# 1. ION TAIL (the first comet)
+[os]
+disabled = false
+style = "bg:color_ion fg:color_ink bold"
+format = '[⣠](fg:#336e86 bg:color_ground)[⣴](fg:#48a5c1 bg:color_ground)[⣾](fg:#5ee0ff bg:color_ground)[ 󰑣 ]($style)[⣿](fg:#ffffff bg:color_ground)[⣷](fg:#d1f6ff bg:color_ground)[⡷](fg:#9eebff bg:color_ground)[⡵](fg:#5ee0ff bg:color_ground)[⠕](fg:#4fb8d5 bg:color_ground)[⠅](fg:#4192ad bg:color_ground)[⠂](fg:#336e86 bg:color_ground)'
+
+# 2. COMA (where you are: the bright green head)
+[directory]
+style = "bg:color_teal fg:color_ink bold"
+format = "[⣠](fg:#266a66 bg:color_ground)[⣴](fg:#329e8d bg:color_ground)[⣾](fg:#3dd6b5 bg:color_ground)[ 󰲋 $path ]($style)[⣿](fg:#ffffff bg:color_ground)[⣷](fg:#caf2e6 bg:color_ground)[⡷](fg:#8fe5cd bg:color_ground)[⡵](fg:#3dd6b5 bg:color_ground)[⠕](fg:#36b19a bg:color_ground)[⠅](fg:#2e8c80 bg:color_ground)[⠂](fg:#266a66 bg:color_ground)"
+truncation_length = 3
+
+# 3. ICE (history, sunlit)
+[git_branch]
+symbol = " "
+style = "bg:color_ice fg:color_ink bold"
+format = '[⣠](fg:#4c6386 bg:color_ground)[⣴](fg:#7394c1 bg:color_ground)[⣾](fg:#9cc8ff bg:color_ground)[ $symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_ice fg:color_ink bold"
+format = '([$all_status$ahead_behind ]($style))[⣿](fg:#ffffff bg:color_ground)[⣷](fg:#deedff bg:color_ground)[⡷](fg:#bddbff bg:color_ground)[⡵](fg:#9cc8ff bg:color_ground)[⠕](fg:#80a5d5 bg:color_ground)[⠅](fg:#6683ad bg:color_ground)[⠂](fg:#4c6386 bg:color_ground)'
+
+# 4. DUST (the toolchain, when needed)
+[c]
+symbol = " "
+style = "bg:color_violet fg:color_ink bold"
+format = '[⣠](fg:#514886 bg:color_ground)[⣴](fg:#7969c1 bg:color_ground)[⣾](fg:#a48bff bg:color_ground)[ $symbol($version) ]($style)[⣿](fg:#ffffff bg:color_ground)[⣷](fg:#dfd9ff bg:color_ground)[⡷](fg:#c0b3ff bg:color_ground)[⡵](fg:#a48bff bg:color_ground)[⠕](fg:#8774d5 bg:color_ground)[⠅](fg:#6c5dad bg:color_ground)[⠂](fg:#514886 bg:color_ground)'
+
+[rust]
+symbol = " "
+style = "bg:color_violet fg:color_ink bold"
+format = '[⣠](fg:#514886 bg:color_ground)[⣴](fg:#7969c1 bg:color_ground)[⣾](fg:#a48bff bg:color_ground)[ $symbol($version) ]($style)[⣿](fg:#ffffff bg:color_ground)[⣷](fg:#dfd9ff bg:color_ground)[⡷](fg:#c0b3ff bg:color_ground)[⡵](fg:#a48bff bg:color_ground)[⠕](fg:#8774d5 bg:color_ground)[⠅](fg:#6c5dad bg:color_ground)[⠂](fg:#514886 bg:color_ground)'
+
+[golang]
+symbol = " "
+style = "bg:color_violet fg:color_ink bold"
+format = '[⣠](fg:#514886 bg:color_ground)[⣴](fg:#7969c1 bg:color_ground)[⣾](fg:#a48bff bg:color_ground)[ $symbol($version) ]($style)[⣿](fg:#ffffff bg:color_ground)[⣷](fg:#dfd9ff bg:color_ground)[⡷](fg:#c0b3ff bg:color_ground)[⡵](fg:#a48bff bg:color_ground)[⠕](fg:#8774d5 bg:color_ground)[⠅](fg:#6c5dad bg:color_ground)[⠂](fg:#514886 bg:color_ground)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_violet fg:color_ink bold"
+format = '[⣠](fg:#514886 bg:color_ground)[⣴](fg:#7969c1 bg:color_ground)[⣾](fg:#a48bff bg:color_ground)[ $symbol($version) ]($style)[⣿](fg:#ffffff bg:color_ground)[⣷](fg:#dfd9ff bg:color_ground)[⡷](fg:#c0b3ff bg:color_ground)[⡵](fg:#a48bff bg:color_ground)[⠕](fg:#8774d5 bg:color_ground)[⠅](fg:#6c5dad bg:color_ground)[⠂](fg:#514886 bg:color_ground)'
+
+[deno]
+symbol = " "
+style = "bg:color_violet fg:color_ink bold"
+format = '[⣠](fg:#514886 bg:color_ground)[⣴](fg:#7969c1 bg:color_ground)[⣾](fg:#a48bff bg:color_ground)[ $symbol($version) ]($style)[⣿](fg:#ffffff bg:color_ground)[⣷](fg:#dfd9ff bg:color_ground)[⡷](fg:#c0b3ff bg:color_ground)[⡵](fg:#a48bff bg:color_ground)[⠕](fg:#8774d5 bg:color_ground)[⠅](fg:#6c5dad bg:color_ground)[⠂](fg:#514886 bg:color_ground)'
+
+[python]
+symbol = " "
+style = "bg:color_violet fg:color_ink bold"
+format = '[⣠](fg:#514886 bg:color_ground)[⣴](fg:#7969c1 bg:color_ground)[⣾](fg:#a48bff bg:color_ground)[ $symbol($version) ]($style)[⣿](fg:#ffffff bg:color_ground)[⣷](fg:#dfd9ff bg:color_ground)[⡷](fg:#c0b3ff bg:color_ground)[⡵](fg:#a48bff bg:color_ground)[⠕](fg:#8774d5 bg:color_ground)[⠅](fg:#6c5dad bg:color_ground)[⠂](fg:#514886 bg:color_ground)'
+
+# 5. NUCLEUS HAZE (the clock, whose tail runs off into space)
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_pale fg:color_ink bold"
+format = '[⣠](fg:#687186 bg:color_ground)[⣴](fg:#a0aac1 bg:color_ground)[⣾](fg:#dbe6ff bg:color_ground)[ $time ]($style)[⣿](fg:#ffffff)[⣷](fg:#f5f8ff)[⡷](fg:#eaf1ff)[⡵](fg:#e0eaff)[⠕](fg:#cad4ed)[⠅](fg:#a8b2c9)[⠂](fg:#8791a7)[⠁](fg:#687186)'
+
+# 6. THE CURSOR (a small comet; red on error)
+[character]
+success_symbol = "[⠂⠕⡷](color_teal)[⣿](color_hot)[ ❯](bold color_ion)"
+error_symbol = "[⠂⠕⡷](color_red)[⣿](bold color_red)[ ✗](bold color_red)"
