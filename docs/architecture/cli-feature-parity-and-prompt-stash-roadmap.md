@@ -6,7 +6,7 @@
 
 ---
 
-## 0. Implementation Status (2026-11-13)
+## 0. Implementation Status (2026-11-20)
 
 | Item | State | Where |
 | :--- | :--- | :--- |
@@ -15,10 +15,10 @@
 | `W2b` Persistent stash + presets `0–9` | **Shipped** · `Ctrl + S` toggle on agent panes (Claude parity, ~30–80 ms visible), `Prefix + S` picker | `ai-prompt list\|send\|preset\|save\|pin\|drop`, [`prompt-stash-picker.sh`](../../tmux/.config/tmux/prompt-stash-picker.sh) |
 | `W2c` Auto-restore after a `/command` | **Shipped** · opt-in `stash --after-cmd` / `AI_PROMPT_AUTO_RESTORE=1` (waymux's `Config` rejects unknown keys, so no `[prompt_stash]` section) | `ai-prompt _autorestore` (`waymux wait` busy → idle) |
 | `W2d` Failover draft carryover | **Shipped** | [`ai-failover`](../../utils/.local/bin/ai-failover) → `ai-prompt _carry` |
-| `W3` Draft-aware hold, queue inspect / edit / send now | **Built, unreleased** (waymux branch `feat/cli-parity`): `held` status, `queue/send`, `queue/edit`, Cockpit preview lists the queue; dotfiles queue tab falls back to drop + re-add on 0.13 | `src/api/queue.rs`, `tests/tmux.rs` |
+| `W3` Draft-aware hold, queue inspect / edit / send now | **Shipped** in `waymux` 0.14.0: `held` status, `queue/send`, `queue/edit`, Cockpit preview lists the queue | `src/api/queue.rs`, `tests/tmux.rs` |
 | `W4` `/btw` side question | **Shipped** · `Prefix + b` | [`btw-popup.sh`](../../tmux/.config/tmux/btw-popup.sh) |
-| `W5.1` Last-turn recap | **Built, unreleased** (waymux `src/activity.rs`) | Cockpit preview line `󰄬 Last turn …` |
-| `W5.2` `/goal` verifier | **Built, unreleased** as its own verb, `waymux goal <pane> --check <cmd>`: `run --wait` waits on a command, not an agent | `src/verbs.rs` |
+| `W5.1` Last-turn recap | **Shipped** in `waymux` 0.14.0 (`src/activity.rs`) | Cockpit preview line `󰄬 Last turn …` |
+| `W5.2` `/goal` verifier | **Shipped** in `waymux` 0.14.0 as its own verb, `waymux goal <pane> --check <cmd>`: `run --wait` waits on a command, not an agent | `src/verbs.rs` |
 | `W5.3` MCP & skill inventory | **Shipped** (leftover dev processes on window close not covered) | [`ai-inventory`](../../utils/.local/bin/ai-inventory) |
 
 ## 1. Executive Summary

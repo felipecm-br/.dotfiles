@@ -8,9 +8,9 @@
 # what this times.
 #
 # Each run waits for the previous picker to exit before starting the next one. A picker killed
-# with its pane takes up to ~800 ms to exit when nav mode starts focused on the results
-# (`ai-launch`); starting the next run on top of it measured that shutdown, not the render
-# (p95 1.7 s before this wait, ~30 ms after).
+# with its pane (`ai-launch`) took ~800 ms–1.3 s to exit, because it aborted and wrote a core dump
+# (fixed in waymaker's fix/exit-after-kill); starting the next run on top of it measured that
+# shutdown, not the render (p95 1.7 s before this wait, ~30 ms after).
 #
 #   tests/popup_render_perf.test.sh              N=20 runs per preset, budget p50 ≤ 100 ms
 #   N=40 BUDGET_MS=80 tests/popup_render_perf.test.sh
