@@ -104,6 +104,13 @@ launch_continue() { # <agent> [args]
 
 agent=${1:?usage: ai-launch-exec <agent> [args]}
 shift
+# Codex runs its hooks in one shared app-server, whose TMUX_PANE is the pane that started it,
+# so a second Codex reported to the first one's pane (codex-hook resolves the pane from the
+# payload as a fallback). --no-daemon gives each session its own server and its own pane's
+# environment (U1, from workmux 0.1.278). AI_LAUNCH_CODEX_DAEMON=1 keeps the shared server.
+if [ "$agent" = codex ] && [ "${AI_LAUNCH_CODEX_DAEMON:-0}" != 1 ]; then
+  case " $* " in *" --no-daemon "*) ;; *) set -- --no-daemon "$@" ;; esac
+fi
 continue_run=${AI_LAUNCH_CONTINUE:-0}
 unset AI_LAUNCH_CONTINUE
 case "$agent" in claude | jail-claude | jail-claude-ask) settings_guard ;; esac

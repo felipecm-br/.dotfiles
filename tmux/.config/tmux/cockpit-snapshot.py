@@ -84,7 +84,8 @@ def resume_command(resume: Optional[Dict[str, Any]]) -> Optional[str]:
     if not r:
         return None
     if r["agent"] == "codex":
-        return f"codex resume {r['id']}"
+        # --no-daemon: each Codex gets its own app-server, so its hooks report to its own pane (U1)
+        return f"codex --no-daemon resume {r['id']}"
     if r["launch"]:
         words = [RESUME_SAFER.get(r["launch"][0], r["launch"][0])] + r["launch"][1:]
         return f"ai-launch {' '.join(words)} --resume {r['id']}"
