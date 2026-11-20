@@ -1,0 +1,105 @@
+# ==============================================================================
+#  Preset: Antigravity Particles (Liftoff Edition)
+#  Inspired by: the particle field on antigravity.google (Google Antigravity, 2026) - Poisson-disc
+#               dots drifting on simplex noise over a dark ground, pushed apart by a ring
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# Glyph chain: Braille rain. Every segment is a body of particles floating on the dark ground.
+# It condenses out of the field (U+2802 U+2815 U+2877 U+28FF, sparse to dense) and rains back
+# into it (U+28FF U+2877 U+2815 U+2802, dense to sparse); each dot has its own fg, sampled in
+# OKLab from the body's color toward the ground, so the drops dim as they fall away. Between
+# bodies, single free dots (U+2801 U+2840 U+2804 U+2808 ...) float in the other particle colors,
+# like the site's multicolor field. The colors are the ones the site's WebGL particle shaders
+# use (hero field #7189ff / #3074f9, morphing field #318bf7 / #bada4c, light theme #ffcf03).
+# Self-contained joints: each module carries its own condense and rain chains, so a module
+# that does not render leaves no orphaned glyphs (no empty language body). The bar ends with
+# loose particles drifting off the ground into the terminal: antigravity.
+# The modules cascade through: Periwinkle -> Liftoff Blue -> Lime -> Yellow -> Pale Blue
+format = """
+$os\
+$directory\
+$git_branch$git_status\
+$c$rust$golang$nodejs$deno$python\
+$time\
+[⠁](fg:color_peri)[ ⡀](fg:color_lime)[ ⠈](fg:color_yolk)[  ⠂](fg:color_dust)
+$character"""
+
+palette = 'antigravity_particles'
+
+[palettes.antigravity_particles]
+color_ground = '#121317' # Space ground (antigravity.google dark surface)
+color_peri   = '#7189ff' # Periwinkle particle (hero field, dark theme color 1)
+color_blue   = '#318bf7' # Liftoff blue particle (morphing field, dark theme color 1)
+color_lime   = '#bada4c' # Lime particle (morphing field, dark theme color 2)
+color_yolk   = '#ffcf03' # Yellow particle (hero field, light theme color 3)
+color_sky    = '#aecbfa' # Pale blue particle (morphing field default)
+color_dust   = '#676a72' # Grey dust (morphing field, light theme color 1)
+color_red    = '#f84242' # Red particle (reserved for errors)
+
+# 1. PERIWINKLE (the first cluster lifting off)
+[os]
+disabled = false
+style = "bg:color_peri fg:color_ground bold"
+format = '[⠂](fg:#3e4b81 bg:color_ground)[⠕](fg:#4e5fa9 bg:color_ground)[⡷](fg:#5f74d3 bg:color_ground)[⣿](fg:#7189ff bg:color_ground)[ 󰑣 ]($style)[⣿](fg:#7189ff bg:color_ground)[⡷](fg:#5f74d3 bg:color_ground)[⠕](fg:#4e5fa9 bg:color_ground)[⠂](fg:#3e4b81 bg:color_ground)[⠁](fg:color_blue bg:color_ground)[ ](fg:color_blue bg:color_ground)[⡀](fg:color_lime bg:color_ground)'
+
+# 2. LIFTOFF BLUE (where you are: the densest body of particles)
+[directory]
+style = "bg:color_blue fg:color_ground bold"
+format = "[⠂](fg:#264c7e bg:color_ground)[⠕](fg:#2b60a5 bg:color_ground)[⡷](fg:#2e75cd bg:color_ground)[⣿](fg:#318bf7 bg:color_ground)[ 󰲋 $path ]($style)[⣿](fg:#318bf7 bg:color_ground)[⡷](fg:#2e75cd bg:color_ground)[⠕](fg:#2b60a5 bg:color_ground)[⠂](fg:#264c7e bg:color_ground)[⠄](fg:color_yolk bg:color_ground)[ ](fg:color_yolk bg:color_ground)[⠈](fg:color_sky bg:color_ground)"
+truncation_length = 3
+
+# 3. LIME (history: the branch, then its status, as one body)
+[git_branch]
+symbol = " "
+style = "bg:color_lime fg:color_ground bold"
+format = '[⠂](fg:#5f6e37 bg:color_ground)[⠕](fg:#7c913f bg:color_ground)[⡷](fg:#9ab546 bg:color_ground)[⣿](fg:#bada4c bg:color_ground)[ $symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_lime fg:color_ground bold"
+format = '([$all_status$ahead_behind ]($style))[⣿](fg:#bada4c bg:color_ground)[⡷](fg:#9ab546 bg:color_ground)[⠕](fg:#7c913f bg:color_ground)[⠂](fg:#5f6e37 bg:color_ground)[⢀](fg:color_peri bg:color_ground)[⠂](fg:color_lime bg:color_ground)'
+
+# 4. YELLOW (the toolchain, only when a project needs one)
+[c]
+symbol = " "
+style = "bg:color_yolk fg:color_ground bold"
+format = '[⠂](fg:#7d6a2b bg:color_ground)[⠕](fg:#a68a2a bg:color_ground)[⡷](fg:#d2ac22 bg:color_ground)[⣿](fg:#ffcf03 bg:color_ground)[ $symbol($version) ]($style)[⣿](fg:#ffcf03 bg:color_ground)[⡷](fg:#d2ac22 bg:color_ground)[⠕](fg:#a68a2a bg:color_ground)[⠂](fg:#7d6a2b bg:color_ground)[⠠](fg:color_sky bg:color_ground)'
+
+[rust]
+symbol = " "
+style = "bg:color_yolk fg:color_ground bold"
+format = '[⠂](fg:#7d6a2b bg:color_ground)[⠕](fg:#a68a2a bg:color_ground)[⡷](fg:#d2ac22 bg:color_ground)[⣿](fg:#ffcf03 bg:color_ground)[ $symbol($version) ]($style)[⣿](fg:#ffcf03 bg:color_ground)[⡷](fg:#d2ac22 bg:color_ground)[⠕](fg:#a68a2a bg:color_ground)[⠂](fg:#7d6a2b bg:color_ground)[⠠](fg:color_sky bg:color_ground)'
+
+[golang]
+symbol = " "
+style = "bg:color_yolk fg:color_ground bold"
+format = '[⠂](fg:#7d6a2b bg:color_ground)[⠕](fg:#a68a2a bg:color_ground)[⡷](fg:#d2ac22 bg:color_ground)[⣿](fg:#ffcf03 bg:color_ground)[ $symbol($version) ]($style)[⣿](fg:#ffcf03 bg:color_ground)[⡷](fg:#d2ac22 bg:color_ground)[⠕](fg:#a68a2a bg:color_ground)[⠂](fg:#7d6a2b bg:color_ground)[⠠](fg:color_sky bg:color_ground)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_yolk fg:color_ground bold"
+format = '[⠂](fg:#7d6a2b bg:color_ground)[⠕](fg:#a68a2a bg:color_ground)[⡷](fg:#d2ac22 bg:color_ground)[⣿](fg:#ffcf03 bg:color_ground)[ $symbol($version) ]($style)[⣿](fg:#ffcf03 bg:color_ground)[⡷](fg:#d2ac22 bg:color_ground)[⠕](fg:#a68a2a bg:color_ground)[⠂](fg:#7d6a2b bg:color_ground)[⠠](fg:color_sky bg:color_ground)'
+
+[deno]
+symbol = " "
+style = "bg:color_yolk fg:color_ground bold"
+format = '[⠂](fg:#7d6a2b bg:color_ground)[⠕](fg:#a68a2a bg:color_ground)[⡷](fg:#d2ac22 bg:color_ground)[⣿](fg:#ffcf03 bg:color_ground)[ $symbol($version) ]($style)[⣿](fg:#ffcf03 bg:color_ground)[⡷](fg:#d2ac22 bg:color_ground)[⠕](fg:#a68a2a bg:color_ground)[⠂](fg:#7d6a2b bg:color_ground)[⠠](fg:color_sky bg:color_ground)'
+
+[python]
+symbol = " "
+style = "bg:color_yolk fg:color_ground bold"
+format = '[⠂](fg:#7d6a2b bg:color_ground)[⠕](fg:#a68a2a bg:color_ground)[⡷](fg:#d2ac22 bg:color_ground)[⣿](fg:#ffcf03 bg:color_ground)[ $symbol($version) ]($style)[⣿](fg:#ffcf03 bg:color_ground)[⡷](fg:#d2ac22 bg:color_ground)[⠕](fg:#a68a2a bg:color_ground)[⠂](fg:#7d6a2b bg:color_ground)[⠠](fg:color_sky bg:color_ground)'
+
+# 5. PALE BLUE (the clock: the last, lightest body before open space)
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_sky fg:color_ground bold"
+format = '[⠂](fg:#5a677f bg:color_ground)[⠕](fg:#7587a6 bg:color_ground)[⡷](fg:#91a8cf bg:color_ground)[⣿](fg:#aecbfa bg:color_ground)[ $time ]($style)[⣿](fg:#aecbfa bg:color_ground)[⡷](fg:#91a8cf bg:color_ground)[⠕](fg:#7587a6 bg:color_ground)[⠂](fg:#5a677f bg:color_ground)'
+
+# 6. THE CURSOR (particles raining onto the prompt; a red particle cloud on error)
+[character]
+success_symbol = "[⠂](color_dust)[⠕](color_peri)[⡷](color_blue)[ ❯](bold color_blue)"
+error_symbol = "[⠂⠕⡷](color_red)[ ✗](bold color_red)"
