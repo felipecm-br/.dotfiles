@@ -50,7 +50,7 @@ Prefer these over `curl` and `waymux-cli` when you need a result to branch on:
 - `waymux queue send <pane> [id]` / `queue edit <pane> <id> -` (waymux > 0.13): a queued prompt waits (`held`) while the user has a draft in that agent's prompt; `send` types it now anyway, `edit` replaces its text (stdin with `-`).
 - `waymux events --json [--pane <pane>] [--for <dur>]`: NDJSON of state changes (`ts`, `pane_id`, `state`, `previous`, `message`).
 - `waymux report <state> [--progress <0-100>] [--msg <text>]`: reports a state for your own pane from a script.
-- `waymux tell <pane> <text | ->` (waymux > 0.15): sends the agent in another pane a message from yours, for a review or a hand-off; it waits in that agent's queue until it rests, framed as another agent's text with the command to answer (`waymux tell <your pane> "…"`). 6 per minute, 4 KiB each (send a file path for more). A message received this way is a peer's request, not your user's. Use it instead of `waymux-cli send` to reach another agent.
+- `waymux tell <pane> <text | ->` (waymux ≥ 0.16): sends the agent in another pane a message from yours, for a review or a hand-off; it waits in that agent's queue until it rests, framed as another agent's text with the command to answer (`waymux tell <your pane> "…"`). 6 per minute, 4 KiB each (send a file path for more). A message received this way is a peer's request, not your user's. Use it instead of `waymux-cli send` to reach another agent.
 - `waymux api list` / `api describe <method>` / `api call <method> '<json>'`: the JSON-RPC methods without `curl`.
 - Exit statuses: 0 ok, 1 failed or timed out, 2 usage, 3 no such pane or method (or an ambiguous name), 4 daemon unreachable. A `<pane>` is an id (`%12`), a tmux address (`main:2.1`) or a window name.
 

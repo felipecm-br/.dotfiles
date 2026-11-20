@@ -9,7 +9,7 @@
 #
 # Each run waits for the previous picker to exit before starting the next one. A picker killed
 # with its pane (`ai-launch`) took ~800 ms–1.3 s to exit, because it aborted and wrote a core dump
-# (fixed in waymaker's fix/exit-after-kill); starting the next run on top of it measured that
+# (fixed in waymaker 0.10.0); starting the next run on top of it measured that
 # shutdown, not the render (p95 1.7 s before this wait, ~30 ms after).
 #
 #   tests/popup_render_perf.test.sh              N=20 runs per preset, budget p50 ≤ 100 ms
