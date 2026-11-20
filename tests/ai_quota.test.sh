@@ -112,6 +112,24 @@ snap=$(AI_QUOTA_FIXTURE_DIR="$FIX" ai-quota --json)
 [ "$(AI_QUOTA_FIXTURE_DIR="$FIX" ai-launch --peek --auto)" = "agy --model gemini-4-argon-medium" ] &&
   ok "ai-launch recommends default Gemini 4 Argon when it has quota" || bad "argon launch: $(AI_QUOTA_FIXTURE_DIR="$FIX" ai-launch --peek --auto)"
 
+# 4b-neon. Antigravity 1.5.13 defaults to gemini-4-neon-high, with its own per-model quota
+jq -n --arg rc "$(iso $((now + 3600)))" --arg rn "$(iso $((now + 18000)))" --arg ra "$(iso $((now + 500000)))" '{
+  defaultAgentModelId: "gemini-4-neon-high",
+  tieredModelIds: {flash: ["gemini-3.8-flash-tiered"], pro: ["gemini-3.8-flash-tiered"]},
+  models: {
+    "claude-opus-5-5-low": {quotaInfo: {remainingFraction: 1, resetTime: $rc}},
+    "gemini-3.8-flash-tiered": {quotaInfo: {remainingFraction: 0.97, resetTime: $rc}},
+    "gemini-4-neon-high": {quotaInfo: {remainingFraction: 0.6, resetTime: $rn}},
+    "gemini-4-argon-medium": {quotaInfo: {remainingFraction: 1, resetTime: $ra}}
+  }}' >"$FIX/agy.json"
+snap=$(AI_QUOTA_FIXTURE_DIR="$FIX" ai-quota --json)
+[ "$(jq -c '[.agents[1].groups[] | select(.key == "neon") | {key, pct, abbr}]' <<<"$snap")" = '[{"key":"neon","pct":40,"abbr":"N"}]' ] &&
+  ok "Gemini 4 Neon group parsed (40% used, badge N)" || bad "neon group: $(jq -c '.agents[1].groups' <<<"$snap")"
+[ "$(jq -r '.agents[1].launch[] | select(.model == "Gemini 4 Neon") | "\(.quota | split(" ⟳")[0]) \(.tier) \(.rec)"' <<<"$snap")" = '40% used $$$$ true' ] &&
+  ok "Neon launch row: its quota, top tier, recommended as the default" || bad "neon row: $(jq -c '.agents[1].launch' <<<"$snap")"
+[ "$(AI_QUOTA_FIXTURE_DIR="$FIX" ai-launch --peek --auto)" = "agy --model gemini-4-neon-medium" ] &&
+  ok "ai-launch recommends default Gemini 4 Neon when it has quota" || bad "neon launch: $(AI_QUOTA_FIXTURE_DIR="$FIX" ai-launch --peek --auto)"
+
 # 4c. `bash -x ai-quota-agy` (the provider that reads it) never prints the token: a fake token file, a curl stub that answers with
 # the fixture, and a secret-tool stub, so no network and no real keyring.
 SECRET="FAKE-ACCESS-TOKEN-$$"
@@ -245,8 +263,9 @@ rm -f "$HOME/.claude/settings.json"
 # can start it the same way; a plain shell clears the tag. tmux is a stub: never the live server.
 printf '#!/bin/sh\necho "$*" >>"%s/tmux.log"\n' "$SANDBOX" >"$SANDBOX/bin/tmux"; chmod +x "$SANDBOX/bin/tmux"
 TMUX_PANE=%9 ai-launch claude --model opus >/dev/null 2>&1
-[ "$(tail -1 "$SANDBOX/tmux.log")" = "-u set-option -p -t %9 @ai_launch claude --model opus" ] && ok "launch tagged on the pane" || bad "tag: $(tail -1 "$SANDBOX/tmux.log")"
+# (waymux launch then lists panes for its shared-worktree warning, so look for the call, not the last line)
+grep -qxF -- "-u set-option -p -t %9 @ai_launch claude --model opus" "$SANDBOX/tmux.log" && ok "launch tagged on the pane" || bad "tag: $(cat "$SANDBOX/tmux.log")"
 TMUX_PANE=%9 SHELL=/bin/true ai-launch shell >/dev/null 2>&1
-[ "$(tail -1 "$SANDBOX/tmux.log")" = "-u set-option -p -u -t %9 @ai_launch" ] && ok "shell clears the tag" || bad "untag: $(tail -1 "$SANDBOX/tmux.log")"
+grep -qxF -- "-u set-option -p -u -t %9 @ai_launch" "$SANDBOX/tmux.log" && ok "shell clears the tag" || bad "untag: $(tail -3 "$SANDBOX/tmux.log")"
 : >"$SANDBOX/tmux.log"; TMUX_PANE= ai-launch claude >/dev/null 2>&1
 [ ! -s "$SANDBOX/tmux.log" ] && ok "outside tmux: no tag" || bad "tagged outside tmux"

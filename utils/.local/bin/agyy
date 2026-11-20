@@ -49,9 +49,13 @@ REAL_BIN="$REAL_HOME/.local/bin/agy-bin"
 if [ ! -x "$REAL_BIN" ]; then
   REAL_BIN=$(which -a agy-bin 2>/dev/null | head -n 1)
 fi
+# Antigravity 1.5+ (mise) ships `agy` only: the first one that is not our PATH wrapper
+if [ -z "$REAL_BIN" ] || [ ! -x "$REAL_BIN" ]; then
+  REAL_BIN=$(which -a agy 2>/dev/null | grep -v "^$REAL_HOME/.local/bin/agy$" | head -n 1)
+fi
 
 if [ -z "$REAL_BIN" ] || [ ! -x "$REAL_BIN" ]; then
-  echo "Error: agy-bin not found." >&2
+  echo "Error: no Antigravity binary (agy-bin or agy) found." >&2
   exit 1
 fi
 

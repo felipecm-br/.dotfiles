@@ -12,7 +12,7 @@
 
 AGY_MODELS="${WAYMUX_QUOTA_STATE_DIR:-${XDG_STATE_HOME:-$HOME/.local/state}/ai-quota}/agy-models.tsv"
 models=$(cat "$AGY_MODELS" 2>/dev/null)
-[ -n "$models" ] || models=$'gemini-4-argon-medium\tGemini 4 Argon (Medium)\ngemini-4-argon-high\tGemini 4 Argon (High)\ngemini-4-argon-low\tGemini 4 Argon (Low)\ngemini-4-hydrogen-medium\tGemini 4 Hydrogen (Medium)\ngemini-4-hydrogen-low\tGemini 4 Hydrogen (Low)\ngemini-4-hydrogen-high\tGemini 4 Hydrogen (High)\ngemini-4-hydrogen-xhigh\tGemini 4 Hydrogen (XHigh)\ngemini-3.8-flash-high\tGemini 3.8 Flash (High)\ngemini-3.8-flash-medium\tGemini 3.8 Flash (Medium)\ngemini-3.8-flash-low\tGemini 3.8 Flash (Low)\nclaude-opus-5-5-low\tClaude Opus 5.5 (Low)\nclaude-opus-5-5-medium\tClaude Opus 5.5 (Medium)\nclaude-opus-5-5-high\tClaude Opus 5.5 (High)\nclaude-sonnet-5-5-low\tClaude Sonnet 5.5 (Low)\nclaude-sonnet-5-5-medium\tClaude Sonnet 5.5 (Medium)\nclaude-sonnet-5-5-high\tClaude Sonnet 5.5 (High)\ngpt-oss-120b-medium\tGPT-OSS 120B (Medium)'
+[ -n "$models" ] || models=$'gemini-4-neon-medium\tGemini 4 Neon (Medium)\ngemini-4-neon-high\tGemini 4 Neon (High)\ngemini-4-neon-low\tGemini 4 Neon (Low)\ngemini-4-neon-xhigh\tGemini 4 Neon (XHigh)\ngemini-pro-orchestrator-neon\tOrchestrator (Neon)\ngemini-pro-orchestrator-g1-pro\tOrchestrator (Argon)\ngemini-4-argon-medium\tGemini 4 Argon (Medium)\ngemini-4-argon-high\tGemini 4 Argon (High)\ngemini-4-argon-low\tGemini 4 Argon (Low)\ngemini-4-hydrogen-medium\tGemini 4 Hydrogen (Medium)\ngemini-4-hydrogen-low\tGemini 4 Hydrogen (Low)\ngemini-4-hydrogen-high\tGemini 4 Hydrogen (High)\ngemini-4-hydrogen-xhigh\tGemini 4 Hydrogen (XHigh)\ngemini-3.8-flash-high\tGemini 3.8 Flash (High)\ngemini-3.8-flash-medium\tGemini 3.8 Flash (Medium)\ngemini-3.8-flash-low\tGemini 3.8 Flash (Low)\nclaude-opus-5-5-low\tClaude Opus 5.5 (Low)\nclaude-opus-5-5-medium\tClaude Opus 5.5 (Medium)\nclaude-opus-5-5-high\tClaude Opus 5.5 (High)\nclaude-sonnet-5-5-low\tClaude Sonnet 5.5 (Low)\nclaude-sonnet-5-5-medium\tClaude Sonnet 5.5 (Medium)\nclaude-sonnet-5-5-high\tClaude Sonnet 5.5 (High)\ngpt-oss-120b-medium\tGPT-OSS 120B (Medium)'
 
 IFS=$'\t' read -r current effort < <(sed -nE 's/.*  ([^ ].*[^ ]) · ([Ll]ow|[Mm]edium|[Hh]igh|[Xx][Hh]igh|[Mm]ax)[[:space:]]*$/\1\t\2/p' | tail -1)
 effort=${effort,,}
@@ -21,7 +21,7 @@ jq -n -c --arg models "$models" --arg current "${current:-}" --arg effort "${eff
 ($models | split("\n") | map(select(length > 0) | split("\t") | {id: .[0], name: (.[1] // .[0])})) as $all
 | ($all | map(.id)) as $ids
 | def has($id): $ids | index($id) != null;
-  def tier: if test("argon|hydrogen") then "$$$$" elif test("opus") then "$$$" elif test("sonnet") then "$$" else "$" end;
+  def tier: if test("neon|argon|hydrogen|orchestrator") then "$$$$" elif test("opus") then "$$$" elif test("sonnet") then "$$" else "$" end;
   [ $all[] | select(.id | test("-(low|high|xhigh|max)$") | not)
     | (.id | sub("-medium$"; "")) as $fam
     | (.name | sub(" \\(Medium\\)$"; "")) as $name

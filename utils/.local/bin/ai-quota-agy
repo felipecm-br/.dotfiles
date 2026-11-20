@@ -5,7 +5,8 @@
 # profile ($AGYY_HOME) when it has a token. See `waymux quota --help` for the agent fields.
 #
 # Data sources:
-#   percent used per group (Claude & GPT, Gemini Flash, Gemini 4 Argon) from fetchAvailableModels,
+#   percent used per group (Claude & GPT, Gemini Flash, Gemini 4 Neon, Gemini 4 Argon) from
+#   fetchAvailableModels,
 #   with the profile's own token on curl's stdin, cached 60 s (a reader accepts up to 15 min of
 #   staleness and refreshes in the background); without a valid token, 429 "Individual quota
 #   reached ... Resets in XhYmZs" lines in antigravity-cli logs (exhausted-until + learned prompt
@@ -80,8 +81,14 @@ agy_token() ( # <home>: a valid Antigravity access token for that profile, or no
     else
       IFS=$'\t' read -r tok exp email < <(secret-tool lookup service gemini 2>/dev/null |
         jq -r "[.token.access_token // \"\", .token.expiry // \"\", $jwt_email] | @tsv" 2>/dev/null)
-      # No token file means no profile here (e.g. a sandboxed HOME): never borrow the keyring's.
-      [ -n "$file_email" ] && [ "$email" = "$file_email" ] || continue
+      # Antigravity 1.5.13+ keeps the primary profile's token in the keyring only (no file). The
+      # keyring holds one login, so it is used for the account's own home (never a sandboxed HOME
+      # or $AGYY_HOME), or for a profile whose token file names the same account.
+      if [ -n "$file_email" ]; then
+        [ "$email" = "$file_email" ] || continue
+      else
+        [ "$home" = "$(getent passwd "$(id -un)" | cut -d: -f6)" ] && [ "$home" != "$AGYY_HOME" ] || continue
+      fi
     fi
     [ -n "$tok" ] && [ -n "$exp" ] || continue
     exp=$(date -d "$exp" +%s 2>/dev/null) || continue
@@ -137,11 +144,17 @@ agy_api() ( # <home> <label>: per-model quota from fetchAvailableModels, cached 
     .
     | ([$r.models | keys[] | select(startswith("claude-") or startswith("gpt-oss"))] | map(entry(.)) | map(select(.pct != null))) as $cg
     | ([$r.models | keys[] | select(startswith("gemini-4-argon"))] | map(entry(.)) | map(select(.pct != null))) as $ag
+    | ([$r.models | keys[] | select(startswith("gemini-4-neon"))] | map(entry(.)) | map(select(.pct != null))) as $ng
+    | ([$r.models | keys[] | select(test("^gemini-4-hydrogen-(low|medium|high|xhigh)$"))] | map(entry(.)) | map(select(.pct != null))) as $hg
     | {ts: $now, default_model: .defaultAgentModelId,
        groups: [
          (if ($cg | length) > 0 then {key: "claude", label: "Claude & GPT", pct: ($cg | map(.pct) | max),
             reset: ($cg | map(.reset) | map(select(. != null)) | min)} else empty end),
          (entry($r.tieredModelIds.flash[0]? // "") | select(. != null) | {key: "flash", label: "Gemini Flash"} + .),
+         (if ($ng | length) > 0 then {key: "neon", label: "Gemini 4 Neon", model: ($ng[0].model), name: "Gemini 4 Neon",
+            pct: ($ng | map(.pct) | max), reset: ($ng | map(.reset) | map(select(. != null)) | min)} else empty end),
+         (if ($hg | length) > 0 then {key: "hydrogen", label: "Gemini 4 Hydrogen", model: ($hg[0].model), name: "Gemini 4 Hydrogen",
+            pct: ($hg | map(.pct) | max), reset: ($hg | map(.reset) | map(select(. != null)) | min)} else empty end),
          (if ($ag | length) > 0 then {key: "argon", label: "Gemini 4 Argon", model: ($ag[0].model), name: "Gemini 4 Argon",
             pct: ($ag | map(.pct) | max), reset: ($ag | map(.reset) | map(select(. != null)) | min)} else empty end),
          (entry($r.tieredModelIds.pro[0]? // "") | select(. != null) | {key: "pro", label: "Gemini pro tier"} + .)
@@ -150,8 +163,10 @@ agy_api() ( # <home> <label>: per-model quota from fetchAvailableModels, cached 
 )
 
 # Real Antigravity binary: agy-bin when present, else the first `agy` that is not our PATH wrapper
-agy_bin=false; { command -v agy-bin >/dev/null 2>&1 || [ -x "$HOME/.local/bin/agy-bin" ] ||
-  which -a agy 2>/dev/null | grep -qv "^$HOME/.local/bin/agy$"; } && agy_bin=true
+# (the mise install since Antigravity 1.5)
+agy_real=$(command -v agy-bin 2>/dev/null || { [ -x "$HOME/.local/bin/agy-bin" ] && echo "$HOME/.local/bin/agy-bin"; } ||
+  which -a agy 2>/dev/null | grep -v "^$HOME/.local/bin/agy$" | grep -v '^agy: ' | head -n 1)
+agy_bin=false; [ -n "$agy_real" ] && agy_bin=true
 agyy_ok=false; $agy_bin && [ -s "$AGYY_HOME/.gemini/antigravity-cli/antigravity-oauth-token" ] && agyy_ok=true
 
 # Per-model quota from the API (cached 60 s). AI_QUOTA_NO_API=1 keeps the log heuristic only.
@@ -175,12 +190,12 @@ fi
 # Antigravity models for the launch rows: `agy models`, cached for a day (refreshed in the
 # background); before the first cache, the families known at the time of writing
 AGY_MODELS="$STATE_DIR/agy-models.tsv"
-if $agy_bin && [ -z "$(find "$AGY_MODELS" -mtime -1 2>/dev/null)" ] && command -v agy-bin >/dev/null 2>&1; then
-  (timeout 20 agy-bin models 2>/dev/null | grep -P '^[a-z0-9.-]+\t' >"$AGY_MODELS.tmp" &&
+if $agy_bin && [ -z "$(find "$AGY_MODELS" -mtime -1 2>/dev/null)" ] && [ -z "${AI_QUOTA_FIXTURE_DIR:-}" ]; then
+  (timeout 20 "$agy_real" models 2>/dev/null | grep -P '^[a-z0-9.-]+\t' >"$AGY_MODELS.tmp" &&
     [ -s "$AGY_MODELS.tmp" ] && mv -f "$AGY_MODELS.tmp" "$AGY_MODELS" || rm -f "$AGY_MODELS.tmp") >/dev/null 2>&1 &
 fi
 agy_models=$(cat "$AGY_MODELS" 2>/dev/null)
-[ -n "$agy_models" ] || agy_models=$'gemini-4-argon-medium\tGemini 4 Argon (Medium)\ngemini-3.8-flash-medium\tGemini 3.8 Flash (Medium)\nclaude-opus-5-5-medium\tClaude Opus 5.5 (Medium)\nclaude-sonnet-5-5-medium\tClaude Sonnet 5.5 (Medium)\ngpt-oss-120b-medium\tGPT-OSS 120B (Medium)'
+[ -n "$agy_models" ] || agy_models=$'gemini-4-neon-medium\tGemini 4 Neon (Medium)\ngemini-4-argon-medium\tGemini 4 Argon (Medium)\ngemini-3.8-flash-medium\tGemini 3.8 Flash (Medium)\nclaude-opus-5-5-medium\tClaude Opus 5.5 (Medium)\nclaude-sonnet-5-5-medium\tClaude Sonnet 5.5 (Medium)\ngpt-oss-120b-medium\tGPT-OSS 120B (Medium)'
 
 # Per-group quota from the API when it answered; otherwise exhausted-until from 429s and
 # capacity learned from the window that hit the cap
@@ -192,6 +207,9 @@ jq -n -c \
   --argjson a_api "${agy_api_json:-null}" --argjson y_api "${agyy_api_json:-null}" '
 def count_since($ts; $since): [$ts[] | select(. >= $since)] | length;
 def fam: sub("-(low|medium|high|xhigh|max)$"; "");
+# Cost tier, as ai-switch-agy shows it (the launch menu would otherwise guess from the name)
+def tier: if test("neon|argon|hydrogen|orchestrator") then "$$$$" elif test("opus") then "$$$"
+  elif test("sonnet|gpt") then "$$" else "$" end;
 def clock: if (. - $now) > 86400 then strflocaltime("%a %H:%M") else strflocaltime("%H:%M") end;
 # One launch row per model family (the -medium variant when there is one)
 ($models | split("\n") | map(select(length > 0) | split("\t") | {id: .[0], name: (.[1] // .[0] | sub(" \\((Low|Medium|High|XHigh|Max)\\)$"; ""))})
@@ -212,11 +230,12 @@ def agy_model($name; $title; $tag; $bin; $ev; $pr; $n; $api):
   # Report shape: badge letters, the model next to Flash/pro, and the pro tier hidden when it is
   # the Flash model again (its quota is the Flash row)
   | (if $raw == null then null else [$raw[] | . + {
-        abbr: ({claude: "C", flash: "G", argon: "A"}[.key]),
+        abbr: ({claude: "C", flash: "G", neon: "N", argon: "A"}[.key]),
         detail: (if .key == "flash" or .key == "pro" then .model else null end),
         hidden: (.key == "pro" and .model == ($flash.model // ""))}
       | with_entries(select(.value != null))] end) as $groups
   | (if ($dm | startswith("claude-")) or ($dm | startswith("gpt-oss")) then "claude"
+     elif ($dm | startswith("gemini-4-neon")) and ($groups != null) and ([$groups[] | select(.key == "neon")] | length > 0) then "neon"
      elif ($dm | startswith("gemini-4-argon")) and ($groups != null) and ([$groups[] | select(.key == "argon")] | length > 0) then "argon"
      else "flash" end) as $dkey
   | (if $groups then [$groups[] | select(.key == $dkey)] | first else null end) as $dgroup
@@ -235,17 +254,20 @@ def agy_model($name; $title; $tag; $bin; $ev; $pr; $n; $api):
   # agent is the recommended one (its default while that has quota, else the fullest group)
   | [ $families[] | (.id | fam) as $f
       | (if ($f | startswith("claude-")) or ($f | startswith("gpt-oss")) then "claude"
-         elif ($f | startswith("gemini-4-argon")) then "argon"
+         elif ($f | startswith("gemini-4-neon")) or ($f == "gemini-pro-orchestrator-neon") then "neon"
+         elif ($f | startswith("gemini-4-argon")) or ($f == "gemini-pro-orchestrator-g1-pro") then "argon"
+         elif ($f | startswith("gemini-4-hydrogen")) then "hydrogen"
          elif ($f | test("flash")) then "flash" else "pro" end) as $key
       | ($groups // [] | map(select(.key == $key and ($key != "pro" or ((.model // "") | fam) == $f))) | first) as $grp
       | [ ("low", "medium", "high", "xhigh", "max") as $l | "\($f)-\($l)" as $v | select($ids | index($v)) | {level: $l, args: "--model \($v)"} ] as $efforts
-      | {args: "--model \(.id)", model: .name,
+      | {args: "--model \(.id)", model: .name, tier: ($f | tier),
          quota: (if $groups == null then (if $exhausted then "exhausted ⏳\($exhausted | clock)" else "quota ?" end)
                  elif $grp == null then "no quota data"
                  else "\($grp.pct)% used" + (if $grp.reset and $grp.pct > 0 then " ⟳\($grp.reset | clock)" else "" end) end),
          level: (if $groups == null then $level elif $grp == null then "unknown"
                  elif $grp.pct >= 90 then "red" elif $grp.pct >= 70 then "yellow" else "green" end),
          rec: (if $groups != null and ($dex | not) and $has_default != null then $f == $dfam
+               elif $best == "neon" then ($f | startswith("gemini-4-neon"))
                elif $best == "argon" then ($f | startswith("gemini-4-argon"))
                elif $best == "claude" then ($f | test("sonnet"))
                elif $best == "flash" then ($f | test("flash"))

@@ -32,7 +32,8 @@ export AI_LAUNCH_MODELS_NO_REFRESH=1
 rows() { AI_SWITCH_AGENT=$1 ai-switch --peek | cut -f2 | tr '\n' ' '; }
 [[ "$(rows claude)" == "/model fable /model opus /model sonnet /model haiku /effort low "*"/effort auto " ]] &&
   ok "claude: 4 models + effort levels" || bad "claude rows: $(rows claude)"
-[[ "$(rows agy)" == "/model gemini-4-argon-medium "* ]] && ok "agy: model families" || bad "agy rows: $(rows agy)"
+[[ "$(rows agy)" == "/model gemini-4-neon-medium /model gemini-4-argon-medium "* && "$(rows agy)" == *"/model gemini-pro-orchestrator-neon "* ]] &&
+  ok "agy: model families, Neon first, orchestrators as plain rows" || bad "agy rows: $(rows agy)"
 # Devin and Codex: their listed models (ai-switch-rows, see tests/ai_launch_models.test.sh) when
 # the CLI lists them, else the built-in rows; the sandbox has no Devin cache.
 [ "$(rows devin)" = "/model opus /model sonnet /model codex /model fusion " ] && ok "devin: built-in rows without a model cache" || bad "devin rows: $(rows devin)"
