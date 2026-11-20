@@ -1,0 +1,115 @@
+# ==============================================================================
+#  Preset: Kilauea Pahoehoe (Blackbody Edition)
+#  Inspired by: Kilauea, Hawai'i (Pu'u O'o eruption 1983-2018) - pahoehoe lava cooling along its incandescence curve
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# Glyph chain: the line is a lava flow cooling from left to right along the blackbody curve
+# (about 1150 C yellow-orange core, 1000 C orange, 900 C cherry, then glassy silver crust).
+# The crust is the honeycomb U+E0CC drawn in basalt over cherry red: dark plates with glowing
+# seams, exactly how a pahoehoe skin cracks. A flame U+E0C0 then tongues out of the seams into
+# the core (a breakout). The core folds into orange as a mirrored and forward flame pair
+# U+E0C2 U+E0C0, the ropy fold that gives pahoehoe its name; orange skins over in shattering
+# quadrants U+259C U+259A; the cherry flow crusts over in silver plates U+E0CC with its last
+# glow dying in big pixel squares U+E0C6; and the bar ends in cinders U+E0C6 U+E0C4. The error
+# color is the only cold hue: ocean blue, the littoral blast when lava meets the sea.
+# The modules cascade through: Cold Basalt -> 1150 C Core -> 1000 C Orange -> 900 C Cherry -> Silver Crust
+format = """
+[](fg:color_basalt)\
+$os\
+[](fg:color_basalt bg:color_cherry)\
+[](fg:color_cherry bg:color_core)\
+
+$directory\
+[](fg:color_orange bg:color_core)\
+[](fg:color_core bg:color_orange)\
+
+$git_branch$git_status\
+[▜▚](fg:color_orange bg:color_cherry)\
+
+$c$rust$golang$nodejs$deno$python\
+[](fg:color_crust bg:color_cherry)\
+[](fg:color_cherry bg:color_crust)\
+
+$time\
+[](fg:color_crust bg:transparent)\
+\n$character"""
+
+palette = 'phys_kilauea_pahoehoe'
+
+[palettes.phys_kilauea_pahoehoe]
+color_basalt= '#16121a' # Glassy basalt (cold tholeiitic crust)
+color_core  = '#ffb43a' # Incandescent core (blackbody, about 1150 C)
+color_orange= '#ef6d1c' # Orange flow (blackbody, about 1000 C)
+color_cherry= '#a81c16' # Cherry red skin (blackbody, about 900 C)
+color_crust = '#8e8b96' # Silver pahoehoe skin (fresh glassy crust with its metallic sheen)
+color_ocean = '#2f9bdc' # Pacific blue (the ocean entry: reserved for errors)
+color_paper = '#fff4e6' # Steam white (text on dark fields)
+color_ink   = '#16121a' # Basalt black (text on hot fields)
+
+# 1. COLD BASALT (the old flow field)
+[os]
+disabled = false
+style = "bg:color_basalt fg:color_core bold"
+format = '[ 󰈸 ]($style)'
+
+# 2. 1150 C CORE (the breakout, the hottest and brightest point)
+[directory]
+style = "bg:color_core fg:color_ink bold"
+format = "[ 󰲋 $path ]($style)"
+truncation_length = 3
+
+# 3. 1000 C ORANGE (the ropy folds of the advancing toe)
+[git_branch]
+symbol = " "
+style = "bg:color_orange fg:color_ink bold"
+format = '[ $symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_orange fg:color_ink bold"
+format = '([$all_status$ahead_behind ]($style))'
+
+# 4. 900 C CHERRY (the skin that has started to cool)
+[c]
+symbol = " "
+style = "bg:color_cherry fg:color_paper bold"
+format = '[ $symbol($version) ]($style)'
+
+[rust]
+symbol = " "
+style = "bg:color_cherry fg:color_paper bold"
+format = '[ $symbol($version) ]($style)'
+
+[golang]
+symbol = " "
+style = "bg:color_cherry fg:color_paper bold"
+format = '[ $symbol($version) ]($style)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_cherry fg:color_paper bold"
+format = '[ $symbol($version) ]($style)'
+
+[deno]
+symbol = " "
+style = "bg:color_cherry fg:color_paper bold"
+format = '[ $symbol($version) ]($style)'
+
+[python]
+symbol = " "
+style = "bg:color_cherry fg:color_paper bold"
+format = '[ $symbol($version) ]($style)'
+
+# 5. SILVER CRUST (the flow at rest; the clock cools last)
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_crust fg:color_ink bold"
+format = '[ $time ]($style)'
+
+# 6. THE FLOW FRONT (lava at the cursor; the ocean entry blast on error)
+[character]
+success_symbol = "[󰈸](bold color_core)[❯](bold color_orange)"
+error_symbol = "[≈](bold color_ocean)[✗](bold color_ocean)"

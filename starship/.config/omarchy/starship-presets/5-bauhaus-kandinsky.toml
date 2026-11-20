@@ -1,0 +1,113 @@
+# ==============================================================================
+#  Preset: Bauhaus (Weimar 1923 Edition)
+#  Inspired by: Wassily Kandinsky (1923) - the Bauhaus form and color questionnaire: yellow triangle, red square, blue circle
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# Glyph chain: each seam is one of Kandinsky's three primary forms, cut hard out of the
+# off-white paper ground. Black to yellow is a TRIANGLE: a falling black wedge U+E0B8 and a
+# rising yellow wedge U+E0BA leave a white triangle between them. Yellow to red is the SQUARE:
+# quadrants U+2597 U+259F climb in square steps. Red to blue is the CIRCLE: the red field ends
+# on a right half circle U+E0B4 and the blue one starts on a left half circle U+E0B6, so the
+# paper between them reads as a round void. Blue to the grey ground runs through a black bar
+# (the Bauhaus rule line) U+E0B4 U+E0BC. These are deliberate cuts, not hand-offs: Constructivist
+# edges are printed, never blended.
+# The modules cascade through: Black Rule -> Yellow Triangle -> Red Square -> Blue Circle -> Paper Ground
+format = """
+[](fg:color_black)\
+$os\
+[](fg:color_black bg:color_paper)\
+[](fg:color_yellow bg:color_paper)\
+
+$directory\
+[▗▟](fg:color_red bg:color_yellow)\
+
+$git_branch$git_status\
+[](fg:color_red bg:color_paper)\
+[](fg:color_blue bg:color_paper)\
+
+$c$rust$golang$nodejs$deno$python\
+[](fg:color_blue bg:color_black)\
+[](fg:color_black bg:color_ground)\
+
+$time\
+[](fg:color_ground bg:transparent)\
+\n$character"""
+
+palette = 'art_bauhaus_kandinsky'
+
+[palettes.art_bauhaus_kandinsky]
+color_black = '#1a1a1a' # Lamp-black (the typographic rule line)
+color_yellow= '#f2bf1d' # Cadmium yellow (the triangle: sharp, active, advancing)
+color_red   = '#c3341f' # Cadmium red (the square: weight, rest; also the error square)
+color_blue  = '#1d4a9c' # Ultramarine (the circle: depth, calm, receding)
+color_paper = '#f1ece0' # Unbleached paper (the ground the forms are cut from)
+color_ground= '#d9d3c4' # Grey card (the quiet field for the clock)
+color_white = '#f7f4ec' # Lead white (text on dark forms)
+
+# 1. BLACK RULE (the heavy bar every Bauhaus poster starts from)
+[os]
+disabled = false
+style = "bg:color_black fg:color_yellow bold"
+format = '[ 󰠱 ]($style)'
+
+# 2. YELLOW TRIANGLE (the sharpest form for where you are)
+[directory]
+style = "bg:color_yellow fg:color_black bold"
+format = "[ 󰲋 $path ]($style)"
+truncation_length = 3
+
+# 3. RED SQUARE (the solid, heavy form for history)
+[git_branch]
+symbol = " "
+style = "bg:color_red fg:color_white bold"
+format = '[ $symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_red fg:color_white bold"
+format = '([$all_status$ahead_behind ]($style))'
+
+# 4. BLUE CIRCLE (the calm, closed form for the toolchain)
+[c]
+symbol = " "
+style = "bg:color_blue fg:color_white bold"
+format = '[ $symbol($version) ]($style)'
+
+[rust]
+symbol = " "
+style = "bg:color_blue fg:color_white bold"
+format = '[ $symbol($version) ]($style)'
+
+[golang]
+symbol = " "
+style = "bg:color_blue fg:color_white bold"
+format = '[ $symbol($version) ]($style)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_blue fg:color_white bold"
+format = '[ $symbol($version) ]($style)'
+
+[deno]
+symbol = " "
+style = "bg:color_blue fg:color_white bold"
+format = '[ $symbol($version) ]($style)'
+
+[python]
+symbol = " "
+style = "bg:color_blue fg:color_white bold"
+format = '[ $symbol($version) ]($style)'
+
+# 5. PAPER GROUND (the grey card the forms rest on)
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_ground fg:color_black bold"
+format = '[ $time ]($style)'
+
+# 6. THE THREE FORMS (triangle, square, circle; the red square alone on error)
+[character]
+success_symbol = "[▲](bold color_yellow)[■](bold color_red)[●](bold color_blue)[ ❯](bold color_yellow)"
+error_symbol = "[■](bold color_red)[ ✗](bold color_red)"

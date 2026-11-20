@@ -1,0 +1,128 @@
+# ==============================================================================
+#  Preset: La Grande Jatte (Chromoluminarist Edition)
+#  Inspired by: Georges Seurat (1884-1886) - A Sunday on La Grande Jatte (Art Institute of Chicago)
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# Glyph chain: optical mixing. Seurat never blended on the palette; he set dots of a hue
+# next to dots of its complement and let the eye mix them. Every seam is a Braille stipple
+# U+28F7 U+2895 U+286A U+280A thinning from dense to sparse over the next field, and the dots
+# alternate per cell between the color being left and its complement: vermilion dots in the
+# violet shade, violet in the sunlit lawn, orange on the Seine, cobalt in the parasol. The bar
+# ends on the hazy sky with a last sparse stipple into the terminal. It is the only preset whose
+# chain carries two hues at once, so the seam shimmers instead of fading.
+# The modules cascade through: Shade Under the Trees -> Sunlit Lawn -> The Seine -> The Parasol -> Summer Haze
+format = """
+[](fg:color_shade)\
+$os\
+[⣷](fg:color_shade bg:color_lawn)\
+[⢕](fg:color_vermilion bg:color_lawn)\
+[⡪](fg:color_shade bg:color_lawn)\
+[⠊](fg:color_vermilion bg:color_lawn)\
+
+$directory\
+[⣷](fg:color_lawn bg:color_seine)\
+[⢕](fg:color_violet bg:color_seine)\
+[⡪](fg:color_lawn bg:color_seine)\
+[⠊](fg:color_violet bg:color_seine)\
+
+$git_branch$git_status\
+[⣷](fg:color_seine bg:color_parasol)\
+[⢕](fg:color_orange bg:color_parasol)\
+[⡪](fg:color_seine bg:color_parasol)\
+[⠊](fg:color_orange bg:color_parasol)\
+
+$c$rust$golang$nodejs$deno$python\
+[⣷](fg:color_parasol bg:color_haze)\
+[⢕](fg:color_cobalt bg:color_haze)\
+[⡪](fg:color_parasol bg:color_haze)\
+[⠊](fg:color_cobalt bg:color_haze)\
+
+$time\
+[⡪](fg:color_haze bg:transparent)\
+[⠊](fg:color_lawn bg:transparent)\
+[⠂](fg:color_haze bg:transparent)\
+\n$character"""
+
+palette = 'art_seurat_grande_jatte'
+
+[palettes.art_seurat_grande_jatte]
+color_shade = '#2e3550' # Ultramarine with emerald green (the violet shade under the trees)
+color_lawn  = '#9cbf4a' # Emerald green with zinc yellow (the sunlit lawn; Seurat's zinc yellow later browned)
+color_seine = '#3563a8' # Cobalt blue (the Seine)
+color_parasol= '#e0743a' # Vermilion with chrome orange (the parasol and the monkey's leash)
+color_haze  = '#ece3bd' # Lead white with Naples yellow (the summer haze)
+color_vermilion= '#e2553a' # Vermilion dots (complement inside the shade)
+color_violet= '#c38ad6' # Cobalt violet in white dots (complement inside the light)
+color_orange= '#f0a040' # Orange dots (complement on the water)
+color_cobalt= '#2f5fb8' # Cobalt dots (complement inside the parasol)
+color_carmine= '#c21f5b' # Carmine lake (reserved for errors)
+color_paper = '#fbf7ea' # Lead white (text on dark fields)
+color_ink   = '#1f2236' # Ultramarine black (text on light fields)
+
+# 1. SHADE UNDER THE TREES (the cool violet foreground)
+[os]
+disabled = false
+style = "bg:color_shade fg:color_haze bold"
+format = '[ 󰏘 ]($style)'
+
+# 2. SUNLIT LAWN (the island where everyone stands)
+[directory]
+style = "bg:color_lawn fg:color_ink bold"
+format = "[ 󰲋 $path ]($style)"
+truncation_length = 3
+
+# 3. THE SEINE (boats and branches drifting past)
+[git_branch]
+symbol = " "
+style = "bg:color_seine fg:color_paper bold"
+format = '[ $symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_seine fg:color_paper bold"
+format = '([$all_status$ahead_behind ]($style))'
+
+# 4. THE PARASOL (the warm accents carried by the strollers)
+[c]
+symbol = " "
+style = "bg:color_parasol fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[rust]
+symbol = " "
+style = "bg:color_parasol fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[golang]
+symbol = " "
+style = "bg:color_parasol fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_parasol fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[deno]
+symbol = " "
+style = "bg:color_parasol fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[python]
+symbol = " "
+style = "bg:color_parasol fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+# 5. SUMMER HAZE (the far bank in afternoon light)
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_haze fg:color_ink bold"
+format = '[ $time ]($style)'
+
+# 6. THE DOT (a pair of complementary dots; carmine on error)
+[character]
+success_symbol = "[⢕](bold color_parasol)[⡪](bold color_seine)[ ❯](bold color_lawn)"
+error_symbol = "[⢕⡪](bold color_carmine)[ ✗](bold color_carmine)"

@@ -1,0 +1,114 @@
+# ==============================================================================
+#  Preset: Rain, Steam and Speed (Great Western Edition)
+#  Inspired by: J. M. W. Turner (1844) - Rain, Steam and Speed, The Great Western Railway (National Gallery, London)
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# Glyph chain: the locomotive's black prow is an upper-left wedge U+E0BC driving into the
+# steam, and the steam dissolves into Turner's chrome-yellow haze through a shade ramp
+# U+2593 U+2592 U+2591. The haze then breaks into rain: a Braille dither (dense to sparse) over
+# the grey rain veil, and the Maidenhead bridge embankment rises out of it as a lower-right
+# wedge U+E0BA. The brick embankment falls to the Thames in eighth blocks U+2586 U+2584 U+2582,
+# mist lifts off the river in a reversed shade ramp, and the bar ends in a speed streak
+# U+2588 U+2593 U+2592 U+2591 fading into the terminal: motion blur, the painting's real subject.
+# The modules cascade through: Firebox Iron -> Chrome Haze -> Maidenhead Bridge -> The Thames -> Break in the Cloud
+format = """
+[](fg:color_iron)\
+$os\
+[](fg:color_iron bg:color_steam)\
+[▓▒░](fg:color_steam bg:color_haze)\
+
+$directory\
+[⣿⡷⠕⠂](fg:color_haze bg:color_rain)\
+[](fg:color_umber bg:color_rain)\
+
+$git_branch$git_status\
+[▆▄▂](fg:color_umber bg:color_river)\
+
+$c$rust$golang$nodejs$deno$python\
+[░▒▓](fg:color_sky bg:color_river)\
+
+$time\
+[█▓▒░](fg:color_sky bg:transparent)\
+\n$character"""
+
+palette = 'art_turner_rain_steam_speed'
+
+[palettes.art_turner_rain_steam_speed]
+color_iron  = '#1c1a17' # Lamp-black (the locomotive's iron and its open firebox)
+color_steam = '#f2eee2' # Lead white, barely tinted (the steam plume)
+color_haze  = '#e6bf55' # Chrome yellow (lead chromate, Turner's new pigment for blazing light)
+color_rain  = '#8a8571' # Rain veil (lead white glazed with raw umber)
+color_umber = '#5a3a22' # Burnt umber (Brunel's brick Maidenhead Railway Bridge)
+color_river = '#44594f' # Terre verte (the Thames under the rain)
+color_sky   = '#b8c3c8' # Cobalt blue in lead white (the break in the cloud, upper left)
+color_fire  = '#e0462c' # Vermilion (the glowing firebox: reserved for errors)
+color_paper = '#f5efe0' # Lead white (text on dark fields)
+color_ink   = '#1c1a17' # Lamp-black (text on light fields)
+
+# 1. FIREBOX IRON (the locomotive bursting out of the storm)
+[os]
+disabled = false
+style = "bg:color_iron fg:color_haze bold"
+format = '[ 󰔬 ]($style)'
+
+# 2. CHROME HAZE (the blaze of light where you are standing)
+[directory]
+style = "bg:color_haze fg:color_ink bold"
+format = "[ 󰲋 $path ]($style)"
+truncation_length = 3
+
+# 3. MAIDENHEAD BRIDGE (the brick viaduct carrying the line)
+[git_branch]
+symbol = " "
+style = "bg:color_umber fg:color_paper bold"
+format = '[ $symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_umber fg:color_paper bold"
+format = '([$all_status$ahead_behind ]($style))'
+
+# 4. THE THAMES (the river below, where the rowing boat drifts)
+[c]
+symbol = " "
+style = "bg:color_river fg:color_paper bold"
+format = '[ $symbol($version) ]($style)'
+
+[rust]
+symbol = " "
+style = "bg:color_river fg:color_paper bold"
+format = '[ $symbol($version) ]($style)'
+
+[golang]
+symbol = " "
+style = "bg:color_river fg:color_paper bold"
+format = '[ $symbol($version) ]($style)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_river fg:color_paper bold"
+format = '[ $symbol($version) ]($style)'
+
+[deno]
+symbol = " "
+style = "bg:color_river fg:color_paper bold"
+format = '[ $symbol($version) ]($style)'
+
+[python]
+symbol = " "
+style = "bg:color_river fg:color_paper bold"
+format = '[ $symbol($version) ]($style)'
+
+# 5. BREAK IN THE CLOUD (the calm sky over the speed)
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_sky fg:color_ink bold"
+format = '[ $time ]($style)'
+
+# 6. THE HARE (Turner's hare outruns the train; a failure lights the firebox)
+[character]
+success_symbol = "[»](bold color_steam)[❯](bold color_haze)"
+error_symbol = "[»](bold color_fire)[✗](bold color_fire)"

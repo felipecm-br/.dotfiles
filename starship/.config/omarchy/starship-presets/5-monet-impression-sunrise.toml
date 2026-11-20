@@ -1,0 +1,160 @@
+# ==============================================================================
+#  Preset: Monet Impression Sunrise (Le Havre 1872 Edition)
+#  Inspired by: Claude Monet (1872) - Impression, soleil levant (Musee Marmottan Monet)
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+#
+# The painting that named Impressionism: a rowing boat, the harbour, cranes dissolved in
+# mist, and one orange sun whose reflection breaks into dabs on the water.
+# Seams are brush dabs, not cuts: a dense-to-sparse Braille ramp (U+28FF U+2877 U+2815
+# U+2802) in the colour being left, warming a little each stroke, over the next colour.
+# The empty middle of the line is the harbour itself: 12 upper half blocks (U+2580) with
+# $fill, sky on top and water below, three dark boats and the broken reflection of the
+# sun just before the clock, which is the sun. It scales with the terminal, with no fork.
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# The modules cascade through: Boat -> Harbour -> Cranes in Mist -> Haze -> Harbour band -> Sun
+format = """
+[⠂](fg:color_boat)\
+[⠕](fg:color_boat)\
+[⡷](fg:color_boat)\
+[⣿](fg:color_boat)\
+$os\
+[⣿](fg:color_d00 bg:color_harbour)\
+[⡷](fg:color_d01 bg:color_harbour)\
+[⠕](fg:color_d02 bg:color_harbour)\
+[⠂](fg:color_d03 bg:color_harbour)\
+$directory\
+[⣿](fg:color_d10 bg:color_cerulean)\
+[⡷](fg:color_d11 bg:color_cerulean)\
+[⠕](fg:color_d12 bg:color_cerulean)\
+[⠂](fg:color_d13 bg:color_cerulean)\
+$git_branch$git_status\
+[⣿](fg:color_d20 bg:color_mist)\
+[⡷](fg:color_d21 bg:color_mist)\
+[⠕](fg:color_d22 bg:color_mist)\
+[⠂](fg:color_d23 bg:color_mist)\
+$c$rust$golang$nodejs$deno$python\
+[▀](fg:color_sky00 bg:color_sea00)$fill[▀](fg:color_sky01 bg:color_sea01)$fill[▀](fg:color_sky02 bg:color_sea02)$fill[▀](fg:color_sky03 bg:color_sea03)$fill[▀](fg:color_sky04 bg:color_sea04)$fill[▀](fg:color_sky05 bg:color_sea05)$fill[▀](fg:color_sky06 bg:color_sea06)$fill[▀](fg:color_sky07 bg:color_sea07)$fill[▀](fg:color_sky08 bg:color_sea08)$fill[▀](fg:color_sky09 bg:color_sea09)$fill[▀](fg:color_sky10 bg:color_sea10)$fill[▀](fg:color_sky11 bg:color_sea11)$fill\
+$time\
+[](fg:color_sun)\
+\n$character"""
+
+palette = 'art_monet_impression'
+
+[palettes.art_monet_impression]
+color_boat     = '#1d2a35' # Ivory black and cobalt (the rowing boat silhouette)
+color_harbour  = '#34505f' # Cobalt blue and lead white (Le Havre harbour water)
+color_cerulean = '#6c8b90' # Cerulean blue and lead white (the mist over the cranes)
+color_mist     = '#9db3aa' # Viridian and lead white (the dawn haze)
+color_sun      = '#f26b2a' # Chrome orange (the sun, painted last, wet into wet)
+color_d00      = '#1d2a35' # brush dab 1/4, boat over harbour
+color_d01      = '#2b323a' # brush dab 2/4, boat over harbour
+color_d02      = '#3a3b3f' # brush dab 3/4, boat over harbour
+color_d03      = '#494344' # brush dab 4/4, boat over harbour
+color_d10      = '#34505f' # brush dab 1/4, harbour over cerulean
+color_d11      = '#425661' # brush dab 2/4, harbour over cerulean
+color_d12      = '#505b62' # brush dab 3/4, harbour over cerulean
+color_d13      = '#5d6164' # brush dab 4/4, harbour over cerulean
+color_d20      = '#6c8b90' # brush dab 1/4, cerulean over mist
+color_d21      = '#768b8d' # brush dab 2/4, cerulean over mist
+color_d22      = '#7f8c8a' # brush dab 3/4, cerulean over mist
+color_d23      = '#888c87' # brush dab 4/4, cerulean over mist
+color_sky00    = '#9db3aa' # harbour band column 0: dawn sky
+color_sea00    = '#3c5866' # harbour band column 0: water
+color_sky01    = '#a4b2a7' # harbour band column 1: dawn sky
+color_sea01    = '#3e5967' # harbour band column 1: water
+color_sky02    = '#acb1a5' # harbour band column 2: dawn sky
+color_sea02    = '#1d2a35' # harbour band column 2: boat
+color_sky03    = '#b2b1a2' # harbour band column 3: dawn sky
+color_sea03    = '#415c68' # harbour band column 3: water
+color_sky04    = '#baaf9e' # harbour band column 4: dawn sky
+color_sea04    = '#435e69' # harbour band column 4: water
+color_sky05    = '#c4ac96' # harbour band column 5: dawn sky
+color_sea05    = '#22303a' # harbour band column 5: boat
+color_sky06    = '#cda98f' # harbour band column 6: dawn sky
+color_sea06    = '#47616a' # harbour band column 6: water
+color_sky07    = '#d6a688' # harbour band column 7: dawn sky
+color_sea07    = '#26333b' # harbour band column 7: boat
+color_sky08    = '#dda481' # harbour band column 8: dawn sky
+color_sea08    = '#b86a46' # harbour band column 8: sun reflection
+color_sky09    = '#e4a37c' # harbour band column 9: dawn sky
+color_sea09    = '#d9692f' # harbour band column 9: sun reflection
+color_sky10    = '#eaa176' # harbour band column 10: dawn sky
+color_sea10    = '#c45e33' # harbour band column 10: sun reflection
+color_sky11    = '#f0a070' # harbour band column 11: dawn sky
+color_sea11    = '#ee7a3a' # harbour band column 11: sun reflection
+color_error    = '#ff4a6a' # Crimson lake (the error; the sun stays orange)
+color_paper    = '#f3efe4' # Lead white (text on dark water)
+color_ink      = '#14202a' # Ivory black (text on mist and sun)
+
+# 1. THE ROWING BOAT (the dark silhouette in the foreground)
+[os]
+disabled = false
+style = "bg:color_boat fg:color_paper bold"
+format = '[ 󰘈 ]($style)'
+
+# 2. THE HARBOUR (the water you are on)
+[directory]
+style = "bg:color_harbour fg:color_paper bold"
+format = "[ 󰉋 $path ]($style)"
+truncation_length = 3
+
+# 3. THE CRANES IN THE MIST (the branch, half dissolved)
+[git_branch]
+symbol = " "
+style = "bg:color_cerulean fg:color_ink bold"
+format = '[ $symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_cerulean fg:color_ink bold"
+format = '([$all_status$ahead_behind ]($style))'
+
+# 4. THE DAWN HAZE (the last mist before the sun)
+[c]
+symbol = " "
+style = "bg:color_mist fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[rust]
+symbol = " "
+style = "bg:color_mist fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[golang]
+symbol = " "
+style = "bg:color_mist fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_mist fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[deno]
+symbol = " "
+style = "bg:color_mist fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[python]
+symbol = " "
+style = "bg:color_mist fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+# 5. THE SUN (the hour itself, rounded off like the disc)
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_sun fg:color_ink bold"
+format = '[ $time ]($style)'
+
+
+[fill]
+symbol = "▀"
+style = "fg:prev_fg bg:prev_bg"
+
+# 6. THE REFLECTION (orange dabs on the water; an error turns them crimson)
+[character]
+success_symbol = "[⠂⠕⡷](bold color_sun)[ ❯](bold color_mist)"
+error_symbol = "[⠂⠕⡷](bold color_error)[ ✗](bold color_error)"
