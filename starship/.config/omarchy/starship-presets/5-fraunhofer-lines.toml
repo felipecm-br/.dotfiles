@@ -1,0 +1,221 @@
+# ==============================================================================
+#  Preset: Fraunhofer Lines (Solar Spectrum 1814 Edition)
+#  Inspired by: Joseph von Fraunhofer (1814) - Bestimmung des Brechungs- und Farbenzerstreuungs-Vermoegens
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+# glyph-stacking: gradient
+#
+# The prompt is a slice of the solar spectrum from 381 to 770 nm, laid out left to right.
+# Every half cell (U+258C, left in fg, right in bg) is coloured by its own wavelength (Dan Bruton's wavelength-to-RGB fit, with the
+# natural fade into the ultraviolet and infrared), and the dark absorption lines Fraunhofer
+# catalogued sit at their true positions: K and H (Ca II) in the lead, G, F (H-beta), the
+# Mg b triplet, D1/D2 (sodium), C (H-alpha) and the telluric O2 bands B and A in the tail.
+# A line darkens its own patch of continuum (it absorbs light, it is not a hole): strong lines
+# are a half block (U+258C/U+2590) at 40% OKLab lightness, medium and weak ones a quarter
+# or half block at 58% / 74%, on the side of the cell where the wavelength falls.
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# The modules cascade through: Violet -> Blue -> Green -> Amber -> Red -> infrared fade
+format = """
+[▌](fg:color_nm382 bg:color_nm385)\
+[▌](fg:color_nm387 bg:color_nm390)\
+[▌](fg:color_abs393 bg:color_nm394)\
+[▌](fg:color_abs397 bg:color_nm398)\
+[▌](fg:color_nm402 bg:color_nm405)\
+[▌](fg:color_nm407 bg:color_nm410)\
+$os\
+[▐](fg:color_abs431 bg:color_nm430)\
+[▌](fg:color_nm437 bg:color_nm442)\
+[▌](fg:color_nm446 bg:color_nm451)\
+[▌](fg:color_nm455 bg:color_nm460)\
+$directory\
+[▌](fg:color_nm477 bg:color_nm482)\
+[▌](fg:color_abs486 bg:color_nm490)\
+[▌](fg:color_nm497 bg:color_nm503)\
+[▌](fg:color_nm508 bg:color_nm513)\
+[▌](fg:color_abs517 bg:color_nm521)\
+$git_branch$git_status\
+[▌](fg:color_nm541 bg:color_nm546)\
+[▌](fg:color_nm552 bg:color_nm557)\
+[▌](fg:color_nm562 bg:color_nm568)\
+[▌](fg:color_nm573 bg:color_nm578)\
+[▐](fg:color_abs589 bg:color_nm587)\
+$c$rust$golang$nodejs$deno$python\
+[▌](fg:color_nm607 bg:color_nm612)\
+[▌](fg:color_nm617 bg:color_nm623)\
+[▎](fg:color_abs628 bg:color_nm631)\
+$time\
+[▐](fg:color_abs656 bg:color_nm654)\
+[▌](fg:color_nm665 bg:color_nm673)\
+[▐](fg:color_abs687 bg:color_nm685)\
+[▌](fg:color_nm696 bg:color_nm704)\
+[▌](fg:color_nm712 bg:color_nm719)\
+[▌](fg:color_nm727 bg:color_nm735)\
+[▌](fg:color_nm743 bg:color_nm750)\
+[▎](fg:color_abs759 bg:color_nm762)\
+[▌](fg:color_nm773 bg:transparent)\
+\n$character"""
+
+palette = 'sci_fraunhofer'
+
+[palettes.sci_fraunhofer]
+color_nm382  = '#2c2348' # 382 nm continuum (left half-cell)
+color_nm384  = '#2e244c' # 384 nm continuum
+color_nm385  = '#302550' # 385 nm continuum (right half-cell)
+color_nm387  = '#342758' # 387 nm continuum (left half-cell)
+color_nm388  = '#35285c' # 388 nm continuum
+color_nm390  = '#382960' # 390 nm continuum (right half-cell)
+color_abs393 = '#0a0519' # absorption at K, Ca II
+color_nm394  = '#3e2c6c' # 394 nm continuum
+color_abs397 = '#0d061e' # absorption at H, Ca II
+color_nm398  = '#46307d' # 398 nm continuum
+color_nm402  = '#4c338a' # 402 nm continuum (left half-cell)
+color_nm404  = '#4f348e' # 404 nm continuum
+color_nm405  = '#513592' # 405 nm continuum (right half-cell)
+color_nm407  = '#583599' # 407 nm continuum (left half-cell)
+color_nm408  = '#5c369d' # 408 nm continuum
+color_nm410  = '#5e36a1' # 410 nm continuum (right half-cell)
+color_nm420  = '#6842cb' # 420 nm os segment
+color_nm430  = '#5d47d0' # 430 nm continuum
+color_abs431 = '#281d62' # absorption at G, CH band
+color_nm437  = '#6246cf' # 437 nm continuum (left half-cell)
+color_nm440  = '#6346cf' # 440 nm continuum
+color_nm442  = '#6347d0' # 442 nm continuum (right half-cell)
+color_nm446  = '#5e4ad2' # 446 nm continuum (left half-cell)
+color_nm448  = '#5a4cd4' # 448 nm continuum
+color_nm451  = '#564ed5' # 451 nm continuum (right half-cell)
+color_nm455  = '#4854d8' # 455 nm continuum (left half-cell)
+color_nm458  = '#3c58da' # 458 nm continuum
+color_nm460  = '#2a5dda' # 460 nm continuum (right half-cell)
+color_nm468  = '#2e60de' # 468 nm dir segment
+color_nm477  = '#1f68e3' # 477 nm continuum (left half-cell)
+color_nm479  = '#006de4' # 479 nm continuum
+color_nm482  = '#0075dc' # 482 nm continuum (right half-cell)
+color_abs486 = '#00252c' # absorption at F, H-beta
+color_nm490  = '#0091a7' # 490 nm continuum
+color_nm497  = '#00a667' # 497 nm continuum (left half-cell)
+color_nm500  = '#00ab56' # 500 nm continuum
+color_nm503  = '#00ae4c' # 503 nm continuum (right half-cell)
+color_nm508  = '#12b844' # 508 nm continuum (left half-cell)
+color_nm510  = '#32be44' # 510 nm continuum
+color_nm513  = '#44c447' # 513 nm continuum (right half-cell)
+color_abs517 = '#153b13' # absorption at b4, Mg I, b2, Mg I, b1, Mg I
+color_nm521  = '#60d959' # 521 nm continuum
+color_nm532  = '#77ef70' # 532 nm git segment
+color_nm541  = '#80f878' # 541 nm continuum (left half-cell)
+color_nm543  = '#80f878' # 543 nm continuum
+color_nm546  = '#80f878' # 546 nm continuum (right half-cell)
+color_nm552  = '#80f878' # 552 nm continuum (left half-cell)
+color_nm554  = '#87f772' # 554 nm continuum
+color_nm557  = '#94f567' # 557 nm continuum (right half-cell)
+color_nm562  = '#b1ef49' # 562 nm continuum (left half-cell)
+color_nm565  = '#c2eb33' # 565 nm continuum
+color_nm568  = '#d3e604' # 568 nm continuum (right half-cell)
+color_nm573  = '#f2d600' # 573 nm continuum (left half-cell)
+color_nm576  = '#fdcd00' # 576 nm continuum
+color_nm578  = '#ffc318' # 578 nm continuum (right half-cell)
+color_nm587  = '#ffa432' # 587 nm continuum
+color_abs589 = '#482b07' # absorption at D2, Na I, D1, Na I
+color_nm598  = '#ff7c46' # 598 nm lang segment
+color_nm607  = '#ff6752' # 607 nm continuum (left half-cell)
+color_nm609  = '#ff6250' # 609 nm continuum
+color_nm612  = '#ff5d4c' # 612 nm continuum (right half-cell)
+color_nm617  = '#f55443' # 617 nm continuum (left half-cell)
+color_nm620  = '#f04f3f' # 620 nm continuum
+color_nm623  = '#ec4b3b' # 623 nm continuum (right half-cell)
+color_abs628 = '#95261d' # absorption at a, O2 telluric
+color_nm631  = '#df3e30' # 631 nm continuum
+color_nm640  = '#d43225' # 640 nm time segment
+color_nm654  = '#c72319' # 654 nm continuum
+color_abs656 = '#360402' # absorption at C, H-alpha
+color_nm665  = '#c11a11' # 665 nm continuum (left half-cell)
+color_nm669  = '#c0170f' # 669 nm continuum
+color_nm673  = '#bf150e' # 673 nm continuum (right half-cell)
+color_nm685  = '#bc110a' # 685 nm continuum
+color_abs687 = '#580402' # absorption at B, O2 telluric
+color_nm696  = '#bb0e08' # 696 nm continuum (left half-cell)
+color_nm700  = '#bb0e08' # 700 nm continuum
+color_nm704  = '#b4110a' # 704 nm continuum (right half-cell)
+color_nm712  = '#a8150e' # 712 nm continuum (left half-cell)
+color_nm716  = '#a1170f' # 716 nm continuum
+color_nm719  = '#9b1911' # 719 nm continuum (right half-cell)
+color_nm727  = '#8f1b13' # 727 nm continuum (left half-cell)
+color_nm731  = '#891b13' # 731 nm continuum
+color_nm735  = '#831c14' # 735 nm continuum (right half-cell)
+color_nm743  = '#771d15' # 743 nm continuum (left half-cell)
+color_nm746  = '#711d15' # 746 nm continuum
+color_nm750  = '#6b1d16' # 750 nm continuum (right half-cell)
+color_abs759 = '#270805' # absorption at A, O2 telluric
+color_nm762  = '#5a1d16' # 762 nm continuum
+color_nm773  = '#491b16' # 773 nm continuum (left half-cell)
+color_nm777  = '#441b15' # 777 nm continuum
+color_halpha = '#c62117' # 656.3 nm H-alpha (the error: a line falls on it)
+color_paper  = '#ffffff' # Lead white (text on the violet end)
+color_ink    = '#06060a' # Lamp black (text on the bright continuum)
+
+# 1. VIOLET 420 nm (just past Ca II H and K, the deepest lines)
+[os]
+disabled = false
+style = "bg:color_nm420 fg:color_paper bold"
+format = '[ 󰭎 ]($style)'
+
+# 2. BLUE 468 nm (between the G band and H-beta)
+[directory]
+style = "bg:color_nm468 fg:color_paper bold"
+format = "[ 󰉋 $path ]($style)"
+truncation_length = 3
+
+# 3. GREEN 532 nm (just past the magnesium b triplet)
+[git_branch]
+symbol = " "
+style = "bg:color_nm532 fg:color_ink bold"
+format = '[ $symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_nm532 fg:color_ink bold"
+format = '([$all_status$ahead_behind ]($style))'
+
+# 4. AMBER 598 nm (just past the sodium D doublet)
+[c]
+symbol = " "
+style = "bg:color_nm598 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[rust]
+symbol = " "
+style = "bg:color_nm598 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[golang]
+symbol = " "
+style = "bg:color_nm598 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_nm598 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[deno]
+symbol = " "
+style = "bg:color_nm598 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[python]
+symbol = " "
+style = "bg:color_nm598 fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+# 5. RED 640 nm (before H-alpha and the telluric oxygen bands)
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_nm640 fg:color_paper bold"
+format = '[ $time ]($style)'
+
+
+# 6. THE SLIT (success: the spectrum through the prism; error: one absorption line on H-alpha)
+[character]
+success_symbol = "[❯](bold color_nm420)[❯](bold color_nm532)[❯](bold color_nm640)"
+error_symbol = "[▌](fg:color_abs656 bg:color_halpha)[✗❯](bold color_halpha)"

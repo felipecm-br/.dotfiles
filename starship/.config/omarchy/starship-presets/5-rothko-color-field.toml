@@ -1,0 +1,141 @@
+# ==============================================================================
+#  Preset: Rothko Color Field (No. 14 Feathered Edge Edition)
+#  Inspired by: Mark Rothko (1960) - No. 14, 1960 (SFMOMA): cadmium fields floating on a maroon ground
+#  Configured for: Omarchy / Starship Studio
+# ==============================================================================
+# glyph-stacking: gradient
+#
+# Rothko never drew an edge: he scumbled thin washes until each rectangle dissolved into
+# the ground, and the seam glowed. Each transition here is a four-cell feather of left
+# eighth blocks (U+2589 U+258B U+258D U+258F). Cell k is drawn in colour k over colour k+1,
+# so every intermediate OKLab step shows exactly 6/8 of a cell: an 8-subpixel-per-cell
+# gradient with no visible cell grid. The middle step is lifted +0.035 L (halation).
+
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# The modules cascade through: Dark Band -> Maroon Ground -> Cadmium Red -> Cadmium Orange -> Halo
+format = """
+[▐](fg:color_lead1)\
+[▍](fg:color_lead1 bg:color_lead2)\
+[▊](fg:color_lead2 bg:color_band)\
+$os\
+[▉](fg:color_band bg:color_f01)\
+[▋](fg:color_f01 bg:color_f02)\
+[▍](fg:color_f02 bg:color_f03)\
+[▏](fg:color_f03 bg:color_maroon)\
+$directory\
+[▉](fg:color_maroon bg:color_f11)\
+[▋](fg:color_f11 bg:color_f12)\
+[▍](fg:color_f12 bg:color_f13)\
+[▏](fg:color_f13 bg:color_cadmium)\
+$git_branch$git_status\
+[▉](fg:color_cadmium bg:color_f21)\
+[▋](fg:color_f21 bg:color_f22)\
+[▍](fg:color_f22 bg:color_f23)\
+[▏](fg:color_f23 bg:color_orange)\
+$c$rust$golang$nodejs$deno$python\
+[▉](fg:color_orange bg:color_f31)\
+[▋](fg:color_f31 bg:color_f32)\
+[▍](fg:color_f32 bg:color_f33)\
+[▏](fg:color_f33 bg:color_glow)\
+$time\
+[▉](fg:color_glow bg:color_t1)\
+[▋](fg:color_t1 bg:color_t2)\
+[▍](fg:color_t2 bg:color_t3)\
+[▏](fg:color_t3 bg:transparent)\
+\n$character"""
+
+palette = 'art_rothko_no14'
+
+[palettes.art_rothko_no14]
+color_band    = '#1b1d33' # Ultramarine and bone black (the dark lower rectangle)
+color_maroon  = '#4b1621' # Alizarin crimson over raw umber (the maroon ground)
+color_cadmium = '#9e2318' # Cadmium red deep (the upper rectangle)
+color_orange  = '#d5521d' # Cadmium orange (the rectangle's lit core)
+color_glow    = '#eda349' # Cadmium yellow and lead white (the halo bleeding through the top)
+color_lead1   = '#15111a' # lead: ground rising into the band, 1/3
+color_lead2   = '#181726' # lead: ground rising into the band, 2/3
+color_f01     = '#281d2f' # feather band -> maroon, step 1/4
+color_f02     = '#3d2434' # feather band -> maroon, step 2/4 (halation)
+color_f03     = '#401a26' # feather band -> maroon, step 3/4
+color_f11     = '#5f1a21' # feather maroon -> cadmium, step 1/4
+color_f12     = '#7e2829' # feather maroon -> cadmium, step 2/4 (halation)
+color_f13     = '#88201d' # feather maroon -> cadmium, step 3/4
+color_f21     = '#ac2f1a' # feather cadmium -> orange, step 1/4
+color_f22     = '#c54728' # feather cadmium -> orange, step 2/4 (halation)
+color_f23     = '#c7471c' # feather cadmium -> orange, step 3/4
+color_f31     = '#dc6829' # feather orange -> glow, step 1/4
+color_f32     = '#ee8740' # feather orange -> glow, step 2/4 (halation)
+color_f33     = '#e8903e' # feather orange -> glow, step 3/4
+color_t1      = '#af793c' # feather glow -> ground, step 1/4
+color_t2      = '#7f5b38' # feather glow -> ground, step 2/4 (halation)
+color_t3      = '#402c1f' # feather glow -> ground, step 3/4
+color_error   = '#5b8cff' # Cobalt blue: the one cold hue, kept for the error
+color_paper   = '#f6ecdf' # Lead white (text on dark fields)
+color_ink     = '#1a0d0a' # Lamp black (text on lit fields)
+
+# 1. THE DARK BAND (the low rectangle, where the eye rests)
+[os]
+disabled = false
+style = "bg:color_band fg:color_paper bold"
+format = '[ 󰢵 ]($style)'
+
+# 2. THE MAROON GROUND (where you are standing)
+[directory]
+style = "bg:color_maroon fg:color_paper bold"
+format = "[ 󰉋 $path ]($style)"
+truncation_length = 3
+
+# 3. CADMIUM RED (the upper rectangle: the branch)
+[git_branch]
+symbol = " "
+style = "bg:color_cadmium fg:color_paper bold"
+format = '[ $symbol$branch ]($style)'
+
+[git_status]
+style = "bg:color_cadmium fg:color_paper bold"
+format = '([$all_status$ahead_behind ]($style))'
+
+# 4. CADMIUM ORANGE (the lit core of the field)
+[c]
+symbol = " "
+style = "bg:color_orange fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[rust]
+symbol = " "
+style = "bg:color_orange fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[golang]
+symbol = " "
+style = "bg:color_orange fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[nodejs]
+symbol = " "
+style = "bg:color_orange fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[deno]
+symbol = " "
+style = "bg:color_orange fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+[python]
+symbol = " "
+style = "bg:color_orange fg:color_ink bold"
+format = '[ $symbol($version) ]($style)'
+
+# 5. THE HALO (light coming through the top edge)
+[time]
+disabled = false
+time_format = "%R"
+style = "bg:color_glow fg:color_ink bold"
+format = '[ $time ]($style)'
+
+
+# 6. THE SIGNATURE (two stacked colour fields; an error turns them cobalt)
+[character]
+success_symbol = "[▉](bold color_cadmium)[▉](bold color_glow)[ ❯](bold color_glow)"
+error_symbol = "[▉▉](bold color_error)[ ✗](bold color_error)"
