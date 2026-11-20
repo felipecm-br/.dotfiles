@@ -12,6 +12,7 @@ The commit hashes link each entry to the full change (`git show <hash>`). Weeks 
 ## Unreleased
 
 ### AI agents
+- Agents can message each other: `waymux tell <pane> <message>` puts a message in the other agent's queue, typed once it rests and framed as another agent's text with the command to answer; it is in the command palette and the waymux skill (with `waymux` built from `feat/keep-awake-and-enter-retry`). (`intelli-shell`, `agents-skills`) `needs: waymux`
 - `awt-fan compare` shows what each attempt would cost at API prices next to its tokens (Claude priced out of the box, Codex from `~/.config/awt-fan/prices.json`), and a running fan's attempts carry a `󰘬2/3` badge in the Cockpit (`Prefix + Space`, with `waymux` built from `feat/keep-awake-and-enter-retry`). (`utils`, `waymaker`) `needs: waymux`
 - Codex started from the launch menu (`Prefix + a`), `ai-failover` or a reboot restore runs with `--no-daemon`, so each session gets its own app-server and its hooks report to its own pane instead of the pane that started the shared server; `AI_LAUNCH_CODEX_DAEMON=1` keeps the shared server. (`utils`, `tmux`) `needs: codex`
 - The AI launch menu (`Prefix + a`) and the model switcher (`Prefix + A`) list Antigravity's new Gemini 4 Neon (low to xhigh, now its default) and the two Orchestrator models. Neon and Hydrogen get their own quota (`N` in the badge), and the live quota and model list work again with Antigravity 1.5.13, which keeps its token only in the keyring and ships no `agy-bin` (`agyy` falls back to the mise `agy` too). (`utils`) `needs: agy`

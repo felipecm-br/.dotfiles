@@ -484,6 +484,9 @@ waymux wait {{pane}} --for {{10m}}
 # Stream AI agent state changes as NDJSON (pane, state, previous, message)
 waymux events --json
 
+# Send the agent in another pane a message from this one, through its queue (it answers with waymux tell)
+waymux tell {{pane}} {{message}}
+
 # Report a state for this pane from a script, shown in the status bar and Cockpit like an agent
 waymux report {{working|idle|error}} --progress {{percent}} --msg {{text}}
 
