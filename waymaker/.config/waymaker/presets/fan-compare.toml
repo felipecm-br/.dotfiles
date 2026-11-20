@@ -1,7 +1,7 @@
 # Waymaker fan compare (`awt-fan compare`): the attempts of one fan on the left (40%), the diff of
 # the selected attempt against the fan's base on the right (60%). Rows come from `awt-fan ls`,
 # which pads its columns by characters so the grid stays aligned (state, #, agent, commits, diff,
-# check, tokens, age). T starts the checks in the background (ai-jail, no network); ctrl-r reloads.
+# check, tokens, API-price cost, age). T starts the checks in the background (ai-jail, no network); ctrl-r reloads.
 
 [start]
 sort = false

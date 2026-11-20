@@ -84,13 +84,20 @@ set +e; out=$(cd "$SB" && mkdir -p bare && cd bare && git init -q && "$F" check 
 # 4c. Tokens: from each agent's own session logs, repeated Claude lines counted once, cache reads out.
 H="$SB/home"; enc=$(printf '%s' "$SB/fan-$id-1" | sed 's/[^A-Za-z0-9]/-/g')
 mkdir -p "$H/.claude/projects/$enc" "$H/.codex/sessions/$(date +%Y/%m/%d)"
-u='{"type":"assistant","message":{"id":"m1","usage":{"input_tokens":10,"cache_creation_input_tokens":100,"cache_read_input_tokens":999,"output_tokens":5}}}'
-{ echo "$u"; echo "$u"; echo '{"type":"assistant","message":{"id":"m2","usage":{"input_tokens":0,"output_tokens":2000}}}'; } >"$H/.claude/projects/$enc/s.jsonl"
+u='{"type":"assistant","message":{"id":"m1","model":"claude-opus-5-5","usage":{"input_tokens":10,"cache_creation_input_tokens":100,"cache_read_input_tokens":999,"output_tokens":5}}}'
+{ echo "$u"; echo "$u"; echo '{"type":"assistant","message":{"id":"m2","model":"claude-opus-5-5","usage":{"input_tokens":0,"output_tokens":2000}}}'; } >"$H/.claude/projects/$enc/s.jsonl"
 { echo "{\"type\":\"session_meta\",\"payload\":{\"cwd\":\"$SB/fan-$id-2\"}}"
+  echo '{"type":"turn_context","payload":{"model":"gpt-x-codex"}}'
   echo '{"type":"event_msg","payload":{"type":"token_count","info":{"total_token_usage":{"input_tokens":5000,"cached_input_tokens":4000,"output_tokens":500}}}}'
 } >"$H/.codex/sessions/$(date +%Y/%m/%d)/rollout-x.jsonl"
 rows=$(HOME="$H" "$F" ls "$id")
 grep -q ' 2k ' <<<"$(sed -n 1p <<<"$rows")" && grep -q ' 1k ' <<<"$(sed -n 2p <<<"$rows")" && ok "tokens per attempt (claude 2k, codex 1k)" || bad "tokens: $rows"
+# Cost at API prices: Claude from the built-in table (cache write 1.25x, read priced), Codex only
+# with a prices file. m1+m2 on Opus 5.5: (10*4 + 100*5 + 999*0.2 + 5*20 + 2000*20)/1e6 = $0.04.
+grep -q ' \$0.04 ' <<<"$(sed -n 1p <<<"$rows")" && ! grep -q '\$' <<<"$(sed -n 2p <<<"$rows" | cut -f1)" && ok "claude priced, codex unpriced without a prices file" || bad "cost: $rows"
+printf '{"codex":{"gpt-x":{"input":1,"cached_input":0.1,"output":10}}}' >"$SB/prices.json"
+rows=$(HOME="$H" AWT_FAN_PRICES="$SB/prices.json" "$F" ls "$id")
+grep -q ' \$0.01 ' <<<"$(sed -n 2p <<<"$rows")" && ok "codex priced from the prices file (longest prefix)" || bad "codex cost: $rows"
 
 # 5. Drop, then keep: the kept attempt is committed and merged, every attempt removed.
 "$F" drop "$id" 2 --yes >/dev/null

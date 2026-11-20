@@ -16,8 +16,11 @@
 #
 # Rows show the check result (✓ pass, ✗ fail, … running, ~ the attempt changed since) and the
 # tokens each agent spent in its worktree, read from its own session logs (Claude, Codex; cache
-# reads excluded). A check runs code the agent wrote, so it runs in ai-jail with no network
-# unless --no-jail says otherwise; Cargo builds share one target directory per fan.
+# reads excluded), and what they would cost at API prices (cache writes and reads priced too;
+# Claude prices built in, Codex ones from ~/.config/awt-fan/prices.json, which can also override
+# Claude's). A check runs code the agent wrote, so it runs in ai-jail with no network unless
+# --no-jail says otherwise; Cargo builds share one target directory per fan. Each attempt's pane
+# is tagged @awt_fan <n>/<N>, which the waymux Cockpit shows as a badge on its row.
 # Docs: docs/architecture/state-of-the-art-terminal-agent-workflow.md §8 (P2).
 set -euo pipefail
 
@@ -94,12 +97,41 @@ detect_check() { # <dir>
   fi
 }
 
-# Tokens each attempt's agent spent in its worktree: "n<TAB>tokens" per attempt (empty when unknown).
+# Tokens each attempt's agent spent in its worktree and their API-price cost in USD:
+# "n<TAB>tokens<TAB>cost" per attempt (a field is empty when unknown).
 tokens() { # <id>
-  python3 -I - "$(manifest "$1")" <<'PY'
+  python3 -I - "$(manifest "$1")" "${AWT_FAN_PRICES:-${XDG_CONFIG_HOME:-$HOME/.config}/awt-fan/prices.json}" <<'PY'
 import glob, json, os, re, sys, time
 m = json.load(open(sys.argv[1]))
 home = os.path.expanduser("~")
+
+# USD per million tokens at Anthropic API rates (Nov 2026, claude-api skill). A 5-minute cache
+# write costs 1.25x input and a 1-hour one 2x; cache reads have their own price. A subscription
+# pays none of this per token: the column is what the attempt would cost on the API.
+CLAUDE = {
+    "claude-fable-5-2": (8, 40, 0.20), "claude-fable-5-1": (10, 50, 0.25), "claude-fable-5": (10, 50, 1.0),
+    "claude-opus-5-5": (4, 20, 0.20), "claude-opus-5": (5, 25, 0.50), "claude-opus-4-8": (5, 25, 0.50),
+    "claude-opus-4-7": (5, 25, 0.50), "claude-opus-4-6": (5, 25, 0.50),
+    "claude-sonnet-5-5": (2, 10, 0.10), "claude-sonnet-5": (2, 10, 0.20), "claude-sonnet-4-6": (3, 15, 0.30),
+    "claude-haiku-5-5": (0.10, 0.50, 0.01), "claude-haiku-4-5": (1, 5, 0.10),
+}
+CODEX = {}
+try:
+    extra = json.load(open(sys.argv[2]))
+    for k, v in (extra.get("claude") or {}).items():
+        CLAUDE[k] = (v["input"], v["output"], v["cache_read"])
+    for k, v in (extra.get("codex") or {}).items():
+        CODEX[k] = (v["input"], v["output"], v["cached_input"])
+except (OSError, ValueError, KeyError, TypeError, AttributeError):
+    pass
+
+def price(table, model):
+    """The entry whose id is the longest prefix of model (dated ids match their family)."""
+    best = None
+    for k in table:
+        if (model or "").startswith(k) and (best is None or len(k) > len(best)):
+            best = k
+    return table.get(best)
 
 def claude(d):
     seen = {}
@@ -113,16 +145,31 @@ def claude(d):
                 continue
             u = msg.get("usage")
             if isinstance(u, dict) and msg.get("id"):
-                seen[msg["id"]] = (u.get("input_tokens") or 0) + (u.get("cache_creation_input_tokens") or 0) + (u.get("output_tokens") or 0)
-    return sum(seen.values()) if seen else None
+                seen[msg["id"]] = (msg.get("model") or "", u)
+    if not seen:
+        return None, None
+    tokens, cost, priced = 0, 0.0, True
+    for model, u in seen.values():
+        inp, out = u.get("input_tokens") or 0, u.get("output_tokens") or 0
+        write, read = u.get("cache_creation_input_tokens") or 0, u.get("cache_read_input_tokens") or 0
+        tokens += inp + write + out
+        p = price(CLAUDE, model)
+        if p is None:
+            priced = False
+            continue
+        cc = u.get("cache_creation") if isinstance(u.get("cache_creation"), dict) else {}
+        hour = cc.get("ephemeral_1h_input_tokens") or 0
+        five = max(write - hour, 0)
+        cost += (inp * p[0] + five * p[0] * 1.25 + hour * p[0] * 2 + read * p[2] + out * p[1]) / 1e6
+    return tokens, (cost if priced else None)
 
 def codex(d):
-    total, found = 0, False
+    total, cost, found, priced = 0, 0.0, False, True
     day = time.strftime("%Y/%m/%d", time.localtime(m.get("created", 0)))
     for f in sorted(glob.glob(f"{home}/.codex/sessions/*/*/*/*.jsonl")):
         if f.split("/sessions/")[1][:10] < day:
             continue
-        last = None
+        last, model = None, ""
         with open(f, errors="replace") as fh:
             try:
                 meta = json.loads(fh.readline())
@@ -131,22 +178,40 @@ def codex(d):
             if (meta.get("payload") or {}).get("cwd") != d:
                 continue
             for line in fh:
-                if '"token_count"' in line:
+                if '"turn_context"' in line or '"token_count"' in line:
                     try:
-                        info = (json.loads(line).get("payload") or {}).get("info")
+                        payload = json.loads(line).get("payload") or {}
                     except ValueError:
                         continue
+                    if payload.get("model"):
+                        model = payload["model"]
+                    info = payload.get("info")
                     if info:
                         last = info.get("total_token_usage") or last
         if last:
             found = True
-            total += (last.get("input_tokens") or 0) - (last.get("cached_input_tokens") or 0) + (last.get("output_tokens") or 0)
-    return total if found else None
+            inp, cached = last.get("input_tokens") or 0, last.get("cached_input_tokens") or 0
+            out = last.get("output_tokens") or 0
+            total += inp - cached + out
+            p = price(CODEX, model)
+            if p is None:
+                priced = False
+            else:
+                cost += ((inp - cached) * p[0] + cached * p[2] + out * p[1]) / 1e6
+    if not found:
+        return None, None
+    return total, (cost if priced else None)
 
 for a in m["attempts"]:
-    n = {"claude": claude, "codex": codex}.get(a["agent"], lambda d: None)(a["dir"])
-    print(f'{a["n"]}\t{"" if n is None else n}')
+    n, c = {"claude": claude, "codex": codex}.get(a["agent"], lambda d: (None, None))(a["dir"])
+    print(f'{a["n"]}\t{"" if n is None else n}\t{"" if c is None else f"{c:.4f}"}')
 PY
+}
+
+usd() { # <cost>: $0.42, $3.1, $12, or — when unknown
+  local c=${1:-}
+  [ -n "$c" ] || { echo "—"; return; }
+  awk -v c="$c" 'BEGIN{ if (c < 10) printf "$%.2f", c; else if (c < 100) printf "$%.1f", c; else printf "$%d", c }'
 }
 
 human() { # <tokens>: 9k, 412k, 1.2M
@@ -180,6 +245,13 @@ worktree_dir() { # <branch>: where git has it checked out
 }
 pane_of() { # <dir>: first tmux pane whose current path is dir
   { tmux list-panes -a -F '#{pane_current_path}	#{pane_id}' 2>/dev/null || true; } | awk -F'\t' -v d="$1" '$1==d{print $2; exit}'
+}
+
+# Tags an attempt's pane @awt_fan <n>/<N> for the Cockpit badge; quiet outside tmux.
+tag_attempt() { # <dir> <n/N>
+  local pane
+  pane=$(pane_of "$1")
+  [ -n "$pane" ] && tmux set-option -p -t "$pane" @awt_fan "$2" 2>/dev/null || true
 }
 
 cmd_new() {
@@ -235,6 +307,7 @@ cmd_new() {
     "$AWT" -c "$branch" "$base" --no-connect -- "$(agent_cmd "$agent" "$prompt")" >/dev/null
     python3 -I -c 'import json,sys; p=sys.argv[1]; m=json.load(open(p)); m["attempts"].append({"n":int(sys.argv[2]),"agent":sys.argv[3],"branch":sys.argv[4],"dir":sys.argv[5]}); json.dump(m,open(p,"w"),indent=1)' \
       "$m" "$i" "$agent" "$branch" "$(worktree_dir "$branch")"
+    tag_attempt "$(worktree_dir "$branch")" "$i/$n"
   done
   echo "fan $id: $n attempts. Compare with: awt-fan compare $id"
 }
@@ -255,8 +328,9 @@ cmd_ls() {
   spent=$(tokens "$id" 2>/dev/null || true)
   field "$id" '"\n".join("\t".join(str(x[k]) for k in ("n", "agent", "branch", "dir")) for x in a)' |
     while IFS=$'\t' read -r n agent branch dir; do
-      local st="·" age="—" diff="gone" ahead="" pane state test="—" tok
+      local st="·" age="—" diff="gone" ahead="" pane state test="—" tok cost
       tok=$(human "$(awk -F'\t' -v n="$n" '$1==n{print $2}' <<<"$spent")")
+      cost=$(usd "$(awk -F'\t' -v n="$n" '$1==n{print $3}' <<<"$spent")")
       if [ -d "$dir" ]; then
         pane=$(pane_of "$dir")
         state=$(awk -v p="$pane" '$1==p{print $2}' <<<"$states")
@@ -270,8 +344,8 @@ cmd_ls() {
         age=$(( (now - $(stat -c %Y "$dir")) / 60 ))m
         test=$(check_cell "$id" "$n" "$dir")
       fi
-      printf '%s %s %s %s %s %s %s %s\t%s\t%s\t%s\n' "$(pad "$st" 1)" "$(pad "$n" 2)" "$(pad "$agent" 7)" \
-        "$(pad "$ahead" 5)" "$(pad "$diff" 12)" "$(pad "$test" 7)" "$(pad "$tok" 5 right)" "$(pad "$age" 5 right)" \
+      printf '%s %s %s %s %s %s %s %s %s\t%s\t%s\t%s\n' "$(pad "$st" 1)" "$(pad "$n" 2)" "$(pad "$agent" 7)" \
+        "$(pad "$ahead" 5)" "$(pad "$diff" 12)" "$(pad "$test" 7)" "$(pad "$tok" 5 right)" "$(pad "$cost" 6 right)" "$(pad "$age" 5 right)" \
         "$id" "$n" "$dir"
     done
 }
