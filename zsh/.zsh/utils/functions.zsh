@@ -208,6 +208,89 @@ autoload -Uz add-zsh-hook
 add-zsh-hook -d chpwd wm_chpwd 2>/dev/null
 add-zsh-hook chpwd wm_smart_chpwd
 
+# Register a freshly cloned repository in Waymaker frecency so it is immediately
+# discoverable as a session in the AI workflow picker (skipping /tmp scratch clones).
+_wm_register_cloned_repo() {
+    local dir="$1"
+    (( $+commands[wm] )) || return 0
+    [[ -n "$dir" && -d "$dir" ]] || return 0
+    local abs="${dir:A}"
+    case "$abs" in
+        /tmp*|/proc*|/sys*) return 0 ;;
+    esac
+    wm add "$abs" >/dev/null 2>&1 &!
+}
+
+_wm_clone_target_dir() {
+    local repo="$1" dest="$2"
+    if [[ -n "$dest" ]]; then
+        print -r -- "$dest"
+        return 0
+    fi
+    [[ -n "$repo" ]] || return 1
+    local name="${repo%/}"
+    name="${name##*/}"
+    name="${name##*:}"
+    name="${name%.git}"
+    [[ -n "$name" ]] && print -r -- "$name"
+}
+
+git() {
+    command git "$@"
+    local rc=$?
+    if (( rc == 0 )) && [[ "$1" == "clone" ]]; then
+        local -a pos=()
+        local arg end_opts=0 skip_next=0 is_bare=0
+        for arg in "${@:2}"; do
+            if (( skip_next )); then
+                skip_next=0
+                continue
+            fi
+            if (( ! end_opts )); then
+                case "$arg" in
+                    --) end_opts=1; continue ;;
+                    --bare|--mirror) is_bare=1; continue ;;
+                    -b|--branch|-o|--origin|-u|--upload-pack|-c|--config|--depth|--shallow-since|--shallow-exclude|--reference|--reference-if-able|--separate-git-dir|--template|--filter|--jobs|-j|--server-option|--bundle-uri)
+                        skip_next=1; continue ;;
+                    -*) continue ;;
+                esac
+            fi
+            pos+=("$arg")
+        done
+        if (( ! is_bare )); then
+            local target
+            target=$(_wm_clone_target_dir "${pos[1]:-}" "${pos[2]:-}")
+            _wm_register_cloned_repo "$target"
+        fi
+    fi
+    return $rc
+}
+
+gh() {
+    command gh "$@"
+    local rc=$?
+    if (( rc == 0 )) && [[ "$1" == "repo" && "$2" == "clone" ]]; then
+        local -a pos=()
+        local arg skip_next=0
+        for arg in "${@:3}"; do
+            if (( skip_next )); then
+                skip_next=0
+                continue
+            fi
+            case "$arg" in
+                --) break ;;
+                -u|--upstream-remote-name) skip_next=1; continue ;;
+                -*) continue ;;
+            esac
+            pos+=("$arg")
+        done
+        local target
+        target=$(_wm_clone_target_dir "${pos[1]:-}" "${pos[2]:-}")
+        _wm_register_cloned_repo "$target"
+    fi
+    return $rc
+}
+
 # j - Rapid directory jump with Zero-Friction Frecency 2.0
 # Usage:
 #   j           -> Jump to $HOME (rapid muscle memory)

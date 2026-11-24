@@ -72,7 +72,12 @@ echo "gitdir: ./.bare" > "$base_dir/.git"
 
 echo "✓ Successfully provisioned container layout in: $base_dir"
 
-# 8. Connect to the primary worktree using Waymaker or Sesh if available
+# 8. Register primary worktree in Waymaker frecency so it appears immediately in the session picker
+if command -v wm >/dev/null 2>&1; then
+    wm add "$base_dir/$default_branch" >/dev/null 2>&1 || true
+fi
+
+# 9. Connect to the primary worktree using Waymaker or Sesh if available
 if command -v wm >/dev/null 2>&1; then
     exec wm connect "$base_dir/$default_branch"
 elif command -v sesh >/dev/null 2>&1; then

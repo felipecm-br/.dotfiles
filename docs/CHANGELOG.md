@@ -11,6 +11,9 @@ The commit hashes link each entry to the full change (`git show <hash>`). Weeks 
 
 ## Unreleased
 
+### Shell & git
+- `git clone`, `gh repo clone` (Zsh wrappers), and `awt clone` / `awtc` now register the cloned repository working tree in Waymaker frecency (`wm add`, skipping `/tmp` and `--bare` clones) so newly cloned repos appear immediately in the session picker. (`zsh`, `awt`) `needs: wm`
+
 ### AI agents
 - Promoted the `waymux` skill to a universal global skill in `agents-skills/.agents/skills/waymux/` (stowed to `~/.agents/skills/waymux` for Antigravity, Codex, OpenCode, and Pi, and symlinked via `claude/.claude/skills/waymux` to `~/.claude/skills/waymux` for Claude Code and Devin, keeping `.agents/skills/waymux` as a repo symlink). (`agents-skills`, `claude`) `portable`
 - Removed stale `workmux` hook entries from `codex/.codex/hooks.json` (which caused `Hook failed (exit 127)` on every Codex turn where `workmux` is not installed), keeping only `codex-hook` and `herdr-agent-state.sh`. (`codex`) `needs: codex, waymux`
