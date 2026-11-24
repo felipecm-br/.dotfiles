@@ -459,4 +459,8 @@ export const AiMemoryHooks: Plugin = async ({ directory }) => {
   };
 };
 
-export default AiMemoryHooks;
+export default {
+  id: "ai-memory.opencode",
+  server: AiMemoryHooks,
+  setup() {},
+};

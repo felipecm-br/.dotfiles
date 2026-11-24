@@ -158,3 +158,9 @@ export const NotifyIdlePlugin: Plugin = async ({ $ }) => {
     },
   }
 }
+
+export default {
+  id: "waymux.opencode",
+  server: NotifyIdlePlugin,
+  setup() {},
+}
