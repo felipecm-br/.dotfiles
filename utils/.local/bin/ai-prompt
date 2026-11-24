@@ -249,8 +249,19 @@ if ! { [ -n "$pane" ] && read -r pid agent < <(agent_pid); }; then
 fi
 case $agent in agy-bin | antigravity) agent=agy ;; esac
 
-# The agent took $VISUAL / $EDITOR at start: agents started before ai-prompt was set open their own editor
-ready() { tr '\0' '\n' <"/proc/$pid/environ" 2>/dev/null | grep -qE '^(VISUAL|EDITOR)=.*ai-prompt'; }
+# The agent took $VISUAL / $EDITOR at start: agents started before ai-prompt was set open their own editor.
+# Antigravity (agy) ignores $VISUAL and reads its settings.json "editor" or $EDITOR only.
+ready() {
+  if [ "$agent" = agy ]; then
+    tr '\0' '\n' <"/proc/$pid/environ" 2>/dev/null | grep -qE '^EDITOR=.*ai-prompt' && return 0
+    local env_home cfg
+    env_home=$(tr '\0' '\n' <"/proc/$pid/environ" 2>/dev/null | sed -n 's/^HOME=//p')
+    cfg="${env_home:-$HOME}/.gemini/antigravity-cli/settings.json"
+    [ -r "$cfg" ] && jq -e '(.editor // "") | contains("ai-prompt")' "$cfg" >/dev/null 2>&1 && return 0
+    return 1
+  fi
+  tr '\0' '\n' <"/proc/$pid/environ" 2>/dev/null | grep -qE '^(VISUAL|EDITOR)=.*ai-prompt'
+}
 [ "$action" = --ready ] && { ready; exit; }
 
 var="AI_PROMPT_KEY_$agent"

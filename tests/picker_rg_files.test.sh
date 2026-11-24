@@ -208,8 +208,8 @@ CONF="$ROOT/tmux/.config/tmux/tmux.conf"
 grep -qE "bind-key \"e\" run-shell \".*workspace-picker\.sh '#{pane_id}' '#{pane_current_path}'\"" "$CONF" \
   && ok "tmux.conf: prefix + e -> workspace-picker.sh" || bad "tmux.conf prefix+e"
 
-grep -qE "bind-key C-e run-shell \".*workspace-picker\.sh '#{pane_id}' '#{pane_current_path}'\"" "$CONF" \
-  && ok "tmux.conf: prefix + C-e -> workspace-picker.sh" || bad "tmux.conf prefix+C-e"
+grep -qE "bind-key C-e run-shell \".*workspace-picker\.sh '#{pane_id}' '#{pane_current_path}' '--fullscreen'\"" "$CONF" \
+  && ok "tmux.conf: prefix + C-e -> workspace-picker.sh --fullscreen" || bad "tmux.conf prefix+C-e"
 
 grep -q "bind-key \"/\" run-shell \".*grep-picker.sh '#{pane_id}' '#{pane_current_path}'\"" "$CONF" \
   && ok "tmux.conf: prefix + / -> grep-picker.sh" || bad "tmux.conf prefix+/"

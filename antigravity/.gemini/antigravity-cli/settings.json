@@ -10,7 +10,8 @@
     }
   ],
   "artifactReviewPolicy": "always-proceed",
-  "model": "Gemini 4 Neon (Medium)",
+  "editor": "ai-prompt",
+  "model": "Gemini 4 Neon (XHigh)",
   "notifications": true,
   "permissions": {
     "allow": [

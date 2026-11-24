@@ -25,10 +25,10 @@ printf '\n---\n\n'
 case "$ID" in
   tmux-workspace)
     cat <<'EOF'
-### 󰈞 Workspace Files Explorer (`85% × 75%`)
+### 󰈞 Workspace Files Explorer (`85% × 75%` / `96% × 92%`)
 Inspect workspace files, tree structures, AI code, diagrams, and photos without leaving your active session.
 
-- **Ergonomics**: Inward chord (`e` = Explorer, $H=0$, sub-100ms latency).
+- **Ergonomics**: Inward chord (`Prefix + e` Golden Ratio, `Prefix + Ctrl+e` maximized `96% × 92%`, $H=0$, sub-100ms latency).
 - **Previews**: Line-synced syntax preview, native Markdown, Mermaid diagrams & Photos with Kitty Graphics.
 - **Controls**:
   - `Enter`: Toggle 100% exclusive fullscreen preview modal.

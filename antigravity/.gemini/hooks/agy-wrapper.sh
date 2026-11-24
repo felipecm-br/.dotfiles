@@ -16,6 +16,11 @@ if [ -n "$TMUX_PANE" ]; then
     tmux refresh-client -S > /dev/null 2>&1 || true
   ' EXIT INT TERM
   tmux rename-window -t "$TMUX_PANE" "$(waymux icon agy)" > /dev/null 2>&1 || true
+  # Antigravity opens its prompt draft (Ctrl+G) in $EDITOR only (ignores $VISUAL): route it
+  # through ai-prompt so Prefix + v and Ctrl + S stash work even when mise's agy outranks ~/.local/bin/agy.
+  if [ -x "$HOME/.local/bin/ai-prompt" ]; then
+    export AI_PROMPT_EDITOR="${AI_PROMPT_EDITOR:-$EDITOR}" EDITOR="$HOME/.local/bin/ai-prompt"
+  fi
 fi
 
 # Execute the actual CLI, passing all arguments transparently

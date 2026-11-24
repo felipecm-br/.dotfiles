@@ -13,7 +13,7 @@ if [ -z "$PALETTE" ] && [ "${WM_KB_PALETTE:-0}" = "1" ]; then PALETTE=palette; f
 
 emit_tmux() {
   cat <<'EOF'
-󰈞  Prefix + e	Workspace Files Picker (Golden Ratio)	tmux	tmux-workspace	~/.config/tmux/workspace-picker.sh
+󰈞  Prefix + e	Workspace Files Picker (85%×75% · C-e full)	tmux	tmux-workspace	~/.config/tmux/workspace-picker.sh
   Prefix + P	GitHub Pull Request Review Picker	tmux	tmux-pr	~/.config/tmux/pr-picker.sh
 󰅍  Prefix + y	Scrollback Picker (Tokens, Links & Yank)	tmux	tmux-scrollback	~/.config/tmux/scrollback-picker.sh
 󰍉  Prefix + /	Workspace Ripgrep Live Search	tmux	tmux-grep	~/.config/tmux/grep-picker.sh

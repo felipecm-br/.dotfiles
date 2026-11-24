@@ -133,6 +133,15 @@ shift
 if [ "$agent" = codex ] && [ "${AI_LAUNCH_CODEX_DAEMON:-0}" != 1 ]; then
   case " $* " in *" --no-daemon "*) ;; *) set -- --no-daemon "$@" ;; esac
 fi
+# Antigravity opens its prompt draft (Ctrl+G) in $EDITOR only (ignores $VISUAL); mise's agy
+# outranks ~/.local/bin/agy in PATH, so route EDITOR through ai-prompt here for agy/agyy too.
+case "$agent" in
+  agy*)
+    if [ -n "${TMUX_PANE:-}" ] && [ -x "$HOME/.local/bin/ai-prompt" ]; then
+      export AI_PROMPT_EDITOR="${AI_PROMPT_EDITOR:-$EDITOR}" EDITOR="$HOME/.local/bin/ai-prompt"
+    fi
+    ;;
+esac
 continue_run=${AI_LAUNCH_CONTINUE:-0}
 unset AI_LAUNCH_CONTINUE
 case "$agent" in claude | jail-claude | jail-claude-ask) settings_guard ;; esac
