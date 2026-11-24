@@ -57,6 +57,27 @@ jail_blocker() {
   fi
 }
 
+# Pin repository git metadata inside the jail so a prompt-injected agent cannot rewrite
+# config/hooks (which host-side git or lazygitrs would later execute) or swap the .git pointer
+# in linked worktrees (awt). In linked worktrees (.git is a file), --worktree exposes the common
+# git dir and --map on .git makes rename/unlink fail with EBUSY while git commit still works.
+# In normal repos (.git is a dir), config and hooks are mounted read-only (renaming .git itself
+# still needs upstream ai-jail support to nest --map inside --rw-map .git).
+pin_git() {
+  local top gitdir commondir
+  top=$(git rev-parse --show-toplevel 2>/dev/null) || return 0
+  gitdir=$(git rev-parse --path-format=absolute --git-dir 2>/dev/null) || return 0
+  commondir=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null) || return 0
+  if [ -f "$top/.git" ]; then
+    supervise+=(--worktree --map "$top/.git")
+  fi
+  [ -f "$commondir/config" ] && supervise+=(--map "$commondir/config")
+  [ -d "$commondir/hooks" ] && supervise+=(--map "$commondir/hooks")
+  if [ "$gitdir" != "$commondir" ] && [ -f "$gitdir/config" ]; then
+    supervise+=(--map "$gitdir/config")
+  fi
+}
+
 # Claude in ai-jail through `ai-memory run` (ai-memory workstream/handoff): the project directory
 # is the blast radius. `ask` keeps permission prompts (held approvals, the phone page); `yolo`
 # turns them off (--true-yolo). Where ai-jail cannot run, plain claude starts with prompts on.
@@ -67,6 +88,7 @@ launch_jailed() { # <ask|yolo> [claude args]
   blocker=$(jail_blocker)
   if [ -z "$blocker" ]; then
     pin_settings
+    pin_git
     jail_supervision
     if [ "$mode" = yolo ]; then
       exec ai-jail --no-save-config "${supervise[@]}" ai-memory run --true-yolo claude "$@"

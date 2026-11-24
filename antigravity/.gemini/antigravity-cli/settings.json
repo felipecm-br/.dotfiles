@@ -10,7 +10,7 @@
     }
   ],
   "artifactReviewPolicy": "always-proceed",
-  "model": "Gemini 4 Neon (XHigh)",
+  "model": "Gemini 4 Neon (Medium)",
   "notifications": true,
   "permissions": {
     "allow": [
@@ -100,6 +100,7 @@
     "/home/fecavmi/dev/github/waymux",
     "/home/fecavmi/.dotfiles/main/.shell/install",
     "/home/fecavmi/dev/github/second-brain",
-    "/home/fecavmi/dev/github/hermes"
+    "/home/fecavmi/dev/github/hermes",
+    "/home/fecavmi/dev/github/vimium/main"
   ]
 }

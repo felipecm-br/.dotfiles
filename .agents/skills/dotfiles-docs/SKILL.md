@@ -28,7 +28,7 @@ docs/
 │   ├── neovim-visual-workflow.md                   # Wayland clipboard isolation, Mermaid hover, smart image paste
 │   ├── smart-patterns-roadmap.md                   # Event-driven intelligence roadmap and pattern catalog
 │   ├── universal-keyboard-ergonomics-and-profiles.md # Dual-profile keyboard ergonomics (vanilla vs keyd)
-│   ├── state-of-the-art-terminal-agent-workflow.md # Canonical SOTA architecture, 9.94/10 verdict & benchmarks
+│   ├── state-of-the-art-terminal-agent-workflow.md # Canonical SOTA architecture, 9.05/10 verdict & benchmarks
 │   ├── cockpit-topology-snapshot-and-restore.md    # Session topology snapshot, post-reboot restore & agent resume
 │   ├── evidence-based-telemetry-and-deep-work.md   # Human response latency metrics & 24h deep work heatmaps
 │   ├── remote-agent-workflow-waymux.md             # Proactive agent supervision, focus auto-dismiss & wait RPCs

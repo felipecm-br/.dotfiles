@@ -20,6 +20,7 @@ Special keys:
 
 - `agent` is the generic glyph for an agent that has no entry of its own.
 - `ai` is the glyph for the AI tooling as a whole (updater header, sound notifications).
+- `fan` (`󰘬` built-in default in `waymux` ≥ 0.16) is the prefix for running `awt-fan` attempt badges in the Cockpit (`@awt_fan` = `<n>/<N>` → `󰘬2/3`); set `[icons] fan` to override it.
 - `awaiting_input` and `hanging` are aliases of `question` and `stalled`, so they always share a glyph.
 
 ## Reading the registry

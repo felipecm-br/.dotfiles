@@ -310,7 +310,7 @@ Inside tmux, Waymaker queries the terminal for image support before its first fr
 active = false
 ```
 
-Measured with [`tests/popup_render_perf.test.sh`](../../tests/popup_render_perf.test.sh) (2 Nov 2026): the first row appears after ~25 ms with the query off, ~135 ms with it on. Only the presets that can preview images keep it: `backgrounds`, `downloads`, `jump`, `nvim`, `scrollback-picker` (Mermaid) and the bundled `workspace`. A new preset gets the block unless it previews images, and the test's budget (p50 ≤ 100 ms) catches a regression.
+Measured with [`tests/popup_render_perf.test.sh`](../../tests/popup_render_perf.test.sh) (2 Nov 2026, re-verified 20 Nov on `wm` 0.10.0): the first row appears after ~25–37 ms with the query off, ~135 ms with it on. Only the presets that can preview images keep it: `backgrounds`, `downloads`, `jump`, `nvim`, `scrollback-picker` (Mermaid) and the bundled `workspace`. A new preset gets the block unless it previews images, and the test's budget (p50 ≤ 100 ms) catches a regression. On 20 Nov, [`tests/cockpit_first_frame.test.sh`](../../tests/cockpit_first_frame.test.sh) extended the same `<100 ms` budget to the full Cockpit HUD (`waymux cockpit`, p50 ~62–64 ms, p95 ~72 ms across 9 panes), and `wm` 0.10.0 fixed an abort-on-exit crash in ratatui's `Drop` when a picker's pane is killed or respawned (cutting exit time from ~1.3 s with a systemd core dump to 11–19 ms with no core).
 
 ## ⌨️ 4. Biomechanical Keymapping Architecture
 
