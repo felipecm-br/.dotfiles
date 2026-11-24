@@ -487,6 +487,9 @@ waymux events --json
 # Send the agent in another pane a message from this one, through its queue (it answers with waymux tell)
 waymux tell {{pane}} {{message}}
 
+# Run the stdio MCP server exposing waymux_list and waymux_tell to sandboxed agents (e.g. Codex)
+waymux mcp
+
 # Report a state for this pane from a script, shown in the status bar and Cockpit like an agent
 waymux report {{working|idle|error}} --progress {{percent}} --msg {{text}}
 

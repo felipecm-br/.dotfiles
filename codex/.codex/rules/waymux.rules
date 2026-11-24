@@ -1,0 +1,24 @@
+# Allow Codex to exchange peer messages with other tmux agents via `waymux tell`
+# (and inspect live agent panes via `waymux list` / `waymux health`) when escalating
+# out of Codex's network-disabled workspace sandbox.
+#
+# `waymux tell` only invokes `agent/send` (rate-limited 6/min, 4 KiB max, peer-fenced,
+# refused on non-agent panes), so Codex's network sandbox remains closed for every
+# other command while bidirectional inter-agent messaging works without prompts.
+prefix_rule(
+    pattern = ["waymux", "tell"],
+    decision = "allow",
+    justification = "Send a framed peer message to another tmux agent pane via waymux tell",
+)
+
+prefix_rule(
+    pattern = ["waymux", "list"],
+    decision = "allow",
+    justification = "List active tmux agent panes tracked by waymux",
+)
+
+prefix_rule(
+    pattern = ["waymux", "health"],
+    decision = "allow",
+    justification = "Check local waymux daemon health",
+)

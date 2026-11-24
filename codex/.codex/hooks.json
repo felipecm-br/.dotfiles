@@ -4,14 +4,6 @@
       {
         "hooks": [
           {
-            "command": "workmux set-window-status waiting",
-            "type": "command"
-          }
-        ]
-      },
-      {
-        "hooks": [
-          {
             "command": "codex-hook Notification",
             "type": "command"
           }
@@ -19,14 +11,6 @@
       }
     ],
     "PostToolUse": [
-      {
-        "hooks": [
-          {
-            "command": "workmux set-window-status working",
-            "type": "command"
-          }
-        ]
-      },
       {
         "hooks": [
           {
@@ -60,15 +44,6 @@
       {
         "hooks": [
           {
-            "command": "workmux register-agent",
-            "type": "command"
-          }
-        ],
-        "matcher": "startup|resume|clear"
-      },
-      {
-        "hooks": [
-          {
             "command": "codex-hook SessionStart",
             "type": "command"
           }
@@ -88,49 +63,13 @@
       {
         "hooks": [
           {
-            "command": "workmux set-window-status done",
-            "type": "command"
-          }
-        ]
-      },
-      {
-        "hooks": [
-          {
             "command": "codex-hook Stop",
             "type": "command"
           }
         ]
       }
     ],
-    "SubagentStart": [
-      {
-        "hooks": [
-          {
-            "command": "workmux set-window-status working",
-            "type": "command"
-          }
-        ]
-      }
-    ],
-    "SubagentStop": [
-      {
-        "hooks": [
-          {
-            "command": "workmux set-window-status working",
-            "type": "command"
-          }
-        ]
-      }
-    ],
     "UserPromptSubmit": [
-      {
-        "hooks": [
-          {
-            "command": "workmux set-window-status working",
-            "type": "command"
-          }
-        ]
-      },
       {
         "hooks": [
           {

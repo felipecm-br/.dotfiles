@@ -48,7 +48,7 @@ flowchart LR
 | **Remote Ingress** | Zero-trust Tailscale SSH / Tailscale Serve | SSH to saved machines (`herdr machine add`), which also works over Tailscale SSH |
 | **Ergonomics & Memory** | Home Row anchored ($H=0$), sub-100ms latency | Replaces tmux; its own prefix key (configurable, several allowed) |
 
-Competitor state as of 29 Oct 2026 (herdr 0.9.5 and seven other tools): [state-of-the-art benchmark §2](state-of-the-art-terminal-agent-workflow.md#2-competitor-matrix--architecture-analysis).
+Competitor state (re-audited 20 Nov 2026 across nine tools): [state-of-the-art benchmark §2](state-of-the-art-terminal-agent-workflow.md#2-competitor-matrix--architecture-analysis).
 
 ---
 
@@ -116,8 +116,11 @@ The `waymux-cli` utility ([`waymux/.local/bin/waymux-cli`](../../waymux/.local/b
      ```bash
      waymux-cli wait %2 --state idle --timeout 120
      ```
+4. **Keep-Awake Inhibitor (`waymux` ≥ 0.16):**
+   - While any tracked pane is `working` or `background`, the daemon holds a `systemd-inhibit --what=idle:sleep --mode=block` lock (`systemd-inhibit --list` shows `waymux`) so the host does not suspend mid-turn or during a long background build.
+   - The lock is released automatically when the last active agent rests, closes, or when the daemon exits/crashes. Set `keep_awake = false` in [`waymux/.config/waymux/config.toml`](../../waymux/.config/waymux/config.toml) to disable it (on systems without `systemd-inhibit`, it warns once and no-ops).
 
-### The `waymux` Unified Binary (`v0.2.0+`)
+### The `waymux` Unified Binary (`v0.2.0+` … `v0.16.0`)
 
 The crate builds `waymux` from a unified Rust library (`src/lib.rs`). All client subcommands are intercepted synchronously **before** initializing logging, the PID file, or the multi-threaded Tokio runtime (<1.5ms startup overhead):
 
@@ -128,17 +131,19 @@ The crate builds `waymux` from a unified Rust library (`src/lib.rs`). All client
 - `waymux list`: List active AI agent pane states in TSV format (`pane_id`, `state`, `last_timestamp`).
 - `waymux dismiss [pane_id]`: Dismiss attention/question/permission badge for a pane (invoked directly by Tmux `pane-focus-in` hook).
 - `waymux daemon [--config <FILE>]` (managed via `waymux.service`): Start the async Axum/Tokio control plane daemon.
-- `waymux cockpit`: Launch the Golden-Ratio (`85% × 75%`) AI Fleet & Window Cockpit HUD via Waymaker (`wm`) with an embedded preset and `@SEGMENT_BG`/`@FG`/`@ACCENT_COLOR` theme synchronization.
+- `waymux cockpit`: Launch the Golden-Ratio (`85% × 75%`) AI Fleet & Window Cockpit HUD via Waymaker (`wm`) with an embedded preset, `@SEGMENT_BG`/`@FG`/`@ACCENT_COLOR` theme synchronization, and `󰘬2/3` badges on running `awt-fan` attempts (`@awt_fan` pane tag, `waymux` ≥ 0.16).
 - `waymux cockpit-items`: Generate the 12-column TSV rows for Waymaker using native `/proc/<pid>/stat` and `/proc/<pid>/comm` scanning (~14ms).
 - `waymux cockpit-preview <session> <idx> <pane_id> [path]` / `waymux cockpit-diff <path> [pane_id]` / `waymux cockpit-help`: Render live terminal previews, `delta` side-by-side git diffs, and telemetry help cards.
 - `waymux agent-action <approve|deny|prompt> <state> <pid> [pane_id]` & `waymux review-notes <count|list|send> ...`: Execute guarded agent prompt actions (`approve`/`deny` re-read the daemon's live state and ignore a prompt on screen for less than 400 ms; `deny` sends `Esc`, never `Enter`; a call matching a risk rule needs a second `approve` within 3 s) and dispatch `.git/info/lines.json` review notes through the delivery queue.
 - `waymux triage --popup` & `waymux triage --jump`: Cycle notifying AI agent panes in an isolated `_popups` overlay or jump directly with return-origin memory.
 - `waymux hook <tmux|lazygit> [event]` & `waymux inject <workspace_dir> <prompt>`: Native sub-10ms AI lifecycle hooks and prompt delivery through the queue.
-- `waymux tell <pane> <text | ->` (waymux ≥ 0.16): one agent sends another a message through the recipient's queue, framed as a peer's text with the command to answer; 6 per minute, 4 KiB each; a sandboxed agent's hook token may send only as its own pane. See [the SOTA roadmap, P9](state-of-the-art-terminal-agent-workflow.md#83-open-three-phases-to-92).
-- `waymux queue <add <pane> <text>|ls [pane]|rm <pane> [id]>`: The daemon holds prompts and types them only after 1 s of `idle`, one per rest, never into `working`/`permission`/`question`; a prompt not taken in 5 s is marked `stalled` and never retyped. See [the TUIOS roadmap](tuios-benchmark-and-agent-inbox-roadmap.md#4-adoption-roadmap).
+- `waymux tell <pane> <text | ->` (`agent/send`, `waymux` ≥ 0.16): one agent sends another a message through the recipient's queue, framed as a peer's text behind a `│ ` gutter with the command to answer (`waymux tell <sender> "…"`), stripped of escapes and invisible characters; 6 per minute, 4 KiB each; accepts both daemon-tracked panes and freshly opened known agent binaries (`#{pane_current_command}`) before their first hook while strictly refusing shells/editors; distinguishes sandbox-blocked `PermissionDenied` on `127.0.0.1:4040` from a stopped daemon; a sandboxed agent's hook token may send only as its own pane (403 on spoofing, `tmux.*` and `inject`; spawning agents stays excluded from jailed tokens). See [the SOTA done ledger, P9](state-of-the-art-terminal-agent-workflow.md#82-done).
+- `waymux mcp`: stdio MCP server exposing only `waymux_list` (read-only live agent panes across sessions) and `waymux_tell` (framed `agent/send`). Lets agents whose shell sandbox blocks loopback `127.0.0.1:4040` (such as Codex under `:workspace` with `network = restricted`) reply bidirectionally on the host without weakening their command sandbox (paired with `codex/.codex/rules/waymux.rules` for `on-request` escalation).
+- `waymux queue <add <pane> <text>|ls [pane]|rm <pane> [id]|send <pane> [id]|edit <pane> <id> <text|->>`: The daemon holds prompts and types them only after 1 s of `idle` with an empty composer (`held` while the user has a draft, `waymux` ≥ 0.14), one per rest, never into `working`/`permission`/`question`. After 1.5 s, if the agent has not started and the prompt tail still shows on the bottom of the resting pane (a long paste that dropped `Enter`), it presses `Enter` once more (`waymux` ≥ 0.16); a prompt not taken in 5 s is marked `stalled` and never retyped. Prompts not yet typed are persisted in `$XDG_STATE_HOME/waymux/queue` (`0600`) tied to the tmux server and restored across daemon restarts without double-typing (`waymux` ≥ 0.16). See [the TUIOS roadmap](tuios-benchmark-and-agent-inbox-roadmap.md#4-adoption-roadmap).
+- Agent & script verbs (`waymux` ≥ 0.13–0.15): `waymux run [--split <side>] --wait [--capture] -- <cmd>`, `waymux wait <pane> [--for <dur>]`, `waymux events --json`, `waymux report <state>`, `waymux goal <pane> --check <cmd>`, `waymux api list|describe|call`, `waymux mute`, `waymux skill setup|status`, `waymux forward <pane> <port>`, and `waymux send-file <pane> <file|--clipboard>`. See the [Waymux Skill](../../.agents/skills/waymux/SKILL.md) for exit statuses and usage.
 - Held approvals (`[approvals]` in `waymux/.config/waymux/config.toml`, `PermissionRequest` hook in `claude/.claude/settings.json`): the Cockpit's `y`/`n` answer Claude Code's permission prompt through the hook's decision output instead of keystrokes; Claude keeps its dialog on screen and the first answer wins. Set `enabled = false` to go back to keystrokes.
 - `waymux checkpoint <list|diff <n>|restore <n> [--force]> [-w <pane>]`: every agent turn's work tree is saved outside the repository (`$XDG_STATE_HOME/waymux/checkpoints/`); `restore` puts the files back as a turn left them after saving a safety checkpoint, without touching the index or `HEAD`.
-- Away recap & alert bursts: after 10 minutes away from a pane, the Cockpit preview opens with one line of what its agent did since you last focused it (turns, files, commands, last test; RPC `agent/recap`). Blocking alerts within 1.5 s play one sound and share one status-bar line (`3 agents need you › …`).
+- Away recap & alert bursts: after 10 minutes away from a pane, the Cockpit preview opens with one line of what its agent did since you last focused it (turns, files, commands, last test; RPC `agent/recap`), plus a per-turn `Last turn` summary (`waymux` ≥ 0.14). Blocking alerts within 1.5 s play one sound and share one status-bar line (`3 agents need you › …`).
 - `waymux wt <subcommand>` (or invoked via `awt` symlink): Native Git worktree orchestrator (`new`, `go`, `ls`, `rm`, `ship`, `reap`, `sweep`, `pick`).
 - `waymux init <--tmux|--systemd|--hooks>`: Emit portable integration snippets for `.tmux.conf`, user systemd, and agent hooks.
 
