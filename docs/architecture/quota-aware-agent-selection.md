@@ -99,6 +99,8 @@ Projections only change the level once a burn rate has been **measured** (≥ 2 
 
 Selection walks `AI_AGENT_PREFERENCE` (default `claude agy agyy`) and picks the first `green`/`unknown`, then the first `yellow`, then the `red` agent with the earliest reset. With `--auto`, `ai-launch` prints the chosen row (dim) before starting the agent.
 
+To hide an inactive or unpaid CLI from the launch menu and exclude it from recommendations (each account id — `claude`, `agy`, `agyy`, `codex`, `devin` — is independent), list it in `AI_LAUNCH_DISABLE` (space-separated) or in the machine-local file `~/.config/ai-quota/disable` (one id per line, `#` comments ignored). Setting `AI_LAUNCH_DISABLE=""` overrides the file for a single command.
+
 ## Precedence in `ai-launch`
 
 1. Explicit argument: `ai-launch claude --model sonnet`, `ai-launch --auto`, `ai-launch --menu`

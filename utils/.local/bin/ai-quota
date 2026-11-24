@@ -13,7 +13,25 @@
 here=$(dirname "$(readlink -f "$0")")
 export WAYMUX_QUOTA_STATE_DIR="${WAYMUX_QUOTA_STATE_DIR:-${XDG_STATE_HOME:-$HOME/.local/state}/ai-quota}"
 export WAYMUX_QUOTA_PROVIDERS="${WAYMUX_QUOTA_PROVIDERS-$(printf '%q' "$here/ai-quota-agy")}"
-export WAYMUX_QUOTA_PREFERENCE="${WAYMUX_QUOTA_PREFERENCE:-${AI_AGENT_PREFERENCE:-claude agy agyy}}"
+if [ -z "${AI_LAUNCH_DISABLE+x}" ]; then
+  _disable_file="${XDG_CONFIG_HOME:-$HOME/.config}/ai-quota/disable"
+  if [ -r "$_disable_file" ]; then
+    AI_LAUNCH_DISABLE=$(sed -e 's/#.*//' -e '/^[[:space:]]*$/d' "$_disable_file" | tr '\n' ' ')
+  else
+    AI_LAUNCH_DISABLE=""
+  fi
+fi
+export AI_LAUNCH_DISABLE
+_pref="${WAYMUX_QUOTA_PREFERENCE:-${AI_AGENT_PREFERENCE:-claude agy agyy}}"
+if [ -n "${AI_LAUNCH_DISABLE:-}" ]; then
+  _filtered=""
+  for _a in $_pref; do
+    case " $AI_LAUNCH_DISABLE " in *" $_a "*) continue ;; esac
+    _filtered="${_filtered:+$_filtered }$_a"
+  done
+  [ -n "$_filtered" ] && _pref="$_filtered"
+fi
+export WAYMUX_QUOTA_PREFERENCE="$_pref"
 [ -n "${AI_QUOTA_SESSION_RATE:-}" ] && export WAYMUX_QUOTA_SESSION_RATE="$AI_QUOTA_SESSION_RATE"
 
 if ! command -v waymux >/dev/null 2>&1; then

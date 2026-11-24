@@ -15,8 +15,16 @@ jail_default=0
 models=$("$(dirname "$(readlink -f "$0")")/ai-launch-models" 2>/dev/null)
 [ -n "$models" ] || models='{}'
 
-jq -c --arg jail_ok "$jail_ok" --arg jail_default "$jail_default" --argjson models "$models" '
-[ .[] | if (.agent == "codex" or .agent == "devin") and .model == "default" and (($models[.agent] // []) | length) > 0
+disable="${AI_LAUNCH_DISABLE-}"
+if [ -z "${AI_LAUNCH_DISABLE+x}" ]; then
+  _disable_file="${XDG_CONFIG_HOME:-$HOME/.config}/ai-quota/disable"
+  [ -r "$_disable_file" ] && disable=$(sed -e 's/#.*//' -e '/^[[:space:]]*$/d' "$_disable_file" | tr '\n' ' ')
+fi
+
+jq -c --arg jail_ok "$jail_ok" --arg jail_default "$jail_default" --argjson models "$models" --arg disable "$disable" '
+($disable | split(" ") | map(select(length > 0))) as $dis
+| [ .[] | select((.agent as $a | $dis | index($a)) == null) ]
+| [ .[] | if (.agent == "codex" or .agent == "devin") and .model == "default" and (($models[.agent] // []) | length) > 0
         then . as $r | $models[.agent][] | $r + . + {rec: false} else . end ]
 | (map(select(.agent == "claude" and .rec)) + map(select(.agent == "claude")) | first) as $c
 | . + [$c | select(. != null and $jail_ok == "1")

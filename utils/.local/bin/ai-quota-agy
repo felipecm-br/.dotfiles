@@ -28,9 +28,12 @@ FORCE="${WAYMUX_QUOTA_FORCE:-${AI_QUOTA_FORCE:-0}}"
 mkdir -p "$STATE_DIR"
 
 prompt_times() { # <history.jsonl>: epoch-seconds of real prompts in the last 8 days
-  tail -n 6000 "$1" 2>/dev/null |
+  [ -r "$1" ] || { echo '[]'; return; }
+  local out
+  out=$(tail -n 6000 "$1" 2>/dev/null |
     jq -c -s --argjson cut $((now - 691200)) \
-      '[.[] | select((.type // "prompt") != "slash_command") | (.timestamp / 1000 | floor) | select(. >= $cut)]' 2>/dev/null || echo '[]'
+      '[.[] | select((.type // "prompt") != "slash_command") | (.timestamp / 1000 | floor) | select(. >= $cut)]' 2>/dev/null) &&
+    [ -n "$out" ] && printf '%s\n' "$out" || echo '[]'
 }
 
 agy_events() { # <log dir>: [{ts, reset}] from 429 quota lines in logs touched in the last 8 days

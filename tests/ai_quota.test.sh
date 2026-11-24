@@ -9,11 +9,11 @@ bad() { echo "FAIL: $*" >&2; exit 1; }
 # Sandboxed HOME / state / runtime: never the live ~/.claude, ~/.gemini or ~/.local/state.
 SANDBOX=$(mktemp -d)
 trap 'rm -rf "$SANDBOX"' EXIT
-export HOME="$SANDBOX/home" XDG_STATE_HOME="$SANDBOX/state" XDG_RUNTIME_DIR="$SANDBOX/run"
+export HOME="$SANDBOX/home" XDG_STATE_HOME="$SANDBOX/state" XDG_RUNTIME_DIR="$SANDBOX/run" XDG_CONFIG_HOME="$SANDBOX/config"
 mkdir -p "$HOME/.claude/sessions" "$HOME/.gemini/antigravity-cli/log" "$XDG_RUNTIME_DIR" "$SANDBOX/bin"
 for b in claude agy-bin; do printf '#!/bin/sh\n' >"$SANDBOX/bin/$b"; chmod +x "$SANDBOX/bin/$b"; done
 export PATH="$SANDBOX/bin:$ROOT/utils/.local/bin:$PATH"
-unset AI_AGENT_PREFERENCE AI_LAUNCH_AGENT AI_QUOTA_SESSION_RATE
+unset AI_AGENT_PREFERENCE AI_LAUNCH_AGENT AI_QUOTA_SESSION_RATE AI_LAUNCH_DISABLE
 # A shell started through ai-launch carries the wrapper's WAYMUX_* settings; they would point
 # these tests at the real quota state and armed-choice file. Drop them.
 for _v in $(env | sed -n 's/^\(WAYMUX_\(QUOTA\|LAUNCH\|SWITCH\)_[A-Z_]*\)=.*/\1/p'); do unset "$_v"; done
@@ -269,3 +269,22 @@ TMUX_PANE=%9 SHELL=/bin/true ai-launch shell >/dev/null 2>&1
 grep -qxF -- "-u set-option -p -u -t %9 @ai_launch" "$SANDBOX/tmux.log" && ok "shell clears the tag" || bad "untag: $(tail -3 "$SANDBOX/tmux.log")"
 : >"$SANDBOX/tmux.log"; TMUX_PANE= ai-launch claude >/dev/null 2>&1
 [ ! -s "$SANDBOX/tmux.log" ] && ok "outside tmux: no tag" || bad "tagged outside tmux"
+
+# 11. Missing history.jsonl under pipefail must not break ai-quota-agy (e.g. fresh agyy profile)
+mkdir -p "$SANDBOX/agyy/.gemini/antigravity-cli"
+printf '{"token":{"access_token":"x","expiry":"2000-01-01T00:00:00Z"}}\n' >"$SANDBOX/agyy/.gemini/antigravity-cli/antigravity-oauth-token"
+snap=$(AGYY_HOME="$SANDBOX/agyy" AI_QUOTA_NO_API=1 ai-quota --json)
+[ "$(jq -r '[.agents[] | .agent] | sort | join(",")' <<<"$snap")" = "agy,agyy,claude" ] &&
+  ok "missing agyy history.jsonl keeps agy and agyy" || bad "missing history: $(jq -c '[.agents[].agent]' <<<"$snap")"
+
+# 12. AI_LAUNCH_DISABLE and ~/.config/ai-quota/disable hide agents independently and exclude them from recommendations
+mkdir -p "$XDG_CONFIG_HOME/ai-quota"
+printf '# unpaid subscription\nclaude\n' >"$XDG_CONFIG_HOME/ai-quota/disable"
+[ "$(ai-quota --recommend)" = "agy" ] && ok "disable file skips claude in recommend" || bad "disable recommend: $(ai-quota --recommend)"
+rows=$(printf '[{"agent":"claude","cli":"Claude Code","model":"opus","rec":true},{"agent":"agy","cli":"Antigravity","model":"neon","rec":false},{"agent":"agyy","cli":"Antigravity ²","model":"neon","rec":false}]' | ai-launch-rows)
+[ "$(jq -r '[.[].agent] | join(",")' <<<"$rows")" = "agy,agyy" ] &&
+  ok "disable file removes claude (and jail rows), keeps agy + agyy" || bad "disable rows: $rows"
+rows_env=$(printf '[{"agent":"claude","cli":"Claude Code","model":"opus","rec":true},{"agent":"agy","cli":"Antigravity","model":"neon","rec":false},{"agent":"agyy","cli":"Antigravity ²","model":"neon","rec":false}]' | AI_LAUNCH_DISABLE="agyy" ai-launch-rows)
+[ "$(jq -r '[.[].agent | select(. != "jail-claude")] | join(",")' <<<"$rows_env")" = "claude,agy" ] &&
+  ok "AI_LAUNCH_DISABLE=agyy disables only agyy, keeping claude + agy" || bad "env disable rows: $rows_env"
+rm -f "$XDG_CONFIG_HOME/ai-quota/disable"
