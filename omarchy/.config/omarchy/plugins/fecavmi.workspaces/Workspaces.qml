@@ -3,45 +3,177 @@ import QtQuick.Layouts
 import QtQuick.Effects
 import Quickshell
 import Quickshell.Hyprland
+import Quickshell.Io
 import Quickshell.Wayland
 import qs.Commons
+import qs.Commons as Commons
 import qs.Ui
 
 BarWidget {
   id: root
   moduleName: "fecavmi.workspaces"
 
+  // Every monitor has workspaces 1-10 of its own, which Hyprland numbers in a
+  // block of ten per monitor: 1-10, 11-20, and so on (see
+  // default/hypr/monitor-workspaces.lua). Each bar shows workspace 0 ("zero"),
+  // its own monitor's block (labeled 1-10), and any visiting guest workspaces.
+  readonly property int slots: 10
+
+  readonly property var monitor: {
+    var window = root.QsWindow.window
+    var screen = window ? window.screen : null
+    return screen ? Hyprland.monitorFor(screen) : Hyprland.focusedMonitor
+  }
+  readonly property string monitorName: root.monitor ? root.monitor.name : ""
+
+  // Connector -> block, from the file Hyprland keeps them in.
+  property var blocks: ({})
+
+  function readBlocks(text) {
+    var next = {}
+    var lines = String(text || "").split("\n")
+    for (var i = 0; i < lines.length; i++) {
+      var fields = lines[i].split("\t")
+      if (fields.length >= 3 && fields[1] !== "") {
+        var parsed = parseInt(fields[0], 10)
+        if (!isNaN(parsed)) next[fields[1]] = parsed
+      }
+    }
+    root.blocks = next
+  }
+
+  FileView {
+    path: (Quickshell.env("XDG_STATE_HOME") || Quickshell.env("HOME") + "/.local/state") + "/omarchy/monitors/workspaces"
+    watchChanges: true
+    printErrors: false
+    onFileChanged: reload()
+    onLoaded: root.readBlocks(text())
+    onLoadFailed: root.readBlocks("")
+  }
+
+  function blockOf(id) {
+    return Math.floor((id - 1) / root.slots)
+  }
+
+  function slotOf(id) {
+    return (id - 1) % root.slots + 1
+  }
+
+  function isZeroWorkspace(w) {
+    return w !== null && (w.name === "zero" || w.name === "0")
+  }
+
+  function isGuest(id) {
+    return id > 0 && root.blockOf(id) !== root.block
+  }
+
+  function displayLabel(id) {
+    if (id === 0) return "0"
+    return String(root.slotOf(id))
+  }
+
+  function activeWorkspaceId() {
+    return root.monitor && root.monitor.activeWorkspace ? root.monitor.activeWorkspace.id : -1
+  }
+
+  // Until Hyprland has written the file, infer the block from the active or
+  // existing numeric workspaces on this monitor.
+  readonly property int block: {
+    var assigned = root.blocks[root.monitorName]
+    if (assigned !== undefined) return assigned
+    var active = root.activeWorkspaceId()
+    if (active > 0) return root.blockOf(active)
+    var values = Hyprland.workspaces.values
+    for (var i = 0; i < values.length; i++) {
+      var w = values[i]
+      if (w && w.id > 0 && w.monitor && w.monitor.name === root.monitorName) {
+        return root.blockOf(w.id)
+      }
+    }
+    return 0
+  }
+
   function workspaceById(id) {
     var values = Hyprland.workspaces.values
     for (var i = 0; i < values.length; i++) {
-      if (values[i].id === id || values[i].name === String(id) || (id === 0 && (values[i].name === "zero" || values[i].name === "0"))) return values[i]
+      var w = values[i]
+      if (!w) continue
+      if (id === 0) {
+        if (root.isZeroWorkspace(w)) return w
+      } else if (w.id === id) {
+        return w
+      }
     }
 
     return null
   }
 
+  // Workspace 0 ("zero"), the first five of the monitor's own block, and any
+  // of the rest of the block (6-10) that exist. After them come visiting guest
+  // workspaces from an unplugged monitor that had no room to merge.
   function workspaceIds() {
-    var ids = [0, 1, 2, 3, 4, 5]
+    var base = root.block * root.slots
+    var ids = [0, base + 1, base + 2, base + 3, base + 4, base + 5]
+    var guests = []
     var values = Hyprland.workspaces.values
 
     for (var i = 0; i < values.length; i++) {
       var w = values[i]
+      if (!w || root.isZeroWorkspace(w)) continue
+      if (w.name && String(w.name).indexOf("special:") === 0) continue
       var id = w.id
-      if ((w.name === "zero" || w.name === "0" || id === 0) && ids.indexOf(0) === -1) {
-        ids.push(0)
-      } else if (id > 0 && id <= 10 && ids.indexOf(id) === -1) {
-        ids.push(id)
+      if (id <= 0) continue
+      if (root.blockOf(id) === root.block) {
+        if (ids.indexOf(id) === -1) ids.push(id)
+      } else if (w.monitor && w.monitor.name === root.monitorName) {
+        if (guests.indexOf(id) === -1) guests.push(id)
       }
     }
 
     ids.sort(function(left, right) { return left - right })
-    return ids
+    guests.sort(function(left, right) { return left - right })
+    return ids.concat(guests)
+  }
+
+  readonly property var visibleWorkspaceIds: root.workspaceIds()
+
+  function dispatch(expression) {
+    if (root.bar) root.bar.run("hyprctl dispatch " + Util.shellQuote(expression))
   }
 
   function focusWorkspace(id) {
-    if (!root.bar) return
-    var target = (id === 0) ? "name:zero" : String(id)
-    root.bar.run("hyprctl dispatch " + Util.shellQuote("hl.dsp.focus({ workspace = \"" + target + "\" })"))
+    if (id === 0) {
+      root.dispatch("hl.dsp.focus({ workspace = \"name:zero\" })")
+    } else if (root.blockOf(id) === root.block) {
+      if (root.monitorName) {
+        root.dispatch("o.workspaces.focus(" + root.slotOf(id) + ", \"" + root.monitorName + "\")")
+      } else {
+        root.dispatch("o.workspaces.focus(" + root.slotOf(id) + ")")
+      }
+    } else {
+      root.dispatch("hl.dsp.focus({ workspace = \"" + id + "\" })")
+    }
+  }
+
+  Connections {
+    target: Hyprland
+    function onRawEvent(event) {
+      var name = event ? String(event.name) : ""
+      // Quickshell credits every workspace switch to the focused monitor, as
+      // the event doesn't say which one switched, and misses the workspace a
+      // monitor falls back to when its own is moved away. Moving workspaces
+      // between monitors switches the others, so ask Hyprland for the truth.
+      // A workspace that changes number is only learned by asking too. Every
+      // bar shares what Hyprland answers, so one asks after a plain switch.
+      var switched = name === "workspacev2" && root.monitor !== null && root.monitor.focused
+      if (switched || name === "moveworkspacev2" || name === "changeworkspaceid") {
+        Hyprland.refreshMonitors()
+        Hyprland.refreshWorkspaces()
+        if (name === "moveworkspacev2" || name === "changeworkspaceid") {
+          Hyprland.refreshToplevels()
+        }
+      }
+    }
   }
 
   readonly property var defaultNerdFontGlyphs: ({
@@ -313,7 +445,7 @@ BarWidget {
 
   function getWorkspaceIcons(workspace, id, focused) {
     if (!workspace || !workspace.toplevels || !workspace.toplevels.values || workspace.toplevels.values.length === 0) {
-      return [{ icon: focused ? "\uDB85\uDCFB" : String(id), brightness: 0.0, contrast: 1.0 }]
+      return [{ icon: focused ? "\uDB85\uDCFB" : root.displayLabel(id), brightness: 0.0, contrast: 1.0 }]
     }
 
     var toplevels = workspace.toplevels.values
@@ -322,7 +454,7 @@ BarWidget {
       var iconSpec = root.iconForToplevel(toplevels[i])
       if (iconSpec) icons.push(iconSpec)
     }
-    return icons.length > 0 ? icons : [{ icon: focused ? "\uDB85\uDCFB" : String(id), brightness: 0.0, contrast: 1.0 }]
+    return icons.length > 0 ? icons : [{ icon: focused ? "\uDB85\uDCFB" : root.displayLabel(id), brightness: 0.0, contrast: 1.0 }]
   }
 
   readonly property real trailingGap: root.vertical ? 0 : Style.spaceReal(1.5)
@@ -334,25 +466,31 @@ BarWidget {
     id: grid
     anchors.fill: parent
     anchors.rightMargin: root.trailingGap
-    columns: root.vertical ? 1 : root.workspaceIds().length
+    columns: root.vertical ? 1 : root.visibleWorkspaceIds.length
     columnSpacing: root.vertical ? 0 : Style.space(3)
     rowSpacing: root.vertical ? Style.space(3) : 0
 
     Repeater {
-      model: root.workspaceIds()
+      model: root.visibleWorkspaceIds
 
       Item {
         id: pillItem
         required property int modelData
+        required property int index
 
         readonly property var workspace: root.workspaceById(modelData)
         readonly property bool occupied: workspace !== null && workspace.toplevels && workspace.toplevels.values && workspace.toplevels.values.length > 0
+        readonly property var activeWorkspace: root.monitor && root.monitor.activeWorkspace ? root.monitor.activeWorkspace : Hyprland.focusedWorkspace
         readonly property bool focused: {
-          if (Hyprland.focusedWorkspace === null) return false
-          if (Hyprland.focusedWorkspace.id === modelData) return true
-          if (modelData === 0 && (Hyprland.focusedWorkspace.name === "zero" || Hyprland.focusedWorkspace.name === "0")) return true
-          return Hyprland.focusedWorkspace.name === String(modelData)
+          if (!activeWorkspace) return false
+          if (modelData === 0) return root.isZeroWorkspace(activeWorkspace)
+          return activeWorkspace.id === modelData
         }
+        readonly property bool firstGuest: root.isGuest(modelData) && index > 0 && !root.isGuest(root.visibleWorkspaceIds[index - 1])
+
+        // A gap sets visiting workspaces apart from the monitor's own.
+        Layout.leftMargin: firstGuest && !root.vertical ? Style.space(6) : 0
+        Layout.topMargin: firstGuest && root.vertical ? Style.space(6) : 0
 
         // Reactive signature that triggers instant icon re-computation on tab/title changes for THIS workspace only
         readonly property string toplevelSignature: {
@@ -367,7 +505,7 @@ BarWidget {
               if (t.lastIpcObject && t.lastIpcObject.title) sig += t.lastIpcObject.title + ";"
             }
           }
-          if (focused && ToplevelManager.activeToplevel) {
+          if (focused && (!root.monitor || root.monitor.focused) && ToplevelManager.activeToplevel) {
             sig += (ToplevelManager.activeToplevel.title || "") + ";"
           }
           return sig
@@ -378,10 +516,10 @@ BarWidget {
           return root.getWorkspaceIcons(workspace, modelData, focused)
         }
         readonly property color itemColor: {
-          if (focused) return Color.accent
-          if (mouseArea.containsMouse) return Color.foreground
-          if (occupied) return Qt.lighter(Color.muted, 1.65)
-          return Util.alpha(Color.muted, 0.45)
+          if (focused) return Commons.Color.accent
+          if (mouseArea.containsMouse) return Commons.Color.foreground
+          if (occupied) return Qt.lighter(Commons.Color.muted, 1.65)
+          return Util.alpha(Commons.Color.muted, 0.45)
         }
 
         implicitWidth: pillRect.implicitWidth
@@ -396,16 +534,16 @@ BarWidget {
           implicitWidth: Math.max(height, iconsRow.implicitWidth + 14)
 
           color: {
-            if (focused) return Util.alpha(Color.accent, 0.22)
-            if (mouseArea.containsMouse) return Util.alpha(Color.foreground, 0.12)
-            if (occupied) return Util.alpha(Color.foreground, 0.06)
+            if (focused) return Util.alpha(Commons.Color.accent, 0.22)
+            if (mouseArea.containsMouse) return Util.alpha(Commons.Color.foreground, 0.12)
+            if (occupied) return Util.alpha(Commons.Color.foreground, 0.06)
             return "transparent"
           }
 
           border.color: {
-            if (focused) return Color.accent
-            if (mouseArea.containsMouse) return Util.alpha(Color.foreground, 0.3)
-            if (occupied) return Util.alpha(Color.foreground, 0.15)
+            if (focused) return Commons.Color.accent
+            if (mouseArea.containsMouse) return Util.alpha(Commons.Color.foreground, 0.3)
+            if (occupied) return Util.alpha(Commons.Color.foreground, 0.15)
             return "transparent"
           }
           border.width: focused ? 1.5 : (occupied ? 1 : 0)
@@ -437,6 +575,7 @@ BarWidget {
                   id: glyphText
                   visible: !hasSvg
                   anchors.centerIn: parent
+                  textFormat: Text.PlainText
                   text: hasSvg ? "" : root.getGlyphOrFallback(spec.icon)
                   color: pillItem.itemColor
                   font.family: "JetBrainsMono Nerd Font Propo"

@@ -49,10 +49,11 @@ The mechanism relies on real-time event-driven IPC between Hyprland, Wayland pro
 └─────────────────────────────────────────────────────────────┘
 ```
 
-### 1. Event-Driven Reactivity (Zero Polling)
-- **Hyprland IPC Events**: Whenever you change a browser tab, navigate to a new site, or focus a window, Hyprland emits an IPC notification updating the window's `title` and `lastIpcObject`.
+### 1. Event-Driven Reactivity & Per-Monitor Blocks (Zero Polling)
+- **Per-Monitor Workspace Blocks**: Omarchy assigns each physical monitor a block of 10 global Hyprland workspace IDs (`1–10`, `11–20`, `21–30`, …) persisted in `$XDG_STATE_HOME/omarchy/monitors/workspaces` (see `/usr/share/omarchy/default/hypr/monitor-workspaces.lua`). `Workspaces.qml` watches that state file via `FileView`, resolves the bar's own monitor (`Hyprland.monitorFor(screen)`), displays workspace `0` (`name:zero`) plus the monitor's block slots labeled `1–10`, and appends any visiting guest workspaces from unplugged monitors after a visual gap.
+- **Hyprland IPC Events**: Whenever you change a browser tab, navigate to a new site, or focus/move/renumber a workspace (`workspacev2`, `moveworkspacev2`, `changeworkspaceid`), Hyprland emits an IPC notification and the widget refreshes monitor, workspace, and toplevel state as needed.
 - **QML Bindable Properties**: In Qt/Quickshell, properties such as `workspace.toplevels` and `toplevel.title` are reactive bindings (`QObjectBindableProperty`).
-- Whenever Hyprland updates the title string, Quickshell's QML engine immediately triggers a re-evaluation of `getWorkspaceLabel()` without any timers, scripts, or polling loops.
+- Whenever Hyprland updates the title string, Quickshell's QML engine immediately triggers a re-evaluation of `getWorkspaceIcons()` without any timers, scripts, or polling loops.
 
 ### 2. Hierarchical Matching Pipeline
 
@@ -105,13 +106,13 @@ Rectangle {
   radius: height / 2
   implicitWidth: Math.max(height, label.implicitWidth + 14)
 
-  color: focused ? Util.alpha(Color.accent, 0.22)
-       : mouseArea.containsMouse ? Util.alpha(Color.foreground, 0.12)
-       : occupied ? Util.alpha(Color.foreground, 0.06) : "transparent"
+  color: focused ? Util.alpha(Commons.Color.accent, 0.22)
+       : mouseArea.containsMouse ? Util.alpha(Commons.Color.foreground, 0.12)
+       : occupied ? Util.alpha(Commons.Color.foreground, 0.06) : "transparent"
 
-  border.color: focused ? Color.accent
-              : mouseArea.containsMouse ? Util.alpha(Color.foreground, 0.3)
-              : occupied ? Util.alpha(Color.foreground, 0.15) : "transparent"
+  border.color: focused ? Commons.Color.accent
+              : mouseArea.containsMouse ? Util.alpha(Commons.Color.foreground, 0.3)
+              : occupied ? Util.alpha(Commons.Color.foreground, 0.15) : "transparent"
   border.width: focused ? 1.5 : (occupied ? 1 : 0)
 }
 ```
@@ -129,7 +130,7 @@ Rectangle {
    - Low-contrast workspace number (`opacity: 0.45`).
 4. **Interactive**:
    - `Qt.PointingHandCursor` on hover with smooth color transition.
-   - Left-click executes `hyprctl dispatch hl.dsp.focus(...)` to switch workspaces instantly.
+   - Left-click dispatches `o.workspaces.focus(slot, monitorName)` for the monitor's own block (matching `Super + 1`…`0`), `hl.dsp.focus({ workspace = "name:zero" })` for workspace `0`, or `hl.dsp.focus({ workspace = "<id>" })` for visiting guest workspaces.
 
 ---
 
