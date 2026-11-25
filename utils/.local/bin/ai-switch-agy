@@ -21,7 +21,7 @@ jq -n -c --arg models "$models" --arg current "${current:-}" --arg effort "${eff
 ($models | split("\n") | map(select(length > 0) | split("\t") | {id: .[0], name: (.[1] // .[0])})) as $all
 | ($all | map(.id)) as $ids
 | def has($id): $ids | index($id) != null;
-  def tier: if test("neon|argon|hydrogen|orchestrator") then "$$$$" elif test("opus") then "$$$" elif test("sonnet") then "$$" else "$" end;
+  def tier: if test("neon|argon|hydrogen|carbon|orchestrator") then "$$$$" elif test("opus") then "$$$" elif test("sonnet") then "$$" else "$" end;
   [ $all[] | select(.id | test("-(low|high|xhigh|max)$") | not)
     | (.id | sub("-medium$"; "")) as $fam
     | (.name | sub(" \\(Medium\\)$"; "")) as $name

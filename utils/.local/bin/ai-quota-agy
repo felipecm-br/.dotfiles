@@ -5,17 +5,20 @@
 # profile ($AGYY_HOME) when it has a token. See `waymux quota --help` for the agent fields.
 #
 # Data sources:
-#   percent used per group (Claude & GPT, Gemini Flash, Gemini 4 Neon, Gemini 4 Argon) from
-#   fetchAvailableModels,
-#   with the profile's own token on curl's stdin, cached 60 s (a reader accepts up to 15 min of
-#   staleness and refreshes in the background); without a valid token, 429 "Individual quota
-#   reached ... Resets in XhYmZs" lines in antigravity-cli logs (exhausted-until + learned prompt
-#   capacity per 5h window); prompts in history.jsonl
+#   percent used per group (Claude & GPT, Gemini Flash, Gemini 4 Neon, Gemini 4 Hydrogen,
+#   Gemini 4 Argon, plus 7d weekly Gemini and Claude/GPT windows) from fetchAvailableModels and
+#   retrieveUserQuotaSummary, with the profile's own token on curl's stdin, cached 60 s (a reader
+#   accepts up to 15 min of staleness and refreshes in the background); on forced refresh (`--refresh`),
+#   an expired profile with a saved refresh token asks `agy models` to renew its own token (at most
+#   once per 10 min); without a valid token, 429 "Individual quota reached ... Resets in XhYmZs"
+#   lines in antigravity-cli logs (exhausted-until + learned prompt capacity per 5h window); prompts
+#   in history.jsonl
 #
 # Environment (from waymux): WAYMUX_QUOTA_NOW, WAYMUX_QUOTA_STATE_DIR, WAYMUX_QUOTA_FORCE=1 (skip
 # the cache). Tunables: AI_QUOTA_NO_API=1 (logs and history only), AI_QUOTA_MAX_STALE (seconds a
 # cached answer may be served while a background refresh runs, default 900), AI_QUOTA_FIXTURE_DIR
-# (tests: recorded fetchAvailableModels answers instead of the network).
+# (tests: recorded fetchAvailableModels answers in <label>.json and optional
+# retrieveUserQuotaSummary answers in <label>-summary.json instead of the network).
 
 set -uo pipefail
 
@@ -108,12 +111,40 @@ agy_post() ( # <token> <url> <json body>: POST with the token read from stdin, n
       -X POST --data "$3" "$2" 2>/dev/null
 )
 
-agy_api() ( # <home> <label>: per-model quota from fetchAvailableModels, cached 60 s; `null` when unavailable
+agy_has_refresh() ( # <home>: 0 when the profile has a saved refresh_token (never reads/prints it)
+  { set +x; } 2>/dev/null
+  local home=$1 file="$1/.gemini/antigravity-cli/antigravity-oauth-token"
+  if [ -r "$file" ] && jq -e '(.token.refresh_token // "") != ""' "$file" >/dev/null 2>&1; then
+    return 0
+  fi
+  if [ "$home" = "$(getent passwd "$(id -un)" | cut -d: -f6)" ] && [ "$home" != "$AGYY_HOME" ]; then
+    secret-tool lookup service gemini 2>/dev/null | jq -e '(.token.refresh_token // "") != ""' >/dev/null 2>&1 && return 0
+  fi
+  return 1
+)
+
+agy_renew() ( # <home> <label>: ask the official agy binary to refresh its own lapsed token (throttled)
+  { set +x; } 2>/dev/null
+  local home=$1 label=$2 stamp="$STATE_DIR/agy-renew-$2.ts" last=0
+  $agy_bin || return 0
+  [ -r "$stamp" ] && last=$(cat "$stamp" 2>/dev/null || echo 0)
+  [[ "$last" =~ ^[0-9]+$ ]] && [ $((now - last)) -lt 600 ] && return 0
+  agy_has_refresh "$home" || return 0
+  printf '%s\n' "$now" >"$stamp"
+  if [ "$home" = "$AGYY_HOME" ]; then
+    HOME="$home" DBUS_SESSION_BUS_ADDRESS="unix:path=/dev/null" timeout 12 "$agy_real" models >/dev/null 2>&1 || true
+  else
+    HOME="$home" timeout 12 "$agy_real" models >/dev/null 2>&1 || true
+  fi
+)
+
+agy_api() ( # <home> <label>: per-model + weekly quota from Cloud Code API, cached 60 s; `null` when unavailable
   { set +x; } 2>/dev/null # never trace the token (bash -x would print it expanded)
-  local home=$1 label=$2 cache="$STATE_DIR/agy-models-$2.json" proj_file="$STATE_DIR/agy-project-$2" tok proj resp age
+  local home=$1 label=$2 cache="$STATE_DIR/agy-models-$2.json" proj_file="$STATE_DIR/agy-project-$2" tok proj body resp summary='{}' age
   if [ -n "${AI_QUOTA_FIXTURE_DIR:-}" ]; then
-    # Tests: a recorded fetchAvailableModels response instead of the network
+    # Tests: recorded fetchAvailableModels (+ optional retrieveUserQuotaSummary) responses
     resp=$(cat "$AI_QUOTA_FIXTURE_DIR/$label.json" 2>/dev/null) || { echo null; return; }
+    [ -r "$AI_QUOTA_FIXTURE_DIR/$label-summary.json" ] && summary=$(cat "$AI_QUOTA_FIXTURE_DIR/$label-summary.json" 2>/dev/null)
   else
     if [ -s "$cache" ] && [ "$FORCE" != 1 ]; then
       age=$((now - $(stat -c %Y "$cache")))
@@ -125,6 +156,10 @@ agy_api() ( # <home> <label>: per-model quota from fetchAvailableModels, cached 
       fi
     fi
     tok=$(agy_token "$home")
+    if [ -z "$tok" ] && [ "$FORCE" = 1 ]; then
+      agy_renew "$home" "$label"
+      tok=$(agy_token "$home")
+    fi
     if [ -z "$tok" ]; then echo null; return; fi
     proj=$(cat "$proj_file" 2>/dev/null)
     if [ -z "$proj" ]; then
@@ -132,12 +167,29 @@ agy_api() ( # <home> <label>: per-model quota from fetchAvailableModels, cached 
         '{"metadata":{"ideType":"ANTIGRAVITY"}}' | jq -r '.cloudaicompanionProject // empty' 2>/dev/null)
       [ -n "$proj" ] && printf '%s\n' "$proj" >"$proj_file"
     fi
-    resp=$(agy_post "$tok" "https://daily-cloudcode-pa.googleapis.com/v1internal:fetchAvailableModels" \
-      "$(jq -cn --arg p "$proj" 'if $p == "" then {} else {project: $p} end')")
+    body=$(jq -cn --arg p "$proj" 'if $p == "" then {} else {project: $p} end')
+    resp=$(agy_post "$tok" "https://daily-cloudcode-pa.googleapis.com/v1internal:fetchAvailableModels" "$body")
+    summary=$(agy_post "$tok" "https://daily-cloudcode-pa.googleapis.com/v1internal:retrieveUserQuotaSummary" "$body")
   fi
-  # A model with a resetTime but no remainingFraction is exhausted (the API omits zero).
-  jq -c --argjson now "$now" '
+  jq -e . >/dev/null 2>&1 <<<"$summary" || summary='{}'
+  # A model/bucket with a resetTime but no remainingFraction is exhausted (the API omits zero).
+  jq -c --argjson now "$now" --argjson sum "$summary" '
     def epoch: if . == null then null else (sub("\\.[0-9]+"; "") | fromdateiso8601?) end;
+    def bucket_pct($b):
+      if ($b.disabled // false) then null
+      else (($b.remainingFraction // $b.remaining_fraction //
+             (if ($b.resetTime // $b.reset_time) then 0 else null end))
+            | if . == null then null else (100 - (. * 100 | round)) end) end;
+    def weekly_bucket($pred):
+      [($sum.groups // [])[] | select(type == "object")
+        | select((.displayName // "") | ascii_downcase | test($pred))
+        | (.buckets // [])[] | select(type == "object")
+        | select(((.window // "") | ascii_downcase) == "weekly" or ((.bucketId // "") | ascii_downcase | test("week")))]
+      | first // null
+      | if . == null then null
+        else (bucket_pct(.)) as $p
+        | if $p == null then null
+          else {pct: $p, reset: ((.resetTime // .reset_time) | epoch), window: 604800} end end;
     select(.models) | . as $r
     | def entry($id): ($r.models[$id] // null) as $m | if $m == null then null else {
         model: $id, name: ($m.displayName // $id),
@@ -148,7 +200,10 @@ agy_api() ( # <home> <label>: per-model quota from fetchAvailableModels, cached 
     | ([$r.models | keys[] | select(startswith("claude-") or startswith("gpt-oss"))] | map(entry(.)) | map(select(.pct != null))) as $cg
     | ([$r.models | keys[] | select(startswith("gemini-4-argon"))] | map(entry(.)) | map(select(.pct != null))) as $ag
     | ([$r.models | keys[] | select(startswith("gemini-4-neon"))] | map(entry(.)) | map(select(.pct != null))) as $ng
+    | ([$r.models | keys[] | select(startswith("gemini-4-carbon"))] | map(entry(.)) | map(select(.pct != null))) as $cbg
     | ([$r.models | keys[] | select(test("^gemini-4-hydrogen-(low|medium|high|xhigh)$"))] | map(entry(.)) | map(select(.pct != null))) as $hg
+    | (weekly_bucket("gemini")) as $g7
+    | (weekly_bucket("claude|gpt")) as $c7
     | {ts: $now, default_model: .defaultAgentModelId,
        groups: [
          (if ($cg | length) > 0 then {key: "claude", label: "Claude & GPT", pct: ($cg | map(.pct) | max),
@@ -156,11 +211,15 @@ agy_api() ( # <home> <label>: per-model quota from fetchAvailableModels, cached 
          (entry($r.tieredModelIds.flash[0]? // "") | select(. != null) | {key: "flash", label: "Gemini Flash"} + .),
          (if ($ng | length) > 0 then {key: "neon", label: "Gemini 4 Neon", model: ($ng[0].model), name: "Gemini 4 Neon",
             pct: ($ng | map(.pct) | max), reset: ($ng | map(.reset) | map(select(. != null)) | min)} else empty end),
+         (if ($cbg | length) > 0 then {key: "carbon", label: "Gemini 4 Carbon", model: ($cbg[0].model), name: "Gemini 4 Carbon",
+            pct: ($cbg | map(.pct) | max), reset: ($cbg | map(.reset) | map(select(. != null)) | min)} else empty end),
          (if ($hg | length) > 0 then {key: "hydrogen", label: "Gemini 4 Hydrogen", model: ($hg[0].model), name: "Gemini 4 Hydrogen",
             pct: ($hg | map(.pct) | max), reset: ($hg | map(.reset) | map(select(. != null)) | min)} else empty end),
          (if ($ag | length) > 0 then {key: "argon", label: "Gemini 4 Argon", model: ($ag[0].model), name: "Gemini 4 Argon",
             pct: ($ag | map(.pct) | max), reset: ($ag | map(.reset) | map(select(. != null)) | min)} else empty end),
-         (entry($r.tieredModelIds.pro[0]? // "") | select(. != null) | {key: "pro", label: "Gemini pro tier"} + .)
+         (entry($r.tieredModelIds.pro[0]? // "") | select(. != null) | {key: "pro", label: "Gemini pro tier"} + .),
+         (if $g7 != null then {key: "gemini_7d", label: "Gemini 7d"} + $g7 else empty end),
+         (if $c7 != null then {key: "claude_7d", label: "Claude/GPT 7d"} + $c7 else empty end)
        ]}' <<<"$resp" 2>/dev/null >"$cache.tmp" && [ -s "$cache.tmp" ] && mv -f "$cache.tmp" "$cache" || rm -f "$cache.tmp"
   if [ -s "$cache" ]; then cat "$cache"; else echo null; fi
 )
@@ -211,7 +270,7 @@ jq -n -c \
 def count_since($ts; $since): [$ts[] | select(. >= $since)] | length;
 def fam: sub("-(low|medium|high|xhigh|max)$"; "");
 # Cost tier, as ai-switch-agy shows it (the launch menu would otherwise guess from the name)
-def tier: if test("neon|argon|hydrogen|orchestrator") then "$$$$" elif test("opus") then "$$$"
+def tier: if test("neon|argon|hydrogen|carbon|orchestrator") then "$$$$" elif test("opus") then "$$$"
   elif test("sonnet|gpt") then "$$" else "$" end;
 def clock: if (. - $now) > 86400 then strflocaltime("%a %H:%M") else strflocaltime("%H:%M") end;
 # One launch row per model family (the -medium variant when there is one)
@@ -231,24 +290,35 @@ def agy_model($name; $title; $tag; $bin; $ev; $pr; $n; $api):
   | (($api // {}).default_model // "") as $dm
   | (if $raw then [$raw[] | select(.key == "flash")] | first else null end) as $flash
   # Report shape: badge letters, the model next to Flash/pro, and the pro tier hidden when it is
-  # the Flash model again (its quota is the Flash row)
+  # the Flash model again (its quota is the Flash row); Carbon stays hidden in the popup (same
+  # Gemini 5h pool) while still feeding its launch rows.
   | (if $raw == null then null else [$raw[] | . + {
-        abbr: ({claude: "C", flash: "G", neon: "N", argon: "A"}[.key]),
+        abbr: ({claude: "C", flash: "G", neon: "N", argon: "A", gemini_7d: "W"}[.key]),
         detail: (if .key == "flash" or .key == "pro" then .model else null end),
-        hidden: (.key == "pro" and .model == ($flash.model // ""))}
+        hidden: ((.key == "pro" and .model == ($flash.model // "")) or .key == "carbon")}
       | with_entries(select(.value != null))] end) as $groups
-  | (if ($dm | startswith("claude-")) or ($dm | startswith("gpt-oss")) then "claude"
-     elif ($dm | startswith("gemini-4-neon")) and ($groups != null) and ([$groups[] | select(.key == "neon")] | length > 0) then "neon"
-     elif ($dm | startswith("gemini-4-argon")) and ($groups != null) and ([$groups[] | select(.key == "argon")] | length > 0) then "argon"
+  | ($groups // [] | map(select(.key == "gemini_7d")) | first) as $g7
+  | ($groups // [] | map(select(.key == "claude_7d")) | first) as $c7
+  | (if $groups then [$groups[] | select(.key != "gemini_7d" and .key != "claude_7d")] else null end) as $mgroups
+  | def wfor($k): if $k == "claude" then $c7 else $g7 end;
+    def eff($g): [($g.pct // 100), ((wfor($g.key).pct) // 0)] | max;
+    def unblock($g):
+      (wfor($g.key)) as $w
+      | [ (if ($g.pct // 100) >= 90 and $g.reset != null then $g.reset else empty end),
+          (if ($w.pct // 0) >= 90 and $w.reset != null then $w.reset else empty end) ]
+      | if length > 0 then max else null end;
+    (if ($dm | startswith("claude-")) or ($dm | startswith("gpt-oss")) then "claude"
+     elif ($dm | startswith("gemini-4-neon")) and ($mgroups != null) and ([$mgroups[] | select(.key == "neon")] | length > 0) then "neon"
+     elif ($dm | startswith("gemini-4-argon")) and ($mgroups != null) and ([$mgroups[] | select(.key == "argon")] | length > 0) then "argon"
      else "flash" end) as $dkey
-  | (if $groups then [$groups[] | select(.key == $dkey)] | first else null end) as $dgroup
-  | (if $groups then [$groups[] | select((.pct // 100) < 90)] else null end) as $usable
-  | (if $groups == null then null
+  | (if $mgroups then [$mgroups[] | select(.key == $dkey)] | first else null end) as $dgroup
+  | (if $mgroups then [$mgroups[] | select(eff(.) < 90)] else null end) as $usable
+  | (if $mgroups == null then null
      elif ($usable | length) == 0 then "red"
-     elif ($dgroup != null and ($dgroup.pct // 0) >= 70) or ([$usable[] | select(.pct >= 70)] | length) > 0 then "yellow"
+     elif ($dgroup != null and eff($dgroup) >= 70) or ([$usable[] | select(eff(.) >= 70)] | length) > 0 then "yellow"
      else "green" end) as $api_level
-  | ($dgroup != null and ($dgroup.pct // 0) >= 90) as $dex
-  | ($groups // [] | map(select(.key != "pro")) | map(select((.pct // 100) < 90)) | min_by(.pct) | .key? // null) as $best
+  | ($dgroup != null and eff($dgroup) >= 90) as $dex
+  | ($mgroups // [] | map(select(.key != "pro" and .key != "carbon")) | map(select(eff(.) < 90)) | min_by(eff(.)) | .key? // null) as $best
   | ($dm | fam) as $dfam
   | ($families | map(.id | fam) | index($dfam)) as $has_default
   | ($api_level // (if $active then "red" elif ($est // 0) >= 90 then "red" elif ($est // 0) >= 70 then "yellow" elif $cap == null then "unknown" else "green" end)) as $level
@@ -258,17 +328,21 @@ def agy_model($name; $title; $tag; $bin; $ev; $pr; $n; $api):
   | [ $families[] | (.id | fam) as $f
       | (if ($f | startswith("claude-")) or ($f | startswith("gpt-oss")) then "claude"
          elif ($f | startswith("gemini-4-neon")) or ($f == "gemini-pro-orchestrator-neon") then "neon"
-         elif ($f | startswith("gemini-4-argon")) or ($f == "gemini-pro-orchestrator-g1-pro") then "argon"
+         elif ($f | startswith("gemini-4-carbon")) or ($f == "gemini-pro-orchestrator") then "carbon"
+         elif ($f | startswith("gemini-4-argon")) or ($f == "gemini-pro-orchestrator-g1-pro") or ($f == "gemini-pro-orchestrator-argon") then "argon"
          elif ($f | startswith("gemini-4-hydrogen")) then "hydrogen"
          elif ($f | test("flash")) then "flash" else "pro" end) as $key
-      | ($groups // [] | map(select(.key == $key and ($key != "pro" or ((.model // "") | fam) == $f))) | first) as $grp
+      | ($mgroups // [] | map(select(.key == $key and ($key != "pro" or ((.model // "") | fam) == $f))) | first) as $grp
+      | (wfor($key)) as $wgrp
+      | (if $grp == null then null elif $wgrp == null then $grp.pct else [$grp.pct, $wgrp.pct] | max end) as $rpct
       | [ ("low", "medium", "high", "xhigh", "max") as $l | "\($f)-\($l)" as $v | select($ids | index($v)) | {level: $l, args: "--model \($v)"} ] as $efforts
       | {args: "--model \(.id)", model: .name, tier: ($f | tier),
          quota: (if $groups == null then (if $exhausted then "exhausted ⏳\($exhausted | clock)" else "quota ?" end)
                  elif $grp == null then "no quota data"
+                 elif $wgrp != null then "\($grp.pct)% · 7d \($wgrp.pct)%" + (if $grp.reset and $grp.pct > 0 then " ⟳\($grp.reset | clock)" else "" end)
                  else "\($grp.pct)% used" + (if $grp.reset and $grp.pct > 0 then " ⟳\($grp.reset | clock)" else "" end) end),
-         level: (if $groups == null then $level elif $grp == null then "unknown"
-                 elif $grp.pct >= 90 then "red" elif $grp.pct >= 70 then "yellow" else "green" end),
+         level: (if $groups == null then $level elif $rpct == null then "unknown"
+                 elif $rpct >= 90 then "red" elif $rpct >= 70 then "yellow" else "green" end),
          rec: (if $groups != null and ($dex | not) and $has_default != null then $f == $dfam
                elif $best == "neon" then ($f | startswith("gemini-4-neon"))
                elif $best == "argon" then ($f | startswith("gemini-4-argon"))
@@ -283,16 +357,16 @@ def agy_model($name; $title; $tag; $bin; $ev; $pr; $n; $api):
       source: (if $groups then "api" else "logs" end), groups: $groups, default_model: $dm,
       default_exhausted: $dex,
       until: (if $groups == null then ($active.reset // null)
-              elif $api_level == "red" then ([$groups[].reset | select(. != null)] | min) else null end),
+              elif $api_level == "red" then ([$mgroups[] | unblock(.) | select(. != null)] | min) else null end),
       window: (if $groups == null and $active then (if ($active.reset - $active.ts) > 21600 then "7d" else "5h" end) else null end),
       level: $level, launch: $launch,
       notes: (
         if $groups == null then [{text: "no live API data: the profile has no valid token; open \($name) once to refresh it"}]
         else
-          (if ([$groups[] | select(.key == "argon")] | length) > 0 then []
-           else [$groups[] | select(.key == "pro" and .hidden)
+          (if ([$mgroups[] | select(.key == "argon")] | length) > 0 then []
+           else [$mgroups[] | select(.key == "pro" and .hidden)
                  | {text: "Gemini 4 Argon: no per-model quota in the API; its pro tier maps to \(.model) (the Gemini Flash quota above)"}] end)
-          + (if $dex and ([$groups[] | select(.key == "flash" and (.pct // 100) < 90)] | length) > 0
+          + (if $dex and ([$mgroups[] | select(.key == "flash" and eff(.) < 90)] | length) > 0
              then [{text: "default model \($dm) is out of quota: start with --model gemini-3.8-flash-high", level: "warn"}]
              else [] end)
         end)

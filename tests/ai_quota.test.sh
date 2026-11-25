@@ -130,6 +130,51 @@ snap=$(AI_QUOTA_FIXTURE_DIR="$FIX" ai-quota --json)
 [ "$(AI_QUOTA_FIXTURE_DIR="$FIX" ai-launch --peek --auto)" = "agy --model gemini-4-neon-medium" ] &&
   ok "ai-launch recommends default Gemini 4 Neon when it has quota" || bad "neon launch: $(AI_QUOTA_FIXTURE_DIR="$FIX" ai-launch --peek --auto)"
 
+# 4b-weekly. retrieveUserQuotaSummary adds 7d Gemini and Claude/GPT groups with pace and informs levels/launch
+jq -n --arg gw "$(iso $((now + 432000)))" --arg g5 "$(iso $((now + 14400)))" --arg cw "$(iso $((now + 580000)))" '{
+  groups: [
+    {displayName: "Gemini Models", buckets: [
+      {bucketId: "gemini-weekly", window: "weekly", remainingFraction: 0.70, resetTime: $gw},
+      {bucketId: "gemini-5h", window: "5h", remainingFraction: 0.90, resetTime: $g5}
+    ]},
+    {displayName: "Claude and GPT models", buckets: [
+      {bucketId: "3p-weekly", window: "weekly", remainingFraction: 1, resetTime: $cw},
+      {bucketId: "3p-5h", window: "5h", remainingFraction: 1, resetTime: $g5}
+    ]}
+  ]}' >"$FIX/agy-summary.json"
+snap=$(AI_QUOTA_FIXTURE_DIR="$FIX" ai-quota --json)
+[ "$(jq -c '[.agents[1].groups[] | select(.key == "gemini_7d" or .key == "claude_7d") | {key, pct, window, abbr: (.abbr // null)}]' <<<"$snap")" = '[{"key":"gemini_7d","pct":30,"window":604800,"abbr":"W"},{"key":"claude_7d","pct":0,"window":604800,"abbr":null}]' ] &&
+  ok "weekly groups parsed (Gemini 7d 30% W, Claude/GPT 7d 0%, window 604800)" || bad "weekly groups: $(jq -c '.agents[1].groups' <<<"$snap")"
+[[ "$(AI_QUOTA_FIXTURE_DIR="$FIX" ai-quota)" == *"Gemini 7d: 30% used"*"pace:"* && "$(AI_QUOTA_FIXTURE_DIR="$FIX" ai-quota)" == *"Claude/GPT 7d: 0% used"* ]] &&
+  ok "report shows Gemini 7d with pace and Claude/GPT 7d" || bad "weekly report: $(AI_QUOTA_FIXTURE_DIR="$FIX" ai-quota)"
+[[ "$(AI_QUOTA_FIXTURE_DIR="$FIX" ai-quota --visual | sed 's/\x1b\[[0-9;]*m//g')" == *"Gemini 7d"*"30% used"*"× pace"* ]] &&
+  ok "--visual shows Gemini 7d gauge and pace" || bad "weekly visual"
+[[ "$(AI_QUOTA_FIXTURE_DIR="$FIX" ai-quota --badge)" == *"W30%"* ]] &&
+  ok "badge includes W30% for Gemini 7d" || bad "weekly badge: $(AI_QUOTA_FIXTURE_DIR="$FIX" ai-quota --badge)"
+[ "$(jq -r '.agents[1].launch[] | select(.model == "Gemini 4 Neon") | .quota | split(" ⟳")[0]' <<<"$snap")" = '40% · 7d 30%' ] &&
+  ok "launch row pairs 5h and 7d percentages" || bad "weekly launch row: $(jq -c '.agents[1].launch' <<<"$snap")"
+# Weekly Gemini exhausted (proto3 omits remainingFraction) -> default Gemini exhausted, falls back to Claude Sonnet
+jq -n --arg gw "$(iso $((now + 432000)))" --arg cw "$(iso $((now + 580000)))" '{
+  groups: [
+    {displayName: "Gemini Models", buckets: [{bucketId: "gemini-weekly", window: "weekly", resetTime: $gw}]},
+    {displayName: "Claude and GPT models", buckets: [{bucketId: "3p-weekly", window: "weekly", remainingFraction: 1, resetTime: $cw}]}
+  ]}' >"$FIX/agy-summary.json"
+snap=$(AI_QUOTA_FIXTURE_DIR="$FIX" ai-quota --json)
+[ "$(jq -r '.agents[1].level' <<<"$snap")" = "yellow" ] && [ "$(jq -r '.agents[1].default_exhausted' <<<"$snap")" = "true" ] &&
+  [ "$(AI_QUOTA_FIXTURE_DIR="$FIX" ai-launch --peek --auto)" = "agy --model claude-sonnet-5-5-medium" ] &&
+  ok "Gemini 7d exhausted -> default_exhausted, yellow, launch falls back to Claude Sonnet" || bad "weekly fallback: $(jq -c '.agents[1] | {level, default_exhausted}' <<<"$snap") / $(AI_QUOTA_FIXTURE_DIR="$FIX" ai-launch --peek --auto)"
+# All 5h groups exhausted while weekly still has headroom must STILL be red (weekly groups never count as usable models)
+models 0 0 >"$FIX/agy.json"
+jq -n --arg gw "$(iso $((now + 432000)))" --arg cw "$(iso $((now + 580000)))" '{
+  groups: [
+    {displayName: "Gemini Models", buckets: [{bucketId: "gemini-weekly", window: "weekly", remainingFraction: 0.70, resetTime: $gw}]},
+    {displayName: "Claude and GPT models", buckets: [{bucketId: "3p-weekly", window: "weekly", remainingFraction: 1, resetTime: $cw}]}
+  ]}' >"$FIX/agy-summary.json"
+snap=$(AI_QUOTA_FIXTURE_DIR="$FIX" ai-quota --json)
+[ "$(jq -r '.agents[1].level' <<<"$snap")" = "red" ] && [ "$(jq -r '.agents[1].until' <<<"$snap")" = "$((now + 3600))" ] &&
+  ok "all 5h exhausted with weekly headroom stays red until earliest 5h reset" || bad "5h red with weekly: $(jq -c '.agents[1] | {level, until}' <<<"$snap")"
+rm -f "$FIX/agy-summary.json"
+
 # 4c. `bash -x ai-quota-agy` (the provider that reads it) never prints the token: a fake token file, a curl stub that answers with
 # the fixture, and a secret-tool stub, so no network and no real keyring.
 SECRET="FAKE-ACCESS-TOKEN-$$"
@@ -145,6 +190,45 @@ trace=$(WAYMUX_QUOTA_STATE_DIR="$XDG_STATE_HOME/ai-quota" bash -x "$ROOT/utils/.
 [ "$(tail -n 1 <<<"$trace" | jq -r '.[0].source')" = "api" ] && ok "token path reaches the API (stubbed)" || bad "token path: $(tail -n 1 <<<"$trace")"
 grep -qF "$SECRET" <<<"$trace" && bad "bash -x printed the token" || ok "bash -x never prints the token"
 rm -f "$HOME/.gemini/antigravity-cli/antigravity-oauth-token" "$SANDBOX/bin/curl" "$SANDBOX/bin/secret-tool" "$XDG_STATE_HOME/ai-quota/agy-models-agy.json"
+
+# 4d. Forced refresh (`WAYMUX_QUOTA_FORCE=1`) renews a lapsed agyy token via `agy models` (with isolated HOME + D-Bus)
+# without ever tracing the refresh token, and respects the cooldown stamp.
+mkdir -p "$SANDBOX/agyy-renew/.gemini/antigravity-cli"
+REFRESH_SECRET="FAKE-REFRESH-TOKEN-$$"
+NEW_SECRET="FAKE-NEW-ACCESS-$$"
+jq -n --arg r "$REFRESH_SECRET" \
+  '{token: {access_token: "expired", refresh_token: $r, expiry: "2000-01-01T00:00:00Z"}, id_token_email: "sec@example.invalid"}' \
+  >"$SANDBOX/agyy-renew/.gemini/antigravity-cli/antigravity-oauth-token"
+cat >"$SANDBOX/bin/agy-bin" <<EOF
+#!/bin/sh
+echo "\$HOME|\$DBUS_SESSION_BUS_ADDRESS|\$*" >>"$SANDBOX/renew.log"
+if [ "\$1" = models ] && [ "\$HOME" = "$SANDBOX/agyy-renew" ]; then
+  jq -n --arg t "$NEW_SECRET" --arg r "$REFRESH_SECRET" --arg e "\$(date -d '+1 hour' --iso-8601=seconds)" \
+    '{token: {access_token: \$t, refresh_token: \$r, expiry: \$e}, id_token_email: "sec@example.invalid"}' \
+    >"\$HOME/.gemini/antigravity-cli/antigravity-oauth-token"
+fi
+EOF
+chmod +x "$SANDBOX/bin/agy-bin"
+models none 1 >"$FIX/agy.json"
+printf '#!/bin/sh\ncat >/dev/null\ncat "%s"\n' "$FIX/agy.json" >"$SANDBOX/bin/curl"
+printf '#!/bin/sh\nexit 1\n' >"$SANDBOX/bin/secret-tool"
+chmod +x "$SANDBOX/bin/curl" "$SANDBOX/bin/secret-tool"
+trace=$(AGYY_HOME="$SANDBOX/agyy-renew" WAYMUX_QUOTA_FORCE=1 WAYMUX_QUOTA_STATE_DIR="$XDG_STATE_HOME/ai-quota" bash -x "$ROOT/utils/.local/bin/ai-quota-agy" 2>&1)
+[ "$(tail -n 1 <<<"$trace" | jq -r '.[] | select(.agent == "agyy") | .source')" = "api" ] &&
+  ok "forced refresh renews lapsed agyy token via agy models" || bad "agyy renew: $(tail -n 1 <<<"$trace")"
+grep -qF "$SANDBOX/agyy-renew|unix:path=/dev/null|models" "$SANDBOX/renew.log" &&
+  ok "agyy renewal isolates HOME and DBUS_SESSION_BUS_ADDRESS" || bad "renew env: $(cat "$SANDBOX/renew.log")"
+grep -qE "$REFRESH_SECRET|$NEW_SECRET" <<<"$trace" && bad "bash -x leaked renewal token" || ok "bash -x never prints refresh or renewed token"
+# Cooldown prevents hammering agy models on back-to-back refreshes when token stays expired
+jq -n --arg r "$REFRESH_SECRET" \
+  '{token: {access_token: "expired", refresh_token: $r, expiry: "2000-01-01T00:00:00Z"}, id_token_email: "sec@example.invalid"}' \
+  >"$SANDBOX/agyy-renew/.gemini/antigravity-cli/antigravity-oauth-token"
+: >"$SANDBOX/renew.log"
+AGYY_HOME="$SANDBOX/agyy-renew" WAYMUX_QUOTA_FORCE=1 WAYMUX_QUOTA_STATE_DIR="$XDG_STATE_HOME/ai-quota" "$ROOT/utils/.local/bin/ai-quota-agy" >/dev/null
+! grep -qF "$SANDBOX/agyy-renew|" "$SANDBOX/renew.log" && ok "renewal cooldown skips repeated agy models calls within 10 min" || bad "cooldown ignored: $(cat "$SANDBOX/renew.log")"
+printf '#!/bin/sh\n' >"$SANDBOX/bin/agy-bin"; chmod +x "$SANDBOX/bin/agy-bin"
+rm -f "$SANDBOX/bin/curl" "$SANDBOX/bin/secret-tool" "$SANDBOX/renew.log" "$XDG_STATE_HOME/ai-quota/agy-models-"*.json "$XDG_STATE_HOME/ai-quota/agy-renew-"*.ts
+rm -rf "$SANDBOX/agyy-renew"
 
 # 5. ai-launch precedence: one-shot arm > AI_LAUNCH_AGENT > recommendation; AI_AGENT ignored
 ai-launch --next agyy
